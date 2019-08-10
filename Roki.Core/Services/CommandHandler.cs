@@ -29,7 +29,7 @@ namespace Roki.Core.Services
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commandService;
         private readonly Logger _log;
-        private readonly Configuration _config;
+//        private readonly Configuration _config;
         private readonly Roki _roki;
         private IServiceProvider _services;
         private IEnumerable<IEarlyBehavior> _earlyBehaviors;
@@ -50,13 +50,13 @@ namespace Roki.Core.Services
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commandService,
-            Configuration config,
+//            Configuration config,
             Roki roki,
             IServiceProvider services)
         {
             _client = client;
             _commandService = commandService;
-            _config = config;
+//            _config = config;
             _roki = roki;
             _services = services;
 
@@ -107,7 +107,10 @@ namespace Roki.Core.Services
                     msg = (IUserMessage) await channel.GetMessageAsync(msg.Id).ConfigureAwait(false);
                     await TryRunComand(guild, channel, msg).ConfigureAwait(false);
                 }
-                catch { }
+                catch
+                {
+                    //
+                }
             }
         }
         
