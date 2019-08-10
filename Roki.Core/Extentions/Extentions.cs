@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Core.Services;
@@ -11,6 +12,16 @@ namespace Roki.Core.Extentions
     public static class Extentions
     {
         private static Logger _log = LogManager.GetCurrentClassLogger();
+        
+        public static ModuleInfo GetTopLevelModule(this ModuleInfo module)
+        {
+            while (module.Parent != null)
+            {
+                module = module.Parent;
+            }
+            return module;
+        }
+
         
         public static IEnumerable<Type> LoadFrom(this IServiceCollection collection, Assembly assembly)
         {
