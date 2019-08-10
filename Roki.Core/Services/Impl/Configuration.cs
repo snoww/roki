@@ -1,12 +1,10 @@
-
-using System;
 using Discord;
 using Microsoft.Extensions.Configuration;
-//using Newtonsoft.Json;
 using NLog;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System;
 
 namespace Roki.Core.Services.Impl
 {
@@ -37,7 +35,8 @@ namespace Roki.Core.Services.Impl
                 Token = data[nameof(Token)];
                 if (string.IsNullOrWhiteSpace(Token))
                 {
-                    _log.Error("Token is missing from credentials.json or Environment varibles. Add it and restart the program.");
+                    Console.WriteLine(_credsFileName);
+                    _log.Error("Token is missing from config.json or Environment varibles. Add it and restart the program.");
                     if (!Console.IsInputRedirected)
                         Console.ReadKey();
                     Environment.Exit(3);
@@ -50,10 +49,10 @@ namespace Roki.Core.Services.Impl
                     clId = 0;
                 ClientId = clId;
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                _log.Fatal(ex.Message);
-                _log.Fatal(ex);
+                _log.Fatal(e.Message);
+                _log.Fatal(e);
                 throw;
             }
         }

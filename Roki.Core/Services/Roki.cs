@@ -40,7 +40,23 @@ namespace Roki
                 LogLevel = LogSeverity.Warning,
                 ConnectionTimeout = int.MaxValue,
             });
+            CommandService = new CommandService(new CommandServiceConfig
+            {
+                CaseSensitiveCommands = false,
+                DefaultRunMode = RunMode.Async
+            });
+            Client.Log += Client_Log;
         }
+        
+        private Task Client_Log(LogMessage arg)
+        {
+            _log.Warn(arg.Source + " | " + arg.Message);
+            if (arg.Exception != null)
+                _log.Warn(arg.Exception);
+
+            return Task.CompletedTask;
+        }
+
         
         private List<ulong> GetCurrentGuildIds()
         {
@@ -172,7 +188,7 @@ namespace Roki
                 return Task.CompletedTask;
             }
             
-            _log.Info("Logging in as {0}", Client.CurrentUser);
+            _log.Info("Logging in as roki");
             await Client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
             await Client.StartAsync().ConfigureAwait(false);
             Client.Ready += SetClientReady;
