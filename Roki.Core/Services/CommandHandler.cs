@@ -12,7 +12,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Common.ModuleBehaviors;
-using Roki.Core.Extentions;
+using Roki.Extentions;
 using Roki.Core.Services.Impl;
 
 namespace Roki.Core.Services

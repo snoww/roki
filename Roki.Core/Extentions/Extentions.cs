@@ -2,16 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Core.Services;
 
-namespace Roki.Core.Extentions
+namespace Roki.Extentions
 {
     public static class Extentions
     {
         private static Logger _log = LogManager.GetCurrentClassLogger();
+        
+        public static EmbedBuilder WithOkColor(this EmbedBuilder embed) =>
+            embed.WithColor(Roki.OkColor);
+
+        public static EmbedBuilder WithErrorColor(this EmbedBuilder embed) =>
+            embed.WithColor(Roki.ErrorColor);
         
         public static ModuleInfo GetTopLevelModule(this ModuleInfo module)
         {
@@ -80,6 +88,23 @@ namespace Roki.Core.Extentions
             }
 
             return addedTypes;
+        }
+        
+        public static IMessage DeleteAfter(this IUserMessage msg, int seconds)
+        {
+            Task.Run(async () =>
+            {
+                await Task.Delay(seconds * 1000).ConfigureAwait(false);
+                try
+                {
+                    await msg.DeleteAsync().ConfigureAwait(false);
+                }
+                catch
+                {
+                    //
+                }
+            });
+            return msg;
         }
 
     }

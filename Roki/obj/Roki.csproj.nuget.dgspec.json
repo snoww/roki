@@ -1,28 +1,30 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Snow\\RiderProjects\\roki-cs\\Roki\\Roki.csproj": {}
+    "C:\\Users\\Snow\\Documents\\projects\\roki-cs\\Roki\\Roki.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Snow\\RiderProjects\\roki-cs\\Roki.Core\\Roki.Core.csproj": {
+    "C:\\Users\\Snow\\Documents\\projects\\roki-cs\\Roki.Core\\Roki.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Snow\\RiderProjects\\roki-cs\\Roki.Core\\Roki.Core.csproj",
+        "projectUniqueName": "C:\\Users\\Snow\\Documents\\projects\\roki-cs\\Roki.Core\\Roki.Core.csproj",
         "projectName": "Roki.Core",
-        "projectPath": "C:\\Users\\Snow\\RiderProjects\\roki-cs\\Roki.Core\\Roki.Core.csproj",
+        "projectPath": "C:\\Users\\Snow\\Documents\\projects\\roki-cs\\Roki.Core\\Roki.Core.csproj",
         "packagesPath": "C:\\Users\\Snow\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Snow\\RiderProjects\\roki-cs\\Roki.Core\\obj\\",
+        "outputPath": "C:\\Users\\Snow\\Documents\\projects\\roki-cs\\Roki.Core\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\Snow\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Snow\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netcoreapp2.2"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -78,32 +80,34 @@
         }
       }
     },
-    "C:\\Users\\Snow\\RiderProjects\\roki-cs\\Roki\\Roki.csproj": {
+    "C:\\Users\\Snow\\Documents\\projects\\roki-cs\\Roki\\Roki.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Snow\\RiderProjects\\roki-cs\\Roki\\Roki.csproj",
+        "projectUniqueName": "C:\\Users\\Snow\\Documents\\projects\\roki-cs\\Roki\\Roki.csproj",
         "projectName": "Roki",
-        "projectPath": "C:\\Users\\Snow\\RiderProjects\\roki-cs\\Roki\\Roki.csproj",
+        "projectPath": "C:\\Users\\Snow\\Documents\\projects\\roki-cs\\Roki\\Roki.csproj",
         "packagesPath": "C:\\Users\\Snow\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Snow\\RiderProjects\\roki-cs\\Roki\\obj\\",
+        "outputPath": "C:\\Users\\Snow\\Documents\\projects\\roki-cs\\Roki\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\Snow\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Snow\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netcoreapp2.2"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "netcoreapp2.2": {
             "projectReferences": {
-              "C:\\Users\\Snow\\RiderProjects\\roki-cs\\Roki.Core\\Roki.Core.csproj": {
-                "projectPath": "C:\\Users\\Snow\\RiderProjects\\roki-cs\\Roki.Core\\Roki.Core.csproj"
+              "C:\\Users\\Snow\\Documents\\projects\\roki-cs\\Roki.Core\\Roki.Core.csproj": {
+                "projectPath": "C:\\Users\\Snow\\Documents\\projects\\roki-cs\\Roki.Core\\Roki.Core.csproj"
               }
             }
           }
