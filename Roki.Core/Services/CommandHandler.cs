@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -44,6 +45,8 @@ namespace Roki.Core.Services
         public event Func<IUserMessage, CommandInfo, Task> CommandExecuted = delegate { return Task.CompletedTask; };
         public event Func<CommandInfo, ITextChannel, string, Task> CommandErrored = delegate { return Task.CompletedTask; };
         public event Func<IUserMessage, Task> OnMessageNoTrigger = delegate { return Task.CompletedTask; };
+        
+        public ConcurrentDictionary<ulong, uint> UserMessagesSent { get; } = new ConcurrentDictionary<ulong, uint>();
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commandService,
@@ -79,6 +82,12 @@ namespace Roki.Core.Services
             _earlyBehaviors = services.Where(x => x.ImplementationType?.GetInterfaces().Contains(typeof(IEarlyBehavior)) ?? false)
                 .Select(x => _services.GetService(x.ImplementationType) as IEarlyBehavior)
                 .ToArray();
+        }
+        
+        public Task StartHandling()
+        {
+            _client.MessageReceived += (msg) => { var _ = Task.Run(() => MessageReceivedHandler(msg)); return Task.CompletedTask; };
+            return Task.CompletedTask;
         }
 
         public async Task ExecuteExternal(ulong? guildId, ulong channelId, string commandText)
@@ -145,6 +154,35 @@ namespace Roki.Core.Services
 //                    usrMsg.Author.Id,
 //                    usrMsg.Content.TrimTo(10),
 //                    errorMessage);
+        }
+
+        private async Task MessageReceivedHandler(SocketMessage msg)
+        {
+            try
+            {
+                if (msg.Author.IsBot || !_roki.Ready.Task.IsCompleted)
+                    return;
+                if (!(msg is SocketUserMessage usrMsg))
+                    return;
+
+                UserMessagesSent.AddOrUpdate(usrMsg.Author.Id, 1, (key, old) => ++old);
+
+                var channel = msg.Channel as ISocketMessageChannel;
+                var guild = (msg.Channel as SocketTextChannel)?.Guild;
+
+                await TryRunComand(guild, channel, usrMsg).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                _log.Warn("Error in CommandHandler");
+                _log.Warn(e);
+                if (e.InnerException != null)
+                {
+                    _log.Warn("Inner Exception of the error in CommandHandler");
+                    _log.Warn(e.InnerException);
+                }
+
+            }
         }
 
         public async Task TryRunComand(SocketGuild guild, ISocketMessageChannel channel, IUserMessage usrMsg)

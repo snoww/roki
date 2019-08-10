@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Roki
 {
-    class Program
+    public sealed class Program
     {
-        public static void Main(string[] args)
-            => Roki.RunAsync(args);
+        public static async Task Main(string[] args)
+        {
+            await new Roki().RunAndBlockAsync();
+        }
     }
 }
