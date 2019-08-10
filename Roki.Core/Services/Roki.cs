@@ -7,14 +7,11 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
-using NLog.Fluent;
-using Roki.Core.Extentions;
+using Roki.Extentions;
 using Roki.Core.Services;
 using Roki.Core.Services.Impl;
-using IConfiguration = Roki.Core.Services.IConfiguration;
 
 namespace Roki
 {
@@ -25,6 +22,11 @@ namespace Roki
         public Configuration Config { get; }
         public DiscordSocketClient Client { get; }
         public CommandService CommandService { get; }
+        
+        public static Color OkColor { get; set; }
+        public static Color ErrorColor { get; set; }
+
+        
         public TaskCompletionSource<bool> Ready { get; private set; } = new TaskCompletionSource<bool>();
         public IServiceProvider Services { get; private set; }
         public Roki()
@@ -45,6 +47,10 @@ namespace Roki
                 CaseSensitiveCommands = false,
                 DefaultRunMode = RunMode.Async
             });
+            
+            OkColor = Color.DarkGreen;
+            ErrorColor = Color.Red;
+            
             Client.Log += Client_Log;
         }
         
@@ -105,18 +111,18 @@ namespace Roki
                             && !x.IsAbstract);
 
             var toReturn = new List<object>();
-            foreach (var ft in filteredTypes)
+            foreach (var filteredType in filteredTypes)
             {
-                var x = (TypeReader)Activator.CreateInstance(ft, Client, CommandService);
-                var baseType = ft.BaseType;
+                var x = (TypeReader) Activator.CreateInstance(filteredType, Client, CommandService);
+                var baseType = filteredType.BaseType;
                 var typeArgs = baseType.GetGenericArguments();
                 try
                 {
                     CommandService.AddTypeReader(typeArgs[0], x);
                 }
-                catch (Exception ex)
+                catch (Exception e)
                 {
-                    _log.Error(ex);
+                    _log.Error(e);
                     throw;
                 }
                 toReturn.Add(x);
