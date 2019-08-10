@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roki", "Roki\Roki.csproj", "{C16685EF-368B-4849-9B8F-18EC6364F379}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2071134F-A308-4809-9770-D2E0E35334D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roki.Core", "Roki.Core\Roki.Core.csproj", "{1AC72B9C-16F6-4123-99EA-A6A05ADE3835}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C16685EF-368B-4849-9B8F-18EC6364F379}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C16685EF-368B-4849-9B8F-18EC6364F379}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C16685EF-368B-4849-9B8F-18EC6364F379}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C16685EF-368B-4849-9B8F-18EC6364F379}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AC72B9C-16F6-4123-99EA-A6A05ADE3835}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AC72B9C-16F6-4123-99EA-A6A05ADE3835}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AC72B9C-16F6-4123-99EA-A6A05ADE3835}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AC72B9C-16F6-4123-99EA-A6A05ADE3835}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C16685EF-368B-4849-9B8F-18EC6364F379} = {2071134F-A308-4809-9770-D2E0E35334D8}
+		{1AC72B9C-16F6-4123-99EA-A6A05ADE3835} = {2071134F-A308-4809-9770-D2E0E35334D8}
+	EndGlobalSection
+EndGlobal
