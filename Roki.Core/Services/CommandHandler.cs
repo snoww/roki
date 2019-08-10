@@ -35,6 +35,8 @@ namespace Roki.Core.Services
         private IEnumerable<IInputTransformer> _inputTransformers;
         private IEnumerable<ILateBlocker> _lateBlockers;
         private IEnumerable<ILateExecutor> _lateExecutors;
+        
+        private const float OneThousandth = 1.0f / 1000;
 
         
         public string DefaultPrefix { get; set; }
@@ -99,6 +101,51 @@ namespace Roki.Core.Services
                 catch { }
             }
         }
+        
+        private Task LogSuccessfulExecution(IUserMessage usrMsg, ITextChannel channel, params int[] execPoints)
+        {
+            _log.Info($"Command Executed after " + string.Join("/", execPoints.Select(x => (x * OneThousandth).ToString("F3"))) + "s\n\t" +
+                      "User: {0}\n\t" +
+                      "Server: {1}\n\t" +
+                      "Channel: {2}\n\t" +
+                      "Message: {3}",
+                usrMsg.Author + " [" + usrMsg.Author.Id + "]", // {0}
+                (channel == null ? "PRIVATE" : channel.Guild.Name + " [" + channel.Guild.Id + "]"), // {1}
+                (channel == null ? "PRIVATE" : channel.Name + " [" + channel.Id + "]"), // {2}
+                usrMsg.Content // {3}
+            );
+
+//            _log.Info("Succ | g:{0} | c: {1} | u: {2} | msg: {3}",
+//                    channel?.Guild.Id.ToString() ?? "-",
+//                    channel?.Id.ToString() ?? "-",
+//                    usrMsg.Author.Id,
+//                    usrMsg.Content.TrimTo(10));
+            return Task.CompletedTask;
+        }
+        
+        private void LogErroredExecution(string errorMessage, IUserMessage usrMsg, ITextChannel channel, params int[] execPoints)
+        {
+            _log.Warn($"Command Errored after " + string.Join("/", execPoints.Select(x => (x * OneThousandth).ToString("F3"))) + "s\n\t" +
+                      "User: {0}\n\t" +
+                      "Server: {1}\n\t" +
+                      "Channel: {2}\n\t" +
+                      "Message: {3}\n\t" +
+                      "Error: {4}",
+                usrMsg.Author + " [" + usrMsg.Author.Id + "]", // {0}
+                (channel == null ? "PRIVATE" : channel.Guild.Name + " [" + channel.Guild.Id + "]"), // {1}
+                (channel == null ? "PRIVATE" : channel.Name + " [" + channel.Id + "]"), // {2}
+                usrMsg.Content,// {3}
+                errorMessage
+                //exec.Result.ErrorReason // {4}
+            );
+
+//            _log.Warn("Err | g:{0} | c: {1} | u: {2} | msg: {3}\n\tErr: {4}",
+//                    channel?.Guild.Id.ToString() ?? "-",
+//                    channel?.Id.ToString() ?? "-",
+//                    usrMsg.Author.Id,
+//                    usrMsg.Content.TrimTo(10),
+//                    errorMessage);
+        }
 
         public async Task TryRunComand(SocketGuild guild, ISocketMessageChannel channel, IUserMessage usrMsg)
         {
@@ -110,7 +157,7 @@ namespace Roki.Core.Services
                 {
                     if (behavior.BehaviorType == ModuleBehaviorType.Blocker)
                     {
-                        _log.Info("Blocked User: [{0}] Message: [{1}] Service: [{2}]", usrMsg.Author, usrMsg.Content, beh.GetType().Name);
+                        _log.Info("Blocked User: [{0}] Message: [{1}] Service: [{2}]", usrMsg.Author, usrMsg.Content, behavior.GetType().Name);
                     }
                     else if (behavior.BehaviorType == ModuleBehaviorType.Executor)
                     {
@@ -137,7 +184,30 @@ namespace Roki.Core.Services
             var isPrefixCommand = messageContent.StartsWith(".prefix", StringComparison.CurrentCultureIgnoreCase);
             if (messageContent.StartsWith(prefix, StringComparison.InvariantCulture) || isPrefixCommand)
             {
-                var (Success, Error, Info) = ExecuteCommandAsync
+                var (Success, Error, Info) = await ExecuteCommandAsync(new CommandContext(_client, usrMsg), messageContent, isPrefixCommand ? 1 : prefix.Length, _services, MultiMatchHandling.Best).ConfigureAwait(false);
+                execTime = Environment.TickCount - execTime;
+
+                if (Success)
+                {
+                    await LogSuccessfulExecution(usrMsg, channel as ITextChannel, execEnd, execTime).ConfigureAwait(false);
+                    await CommandExecuted(usrMsg, Info).ConfigureAwait(false);
+                    return;
+                }
+                else if (Error != null)
+                {
+                    LogErroredExecution(Error, usrMsg, channel as ITextChannel, execEnd, execTime);
+                    if (guild != null)
+                        await CommandErrored(Info, channel as ITextChannel, Error).ConfigureAwait(false);
+                }
+            }
+            else
+            {
+                await OnMessageNoTrigger(usrMsg).ConfigureAwait(false);
+            }
+
+            foreach (var exec in _lateExecutors)
+            {
+                await exec.LateExecute(_client, guild, usrMsg).ConfigureAwait(false);
             }
         }
 
