@@ -35,14 +35,13 @@ namespace Roki.Core.Services.Impl
         private long _commandsRan;
         public long CommandsRan => Interlocked.Read(ref _commandsRan);
 
-        private readonly Timer _carbonitexTimer;
+//        private readonly Timer _carbonitexTimer;
         private readonly Timer _botlistTimer;
         private readonly Timer _dataTimer;
 //        private readonly ConnectionMultiplexer _redis;
 //        private readonly IHttpClientFactory _httpFactory;
 
-        public StatsService(DiscordSocketClient client, CommandHandler cmdHandler,
-            IConfiguration config, Roki roki)
+        public StatsService(DiscordSocketClient client, CommandHandler cmdHandler, IConfiguration config, Roki roki)
         {
             _log = LogManager.GetCurrentClassLogger();
             _client = client;
@@ -52,62 +51,62 @@ namespace Roki.Core.Services.Impl
             _client.MessageReceived += _ => Task.FromResult(Interlocked.Increment(ref _messageCounter));
             cmdHandler.CommandExecuted += (_, e) => Task.FromResult(Interlocked.Increment(ref _commandsRan));
 
-            _client.ChannelCreated += (c) =>
+            _client.ChannelCreated += channel =>
             {
                 var _ = Task.Run(() =>
                 {
-                    if (c is ITextChannel)
+                    if (channel is ITextChannel)
                         Interlocked.Increment(ref _textChannels);
-                    else if (c is IVoiceChannel)
+                    else if (channel is IVoiceChannel)
                         Interlocked.Increment(ref _voiceChannels);
                 });
 
                 return Task.CompletedTask;
             };
 
-            _client.ChannelDestroyed += (c) =>
+            _client.ChannelDestroyed += channel =>
             {
                 var _ = Task.Run(() =>
                 {
-                    if (c is ITextChannel)
+                    if (channel is ITextChannel)
                         Interlocked.Decrement(ref _textChannels);
-                    else if (c is IVoiceChannel)
+                    else if (channel is IVoiceChannel)
                         Interlocked.Decrement(ref _voiceChannels);
                 });
 
                 return Task.CompletedTask;
             };
 
-            _client.GuildAvailable += (g) =>
+            _client.GuildAvailable += guild =>
             {
                 var _ = Task.Run(() =>
                 {
-                    var tc = g.Channels.Count(cx => cx is ITextChannel);
-                    var vc = g.Channels.Count - tc;
+                    var tc = guild.Channels.Count(cx => cx is ITextChannel);
+                    var vc = guild.Channels.Count - tc;
                     Interlocked.Add(ref _textChannels, tc);
                     Interlocked.Add(ref _voiceChannels, vc);
                 });
                 return Task.CompletedTask;
             };
 
-            _client.JoinedGuild += (g) =>
+            _client.JoinedGuild += guild =>
             {
                 var _ = Task.Run(() =>
                 {
-                    var tc = g.Channels.Count(cx => cx is ITextChannel);
-                    var vc = g.Channels.Count - tc;
+                    var tc = guild.Channels.Count(cx => cx is ITextChannel);
+                    var vc = guild.Channels.Count - tc;
                     Interlocked.Add(ref _textChannels, tc);
                     Interlocked.Add(ref _voiceChannels, vc);
                 });
                 return Task.CompletedTask;
             };
 
-            _client.GuildUnavailable += (g) =>
+            _client.GuildUnavailable += guild =>
             {
                 var _ = Task.Run(() =>
                 {
-                    var tc = g.Channels.Count(cx => cx is ITextChannel);
-                    var vc = g.Channels.Count - tc;
+                    var tc = guild.Channels.Count(cx => cx is ITextChannel);
+                    var vc = guild.Channels.Count - tc;
                     Interlocked.Add(ref _textChannels, -tc);
                     Interlocked.Add(ref _voiceChannels, -vc);
                 });
@@ -115,12 +114,12 @@ namespace Roki.Core.Services.Impl
                 return Task.CompletedTask;
             };
 
-            _client.LeftGuild += (g) =>
+            _client.LeftGuild += guild =>
             {
                 var _ = Task.Run(() =>
                 {
-                    var tc = g.Channels.Count(cx => cx is ITextChannel);
-                    var vc = g.Channels.Count - tc;
+                    var tc = guild.Channels.Count(cx => cx is ITextChannel);
+                    var vc = guild.Channels.Count - tc;
                     Interlocked.Add(ref _textChannels, -tc);
                     Interlocked.Add(ref _voiceChannels, -vc);
                 });
@@ -141,8 +140,8 @@ namespace Roki.Core.Services.Impl
         public void Initialize()
         {
             var guilds = _client.Guilds.ToArray();
-            _textChannels = guilds.Sum(g => g.Channels.Count(cx => cx is ITextChannel));
-            _voiceChannels = guilds.Sum(g => g.Channels.Count(cx => cx is IVoiceChannel));
+            _textChannels = guilds.Sum(guild => guild.Channels.Count(cx => cx is ITextChannel));
+            _voiceChannels = guilds.Sum(guild => guild.Channels.Count(cx => cx is IVoiceChannel));
         }
 
         public TimeSpan GetUptime() =>
