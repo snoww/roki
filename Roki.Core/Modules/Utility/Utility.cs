@@ -41,7 +41,8 @@ namespace Roki.Modules.Utility
                     .AddField(efb => efb.WithName("Messages").WithValue(_stats.MessageCounter).WithIsInline(true))
                     .AddField(efb => efb.WithName("Memory").WithValue($"{_stats.Heap} MB").WithIsInline(true))
                     .AddField(efb => efb.WithName("Owner ID").WithValue(ownerId).WithIsInline(true))
-                    .AddField(efb => efb.WithName("Uptime").WithValue(_stats.GetUptimeString("\n")).WithIsInline(true)));
+                    .AddField(efb => efb.WithName("Uptime").WithValue(_stats.GetUptimeString("\n")).WithIsInline(true))
+                    .AddField(efb => efb.WithName("Presence").WithValue($"{_stats.TextChannels} Text Channels\n{_stats.VoiceChannels} Voice Channels").WithIsInline(true)));
         }
     }
 }

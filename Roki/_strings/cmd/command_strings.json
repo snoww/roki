@@ -1,9 +1,16 @@
 {
   "stats": {
     "Command": "stats",
-    "Description": "Basic stats for Roki",
+    "Description": "Basic stats for Roki.",
     "Usage": [
       "{0}stats"
+    ]
+  },
+  "serverinfo": {
+    "Command": "serverinfo server",
+    "Description": "Shows information about current server.",
+    "Usage": [
+      "{0}server"
     ]
   }
 }

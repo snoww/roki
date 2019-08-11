@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System;
+using System.Threading;
 
 namespace Roki.Core.Services.Impl
 {
@@ -35,7 +36,7 @@ namespace Roki.Core.Services.Impl
                 Token = data[nameof(Token)];
                 if (string.IsNullOrWhiteSpace(Token))
                 {
-                    Console.WriteLine(_credsFileName);
+                    Console.WriteLine($"The current directory is {_credsFileName}");
                     _log.Error("Token is missing from config.json or Environment varibles. Add it and restart the program.");
                     if (!Console.IsInputRedirected)
                         Console.ReadKey();
