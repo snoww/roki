@@ -86,7 +86,7 @@ namespace Roki.Core.Services
         
         public Task StartHandling()
         {
-            _client.MessageReceived += (msg) => { var _ = Task.Run(() => MessageReceivedHandler(msg)); return Task.CompletedTask; };
+            _client.MessageReceived += message => { var _ = Task.Run(() => MessageReceivedHandler(message)); return Task.CompletedTask; };
             return Task.CompletedTask;
         }
 
@@ -105,7 +105,7 @@ namespace Roki.Core.Services
                 {
                     IUserMessage msg = await channel.SendMessageAsync(commandText).ConfigureAwait(false);
                     msg = (IUserMessage) await channel.GetMessageAsync(msg.Id).ConfigureAwait(false);
-                    await TryRunComand(guild, channel, msg).ConfigureAwait(false);
+                    await TryRunCommand(guild, channel, msg).ConfigureAwait(false);
                 }
                 catch
                 {
@@ -159,21 +159,21 @@ namespace Roki.Core.Services
 //                    errorMessage);
         }
 
-        private async Task MessageReceivedHandler(SocketMessage msg)
+        private async Task MessageReceivedHandler(SocketMessage message)
         {
             try
             {
-                if (msg.Author.IsBot || !_roki.Ready.Task.IsCompleted)
+                if (message.Author.IsBot || !_roki.Ready.Task.IsCompleted)
                     return;
-                if (!(msg is SocketUserMessage usrMsg))
+                if (!(message is SocketUserMessage userMessage))
                     return;
 
-                UserMessagesSent.AddOrUpdate(usrMsg.Author.Id, 1, (key, old) => ++old);
+                UserMessagesSent.AddOrUpdate(userMessage.Author.Id, 1, (key, old) => ++old);
 
-                var channel = msg.Channel as ISocketMessageChannel;
-                var guild = (msg.Channel as SocketTextChannel)?.Guild;
+                var channel = message.Channel as ISocketMessageChannel;
+                var guild = (message.Channel as SocketTextChannel)?.Guild;
 
-                await TryRunComand(guild, channel, usrMsg).ConfigureAwait(false);
+                await TryRunCommand(guild, channel, userMessage).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -188,33 +188,33 @@ namespace Roki.Core.Services
             }
         }
 
-        public async Task TryRunComand(SocketGuild guild, ISocketMessageChannel channel, IUserMessage usrMsg)
+        public async Task TryRunCommand(SocketGuild guild, ISocketMessageChannel channel, IUserMessage userMessage)
         {
             var execTime = Environment.TickCount;
 
             foreach (var behavior in _earlyBehaviors)
             {
-                if (await behavior.RunBehavior(_client, guild, usrMsg).ConfigureAwait(false))
+                if (await behavior.RunBehavior(_client, guild, userMessage).ConfigureAwait(false))
                 {
                     if (behavior.BehaviorType == ModuleBehaviorType.Blocker)
                     {
-                        _log.Info("Blocked User: [{0}] Message: [{1}] Service: [{2}]", usrMsg.Author, usrMsg.Content, behavior.GetType().Name);
+                        _log.Info("Blocked User: [{0}] Message: [{1}] Service: [{2}]", userMessage.Author, userMessage.Content, behavior.GetType().Name);
                     }
                     else if (behavior.BehaviorType == ModuleBehaviorType.Executor)
                     {
-                        _log.Info("User [{0}] executed [{1}] in [{2}]", usrMsg.Author, usrMsg.Content, behavior.GetType().Name);
+                        _log.Info("User [{0}] executed [{1}] in [{2}]", userMessage.Author, userMessage.Content, behavior.GetType().Name);
                     }
                     return;
                 }
             }
 
-            var execEnd = Environment.TickCount - execTime;
+            var execPoint = Environment.TickCount - execTime;
 
-            string messageContent = usrMsg.Content;
+            string messageContent = userMessage.Content;
             foreach (var exec in _inputTransformers)
             {
                 string newContent;
-                if ((newContent = await exec.TransformInput(guild, usrMsg.Channel, usrMsg.Author, messageContent).ConfigureAwait(false)) != messageContent.ToLowerInvariant())
+                if ((newContent = await exec.TransformInput(guild, userMessage.Channel, userMessage.Author, messageContent).ConfigureAwait(false)) != messageContent.ToLowerInvariant())
                 {
                     messageContent = newContent;
                     break;
@@ -225,37 +225,38 @@ namespace Roki.Core.Services
             var isPrefixCommand = messageContent.StartsWith(".prefix", StringComparison.CurrentCultureIgnoreCase);
             if (messageContent.StartsWith(prefix, StringComparison.InvariantCulture) || isPrefixCommand)
             {
-                var (Success, Error, Info) = await ExecuteCommandAsync(new CommandContext(_client, usrMsg), messageContent, isPrefixCommand ? 1 : prefix.Length, _services, MultiMatchHandling.Best).ConfigureAwait(false);
+                var (success, error, info) = await ExecuteCommandAsync(new CommandContext(_client, userMessage), messageContent, isPrefixCommand ? 1 : prefix.Length, _services, MultiMatchHandling.Best).ConfigureAwait(false);
                 execTime = Environment.TickCount - execTime;
 
-                if (Success)
+                if (success)
                 {
-                    await LogSuccessfulExecution(usrMsg, channel as ITextChannel, execEnd, execTime).ConfigureAwait(false);
-                    await CommandExecuted(usrMsg, Info).ConfigureAwait(false);
+                    await LogSuccessfulExecution(userMessage, channel as ITextChannel, execPoint, execTime).ConfigureAwait(false);
+                    await CommandExecuted(userMessage, info).ConfigureAwait(false);
                     return;
                 }
-                else if (Error != null)
+                
+                if (error != null)
                 {
-                    LogErroredExecution(Error, usrMsg, channel as ITextChannel, execEnd, execTime);
+                    LogErroredExecution(error, userMessage, channel as ITextChannel, execPoint, execTime);
                     if (guild != null)
-                        await CommandErrored(Info, channel as ITextChannel, Error).ConfigureAwait(false);
+                        await CommandErrored(info, channel as ITextChannel, error).ConfigureAwait(false);
                 }
             }
             else
             {
-                await OnMessageNoTrigger(usrMsg).ConfigureAwait(false);
+                await OnMessageNoTrigger(userMessage).ConfigureAwait(false);
             }
 
             foreach (var exec in _lateExecutors)
             {
-                await exec.LateExecute(_client, guild, usrMsg).ConfigureAwait(false);
+                await exec.LateExecute(_client, guild, userMessage).ConfigureAwait(false);
             }
         }
 
-        public Task<(bool Success, string Error, CommandInfo Info)> ExecuteCommandAsync(CommandContext context, string input, int argPos, IServiceProvider servicesProvider, MultiMatchHandling multiMatchHandling = MultiMatchHandling.Exception)
+        private Task<(bool Success, string Error, CommandInfo Info)> ExecuteCommandAsync(CommandContext context, string input, int argPos, IServiceProvider servicesProvider, MultiMatchHandling multiMatchHandling = MultiMatchHandling.Exception)
             => ExecuteCommand(context, input.Substring(argPos), servicesProvider, multiMatchHandling);
 
-        public async Task<(bool Success, string Error, CommandInfo Info)> ExecuteCommand(CommandContext context, string input, IServiceProvider services, MultiMatchHandling multiMatchHandling = MultiMatchHandling.Exception)
+        private async Task<(bool Success, string Error, CommandInfo Info)> ExecuteCommand(CommandContext context, string input, IServiceProvider services, MultiMatchHandling multiMatchHandling = MultiMatchHandling.Exception)
         {
             var searchResult = _commandService.Search(context, input);
             if (!searchResult.IsSuccess)
@@ -269,11 +270,11 @@ namespace Roki.Core.Services
                 preconditionResults[match] = await match.Command.CheckPreconditionsAsync(context, services).ConfigureAwait(false);
             }
 
-            var sucessfulPreconditions = preconditionResults
+            var successfulPreconditions = preconditionResults
                 .Where(x => x.Value.IsSuccess)
                 .ToArray();
 
-            if (sucessfulPreconditions.Length == 0)
+            if (successfulPreconditions.Length == 0)
             {
                 var bestCandidate = preconditionResults
                     .OrderByDescending(x => x.Key.Command.Priority)
@@ -282,7 +283,7 @@ namespace Roki.Core.Services
             }
             
             var parseResultDict = new Dictionary<CommandMatch, ParseResult>();
-            foreach (var pair in sucessfulPreconditions)
+            foreach (var pair in successfulPreconditions)
             {
                 var parseResult = await pair.Key.ParseAsync(context, searchResult, pair.Value, services).ConfigureAwait(false);
 
@@ -322,18 +323,18 @@ namespace Roki.Core.Services
             var parseResults = parseResultDict
                 .OrderByDescending(x => CalculateScore(x.Key, x.Value));
 
-            var successfullParses = parseResults
+            var successfulParses = parseResults
                 .Where(x => x.Value.IsSuccess)
                 .ToArray();
 
-            if (successfullParses.Length == 0)
+            if (successfulParses.Length == 0)
             {
                 var bestMatch = parseResults
                     .FirstOrDefault(x => !x.Value.IsSuccess);
                 return (false, bestMatch.Value.ErrorReason, commands[0].Command);
             }
 
-            var cmd = successfullParses[0].Key.Command;
+            var cmd = successfulParses[0].Key.Command;
             var commandName = cmd.Aliases.First();
             foreach (var exec in _lateBlockers)
             {
@@ -345,12 +346,12 @@ namespace Roki.Core.Services
                 }
             }
 
-            var chosenOverload = successfullParses[0];
+            var chosenOverload = successfulParses[0];
             var execResult = (ExecuteResult) await chosenOverload.Key.ExecuteAsync(context, chosenOverload.Value, services).ConfigureAwait(false);
 
             if (execResult.Exception != null && (!(execResult.Exception is HttpException httpException) || httpException.DiscordCode != 50013))
             {
-                lock (errorLogLock)
+                lock (_errorLogLock)
                 {
                     var now = DateTime.Now;
                     File.AppendAllText($"./command_errors_{now:yyyy-MM-dd}.txt",
@@ -362,6 +363,6 @@ namespace Roki.Core.Services
 
             return (true, null, cmd);
         }
-        private readonly object errorLogLock = new object();
+        private readonly object _errorLogLock = new object();
     }
 }

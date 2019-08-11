@@ -22,8 +22,7 @@ namespace Roki.Core.Services.Impl
         public string Author => "Snow#7777";
         public string Library => "Discord.Net";
 
-        public string Heap => Math.Round((double) GC.GetTotalMemory(false) / 1.MiB(), 2)
-            .ToString(CultureInfo.InvariantCulture);
+        public string Heap => Math.Round((double) GC.GetTotalMemory(false) / 1.MiB(), 2).ToString(CultureInfo.InvariantCulture);
         public double MessagesPerSecond => MessageCounter / GetUptime().TotalSeconds;
 
         private long _textChannels;
