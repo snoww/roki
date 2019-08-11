@@ -34,8 +34,7 @@ namespace Roki.Modules.Utility
 
             await ctx.Channel.EmbedAsync(
                 new EmbedBuilder().WithOkColor()
-                    .WithAuthor(eab => eab.WithName($"Roki v{StatsService.BotVersion}")
-                        .WithIconUrl("https://i.imgur.com/KmPRRKh.png"))
+                    .WithAuthor(eab => eab.WithName($"Roki v{StatsService.BotVersion}").WithIconUrl("https://i.imgur.com/KmPRRKh.png"))
                     .AddField(efb => efb.WithName("Author").WithValue(_stats.Author).WithIsInline(true))
                     .AddField(efb => efb.WithName("Bot ID").WithValue(_client.CurrentUser.Id.ToString()).WithIsInline(true))
                     .AddField(efb => efb.WithName("Commands ran").WithValue(_stats.CommandsRan.ToString()).WithIsInline(true))
