@@ -3,8 +3,8 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using NLog;
-using Roki.Extentions;
 using Roki.Core.Services;
+using Roki.Extentions;
 
 namespace Roki.Modules
 {
