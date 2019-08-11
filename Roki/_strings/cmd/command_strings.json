@@ -1,0 +1,9 @@
+{
+  "stats": {
+    "Command": "stats",
+    "Description": "Basic stats for Roki",
+    "Usage": [
+      "{0}stats"
+    ]
+  }
+}
