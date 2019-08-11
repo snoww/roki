@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -28,6 +27,7 @@ namespace Roki.Modules
             LowerModuleTypeName = ModuleTypeName.ToLowerInvariant();
             _log = LogManager.GetCurrentClassLogger();
         }
+        
 
         public async Task<bool> PromptUserConfirmAsync(EmbedBuilder embed)
         {
