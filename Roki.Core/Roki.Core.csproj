@@ -14,4 +14,8 @@
       <PackageReference Include="NLog" Version="4.6.6" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Modules\Utility\Services" />
+    </ItemGroup>
+
 </Project>

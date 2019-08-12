@@ -258,9 +258,7 @@ namespace Roki.Core.Services
 
         private async Task<(bool Success, string Error, CommandInfo Info)> ExecuteCommand(CommandContext context, string input, IServiceProvider services, MultiMatchHandling multiMatchHandling = MultiMatchHandling.Exception)
         {
-            Console.WriteLine($"input is {input}");
             var searchResult = _commandService.Search(context, input);
-            Console.WriteLine($"search is {searchResult}");
             if (!searchResult.IsSuccess)
                 return (false, null, null);
 

@@ -24,7 +24,7 @@ namespace Roki.Modules.Utility
                 _stats = stats;
             }
             
-            [RokiCommand, Usage, Description, Aliases, Alias("server")]
+            [RokiCommand, Usage, Description, Aliases]
             [RequireContext(ContextType.Guild)]
             public async Task ServerInfo(string guildName = null)
             {
