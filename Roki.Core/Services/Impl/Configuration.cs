@@ -27,6 +27,7 @@ namespace Roki.Core.Services.Impl
             _log = LogManager.GetCurrentClassLogger();
             try
             {
+//                Console.WriteLine($"The current directory is {_credsFileName}");
                 var configBuilder = new ConfigurationBuilder();
                 configBuilder.AddJsonFile(_credsFileName, true)
                     .AddEnvironmentVariables("Roki_");
@@ -36,7 +37,6 @@ namespace Roki.Core.Services.Impl
                 Token = data[nameof(Token)];
                 if (string.IsNullOrWhiteSpace(Token))
                 {
-                    Console.WriteLine($"The current directory is {_credsFileName}");
                     _log.Error("Token is missing from config.json or Environment varibles. Add it and restart the program.");
                     if (!Console.IsInputRedirected)
                         Console.ReadKey();
