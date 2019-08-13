@@ -3,6 +3,7 @@
     <PropertyGroup>
         <TargetFramework>netcoreapp2.2</TargetFramework>
         <RootNamespace>Roki</RootNamespace>
+        <Configurations>Debug;Release;Default</Configurations>
     </PropertyGroup>
 
     <ItemGroup>
