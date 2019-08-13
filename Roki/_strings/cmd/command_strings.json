@@ -10,7 +10,24 @@
     "Command": "serverinfo server",
     "Description": "Shows information about current server.",
     "Usage": [
+      "{0}serverinfo",
       "{0}server"
+    ]
+  },
+  "channelinfo": {
+    "Command": "channelinfo channel",
+    "Description": "Shows information about the current channel.",
+    "Usage": [
+      "{0}channelinfo",
+      "{0}channel"
+    ]
+  },
+  "userinfo": {
+    "Command": "userinfo user",
+    "Description": "Shows information about yourself.",
+    "Usage": [
+      "{0}userinfo",
+      "{0}user"
     ]
   }
 }
