@@ -92,7 +92,7 @@ namespace Roki.Modules.Utility
             public async Task UserInfo(IGuildUser user = null)
             {
                 var usr = user ?? ctx.User as IGuildUser;
-                if (user == null)
+                if (usr == null)
                     return;
 
                 var embed = new EmbedBuilder().WithOkColor()
