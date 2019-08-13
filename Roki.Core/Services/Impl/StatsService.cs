@@ -35,8 +35,8 @@ namespace Roki.Core.Services.Impl
         public long CommandsRan => Interlocked.Read(ref _commandsRan);
 
 //        private readonly Timer _carbonitexTimer;
-        private readonly Timer _botlistTimer;
-        private readonly Timer _dataTimer;
+//        private readonly Timer _botlistTimer;
+//        private readonly Timer _dataTimer;
 //        private readonly ConnectionMultiplexer _redis;
 //        private readonly IHttpClientFactory _httpFactory;
 
@@ -126,13 +126,13 @@ namespace Roki.Core.Services.Impl
                 return Task.CompletedTask;
             };
             
-            var platform = "other";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                platform = "linux";
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                platform = "osx";
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                platform = "windows";
+//            var platform = "other";
+//            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+//                platform = "linux";
+//            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+//                platform = "osx";
+//            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+//                platform = "windows";
             
         }
 
