@@ -51,7 +51,16 @@
       "{0}cmds Admin",
       "{0}cmds Admin --view 1"
     ]
-}
+  },
+  "help": {
+    "Cmd": "help h",
+    "Desc": "Either shows a help for a single command, or DMs you help link if no parameters are specified.",
+    "Usage": [
+      "{0}help {0}cmds",
+      "{0}h"
+    ]
+  }
+
 
 
 }
