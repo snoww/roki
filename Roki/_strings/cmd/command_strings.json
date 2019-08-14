@@ -16,18 +16,25 @@
   },
   "channelinfo": {
     "Command": "channelinfo channel",
-    "Description": "Shows information about the current channel.",
+    "Description": "Shows information about the current channel or mentioned channel.",
     "Usage": [
       "{0}channelinfo",
-      "{0}channel"
+      "{0}channel channel"
     ]
   },
   "userinfo": {
     "Command": "userinfo user",
-    "Description": "Shows information about yourself.",
+    "Description": "Shows information about yourself or another user.",
     "Usage": [
       "{0}userinfo",
-      "{0}user"
+      "{0}user @user"
+    ]
+  },
+  "ping": {
+    "Command": "ping",
+    "Description": "Gets current ping to Discord's servers",
+    "Usage": [
+      "{0}ping"
     ]
   }
 }
