@@ -34,7 +34,7 @@ namespace Roki.Modules.Help
                         _command.Modules.GroupBy(module => module.GetTopLevelModule())
                             .Select(module => "• " + module.Key.Name)
                             .OrderBy(s => s)));
-            await ctx.Channel.EmbedAsync(embed);
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
         
         [RokiCommand, Description, Usage, Aliases]
@@ -78,13 +78,13 @@ namespace Roki.Modules.Help
                 {
                     var errEmbed = new EmbedBuilder().WithErrorColor()
                         .WithDescription("Module not found");
-                    await ctx.Channel.EmbedAsync(errEmbed);
+                    await ctx.Channel.EmbedAsync(errEmbed).ConfigureAwait(false);
                 }
                 else
                 {
                     var errEmbed = new EmbedBuilder().WithErrorColor()
                         .WithDescription("Module not found or can't execute");
-                    await ctx.Channel.EmbedAsync(errEmbed);
+                    await ctx.Channel.EmbedAsync(errEmbed).ConfigureAwait(false);
                 }
                 return;
             }
@@ -101,8 +101,7 @@ namespace Roki.Modules.Help
                     {
                         if (opts.View == CommandOptions.ViewType.Cross)
                         {
-                            return
-                                $"{(succuss.Contains(x) ? "✅" : "❌")}{Prefix + x.Aliases.First(),-15} {"[" + x.Aliases.Skip(1).FirstOrDefault() + "]",-8}";
+                            return $"{(succuss.Contains(x) ? "✅" : "❌")}{Prefix + x.Aliases.First(),-15} {"[" + x.Aliases.Skip(1).FirstOrDefault() + "]",-8}";
                         }
 
                         return $"{Prefix + x.Aliases.First(),-15} {"[" + x.Aliases.Skip(1).FirstOrDefault() + "]",-8}";
@@ -127,7 +126,7 @@ namespace Roki.Modules.Help
             }
 
             embed.WithFooter(String.Format("Type `{0}h CommandName` to see the help for that specified command. e.g. `{0}h {0}8ball`", Prefix));
-            await ctx.Channel.EmbedAsync(embed);
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         public class CommandTextEqualityComparer : IEqualityComparer<CommandInfo>
