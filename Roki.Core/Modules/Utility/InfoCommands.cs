@@ -28,11 +28,11 @@ namespace Roki.Modules.Utility
             [RequireContext(ContextType.Guild)]
             public async Task ServerInfo(string guildName = null)
             {
-                var channel = (ITextChannel) ctx.Channel;
+                var channel = (ITextChannel)ctx.Channel;
                 guildName = guildName?.ToUpperInvariant();
                 SocketGuild guild;
                 if (string.IsNullOrWhiteSpace(guildName))
-                    guild = (SocketGuild) channel.Guild;
+                    guild = (SocketGuild)channel.Guild;
                 else
                     guild = _client.Guilds.FirstOrDefault(g => g.Name.ToUpperInvariant() == guildName.ToUpperInvariant());
                 if (guild == null)
@@ -97,12 +97,14 @@ namespace Roki.Modules.Utility
 
                 var embed = new EmbedBuilder().WithOkColor()
                     .AddField(efb => efb.WithName("Name").WithValue($"**{usr.Username}**#{usr.Discriminator}").WithIsInline(true));
+                
                 if (!string.IsNullOrWhiteSpace(usr.Nickname))
                     embed.AddField(efb => efb.WithName("Nickname").WithValue(usr.Nickname).WithIsInline(true));
+                
                 embed.AddField(efb => efb.WithName("ID").WithValue(usr.Id).WithIsInline(true))
                     .AddField(efb => efb.WithName("Joined server").WithValue($"{usr.JoinedAt?.ToString("MM/dd/yyyy HH:mm") ?? "?"}").WithIsInline(true))
-                    .AddField(efb => efb.WithName("Joined Discord").WithValue($"{usr.CreatedAt:MM/dd/yyyy HH:mm}").WithIsInline(true));
-                //.AddField(efb => efb.WithName("Roles").WithValue($"**({usr.RoleIds.Count - 1})** - {string.Join("\n", usr.GetRoles().Take(10).Where(r => r.Id != r.Guild.EveryoneRole.Id).Select(r => r.Name))}").WithIsInline(true));
+                    .AddField(efb => efb.WithName("Joined Discord").WithValue($"{usr.CreatedAt:MM/dd/yyyy HH:mm}").WithIsInline(true))
+                    .AddField(efb => efb.WithName("Roles").WithValue($"**({usr.RoleIds.Count - 1})** - {string.Join("\n", usr.GetRoles().Take(10).Where(r => r.Id != r.Guild.EveryoneRole.Id).Select(r => r.Name))}").WithIsInline(true));
 
                 var avatar = usr.RealAvatarUrl();
                 if (avatar != null && avatar.IsAbsoluteUri)
