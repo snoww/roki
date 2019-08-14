@@ -125,6 +125,9 @@ namespace Roki.Modules.Help
                     embed.AddField(group.ElementAt(i).Key, "```css\n" + string.Join("\n", transformed) + "\n```", true);
                 }
             }
+
+            embed.WithFooter(String.Format("Type `{0}h CommandName` to see the help for that specified command. e.g. `{0}h {0}8ball`", Prefix));
+            await ctx.Channel.EmbedAsync(embed);
         }
 
         public class CommandTextEqualityComparer : IEqualityComparer<CommandInfo>
