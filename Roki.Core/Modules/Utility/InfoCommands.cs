@@ -50,17 +50,17 @@ namespace Roki.Modules.Utility
                     features = "-";
                 
                 var embed = new EmbedBuilder().WithOkColor()
-                    .WithAuthor(eab => eab.WithName("Server Info"))
+                    .WithAuthor("Server Info")
                     .WithTitle(guild.Name)
-                    .AddField(efb => efb.WithName("ID").WithValue(guild.Id.ToString()).WithIsInline(true))
-                    .AddField(efb => efb.WithName("Owner").WithValue(ownerName.ToString()).WithIsInline(true))
-                    .AddField(efb => efb.WithName("Members").WithValue(guild.MemberCount.ToString()).WithIsInline(true))
-                    .AddField(efb => efb.WithName("Text Channels").WithValue(textChannels.ToString()).WithIsInline(true))
-                    .AddField(efb => efb.WithName("Voice Channels").WithValue(voiceChannels.ToString()).WithIsInline(true))
-                    .AddField(efb => efb.WithName("Created on").WithValue($"{createdOn:MM/dd/yyyy HH:mm}").WithIsInline(true))
-                    .AddField(efb => efb.WithName("Region").WithValue(guild.VoiceRegionId.ToString()).WithIsInline(true))
-                    .AddField(efb => efb.WithName("Roles").WithValue((guild.Roles.Count - 1).ToString()).WithIsInline(true))
-                    .AddField(efb => efb.WithName("Features").WithValue(features).WithIsInline(true));
+                    .AddField("ID", guild.Id.ToString(), true)
+                    .AddField("Owner", ownerName.ToString(), true)
+                    .AddField("Members", guild.MemberCount.ToString(), true)
+                    .AddField("Text Channels", textChannels.ToString(), true)
+                    .AddField("Voice Channels", voiceChannels.ToString(), true)
+                    .AddField("Created on", $"{createdOn:MM/dd/yyyy HH:mm}", true)
+                    .AddField("Region", guild.VoiceRegionId.ToString(), true)
+                    .AddField("Roles", (guild.Roles.Count - 1).ToString(), true)
+                    .AddField("Features", features, true);
                 if (Uri.IsWellFormedUriString(guild.IconUrl, UriKind.Absolute))
                     embed.WithThumbnailUrl(guild.IconUrl);
 
@@ -81,9 +81,9 @@ namespace Roki.Modules.Utility
                 var embed = new EmbedBuilder().WithOkColor()
                     .WithTitle(ch.Name)
                     .WithDescription(ch.Topic)
-                    .AddField(efb => efb.WithName("ID").WithValue(ch.Id.ToString()).WithIsInline(true))
-                    .AddField(efb => efb.WithName("Created on").WithValue($"{createdOn:MM/dd/yyyy HH:mm}").WithIsInline(true))
-                    .AddField(efb => efb.WithName("Users").WithValue(userCount.ToString()).WithIsInline(true));
+                    .AddField("ID", ch.Id.ToString(), true)
+                    .AddField("Created on", $"{createdOn:MM/dd/yyyy HH:mm}", true)
+                    .AddField("Users", userCount.ToString(), true);
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
@@ -97,15 +97,15 @@ namespace Roki.Modules.Utility
                     return;
 
                 var embed = new EmbedBuilder().WithOkColor()
-                    .AddField(efb => efb.WithName("Name").WithValue($"**{usr.Username}**#{usr.Discriminator}").WithIsInline(true));
+                    .AddField("Name", $"**{usr.Username}**#{usr.Discriminator}", true);
                 
                 if (!string.IsNullOrWhiteSpace(usr.Nickname))
-                    embed.AddField(efb => efb.WithName("Nickname").WithValue(usr.Nickname).WithIsInline(true));
+                    embed.AddField("Nickname", usr.Nickname, true);
                 
-                embed.AddField(efb => efb.WithName("ID").WithValue(usr.Id).WithIsInline(true))
-                    .AddField(efb => efb.WithName("Joined server").WithValue($"{usr.JoinedAt?.ToString("MM/dd/yyyy HH:mm") ?? "?"}").WithIsInline(true))
-                    .AddField(efb => efb.WithName("Joined Discord").WithValue($"{usr.CreatedAt:MM/dd/yyyy HH:mm}").WithIsInline(true))
-                    .AddField(efb => efb.WithName("Roles").WithValue($"**({usr.RoleIds.Count - 1})** - {string.Join("\n", usr.GetRoles().Take(10).Where(r => r.Id != r.Guild.EveryoneRole.Id).Select(r => r.Name))}").WithIsInline(true));
+                embed.AddField("ID", usr.Id, true)
+                    .AddField("Joined server", $"{usr.JoinedAt?.ToString("MM/dd/yyyy HH:mm") ?? "?"}", true)
+                    .AddField("Joined Discord", $"{usr.CreatedAt:MM/dd/yyyy HH:mm}", true)
+                    .AddField("Roles", $"**({usr.RoleIds.Count - 1})** - {string.Join("\n", usr.GetRoles().Take(10).Where(r => r.Id != r.Guild.EveryoneRole.Id).Select(r => r.Name))}", true);
 
                 var avatar = usr.RealAvatarUrl();
                 if (avatar != null && avatar.IsAbsoluteUri)
