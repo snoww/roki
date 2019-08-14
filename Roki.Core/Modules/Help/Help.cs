@@ -92,6 +92,7 @@ namespace Roki.Modules.Help
             var i = 0;
             var groups = cmdsWithGroup.GroupBy(x => i++ / 48).ToArray();
             var embed = new EmbedBuilder().WithOkColor();
+            // abcie
             foreach (var group in groups)
             {
                 var last = group.Count();
@@ -103,7 +104,6 @@ namespace Roki.Modules.Help
                         {
                             return $"{(succuss.Contains(x) ? "✅" : "❌")}{Prefix + x.Aliases.First(),-15} {"[" + x.Aliases.Skip(1).FirstOrDefault() + "]",-8}";
                         }
-
                         return $"{Prefix + x.Aliases.First(),-15} {"[" + x.Aliases.Skip(1).FirstOrDefault() + "]",-8}";
                     });
 
@@ -123,9 +123,38 @@ namespace Roki.Modules.Help
                     embed.AddField(group.ElementAt(i).Key, "```css\n" + string.Join("\n", transformed) + "\n```", true);
                 }
             }
-
             embed.WithFooter(String.Format("Type `{0}h CommandName` to see the help for that specified command. e.g. `{0}h {0}8ball`", Prefix));
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+        }
+
+        [RokiCommand, Description, Usage, Aliases]
+        [Priority(0)]
+        public async Task Help([Leftover] string fail)
+        {
+            var preflixless = _command.Commands.FirstOrDefault(x => x.Aliases.Any(cmdName => cmdName.ToLowerInvariant() == fail));
+            if (preflixless != null)
+            {
+                await (Help(preflixless).ConfigureAwait(false));
+                return;
+            }
+            var embed = new EmbedBuilder().WithErrorColor()
+                .WithDescription("Command not found");
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+        }
+
+        [RokiCommand, Description, Usage, Aliases]
+        [Priority(1)]
+        public async Task Help([Leftover] CommandInfo cmd = null)
+        {
+            var channel = ctx.Channel;
+
+            if (cmd == null)
+            {
+                IMessageChannel ch = channel is ITextChannel
+                    ? await ((IGuildUser) ctx.User).GetOrCreateDMChannelAsync().ConfigureAwait(false)
+                    : channel;
+//                await ch.
+            }
         }
 
         public class CommandTextEqualityComparer : IEqualityComparer<CommandInfo>
