@@ -120,7 +120,6 @@ namespace Roki.Modules.Help
                                 return String.Concat(x);
                             });
                     }
-                    
                     embed.AddField(group.ElementAt(i).Key, "```css\n" + string.Join("\n", transformed) + "\n```", true);
                 }
             }
