@@ -11,7 +11,7 @@ using Roki.Extentions;
 
 namespace Roki.Modules.Utility
 {
-    public partial class Utiltiy
+    public partial class Utility
     {
         [Group]
         public class InfoCommands : RokiSubmodule
