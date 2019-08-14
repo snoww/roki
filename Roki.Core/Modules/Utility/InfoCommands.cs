@@ -113,7 +113,8 @@ namespace Roki.Modules.Utility
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
-
+            
+            [RokiCommand, Description, Usage, Aliases]
             public async Task Ping()
             {
                 var sw = Stopwatch.StartNew();
@@ -124,7 +125,7 @@ namespace Roki.Modules.Utility
                 var embed = new EmbedBuilder();
                 embed.WithOkColor()
                     .WithAuthor("Pong! 🏓")
-                    .WithDescription($"Currently {(int) sw.Elapsed.TotalMilliseconds}ms");
+                    .WithDescription($"Currently {(int)sw.Elapsed.TotalMilliseconds}ms");
 
             }
         }
