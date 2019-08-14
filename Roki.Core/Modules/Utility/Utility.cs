@@ -35,14 +35,14 @@ namespace Roki.Modules.Utility
             await ctx.Channel.EmbedAsync(
                 new EmbedBuilder().WithOkColor()
                     .WithAuthor(eab => eab.WithName($"Roki v{StatsService.BotVersion}").WithIconUrl("https://i.imgur.com/KmPRRKh.png"))
-                    .AddField(efb => efb.WithName("Author").WithValue(_stats.Author).WithIsInline(true))
-                    .AddField(efb => efb.WithName("Bot ID").WithValue(_client.CurrentUser.Id.ToString()).WithIsInline(true))
-                    .AddField(efb => efb.WithName("Commands ran").WithValue(_stats.CommandsRan.ToString()).WithIsInline(true))
-                    .AddField(efb => efb.WithName("Messages").WithValue(_stats.MessageCounter).WithIsInline(true))
-                    .AddField(efb => efb.WithName("Memory").WithValue($"{_stats.Heap} MB").WithIsInline(true))
-                    .AddField(efb => efb.WithName("Owner ID").WithValue(ownerId).WithIsInline(true))
-                    .AddField(efb => efb.WithName("Uptime").WithValue(_stats.GetUptimeString("\n")).WithIsInline(true))
-                    .AddField(efb => efb.WithName("Presence").WithValue($"{_stats.TextChannels} Text Channels\n{_stats.VoiceChannels} Voice Channels").WithIsInline(true)));
+                    .AddField("Author", _stats.Author, true)
+                    .AddField("Bot ID", _client.CurrentUser.Id.ToString(), true)
+                    .AddField("Commands ran", _stats.CommandsRan.ToString(), true)
+                    .AddField("Messages", _stats.MessageCounter, true)
+                    .AddField("Memory", $"{_stats.Heap} MB", true)
+                    .AddField("Owner ID", ownerId, true)
+                    .AddField("Uptime", _stats.GetUptimeString("\n"), true)
+                    .AddField("Presence", $"{_stats.TextChannels} Text Channels\n{_stats.VoiceChannels} Voice Channels", true));
         }
     }
 }
