@@ -26,7 +26,7 @@ namespace Roki.Modules.Help
         }
         
         [RokiCommand, Description, Usage, Aliases]
-        public async Task Modlues()
+        public async Task Modules()
         {
             var embed = new EmbedBuilder().WithOkColor()
                 .WithTitle("List of Modules")
