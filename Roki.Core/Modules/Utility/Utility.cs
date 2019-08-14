@@ -8,14 +8,14 @@ using Roki.Extentions;
 
 namespace Roki.Modules.Utility
 {
-    public partial class Utiltiy : RokiTopLevelModule
+    public partial class Utility : RokiTopLevelModule
     {
         private readonly DiscordSocketClient _client;
         private readonly IStatsService _stats;
         private readonly IConfiguration _config;
         private readonly Roki _roki;
 
-        public Utiltiy(Roki roki, DiscordSocketClient client, IStatsService stats, IConfiguration config)
+        public Utility(Roki roki, DiscordSocketClient client, IStatsService stats, IConfiguration config)
         {
             _client = client;
             _stats = stats;
