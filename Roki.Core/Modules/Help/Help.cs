@@ -37,10 +37,10 @@ namespace Roki.Modules.Help
             await ctx.Channel.EmbedAsync(embed);
         }
         
+        [RokiCommand, Description, Usage, Aliases]
+        [RokiOptions(typeof(CommandOptions))]
         public async Task Commands(string module = null, params string[] args)
         {
-            var channel = ctx.Channel;
-
             var (opts, _) = OptionParser.ParseFrom(new CommandOptions(), args);
 
             module = module?.Trim().ToUpperInvariant();
