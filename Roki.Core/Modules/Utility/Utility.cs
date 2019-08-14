@@ -23,7 +23,7 @@ namespace Roki.Modules.Utility
             _roki = roki;
         }
 
-        [RokiCommand, Usage, Description, Aliases]
+        [RokiCommand, Description, Usage, Aliases]
         public async Task Stats()
         {
             var ownerId = string.Join("\n", _config.OwnerIds);
