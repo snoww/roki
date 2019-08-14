@@ -36,5 +36,13 @@
     "Usage": [
       "{0}ping"
     ]
-  }
+  },
+  "modules": {
+    "Cmd": "modules mdls",
+    "Desc": "Lists all bot modules.",
+    "Usage": [
+      "{0}modules"
+    ]
+  },
+
 }
