@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -111,6 +112,20 @@ namespace Roki.Modules.Utility
                     embed.WithThumbnailUrl(avatar.ToString());
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            }
+
+            public async Task Ping()
+            {
+                var sw = Stopwatch.StartNew();
+                var msg = await ctx.Channel.SendMessageAsync("🏓").ConfigureAwait(false);
+                sw.Stop();
+                msg.DeleteAfter(0);
+                
+                var embed = new EmbedBuilder();
+                embed.WithOkColor()
+                    .WithAuthor("Pong! 🏓")
+                    .WithDescription($"Currently {(int) sw.Elapsed.TotalMilliseconds}ms");
+
             }
         }
     }
