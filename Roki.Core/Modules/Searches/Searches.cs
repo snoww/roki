@@ -73,7 +73,7 @@ namespace Roki.Modules.Searches
             query = WebUtility.UrlEncode(encode).Replace(" ", "+");
             var result = await _google.GetImagesAsync(encode).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithOkColor()
-                .WithAuthor("Image search for: " + encode.TrimTo(50), "http://i.imgur.com/G46fm8J.png",
+                .WithAuthor("Image search for: " + encode.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
                     "https://www.google.com/search?q=" + query + "&source=lnms&tbm=isch")
                 .WithDescription(result.Link)
                 .WithImageUrl(result.Link)
@@ -91,7 +91,7 @@ namespace Roki.Modules.Searches
             query = WebUtility.UrlEncode(encode).Replace(" ", "+");
             var result = await _google.GetImagesAsync(encode, true).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithOkColor()
-                .WithAuthor("Image search for: " + encode.TrimTo(50), "http://i.imgur.com/G46fm8J.png",
+                .WithAuthor("Image search for: " + encode.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
                     "https://www.google.com/search?q=" + query + "&source=lnms&tbm=isch")
                 .WithDescription(result.Link)
                 .WithImageUrl(result.Link)
