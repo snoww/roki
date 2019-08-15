@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using NLog;
 using Roki.Core.Services;
 
@@ -110,6 +111,8 @@ namespace Roki.Extentions
         public static IEnumerable<IRole> GetRoles(this IGuildUser user) =>
             user.RoleIds.Select(r => user.Guild.GetRole(r)).Where(r => r != null);
 
-
+        public static string RealSummary(this CommandInfo info, string prefix) => string.Format(info.Summary, prefix);
+        
+        public static string RealRemarks(this CommandInfo cmd, string prefix) => string.Join(" or ", JsonConvert.DeserializeObject<string[]>(cmd.Remarks).Select(x => Format.Code(string.Format(x, prefix))));
     }
 }
