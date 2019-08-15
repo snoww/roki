@@ -74,5 +74,21 @@
       "{0}youtube Jebaited",
       "{0}yt hello"
     ]
+  },
+  "image": {
+    "Command": "image, img",
+    "Description": "Searches Google Images with the specified query, returns the top result.",
+    "Usage": [
+      "{0}image cats",
+      "{0}img dogs"
+    ]
+  },
+  "randomimage": {
+    "Command": "randomimage, rimg",
+    "Description": "Searches Google Images with the specified query, returns a random result.",
+    "Usage": [
+      "{0}randomimage cats",
+      "{0}rimg dogs"
+    ]
   }
 }
