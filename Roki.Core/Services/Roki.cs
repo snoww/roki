@@ -82,6 +82,8 @@ namespace Roki
                 .AddSingleton(CommandService)
                 .AddSingleton(this);
 
+            service.AddHttpClient();
+
             service.LoadFrom(Assembly.GetAssembly(typeof(CommandHandler)));
 
             Services = service.BuildServiceProvider();
