@@ -16,8 +16,7 @@ namespace Roki.Core.Services.Impl
         public ulong ClientId { get; }
         public string Token { get; }
         public string GoogleApi { get; }
-        public string GoogleCs { get; }
-        
+
         public ImmutableArray<ulong> OwnerIds { get; }
         
         private readonly string _credsFileName = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
@@ -44,8 +43,7 @@ namespace Roki.Core.Services.Impl
                 }
                 OwnerIds = data.GetSection("OwnerIds").GetChildren().Select(c => ulong.Parse(c.Value)).ToImmutableArray();
                 GoogleApi = data[nameof(GoogleApi)];
-                GoogleCs = data[nameof(GoogleCs)];
-                
+
                 if (!ulong.TryParse(data[nameof(ClientId)], out ulong clId))
                     clId = 0;
                 ClientId = clId;
