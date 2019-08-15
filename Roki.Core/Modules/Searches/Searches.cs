@@ -4,10 +4,11 @@ using Discord;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
 using Roki.Extentions;
+using Roki.Modules.Searches.Services;
 
 namespace Roki.Modules.Searches
 {
-    public partial class Searches : RokiTopLevelModule
+    public partial class Searches : RokiTopLevelModule<SearchService>
     {
         private readonly IConfiguration _config;
         private readonly IHttpClientFactory _httpFactory;
@@ -20,9 +21,26 @@ namespace Roki.Modules.Searches
             _httpFactory = httpFactory;
         }
 
+        [RokiCommand, Description, Usage, Aliases]
         public async Task Time([Leftover] string query)
         {
+            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+                return;
+            if (string.IsNullOrWhiteSpace(_config.GoogleApi))
+            {
+                var err = new EmbedBuilder().WithErrorColor()
+                    .WithDescription("No Google Api key provided");
+                await ctx.Channel.EmbedAsync(err).ConfigureAwait(false);
+                return;
+            }
+
+            var data = await _service.GetTimeDataAsync(query).ConfigureAwait(false);
             
+            var embed = new EmbedBuilder().WithOkColor()
+                .WithTitle($"**{data.Address}**")
+                .WithDescription($"```{data.Time:HH:mm} {data.TimeZoneName}```");
+            
+            await ctx.Channel.EmbedAsync(embed);
         }
 
         public async Task<bool> ValidateQuery(IMessageChannel channel, string query)
@@ -32,7 +50,7 @@ namespace Roki.Modules.Searches
             
             var embed = new EmbedBuilder().WithErrorColor()
                 .WithDescription("No search query provided");
-            await channel.EmbedAsync(embed);
+            await ctx.Channel.EmbedAsync(embed);
             return false;
         }
 

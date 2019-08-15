@@ -30,7 +30,6 @@ namespace Roki.Extentions
             }
             return module;
         }
-
         
         public static IEnumerable<Type> LoadFrom(this IServiceCollection collection, Assembly assembly)
         {
@@ -114,5 +113,7 @@ namespace Roki.Extentions
         public static string RealSummary(this CommandInfo info, string prefix) => string.Format(info.Summary, prefix);
         
         public static string RealRemarks(this CommandInfo cmd, string prefix) => string.Join(" or ", JsonConvert.DeserializeObject<string[]>(cmd.Remarks).Select(x => Format.Code(string.Format(x, prefix))));
+        
+        public static double UnixTimestamp(this DateTime dt) => dt.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
     }
 }
