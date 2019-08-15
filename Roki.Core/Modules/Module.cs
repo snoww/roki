@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -17,7 +18,8 @@ namespace Roki.Modules
 
         public CommandHandler Handler { get; }
 
-        public string Prefix => Handler.DefaultPrefix;
+        public string Prefix = ".";
+//        public string Prefix => Handler.DefaultPrefix;
 
         protected ICommandContext ctx => Context;
 

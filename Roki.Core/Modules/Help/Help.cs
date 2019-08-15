@@ -9,14 +9,20 @@ using Roki.Common.Attributes;
 using Roki.Core.Services;
 using Roki.Extentions;
 using Roki.Modules.Help.Common;
+using Roki.Modules.Help.Services;
 
 namespace Roki.Modules.Help
 {
-    public class Help : RokiTopLevelModule
+    public class Help : RokiTopLevelModule<HelpService>
     {
         private readonly IConfiguration _config;
         private readonly CommandService _command;
         private readonly IServiceProvider _service;
+
+//        public EmbedBuilder GetHelpStringEmbed()
+//        {
+//            
+//        }
 
         public Help(IConfiguration config, CommandService command, IServiceProvider service)
         {
@@ -53,7 +59,8 @@ namespace Roki.Modules.Help
                     .Distinct(new CommandTextEqualityComparer());
 
             var succuss = new HashSet<CommandInfo>();
-            if(opts.View != CommandOptions.ViewType.All){
+            if(opts.View != CommandOptions.ViewType.All)
+            {
                 succuss = new HashSet<CommandInfo>((await Task.WhenAll(cmds.Select(async x =>
                 {
                     var pre = await x.CheckPreconditionsAsync(Context, _service).ConfigureAwait(false);
@@ -64,12 +71,11 @@ namespace Roki.Modules.Help
 
                 if (opts.View == CommandOptions.ViewType.Hide)
                 {
-                    cmds = cmds.Where((x => succuss.Contains(x)));
+                    cmds = cmds.Where(x => succuss.Contains(x));
                 }
             }
 
-            var cmdsWithGroup = cmds
-                .GroupBy(cmd => cmd.Module.Name.Replace("Commands", "", StringComparison.InvariantCulture))
+            var cmdsWithGroup = cmds.GroupBy(cmd => cmd.Module.Name.Replace("Commands", "", StringComparison.InvariantCulture))
                 .OrderBy(x => x.Key == x.First().Module.Name ? int.MaxValue : x.Count());
 
             if (!cmds.Any())
@@ -96,8 +102,10 @@ namespace Roki.Modules.Help
             foreach (var group in groups)
             {
                 var last = group.Count();
+                Console.WriteLine(last);
                 for (i = 0; i < last; i++)
                 {
+                    Console.WriteLine(i);
                     var transformed = group.ElementAt(i).Select(x =>
                     {
                         if (opts.View == CommandOptions.ViewType.Cross)
@@ -127,35 +135,36 @@ namespace Roki.Modules.Help
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
-        [RokiCommand, Description, Usage, Aliases]
-        [Priority(0)]
-        public async Task Help([Leftover] string fail)
-        {
-            var preflixless = _command.Commands.FirstOrDefault(x => x.Aliases.Any(cmdName => cmdName.ToLowerInvariant() == fail));
-            if (preflixless != null)
-            {
-                await (Help(preflixless).ConfigureAwait(false));
-                return;
-            }
-            var embed = new EmbedBuilder().WithErrorColor()
-                .WithDescription("Command not found");
-            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
-        }
-
-        [RokiCommand, Description, Usage, Aliases]
-        [Priority(1)]
-        public async Task Help([Leftover] CommandInfo cmd = null)
-        {
-            var channel = ctx.Channel;
-
-            if (cmd == null)
-            {
-                IMessageChannel ch = channel is ITextChannel
-                    ? await ((IGuildUser) ctx.User).GetOrCreateDMChannelAsync().ConfigureAwait(false)
-                    : channel;
-//                await ch.
-            }
-        }
+//        [RokiCommand, Description, Usage, Aliases]
+//        [Priority(0)]
+//        public async Task H([Leftover] string fail)
+//        {
+//            var preflixless = _command.Commands.FirstOrDefault(x => x.Aliases.Any(cmdName => cmdName.ToLowerInvariant() == fail));
+//            if (preflixless != null)
+//            {
+//                await (H(preflixless).ConfigureAwait(false));
+//                return;
+//            }
+//            var embed = new EmbedBuilder().WithErrorColor()
+//                .WithDescription("Command not found");
+//            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+//        }
+//
+//        [RokiCommand, Description, Usage, Aliases]
+//        [Priority(1)]
+//        public async Task H([Leftover] CommandInfo cmd = null)
+//        {
+//            var channel = ctx.Channel;
+//
+//            if (cmd == null)
+//            {
+//                IMessageChannel ch = channel is ITextChannel
+//                    ? await ((IGuildUser) ctx.User).GetOrCreateDMChannelAsync().ConfigureAwait(false)
+//                    : channel;
+//                // TODO add help command
+////                await ch.
+//            }
+//        }
 
         public class CommandTextEqualityComparer : IEqualityComparer<CommandInfo>
         {
