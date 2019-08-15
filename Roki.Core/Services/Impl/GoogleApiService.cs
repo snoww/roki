@@ -74,15 +74,16 @@ namespace Roki.Core.Services.Impl
             await Task.Yield();
             if (string.IsNullOrWhiteSpace(query))
                 throw new ArgumentNullException(nameof(query));
-
+            
             var request = cs.Cse.List(query);
+            var start = random ? new Random().Next(1, 10) : 1;
             request.Cx = search_engine_id;
             request.Num = 1;
             request.Fields = "items(image(contextLink,thumbnailLink),link)";
             request.SearchType = CseResource.ListRequest.SearchTypeEnum.Image;
-            request.Start = random ? new Random().Next(1, 15) : 1;
+            request.Start = start;
             var search = await request.ExecuteAsync().ConfigureAwait(false);
-            return new ImageResult(search.Items[0].Image, search.Items[0].Link);
+            return random ? new ImageResult(search.Items[start].Image, search.Items[start].Link) : new ImageResult(search.Items[0].Image, search.Items[0].Link);
         }
     }
 }
