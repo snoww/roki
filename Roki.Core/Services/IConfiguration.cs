@@ -8,8 +8,7 @@ namespace Roki.Core.Services
         ulong ClientId { get; }
         string Token { get; }
         string GoogleApi { get; }
-        string GoogleCs { get; }
-        
+
         ImmutableArray<ulong> OwnerIds { get; }
         bool IsOwner(IUser u);
     }
