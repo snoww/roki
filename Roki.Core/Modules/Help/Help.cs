@@ -102,17 +102,15 @@ namespace Roki.Modules.Help
             foreach (var group in groups)
             {
                 var last = group.Count();
-                Console.WriteLine(last);
                 for (i = 0; i < last; i++)
                 {
-                    Console.WriteLine(i);
                     var transformed = group.ElementAt(i).Select(x =>
                     {
                         if (opts.View == CommandOptions.ViewType.Cross)
                         {
                             return $"{(succuss.Contains(x) ? "✅" : "❌")}{Prefix + x.Aliases.First(),-15} {"[" + x.Aliases.Skip(1).FirstOrDefault() + "]",-8}";
                         }
-                        return $"{Prefix + x.Aliases.First(),-15} {"[" + x.Aliases.Skip(1).FirstOrDefault() + "]",-8}";
+                        return $"{Prefix + x.Aliases.First(),-13} {"[" + x.Aliases.Skip(1).FirstOrDefault() + "]",-5}";
                     });
 
                     if (i == last - 1 && (i + 1) % 2 != 0)
@@ -128,6 +126,7 @@ namespace Roki.Modules.Help
                                 return String.Concat(x);
                             });
                     }
+                    
                     embed.AddField(group.ElementAt(i).Key, "```css\n" + string.Join("\n", transformed) + "\n```", true);
                 }
             }
