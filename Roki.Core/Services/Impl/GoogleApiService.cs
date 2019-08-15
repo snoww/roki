@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Google.Apis.Customsearch.v1;
 using Google.Apis.Services;
@@ -71,7 +70,7 @@ namespace Roki.Core.Services.Impl
             return (await query.ExecuteAsync().ConfigureAwait(false)).Items.Select(i => (i.Snippet.Title.TrimTo(50), i.Id.VideoId, "http://www.youtube.com/watch?v=" + i.Id.VideoId));
         }
 
-        public async Task<ImageResult> GetImagesAsync(string query)
+        public async Task<ImageResult> GetImagesAsync(string query, bool random = false)
         {
             await Task.Yield();
             if (string.IsNullOrWhiteSpace(query))
@@ -82,8 +81,7 @@ namespace Roki.Core.Services.Impl
             request.Num = 1;
             request.Fields = "items(image(contextLink,thumbnailLink),link";
             request.SearchType = CseResource.ListRequest.SearchTypeEnum.Image;
-            request.Start = new Random().Next(0, 20);
-
+            request.Start = random ? new Random().Next(1, 15) : 1;
             var search = await request.ExecuteAsync().ConfigureAwait(false);
             return new ImageResult(search.Items[0].Image, search.Items[0].Link);
         }

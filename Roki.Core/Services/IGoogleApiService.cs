@@ -8,7 +8,7 @@ namespace Roki.Core.Services
     {
         Task<IEnumerable<string>> GetVideoLinksByKeywordAsync(string keywords, int count = 1);
         Task<IEnumerable<(string Name, string Id, string Url)>> GetVideoInfoByKeywordAsync(string keywords, int count = 1);
-        Task<ImageResult> GetImagesAsync(string query);
+        Task<ImageResult> GetImagesAsync(string query, bool random = false);
     }
 
     public struct ImageResult

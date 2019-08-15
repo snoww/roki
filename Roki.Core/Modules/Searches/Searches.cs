@@ -1,8 +1,10 @@
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Discord;
 using Roki.Common.Attributes;
+using Roki.Core.Extentions;
 using Roki.Core.Services;
 using Roki.Extentions;
 using Roki.Modules.Searches.Services;
@@ -60,6 +62,42 @@ namespace Roki.Modules.Searches
 
             await ctx.Channel.SendMessageAsync(result).ConfigureAwait(false);
         }
+        
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task Image([Leftover] string query = null)
+        {
+            // TODO search imgur if google returns no results
+            var encode = query?.Trim();
+            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+                return;
+            query = WebUtility.UrlEncode(encode).Replace(" ", "+");
+            var result = await _google.GetImagesAsync(encode).ConfigureAwait(false);
+            var embed = new EmbedBuilder().WithOkColor()
+                .WithAuthor("Image search for: " + encode.TrimTo(50), "http://i.imgur.com/G46fm8J.png",
+                    "https://www.google.com/search?q=" + query + "&source=lnms&tbm=isch")
+                .WithDescription(result.Link)
+                .WithImageUrl(result.Link)
+                .WithTitle(ctx.User.ToString());
+            await ctx.Channel.EmbedAsync(embed);
+        }
+        
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task RandomImage([Leftover] string query = null)
+        {
+            // TODO search imgur if google returns no results
+            var encode = query?.Trim();
+            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+                return;
+            query = WebUtility.UrlEncode(encode).Replace(" ", "+");
+            var result = await _google.GetImagesAsync(encode, true).ConfigureAwait(false);
+            var embed = new EmbedBuilder().WithOkColor()
+                .WithAuthor("Image search for: " + encode.TrimTo(50), "http://i.imgur.com/G46fm8J.png",
+                    "https://www.google.com/search?q=" + query + "&source=lnms&tbm=isch")
+                .WithDescription(result.Link)
+                .WithImageUrl(result.Link)
+                .WithTitle(ctx.User.ToString());
+            await ctx.Channel.EmbedAsync(embed);
+        }
 
         public async Task<bool> ValidateQuery(IMessageChannel channel, string query)
         {
@@ -71,6 +109,5 @@ namespace Roki.Modules.Searches
             await ctx.Channel.EmbedAsync(embed);
             return false;
         }
-
     }
 }
