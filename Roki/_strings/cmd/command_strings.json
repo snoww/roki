@@ -62,9 +62,17 @@
   },
   "time": {
     "Command": "time",
-    "Description": "Shows the current time and timezone for the specified location",
+    "Description": "Shows the current time and timezone for the specified location.",
     "Usage": [
       "{0}time Tokyo, JP"
+    ]
+  },
+  "youtube": {
+    "Command": "youtube yt",
+    "Description": "Searches Youtube with specified query.",
+    "Usage": [
+      "{0}youtube Jebaited",
+      "{0}yt hello"
     ]
   }
 }

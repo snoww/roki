@@ -29,10 +29,10 @@ namespace Roki.Modules.Searches.Services
 
         public Task<TimeData> GetTimeDataAsync(string arg)
         {
-            return GetTimedataFactory(arg);
+            return GetTimeDataFactory(arg);
         }
 
-        private async Task<TimeData> GetTimedataFactory(string arg)
+        private async Task<TimeData> GetTimeDataFactory(string arg)
         {
             try
             {
