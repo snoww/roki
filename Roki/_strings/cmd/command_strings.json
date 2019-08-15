@@ -53,14 +53,18 @@
     ]
   },
   "help": {
-    "Cmd": "help h",
-    "Desc": "Either shows a help for a single command, or DMs you help link if no parameters are specified.",
+    "Command": "help h",
+    "Description": "Either shows a help for a single command, or DMs you help link if no parameters are specified.",
     "Usage": [
       "{0}help {0}cmds",
       "{0}h"
     ]
+  },
+  "time": {
+    "Command": "time",
+    "Description": "Shows the current time and timezone for the specified location",
+    "Usage": [
+      "{0}time Tokyo, JP"
+    ]
   }
-
-
-
 }
