@@ -28,7 +28,7 @@ namespace Roki.Core.Services.Impl
             _config = config;
             _httpFactory = httpFactory;
             
-            var bcs = new BaseClientService.Initializer 
+            var baseClient = new BaseClientService.Initializer 
             {
                 ApplicationName = "Roki",
                 ApiKey = _config.GoogleApi,
@@ -36,8 +36,8 @@ namespace Roki.Core.Services.Impl
 
             _log = LogManager.GetCurrentClassLogger();
             
-            yt = new YouTubeService();
-            cs = new CustomsearchService();
+            yt = new YouTubeService(baseClient);
+            cs = new CustomsearchService(baseClient);
         }
 
         public async Task<IEnumerable<string>> GetVideoLinksByKeywordAsync(string keywords, int count = 1)
@@ -49,7 +49,6 @@ namespace Roki.Core.Services.Impl
                 throw new ArgumentOutOfRangeException(nameof(count));
 
             var query = yt.Search.List("snippet");
-            query.Key = _config.GoogleApi;
             query.MaxResults = count;
             query.Q = keywords;
             query.Type = "video";
