@@ -49,7 +49,8 @@ namespace Roki.Core.Services.Impl
             if (count <= 0)
                 throw new ArgumentOutOfRangeException(nameof(count));
 
-            var query = yt.Search.List("snippit");
+            var query = yt.Search.List("snippet");
+            query.Key = _config.GoogleApi;
             query.MaxResults = count;
             query.Q = keywords;
             query.Type = "video";
@@ -63,7 +64,7 @@ namespace Roki.Core.Services.Impl
                 throw new ArgumentNullException(nameof(keywords));
             if (count <= 0)
                 throw new ArgumentOutOfRangeException(nameof(count));
-            var query = yt.Search.List("snippit");
+            var query = yt.Search.List("snippet");
             query.MaxResults = count;
             query.Q = keywords;
             query.Type = "video";
