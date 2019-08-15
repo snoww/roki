@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Discord;
@@ -29,7 +30,7 @@ namespace Roki.Modules.Searches
             if (string.IsNullOrWhiteSpace(_config.GoogleApi))
             {
                 var err = new EmbedBuilder().WithErrorColor()
-                    .WithDescription("No Google Api key provided");
+                    .WithDescription("No Google Api key provided.");
                 await ctx.Channel.EmbedAsync(err).ConfigureAwait(false);
                 return;
             }
@@ -43,13 +44,29 @@ namespace Roki.Modules.Searches
             await ctx.Channel.EmbedAsync(embed);
         }
 
+        public async Task Youtube([Leftover] string query = null)
+        {
+            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+                return;
+
+            var result = (await _google.GetVideoLinksByKeywordAsync(query).ConfigureAwait(false)).FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(result))
+            {
+                var err = new EmbedBuilder().WithErrorColor()
+                    .WithDescription("No results.");
+                await ctx.Channel.EmbedAsync(err).ConfigureAwait(false);
+            }
+
+            await ctx.Channel.SendMessageAsync(result).ConfigureAwait(false);
+        }
+
         public async Task<bool> ValidateQuery(IMessageChannel channel, string query)
         {
             if (!string.IsNullOrWhiteSpace(query))
                 return true;
             
             var embed = new EmbedBuilder().WithErrorColor()
-                .WithDescription("No search query provided");
+                .WithDescription("No search query provided.");
             await ctx.Channel.EmbedAsync(embed);
             return false;
         }
