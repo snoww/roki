@@ -78,7 +78,7 @@ namespace Roki.Core.Services.Impl
             var request = cs.Cse.List(query);
             request.Cx = search_engine_id;
             request.Num = 1;
-            request.Fields = "items(image(contextLink,thumbnailLink),link";
+            request.Fields = "items(image(contextLink,thumbnailLink),link)";
             request.SearchType = CseResource.ListRequest.SearchTypeEnum.Image;
             request.Start = random ? new Random().Next(1, 15) : 1;
             var search = await request.ExecuteAsync().ConfigureAwait(false);
