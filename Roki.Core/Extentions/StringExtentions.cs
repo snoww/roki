@@ -1,10 +1,12 @@
 using System;
 using System.Linq;
+using NLog;
 
 namespace Roki.Core.Extentions
 {
     public static class StringExtentions
     {
+        private static Logger _log = LogManager.GetCurrentClassLogger();
         public static string TrimTo(this string str, int maxLength, bool hideDots = false)
         {
             if (maxLength < 0)
@@ -25,7 +27,16 @@ namespace Roki.Core.Extentions
                 return string.Concat(str.Take(maxLength - 3)) + "...";
             }
         }
+        
+        public static string FirstLetterToUpperCase(this string s)
+        {
+            if (string.IsNullOrEmpty(s))
+                _log.Warn("No first letter");
 
+            char[] a = s.ToCharArray();
+            a[0] = char.ToUpper(a[0]);
+            return new string(a);
+        }
 
     }
 }
