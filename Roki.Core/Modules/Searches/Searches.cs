@@ -99,6 +99,34 @@ namespace Roki.Modules.Searches
             await ctx.Channel.EmbedAsync(embed);
         }
 
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task Movie([Leftover] string query = null)
+        {
+            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+                return;
+
+            await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+
+            var movie = await _service.GetMovieDataAsync(query).ConfigureAwait(false);
+            if (movie == null)
+            {
+                var err = new EmbedBuilder().WithErrorColor()
+                    .WithDescription("No results found.");
+                await ctx.Channel.EmbedAsync(err);
+                return;
+            }
+            var embed = new EmbedBuilder().WithOkColor()
+                .WithTitle(movie.Title)
+                .WithUrl($"http://www.imdb.com/title/{movie.ImdbId}/")
+                .WithDescription(movie.Plot.TrimTo(1000))
+                .AddField("Rating", movie.ImdbRating, true)
+                .AddField("Genre", movie.Genre, true)
+                .AddField("Year", movie.Year, true)
+                .WithImageUrl(movie.Poster);
+
+            await ctx.Channel.EmbedAsync(embed);
+        }
+
         public async Task<bool> ValidateQuery(IMessageChannel channel, string query)
         {
             if (!string.IsNullOrWhiteSpace(query))

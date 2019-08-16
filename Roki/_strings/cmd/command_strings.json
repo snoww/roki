@@ -77,7 +77,7 @@
   },
   "image": {
     "Command": "image, img",
-    "Description": "Searches Google Images with the specified query, returns the top result.",
+    "Description": "Searches Google Images with the specified query, returns first result.",
     "Usage": [
       "{0}image cats",
       "{0}img dogs"
@@ -89,6 +89,13 @@
     "Usage": [
       "{0}randomimage cats",
       "{0}rimg dogs"
+    ]
+  },
+  "movie": {
+    "Command": "movie imdb omdb",
+    "Description": "Searches omdb with the specified query, returns first result",
+    "Usage": [
+      "{0}imdb avengers endgame"
     ]
   }
 }

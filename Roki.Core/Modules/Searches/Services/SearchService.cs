@@ -66,6 +66,25 @@ namespace Roki.Modules.Searches.Services
                 return null;
             }
         }
+
+        public Task<OmdbMovie> GetMovieDataAsync(string name)
+        {
+            name = name.Trim().ToLowerInvariant();
+            return GetMovieDataFactory(name);
+        }
+
+        private async Task<OmdbMovie> GetMovieDataFactory(string name)
+        {
+            using (var http = _httpFactory.CreateClient())
+            {
+                var result = await http.GetStringAsync(string.Format("http://www.omdbapi.com/?t={0}&apikey=f9c978ed&y=&plot=full&r=json",
+                    name.Trim().Replace(' ', '+'))).ConfigureAwait(false);
+                var movie = JsonConvert.DeserializeObject<OmdbMovie>(result);
+                if (movie?.Title == null)
+                    return null;
+                return movie;
+            }
+        }
         
         public Task Unload()
         {
