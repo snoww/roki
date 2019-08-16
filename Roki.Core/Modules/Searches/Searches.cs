@@ -52,7 +52,7 @@ namespace Roki.Modules.Searches
                                 .AddField("Low / High", $"{data.Select(d => d.TemperatureLow).First()} °C / {data.Select(d => d.TemperatureHigh).First()} °C", true)
                                 .AddField("Sunrise", $"{data.Select(d => d.SunriseDateTime).First():HH:mm}", true)
                                 .AddField("Sunset", $"{data.Select(d => d.SunsetDateTime).First():HH:mm}", true)
-                                .WithFooter("(Powered by Dark Sky)[https://darksky.net/poweredby/]");
+                                .WithFooter("Powered by Dark Sky");
                 if (forecast.Response.Alerts != null)
                 {
                     embed.AddField("Active Alerts", $"{forecast.Response.Alerts.Select(d => d.Title).First()}", true)
