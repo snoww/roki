@@ -53,8 +53,8 @@ namespace Roki.Modules.Searches.Services
                         return null;
                     }
 
-                    var darkSky = new DarkSky.Services.DarkSkyService("a4e7bd45cb9c191eec7cda6c2559b413");
-                    var forcast = await darkSky.GetForecast(obj.Results[0].Geometry.Location.Lat, obj.Results[0].Geometry.Location.Lng, new DarkSkyService.OptionalParameters
+                    var darkSky = new DarkSkyService("a4e7bd45cb9c191eec7cda6c2559b413");
+                    var forecast = await darkSky.GetForecast(obj.Results[0].Geometry.Location.Lat, obj.Results[0].Geometry.Location.Lng, new DarkSkyService.OptionalParameters
                     {
                         MeasurementUnits = "ca",
                         DataBlocksToExclude = new List<ExclusionBlock>
@@ -65,7 +65,7 @@ namespace Roki.Modules.Searches.Services
                         },
                     });
 
-                    return forcast;
+                    return forecast;
                 }
                 catch (Exception e)
                 {
