@@ -24,6 +24,35 @@ namespace Roki.Modules.Searches
             _httpFactory = httpFactory;
         }
 
+        [RokiCommand, Usage, Description, Aliases]
+        public async Task Weather([Leftover] string query = null)
+        {
+            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+                return;
+            var forecast = await _service.GetWeatherDataAsync(query).ConfigureAwait(false);
+            var data = forecast.Response.Daily.Data;
+            var embed = new EmbedBuilder();
+            
+            if (!forecast.IsSuccessStatus)
+            {
+                embed.WithErrorColor()
+                    .WithDescription("City not found.");
+            }
+            else
+            {
+                embed = new EmbedBuilder().WithOkColor()
+                                .WithTitle($"Current weather for {forecast.Response.TimeZone}")
+                                .WithDescription(forecast.Response.Daily.Summary)
+                                .AddField("Temperature", $"{forecast.Response.Currently.Temperature}", true)
+                                .AddField("Precip %", $"{data.Select(d => d.PrecipProbability)}", true)
+                                .AddField("Humidity", $"{data.Select(d => d.Humidity)}", true)
+                                .AddField("Wind", $"{data.Select(d => d.WindSpeed)}", true)
+                                .AddField("UV Index", $"{data.Select(d => d.UvIndex)}", true);
+            }
+
+            await ctx.Channel.EmbedAsync(embed);
+        }
+
         [RokiCommand, Description, Usage, Aliases]
         public async Task Time([Leftover] string query)
         {
@@ -73,8 +102,7 @@ namespace Roki.Modules.Searches
             query = WebUtility.UrlEncode(encode).Replace(" ", "+");
             var result = await _google.GetImagesAsync(encode).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithOkColor()
-                .WithAuthor("Image search for: " + encode.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
-                    "https://www.google.com/search?q=" + query + "&source=lnms&tbm=isch")
+                .WithAuthor("Image search for: " + encode.TrimTo(50), "https://i.imgur.com/u1WtML5.png", "https://www.google.com/search?q=" + query + "&source=lnms&tbm=isch")
                 .WithDescription(result.Link)
                 .WithImageUrl(result.Link)
                 .WithTitle(ctx.User.ToString());
@@ -91,8 +119,7 @@ namespace Roki.Modules.Searches
             query = WebUtility.UrlEncode(encode).Replace(" ", "+");
             var result = await _google.GetImagesAsync(encode, true).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithOkColor()
-                .WithAuthor("Image search for: " + encode.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
-                    "https://www.google.com/search?q=" + query + "&source=lnms&tbm=isch")
+                .WithAuthor("Image search for: " + encode.TrimTo(50), "https://i.imgur.com/u1WtML5.png", "https://www.google.com/search?q=" + query + "&source=lnms&tbm=isch")
                 .WithDescription(result.Link)
                 .WithImageUrl(result.Link)
                 .WithTitle(ctx.User.ToString());

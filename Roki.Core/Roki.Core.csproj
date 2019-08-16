@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="CommandLineParser" Version="2.6.0" />
+      <PackageReference Include="DarkSkyCore" Version="5.1.16" />
       <PackageReference Include="Discord.Net" Version="2.1.1" />
       <PackageReference Include="Google.Apis.Customsearch.v1" Version="1.40.3.1369" />
       <PackageReference Include="Google.Apis.YouTube.v3" Version="1.40.3.1663" />

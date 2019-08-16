@@ -1,6 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using DarkSky.Models;
+using DarkSky.Services;
+using Discord;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using NLog;
@@ -25,6 +30,49 @@ namespace Roki.Modules.Searches.Services
             _google = google;
             _config = config;
             _log = LogManager.GetCurrentClassLogger();
+        }
+
+//        TODO use redis cache
+        public Task<DarkSkyResponse> GetWeatherDataAsync(string query)
+        {
+            query = query.Trim().ToLowerInvariant();
+            return GetWeatherDataFactory(query);
+        }
+
+        private async Task<DarkSkyResponse> GetWeatherDataFactory(string query)
+        {
+            using (var http = _httpFactory.CreateClient())
+            {
+                try
+                {
+                    var result = await http.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={query}&key={_config.GoogleApi}").ConfigureAwait(false);
+                    var obj = JsonConvert.DeserializeObject<GeolocationResult>(result);
+                    if (obj?.Results == null || obj.Results.Length == 0)
+                    {
+                        _log.Warn("Geocode lookup failed for {0}", query);
+                        return null;
+                    }
+
+                    var darkSky = new DarkSky.Services.DarkSkyService("a4e7bd45cb9c191eec7cda6c2559b413");
+                    var forcast = await darkSky.GetForecast(obj.Results[0].Geometry.Location.Lat, obj.Results[0].Geometry.Location.Lng, new DarkSkyService.OptionalParameters
+                    {
+                        MeasurementUnits = "ca",
+                        DataBlocksToExclude = new List<ExclusionBlock>
+                        {
+                            ExclusionBlock.Hourly,
+                            ExclusionBlock.Minutely,
+                            ExclusionBlock.Flags,
+                        },
+                    });
+
+                    return forcast;
+                }
+                catch (Exception e)
+                {
+                    _log.Warn(e.Message);
+                    return null;
+                }
+            }
         }
 
         public Task<TimeData> GetTimeDataAsync(string arg)
