@@ -44,10 +44,15 @@ namespace Roki.Modules.Searches
                                 .WithTitle($"Current weather for {forecast.Response.TimeZone}")
                                 .WithDescription(forecast.Response.Daily.Summary)
                                 .AddField("Temperature", $"{forecast.Response.Currently.Temperature}", true)
-                                .AddField("Precip %", $"{data.Select(d => d.PrecipProbability).FirstOrDefault()}", true)
-                                .AddField("Humidity", $"{data.Select(d => d.Humidity).FirstOrDefault()}", true)
-                                .AddField("Wind", $"{data.Select(d => d.WindSpeed).FirstOrDefault()}", true)
-                                .AddField("UV Index", $"{data.Select(d => d.UvIndex).FirstOrDefault()}", true);
+                                .AddField("Precip %", $"{data.Select(d => d.PrecipProbability).First() * 100}%", true)
+                                .AddField("Humidity", $"{data.Select(d => d.Humidity).First()}", true)
+                                .AddField("Wind", $"{data.Select(d => d.WindSpeed).First()}{data.Select(d => d.WindBearing).First()}", true)
+                                .AddField("UV Index", $"{data.Select(d => d.UvIndex).First()}", true)
+                                .AddField("High/Low", $"{data.Select(d => d.TemperatureHigh).First()}/{data.Select(d => d.TemperatureLow).First()}", true)
+                                .AddField("Sunrise", $"{data.Select(d => d.SunriseDateTime).First():hh:mm}", true)
+                                .AddField("Sunset", $"{data.Select(d => d.SunsetDateTime).First():hh:mm}", true)
+                                
+                    ;
             }
 
             await ctx.Channel.EmbedAsync(embed);
