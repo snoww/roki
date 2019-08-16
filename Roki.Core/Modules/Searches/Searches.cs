@@ -44,16 +44,23 @@ namespace Roki.Modules.Searches
                 embed = new EmbedBuilder().WithOkColor()
                                 .WithTitle($"Current weather for {forecast.Response.TimeZone.Substring(forecast.Response.TimeZone.IndexOf('/') + 1)}")
                                 .WithDescription(data.Select(d => d.Summary).First())
-                                .AddField("Temperature", $"{forecast.Response.Currently.Temperature}", true)
+                                .AddField("Temperature", $"{forecast.Response.Currently.Temperature} °C", true)
                                 .AddField("Precip %", $"{data.Select(d => d.PrecipProbability).First() * 100}%", true)
-                                .AddField("Humidity", $"{data.Select(d => d.Humidity).First()}%", true)
-                                .AddField("Wind", $"{data.Select(d => d.WindSpeed).First()}km/h {data.Select(d => d.WindBearing).First()}", true)
+                                .AddField("Humidity", $"{data.Select(d => d.Humidity).First() * 100}%", true)
+                                .AddField("Wind", $"{data.Select(d => d.WindSpeed).First()} km/h {data.Select(d => d.WindBearing).First()}", true)
                                 .AddField("UV Index", $"{data.Select(d => d.UvIndex).First()}", true)
-                                .AddField("Low / High", $"{data.Select(d => d.TemperatureLow).First()}°C / {data.Select(d => d.TemperatureHigh).First()}°C", true)
+                                .AddField("Low / High", $"{data.Select(d => d.TemperatureLow).First()} °C / {data.Select(d => d.TemperatureHigh).First()} °C", true)
                                 .AddField("Sunrise", $"{data.Select(d => d.SunriseDateTime).First():HH:mm}", true)
                                 .AddField("Sunset", $"{data.Select(d => d.SunsetDateTime).First():HH:mm}", true)
-                                
-                    ;
+                                .WithFooter("(Powered by Dark Sky)[https://darksky.net/poweredby/]");
+                if (forecast.Response.Alerts != null)
+                {
+                    embed.AddField("Active Alerts", $"{forecast.Response.Alerts.Select(d => d.Title).First()}", true)
+                        .AddField("Severity", $"{forecast.Response.Alerts.Select(d => d.Severity).First()}", true)
+                        .AddField("Expires in", $"{forecast.Response.Alerts.Select(d => d.ExpiresDateTime).First()}", true)
+                        .AddField("Description", $"{forecast.Response.Alerts.Select(d => d.Description).First()}")
+                        .AddField("Source", $"{forecast.Response.Alerts.Select(d => d.Uri).First()}", true);
+                }
             }
 
             await ctx.Channel.EmbedAsync(embed);
