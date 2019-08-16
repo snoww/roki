@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -40,14 +41,13 @@ namespace Roki.Modules.Searches
             }
             else
             {
-                var city = 
                 embed = new EmbedBuilder().WithOkColor()
                                 .WithTitle($"Current weather for {forecast.Response.TimeZone.Substring(forecast.Response.TimeZone.IndexOf('/') + 1)}")
                                 .WithDescription(data.Select(d => d.Summary).First())
                                 .AddField("Temperature", $"{forecast.Response.Currently.Temperature} °C", true)
                                 .AddField("Precip %", $"{data.Select(d => d.PrecipProbability).First() * 100}%", true)
                                 .AddField("Humidity", $"{data.Select(d => d.Humidity).First() * 100}%", true)
-                                .AddField("Wind", $"{data.Select(d => d.WindSpeed).First()} km/h {data.Select(d => d.WindBearing).First()}", true)
+                                .AddField("Wind", $"{data.Select(d => d.WindSpeed).First()} km/h {((double) data.Select(d => d.WindBearing).First()).DegreesToCardinal()}", true)
                                 .AddField("UV Index", $"{data.Select(d => d.UvIndex).First()}", true)
                                 .AddField("Low / High", $"{data.Select(d => d.TemperatureLow).First()} °C / {data.Select(d => d.TemperatureHigh).First()} °C", true)
                                 .AddField("Sunrise", $"{data.Select(d => d.SunriseDateTime).First():HH:mm}", true)
@@ -56,13 +56,13 @@ namespace Roki.Modules.Searches
                 if (forecast.Response.Alerts != null)
                 {
                     embed.AddField("Active Alerts", $"{forecast.Response.Alerts.Select(d => d.Title).First()}", true)
-                        .AddField("Severity", $"{forecast.Response.Alerts.Select(d => d.Severity).First()}", true)
+                        .AddField("Severity", $"{forecast.Response.Alerts.Select(d => d.Severity).First().FirstLetterToUpperCase()}", true)
                         .AddField("Expires in", $"{forecast.Response.Alerts.Select(d => d.ExpiresDateTime).First()}", true)
                         .AddField("Description", $"{forecast.Response.Alerts.Select(d => d.Description).First()}")
                         .AddField("Source", $"{forecast.Response.Alerts.Select(d => d.Uri).First()}", true);
                 }
             }
-
+            
             await ctx.Channel.EmbedAsync(embed);
         }
 

@@ -26,5 +26,10 @@ namespace Roki.Core.Extentions
 
         public static DateTime ToUnixTimestamp(this double number) => new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(number);
 
+        public static string DegreesToCardinal(this double degrees)
+        {
+            string[] cardinals = {"N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"};
+            return cardinals[(int) Math.Round((degrees % 360) / 45)];
+        }
     }
 }
