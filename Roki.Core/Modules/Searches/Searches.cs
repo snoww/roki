@@ -44,10 +44,10 @@ namespace Roki.Modules.Searches
                                 .WithTitle($"Current weather for {forecast.Response.TimeZone}")
                                 .WithDescription(forecast.Response.Daily.Summary)
                                 .AddField("Temperature", $"{forecast.Response.Currently.Temperature}", true)
-                                .AddField("Precip %", $"{data.Select(d => d.PrecipProbability)}", true)
-                                .AddField("Humidity", $"{data.Select(d => d.Humidity)}", true)
-                                .AddField("Wind", $"{data.Select(d => d.WindSpeed)}", true)
-                                .AddField("UV Index", $"{data.Select(d => d.UvIndex)}", true);
+                                .AddField("Precip %", $"{data.Select(d => d.PrecipProbability).FirstOrDefault()}", true)
+                                .AddField("Humidity", $"{data.Select(d => d.Humidity).FirstOrDefault()}", true)
+                                .AddField("Wind", $"{data.Select(d => d.WindSpeed).FirstOrDefault()}", true)
+                                .AddField("UV Index", $"{data.Select(d => d.UvIndex).FirstOrDefault()}", true);
             }
 
             await ctx.Channel.EmbedAsync(embed);
