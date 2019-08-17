@@ -4,10 +4,12 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Discord;
+using NodaTime.Extensions;
 using Roki.Common.Attributes;
 using Roki.Core.Extentions;
 using Roki.Core.Services;
 using Roki.Extentions;
+using Roki.Modules.Searches.Common;
 using Roki.Modules.Searches.Services;
 
 namespace Roki.Modules.Searches
@@ -30,11 +32,12 @@ namespace Roki.Modules.Searches
         {
             if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
                 return;
-            var forecast = await _service.GetWeatherDataAsync(query).ConfigureAwait(false);
+            var (forecast, address) = await _service.GetWeatherDataAsync(query).ConfigureAwait(false);
             var data = forecast.Response.Daily.Data;
             var embed = new EmbedBuilder();
+            await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
             
-            if (!forecast.IsSuccessStatus)
+            if (!forecast.IsSuccessStatus || address == null)
             {
                 embed.WithErrorColor()
                     .WithDescription("City not found.");
@@ -42,24 +45,28 @@ namespace Roki.Modules.Searches
             else
             {
                 embed = new EmbedBuilder().WithOkColor()
-                                .WithTitle($"Current weather for {forecast.Response.TimeZone.Substring(forecast.Response.TimeZone.IndexOf('/') + 1)}")
+                                .WithTitle($"Current weather for {address}")
                                 .WithDescription(data.Select(d => d.Summary).First())
-                                .AddField("Temperature", $"{forecast.Response.Currently.Temperature} °C", true)
+                                .WithThumbnailUrl(WeatherIcon.GetWeatherIconUrl(forecast.Response.Currently.Icon.ToString()))
+                                .AddField("Temperature", $"{(int) forecast.Response.Currently.Temperature} °C", true)
                                 .AddField("Precip %", $"{data.Select(d => d.PrecipProbability).First() * 100}%", true)
                                 .AddField("Humidity", $"{data.Select(d => d.Humidity).First() * 100}%", true)
                                 .AddField("Wind", $"{data.Select(d => d.WindSpeed).First()} km/h {((double) data.Select(d => d.WindBearing).First()).DegreesToCardinal()}", true)
                                 .AddField("UV Index", $"{data.Select(d => d.UvIndex).First()}", true)
-                                .AddField("Low / High", $"{data.Select(d => d.TemperatureLow).First()} °C / {data.Select(d => d.TemperatureHigh).First()} °C", true)
-                                .AddField("Sunrise", $"{data.Select(d => d.SunriseDateTime).First():HH:mm}", true)
-                                .AddField("Sunset", $"{data.Select(d => d.SunsetDateTime).First():HH:mm}", true)
+                                .AddField("Low / High", $"{(int) data.Select(d => d.TemperatureLow).First()} °C / {(int) data.Select(d => d.TemperatureHigh).First()} °C", true)
+                                .AddField("Sunrise", $"{data.Select(d => d.SunriseDateTime).First():t}", true)
+                                .AddField("Sunset", $"{data.Select(d => d.SunsetDateTime).First():t}", true)
                                 .WithFooter("Powered by Dark Sky");
                 if (forecast.Response.Alerts != null)
                 {
-                    embed.AddField("Active Alerts", $"{forecast.Response.Alerts.Select(d => d.Title).First()}", true)
+                    
+                    
+                    embed.AddField("Active Alerts", $"**{forecast.Response.Alerts.Select(d => d.Title).First()}**")
                         .AddField("Severity", $"{forecast.Response.Alerts.Select(d => d.Severity).First().FirstLetterToUpperCase()}", true)
-                        .AddField("Expires in", $"{forecast.Response.Alerts.Select(d => d.ExpiresDateTime).First()}", true)
+                        .AddField("Expires", $"{forecast.Response.Alerts.Select(d => d.ExpiresDateTime).First():t}", true)
                         .AddField("Description", $"{forecast.Response.Alerts.Select(d => d.Description).First()}")
-                        .AddField("Source", $"{forecast.Response.Alerts.Select(d => d.Uri).First()}", true);
+                        .AddField("Source", $"{forecast.Response.Alerts.Select(d => d.Uri).First()}", true)
+                        .WithErrorColor();
                 }
             }
             
