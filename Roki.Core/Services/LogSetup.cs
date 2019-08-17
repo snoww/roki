@@ -11,7 +11,7 @@ namespace Roki.Core.Services
             var logConfig = new LoggingConfiguration();
             var consoleTarget = new ColoredConsoleTarget()
             {
-                Layout = @" ${date:format=HH\:mm\:ss} ${logger:shortName=True} | ${message}"
+                Layout = @"${date:format=HH\:mm\:ss} ${logger:shortName=True} | ${message}"
             };
             logConfig.AddTarget("Console", consoleTarget);
             
