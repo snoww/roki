@@ -33,13 +33,13 @@ namespace Roki.Modules.Searches.Services
         }
 
 //        TODO use redis cache
-        public Task<DarkSkyResponse> GetWeatherDataAsync(string query)
+        public Task<(DarkSkyResponse, string)> GetWeatherDataAsync(string query)
         {
             query = query.Trim().ToLowerInvariant();
             return GetWeatherDataFactory(query);
         }
 
-        private async Task<DarkSkyResponse> GetWeatherDataFactory(string query)
+        private async Task<(DarkSkyResponse, string)> GetWeatherDataFactory(string query)
         {
             using (var http = _httpFactory.CreateClient())
             {
@@ -50,7 +50,7 @@ namespace Roki.Modules.Searches.Services
                     if (obj?.Results == null || obj.Results.Length == 0)
                     {
                         _log.Warn("Geocode lookup failed for {0}", query);
-                        return null;
+                        return (null, null);
                     }
 
                     var darkSky = new DarkSkyService("a4e7bd45cb9c191eec7cda6c2559b413");
@@ -65,12 +65,12 @@ namespace Roki.Modules.Searches.Services
                         },
                     });
 
-                    return forecast;
+                    return (forecast, obj.Results[0].FormattedAddress);
                 }
                 catch (Exception e)
                 {
                     _log.Warn(e.Message);
-                    return null;
+                    return (null, null);
                 }
             }
         }
