@@ -28,7 +28,7 @@ namespace Roki.Modules.Searches
         }
 
         [RokiCommand, Usage, Description, Aliases]
-        public async Task Weather([Leftover] string query = null)
+        public async Task Weather([Leftover] string query = "toronto")
         {
             if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
                 return;
