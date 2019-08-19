@@ -114,6 +114,8 @@ namespace Roki.Modules.Utility
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
             
+            
+            
             [RokiCommand, Description, Usage, Aliases]
             public async Task Ping()
             {
