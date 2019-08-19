@@ -1,13 +1,14 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
-using Roki.Extentions;
+using Roki.Extensions;
 
 namespace Roki.Modules.Utility
 {
@@ -113,6 +114,29 @@ namespace Roki.Modules.Utility
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
+
+            [RokiCommand, Description, Usage, Aliases]
+            [RequireContext(ContextType.Guild)]
+            public async Task Avatar([Leftover] IGuildUser user = null)
+            {
+                if (user == null)
+                    user = (IGuildUser) ctx.User;
+
+                var avatarUrl = user.RealAvatarUrl();
+
+                if (avatarUrl == null)
+                {
+                    await ctx.Channel.SendErrorAsync($"{user.ToString()} does not have an avatar set").ConfigureAwait(false);
+                }
+                
+                var embed = new EmbedBuilder().WithOkColor()
+                    .WithThumbnailUrl(avatarUrl.ToString())
+                    .WithImageUrl(avatarUrl.ToString())
+                    .AddField("Username", user.ToString(), true)
+                    .AddField("Avatar Url", avatarUrl, true);
+
+                await ctx.Channel.EmbedAsync(embed, ctx.User.Mention).ConfigureAwait(false);
+            }
             
             [RokiCommand, Description, Usage, Aliases]
             public async Task Ping()
@@ -127,6 +151,7 @@ namespace Roki.Modules.Utility
                     .WithAuthor("Pong! 🏓")
                     .WithDescription($"Currently {(int)sw.Elapsed.TotalMilliseconds}ms");
 
+                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
         }
     }

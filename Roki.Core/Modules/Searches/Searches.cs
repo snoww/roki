@@ -4,11 +4,11 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Discord;
-using NodaTime.Extensions;
+using Newtonsoft.Json;
 using Roki.Common.Attributes;
 using Roki.Core.Extentions;
 using Roki.Core.Services;
-using Roki.Extentions;
+using Roki.Extensions;
 using Roki.Modules.Searches.Common;
 using Roki.Modules.Searches.Services;
 
@@ -43,18 +43,18 @@ namespace Roki.Modules.Searches
             else
             {
                 embed = new EmbedBuilder().WithOkColor()
-                                .WithTitle($"Current weather for {address}")
-                                .WithDescription(data.Select(d => d.Summary).First())
-                                .WithThumbnailUrl(WeatherIcon.GetWeatherIconUrl(forecast.Response.Currently.Icon.ToString()))
-                                .AddField("Temperature", $"{(int) forecast.Response.Currently.Temperature} °C", true)
-                                .AddField("Precip %", $"{data.Select(d => d.PrecipProbability).First() * 100}%", true)
-                                .AddField("Humidity", $"{data.Select(d => d.Humidity).First() * 100}%", true)
-                                .AddField("Wind", $"{data.Select(d => d.WindSpeed).First()} km/h {((double) data.Select(d => d.WindBearing).First()).DegreesToCardinal()}", true)
-                                .AddField("UV Index", $"{data.Select(d => d.UvIndex).First()}", true)
-                                .AddField("Low / High", $"{(int) data.Select(d => d.TemperatureLow).First()} °C / {(int) data.Select(d => d.TemperatureHigh).First()} °C", true)
-                                .AddField("Sunrise", $"{data.Select(d => d.SunriseDateTime).First():t}", true)
-                                .AddField("Sunset", $"{data.Select(d => d.SunsetDateTime).First():t}", true)
-                                .WithFooter("Powered by Dark Sky");
+                    .WithTitle($"Current weather for {address}")
+                    .WithDescription(data.Select(d => d.Summary).First())
+                    .WithThumbnailUrl(WeatherIcon.GetWeatherIconUrl(forecast.Response.Currently.Icon.ToString()))
+                    .AddField("Temperature", $"{(int) forecast.Response.Currently.Temperature} °C", true)
+                    .AddField("Precip %", $"{data.Select(d => d.PrecipProbability).First() * 100}%", true)
+                    .AddField("Humidity", $"{data.Select(d => d.Humidity).First() * 100}%", true)
+                    .AddField("Wind", $"{Math.Round((double) data.Select(d => d.WindSpeed).First())} km/h {((double) data.Select(d => d.WindBearing).First()).DegreesToCardinal()}", true)
+                    .AddField("UV Index", $"{data.Select(d => d.UvIndex).First()}", true)
+                    .AddField("Low / High", $"{(int) data.Select(d => d.TemperatureLow).First()} °C / {(int) data.Select(d => d.TemperatureHigh).First()} °C", true)
+                    .AddField("Sunrise", $"{data.Select(d => d.SunriseDateTime).First():t}", true)
+                    .AddField("Sunset", $"{data.Select(d => d.SunsetDateTime).First():t}", true)
+                    .WithFooter("Powered by Dark Sky");
                 if (forecast.Response.Alerts != null)
                 {
                     embed.AddField("Active Alerts", $"**{forecast.Response.Alerts.Select(d => d.Title).First()}**")
@@ -76,9 +76,7 @@ namespace Roki.Modules.Searches
                 return;
             if (string.IsNullOrWhiteSpace(_config.GoogleApi))
             {
-                var err = new EmbedBuilder().WithErrorColor()
-                    .WithDescription("No Google Api key provided.");
-                await ctx.Channel.EmbedAsync(err).ConfigureAwait(false);
+                await ctx.Channel.SendErrorAsync("No Google Api key provided.").ConfigureAwait(false);
                 return;
             }
 
@@ -100,9 +98,8 @@ namespace Roki.Modules.Searches
             var result = (await _google.GetVideoLinksByKeywordAsync(query).ConfigureAwait(false)).FirstOrDefault();
             if (string.IsNullOrWhiteSpace(result))
             {
-                var err = new EmbedBuilder().WithErrorColor()
-                    .WithDescription("No results.");
-                await ctx.Channel.EmbedAsync(err).ConfigureAwait(false);
+                await ctx.Channel.SendErrorAsync("No results.").ConfigureAwait(false);
+                return;
             }
 
             await ctx.Channel.SendMessageAsync(result).ConfigureAwait(false);
@@ -122,7 +119,7 @@ namespace Roki.Modules.Searches
                 .WithDescription(result.Link)
                 .WithImageUrl(result.Link)
                 .WithTitle(ctx.User.ToString());
-            await ctx.Channel.EmbedAsync(embed);
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
         
         [RokiCommand, Description, Usage, Aliases]
@@ -139,7 +136,7 @@ namespace Roki.Modules.Searches
                 .WithDescription(result.Link)
                 .WithImageUrl(result.Link)
                 .WithTitle(ctx.User.ToString());
-            await ctx.Channel.EmbedAsync(embed);
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -153,9 +150,7 @@ namespace Roki.Modules.Searches
             var movie = await _service.GetMovieDataAsync(query).ConfigureAwait(false);
             if (movie == null)
             {
-                var err = new EmbedBuilder().WithErrorColor()
-                    .WithDescription("No results found.");
-                await ctx.Channel.EmbedAsync(err);
+                await ctx.Channel.SendErrorAsync("No results found.").ConfigureAwait(false);
                 return;
             }
             var embed = new EmbedBuilder().WithOkColor()
@@ -167,17 +162,48 @@ namespace Roki.Modules.Searches
                 .AddField("Year", movie.Year, true)
                 .WithImageUrl(movie.Poster);
 
-            await ctx.Channel.EmbedAsync(embed);
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+        }
+
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task UrbanDict([Leftover] String query = null)
+        {
+            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+                return;
+
+            await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+            using (var http = _httpFactory.CreateClient())
+            {
+                var response = await http.GetStringAsync($"http://api.urbandictionary.com/v0/define?term={Uri.EscapeUriString(query)}").ConfigureAwait(false);
+                try
+                {
+                    var items = JsonConvert.DeserializeObject<UrbanResponse>(response).List;
+                    if (items.Any())
+                    {
+                        await ctx.SendPaginatedConfirmAsync(0, p =>
+                        {
+                            var item = items[p];
+                            return new EmbedBuilder().WithOkColor()
+                                .WithUrl(item.Permalink)
+                                .WithAuthor(item.Word, "https://i.imgur.com/p1NqHdf.jpg")
+                                .WithDescription(item.Definition);
+                        }, items.Length, 1).ConfigureAwait(false);
+                    }
+                }
+                catch (Exception e)
+                {
+                    _log.Warn(e.Message);
+                }
+                
+            }
         }
 
         public async Task<bool> ValidateQuery(IMessageChannel channel, string query)
         {
             if (!string.IsNullOrWhiteSpace(query))
                 return true;
-            
-            var embed = new EmbedBuilder().WithErrorColor()
-                .WithDescription("No search query provided.");
-            await ctx.Channel.EmbedAsync(embed);
+
+            await ctx.Channel.SendErrorAsync("No search query provided.").ConfigureAwait(false);
             return false;
         }
     }

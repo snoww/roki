@@ -5,14 +5,16 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using NLog;
+using Roki.Common;
 using Roki.Core.Services;
 
-namespace Roki.Extentions
+namespace Roki.Extensions
 {
-    public static class Extentions
+    public static class Extensions
     {
         private static Logger _log = LogManager.GetCurrentClassLogger();
         
@@ -105,6 +107,25 @@ namespace Roki.Extentions
                 }
             });
             return msg;
+        }
+        
+        public static EmbedBuilder AddPaginatedFooter(this EmbedBuilder embed, int curPage, int? lastPage)
+        {
+            if (lastPage != null)
+                return embed.WithFooter(efb => efb.WithText($"{curPage + 1} / {lastPage + 1}"));
+            else
+                return embed.WithFooter(efb => efb.WithText(curPage.ToString()));
+        }
+        
+        public static ReactionEventWrapper OnReaction(this IUserMessage msg, DiscordSocketClient client, Func<SocketReaction, Task> reactionAdded, Func<SocketReaction, Task> reactionRemoved = null)
+        {
+            if (reactionRemoved == null)
+                reactionRemoved = _ => Task.CompletedTask;
+
+            var wrap = new ReactionEventWrapper(client, msg);
+            wrap.OnReactionAdded += r => { var _ = Task.Run(() => reactionAdded(r)); };
+            wrap.OnReactionRemoved += r => { var _ = Task.Run(() => reactionRemoved(r)); };
+            return wrap;
         }
         
         public static IEnumerable<IRole> GetRoles(this IGuildUser user) =>

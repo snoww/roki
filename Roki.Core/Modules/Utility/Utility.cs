@@ -4,7 +4,7 @@ using Discord.WebSocket;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
 using Roki.Core.Services.Impl;
-using Roki.Extentions;
+using Roki.Extensions;
 
 namespace Roki.Modules.Utility
 {

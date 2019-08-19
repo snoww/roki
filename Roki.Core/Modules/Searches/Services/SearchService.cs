@@ -10,7 +10,7 @@ using Discord.WebSocket;
 using Newtonsoft.Json;
 using NLog;
 using Roki.Core.Services;
-using Roki.Extentions;
+using Roki.Extensions;
 using Roki.Modules.Searches.Common;
 
 namespace Roki.Modules.Searches.Services
