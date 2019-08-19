@@ -7,6 +7,12 @@ namespace Roki.Core.Extentions
     public static class StringExtentions
     {
         private static Logger _log = LogManager.GetCurrentClassLogger();
+        
+        public static bool ContainsNoCase(this string str, string contains, StringComparison compare)
+        {
+            return str.IndexOf(contains, compare) >= 0;
+        }
+        
         public static string TrimTo(this string str, int maxLength, bool hideDots = false)
         {
             if (maxLength < 0)

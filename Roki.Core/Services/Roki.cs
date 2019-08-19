@@ -58,10 +58,10 @@ namespace Roki
             OkColor = Color.DarkGreen;
             ErrorColor = Color.Red;
             
-            Client.Log += Client_Log;
+            Client.Log += ClientLog;
         }
         
-        private Task Client_Log(LogMessage arg)
+        private Task ClientLog(LogMessage arg)
         {
             _log.Warn(arg.Source + " | " + arg.Message);
             if (arg.Exception != null)

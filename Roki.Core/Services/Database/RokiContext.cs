@@ -4,10 +4,10 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Roki.Core.Services;
+using Roki.Core.Services.Database.Models;
 using Roki.Core.Services.Impl;
-using Roki.Services.Database.Models;
 
-namespace Roki.Services.Database
+namespace Roki.Core.Services.Database
 {
     public class RokiContextFactory : IDesignTimeDbContextFactory<RokiContext>
     {

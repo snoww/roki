@@ -13,6 +13,17 @@ namespace Roki.Extensions
             => channel.SendMessageAsync(msg, embed: embed.Build(),
                 options: new RequestOptions() { RetryMode  = RetryMode.AlwaysRetry });
         
+        public static Task<IUserMessage> SendConfirmAsync(this IMessageChannel ch, string title, string text, string url = null, string footer = null)
+        {
+            var eb = new EmbedBuilder().WithOkColor().WithDescription(text)
+                .WithTitle(title);
+            if (url != null && Uri.IsWellFormedUriString(url, UriKind.Absolute))
+                eb.WithUrl(url);
+            if (!string.IsNullOrWhiteSpace(footer))
+                eb.WithFooter(efb => efb.WithText(footer));
+            return ch.SendMessageAsync("", embed: eb.Build());
+        }
+        
         public static Task<IUserMessage> SendConfirmAsync(this IMessageChannel ch, string text)
             => ch.SendMessageAsync("", embed: new EmbedBuilder().WithOkColor().WithDescription(text).Build());
         
