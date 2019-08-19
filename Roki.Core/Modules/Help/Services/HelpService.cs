@@ -9,7 +9,7 @@ using NLog;
 using Roki.Common.Attributes;
 using Roki.Common.ModuleBehaviors;
 using Roki.Core.Services;
-using Roki.Extentions;
+using Roki.Extensions;
 
 namespace Roki.Modules.Help.Services
 {

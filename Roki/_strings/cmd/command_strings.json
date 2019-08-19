@@ -93,16 +93,23 @@
   },
   "movie": {
     "Command": "movie imdb omdb",
-    "Description": "Searches omdb with the specified query, returns first result",
+    "Description": "Searches omdb with the specified query, returns first result.",
     "Usage": [
       "{0}imdb avengers endgame"
     ]
   },
   "weather": {
     "Command": "weather",
-    "Description": "Looks up weather of specified city using Dark Sky's api",
+    "Description": "Looks up weather of specified city using Dark Sky's api.",
     "Usage": [
       "{0}weather toronto"
+    ]
+  },
+  "urbandict": {
+    "Command": "urbandict urban ud",
+    "Description": "Searches urban dictionary for with the specified query.",
+    "Usage": [
+      "{0}urban malding"
     ]
   }
 }
