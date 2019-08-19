@@ -126,9 +126,7 @@ namespace Roki.Modules.Utility
 
                 if (avatarUrl == null)
                 {
-                    var err = new EmbedBuilder().WithErrorColor()
-                        .WithDescription($"{user.ToString()} does not have an avatar set");
-                    await ctx.Channel.EmbedAsync(err).ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync($"{user.ToString()} does not have an avatar set").ConfigureAwait(false);
                 }
                 
                 var embed = new EmbedBuilder().WithOkColor()
