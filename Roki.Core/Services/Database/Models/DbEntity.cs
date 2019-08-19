@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace Roki.Services.Database.Models
+namespace Roki.Core.Services.Database.Models
 {
     public class DbEntity
     {

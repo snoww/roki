@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Roki.Services.Database;
+using Roki.Core.Services.Database;
 
 namespace Roki.Core.Services
 {
@@ -43,5 +43,7 @@ namespace Roki.Core.Services
 
             return context;
         }
+        
+        public IUnitOfWork GetDbContext() => new UnitOfWork(GetDbContextInternal());
     }
 }
