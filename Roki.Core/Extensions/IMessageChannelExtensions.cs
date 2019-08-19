@@ -25,7 +25,7 @@ namespace Roki.Extensions
             => ctx.SendPaginatedConfirmAsync(currentPage,
                 x => Task.FromResult(pageFunc(x)), totalElements, itemsPerPage, addPaginatedFooter);
         
-        public static async Task SendPaginatedConfirmAsync(this ICommandContext ctx, int currentPage, 
+        private static async Task SendPaginatedConfirmAsync(this ICommandContext ctx, int currentPage, 
             Func<int, Task<EmbedBuilder>> pageFunc, int totalElements, int itemsPerPage, bool addPaginatedFooter = true)
         {
             var embed = await pageFunc(currentPage).ConfigureAwait(false);
