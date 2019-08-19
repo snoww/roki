@@ -17,6 +17,9 @@ namespace Roki.Core.Services
             builder.DataSource = Path.Combine(AppContext.BaseDirectory, builder.DataSource);
             
             var optionsBuilder = new DbContextOptionsBuilder<RokiContext>();
+            _options = optionsBuilder.Options;
+            
+            optionsBuilder = new DbContextOptionsBuilder<RokiContext>();
             optionsBuilder.UseSqlite(builder.ToString(), x => x.SuppressForeignKeyEnforcement());
         }
 
