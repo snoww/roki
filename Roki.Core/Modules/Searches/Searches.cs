@@ -174,6 +174,7 @@ namespace Roki.Modules.Searches
             await ctx.Channel.EmbedAsync(embed);
         }
 
+        [RokiCommand, Description, Usage, Aliases]
         public async Task UrbanDict([Leftover] String query = null)
         {
             if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
