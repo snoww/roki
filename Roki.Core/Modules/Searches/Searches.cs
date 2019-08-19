@@ -126,7 +126,7 @@ namespace Roki.Modules.Searches
                 .WithDescription(result.Link)
                 .WithImageUrl(result.Link)
                 .WithTitle(ctx.User.ToString());
-            await ctx.Channel.EmbedAsync(embed);
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
         
         [RokiCommand, Description, Usage, Aliases]
@@ -143,7 +143,7 @@ namespace Roki.Modules.Searches
                 .WithDescription(result.Link)
                 .WithImageUrl(result.Link)
                 .WithTitle(ctx.User.ToString());
-            await ctx.Channel.EmbedAsync(embed);
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -159,7 +159,7 @@ namespace Roki.Modules.Searches
             {
                 var err = new EmbedBuilder().WithErrorColor()
                     .WithDescription("No results found.");
-                await ctx.Channel.EmbedAsync(err);
+                await ctx.Channel.EmbedAsync(err).ConfigureAwait(false);
                 return;
             }
             var embed = new EmbedBuilder().WithOkColor()
@@ -171,7 +171,7 @@ namespace Roki.Modules.Searches
                 .AddField("Year", movie.Year, true)
                 .WithImageUrl(movie.Poster);
 
-            await ctx.Channel.EmbedAsync(embed);
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -214,7 +214,7 @@ namespace Roki.Modules.Searches
             
             var embed = new EmbedBuilder().WithErrorColor()
                 .WithDescription("No search query provided.");
-            await ctx.Channel.EmbedAsync(embed);
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             return false;
         }
     }
