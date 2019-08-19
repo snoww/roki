@@ -61,7 +61,7 @@ namespace Roki.Modules.Searches
                 {
                     
                     
-                    embed.AddField("Active Alerts", $"**{forecast.Response.Alerts.Select(d => d.Title).First()}**")
+                    embed.AddField("⚠️ Active Alerts", $"**{forecast.Response.Alerts.Select(d => d.Title).First()}**")
                         .AddField("Severity", $"{forecast.Response.Alerts.Select(d => d.Severity).First().FirstLetterToUpperCase()}", true)
                         .AddField("Expires", $"{forecast.Response.Alerts.Select(d => d.ExpiresDateTime).First():t}", true)
                         .AddField("Description", $"{forecast.Response.Alerts.Select(d => d.Description).First()}")
