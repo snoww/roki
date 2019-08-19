@@ -42,7 +42,7 @@ namespace Roki.Modules.Utility
                             string.Join("\n", quotes.Select(q => $"`#{q.Id}` {Format.Bold(q.Keyword),-20} by {q.AuthorName}")))
                         .ConfigureAwait(false);
                 else
-                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor().WithDescription("No quotes found on that page."));
+                    await ctx.Channel.SendErrorAsync("No quotes found on that page.").ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]

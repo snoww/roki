@@ -82,15 +82,11 @@ namespace Roki.Modules.Help
             {
                 if (opts.View != CommandOptions.ViewType.Hide)
                 {
-                    var errEmbed = new EmbedBuilder().WithErrorColor()
-                        .WithDescription("Module not found");
-                    await ctx.Channel.EmbedAsync(errEmbed).ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync("Modlue not found").ConfigureAwait(false);
                 }
                 else
                 {
-                    var errEmbed = new EmbedBuilder().WithErrorColor()
-                        .WithDescription("Module not found or can't execute");
-                    await ctx.Channel.EmbedAsync(errEmbed).ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync("Module not found or can't execute");
                 }
                 return;
             }

@@ -80,9 +80,7 @@ namespace Roki.Modules.Searches
                 return;
             if (string.IsNullOrWhiteSpace(_config.GoogleApi))
             {
-                var err = new EmbedBuilder().WithErrorColor()
-                    .WithDescription("No Google Api key provided.");
-                await ctx.Channel.EmbedAsync(err).ConfigureAwait(false);
+                await ctx.Channel.SendErrorAsync("No Google Api key provided.").ConfigureAwait(false);
                 return;
             }
 
@@ -104,9 +102,8 @@ namespace Roki.Modules.Searches
             var result = (await _google.GetVideoLinksByKeywordAsync(query).ConfigureAwait(false)).FirstOrDefault();
             if (string.IsNullOrWhiteSpace(result))
             {
-                var err = new EmbedBuilder().WithErrorColor()
-                    .WithDescription("No results.");
-                await ctx.Channel.EmbedAsync(err).ConfigureAwait(false);
+                await ctx.Channel.SendErrorAsync("No results.").ConfigureAwait(false);
+                return;
             }
 
             await ctx.Channel.SendMessageAsync(result).ConfigureAwait(false);
@@ -157,9 +154,7 @@ namespace Roki.Modules.Searches
             var movie = await _service.GetMovieDataAsync(query).ConfigureAwait(false);
             if (movie == null)
             {
-                var err = new EmbedBuilder().WithErrorColor()
-                    .WithDescription("No results found.");
-                await ctx.Channel.EmbedAsync(err).ConfigureAwait(false);
+                await ctx.Channel.SendErrorAsync("No results found.").ConfigureAwait(false);
                 return;
             }
             var embed = new EmbedBuilder().WithOkColor()
@@ -211,10 +206,8 @@ namespace Roki.Modules.Searches
         {
             if (!string.IsNullOrWhiteSpace(query))
                 return true;
-            
-            var embed = new EmbedBuilder().WithErrorColor()
-                .WithDescription("No search query provided.");
-            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+
+            await ctx.Channel.SendErrorAsync("No search query provided.").ConfigureAwait(false);
             return false;
         }
     }
