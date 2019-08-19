@@ -1,7 +1,7 @@
 ﻿using Discord;
 using System;
 
-namespace Roki.Extentions
+namespace Roki.Extensions
 {
     public static class IUserExtensions
     {

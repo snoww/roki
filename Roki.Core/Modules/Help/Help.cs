@@ -7,7 +7,7 @@ using Discord.Commands;
 using Roki.Common;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
-using Roki.Extentions;
+using Roki.Extensions;
 using Roki.Modules.Help.Common;
 using Roki.Modules.Help.Services;
 

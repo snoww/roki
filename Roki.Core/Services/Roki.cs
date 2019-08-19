@@ -9,7 +9,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
-using Roki.Extentions;
+using Roki.Extensions;
 using Roki.Core.Services;
 using Roki.Core.Services.Impl;
 
