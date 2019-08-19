@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
-using Roki.Extentions;
+using Roki.Extensions;
 using Roki.Core.Services;
 using Roki.Core.Services.Impl;
 
@@ -22,6 +23,8 @@ namespace Roki
         public Configuration Config { get; }
         public DiscordSocketClient Client { get; }
         public CommandService CommandService { get; }
+
+        private readonly DbService _db;
         
         public static Color OkColor { get; set; }
         public static Color ErrorColor { get; set; }
@@ -34,7 +37,11 @@ namespace Roki
             LogSetup.SetupLogger();
             _log = LogManager.GetCurrentClassLogger();
          // TODO elevated permission check?
+         
+            
             Config = new Configuration();
+            _db = new DbService(Config);
+            _db.Setup();
             
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
@@ -51,10 +58,10 @@ namespace Roki
             OkColor = Color.DarkGreen;
             ErrorColor = Color.Red;
             
-            Client.Log += Client_Log;
+            Client.Log += ClientLog;
         }
         
-        private Task Client_Log(LogMessage arg)
+        private Task ClientLog(LogMessage arg)
         {
             _log.Warn(arg.Source + " | " + arg.Message);
             if (arg.Exception != null)
@@ -78,6 +85,7 @@ namespace Roki
             
             var service = new ServiceCollection()
                 .AddSingleton<IConfiguration>(Config)
+                .AddSingleton(_db)
                 .AddSingleton(Client)
                 .AddSingleton(CommandService)
                 .AddSingleton(this);
