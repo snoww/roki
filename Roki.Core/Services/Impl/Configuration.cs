@@ -19,6 +19,8 @@ namespace Roki.Core.Services.Impl
 
         public ImmutableArray<ulong> OwnerIds { get; }
         
+        public DbConfig Db { get; }
+        
         private readonly string _credsFileName = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
 
         public Configuration()
@@ -47,6 +49,14 @@ namespace Roki.Core.Services.Impl
                 if (!ulong.TryParse(data[nameof(ClientId)], out ulong clId))
                     clId = 0;
                 ClientId = clId;
+
+                var dbSection = data.GetSection("db");
+                Db = new DbConfig(string.IsNullOrWhiteSpace(dbSection["Type"])
+                        ? "sqlite"
+                        : dbSection["Type"],
+                    string.IsNullOrWhiteSpace(dbSection["ConnectionString"])
+                        ? "Data Source=data/Roki.db"
+                        : dbSection["ConnectionString"]);
             }
             catch (Exception e)
             {
