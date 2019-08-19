@@ -27,6 +27,9 @@ namespace Roki.Extensions
         public static Task<IUserMessage> SendConfirmAsync(this IMessageChannel ch, string text)
             => ch.SendMessageAsync("", embed: new EmbedBuilder().WithOkColor().WithDescription(text).Build());
         
+        public static Task<IUserMessage> SendErrorAsync(this IMessageChannel ch, string error)
+            => ch.SendMessageAsync("", embed: new EmbedBuilder().WithErrorColor().WithDescription(error).Build());
+        
         private static readonly IEmote arrow_left = new Emoji("⬅");
         private static readonly IEmote arrow_right = new Emoji("➡");
         
