@@ -30,8 +30,6 @@ namespace Roki.Modules.Searches
         [RokiCommand, Usage, Description, Aliases]
         public async Task Weather([Leftover] string query = "toronto")
         {
-            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
-                return;
             var (forecast, address) = await _service.GetWeatherDataAsync(query).ConfigureAwait(false);
             var data = forecast.Response.Daily.Data;
             var embed = new EmbedBuilder();
@@ -59,8 +57,6 @@ namespace Roki.Modules.Searches
                                 .WithFooter("Powered by Dark Sky");
                 if (forecast.Response.Alerts != null)
                 {
-                    
-                    
                     embed.AddField("Active Alerts", $"**{forecast.Response.Alerts.Select(d => d.Title).First()}**")
                         .AddField("Severity", $"{forecast.Response.Alerts.Select(d => d.Severity).First().FirstLetterToUpperCase()}", true)
                         .AddField("Expires", $"{forecast.Response.Alerts.Select(d => d.ExpiresDateTime).First():t}", true)
