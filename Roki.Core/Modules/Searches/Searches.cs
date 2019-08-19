@@ -47,7 +47,7 @@ namespace Roki.Modules.Searches
                                 .AddField("Temperature", $"{forecast.Response.Currently.Temperature} °C", true)
                                 .AddField("Precip %", $"{data.Select(d => d.PrecipProbability).First() * 100}%", true)
                                 .AddField("Humidity", $"{data.Select(d => d.Humidity).First() * 100}%", true)
-                                .AddField("Wind", $"{data.Select(d => d.WindSpeed).First()} km/h {((double) data.Select(d => d.WindBearing).First()).DegreesToCardinal()}", true)
+                                .AddField("Wind", $"{Math.Round((double) data.Select(d => d.WindSpeed).First())} km/h {((double) data.Select(d => d.WindBearing).First()).DegreesToCardinal()}", true)
                                 .AddField("UV Index", $"{data.Select(d => d.UvIndex).First()}", true)
                                 .AddField("Low / High", $"{data.Select(d => d.TemperatureLow).First()} °C / {data.Select(d => d.TemperatureHigh).First()} °C", true)
                                 .AddField("Sunrise", $"{data.Select(d => d.SunriseDateTime).First():HH:mm}", true)
