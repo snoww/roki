@@ -6,5 +6,8 @@
     125025504548880384
   ],
   "GoogleApi": "AIzaSyAQrcfZcXpt5rx8JkWAfDUVwybevjQbtgo",
-  "Db": null
+  "Db": {
+    "Type": "sqlite",
+    "ConnectionString": "Data Source=data/Roki.db"
+  }
 }
