@@ -16,7 +16,8 @@ namespace Roki.Core.Services.Database
             var optionsBuilder = new DbContextOptionsBuilder<RokiContext>(); 
             IConfiguration config = new Configuration();
             var builder = new SqliteConnectionStringBuilder(config.Db.ConnectionString);
-            builder.DataSource = Path.Combine(AppContext.BaseDirectory, builder.DataSource);
+            builder.DataSource = Path.Combine(Directory.GetCurrentDirectory(), builder.DataSource);
+            optionsBuilder.UseSqlite(builder.ToString());
             var ctx = new RokiContext(optionsBuilder.Options);
             ctx.Database.SetCommandTimeout(60);
             return ctx;
@@ -26,7 +27,9 @@ namespace Roki.Core.Services.Database
     {
         public DbSet<Quote> Quotes { get; set; }
 
-        public RokiContext(DbContextOptions<RokiContext> options) : base(options) {  }
+        public RokiContext(DbContextOptions<RokiContext> options) : base(options)
+        {
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
