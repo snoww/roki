@@ -14,8 +14,8 @@ namespace Roki.Core.Services.Database.Repositories.Impl
 
         public Task<Quote> GetRandomQuoteByKeywordAsync(ulong guildId, string keyword)
         {
-            var rand = new Random().Next();
-            return Set.Where(q => q.GuildId == guildId && q.Keyword == keyword).OrderBy(q => rand).FirstOrDefaultAsync();
+//            var rand = new Random().Next();
+            return Set.Where(q => q.GuildId == guildId && q.Keyword == keyword).OrderBy(q => Guid.NewGuid()).FirstOrDefaultAsync();
         }
 
         public Task<Quote> SearchQuoteKeywordTextAsync(ulong guildId, string keyword, string text)
