@@ -6,7 +6,7 @@
         <Configurations>Debug;Release;Default</Configurations>
         <Authors>Snow</Authors>
         <Product>Roki</Product>
-        <AssemblyVersion>0.1.1</AssemblyVersion>
+        <AssemblyVersion>0.1.2</AssemblyVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
