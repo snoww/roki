@@ -18,7 +18,7 @@ namespace Roki.Core.Services.Impl
         private readonly IConfiguration _config;
         private readonly DateTime _started;
 
-        public const string BotVersion = "1.0.0";
+        public const string BotVersion = "0.1.2";
         public string Author => "Snow#7777";
         public string Library => "Discord.Net";
 
