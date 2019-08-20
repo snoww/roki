@@ -154,5 +154,12 @@
       "{0}liqu 3",
       "{0}liqu 3 id"
     ]
+  },
+  "textoimage": {
+    "Command": "tex latex",
+    "Description": "Returns an image showing the specified mathematical formula, using the TeX language.",
+    "Usage": [
+      "{0}tex y=mx+b"
+    ]
   }
 }
