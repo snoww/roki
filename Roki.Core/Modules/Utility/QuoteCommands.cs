@@ -118,7 +118,8 @@ namespace Roki.Modules.Utility
 
                 if (success)
                     await ctx.Channel.SendConfirmAsync(response).ConfigureAwait(false);
-                await ctx.Channel.SendErrorAsync(response).ConfigureAwait(false);
+                else
+                    await ctx.Channel.SendErrorAsync(response).ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]
