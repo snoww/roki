@@ -55,7 +55,7 @@ namespace Roki.Core.Services.Impl
                         ? "sqlite"
                         : dbSection["Type"],
                     string.IsNullOrWhiteSpace(dbSection["ConnectionString"])
-                        ? "Data Source=data/Roki.db"
+                        ? "Data Source=data/roki.db"
                         : dbSection["ConnectionString"]);
             }
             catch (Exception e)

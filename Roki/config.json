@@ -8,6 +8,6 @@
   "GoogleApi": "AIzaSyAQrcfZcXpt5rx8JkWAfDUVwybevjQbtgo",
   "Db": {
     "Type": "sqlite",
-    "ConnectionString": "Data Source=data/Roki.db"
+    "ConnectionString": "Data Source=data/roki.db"
   }
 }
