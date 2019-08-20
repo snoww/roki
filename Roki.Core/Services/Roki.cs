@@ -148,7 +148,7 @@ namespace Roki
             await Task.Delay(-1).ConfigureAwait(false);
         }
 
-        public async Task RunAsync()
+        private async Task RunAsync()
         {
             var sw = Stopwatch.StartNew();
 
@@ -181,7 +181,7 @@ namespace Roki
             _log.Info("Roki is ready");
         }
 
-        public async Task LoginAsync(string token)
+        private async Task LoginAsync(string token)
         {
             var clientReady = new TaskCompletionSource<bool>();
 
