@@ -27,7 +27,7 @@ namespace Roki.Modules.Utility
             [Priority(0)]
             public async Task ListQuotes(int page = 1, OrderType order = OrderType.Keyword)
             {
-                page -= 0;
+                page -= 1;
                 if (page < 0)
                     return;
 
