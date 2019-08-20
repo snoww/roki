@@ -141,6 +141,31 @@ namespace Roki.Modules.Utility
 
                 await ctx.Channel.SendMessageAsync($"`#{quote.Id}` 💬 " + keyword.ToLowerInvariant() + ": " + quote.Text).ConfigureAwait(false);
             }
+
+            [RokiCommand, Description, Usage, Aliases]
+            [RequireContext(ContextType.Guild)]
+            public async Task QuoteId(int id)
+            {
+                if (id < 0)
+                    return;
+
+                Quote quote;
+                using (var uow = _db.GetDbContext())
+                {
+                    quote = uow.Quotes.GetById(id);
+                    if (quote.GuildId != ctx.Guild.Id)
+                        quote = null;
+                }
+
+                if (quote == null)
+                {
+                    await ctx.Channel.SendErrorAsync("Quote not found.").ConfigureAwait(false);
+                    return;
+                }
+
+                var info = $"`#{quote.Id} added by {quote.AuthorName} 🗯️ " + quote.Keyword.ToLowerInvariant() + "\n";
+                await ctx.Channel.SendMessageAsync(info).ConfigureAwait(false);
+            }
         }
     }
     
