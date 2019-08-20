@@ -14,9 +14,10 @@ namespace Roki.Core.Services
         public DbService(IConfiguration config)
         {
             var builder = new SqliteConnectionStringBuilder(config.Db.ConnectionString);
-            builder.DataSource = Path.Combine(AppContext.BaseDirectory, builder.DataSource);
+            builder.DataSource = Path.Combine(Directory.GetCurrentDirectory(), builder.DataSource);
             
             var optionsBuilder = new DbContextOptionsBuilder<RokiContext>();
+            optionsBuilder.UseSqlite(builder.ToString());
             _options = optionsBuilder.Options;
             
             optionsBuilder = new DbContextOptionsBuilder<RokiContext>();

@@ -88,6 +88,7 @@ namespace Roki
                 .AddSingleton(_db)
                 .AddSingleton(Client)
                 .AddSingleton(CommandService)
+                .AddSingleton(_db.GetDbContext())
                 .AddSingleton(this);
 
             service.AddHttpClient();
