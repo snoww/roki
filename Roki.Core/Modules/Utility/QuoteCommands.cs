@@ -120,7 +120,27 @@ namespace Roki.Modules.Utility
                     await ctx.Channel.SendConfirmAsync(response).ConfigureAwait(false);
                 await ctx.Channel.SendErrorAsync(response).ConfigureAwait(false);
             }
-            
+
+            [RokiCommand, Description, Usage, Aliases]
+            [RequireContext(ContextType.Guild)]
+            public async Task QuoteSearch(string keyword, [Leftover] string text)
+            {
+                if (string.IsNullOrWhiteSpace(keyword) || string.IsNullOrWhiteSpace(text))
+                    return;
+
+                keyword = keyword.ToUpperInvariant();
+
+                Quote quote;
+                using (var uow = _db.GetDbContext())
+                {
+                    quote = await uow.Quotes.SearchQuoteKeywordTextAsync(ctx.Guild.Id, keyword, text);
+                }
+                
+                if (quote == null)
+                    return;
+
+                await ctx.Channel.SendMessageAsync($"`#{quote.Id}` 💬 " + keyword.ToLowerInvariant() + ": " + quote.Text).ConfigureAwait(false);
+            }
         }
     }
     
