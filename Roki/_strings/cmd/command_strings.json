@@ -146,5 +146,13 @@
     "Usage": [
       "{0}qdel 123456"
     ]
+  },
+  "listquotes": {
+    "Command": "listquotes liqu",
+    "Description": "Lists all quotes on the server ordered alphabetically or by ID. 15 Per page.",
+    "Usage": [
+      "{0}liqu 3",
+      "{0}liqu 3 id"
+    ]
   }
 }
