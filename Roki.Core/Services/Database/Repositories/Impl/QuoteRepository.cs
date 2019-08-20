@@ -14,15 +14,15 @@ namespace Roki.Core.Services.Database.Repositories.Impl
 
         public Task<Quote> GetRandomQuoteByKeywordAsync(ulong guildId, string keyword)
         {
-//            var rand = new Random().Next();
-            return Set.Where(q => q.GuildId == guildId && q.Keyword == keyword).OrderBy(q => Guid.NewGuid()).FirstOrDefaultAsync();
+            var rand = new Random();
+            return Set.Where(q => q.GuildId == guildId && q.Keyword == keyword).OrderBy(q => rand.Next()).FirstOrDefaultAsync();
         }
 
         public Task<Quote> SearchQuoteKeywordTextAsync(ulong guildId, string keyword, string text)
         {
-            var rand = new Random().Next();
+            var rand = new Random();
             return Set.Where(q => q.Text.ContainsNoCase(text, StringComparison.OrdinalIgnoreCase) && q.GuildId == guildId && q.Keyword == keyword)
-                .OrderBy(q => rand)
+                .OrderBy(q => rand.Next())
                 .FirstOrDefaultAsync();
         }
 
