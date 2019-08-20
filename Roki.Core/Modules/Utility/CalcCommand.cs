@@ -10,6 +10,7 @@ namespace Roki.Modules.Utility
         [Group]
         public class CalcCommands : RokiSubmodule
         {
+            [RokiCommand, Description, Usage, Aliases]
             public async Task TecxToImage([Leftover] string tex)
             {
                 if (string.IsNullOrWhiteSpace(tex))
