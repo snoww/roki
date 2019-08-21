@@ -23,6 +23,8 @@ namespace Roki.Modules.Searches
                 if (string.IsNullOrWhiteSpace(query))
                     return;
 
+                await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+
                 var pokemon = await _pokeClient.GetResourceAsync<Pokemon>(query).ConfigureAwait(false);
                 if (pokemon == null)
                 {
@@ -38,18 +40,19 @@ namespace Roki.Modules.Searches
                     .WithDescription($"{species.Genera[2].Genus}")
                     .WithThumbnailUrl(pokemon.Sprites.FrontDefault)
                     .AddField("Types", string.Join("\n", pokemon.Types.OrderBy(t => t.Slot).Select(t => t.Type.Name.ToTitleCase()).ToList()), true)
-                    .AddField("Abilities", string.Join("\n", pokemon.Abilities.OrderBy(a => a.Slot).Select(a => a.Ability.Name.ToTitleCase().Replace('-', ' ')).ToList()), true);
+                    .AddField("Abilities", string.Join("\n", pokemon.Abilities.OrderBy(a => a.Slot).Select(a => a.Ability.Name.ToTitleCase().Replace('-', ' ')).ToList()), true)
+                    .AddField("Base Stats", $"`HP: {pokemon.Stats[5].BaseStat}\nAttack: {pokemon.Stats[4].BaseStat}\nSp. Atk: {pokemon.Stats[2].BaseStat}\nDefense: {pokemon.Stats[3].BaseStat}\nSp. Def: {pokemon.Stats[1].BaseStat}\nSpeed: {pokemon.Stats[0].BaseStat}\n`", true);
 
-                if (evoChain != null)
+                if (evoChain.Chain.EvolvesTo.Count > 0)
                 {
                     var evostr = "";
-                    evostr += evoChain.Chain.Species.Name + "\n";
+                    evostr += evoChain.Chain.Species.Name.ToTitleCase() + "\n";
                     foreach (var evo in evoChain.Chain.EvolvesTo)
                     {
                         evostr += evo.Species.Name.ToTitleCase() + "\n";
-                        if (evo.EvolvesTo != null)
+                        if (evo.EvolvesTo.Count > 0)
                         {
-                            evostr += evo.EvolvesTo.Select(e => e.Species.Name) + "\n";
+                            evostr += string.Join("\n", evo.EvolvesTo.Select(e => e.Species.Name.ToTitleCase()).ToList());
                         }
                     }
 
