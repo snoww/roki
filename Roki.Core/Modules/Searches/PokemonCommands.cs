@@ -1,9 +1,12 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using PokeApiNet;
 using PokeApiNet.Models;
 using Roki.Common.Attributes;
+using Roki.Core.Extentions;
 using Roki.Extensions;
 
 namespace Roki.Modules.Searches
@@ -27,9 +30,11 @@ namespace Roki.Modules.Searches
                 var species = await _pokeClient.GetResourceAsync(pokemon.Species).ConfigureAwait(false);
 
                 var embed = new EmbedBuilder().WithOkColor()
-                    .WithTitle($"{species.Id} {species.Name}")
-                    .WithDescription($"{species.Genera[0].Genus}")
-                    .WithThumbnailUrl(pokemon.Sprites.FrontDefault);
+                    .WithTitle($"#{pokemon.Id} {pokemon.Name.ToTitleCase()}")
+                    .WithDescription($"{species.Genera[2].Genus}")
+                    .WithThumbnailUrl(pokemon.Sprites.FrontDefault)
+                    .AddField("Types", string.Join("\n", pokemon.Types.OrderBy(t => t.Slot).Select(t => t.Type.ToString()).ToList()), true)
+                    .AddField("Abilities", string.Join("\n", pokemon.Abilities.OrderBy(a => a.Slot).Select(a => a.Ability.ToString().ToTitleCase().ToList())), true);
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
