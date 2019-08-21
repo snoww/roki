@@ -1,7 +1,10 @@
+using System.IO;
 using System.Net;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
+using Roki.Extensions;
 
 namespace Roki.Modules.Utility
 {
@@ -18,9 +21,14 @@ namespace Roki.Modules.Utility
                 var encode = tex.Trim();
                 tex = WebUtility.UrlEncode(encode);
 
-                var result = $"https://chart.googleapis.com/chart?cht=tx&chl={tex}";
-
-                await ctx.Channel.SendMessageAsync(result).ConfigureAwait(false);
+                var result = $"https://math.now.sh?from={tex}.png";
+                using (WebClient client = new WebClient())
+                {
+                    // make image bigger by converting from svg???
+                    client.DownloadFile(result, "tex.png");
+                    await ctx.Channel.SendFileAsync("tex.png");
+                    File.Delete("tex.png");
+                }
             }
         }
     }
