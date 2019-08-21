@@ -156,10 +156,17 @@
     ]
   },
   "textoimage": {
-    "Command": "tex latex",
+    "Command": "latex tex",
     "Description": "Returns an image showing the specified mathematical formula, using the TeX language.",
     "Usage": [
       "{0}tex y=mx+b"
+    ]
+  },
+  "pokemon": {
+    "Command": "pokemon p",
+    "Description": "Returns a short summary of the specified Pokémon",
+    "Usage": [
+      "{0}pokemon decidueye"
     ]
   }
 }
