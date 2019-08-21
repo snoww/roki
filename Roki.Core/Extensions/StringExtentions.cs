@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using NLog;
 
@@ -7,6 +8,9 @@ namespace Roki.Core.Extentions
     public static class StringExtentions
     {
         private static Logger _log = LogManager.GetCurrentClassLogger();
+        
+        public static string ToTitleCase(this string s) =>
+            CultureInfo.InvariantCulture.TextInfo.ToTitleCase(s.ToLower());
         
         public static bool ContainsNoCase(this string str, string contains, StringComparison compare)
         {
