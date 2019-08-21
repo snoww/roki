@@ -34,8 +34,8 @@ namespace Roki.Modules.Searches
                     .WithTitle($"#{pokemon.Id} {pokemon.Name.ToTitleCase()}")
                     .WithDescription($"{species.Genera[2].Genus}")
                     .WithThumbnailUrl(pokemon.Sprites.FrontDefault)
-                    .AddField("Types", string.Join("\n", pokemon.Types.OrderBy(t => t.Slot).Select(t => t.Type.Name).ToList()), true)
-                    .AddField("Abilities", string.Join("\n", pokemon.Abilities.OrderBy(a => a.Slot).Select(a => a.Ability.Name).ToList()), true);
+                    .AddField("Types", string.Join("\n", pokemon.Types.OrderBy(t => t.Slot).Select(t => t.Type.Name.ToTitleCase()).ToList()), true)
+                    .AddField("Abilities", string.Join("\n", pokemon.Abilities.OrderBy(a => a.Slot).Select(a => a.Ability.Name.ToTitleCase().Replace('-', ' ')).ToList()), true);
                 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
