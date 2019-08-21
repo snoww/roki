@@ -13,12 +13,7 @@ namespace Roki.Modules.Searches
         [Group]
         public class PokemonCommands : RokiSubmodule
         {
-            private readonly PokeApiClient _pokeClient;
-
-            public PokemonCommands(PokeApiClient pokeClient)
-            {
-                _pokeClient = pokeClient;
-            }
+            private readonly PokeApiClient _pokeClient = new PokeApiClient();
             
             [RokiCommand, Usage, Description, Aliases]
             public async Task Pokemon([Leftover] string query = null)
