@@ -39,7 +39,7 @@ namespace Roki.Modules.Searches
                         .WithDescription($"{species.Genera[2].Genus}")
                         .WithThumbnailUrl(_service.GetPokemonSprite(pokemon.Name))
                         .AddField("Types", string.Join(", ", pokemon.Types.OrderBy(t => t.Slot).Select(t => t.Type.Name.ToTitleCase()).ToList()), true)
-                        .AddField("Abilities", string.Join("\n", 
+                        .AddField("Abilities", string.Join(", ", 
                             pokemon.Abilities.OrderBy(a => a.Slot).Select(a =>
                             {
                                 if (a.IsHidden)
