@@ -156,6 +156,7 @@ namespace Roki.Modules.Searches
                 }
             }
 
+            [RokiCommand, Usage, Description, Aliases]
             public async Task Item([Leftover] string query)
             {
                 if (string.IsNullOrWhiteSpace(query))
