@@ -103,14 +103,9 @@ namespace Roki.Modules.Searches
                             : move.EffectEntries[0].Effect)
                         .AddField("Type", move.Type.Name.ToTitleCase(), true)
                         .AddField("Damage Type", move.DamageClass.Name.ToTitleCase(), true)
-                        .AddField("Accuracy", $"{move.Accuracy}%", true);
-
-                    if (move.Power != null)
-                        embed.AddField("Power", move.Power, true);
-                    else
-                        embed.AddField("Power", "—", true);
-
-                    embed.AddField("PP", move.Pp, true)
+                        .AddField("Accuracy", move.Accuracy != null ? $"{move.Accuracy}%" : "—", true)
+                        .AddField("Power", move.Power != null ? $"{move.Power}" : "—", true)
+                        .AddField("PP", move.Pp, true)
                         .AddField("Priority", move.Priority, true)
                         .AddField("Introduced In", $"Generation {move.Generation.Name.Split('-')[1].ToUpperInvariant()}", true);
 
