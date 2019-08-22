@@ -168,5 +168,12 @@
     "Usage": [
       "{0}pokemon decidueye"
     ]
+  },
+  "ability": {
+    "Command": "ability ab",
+    "Description": "Returns the description of the specified ability",
+    "Usage": [
+      "{0}ability moxie"
+    ]
   }
 }

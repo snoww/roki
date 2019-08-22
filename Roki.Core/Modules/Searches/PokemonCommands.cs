@@ -70,11 +70,22 @@ namespace Roki.Modules.Searches
                 if (string.IsNullOrWhiteSpace(query))
                     return;
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
-                
-//                if 
 
-                var ability = await _pokeClient.GetResourceAsync<Ability>(query).ConfigureAwait(false);
-                
+                try
+                {
+                    var ability = await _pokeClient.GetResourceAsync<Ability>(query).ConfigureAwait(false);
+                    
+                    var embed = new EmbedBuilder().WithOkColor()
+                        .WithTitle(ability.Name.ToTitleCase().Replace('-', ' '))
+                        .WithDescription(ability.EffectEntries[0].Effect)
+                        .AddField("Introduced In", $"Generation {ability.Generation.Name.Split('-')[1].ToUpperInvariant()}");
+                    
+                    await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                }
+                catch
+                {
+                    await ctx.Channel.SendErrorAsync("No ability of that name found.").ConfigureAwait(false);
+                }
             }
         }
     }
