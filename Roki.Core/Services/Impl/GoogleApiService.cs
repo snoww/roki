@@ -7,7 +7,7 @@ using Google.Apis.Customsearch.v1;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using NLog;
-using Roki.Core.Extentions;
+using Roki.Extensions;
 
 namespace Roki.Core.Services.Impl
 {

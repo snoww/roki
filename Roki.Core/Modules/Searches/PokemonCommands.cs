@@ -6,7 +6,6 @@ using Discord.Commands;
 using PokeApiNet;
 using PokeApiNet.Models;
 using Roki.Common.Attributes;
-using Roki.Core.Extentions;
 using Roki.Extensions;
 
 namespace Roki.Modules.Searches
