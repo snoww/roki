@@ -182,5 +182,12 @@
     "Usage": [
       "{0}move bubble"
     ]
+  },
+  "nature": {
+    "Command": "nature",
+    "Description": "Returns the modifiers of the specified nature.",
+    "Usage": [
+      "{0}nature jolly"
+    ]
   }
 }
