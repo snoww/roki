@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using NLog;
-using Roki.Core.Extentions;
+using Roki.Extensions;
 
 namespace Roki.Core.Services.Impl
 {

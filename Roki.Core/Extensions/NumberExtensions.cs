@@ -1,6 +1,6 @@
 using System;
 
-namespace Roki.Core.Extentions
+namespace Roki.Extensions
 {
     public static class NumberExtensions
     {

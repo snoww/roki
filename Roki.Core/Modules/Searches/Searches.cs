@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Discord;
 using Newtonsoft.Json;
 using Roki.Common.Attributes;
-using Roki.Core.Extentions;
 using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Searches.Common;

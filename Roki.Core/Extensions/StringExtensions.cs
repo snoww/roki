@@ -3,9 +3,9 @@ using System.Globalization;
 using System.Linq;
 using NLog;
 
-namespace Roki.Core.Extentions
+namespace Roki.Extensions
 {
-    public static class StringExtentions
+    public static class StringExtensions
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 

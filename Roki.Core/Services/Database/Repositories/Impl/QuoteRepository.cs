@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Roki.Core.Extentions;
+using Roki.Extensions;
 using Roki.Core.Services.Database.Models;
 
 namespace Roki.Core.Services.Database.Repositories.Impl
