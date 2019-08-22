@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
-using CommandLine;
 using System.Threading.Tasks;
+using CommandLine;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -23,13 +23,13 @@ namespace Roki.Modules.Help.Services
             _command = command;
             _log = LogManager.GetCurrentClassLogger();
         }
+
         public Task LateExecute(DiscordSocketClient client, IGuild guild, IUserMessage msg)
         {
             try
             {
                 if (guild == null)
                 {
-
                 }
             }
             catch (Exception e)
@@ -46,17 +46,11 @@ namespace Roki.Modules.Help.Services
 
             var str = string.Format("**`{0}`**", prefix + info.Aliases.First());
             var alias = info.Aliases.Skip(1).FirstOrDefault();
-            if (alias != null)
-            {
-                str += string.Format(" **/ `{0}`**", prefix + alias);
-            }
+            if (alias != null) str += string.Format(" **/ `{0}`**", prefix + alias);
             var embed = new EmbedBuilder().AddField(str, info.RealSummary(prefix), true);
 
             var reqs = GetCommandRequirements(info);
-            if (reqs.Any())
-            {
-                embed.AddField("Requires", string.Join("\n", reqs));
-            }
+            if (reqs.Any()) embed.AddField("Requires", string.Join("\n", reqs));
 
             embed.WithOkColor()
                 .AddField("Usage", info.RealRemarks(prefix), true)
@@ -67,7 +61,7 @@ namespace Roki.Modules.Help.Services
             {
                 var helpString = GetCommandOptionHelp(options);
                 if (!string.IsNullOrWhiteSpace(helpString))
-                    embed.AddField("Options", helpString, false);
+                    embed.AddField("Options", helpString);
             }
 
             return embed;
@@ -92,24 +86,22 @@ namespace Roki.Modules.Help.Services
             return string.Join("\n", str);
         }
 
-        public static string[] GetCommandRequirements(CommandInfo info) =>
-            info.Preconditions
+        public static string[] GetCommandRequirements(CommandInfo info)
+        {
+            return info.Preconditions
                 // TODO add owner only attribute here
                 .Where(att => att is RequireUserPermissionAttribute)
                 .Select(att =>
                 {
                     var perm = (RequireUserPermissionAttribute) att;
                     if (perm.GuildPermission != null)
-                    {
-                        return (perm.GuildPermission.ToString() + " Server Permission")
+                        return (perm.GuildPermission + " Server Permission")
                             .Replace("Guild", "Server", StringComparison.InvariantCulture);
-                    }
 
                     return (perm.ChannelPermission + " Channel Permission")
                         .Replace("Guild", "Server", StringComparison.InvariantCulture);
                 })
                 .ToArray();
-
-        
+        }
     }
 }

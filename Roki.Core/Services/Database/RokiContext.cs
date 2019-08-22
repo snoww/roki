@@ -1,9 +1,7 @@
-using System;
 using System.IO;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Roki.Core.Services;
 using Roki.Core.Services.Database.Models;
 using Roki.Core.Services.Impl;
 
@@ -13,7 +11,7 @@ namespace Roki.Core.Services.Database
     {
         public RokiContext CreateDbContext(string[] args)
         {
-            var optionsBuilder = new DbContextOptionsBuilder<RokiContext>(); 
+            var optionsBuilder = new DbContextOptionsBuilder<RokiContext>();
             IConfiguration config = new Configuration();
             var builder = new SqliteConnectionStringBuilder(config.Db.ConnectionString);
             builder.DataSource = Path.Combine(Directory.GetCurrentDirectory(), builder.DataSource);
@@ -23,13 +21,14 @@ namespace Roki.Core.Services.Database
             return ctx;
         }
     }
+
     public class RokiContext : DbContext
     {
-        public DbSet<Quote> Quotes { get; set; }
-
         public RokiContext(DbContextOptions<RokiContext> options) : base(options)
         {
         }
+
+        public DbSet<Quote> Quotes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

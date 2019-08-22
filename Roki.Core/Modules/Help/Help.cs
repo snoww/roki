@@ -15,8 +15,8 @@ namespace Roki.Modules.Help
 {
     public class Help : RokiTopLevelModule<HelpService>
     {
-        private readonly IConfiguration _config;
         private readonly CommandService _command;
+        private readonly IConfiguration _config;
         private readonly IServiceProvider _service;
 
 //        public EmbedBuilder GetHelpStringEmbed()
@@ -30,21 +30,20 @@ namespace Roki.Modules.Help
             _command = command;
             _service = service;
         }
-        
+
         [RokiCommand, Description, Usage, Aliases]
         public async Task Modules()
         {
             var embed = new EmbedBuilder().WithOkColor()
                 .WithTitle("List of Modules")
                 .WithDescription(string.Join("\n",
-                        _command.Modules.GroupBy(module => module.GetTopLevelModule())
-                            .Select(module => "• " + module.Key.Name)
-                            .OrderBy(s => s)));
+                    _command.Modules.GroupBy(module => module.GetTopLevelModule())
+                        .Select(module => "• " + module.Key.Name)
+                        .OrderBy(s => s)));
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
-        
-        [RokiCommand, Description, Usage, Aliases]
-        [RokiOptions(typeof(CommandOptions))]
+
+        [RokiCommand, Description, Usage, Aliases, RokiOptions(typeof(CommandOptions))]
         public async Task Commands(string module = null, params string[] args)
         {
             var (opts, _) = OptionParser.ParseFrom(new CommandOptions(), args);
@@ -55,24 +54,21 @@ namespace Roki.Modules.Help
 
             var cmds = _command.Commands.Where(cmd => cmd.Module.GetTopLevelModule().Name.ToUpperInvariant()
                     .StartsWith(module, StringComparison.InvariantCulture))
-                    .OrderBy(commands => commands.Aliases[0])
-                    .Distinct(new CommandTextEqualityComparer());
+                .OrderBy(commands => commands.Aliases[0])
+                .Distinct(new CommandTextEqualityComparer());
 
             var succuss = new HashSet<CommandInfo>();
-            if(opts.View != CommandOptions.ViewType.All)
+            if (opts.View != CommandOptions.ViewType.All)
             {
                 succuss = new HashSet<CommandInfo>((await Task.WhenAll(cmds.Select(async x =>
-                {
-                    var pre = await x.CheckPreconditionsAsync(Context, _service).ConfigureAwait(false);
-                    return (Command: x, Succuss: pre.IsSuccess);
-                })).ConfigureAwait(false))
+                    {
+                        var pre = await x.CheckPreconditionsAsync(Context, _service).ConfigureAwait(false);
+                        return (Command: x, Succuss: pre.IsSuccess);
+                    })).ConfigureAwait(false))
                     .Where(x => x.Succuss)
                     .Select(x => x.Command));
 
-                if (opts.View == CommandOptions.ViewType.Hide)
-                {
-                    cmds = cmds.Where(x => succuss.Contains(x));
-                }
+                if (opts.View == CommandOptions.ViewType.Hide) cmds = cmds.Where(x => succuss.Contains(x));
             }
 
             var cmdsWithGroup = cmds.GroupBy(cmd => cmd.Module.Name.Replace("Commands", "", StringComparison.InvariantCulture))
@@ -81,13 +77,9 @@ namespace Roki.Modules.Help
             if (!cmds.Any())
             {
                 if (opts.View != CommandOptions.ViewType.Hide)
-                {
                     await ctx.Channel.SendErrorAsync("Modlue not found").ConfigureAwait(false);
-                }
                 else
-                {
                     await ctx.Channel.SendErrorAsync("Module not found or can't execute");
-                }
                 return;
             }
 
@@ -103,9 +95,8 @@ namespace Roki.Modules.Help
                     var transformed = group.ElementAt(i).Select(x =>
                     {
                         if (opts.View == CommandOptions.ViewType.Cross)
-                        {
-                            return $"{(succuss.Contains(x) ? "✅" : "❌")}{Prefix + x.Aliases.First(),-15} {"[" + x.Aliases.Skip(1).FirstOrDefault() + "]",-8}";
-                        }
+                            return
+                                $"{(succuss.Contains(x) ? "✅" : "❌")}{Prefix + x.Aliases.First(),-15} {"[" + x.Aliases.Skip(1).FirstOrDefault() + "]",-8}";
                         return $"{Prefix + x.Aliases.First(),-13} {"[" + x.Aliases.Skip(1).FirstOrDefault() + "]",-5}";
                     });
 
@@ -119,14 +110,15 @@ namespace Roki.Modules.Help
                             {
                                 if (x.Count() == 1)
                                     return $"{x.First()}";
-                                return String.Concat(x);
+                                return string.Concat(x);
                             });
                     }
-                    
+
                     embed.AddField(group.ElementAt(i).Key, "```css\n" + string.Join("\n", transformed) + "\n```", true);
                 }
             }
-            embed.WithFooter(String.Format("Type `{0}h CommandName` to see the help for that specified command. e.g. `{0}h {0}8ball`", Prefix));
+
+            embed.WithFooter(string.Format("Type `{0}h CommandName` to see the help for that specified command. e.g. `{0}h {0}8ball`", Prefix));
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
@@ -163,11 +155,15 @@ namespace Roki.Modules.Help
 
         public class CommandTextEqualityComparer : IEqualityComparer<CommandInfo>
         {
-            public bool Equals(CommandInfo x, CommandInfo y) => x.Aliases[0] == y.Aliases[0];
+            public bool Equals(CommandInfo x, CommandInfo y)
+            {
+                return x.Aliases[0] == y.Aliases[0];
+            }
 
-            public int GetHashCode(CommandInfo obj) => obj.Aliases[0].GetHashCode(StringComparison.InvariantCulture);
-
+            public int GetHashCode(CommandInfo obj)
+            {
+                return obj.Aliases[0].GetHashCode(StringComparison.InvariantCulture);
+            }
         }
-
     }
 }

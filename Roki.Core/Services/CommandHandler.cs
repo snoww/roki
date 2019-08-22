@@ -13,40 +13,38 @@ using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Common.ModuleBehaviors;
 using Roki.Extensions;
-using Roki.Core.Services.Impl;
 
 namespace Roki.Core.Services
 {
     public class GuildUserComparer : IEqualityComparer<IGuildUser>
     {
-        public bool Equals(IGuildUser x, IGuildUser y) => x.Id == y.Id;
+        public bool Equals(IGuildUser x, IGuildUser y)
+        {
+            return x.Id == y.Id;
+        }
 
-        public int GetHashCode(IGuildUser obj) => obj.Id.GetHashCode();
+        public int GetHashCode(IGuildUser obj)
+        {
+            return obj.Id.GetHashCode();
+        }
     }
-    
+
     public class CommandHandler : INService
     {
+        private const float OneThousandth = 1.0f / 1000;
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commandService;
+        private readonly object _errorLogLock = new object();
+
         private readonly Logger _log;
+
 //        private readonly Configuration _config;
         private readonly Roki _roki;
-        private IServiceProvider _services;
         private IEnumerable<IEarlyBehavior> _earlyBehaviors;
         private IEnumerable<IInputTransformer> _inputTransformers;
         private IEnumerable<ILateBlocker> _lateBlockers;
         private IEnumerable<ILateExecutor> _lateExecutors;
-        
-        private const float OneThousandth = 1.0f / 1000;
-
-        
-        public string DefaultPrefix { get; set; }
-
-        public event Func<IUserMessage, CommandInfo, Task> CommandExecuted = delegate { return Task.CompletedTask; };
-        public event Func<CommandInfo, ITextChannel, string, Task> CommandErrored = delegate { return Task.CompletedTask; };
-        public event Func<IUserMessage, Task> OnMessageNoTrigger = delegate { return Task.CompletedTask; };
-        
-        public ConcurrentDictionary<ulong, uint> UserMessagesSent { get; } = new ConcurrentDictionary<ulong, uint>();
+        private readonly IServiceProvider _services;
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commandService,
@@ -64,6 +62,15 @@ namespace Roki.Core.Services
 
             DefaultPrefix = ".";
         }
+
+
+        public string DefaultPrefix { get; set; }
+
+        public ConcurrentDictionary<ulong, uint> UserMessagesSent { get; } = new ConcurrentDictionary<ulong, uint>();
+
+        public event Func<IUserMessage, CommandInfo, Task> CommandExecuted = delegate { return Task.CompletedTask; };
+        public event Func<CommandInfo, ITextChannel, string, Task> CommandErrored = delegate { return Task.CompletedTask; };
+        public event Func<IUserMessage, Task> OnMessageNoTrigger = delegate { return Task.CompletedTask; };
 
         public void AddServices(IServiceCollection services)
         {
@@ -83,10 +90,14 @@ namespace Roki.Core.Services
                 .Select(x => _services.GetService(x.ImplementationType) as IEarlyBehavior)
                 .ToArray();
         }
-        
+
         public Task StartHandling()
         {
-            _client.MessageReceived += message => { var _ = Task.Run(() => MessageReceivedHandler(message)); return Task.CompletedTask; };
+            _client.MessageReceived += message =>
+            {
+                var _ = Task.Run(() => MessageReceivedHandler(message));
+                return Task.CompletedTask;
+            };
             return Task.CompletedTask;
         }
 
@@ -113,17 +124,17 @@ namespace Roki.Core.Services
                 }
             }
         }
-        
+
         private Task LogSuccessfulExecution(IUserMessage usrMsg, ITextChannel channel, params int[] execPoints)
         {
-            _log.Info($"Command Executed after " + string.Join("/", execPoints.Select(x => (x * OneThousandth).ToString("F3"))) + "s\n\t" +
+            _log.Info("Command Executed after " + string.Join("/", execPoints.Select(x => (x * OneThousandth).ToString("F3"))) + "s\n\t" +
                       "User: {0}\n\t" +
                       "Server: {1}\n\t" +
                       "Channel: {2}\n\t" +
                       "Message: {3}",
                 usrMsg.Author + " [" + usrMsg.Author.Id + "]", // {0}
-                (channel == null ? "PRIVATE" : channel.Guild.Name + " [" + channel.Guild.Id + "]"), // {1}
-                (channel == null ? "PRIVATE" : channel.Name + " [" + channel.Id + "]"), // {2}
+                channel == null ? "PRIVATE" : channel.Guild.Name + " [" + channel.Guild.Id + "]", // {1}
+                channel == null ? "PRIVATE" : channel.Name + " [" + channel.Id + "]", // {2}
                 usrMsg.Content // {3}
             );
 
@@ -134,19 +145,19 @@ namespace Roki.Core.Services
 //                    usrMsg.Content.TrimTo(10));
             return Task.CompletedTask;
         }
-        
+
         private void LogErroredExecution(string errorMessage, IUserMessage usrMsg, ITextChannel channel, params int[] execPoints)
         {
-            _log.Warn($"Command Errored after " + string.Join("/", execPoints.Select(x => (x * OneThousandth).ToString("F3"))) + "s\n\t" +
+            _log.Warn("Command Errored after " + string.Join("/", execPoints.Select(x => (x * OneThousandth).ToString("F3"))) + "s\n\t" +
                       "User: {0}\n\t" +
                       "Server: {1}\n\t" +
                       "Channel: {2}\n\t" +
                       "Message: {3}\n\t" +
                       "Error: {4}",
                 usrMsg.Author + " [" + usrMsg.Author.Id + "]", // {0}
-                (channel == null ? "PRIVATE" : channel.Guild.Name + " [" + channel.Guild.Id + "]"), // {1}
-                (channel == null ? "PRIVATE" : channel.Name + " [" + channel.Id + "]"), // {2}
-                usrMsg.Content,// {3}
+                channel == null ? "PRIVATE" : channel.Guild.Name + " [" + channel.Guild.Id + "]", // {1}
+                channel == null ? "PRIVATE" : channel.Name + " [" + channel.Id + "]", // {2}
+                usrMsg.Content, // {3}
                 errorMessage
                 //exec.Result.ErrorReason // {4}
             );
@@ -170,7 +181,7 @@ namespace Roki.Core.Services
 
                 UserMessagesSent.AddOrUpdate(userMessage.Author.Id, 1, (key, old) => ++old);
 
-                var channel = message.Channel as ISocketMessageChannel;
+                var channel = message.Channel;
                 var guild = (message.Channel as SocketTextChannel)?.Guild;
 
                 await TryRunCommand(guild, channel, userMessage).ConfigureAwait(false);
@@ -184,7 +195,6 @@ namespace Roki.Core.Services
                     _log.Warn("Inner Exception of the error in CommandHandler");
                     _log.Warn(e.InnerException);
                 }
-
             }
         }
 
@@ -193,28 +203,24 @@ namespace Roki.Core.Services
             var execTime = Environment.TickCount;
 
             foreach (var behavior in _earlyBehaviors)
-            {
                 if (await behavior.RunBehavior(_client, guild, userMessage).ConfigureAwait(false))
                 {
                     if (behavior.BehaviorType == ModuleBehaviorType.Blocker)
-                    {
-                        _log.Info("Blocked User: [{0}] Message: [{1}] Service: [{2}]", userMessage.Author, userMessage.Content, behavior.GetType().Name);
-                    }
+                        _log.Info("Blocked User: [{0}] Message: [{1}] Service: [{2}]", userMessage.Author, userMessage.Content,
+                            behavior.GetType().Name);
                     else if (behavior.BehaviorType == ModuleBehaviorType.Executor)
-                    {
                         _log.Info("User [{0}] executed [{1}] in [{2}]", userMessage.Author, userMessage.Content, behavior.GetType().Name);
-                    }
                     return;
                 }
-            }
 
             var execPoint = Environment.TickCount - execTime;
 
-            string messageContent = userMessage.Content;
+            var messageContent = userMessage.Content;
             foreach (var exec in _inputTransformers)
             {
                 string newContent;
-                if ((newContent = await exec.TransformInput(guild, userMessage.Channel, userMessage.Author, messageContent).ConfigureAwait(false)) != messageContent.ToLowerInvariant())
+                if ((newContent = await exec.TransformInput(guild, userMessage.Channel, userMessage.Author, messageContent).ConfigureAwait(false)) !=
+                    messageContent.ToLowerInvariant())
                 {
                     messageContent = newContent;
                     break;
@@ -225,7 +231,8 @@ namespace Roki.Core.Services
             var isPrefixCommand = messageContent.StartsWith(".prefix", StringComparison.CurrentCultureIgnoreCase);
             if (messageContent.StartsWith(prefix, StringComparison.InvariantCulture) || isPrefixCommand)
             {
-                var (success, error, info) = await ExecuteCommandAsync(new CommandContext(_client, userMessage), messageContent, isPrefixCommand ? 1 : prefix.Length, _services, MultiMatchHandling.Best).ConfigureAwait(false);
+                var (success, error, info) = await ExecuteCommandAsync(new CommandContext(_client, userMessage), messageContent,
+                    isPrefixCommand ? 1 : prefix.Length, _services, MultiMatchHandling.Best).ConfigureAwait(false);
                 execTime = Environment.TickCount - execTime;
 
                 if (success)
@@ -234,7 +241,7 @@ namespace Roki.Core.Services
                     await CommandExecuted(userMessage, info).ConfigureAwait(false);
                     return;
                 }
-                
+
                 if (error != null)
                 {
                     LogErroredExecution(error, userMessage, channel as ITextChannel, execPoint, execTime);
@@ -247,16 +254,17 @@ namespace Roki.Core.Services
                 await OnMessageNoTrigger(userMessage).ConfigureAwait(false);
             }
 
-            foreach (var exec in _lateExecutors)
-            {
-                await exec.LateExecute(_client, guild, userMessage).ConfigureAwait(false);
-            }
+            foreach (var exec in _lateExecutors) await exec.LateExecute(_client, guild, userMessage).ConfigureAwait(false);
         }
 
-        private Task<(bool Success, string Error, CommandInfo Info)> ExecuteCommandAsync(CommandContext context, string input, int argPos, IServiceProvider servicesProvider, MultiMatchHandling multiMatchHandling = MultiMatchHandling.Exception)
-            => ExecuteCommand(context, input.Substring(argPos), servicesProvider, multiMatchHandling);
+        private Task<(bool Success, string Error, CommandInfo Info)> ExecuteCommandAsync(CommandContext context, string input, int argPos,
+            IServiceProvider servicesProvider, MultiMatchHandling multiMatchHandling = MultiMatchHandling.Exception)
+        {
+            return ExecuteCommand(context, input.Substring(argPos), servicesProvider, multiMatchHandling);
+        }
 
-        private async Task<(bool Success, string Error, CommandInfo Info)> ExecuteCommand(CommandContext context, string input, IServiceProvider services, MultiMatchHandling multiMatchHandling = MultiMatchHandling.Exception)
+        private async Task<(bool Success, string Error, CommandInfo Info)> ExecuteCommand(CommandContext context, string input,
+            IServiceProvider services, MultiMatchHandling multiMatchHandling = MultiMatchHandling.Exception)
         {
             var searchResult = _commandService.Search(context, input);
             if (!searchResult.IsSuccess)
@@ -266,9 +274,7 @@ namespace Roki.Core.Services
             var preconditionResults = new Dictionary<CommandMatch, PreconditionResult>();
 
             foreach (var match in commands)
-            {
                 preconditionResults[match] = await match.Command.CheckPreconditionsAsync(context, services).ConfigureAwait(false);
-            }
 
             var successfulPreconditions = preconditionResults
                 .Where(x => x.Value.IsSuccess)
@@ -281,7 +287,7 @@ namespace Roki.Core.Services
                     .FirstOrDefault(x => !x.Value.IsSuccess);
                 return (false, bestCandidate.Value.ErrorReason, commands[0].Command);
             }
-            
+
             var parseResultDict = new Dictionary<CommandMatch, ParseResult>();
             foreach (var pair in successfulPreconditions)
             {
@@ -337,32 +343,27 @@ namespace Roki.Core.Services
             var cmd = successfulParses[0].Key.Command;
             var commandName = cmd.Aliases.First();
             foreach (var exec in _lateBlockers)
-            {
-                if (await exec.TryBlockLate(_client, context.Message, context.Guild, context.Channel, context.User, cmd.Module.GetTopLevelModule().Name, commandName).ConfigureAwait(false))
+                if (await exec.TryBlockLate(_client, context.Message, context.Guild, context.Channel, context.User,
+                    cmd.Module.GetTopLevelModule().Name, commandName).ConfigureAwait(false))
                 {
                     _log.Info("Late blocking User [{0}] Command: [{1}] in [{2}]", context.User, commandName, exec.GetType().Name);
                     return (false, null, cmd);
-
                 }
-            }
 
             var chosenOverload = successfulParses[0];
             var execResult = (ExecuteResult) await chosenOverload.Key.ExecuteAsync(context, chosenOverload.Value, services).ConfigureAwait(false);
 
             if (execResult.Exception != null && (!(execResult.Exception is HttpException httpException) || httpException.DiscordCode != 50013))
-            {
                 lock (_errorLogLock)
                 {
                     var now = DateTime.Now;
                     File.AppendAllText($"./command_errors_{now:yyyy-MM-dd}.txt",
-                    $"[{now:HH:mm-yyyy-MM-dd}]" + Environment.NewLine
-                                                        + execResult.Exception.ToString() + Environment.NewLine
-                                                        + "------" + Environment.NewLine);
+                        $"[{now:HH:mm-yyyy-MM-dd}]" + Environment.NewLine
+                                                    + execResult.Exception + Environment.NewLine
+                                                    + "------" + Environment.NewLine);
                 }
-            }
 
             return (true, null, cmd);
         }
-        private readonly object _errorLogLock = new object();
     }
 }

@@ -11,9 +11,9 @@ namespace Roki.Modules.Utility
     public partial class Utility : RokiTopLevelModule
     {
         private readonly DiscordSocketClient _client;
-        private readonly IStatsService _stats;
         private readonly IConfiguration _config;
         private readonly Roki _roki;
+        private readonly IStatsService _stats;
 
         public Utility(Roki roki, DiscordSocketClient client, IStatsService stats, IConfiguration config)
         {
@@ -27,10 +27,7 @@ namespace Roki.Modules.Utility
         public async Task Stats()
         {
             var ownerId = string.Join("\n", _config.OwnerIds);
-            if (string.IsNullOrWhiteSpace(ownerId))
-            {
-                ownerId = "-";
-            }
+            if (string.IsNullOrWhiteSpace(ownerId)) ownerId = "-";
 
             await ctx.Channel.EmbedAsync(
                 new EmbedBuilder().WithOkColor()
