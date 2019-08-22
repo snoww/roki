@@ -164,9 +164,23 @@
   },
   "pokemon": {
     "Command": "pokemon p",
-    "Description": "Returns a short summary of the specified Pokémon",
+    "Description": "Returns a short summary of the specified Pokémon.",
     "Usage": [
       "{0}pokemon decidueye"
+    ]
+  },
+  "ability": {
+    "Command": "ability ab",
+    "Description": "Returns the description of the specified ability.",
+    "Usage": [
+      "{0}ability moxie"
+    ]
+  },
+  "move": {
+    "Command": "move",
+    "Description": "Returns the description of the specified move.",
+    "Usage": [
+      "{0}move bubble"
     ]
   }
 }
