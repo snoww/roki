@@ -104,7 +104,8 @@ namespace Roki.Modules.Searches
                             ? move.EffectEntries[0].Effect.Replace("$effect_chance", move.EffectChance.ToString())
                             : move.EffectEntries[0].Effect)
                         .AddField("Type", move.Type.Name.ToTitleCase(), true)
-                        .AddField("Damage Type", move.DamageClass.Name.ToTitleCase(), true);
+                        .AddField("Damage Type", move.DamageClass.Name.ToTitleCase(), true)
+                        .AddField("Accuracy", $"{move.Accuracy}%", true);
                     if (move.Power != null)
                         embed.AddField("Power", move.Power, true);
                     else
