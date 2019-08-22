@@ -7,13 +7,14 @@ using PokeApiNet;
 using PokeApiNet.Models;
 using Roki.Common.Attributes;
 using Roki.Extensions;
+using Roki.Modules.Searches.Services;
 
 namespace Roki.Modules.Searches
 {
     public partial class Searches
     {
         [Group]
-        public class PokemonCommands : RokiSubmodule
+        public class PokemonCommands : RokiSubmodule<PokemonService>
         {
             private readonly PokeApiClient _pokeClient = new PokeApiClient();
             
@@ -31,13 +32,25 @@ namespace Roki.Modules.Searches
                     var species = await _pokeClient.GetResourceAsync(pokemon.Species).ConfigureAwait(false);
                     var evoChain = await _pokeClient.GetResourceAsync(species.EvolutionChain).ConfigureAwait(false);
 
-                    var embed = new EmbedBuilder().WithOkColor()
+                    var embed = new EmbedBuilder()
+                        .WithColor(_service.GetColorOfPokemon(species.Color.Name))
                         .WithTitle($"#{pokemon.Id} {pokemon.Name.ToTitleCase()}")
                         .WithDescription($"{species.Genera[2].Genus}")
                         .WithThumbnailUrl(pokemon.Sprites.FrontDefault)
-                        .AddField("Types", string.Join("\n", pokemon.Types.OrderBy(t => t.Slot).Select(t => t.Type.Name.ToTitleCase()).ToList()), true)
-                        .AddField("Abilities", string.Join("\n", pokemon.Abilities.OrderBy(a => a.Slot).Select(a => a.Ability.Name.ToTitleCase().Replace('-', ' ')).ToList()), true)
-                        .AddField("Base Stats", $"`HP: {pokemon.Stats[5].BaseStat}\nAttack: {pokemon.Stats[4].BaseStat}\nSp. Atk: {pokemon.Stats[2].BaseStat}\nDefense: {pokemon.Stats[3].BaseStat}\nSp. Def: {pokemon.Stats[1].BaseStat}\nSpeed: {pokemon.Stats[0].BaseStat}\n`", true);
+                        .AddField("Types", string.Join(", ", pokemon.Types.OrderBy(t => t.Slot).Select(t => t.Type.Name.ToTitleCase()).ToList()), true)
+                        .AddField("Abilities", string.Join("\n", 
+                            pokemon.Abilities.OrderBy(a => a.Slot).Select(a =>
+                            {
+                                if (a.IsHidden)
+                                    return "*" + a.Ability.Name.ToTitleCase().Replace('-', ' ') + "*";
+                                return a.Ability.Name.ToTitleCase().Replace('-', ' ');
+                            }).ToList()), true)
+                        .AddField("Base Stats", $"`HP: {pokemon.Stats[5].BaseStat}\n" +
+                                                $"Attack: {pokemon.Stats[4].BaseStat}\n" +
+                                                $"Defense: {pokemon.Stats[3].BaseStat}\n" +
+                                                $"Sp. Atk: {pokemon.Stats[2].BaseStat}\n" +
+                                                $"Sp. Def: {pokemon.Stats[1].BaseStat}\n" +
+                                                $"Speed: {pokemon.Stats[0].BaseStat}\n`", true);
 
                     if (evoChain.Chain.EvolvesTo.Count > 0)
                     {
@@ -54,6 +67,7 @@ namespace Roki.Modules.Searches
 
                         embed.AddField("Evolution", evostr, true);
                     }
+                    
                     await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 }
                 catch
