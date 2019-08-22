@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -106,21 +105,54 @@ namespace Roki.Modules.Searches
                         .AddField("Type", move.Type.Name.ToTitleCase(), true)
                         .AddField("Damage Type", move.DamageClass.Name.ToTitleCase(), true)
                         .AddField("Accuracy", $"{move.Accuracy}%", true);
+
                     if (move.Power != null)
                         embed.AddField("Power", move.Power, true);
                     else
-                        embed.AddField("Power", "N/A", true);
+                        embed.AddField("Power", "—", true);
+
                     embed.AddField("PP", move.Pp, true)
                         .AddField("Priority", move.Priority, true)
                         .AddField("Introduced In", $"Generation {move.Generation.Name.Split('-')[1].ToUpperInvariant()}", true);
-                    
+
                     await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 }
                 catch
                 {
-                    await ctx.Channel.SendErrorAsync("No move of that name found.").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync("Move not found.").ConfigureAwait(false);
                 }
-                
+            }
+
+            [RokiCommand, Usage, Description, Aliases]
+            public async Task Nature([Leftover] string query)
+            {
+                if (string.IsNullOrWhiteSpace(query))
+                    return;
+                await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+                try
+                {
+                    var nature = await _pokeClient.GetResourceAsync<Nature>(query);
+                    
+                    var embed = new EmbedBuilder().WithOkColor()
+                        .WithTitle(nature.Name.ToTitleCase());
+                    
+                    // checks if nature is not neutral
+                    if (nature.IncreasedStat != null)    
+                        embed.AddField("Increased Stat", nature.IncreasedStat.Name.ToTitleCase(), true)
+                        .AddField("Decreased Stat", nature.DecreasedStat.Name.ToTitleCase(), true)
+                        .AddField("Likes Flavor", nature.LikesFlavor.Name, true)
+                        .AddField("Hates Flavor", nature.HatesFlavor.Name, true);
+                    else
+                        embed.AddField("Increased Stat", "—", true)
+                            .AddField("Decreased Stat", "—", true)
+                            .AddField("Likes Flavor", "—", true)
+                            .AddField("Hates Flavor", "—", true);
+                    await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                }
+                catch
+                {
+                    await ctx.Channel.SendErrorAsync("Nature not found.").ConfigureAwait(false);
+                }
             }
         }
     }
