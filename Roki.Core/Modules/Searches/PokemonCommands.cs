@@ -87,6 +87,40 @@ namespace Roki.Modules.Searches
                     await ctx.Channel.SendErrorAsync("No ability of that name found.").ConfigureAwait(false);
                 }
             }
+
+            [RokiCommand, Usage, Description, Aliases]
+            public async Task Move([Leftover] string query)
+            {
+                if (string.IsNullOrWhiteSpace(query))
+                    return;
+                await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+                try
+                {
+                    var move = _pokeClient.GetResourceAsync<Move>(query).Result;
+
+                    var embed = new EmbedBuilder().WithOkColor()
+                        .WithTitle(move.Name.ToTitleCase().Replace('-', ' '))
+                        .WithDescription(move.EffectChanges != null
+                            ? move.EffectEntries[0].Effect.Replace("$effect_chance", move.EffectChance.ToString())
+                            : move.EffectEntries[0].Effect)
+                        .AddField("Type", move.Type.Name.ToTitleCase(), true)
+                        .AddField("Damage Type", move.DamageClass.Name.ToTitleCase(), true);
+                    if (move.Power != null)
+                        embed.AddField("Power", move.Power, true);
+                    else
+                        embed.AddField("Power", "N/A", true);
+                    embed.AddField("PP", move.Pp, true)
+                        .AddField("Priority", move.Priority, true)
+                        .AddField("Introduced In", $"Generation {move.Generation.Name.Split('-')[1].ToUpperInvariant()}", true);
+                    
+                    await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                }
+                catch
+                {
+                    await ctx.Channel.SendErrorAsync("No move of that name found.").ConfigureAwait(false);
+                }
+                
+            }
         }
     }
 }
