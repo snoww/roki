@@ -1,14 +1,14 @@
 {
   "stats": {
     "Command": "stats",
-    "Descriptionription": "Basic stats for Roki.",
+    "Description": "Basic stats for Roki.",
     "Usage": [
       "{0}stats"
     ]
   },
   "serverinfo": {
     "Command": "serverinfo server",
-    "Descriptionription": "Shows information about current server.",
+    "Description": "Shows information about current server.",
     "Usage": [
       "{0}serverinfo",
       "{0}server"
@@ -16,7 +16,7 @@
   },
   "channelinfo": {
     "Command": "channelinfo channel",
-    "Descriptionription": "Shows information about the current channel or mentioned channel.",
+    "Description": "Shows information about the current channel or mentioned channel.",
     "Usage": [
       "{0}channelinfo",
       "{0}channel channel"
@@ -24,7 +24,7 @@
   },
   "userinfo": {
     "Command": "userinfo user",
-    "Descriptionription": "Shows information about yourself or another user.",
+    "Description": "Shows information about yourself or another user.",
     "Usage": [
       "{0}userinfo",
       "{0}user @user"
@@ -32,21 +32,21 @@
   },
   "ping": {
     "Command": "ping",
-    "Descriptionription": "Gets current ping to Discord's servers",
+    "Description": "Gets current ping to Discord's servers",
     "Usage": [
       "{0}ping"
     ]
   },
   "modules": {
     "Command": "modules",
-    "Descriptionription": "Lists all bot modules.",
+    "Description": "Lists all bot modules.",
     "Usage": [
       "{0}modules"
     ]
   },
   "commands": {
     "Command": "commands Commands",
-    "Descriptionription": "List all of the bot's commands from a certain module. You can either specify the full name or only the first few letters of the module name.",
+    "Description": "List all of the bot's commands from a certain module. You can either specify the full name or only the first few letters of the module name.",
     "Usage": [
       "{0}Commands Admin",
       "{0}Commands Admin --view 1"
@@ -54,7 +54,7 @@
   },
   "help": {
     "Command": "help h",
-    "Descriptionription": "Either shows a help for a single command, or DMs you help link if no parameters are specified.",
+    "Description": "Either shows a help for a single command, or DMs you help link if no parameters are specified.",
     "Usage": [
       "{0}help {0}Commands",
       "{0}h"
@@ -62,14 +62,14 @@
   },
   "time": {
     "Command": "time",
-    "Descriptionription": "Shows the current time and timezone for the specified location.",
+    "Description": "Shows the current time and timezone for the specified location.",
     "Usage": [
       "{0}time Tokyo, JP"
     ]
   },
   "youtube": {
     "Command": "youtube yt",
-    "Descriptionription": "Searches Youtube with specified query.",
+    "Description": "Searches Youtube with specified query.",
     "Usage": [
       "{0}youtube Jebaited",
       "{0}yt hello"
@@ -77,7 +77,7 @@
   },
   "image": {
     "Command": "image, img",
-    "Descriptionription": "Searches Google Images with the specified query, returns first result.",
+    "Description": "Searches Google Images with the specified query, returns first result.",
     "Usage": [
       "{0}image cats",
       "{0}img dogs"
@@ -85,7 +85,7 @@
   },
   "randomimage": {
     "Command": "randomimage, rimg",
-    "Descriptionription": "Searches Google Images with the specified query, returns a random result.",
+    "Description": "Searches Google Images with the specified query, returns a random result.",
     "Usage": [
       "{0}randomimage cats",
       "{0}rimg dogs"
@@ -93,21 +93,21 @@
   },
   "movie": {
     "Command": "movie imdb omdb",
-    "Descriptionription": "Searches omdb with the specified query, returns first result.",
+    "Description": "Searches omdb with the specified query, returns first result.",
     "Usage": [
       "{0}imdb avengers endgame"
     ]
   },
   "weather": {
     "Command": "weather",
-    "Descriptionription": "Looks up weather of specified city using Dark Sky's api.",
+    "Description": "Looks up weather of specified city using Dark Sky's api.",
     "Usage": [
       "{0}weather toronto"
     ]
   },
   "urbandict": {
     "Command": "urban ud",
-    "Descriptionription": "Searches urban dictionary for with the specified query.",
+    "Description": "Searches urban dictionary for with the specified query.",
     "Usage": [
       "{0}urban malding"
     ]
