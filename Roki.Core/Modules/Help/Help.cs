@@ -57,10 +57,10 @@ namespace Roki.Modules.Help
                 .OrderBy(commands => commands.Aliases[0])
                 .Distinct(new CommandTextEqualityComparer());
 
-            var succuss = new HashSet<CommandInfo>();
+            var success = new HashSet<CommandInfo>();
             if (opts.View != CommandOptions.ViewType.All)
             {
-                succuss = new HashSet<CommandInfo>((await Task.WhenAll(cmds.Select(async x =>
+                success = new HashSet<CommandInfo>((await Task.WhenAll(cmds.Select(async x =>
                     {
                         var pre = await x.CheckPreconditionsAsync(Context, _service).ConfigureAwait(false);
                         return (Command: x, Succuss: pre.IsSuccess);
@@ -68,7 +68,7 @@ namespace Roki.Modules.Help
                     .Where(x => x.Succuss)
                     .Select(x => x.Command));
 
-                if (opts.View == CommandOptions.ViewType.Hide) cmds = cmds.Where(x => succuss.Contains(x));
+                if (opts.View == CommandOptions.ViewType.Hide) cmds = cmds.Where(x => success.Contains(x));
             }
 
             var cmdsWithGroup = cmds.GroupBy(cmd => cmd.Module.Name.Replace("Commands", "", StringComparison.InvariantCulture))
@@ -77,7 +77,7 @@ namespace Roki.Modules.Help
             if (!cmds.Any())
             {
                 if (opts.View != CommandOptions.ViewType.Hide)
-                    await ctx.Channel.SendErrorAsync("Modlue not found").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync("Module not found").ConfigureAwait(false);
                 else
                     await ctx.Channel.SendErrorAsync("Module not found or can't execute");
                 return;
@@ -96,7 +96,7 @@ namespace Roki.Modules.Help
                     {
                         if (opts.View == CommandOptions.ViewType.Cross)
                             return
-                                $"{(succuss.Contains(x) ? "✅" : "❌")}{Prefix + x.Aliases.First(),-15} {"[" + x.Aliases.Skip(1).FirstOrDefault() + "]",-8}";
+                                $"{(success.Contains(x) ? "✅" : "❌")}{Prefix + x.Aliases.First(),-15} {"[" + x.Aliases.Skip(1).FirstOrDefault() + "]",-8}";
                         return $"{Prefix + x.Aliases.First(),-13} {"[" + x.Aliases.Skip(1).FirstOrDefault() + "]",-5}";
                     });
 
