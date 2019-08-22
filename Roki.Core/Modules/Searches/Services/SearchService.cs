@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using DarkSky.Models;
 using DarkSky.Services;
-using Discord;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using NLog;
@@ -17,11 +15,11 @@ namespace Roki.Modules.Searches.Services
 {
     public class SearchService : INService, IUnloadableService
     {
-        private readonly IHttpClientFactory _httpFactory;
         private readonly DiscordSocketClient _client;
-        private readonly IGoogleApiService _google;
-        private readonly Logger _log;
         private readonly IConfiguration _config;
+        private readonly IGoogleApiService _google;
+        private readonly IHttpClientFactory _httpFactory;
+        private readonly Logger _log;
 
         public SearchService(DiscordSocketClient client, IHttpClientFactory httpFactory, IGoogleApiService google, IConfiguration config)
         {
@@ -30,6 +28,11 @@ namespace Roki.Modules.Searches.Services
             _google = google;
             _config = config;
             _log = LogManager.GetCurrentClassLogger();
+        }
+
+        public Task Unload()
+        {
+            throw new NotImplementedException();
         }
 
 //        TODO use redis cache
@@ -45,7 +48,9 @@ namespace Roki.Modules.Searches.Services
             {
                 try
                 {
-                    var result = await http.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={query}&key={_config.GoogleApi}").ConfigureAwait(false);
+                    var result = await http
+                        .GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={query}&key={_config.GoogleApi}")
+                        .ConfigureAwait(false);
                     var obj = JsonConvert.DeserializeObject<GeolocationResult>(result);
                     if (obj?.Results == null || obj.Results.Length == 0)
                     {
@@ -54,16 +59,17 @@ namespace Roki.Modules.Searches.Services
                     }
 
                     var darkSky = new DarkSkyService("a4e7bd45cb9c191eec7cda6c2559b413");
-                    var forecast = await darkSky.GetForecast(obj.Results[0].Geometry.Location.Lat, obj.Results[0].Geometry.Location.Lng, new DarkSkyService.OptionalParameters
-                    {
-                        MeasurementUnits = "ca",
-                        DataBlocksToExclude = new List<ExclusionBlock>
+                    var forecast = await darkSky.GetForecast(obj.Results[0].Geometry.Location.Lat, obj.Results[0].Geometry.Location.Lng,
+                        new DarkSkyService.OptionalParameters
                         {
-                            ExclusionBlock.Hourly,
-                            ExclusionBlock.Minutely,
-                            ExclusionBlock.Flags,
-                        },
-                    });
+                            MeasurementUnits = "ca",
+                            DataBlocksToExclude = new List<ExclusionBlock>
+                            {
+                                ExclusionBlock.Hourly,
+                                ExclusionBlock.Minutely,
+                                ExclusionBlock.Flags
+                            }
+                        });
 
                     return (forecast, obj.Results[0].FormattedAddress);
                 }
@@ -86,7 +92,8 @@ namespace Roki.Modules.Searches.Services
             {
                 using (var http = _httpFactory.CreateClient())
                 {
-                    var result = await http.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={arg}&key={_config.GoogleApi}").ConfigureAwait(false);
+                    var result = await http.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={arg}&key={_config.GoogleApi}")
+                        .ConfigureAwait(false);
                     var obj = JsonConvert.DeserializeObject<GeolocationResult>(result);
                     if (obj?.Results == null || obj.Results.Length == 0)
                     {
@@ -95,7 +102,10 @@ namespace Roki.Modules.Searches.Services
                     }
 
                     var currentSeconds = DateTime.UtcNow.UnixTimestamp();
-                    var timeResult = await http.GetStringAsync($"https://maps.googleapis.com/maps/api/timezone/json?location={obj.Results[0].Geometry.Location.Lat},{obj.Results[0].Geometry.Location.Lng}&timestamp={currentSeconds}&key={_config.GoogleApi}").ConfigureAwait(false);
+                    var timeResult = await http
+                        .GetStringAsync(
+                            $"https://maps.googleapis.com/maps/api/timezone/json?location={obj.Results[0].Geometry.Location.Lat},{obj.Results[0].Geometry.Location.Lng}&timestamp={currentSeconds}&key={_config.GoogleApi}")
+                        .ConfigureAwait(false);
                     var timeObj = JsonConvert.DeserializeObject<TimeZoneResult>(timeResult);
                     var time = DateTime.UtcNow.AddSeconds(timeObj.DstOffset + timeObj.RawOffset);
 
@@ -103,7 +113,7 @@ namespace Roki.Modules.Searches.Services
                     {
                         Address = obj.Results[0].FormattedAddress,
                         Time = time,
-                        TimeZoneName = timeObj.TimeZoneName,
+                        TimeZoneName = timeObj.TimeZoneName
                     };
                     return toReturn;
                 }
@@ -132,11 +142,6 @@ namespace Roki.Modules.Searches.Services
                     return null;
                 return movie;
             }
-        }
-        
-        public Task Unload()
-        {
-            throw new System.NotImplementedException();
         }
     }
 }

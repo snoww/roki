@@ -12,24 +12,24 @@ namespace Roki.Modules.Searches.Common
 
     public class GeolocationResult
     {
+        public GeolocationModel[] Results { get; set; }
+
         public class GeolocationModel
         {
+            [JsonProperty("formatted_address")] public string FormattedAddress { get; set; }
+
+            public GeometryModel Geometry { get; set; }
+
             public class GeometryModel
             {
+                public LocationModel Location { get; set; }
+
                 public class LocationModel
                 {
                     public float Lat { get; set; }
                     public float Lng { get; set; }
                 }
-
-                public LocationModel Location { get; set; }
             }
-
-            [JsonProperty("formatted_address")]
-            public string FormattedAddress { get; set; }
-            public GeometryModel Geometry { get; set; }
         }
-
-        public GeolocationModel[] Results { get; set; }
     }
 }

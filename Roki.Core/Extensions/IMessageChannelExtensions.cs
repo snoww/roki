@@ -9,10 +9,15 @@ namespace Roki.Extensions
 {
     public static class IMessageChannelExtensions
     {
+        private static readonly IEmote arrow_left = new Emoji("⬅");
+        private static readonly IEmote arrow_right = new Emoji("➡");
+
         public static Task<IUserMessage> EmbedAsync(this IMessageChannel channel, EmbedBuilder embed, string msg = "")
-            => channel.SendMessageAsync(msg, embed: embed.Build(),
-                options: new RequestOptions() { RetryMode  = RetryMode.AlwaysRetry });
-        
+        {
+            return channel.SendMessageAsync(msg, embed: embed.Build(),
+                options: new RequestOptions {RetryMode = RetryMode.AlwaysRetry});
+        }
+
         public static Task<IUserMessage> SendConfirmAsync(this IMessageChannel ch, string title, string text, string url = null, string footer = null)
         {
             var eb = new EmbedBuilder().WithOkColor().WithDescription(text)
@@ -23,23 +28,26 @@ namespace Roki.Extensions
                 eb.WithFooter(efb => efb.WithText(footer));
             return ch.SendMessageAsync("", embed: eb.Build());
         }
-        
+
         public static Task<IUserMessage> SendConfirmAsync(this IMessageChannel ch, string text)
-            => ch.SendMessageAsync("", embed: new EmbedBuilder().WithOkColor().WithDescription(text).Build());
-        
+        {
+            return ch.SendMessageAsync("", embed: new EmbedBuilder().WithOkColor().WithDescription(text).Build());
+        }
+
         public static Task<IUserMessage> SendErrorAsync(this IMessageChannel ch, string error)
-            => ch.SendMessageAsync("", embed: new EmbedBuilder().WithErrorColor().WithDescription(error).Build());
-        
-        private static readonly IEmote arrow_left = new Emoji("⬅");
-        private static readonly IEmote arrow_right = new Emoji("➡");
-        
-        public static Task SendPaginatedConfirmAsync(this ICommandContext ctx, 
+        {
+            return ch.SendMessageAsync("", embed: new EmbedBuilder().WithErrorColor().WithDescription(error).Build());
+        }
+
+        public static Task SendPaginatedConfirmAsync(this ICommandContext ctx,
             int currentPage, Func<int, EmbedBuilder> pageFunc, int totalElements,
             int itemsPerPage, bool addPaginatedFooter = true)
-            => ctx.SendPaginatedConfirmAsync(currentPage,
+        {
+            return ctx.SendPaginatedConfirmAsync(currentPage,
                 x => Task.FromResult(pageFunc(x)), totalElements, itemsPerPage, addPaginatedFooter);
-        
-        private static async Task SendPaginatedConfirmAsync(this ICommandContext ctx, int currentPage, 
+        }
+
+        private static async Task SendPaginatedConfirmAsync(this ICommandContext ctx, int currentPage,
             Func<int, Task<EmbedBuilder>> pageFunc, int totalElements, int itemsPerPage, bool addPaginatedFooter = true)
         {
             var embed = await pageFunc(currentPage).ConfigureAwait(false);
@@ -49,7 +57,7 @@ namespace Roki.Extensions
             if (addPaginatedFooter)
                 embed.AddPaginatedFooter(currentPage, lastPage);
 
-            var msg = await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false) as IUserMessage;
+            var msg = await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
 
             if (lastPage == 0)
                 return;
@@ -97,22 +105,18 @@ namespace Roki.Extensions
                 }
             }
 
-            using (msg.OnReaction((DiscordSocketClient)ctx.Client, ChangePage, ChangePage))
+            using (msg.OnReaction((DiscordSocketClient) ctx.Client, ChangePage, ChangePage))
             {
                 await Task.Delay(30000).ConfigureAwait(false);
             }
 
             try
             {
-                if(msg.Channel is ITextChannel && ((SocketGuild)ctx.Guild).CurrentUser.GuildPermissions.ManageMessages)
-                {
+                if (msg.Channel is ITextChannel && ((SocketGuild) ctx.Guild).CurrentUser.GuildPermissions.ManageMessages)
                     await msg.RemoveAllReactionsAsync().ConfigureAwait(false);
-                }
                 else
-                {
                     await Task.WhenAll(msg.Reactions.Where(x => x.Value.IsMe)
                         .Select(x => msg.RemoveReactionAsync(x.Key, ctx.Client.CurrentUser)));
-                }
             }
             catch
             {

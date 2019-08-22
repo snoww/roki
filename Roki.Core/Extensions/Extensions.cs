@@ -16,27 +16,28 @@ namespace Roki.Extensions
 {
     public static class Extensions
     {
-        private static Logger _log = LogManager.GetCurrentClassLogger();
-        
-        public static EmbedBuilder WithOkColor(this EmbedBuilder embed) =>
-            embed.WithColor(Roki.OkColor);
+        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
-        public static EmbedBuilder WithErrorColor(this EmbedBuilder embed) =>
-            embed.WithColor(Roki.ErrorColor);
-        
+        public static EmbedBuilder WithOkColor(this EmbedBuilder embed)
+        {
+            return embed.WithColor(Roki.OkColor);
+        }
+
+        public static EmbedBuilder WithErrorColor(this EmbedBuilder embed)
+        {
+            return embed.WithColor(Roki.ErrorColor);
+        }
+
         public static ModuleInfo GetTopLevelModule(this ModuleInfo module)
         {
-            while (module.Parent != null)
-            {
-                module = module.Parent;
-            }
+            while (module.Parent != null) module = module.Parent;
             return module;
         }
-        
+
         public static IEnumerable<Type> LoadFrom(this IServiceCollection collection, Assembly assembly)
         {
             // list of all the types which are added with this method
-            List<Type> addedTypes = new List<Type>();
+            var addedTypes = new List<Type>();
 
             Type[] allTypes;
             try
@@ -49,14 +50,15 @@ namespace Roki.Extensions
                 _log.Warn(ex);
                 return Enumerable.Empty<Type>();
             }
+
             // all types which have INService implementation are services
             // which are supposed to be loaded with this method
             // ignore all interfaces and abstract classes
             var services = new Queue<Type>(allTypes
-                    .Where(x => x.GetInterfaces().Contains(typeof(INService))
-                        && !x.GetTypeInfo().IsInterface && !x.GetTypeInfo().IsAbstract
-                            )
-                    .ToArray());
+                .Where(x => x.GetInterfaces().Contains(typeof(INService))
+                            && !x.GetTypeInfo().IsInterface && !x.GetTypeInfo().IsAbstract
+                )
+                .ToArray());
 
             // we will just return those types when we're done instantiating them
             addedTypes.AddRange(services);
@@ -65,8 +67,8 @@ namespace Roki.Extensions
             // as we need to also add a service for each one of interfaces
             // so that DI works for them too
             var interfaces = new HashSet<Type>(allTypes
-                    .Where(x => x.GetInterfaces().Contains(typeof(INService))
-                        && x.GetTypeInfo().IsInterface));
+                .Where(x => x.GetInterfaces().Contains(typeof(INService))
+                            && x.GetTypeInfo().IsInterface));
 
             // keep instantiating until we've instantiated them all
             while (services.Count > 0)
@@ -91,7 +93,7 @@ namespace Roki.Extensions
 
             return addedTypes;
         }
-        
+
         public static IMessage DeleteAfter(this IUserMessage msg, int seconds)
         {
             Task.Run(async () =>
@@ -108,33 +110,50 @@ namespace Roki.Extensions
             });
             return msg;
         }
-        
+
         public static EmbedBuilder AddPaginatedFooter(this EmbedBuilder embed, int curPage, int? lastPage)
         {
             if (lastPage != null)
                 return embed.WithFooter(efb => efb.WithText($"{curPage + 1} / {lastPage + 1}"));
-            else
-                return embed.WithFooter(efb => efb.WithText(curPage.ToString()));
+            return embed.WithFooter(efb => efb.WithText(curPage.ToString()));
         }
-        
-        public static ReactionEventWrapper OnReaction(this IUserMessage msg, DiscordSocketClient client, Func<SocketReaction, Task> reactionAdded, Func<SocketReaction, Task> reactionRemoved = null)
+
+        public static ReactionEventWrapper OnReaction(this IUserMessage msg, DiscordSocketClient client, Func<SocketReaction, Task> reactionAdded,
+            Func<SocketReaction, Task> reactionRemoved = null)
         {
             if (reactionRemoved == null)
                 reactionRemoved = _ => Task.CompletedTask;
 
             var wrap = new ReactionEventWrapper(client, msg);
-            wrap.OnReactionAdded += r => { var _ = Task.Run(() => reactionAdded(r)); };
-            wrap.OnReactionRemoved += r => { var _ = Task.Run(() => reactionRemoved(r)); };
+            wrap.OnReactionAdded += r =>
+            {
+                var _ = Task.Run(() => reactionAdded(r));
+            };
+            wrap.OnReactionRemoved += r =>
+            {
+                var _ = Task.Run(() => reactionRemoved(r));
+            };
             return wrap;
         }
-        
-        public static IEnumerable<IRole> GetRoles(this IGuildUser user) =>
-            user.RoleIds.Select(r => user.Guild.GetRole(r)).Where(r => r != null);
 
-        public static string RealSummary(this CommandInfo info, string prefix) => string.Format(info.Summary, prefix);
-        
-        public static string RealRemarks(this CommandInfo cmd, string prefix) => string.Join(" or ", JsonConvert.DeserializeObject<string[]>(cmd.Remarks).Select(x => Format.Code(string.Format(x, prefix))));
-        
-        public static double UnixTimestamp(this DateTime dt) => dt.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
+        public static IEnumerable<IRole> GetRoles(this IGuildUser user)
+        {
+            return user.RoleIds.Select(r => user.Guild.GetRole(r)).Where(r => r != null);
+        }
+
+        public static string RealSummary(this CommandInfo info, string prefix)
+        {
+            return string.Format(info.Summary, prefix);
+        }
+
+        public static string RealRemarks(this CommandInfo cmd, string prefix)
+        {
+            return string.Join(" or ", JsonConvert.DeserializeObject<string[]>(cmd.Remarks).Select(x => Format.Code(string.Format(x, prefix))));
+        }
+
+        public static double UnixTimestamp(this DateTime dt)
+        {
+            return dt.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
+        }
     }
 }

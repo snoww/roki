@@ -1,10 +1,8 @@
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
-using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
-using Roki.Extensions;
 
 namespace Roki.Modules.Utility
 {
@@ -22,7 +20,7 @@ namespace Roki.Modules.Utility
                 tex = WebUtility.UrlEncode(encode);
 
                 var result = $"https://math.now.sh?from={tex}.png";
-                using (WebClient client = new WebClient())
+                using (var client = new WebClient())
                 {
                     // make image bigger by converting from svg???
                     client.DownloadFile(result, "tex.png");

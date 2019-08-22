@@ -9,9 +9,8 @@ namespace Roki.Common.Attributes
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class UsageAttribute : RemarksAttribute
     {
-        public UsageAttribute([CallerMemberName] string memberName="") : base(UsageAttribute.GetUsage(memberName))
+        public UsageAttribute([CallerMemberName] string memberName = "") : base(GetUsage(memberName))
         {
-
         }
 
         public static string GetUsage(string memberName)

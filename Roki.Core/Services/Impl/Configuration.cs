@@ -1,27 +1,17 @@
-using Discord;
-using Microsoft.Extensions.Configuration;
-using NLog;
+using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System;
-using System.Threading;
+using Discord;
+using Microsoft.Extensions.Configuration;
+using NLog;
 
 namespace Roki.Core.Services.Impl
 {
     public class Configuration : IConfiguration
     {
-        private Logger _log;
-        
-        public ulong ClientId { get; }
-        public string Token { get; }
-        public string GoogleApi { get; }
-
-        public ImmutableArray<ulong> OwnerIds { get; }
-        
-        public DbConfig Db { get; }
-        
         private readonly string _credsFileName = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
+        private readonly Logger _log;
 
         public Configuration()
         {
@@ -43,10 +33,11 @@ namespace Roki.Core.Services.Impl
                         Console.ReadKey();
                     Environment.Exit(3);
                 }
+
                 OwnerIds = data.GetSection("OwnerIds").GetChildren().Select(c => ulong.Parse(c.Value)).ToImmutableArray();
                 GoogleApi = data[nameof(GoogleApi)];
 
-                if (!ulong.TryParse(data[nameof(ClientId)], out ulong clId))
+                if (!ulong.TryParse(data[nameof(ClientId)], out var clId))
                     clId = 0;
                 ClientId = clId;
 
@@ -65,7 +56,18 @@ namespace Roki.Core.Services.Impl
                 throw;
             }
         }
-      
-        public bool IsOwner(IUser u) => OwnerIds.Contains(u.Id);
+
+        public ulong ClientId { get; }
+        public string Token { get; }
+        public string GoogleApi { get; }
+
+        public ImmutableArray<ulong> OwnerIds { get; }
+
+        public DbConfig Db { get; }
+
+        public bool IsOwner(IUser u)
+        {
+            return OwnerIds.Contains(u.Id);
+        }
     }
 }

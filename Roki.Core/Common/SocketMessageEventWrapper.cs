@@ -7,13 +7,8 @@ namespace Roki.Common
 {
     public sealed class ReactionEventWrapper : IDisposable
     {
-        public IUserMessage Message { get; }
-        public event Action<SocketReaction> OnReactionAdded = delegate {  };
-        public event Action<SocketReaction> OnReactionRemoved = delegate {  };
-        public event Action OnReactionCleared = delegate {  };
-
         private readonly DiscordSocketClient _client;
-        private bool _disposing = false;
+        private bool _disposing;
 
         public ReactionEventWrapper(DiscordSocketClient client, IUserMessage message)
         {
@@ -24,6 +19,20 @@ namespace Roki.Common
             _client.ReactionRemoved += ReactionRemoved;
             _client.ReactionsCleared += ReactionsCleared;
         }
+
+        public IUserMessage Message { get; }
+
+        public void Dispose()
+        {
+            if (_disposing)
+                return;
+            _disposing = true;
+            UnsubAll();
+        }
+
+        public event Action<SocketReaction> OnReactionAdded = delegate { };
+        public event Action<SocketReaction> OnReactionRemoved = delegate { };
+        public event Action OnReactionCleared = delegate { };
 
         private Task ReactionAdded(Cacheable<IUserMessage, ulong> message, ISocketMessageChannel channel, SocketReaction reaction)
         {
@@ -37,9 +46,9 @@ namespace Roki.Common
                 catch
                 {
                     //
-                }    
+                }
             });
-            
+
             return Task.CompletedTask;
         }
 
@@ -87,14 +96,6 @@ namespace Roki.Common
             OnReactionAdded = null;
             OnReactionRemoved = null;
             OnReactionCleared = null;
-        }
-
-        public void Dispose()
-        {
-            if (_disposing)
-                return;
-            _disposing = true;
-            UnsubAll();
         }
     }
 }

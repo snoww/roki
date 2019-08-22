@@ -16,7 +16,7 @@ namespace Roki.Modules.Searches
         public class PokemonCommands : RokiSubmodule
         {
             private readonly PokeApiClient _pokeClient = new PokeApiClient();
-            
+
             [RokiCommand, Usage, Description, Aliases]
             public async Task Pokemon([Leftover] string query = null)
             {
@@ -29,7 +29,7 @@ namespace Roki.Modules.Searches
                     await ctx.Channel.SendErrorAsync("No Pokémon of that name found.");
                     return;
                 }
-                    
+
                 var species = await _pokeClient.GetResourceAsync(pokemon.Species).ConfigureAwait(false);
                 var evoChain = await _pokeClient.GetResourceAsync(species.EvolutionChain).ConfigureAwait(false);
 
@@ -38,7 +38,9 @@ namespace Roki.Modules.Searches
                     .WithDescription($"{species.Genera[2].Genus}")
                     .WithThumbnailUrl(pokemon.Sprites.FrontDefault)
                     .AddField("Types", string.Join("\n", pokemon.Types.OrderBy(t => t.Slot).Select(t => t.Type.Name.ToTitleCase()).ToList()), true)
-                    .AddField("Abilities", string.Join("\n", pokemon.Abilities.OrderBy(a => a.Slot).Select(a => a.Ability.Name.ToTitleCase().Replace('-', ' ')).ToList()), true);
+                    .AddField("Abilities",
+                        string.Join("\n",
+                            pokemon.Abilities.OrderBy(a => a.Slot).Select(a => a.Ability.Name.ToTitleCase().Replace('-', ' ')).ToList()), true);
 
                 if (evoChain != null)
                 {
@@ -47,10 +49,7 @@ namespace Roki.Modules.Searches
                     foreach (var evo in evoChain.Chain.EvolvesTo)
                     {
                         evostr += evo.Species.Name.ToTitleCase() + "\n";
-                        if (evo.EvolvesTo != null)
-                        {
-                            evostr += evo.EvolvesTo.Select(e => e.Species.Name) + "\n";
-                        }
+                        if (evo.EvolvesTo != null) evostr += evo.EvolvesTo.Select(e => e.Species.Name) + "\n";
                     }
 
                     embed.AddField("Evolution", evostr, true);

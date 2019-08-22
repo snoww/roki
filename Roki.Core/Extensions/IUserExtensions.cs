@@ -1,5 +1,5 @@
-﻿using Discord;
-using System;
+﻿using System;
+using Discord;
 
 namespace Roki.Extensions
 {
@@ -15,8 +15,7 @@ namespace Roki.Extensions
                 ? null
                 : new Uri(usr.AvatarId.StartsWith("a_", StringComparison.InvariantCulture)
                     ? $"{DiscordConfig.CDNUrl}avatars/{usr.Id}/{usr.AvatarId}.gif" + append
-                    : usr.GetAvatarUrl(ImageFormat.Auto) + append);
+                    : usr.GetAvatarUrl() + append);
         }
-
     }
 }

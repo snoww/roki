@@ -10,7 +10,9 @@ namespace Roki.Core.Services.Database.Repositories.Impl
 {
     public class QuoteRepository : Repository<Quote>, IQuoteRepository
     {
-        public QuoteRepository(DbContext context) : base(context) {  }
+        public QuoteRepository(DbContext context) : base(context)
+        {
+        }
 
         public Task<Quote> GetRandomQuoteByKeywordAsync(ulong guildId, string keyword)
         {
@@ -32,9 +34,7 @@ namespace Roki.Core.Services.Database.Repositories.Impl
             if (order == OrderType.Keyword)
                 q.OrderBy(x => x.Keyword);
             else
-            {
                 q = q.OrderBy(x => x.Id);
-            }
 
             return q.Skip(15 * page).Take(15).ToArray();
         }

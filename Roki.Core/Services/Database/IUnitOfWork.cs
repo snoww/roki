@@ -7,7 +7,7 @@ namespace Roki.Core.Services.Database
     public interface IUnitOfWork : IDisposable
     {
         RokiContext Context { get; }
-        
+
         IQuoteRepository Quotes { get; }
 
         int SaveChanges();

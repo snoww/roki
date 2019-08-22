@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -11,25 +10,25 @@ namespace Roki.Modules
 {
     public abstract class RokiTopLevelModule : ModuleBase
     {
+        public string Prefix = ".";
+
+        protected RokiTopLevelModule(bool isTopLevelModule = true)
+        {
+            ModuleTypeName = isTopLevelModule ? GetType().Name : GetType().DeclaringType.Name;
+            LowerModuleTypeName = ModuleTypeName.ToLowerInvariant();
+            _log = LogManager.GetCurrentClassLogger();
+        }
+
         protected Logger _log { get; }
 
         public string ModuleTypeName { get; }
         public string LowerModuleTypeName { get; }
 
         public CommandHandler Handler { get; }
-
-        public string Prefix = ".";
 //        public string Prefix => Handler.DefaultPrefix;
 
         protected ICommandContext ctx => Context;
 
-        protected RokiTopLevelModule(bool isTopLevelModule = true)
-        {
-            ModuleTypeName = isTopLevelModule ? this.GetType().Name : this.GetType().DeclaringType.Name;
-            LowerModuleTypeName = ModuleTypeName.ToLowerInvariant();
-            _log = LogManager.GetCurrentClassLogger();
-        }
-        
 
         public async Task<bool> PromptUserConfirmAsync(EmbedBuilder embed)
         {
@@ -42,10 +41,7 @@ namespace Roki.Modules
                 var input = await GetUserInputAsync(ctx.User.Id, ctx.Channel.Id).ConfigureAwait(false);
                 input = input?.ToUpperInvariant();
 
-                if (input != "YES" && input != "Y")
-                {
-                    return false;
-                }
+                if (input != "YES" && input != "Y") return false;
 
                 return true;
             }
@@ -62,10 +58,7 @@ namespace Roki.Modules
             try
             {
                 client.MessageReceived += MessageRecieved;
-                if ((await Task.WhenAny(userInputTask.Task, Task.Delay(10000)).ConfigureAwait(false) != userInputTask.Task))
-                {
-                    return null;
-                }
+                if (await Task.WhenAny(userInputTask.Task, Task.Delay(10000)).ConfigureAwait(false) != userInputTask.Task) return null;
 
                 return await userInputTask.Task.ConfigureAwait(false);
             }
@@ -78,15 +71,10 @@ namespace Roki.Modules
             {
                 var _ = Task.Run(() =>
                 {
-                    if (!(arg is SocketUserMessage userMessage) || !(userMessage.Channel is ITextChannel channel) || userMessage.Author.Id != userId || userMessage.Channel.Id != channelId)
-                    {
-                        return Task.CompletedTask;
-                    }
+                    if (!(arg is SocketUserMessage userMessage) || !(userMessage.Channel is ITextChannel channel) ||
+                        userMessage.Author.Id != userId || userMessage.Channel.Id != channelId) return Task.CompletedTask;
 
-                    if (userInputTask.TrySetResult(arg.Content))
-                    {
-                        userMessage.DeleteAfter(1);
-                    }
+                    if (userInputTask.TrySetResult(arg.Content)) userMessage.DeleteAfter(1);
 
                     return Task.CompletedTask;
                 });
@@ -97,18 +85,24 @@ namespace Roki.Modules
 
     public abstract class RokiTopLevelModule<TService> : RokiTopLevelModule where TService : INService
     {
+        protected RokiTopLevelModule(bool isTopLevel = true) : base(isTopLevel)
+        {
+        }
+
         public TService _service { get; set; }
-        protected RokiTopLevelModule(bool isTopLevel = true) : base(isTopLevel) { }
     }
 
     public abstract class RokiSubmodule : RokiTopLevelModule
     {
-        protected RokiSubmodule() : base(false) { }
+        protected RokiSubmodule() : base(false)
+        {
+        }
     }
 
     public abstract class RokiSubmodule<TService> : RokiTopLevelModule<TService> where TService : INService
     {
-        protected RokiSubmodule() : base(false) { }
+        protected RokiSubmodule() : base(false)
+        {
+        }
     }
-    
 }

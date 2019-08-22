@@ -7,19 +7,25 @@ namespace Roki.Core.Services.Database
 {
     public sealed class UnitOfWork : IUnitOfWork
     {
-        public RokiContext Context { get; }
-
         private IQuoteRepository _quotes;
-        public IQuoteRepository Quotes => _quotes ?? (_quotes = new QuoteRepository(Context));
 
         public UnitOfWork(RokiContext context)
         {
             Context = context;
         }
 
-        public int SaveChanges() => Context.SaveChanges();
+        public RokiContext Context { get; }
+        public IQuoteRepository Quotes => _quotes ?? (_quotes = new QuoteRepository(Context));
 
-        public Task<int> SaveChangesAsync() => Context.SaveChangesAsync();
+        public int SaveChanges()
+        {
+            return Context.SaveChanges();
+        }
+
+        public Task<int> SaveChangesAsync()
+        {
+            return Context.SaveChangesAsync();
+        }
 
         public void Dispose()
         {

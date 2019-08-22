@@ -17,5 +17,4 @@ namespace Roki.Core.Services
         string GetUptimeString(string separator = ", ");
         void Initialize();
     }
-
 }

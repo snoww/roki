@@ -22,9 +22,7 @@ namespace Roki.Modules.Utility
                 _db = db;
             }
 
-            [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
-            [Priority(0)]
+            [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild), Priority(0)]
             public async Task ListQuotes(int page = 1, OrderType order = OrderType.Keyword)
             {
                 page -= 1;
@@ -45,8 +43,7 @@ namespace Roki.Modules.Utility
                     await ctx.Channel.SendErrorAsync("No quotes found on that page.").ConfigureAwait(false);
             }
 
-            [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
+            [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
             public async Task ShowQuote([Leftover] string keyword)
             {
                 if (string.IsNullOrWhiteSpace(keyword))
@@ -59,15 +56,14 @@ namespace Roki.Modules.Utility
                 {
                     quote = await uow.Quotes.GetRandomQuoteByKeywordAsync(ctx.Guild.Id, keyword);
                 }
-                
+
                 if (quote == null)
                     return;
                 // TODO make quotes look better
                 await ctx.Channel.SendMessageAsync($"`#{quote.Id}` 📣 " + quote.Text).ConfigureAwait(false);
             }
 
-            [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
+            [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
             public async Task AddQuote(string keyword, [Leftover] string text)
             {
                 if (string.IsNullOrWhiteSpace(keyword) || string.IsNullOrWhiteSpace(text))
@@ -83,7 +79,7 @@ namespace Roki.Modules.Utility
                         AuthorName = ctx.Message.Author.Username,
                         GuildId = ctx.Guild.Id,
                         Keyword = keyword,
-                        Text = text,
+                        Text = text
                     });
                     await uow.SaveChangesAsync();
                 }
@@ -91,8 +87,7 @@ namespace Roki.Modules.Utility
                 await ctx.Channel.SendMessageAsync("Quote added.");
             }
 
-            [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
+            [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
             public async Task QuoteDelete(int id)
             {
                 var isAdmin = ((IGuildUser) ctx.Message.Author).GuildPermissions.Administrator;
@@ -122,8 +117,7 @@ namespace Roki.Modules.Utility
                     await ctx.Channel.SendErrorAsync(response).ConfigureAwait(false);
             }
 
-            [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
+            [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
             public async Task QuoteSearch(string keyword, [Leftover] string text)
             {
                 if (string.IsNullOrWhiteSpace(keyword) || string.IsNullOrWhiteSpace(text))
@@ -136,15 +130,14 @@ namespace Roki.Modules.Utility
                 {
                     quote = await uow.Quotes.SearchQuoteKeywordTextAsync(ctx.Guild.Id, keyword, text);
                 }
-                
+
                 if (quote == null)
                     return;
 
                 await ctx.Channel.SendMessageAsync($"`#{quote.Id}` 💬 " + keyword.ToLowerInvariant() + ": " + quote.Text).ConfigureAwait(false);
             }
 
-            [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
+            [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
             public async Task QuoteId(int id)
             {
                 if (id < 0)
@@ -169,5 +162,4 @@ namespace Roki.Modules.Utility
             }
         }
     }
-    
 }

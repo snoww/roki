@@ -10,9 +10,9 @@ namespace Roki.Core.Services
         string GoogleApi { get; }
 
         ImmutableArray<ulong> OwnerIds { get; }
-        
+
         DbConfig Db { get; }
-        
+
         bool IsOwner(IUser u);
     }
 
@@ -30,14 +30,13 @@ namespace Roki.Core.Services
 
     public class DbConfig
     {
-        public string Type { get; }
-        public string ConnectionString { get; }
-        
         public DbConfig(string type, string connectionString)
         {
-            this.Type = type;
-            this.ConnectionString = connectionString;
+            Type = type;
+            ConnectionString = connectionString;
         }
-        
+
+        public string Type { get; }
+        public string ConnectionString { get; }
     }
 }

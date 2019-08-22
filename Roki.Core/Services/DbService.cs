@@ -1,6 +1,4 @@
-using System;
 using System.IO;
-using System.Linq;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Roki.Core.Services.Database;
@@ -15,11 +13,11 @@ namespace Roki.Core.Services
         {
             var builder = new SqliteConnectionStringBuilder(config.Db.ConnectionString);
             builder.DataSource = Path.Combine(Directory.GetCurrentDirectory(), builder.DataSource);
-            
+
             var optionsBuilder = new DbContextOptionsBuilder<RokiContext>();
             optionsBuilder.UseSqlite(builder.ToString());
             _options = optionsBuilder.Options;
-            
+
             optionsBuilder = new DbContextOptionsBuilder<RokiContext>();
             optionsBuilder.UseSqlite(builder.ToString(), x => x.SuppressForeignKeyEnforcement());
         }
@@ -47,7 +45,10 @@ namespace Roki.Core.Services
 
             return context;
         }
-        
-        public IUnitOfWork GetDbContext() => new UnitOfWork(GetDbContextInternal());
+
+        public IUnitOfWork GetDbContext()
+        {
+            return new UnitOfWork(GetDbContextInternal());
+        }
     }
 }

@@ -7,60 +7,59 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
-using Roki.Extensions;
 using Roki.Core.Services;
 using Roki.Core.Services.Impl;
+using Roki.Extensions;
 
 namespace Roki
 {
     public class Roki
     {
-        private Logger _log;
-        
-        public Configuration Config { get; }
-        public DiscordSocketClient Client { get; }
-        public CommandService CommandService { get; }
-
         private readonly DbService _db;
-        
-        public static Color OkColor { get; set; }
-        public static Color ErrorColor { get; set; }
+        private readonly Logger _log;
 
-        
-        public TaskCompletionSource<bool> Ready { get; private set; } = new TaskCompletionSource<bool>();
-        public IServiceProvider Services { get; private set; }
         public Roki()
         {
             LogSetup.SetupLogger();
             _log = LogManager.GetCurrentClassLogger();
-         // TODO elevated permission check?
-         
-            
+            // TODO elevated permission check?
+
+
             Config = new Configuration();
             _db = new DbService(Config);
             _db.Setup();
-            
+
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 MessageCacheSize = 500,
                 LogLevel = LogSeverity.Warning,
-                ConnectionTimeout = int.MaxValue,
+                ConnectionTimeout = int.MaxValue
             });
             CommandService = new CommandService(new CommandServiceConfig
             {
                 CaseSensitiveCommands = false,
                 DefaultRunMode = RunMode.Async
             });
-            
+
             OkColor = Color.DarkGreen;
             ErrorColor = Color.Red;
-            
+
             Client.Log += ClientLog;
         }
-        
+
+        public Configuration Config { get; }
+        public DiscordSocketClient Client { get; }
+        public CommandService CommandService { get; }
+
+        public static Color OkColor { get; set; }
+        public static Color ErrorColor { get; set; }
+
+
+        public TaskCompletionSource<bool> Ready { get; } = new TaskCompletionSource<bool>();
+        public IServiceProvider Services { get; private set; }
+
         private Task ClientLog(LogMessage arg)
         {
             _log.Warn(arg.Source + " | " + arg.Message);
@@ -70,7 +69,7 @@ namespace Roki
             return Task.CompletedTask;
         }
 
-        
+
         private List<ulong> GetCurrentGuildIds()
         {
             return Client.Guilds.Select(x => x.Id).ToList();
@@ -82,7 +81,7 @@ namespace Roki
             var sw = Stopwatch.StartNew();
 
 //            var _bot = Client.CurrentUser;
-            
+
             var service = new ServiceCollection()
                 .AddSingleton<IConfiguration>(Config)
                 .AddSingleton(_db)
@@ -99,11 +98,11 @@ namespace Roki
             var commandHandler = Services.GetService<CommandHandler>();
             commandHandler.AddServices(service);
             LoadTypeReaders(typeof(Roki).Assembly);
-            
+
             sw.Stop();
             _log.Info($"All services loaded in {sw.Elapsed.TotalSeconds:F2}s");
         }
-        
+
         private IEnumerable<object> LoadTypeReaders(Assembly assembly)
         {
             Type[] allTypes;
@@ -116,6 +115,7 @@ namespace Roki
                 _log.Warn(ex.LoaderExceptions[0]);
                 return Enumerable.Empty<object>();
             }
+
             var filteredTypes = allTypes
                 .Where(x => x.IsSubclassOf(typeof(TypeReader))
                             && x.BaseType.GetGenericArguments().Length > 0
@@ -136,6 +136,7 @@ namespace Roki
                     _log.Error(e);
                     throw;
                 }
+
                 toReturn.Add(x);
             }
 
@@ -153,7 +154,7 @@ namespace Roki
             var sw = Stopwatch.StartNew();
 
             await LoginAsync(Config.Token).ConfigureAwait(false);
-            
+
             _log.Info("Loading services");
             try
             {
@@ -175,7 +176,7 @@ namespace Roki
 
             await commandHandler.StartHandling().ConfigureAwait(false);
 
-            var _ = await commandService.AddModulesAsync(this.GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
+            var _ = await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
 
             Ready.TrySetResult(true);
             _log.Info("Roki is ready");
@@ -192,10 +193,8 @@ namespace Roki
                     clientReady.TrySetResult(true);
                     try
                     {
-                        foreach (var channel in (await Client.GetDMChannelsAsync().ConfigureAwait(false)))
-                        {
+                        foreach (var channel in await Client.GetDMChannelsAsync().ConfigureAwait(false))
                             await channel.CloseAsync().ConfigureAwait(false);
-                        }
                     }
                     catch
                     {
@@ -204,7 +203,7 @@ namespace Roki
                 });
                 return Task.CompletedTask;
             }
-            
+
             _log.Info("Logging in ...");
             await Client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
             await Client.StartAsync().ConfigureAwait(false);
@@ -215,7 +214,7 @@ namespace Roki
             Client.LeftGuild += Client_LeftGuild;
             _log.Info("Logged in as {0}", Client.CurrentUser);
         }
-        
+
         private Task Client_LeftGuild(SocketGuild arg)
         {
             _log.Info("Left server: {0} [{1}]", arg?.Name, arg?.Id);
@@ -227,6 +226,5 @@ namespace Roki
             _log.Info("Joined server: {0} [{1}]", arg?.Name, arg?.Id);
             return Task.CompletedTask;
         }
-
     }
 }

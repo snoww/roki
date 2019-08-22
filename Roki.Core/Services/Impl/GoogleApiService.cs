@@ -14,31 +14,31 @@ namespace Roki.Core.Services.Impl
     public class GoogleApiService : IGoogleApiService
     {
         private const string search_engine_id = "009851753967553605166:ffip6ctnuaq";
-        
+
         private readonly IConfiguration _config;
         private readonly IHttpClientFactory _httpFactory;
+        private readonly CustomsearchService cs;
 
-        private YouTubeService yt;
-        private CustomsearchService cs;
-        
-        private Logger _log { get; }
+        private readonly YouTubeService yt;
 
         public GoogleApiService(IConfiguration config, IHttpClientFactory httpFactory)
         {
             _config = config;
             _httpFactory = httpFactory;
-            
-            var baseClient = new BaseClientService.Initializer 
+
+            var baseClient = new BaseClientService.Initializer
             {
                 ApplicationName = "Roki",
-                ApiKey = _config.GoogleApi,
+                ApiKey = _config.GoogleApi
             };
 
             _log = LogManager.GetCurrentClassLogger();
-            
+
             yt = new YouTubeService(baseClient);
             cs = new CustomsearchService(baseClient);
         }
+
+        private Logger _log { get; }
 
         public async Task<IEnumerable<string>> GetVideoLinksByKeywordAsync(string keywords, int count = 1)
         {
@@ -66,7 +66,8 @@ namespace Roki.Core.Services.Impl
             query.MaxResults = count;
             query.Q = keywords;
             query.Type = "video";
-            return (await query.ExecuteAsync().ConfigureAwait(false)).Items.Select(i => (i.Snippet.Title.TrimTo(50), i.Id.VideoId, "http://www.youtube.com/watch?v=" + i.Id.VideoId));
+            return (await query.ExecuteAsync().ConfigureAwait(false)).Items.Select(i =>
+                (i.Snippet.Title.TrimTo(50), i.Id.VideoId, "http://www.youtube.com/watch?v=" + i.Id.VideoId));
         }
 
         public async Task<ImageResult> GetImagesAsync(string query, bool random = false)
@@ -74,7 +75,7 @@ namespace Roki.Core.Services.Impl
             await Task.Yield();
             if (string.IsNullOrWhiteSpace(query))
                 throw new ArgumentNullException(nameof(query));
-            
+
             var request = cs.Cse.List(query);
             var start = random ? new Random().Next(1, 10) : 1;
             request.Cx = search_engine_id;
@@ -82,7 +83,9 @@ namespace Roki.Core.Services.Impl
             request.SearchType = CseResource.ListRequest.SearchTypeEnum.Image;
             request.Start = start;
             var search = await request.ExecuteAsync().ConfigureAwait(false);
-            return random ? new ImageResult(search.Items[start].Image, search.Items[start].Link) : new ImageResult(search.Items[0].Image, search.Items[0].Link);
+            return random
+                ? new ImageResult(search.Items[start].Image, search.Items[start].Link)
+                : new ImageResult(search.Items[0].Image, search.Items[0].Link);
         }
     }
 }

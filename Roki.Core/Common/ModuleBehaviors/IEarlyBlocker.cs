@@ -5,7 +5,7 @@ using Discord.WebSocket;
 namespace Roki.Common.ModuleBehaviors
 {
     /// <summary>
-    /// Implemented by modules which block execution before anything is executed
+    ///     Implemented by modules which block execution before anything is executed
     /// </summary>
     public interface IEarlyBehavior
     {
@@ -18,6 +18,6 @@ namespace Roki.Common.ModuleBehaviors
     public enum ModuleBehaviorType
     {
         Blocker,
-        Executor,
+        Executor
     }
 }
