@@ -189,5 +189,12 @@
     "Usage": [
       "{0}nature jolly"
     ]
+  },
+  "item": {
+    "Command": "item",
+    "Description": "Returns the description of the specified item.",
+    "Usage": [
+      "{0}item master ball"
+    ]
   }
 }

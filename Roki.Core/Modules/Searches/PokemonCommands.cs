@@ -95,7 +95,7 @@ namespace Roki.Modules.Searches
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
                 try
                 {
-                    var move = _pokeClient.GetResourceAsync<Move>(query).Result;
+                    var move = await _pokeClient.GetResourceAsync<Move>(query).ConfigureAwait(false);
 
                     var embed = new EmbedBuilder().WithOkColor()
                         .WithTitle(move.Name.ToTitleCase().Replace('-', ' '))
@@ -131,7 +131,7 @@ namespace Roki.Modules.Searches
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
                 try
                 {
-                    var nature = await _pokeClient.GetResourceAsync<Nature>(query);
+                    var nature = await _pokeClient.GetResourceAsync<Nature>(query).ConfigureAwait(false);
                     
                     var embed = new EmbedBuilder().WithOkColor()
                         .WithTitle(nature.Name.ToTitleCase());
@@ -147,6 +147,33 @@ namespace Roki.Modules.Searches
                             .AddField("Decreased Stat", "—", true)
                             .AddField("Likes Flavor", "—", true)
                             .AddField("Hates Flavor", "—", true);
+                    
+                    await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                }
+                catch
+                {
+                    await ctx.Channel.SendErrorAsync("Nature not found.").ConfigureAwait(false);
+                }
+            }
+
+            public async Task Item([Leftover] string query)
+            {
+                if (string.IsNullOrWhiteSpace(query))
+                    return;
+                await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+                try
+                {
+                    var item = await _pokeClient.GetResourceAsync<Item>(query).ConfigureAwait(false);
+
+                    var embed = new EmbedBuilder().WithOkColor()
+                        .WithAuthor(item.Name.ToTitleCase().Replace('-', ' '))
+                        .WithDescription(item.EffectEntries[0].Effect)
+                        .WithThumbnailUrl(item.Sprites.Default)
+                        .AddField("Category", item.Category.Name.ToTitleCase().Replace('-', ' '), true)
+                        .AddField("Cost", item.Cost, true);
+                    if (item.FlingPower != null)
+                        embed.AddField("Fling Power", item.FlingPower, true);
+                    
                     await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 }
                 catch
