@@ -55,7 +55,7 @@ namespace Roki.Modules.Searches.Services
                     return url + pokemon + ".gif";
             }
 
-            return url + pokemon.Replace('-', '') + ".gif";
+            return url + pokemon.Replace("-", "") + ".gif";
         }
     }
 }
