@@ -28,6 +28,7 @@ namespace Roki.Modules.Searches
 
                 try
                 {
+                    // TODO pokemon with forms/varieties https://github.com/PokeAPI/pokeapi/issues/401#issuecomment-482921744
                     var pokemon = await _pokeClient.GetResourceAsync<Pokemon>(query).ConfigureAwait(false);
                     var species = await _pokeClient.GetResourceAsync(pokemon.Species).ConfigureAwait(false);
                     var evoChain = await _pokeClient.GetResourceAsync(species.EvolutionChain).ConfigureAwait(false);
@@ -36,7 +37,7 @@ namespace Roki.Modules.Searches
                         .WithColor(_service.GetColorOfPokemon(species.Color.Name))
                         .WithTitle($"#{pokemon.Id} {pokemon.Name.ToTitleCase()}")
                         .WithDescription($"{species.Genera[2].Genus}")
-                        .WithThumbnailUrl(pokemon.Sprites.FrontDefault)
+                        .WithThumbnailUrl(_service.GetPokemonSprite(pokemon.Name))
                         .AddField("Types", string.Join(", ", pokemon.Types.OrderBy(t => t.Slot).Select(t => t.Type.Name.ToTitleCase()).ToList()), true)
                         .AddField("Abilities", string.Join("\n", 
                             pokemon.Abilities.OrderBy(a => a.Slot).Select(a =>
