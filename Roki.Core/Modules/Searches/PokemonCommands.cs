@@ -138,10 +138,10 @@ namespace Roki.Modules.Searches
                     
                     // checks if nature is not neutral
                     if (nature.IncreasedStat != null)    
-                        embed.AddField("Increased Stat", nature.IncreasedStat.Name.ToTitleCase(), true)
-                        .AddField("Decreased Stat", nature.DecreasedStat.Name.ToTitleCase(), true)
-                        .AddField("Likes Flavor", nature.LikesFlavor.Name, true)
-                        .AddField("Hates Flavor", nature.HatesFlavor.Name, true);
+                        embed.AddField("Increased Stat", nature.IncreasedStat.Name.ToTitleCase().Replace('-', ' '), true)
+                        .AddField("Decreased Stat", nature.DecreasedStat.Name.ToTitleCase().Replace('-', ' '), true)
+                        .AddField("Likes Flavor", nature.LikesFlavor.Name.ToTitleCase(), true)
+                        .AddField("Hates Flavor", nature.HatesFlavor.Name.ToTitleCase(), true);
                     else
                         embed.AddField("Increased Stat", "—", true)
                             .AddField("Decreased Stat", "—", true)
