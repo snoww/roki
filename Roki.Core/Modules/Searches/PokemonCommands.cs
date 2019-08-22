@@ -178,7 +178,7 @@ namespace Roki.Modules.Searches
                 }
                 catch
                 {
-                    await ctx.Channel.SendErrorAsync("Nature not found.").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync("Item not found.").ConfigureAwait(false);
                 }
             }
         }
