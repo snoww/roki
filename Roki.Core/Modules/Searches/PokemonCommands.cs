@@ -46,28 +46,9 @@ namespace Roki.Modules.Searches
                                     return "*" + a.Ability.Name.ToTitleCase().Replace('-', ' ') + "*";
                                 return a.Ability.Name.ToTitleCase().Replace('-', ' ');
                             }).ToList()), true)
-                        .AddField("Base Stats", $"`HP: {pokemon.Stats[5].BaseStat}\n" +
-                                                $"Attack: {pokemon.Stats[4].BaseStat}\n" +
-                                                $"Defense: {pokemon.Stats[3].BaseStat}\n" +
-                                                $"Sp. Atk: {pokemon.Stats[2].BaseStat}\n" +
-                                                $"Sp. Def: {pokemon.Stats[1].BaseStat}\n" +
-                                                $"Speed: {pokemon.Stats[0].BaseStat}\n`", true);
-
-                    if (evoChain.Chain.EvolvesTo.Count > 0)
-                    {
-                        var evostr = "";
-                        evostr += evoChain.Chain.Species.Name.ToTitleCase() + "\n";
-                        foreach (var evo in evoChain.Chain.EvolvesTo)
-                        {
-                            evostr += evo.Species.Name.ToTitleCase() + "\n";
-                            if (evo.EvolvesTo.Count > 0)
-                            {
-                                evostr += string.Join("\n", evo.EvolvesTo.Select(e => e.Species.Name.ToTitleCase()).ToList());
-                            }
-                        }
-
-                        embed.AddField("Evolution", evostr, true);
-                    }
+                        .AddField("`Base Stats", $"HP: {pokemon.Stats[5].BaseStat} Attack: {pokemon.Stats[4].BaseStat} Defense: {pokemon.Stats[3].BaseStat} Sp. Atk: {pokemon.Stats[2].BaseStat} Sp. Def: {pokemon.Stats[1].BaseStat} Speed: {pokemon.Stats[0].BaseStat}`")
+                        .AddField("Height", $"{(double) pokemon.Height / 10} m", true)
+                        .AddField("Weight", $"{(double) pokemon.Weight / 10} kg", true);
                     
                     await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 }
