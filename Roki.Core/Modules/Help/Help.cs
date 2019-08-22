@@ -63,9 +63,9 @@ namespace Roki.Modules.Help
                 success = new HashSet<CommandInfo>((await Task.WhenAll(cmds.Select(async x =>
                     {
                         var pre = await x.CheckPreconditionsAsync(Context, _service).ConfigureAwait(false);
-                        return (Command: x, Succuss: pre.IsSuccess);
+                        return (Command: x, Success: pre.IsSuccess);
                     })).ConfigureAwait(false))
-                    .Where(x => x.Succuss)
+                    .Where(x => x.Success)
                     .Select(x => x.Command));
 
                 if (opts.View == CommandOptions.ViewType.Hide) cmds = cmds.Where(x => success.Contains(x));
