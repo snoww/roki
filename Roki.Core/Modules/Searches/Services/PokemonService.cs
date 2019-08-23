@@ -1,5 +1,8 @@
+using System.Linq;
 using Discord;
+using PokeApiNet.Models;
 using Roki.Core.Services;
+using Roki.Extensions;
 
 namespace Roki.Modules.Searches.Services
 {
@@ -56,6 +59,23 @@ namespace Roki.Modules.Searches.Services
             }
 
             return url + pokemon.Replace("-", "") + ".gif";
+        }
+
+        public string GetPokemonEvolutionChain(string pokemon, EvolutionChain evoChain)
+        {
+            // hardcode wurmple?
+            if (evoChain.Chain.EvolvesTo.Count < 1)
+                return "No Evolutions";
+            var evoStr = "";
+            evoStr += evoChain.Chain.Species.Name.ToTitleCase();
+            foreach (var evo in evoChain.Chain.EvolvesTo)
+            {
+                evoStr += " > " + evo.Species.Name.ToTitleCase();
+                if (evo.EvolvesTo.Count <= 0) continue;
+                evoStr += evo.EvolvesTo.Aggregate("", (current, evo1) => current + (" > " + evo1.Species.Name.ToTitleCase() + "\n"));
+            }
+            
+            return evoStr;
         }
     }
 }
