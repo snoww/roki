@@ -58,7 +58,7 @@ namespace Roki.Modules.Searches.Services
                     return url + pokemon + ".gif";
             }
 
-            return url + pokemon.Replace("-", "") + ".gif";
+            return pokemon.Contains("mega") ? url + pokemon + ".gif" : url + pokemon.Replace("-", "") + ".gif";
         }
 
         public string GetPokemonEvolutionChain(string pokemon, EvolutionChain evoChain)
