@@ -46,9 +46,10 @@ namespace Roki.Modules.Searches
                                     return "*" + a.Ability.Name.ToTitleCase().Replace('-', ' ') + "*";
                                 return a.Ability.Name.ToTitleCase().Replace('-', ' ');
                             }).ToList()), true)
-                        .AddField("`Base Stats", $"HP: {pokemon.Stats[5].BaseStat} Attack: {pokemon.Stats[4].BaseStat} Defense: {pokemon.Stats[3].BaseStat} Sp. Atk: {pokemon.Stats[2].BaseStat} Sp. Def: {pokemon.Stats[1].BaseStat} Speed: {pokemon.Stats[0].BaseStat}`")
+                        .AddField("Base Stats", $"`HP: {pokemon.Stats[5].BaseStat} Attack: {pokemon.Stats[4].BaseStat} Defense: {pokemon.Stats[3].BaseStat} Sp. Atk: {pokemon.Stats[2].BaseStat} Sp. Def: {pokemon.Stats[1].BaseStat} Speed: {pokemon.Stats[0].BaseStat}`")
                         .AddField("Height", $"{(double) pokemon.Height / 10} m", true)
-                        .AddField("Weight", $"{(double) pokemon.Weight / 10} kg", true);
+                        .AddField("Weight", $"{(double) pokemon.Weight / 10} kg", true)
+                        .AddField("Evolution", _service.GetPokemonEvolutionChain(pokemon.Name, evoChain));
                     
                     await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 }
