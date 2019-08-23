@@ -67,15 +67,25 @@ namespace Roki.Modules.Searches.Services
             if (evoChain.Chain.EvolvesTo.Count < 1)
                 return "No Evolutions";
             var evoStr = "";
-            evoStr += evoChain.Chain.Species.Name.ToTitleCase();
+            evoStr += pokemon == evoChain.Chain.Species.Name
+                ? $"**{evoChain.Chain.Species.Name.ToTitleCase()}** > "
+                : $"{evoChain.Chain.Species.Name.ToTitleCase()} > ";
+
             foreach (var evo in evoChain.Chain.EvolvesTo)
             {
-                evoStr += " > " + evo.Species.Name.ToTitleCase();
-                if (evo.EvolvesTo.Count <= 0) continue;
-                evoStr += evo.EvolvesTo.Aggregate("", (current, evo1) => current + (" > " + evo1.Species.Name.ToTitleCase() + "\n"));
+                evoStr += pokemon == evo.Species.Name
+                    ? $"**{evo.Species.Name.ToTitleCase()}**"
+                    : $"{evo.Species.Name.ToTitleCase()}";
+                if (evo.EvolvesTo.Count <= 0)
+                {
+                    evoStr += ", "; 
+                    continue;
+                }
+
+                evoStr += evo.EvolvesTo.Aggregate("", (current, link) => current + (pokemon == link.Species.Name ? $" > **{link.Species.Name.ToTitleCase()}**, " : $" > {link.Species.Name.ToTitleCase()}"));
             }
             
-            return evoStr;
+            return evoStr.TrimEnd(',', ' ');
         }
     }
 }
