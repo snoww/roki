@@ -29,8 +29,19 @@ namespace Roki.Modules.Searches
 // save poke api data to json files?
                 try
                 {
-                    var data = _service.GetPokemonData(query);
-                    var pokemon = await _pokeClient.GetResourceAsync<Pokemon>(data.Api).ConfigureAwait(false);
+                    PokemonData data;
+                    Pokemon pokemon;
+                    if (int.TryParse(query, out var id))
+                    {
+                        pokemon = await _pokeClient.GetResourceAsync<Pokemon>(id).ConfigureAwait(false);
+                        data = _service.GetPokemonData(pokemon.Name);
+                    }
+                    else
+                    {
+                        data = _service.GetPokemonData(query);
+                        pokemon = await _pokeClient.GetResourceAsync<Pokemon>(data.Api).ConfigureAwait(false);
+                    }
+
                     var species = await _pokeClient.GetResourceAsync(pokemon.Species).ConfigureAwait(false);
                     var evoChain = await _pokeClient.GetResourceAsync(species.EvolutionChain).ConfigureAwait(false);
 
