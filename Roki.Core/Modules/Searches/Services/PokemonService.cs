@@ -12,7 +12,7 @@ namespace Roki.Modules.Searches.Services
 {
     public class PokemonService : INService
     {
-        private static readonly string data = File.ReadAllText("./_strings/pokemon/pokemon.json");
+        private static readonly Dictionary<string, PokemonData> Data = JsonConvert.DeserializeObject<Dictionary<string, PokemonData>>(File.ReadAllText("./_strings/pokemon/pokemon.json"));
         
         public Color GetColorOfPokemon(string color)
         {
@@ -45,15 +45,12 @@ namespace Roki.Modules.Searches.Services
 
         public PokemonData GetPokemonData(string query)
         {
-            var pokemonData = JsonConvert.DeserializeObject<Dictionary<string, PokemonData>>(data);
-            return pokemonData[query.Trim().Replace(' ', '-')];
+            return Data[query.Trim().Replace(' ', '-')];
         }
 
         public PokemonData GetPokemonById(int id)
         {
-            var pokemonData = JsonConvert.DeserializeObject<Dictionary<string, PokemonData>>(data);
-
-            return (from pokemon in pokemonData where pokemon.Value.Api == id select pokemonData[pokemon.ToString()]).FirstOrDefault();
+            return (from pokemon in Data where pokemon.Value.Api == id select Data[pokemon.ToString()]).FirstOrDefault();
         }
         
         public string GetPokemonEvolutionChain(string pokemon, EvolutionChain evoChain)
