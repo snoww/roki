@@ -50,13 +50,7 @@ namespace Roki.Modules.Searches.Services
 
         public PokemonData GetPokemonById(int id)
         {
-            foreach (var pokemon in Data)
-            {
-                if (pokemon.Value.Api == id)
-                    return Data[pokemon.Value.Name.ToLowerInvariant().Replace(' ', '-')];
-            }
-
-            return null;
+            return (from pokemon in Data where pokemon.Value.Api == id select Data[pokemon.Value.Name.ToLowerInvariant().Replace(' ', '-')]).FirstOrDefault();
         }
         
         public string GetPokemonEvolutionChain(string pokemon, EvolutionChain evoChain)
