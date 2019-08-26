@@ -1,5 +1,4 @@
-using System.IO;
-using System.Net;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Roki.Common.Attributes;
@@ -16,17 +15,23 @@ namespace Roki.Modules.Utility
             {
                 if (string.IsNullOrWhiteSpace(tex))
                     return;
-                var encode = tex.Trim();
-                tex = WebUtility.UrlEncode(encode);
+                var trim = tex.Trim();
 
-                var result = $"https://math.now.sh?from={tex}.png";
-                using (var client = new WebClient())
+                var proc = new Process()
                 {
-                    // make image bigger by converting from svg???
-                    client.DownloadFile(result, "tex.png");
-                    await ctx.Channel.SendFileAsync("tex.png");
-                    File.Delete("tex.png");
-                }
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "./Resources/tex2pic",
+                        Arguments = $"-r 150 -o tex.png \"{trim}\"",
+                        RedirectStandardOutput = false,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                    }
+                };
+                proc.Start();
+                proc.WaitForExit();
+
+                await ctx.Channel.SendFileAsync("tex.png").ConfigureAwait(false);
             }
         }
     }
