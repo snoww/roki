@@ -1,13 +1,18 @@
+using System.IO;
 using System.Linq;
 using Discord;
+using Newtonsoft.Json;
 using PokeApiNet.Models;
 using Roki.Core.Services;
 using Roki.Extensions;
+using Roki.Modules.Searches.Common;
 
 namespace Roki.Modules.Searches.Services
 {
     public class PokemonService : INService
     {
+        private static readonly PokemonModel PokemonData = JsonConvert.DeserializeObject<PokemonModel>(File.ReadAllText("./_strings/pokemon/pokemon.json"));
+        
         public Color GetColorOfPokemon(string color)
         {
             switch (color)
@@ -37,30 +42,11 @@ namespace Roki.Modules.Searches.Services
             }
         }
 
-        public string GetPokemonSprite(string pokemon)
+        public PokemonModel.PokemonData GetPokemonData(string query)
         {
-            var url = "https://play.pokemonshowdown.com/sprites/xyani/";
-            switch (pokemon)
-            {
-                case "deoxys-normal":
-                    return url + "deoxys.gif";
-                case "deoxys-attack":
-                    return url + pokemon + ".gif";
-                case "deoxys-speed":
-                    return url + pokemon + ".gif";
-                case "deoxys-defense":
-                    return url + pokemon + ".gif";
-                case "zygarde-10":
-                    return url + pokemon + ".gif";
-                case "zygarde-complete":
-                    return url + pokemon + ".gif";
-                case "necrozma-ultra":
-                    return url + pokemon + ".gif";
-            }
-
-            return pokemon.Contains("mega") ? url + pokemon + ".gif" : url + pokemon.Replace("-", "") + ".gif";
+            return PokemonData.Pokemon[query];
         }
-
+        
         public string GetPokemonEvolutionChain(string pokemon, EvolutionChain evoChain)
         {
             // hardcode wurmple?
