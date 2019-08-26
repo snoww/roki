@@ -1,12 +1,13 @@
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Newtonsoft.Json;
 using PokeApiNet;
 using PokeApiNet.Models;
 using Roki.Common.Attributes;
 using Roki.Extensions;
+using Roki.Modules.Searches.Common;
 using Roki.Modules.Searches.Services;
 
 namespace Roki.Modules.Searches
@@ -25,19 +26,19 @@ namespace Roki.Modules.Searches
                     return;
 
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
-
+// save poke api data to json files?
                 try
                 {
-                    // TODO pokemon with forms/varieties https://github.com/PokeAPI/pokeapi/issues/401#issuecomment-482921744
-                    var pokemon = await _pokeClient.GetResourceAsync<Pokemon>(query).ConfigureAwait(false);
+                    var data = _service.GetPokemonData(query);
+                    var pokemon = await _pokeClient.GetResourceAsync<Pokemon>(data.Api).ConfigureAwait(false);
                     var species = await _pokeClient.GetResourceAsync(pokemon.Species).ConfigureAwait(false);
                     var evoChain = await _pokeClient.GetResourceAsync(species.EvolutionChain).ConfigureAwait(false);
 
                     var embed = new EmbedBuilder()
                         .WithColor(_service.GetColorOfPokemon(species.Color.Name))
-                        .WithTitle($"#{pokemon.Id} {pokemon.Name.ToTitleCase()}")
+                        .WithTitle($"#{pokemon.Id} {data.Name}")
                         .WithDescription($"{species.Genera[2].Genus}")
-                        .WithThumbnailUrl(_service.GetPokemonSprite(pokemon.Name))
+                        .WithThumbnailUrl("https://play.pokemonshowdown.com/sprites/xyani/" + data.Sprite)
                         .AddField("Types", string.Join(", ", pokemon.Types.OrderBy(t => t.Slot).Select(t => t.Type.Name.ToTitleCase()).ToList()), true)
                         .AddField("Abilities", string.Join(", ", 
                             pokemon.Abilities.OrderBy(a => a.Slot).Select(a =>

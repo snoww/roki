@@ -1,0 +1,4817 @@
+{
+  "bulbasaur": {
+    "api": 1,
+    "sprite": "bulbasaur.gif",
+    "name": "Bulbasaur"
+  },
+  "ivysaur": {
+    "api": 2,
+    "sprite": "ivysaur.gif",
+    "name": "Ivysaur"
+  },
+  "venusaur": {
+    "api": 3,
+    "sprite": "venusaur.gif",
+    "name": "Venusaur"
+  },
+  "charmander": {
+    "api": 4,
+    "sprite": "charmander.gif",
+    "name": "Charmander"
+  },
+  "charmeleon": {
+    "api": 5,
+    "sprite": "charmeleon.gif",
+    "name": "Charmeleon"
+  },
+  "charizard": {
+    "api": 6,
+    "sprite": "charizard.gif",
+    "name": "Charizard"
+  },
+  "squirtle": {
+    "api": 7,
+    "sprite": "squirtle.gif",
+    "name": "Squirtle"
+  },
+  "wartortle": {
+    "api": 8,
+    "sprite": "wartortle.gif",
+    "name": "Wartortle"
+  },
+  "blastoise": {
+    "api": 9,
+    "sprite": "blastoise.gif",
+    "name": "Blastoise"
+  },
+  "caterpie": {
+    "api": 10,
+    "sprite": "caterpie.gif",
+    "name": "Caterpie"
+  },
+  "metapod": {
+    "api": 11,
+    "sprite": "metapod.gif",
+    "name": "Metapod"
+  },
+  "butterfree": {
+    "api": 12,
+    "sprite": "butterfree.gif",
+    "name": "Butterfree"
+  },
+  "weedle": {
+    "api": 13,
+    "sprite": "weedle.gif",
+    "name": "Weedle"
+  },
+  "kakuna": {
+    "api": 14,
+    "sprite": "kakuna.gif",
+    "name": "Kakuna"
+  },
+  "beedrill": {
+    "api": 15,
+    "sprite": "beedrill.gif",
+    "name": "Beedrill"
+  },
+  "pidgey": {
+    "api": 16,
+    "sprite": "pidgey.gif",
+    "name": "Pidgey"
+  },
+  "pidgeotto": {
+    "api": 17,
+    "sprite": "pidgeotto.gif",
+    "name": "Pidgeotto"
+  },
+  "pidgeot": {
+    "api": 18,
+    "sprite": "pidgeot.gif",
+    "name": "Pidgeot"
+  },
+  "rattata": {
+    "api": 19,
+    "sprite": "rattata.gif",
+    "name": "Rattata"
+  },
+  "raticate": {
+    "api": 20,
+    "sprite": "raticate.gif",
+    "name": "Raticate"
+  },
+  "spearow": {
+    "api": 21,
+    "sprite": "spearow.gif",
+    "name": "Spearow"
+  },
+  "fearow": {
+    "api": 22,
+    "sprite": "fearow.gif",
+    "name": "Fearow"
+  },
+  "ekans": {
+    "api": 23,
+    "sprite": "ekans.gif",
+    "name": "Ekans"
+  },
+  "arbok": {
+    "api": 24,
+    "sprite": "arbok.gif",
+    "name": "Arbok"
+  },
+  "pikachu": {
+    "api": 25,
+    "sprite": "pikachu.gif",
+    "name": "Pikachu"
+  },
+  "raichu": {
+    "api": 26,
+    "sprite": "raichu.gif",
+    "name": "Raichu"
+  },
+  "sandshrew": {
+    "api": 27,
+    "sprite": "sandshrew.gif",
+    "name": "Sandshrew"
+  },
+  "sandslash": {
+    "api": 28,
+    "sprite": "sandslash.gif",
+    "name": "Sandslash"
+  },
+  "nidoran♀": {
+    "api": 29,
+    "sprite": "nidoran♀.gif",
+    "name": "Nidoran♀"
+  },
+  "nidorina": {
+    "api": 30,
+    "sprite": "nidorina.gif",
+    "name": "Nidorina"
+  },
+  "nidoqueen": {
+    "api": 31,
+    "sprite": "nidoqueen.gif",
+    "name": "Nidoqueen"
+  },
+  "nidoran♂": {
+    "api": 32,
+    "sprite": "nidoran♂.gif",
+    "name": "Nidoran♂"
+  },
+  "nidorino": {
+    "api": 33,
+    "sprite": "nidorino.gif",
+    "name": "Nidorino"
+  },
+  "nidoking": {
+    "api": 34,
+    "sprite": "nidoking.gif",
+    "name": "Nidoking"
+  },
+  "clefairy": {
+    "api": 35,
+    "sprite": "clefairy.gif",
+    "name": "Clefairy"
+  },
+  "clefable": {
+    "api": 36,
+    "sprite": "clefable.gif",
+    "name": "Clefable"
+  },
+  "vulpix": {
+    "api": 37,
+    "sprite": "vulpix.gif",
+    "name": "Vulpix"
+  },
+  "ninetales": {
+    "api": 38,
+    "sprite": "ninetales.gif",
+    "name": "Ninetales"
+  },
+  "jigglypuff": {
+    "api": 39,
+    "sprite": "jigglypuff.gif",
+    "name": "Jigglypuff"
+  },
+  "wigglytuff": {
+    "api": 40,
+    "sprite": "wigglytuff.gif",
+    "name": "Wigglytuff"
+  },
+  "zubat": {
+    "api": 41,
+    "sprite": "zubat.gif",
+    "name": "Zubat"
+  },
+  "golbat": {
+    "api": 42,
+    "sprite": "golbat.gif",
+    "name": "Golbat"
+  },
+  "oddish": {
+    "api": 43,
+    "sprite": "oddish.gif",
+    "name": "Oddish"
+  },
+  "gloom": {
+    "api": 44,
+    "sprite": "gloom.gif",
+    "name": "Gloom"
+  },
+  "vileplume": {
+    "api": 45,
+    "sprite": "vileplume.gif",
+    "name": "Vileplume"
+  },
+  "paras": {
+    "api": 46,
+    "sprite": "paras.gif",
+    "name": "Paras"
+  },
+  "parasect": {
+    "api": 47,
+    "sprite": "parasect.gif",
+    "name": "Parasect"
+  },
+  "venonat": {
+    "api": 48,
+    "sprite": "venonat.gif",
+    "name": "Venonat"
+  },
+  "venomoth": {
+    "api": 49,
+    "sprite": "venomoth.gif",
+    "name": "Venomoth"
+  },
+  "diglett": {
+    "api": 50,
+    "sprite": "diglett.gif",
+    "name": "Diglett"
+  },
+  "dugtrio": {
+    "api": 51,
+    "sprite": "dugtrio.gif",
+    "name": "Dugtrio"
+  },
+  "meowth": {
+    "api": 52,
+    "sprite": "meowth.gif",
+    "name": "Meowth"
+  },
+  "persian": {
+    "api": 53,
+    "sprite": "persian.gif",
+    "name": "Persian"
+  },
+  "psyduck": {
+    "api": 54,
+    "sprite": "psyduck.gif",
+    "name": "Psyduck"
+  },
+  "golduck": {
+    "api": 55,
+    "sprite": "golduck.gif",
+    "name": "Golduck"
+  },
+  "mankey": {
+    "api": 56,
+    "sprite": "mankey.gif",
+    "name": "Mankey"
+  },
+  "primeape": {
+    "api": 57,
+    "sprite": "primeape.gif",
+    "name": "Primeape"
+  },
+  "growlithe": {
+    "api": 58,
+    "sprite": "growlithe.gif",
+    "name": "Growlithe"
+  },
+  "arcanine": {
+    "api": 59,
+    "sprite": "arcanine.gif",
+    "name": "Arcanine"
+  },
+  "poliwag": {
+    "api": 60,
+    "sprite": "poliwag.gif",
+    "name": "Poliwag"
+  },
+  "poliwhirl": {
+    "api": 61,
+    "sprite": "poliwhirl.gif",
+    "name": "Poliwhirl"
+  },
+  "poliwrath": {
+    "api": 62,
+    "sprite": "poliwrath.gif",
+    "name": "Poliwrath"
+  },
+  "abra": {
+    "api": 63,
+    "sprite": "abra.gif",
+    "name": "Abra"
+  },
+  "kadabra": {
+    "api": 64,
+    "sprite": "kadabra.gif",
+    "name": "Kadabra"
+  },
+  "alakazam": {
+    "api": 65,
+    "sprite": "alakazam.gif",
+    "name": "Alakazam"
+  },
+  "machop": {
+    "api": 66,
+    "sprite": "machop.gif",
+    "name": "Machop"
+  },
+  "machoke": {
+    "api": 67,
+    "sprite": "machoke.gif",
+    "name": "Machoke"
+  },
+  "machamp": {
+    "api": 68,
+    "sprite": "machamp.gif",
+    "name": "Machamp"
+  },
+  "bellsprout": {
+    "api": 69,
+    "sprite": "bellsprout.gif",
+    "name": "Bellsprout"
+  },
+  "weepinbell": {
+    "api": 70,
+    "sprite": "weepinbell.gif",
+    "name": "Weepinbell"
+  },
+  "victreebel": {
+    "api": 71,
+    "sprite": "victreebel.gif",
+    "name": "Victreebel"
+  },
+  "tentacool": {
+    "api": 72,
+    "sprite": "tentacool.gif",
+    "name": "Tentacool"
+  },
+  "tentacruel": {
+    "api": 73,
+    "sprite": "tentacruel.gif",
+    "name": "Tentacruel"
+  },
+  "geodude": {
+    "api": 74,
+    "sprite": "geodude.gif",
+    "name": "Geodude"
+  },
+  "graveler": {
+    "api": 75,
+    "sprite": "graveler.gif",
+    "name": "Graveler"
+  },
+  "golem": {
+    "api": 76,
+    "sprite": "golem.gif",
+    "name": "Golem"
+  },
+  "ponyta": {
+    "api": 77,
+    "sprite": "ponyta.gif",
+    "name": "Ponyta"
+  },
+  "rapidash": {
+    "api": 78,
+    "sprite": "rapidash.gif",
+    "name": "Rapidash"
+  },
+  "slowpoke": {
+    "api": 79,
+    "sprite": "slowpoke.gif",
+    "name": "Slowpoke"
+  },
+  "slowbro": {
+    "api": 80,
+    "sprite": "slowbro.gif",
+    "name": "Slowbro"
+  },
+  "magnemite": {
+    "api": 81,
+    "sprite": "magnemite.gif",
+    "name": "Magnemite"
+  },
+  "magneton": {
+    "api": 82,
+    "sprite": "magneton.gif",
+    "name": "Magneton"
+  },
+  "farfetch’d": {
+    "api": 83,
+    "sprite": "farfetch’d.gif",
+    "name": "Farfetch’d"
+  },
+  "doduo": {
+    "api": 84,
+    "sprite": "doduo.gif",
+    "name": "Doduo"
+  },
+  "dodrio": {
+    "api": 85,
+    "sprite": "dodrio.gif",
+    "name": "Dodrio"
+  },
+  "seel": {
+    "api": 86,
+    "sprite": "seel.gif",
+    "name": "Seel"
+  },
+  "dewgong": {
+    "api": 87,
+    "sprite": "dewgong.gif",
+    "name": "Dewgong"
+  },
+  "grimer": {
+    "api": 88,
+    "sprite": "grimer.gif",
+    "name": "Grimer"
+  },
+  "muk": {
+    "api": 89,
+    "sprite": "muk.gif",
+    "name": "Muk"
+  },
+  "shellder": {
+    "api": 90,
+    "sprite": "shellder.gif",
+    "name": "Shellder"
+  },
+  "cloyster": {
+    "api": 91,
+    "sprite": "cloyster.gif",
+    "name": "Cloyster"
+  },
+  "gastly": {
+    "api": 92,
+    "sprite": "gastly.gif",
+    "name": "Gastly"
+  },
+  "haunter": {
+    "api": 93,
+    "sprite": "haunter.gif",
+    "name": "Haunter"
+  },
+  "gengar": {
+    "api": 94,
+    "sprite": "gengar.gif",
+    "name": "Gengar"
+  },
+  "onix": {
+    "api": 95,
+    "sprite": "onix.gif",
+    "name": "Onix"
+  },
+  "drowzee": {
+    "api": 96,
+    "sprite": "drowzee.gif",
+    "name": "Drowzee"
+  },
+  "hypno": {
+    "api": 97,
+    "sprite": "hypno.gif",
+    "name": "Hypno"
+  },
+  "krabby": {
+    "api": 98,
+    "sprite": "krabby.gif",
+    "name": "Krabby"
+  },
+  "kingler": {
+    "api": 99,
+    "sprite": "kingler.gif",
+    "name": "Kingler"
+  },
+  "voltorb": {
+    "api": 100,
+    "sprite": "voltorb.gif",
+    "name": "Voltorb"
+  },
+  "electrode": {
+    "api": 101,
+    "sprite": "electrode.gif",
+    "name": "Electrode"
+  },
+  "exeggcute": {
+    "api": 102,
+    "sprite": "exeggcute.gif",
+    "name": "Exeggcute"
+  },
+  "exeggutor": {
+    "api": 103,
+    "sprite": "exeggutor.gif",
+    "name": "Exeggutor"
+  },
+  "cubone": {
+    "api": 104,
+    "sprite": "cubone.gif",
+    "name": "Cubone"
+  },
+  "marowak": {
+    "api": 105,
+    "sprite": "marowak.gif",
+    "name": "Marowak"
+  },
+  "hitmonlee": {
+    "api": 106,
+    "sprite": "hitmonlee.gif",
+    "name": "Hitmonlee"
+  },
+  "hitmonchan": {
+    "api": 107,
+    "sprite": "hitmonchan.gif",
+    "name": "Hitmonchan"
+  },
+  "lickitung": {
+    "api": 108,
+    "sprite": "lickitung.gif",
+    "name": "Lickitung"
+  },
+  "koffing": {
+    "api": 109,
+    "sprite": "koffing.gif",
+    "name": "Koffing"
+  },
+  "weezing": {
+    "api": 110,
+    "sprite": "weezing.gif",
+    "name": "Weezing"
+  },
+  "rhyhorn": {
+    "api": 111,
+    "sprite": "rhyhorn.gif",
+    "name": "Rhyhorn"
+  },
+  "rhydon": {
+    "api": 112,
+    "sprite": "rhydon.gif",
+    "name": "Rhydon"
+  },
+  "chansey": {
+    "api": 113,
+    "sprite": "chansey.gif",
+    "name": "Chansey"
+  },
+  "tangela": {
+    "api": 114,
+    "sprite": "tangela.gif",
+    "name": "Tangela"
+  },
+  "kangaskhan": {
+    "api": 115,
+    "sprite": "kangaskhan.gif",
+    "name": "Kangaskhan"
+  },
+  "horsea": {
+    "api": 116,
+    "sprite": "horsea.gif",
+    "name": "Horsea"
+  },
+  "seadra": {
+    "api": 117,
+    "sprite": "seadra.gif",
+    "name": "Seadra"
+  },
+  "goldeen": {
+    "api": 118,
+    "sprite": "goldeen.gif",
+    "name": "Goldeen"
+  },
+  "seaking": {
+    "api": 119,
+    "sprite": "seaking.gif",
+    "name": "Seaking"
+  },
+  "staryu": {
+    "api": 120,
+    "sprite": "staryu.gif",
+    "name": "Staryu"
+  },
+  "starmie": {
+    "api": 121,
+    "sprite": "starmie.gif",
+    "name": "Starmie"
+  },
+  "mr. mime": {
+    "api": 122,
+    "sprite": "mr. mime.gif",
+    "name": "Mr. mime"
+  },
+  "scyther": {
+    "api": 123,
+    "sprite": "scyther.gif",
+    "name": "Scyther"
+  },
+  "jynx": {
+    "api": 124,
+    "sprite": "jynx.gif",
+    "name": "Jynx"
+  },
+  "electabuzz": {
+    "api": 125,
+    "sprite": "electabuzz.gif",
+    "name": "Electabuzz"
+  },
+  "magmar": {
+    "api": 126,
+    "sprite": "magmar.gif",
+    "name": "Magmar"
+  },
+  "pinsir": {
+    "api": 127,
+    "sprite": "pinsir.gif",
+    "name": "Pinsir"
+  },
+  "tauros": {
+    "api": 128,
+    "sprite": "tauros.gif",
+    "name": "Tauros"
+  },
+  "magikarp": {
+    "api": 129,
+    "sprite": "magikarp.gif",
+    "name": "Magikarp"
+  },
+  "gyarados": {
+    "api": 130,
+    "sprite": "gyarados.gif",
+    "name": "Gyarados"
+  },
+  "lapras": {
+    "api": 131,
+    "sprite": "lapras.gif",
+    "name": "Lapras"
+  },
+  "ditto": {
+    "api": 132,
+    "sprite": "ditto.gif",
+    "name": "Ditto"
+  },
+  "eevee": {
+    "api": 133,
+    "sprite": "eevee.gif",
+    "name": "Eevee"
+  },
+  "vaporeon": {
+    "api": 134,
+    "sprite": "vaporeon.gif",
+    "name": "Vaporeon"
+  },
+  "jolteon": {
+    "api": 135,
+    "sprite": "jolteon.gif",
+    "name": "Jolteon"
+  },
+  "flareon": {
+    "api": 136,
+    "sprite": "flareon.gif",
+    "name": "Flareon"
+  },
+  "porygon": {
+    "api": 137,
+    "sprite": "porygon.gif",
+    "name": "Porygon"
+  },
+  "omanyte": {
+    "api": 138,
+    "sprite": "omanyte.gif",
+    "name": "Omanyte"
+  },
+  "omastar": {
+    "api": 139,
+    "sprite": "omastar.gif",
+    "name": "Omastar"
+  },
+  "kabuto": {
+    "api": 140,
+    "sprite": "kabuto.gif",
+    "name": "Kabuto"
+  },
+  "kabutops": {
+    "api": 141,
+    "sprite": "kabutops.gif",
+    "name": "Kabutops"
+  },
+  "aerodactyl": {
+    "api": 142,
+    "sprite": "aerodactyl.gif",
+    "name": "Aerodactyl"
+  },
+  "snorlax": {
+    "api": 143,
+    "sprite": "snorlax.gif",
+    "name": "Snorlax"
+  },
+  "articuno": {
+    "api": 144,
+    "sprite": "articuno.gif",
+    "name": "Articuno"
+  },
+  "zapdos": {
+    "api": 145,
+    "sprite": "zapdos.gif",
+    "name": "Zapdos"
+  },
+  "moltres": {
+    "api": 146,
+    "sprite": "moltres.gif",
+    "name": "Moltres"
+  },
+  "dratini": {
+    "api": 147,
+    "sprite": "dratini.gif",
+    "name": "Dratini"
+  },
+  "dragonair": {
+    "api": 148,
+    "sprite": "dragonair.gif",
+    "name": "Dragonair"
+  },
+  "dragonite": {
+    "api": 149,
+    "sprite": "dragonite.gif",
+    "name": "Dragonite"
+  },
+  "mewtwo": {
+    "api": 150,
+    "sprite": "mewtwo.gif",
+    "name": "Mewtwo"
+  },
+  "mew": {
+    "api": 151,
+    "sprite": "mew.gif",
+    "name": "Mew"
+  },
+  "chikorita": {
+    "api": 152,
+    "sprite": "chikorita.gif",
+    "name": "Chikorita"
+  },
+  "bayleef": {
+    "api": 153,
+    "sprite": "bayleef.gif",
+    "name": "Bayleef"
+  },
+  "meganium": {
+    "api": 154,
+    "sprite": "meganium.gif",
+    "name": "Meganium"
+  },
+  "cyndaquil": {
+    "api": 155,
+    "sprite": "cyndaquil.gif",
+    "name": "Cyndaquil"
+  },
+  "quilava": {
+    "api": 156,
+    "sprite": "quilava.gif",
+    "name": "Quilava"
+  },
+  "typhlosion": {
+    "api": 157,
+    "sprite": "typhlosion.gif",
+    "name": "Typhlosion"
+  },
+  "totodile": {
+    "api": 158,
+    "sprite": "totodile.gif",
+    "name": "Totodile"
+  },
+  "croconaw": {
+    "api": 159,
+    "sprite": "croconaw.gif",
+    "name": "Croconaw"
+  },
+  "feraligatr": {
+    "api": 160,
+    "sprite": "feraligatr.gif",
+    "name": "Feraligatr"
+  },
+  "sentret": {
+    "api": 161,
+    "sprite": "sentret.gif",
+    "name": "Sentret"
+  },
+  "furret": {
+    "api": 162,
+    "sprite": "furret.gif",
+    "name": "Furret"
+  },
+  "hoothoot": {
+    "api": 163,
+    "sprite": "hoothoot.gif",
+    "name": "Hoothoot"
+  },
+  "noctowl": {
+    "api": 164,
+    "sprite": "noctowl.gif",
+    "name": "Noctowl"
+  },
+  "ledyba": {
+    "api": 165,
+    "sprite": "ledyba.gif",
+    "name": "Ledyba"
+  },
+  "ledian": {
+    "api": 166,
+    "sprite": "ledian.gif",
+    "name": "Ledian"
+  },
+  "spinarak": {
+    "api": 167,
+    "sprite": "spinarak.gif",
+    "name": "Spinarak"
+  },
+  "ariados": {
+    "api": 168,
+    "sprite": "ariados.gif",
+    "name": "Ariados"
+  },
+  "crobat": {
+    "api": 169,
+    "sprite": "crobat.gif",
+    "name": "Crobat"
+  },
+  "chinchou": {
+    "api": 170,
+    "sprite": "chinchou.gif",
+    "name": "Chinchou"
+  },
+  "lanturn": {
+    "api": 171,
+    "sprite": "lanturn.gif",
+    "name": "Lanturn"
+  },
+  "pichu": {
+    "api": 172,
+    "sprite": "pichu.gif",
+    "name": "Pichu"
+  },
+  "cleffa": {
+    "api": 173,
+    "sprite": "cleffa.gif",
+    "name": "Cleffa"
+  },
+  "igglybuff": {
+    "api": 174,
+    "sprite": "igglybuff.gif",
+    "name": "Igglybuff"
+  },
+  "togepi": {
+    "api": 175,
+    "sprite": "togepi.gif",
+    "name": "Togepi"
+  },
+  "togetic": {
+    "api": 176,
+    "sprite": "togetic.gif",
+    "name": "Togetic"
+  },
+  "natu": {
+    "api": 177,
+    "sprite": "natu.gif",
+    "name": "Natu"
+  },
+  "xatu": {
+    "api": 178,
+    "sprite": "xatu.gif",
+    "name": "Xatu"
+  },
+  "mareep": {
+    "api": 179,
+    "sprite": "mareep.gif",
+    "name": "Mareep"
+  },
+  "flaaffy": {
+    "api": 180,
+    "sprite": "flaaffy.gif",
+    "name": "Flaaffy"
+  },
+  "ampharos": {
+    "api": 181,
+    "sprite": "ampharos.gif",
+    "name": "Ampharos"
+  },
+  "bellossom": {
+    "api": 182,
+    "sprite": "bellossom.gif",
+    "name": "Bellossom"
+  },
+  "marill": {
+    "api": 183,
+    "sprite": "marill.gif",
+    "name": "Marill"
+  },
+  "azumarill": {
+    "api": 184,
+    "sprite": "azumarill.gif",
+    "name": "Azumarill"
+  },
+  "sudowoodo": {
+    "api": 185,
+    "sprite": "sudowoodo.gif",
+    "name": "Sudowoodo"
+  },
+  "politoed": {
+    "api": 186,
+    "sprite": "politoed.gif",
+    "name": "Politoed"
+  },
+  "hoppip": {
+    "api": 187,
+    "sprite": "hoppip.gif",
+    "name": "Hoppip"
+  },
+  "skiploom": {
+    "api": 188,
+    "sprite": "skiploom.gif",
+    "name": "Skiploom"
+  },
+  "jumpluff": {
+    "api": 189,
+    "sprite": "jumpluff.gif",
+    "name": "Jumpluff"
+  },
+  "aipom": {
+    "api": 190,
+    "sprite": "aipom.gif",
+    "name": "Aipom"
+  },
+  "sunkern": {
+    "api": 191,
+    "sprite": "sunkern.gif",
+    "name": "Sunkern"
+  },
+  "sunflora": {
+    "api": 192,
+    "sprite": "sunflora.gif",
+    "name": "Sunflora"
+  },
+  "yanma": {
+    "api": 193,
+    "sprite": "yanma.gif",
+    "name": "Yanma"
+  },
+  "wooper": {
+    "api": 194,
+    "sprite": "wooper.gif",
+    "name": "Wooper"
+  },
+  "quagsire": {
+    "api": 195,
+    "sprite": "quagsire.gif",
+    "name": "Quagsire"
+  },
+  "espeon": {
+    "api": 196,
+    "sprite": "espeon.gif",
+    "name": "Espeon"
+  },
+  "umbreon": {
+    "api": 197,
+    "sprite": "umbreon.gif",
+    "name": "Umbreon"
+  },
+  "murkrow": {
+    "api": 198,
+    "sprite": "murkrow.gif",
+    "name": "Murkrow"
+  },
+  "slowking": {
+    "api": 199,
+    "sprite": "slowking.gif",
+    "name": "Slowking"
+  },
+  "misdreavus": {
+    "api": 200,
+    "sprite": "misdreavus.gif",
+    "name": "Misdreavus"
+  },
+  "unown": {
+    "api": 201,
+    "sprite": "unown.gif",
+    "name": "Unown"
+  },
+  "wobbuffet": {
+    "api": 202,
+    "sprite": "wobbuffet.gif",
+    "name": "Wobbuffet"
+  },
+  "girafarig": {
+    "api": 203,
+    "sprite": "girafarig.gif",
+    "name": "Girafarig"
+  },
+  "pineco": {
+    "api": 204,
+    "sprite": "pineco.gif",
+    "name": "Pineco"
+  },
+  "forretress": {
+    "api": 205,
+    "sprite": "forretress.gif",
+    "name": "Forretress"
+  },
+  "dunsparce": {
+    "api": 206,
+    "sprite": "dunsparce.gif",
+    "name": "Dunsparce"
+  },
+  "gligar": {
+    "api": 207,
+    "sprite": "gligar.gif",
+    "name": "Gligar"
+  },
+  "steelix": {
+    "api": 208,
+    "sprite": "steelix.gif",
+    "name": "Steelix"
+  },
+  "snubbull": {
+    "api": 209,
+    "sprite": "snubbull.gif",
+    "name": "Snubbull"
+  },
+  "granbull": {
+    "api": 210,
+    "sprite": "granbull.gif",
+    "name": "Granbull"
+  },
+  "qwilfish": {
+    "api": 211,
+    "sprite": "qwilfish.gif",
+    "name": "Qwilfish"
+  },
+  "scizor": {
+    "api": 212,
+    "sprite": "scizor.gif",
+    "name": "Scizor"
+  },
+  "shuckle": {
+    "api": 213,
+    "sprite": "shuckle.gif",
+    "name": "Shuckle"
+  },
+  "heracross": {
+    "api": 214,
+    "sprite": "heracross.gif",
+    "name": "Heracross"
+  },
+  "sneasel": {
+    "api": 215,
+    "sprite": "sneasel.gif",
+    "name": "Sneasel"
+  },
+  "teddiursa": {
+    "api": 216,
+    "sprite": "teddiursa.gif",
+    "name": "Teddiursa"
+  },
+  "ursaring": {
+    "api": 217,
+    "sprite": "ursaring.gif",
+    "name": "Ursaring"
+  },
+  "slugma": {
+    "api": 218,
+    "sprite": "slugma.gif",
+    "name": "Slugma"
+  },
+  "magcargo": {
+    "api": 219,
+    "sprite": "magcargo.gif",
+    "name": "Magcargo"
+  },
+  "swinub": {
+    "api": 220,
+    "sprite": "swinub.gif",
+    "name": "Swinub"
+  },
+  "piloswine": {
+    "api": 221,
+    "sprite": "piloswine.gif",
+    "name": "Piloswine"
+  },
+  "corsola": {
+    "api": 222,
+    "sprite": "corsola.gif",
+    "name": "Corsola"
+  },
+  "remoraid": {
+    "api": 223,
+    "sprite": "remoraid.gif",
+    "name": "Remoraid"
+  },
+  "octillery": {
+    "api": 224,
+    "sprite": "octillery.gif",
+    "name": "Octillery"
+  },
+  "delibird": {
+    "api": 225,
+    "sprite": "delibird.gif",
+    "name": "Delibird"
+  },
+  "mantine": {
+    "api": 226,
+    "sprite": "mantine.gif",
+    "name": "Mantine"
+  },
+  "skarmory": {
+    "api": 227,
+    "sprite": "skarmory.gif",
+    "name": "Skarmory"
+  },
+  "houndour": {
+    "api": 228,
+    "sprite": "houndour.gif",
+    "name": "Houndour"
+  },
+  "houndoom": {
+    "api": 229,
+    "sprite": "houndoom.gif",
+    "name": "Houndoom"
+  },
+  "kingdra": {
+    "api": 230,
+    "sprite": "kingdra.gif",
+    "name": "Kingdra"
+  },
+  "phanpy": {
+    "api": 231,
+    "sprite": "phanpy.gif",
+    "name": "Phanpy"
+  },
+  "donphan": {
+    "api": 232,
+    "sprite": "donphan.gif",
+    "name": "Donphan"
+  },
+  "porygon2": {
+    "api": 233,
+    "sprite": "porygon2.gif",
+    "name": "Porygon2"
+  },
+  "stantler": {
+    "api": 234,
+    "sprite": "stantler.gif",
+    "name": "Stantler"
+  },
+  "smeargle": {
+    "api": 235,
+    "sprite": "smeargle.gif",
+    "name": "Smeargle"
+  },
+  "tyrogue": {
+    "api": 236,
+    "sprite": "tyrogue.gif",
+    "name": "Tyrogue"
+  },
+  "hitmontop": {
+    "api": 237,
+    "sprite": "hitmontop.gif",
+    "name": "Hitmontop"
+  },
+  "smoochum": {
+    "api": 238,
+    "sprite": "smoochum.gif",
+    "name": "Smoochum"
+  },
+  "elekid": {
+    "api": 239,
+    "sprite": "elekid.gif",
+    "name": "Elekid"
+  },
+  "magby": {
+    "api": 240,
+    "sprite": "magby.gif",
+    "name": "Magby"
+  },
+  "miltank": {
+    "api": 241,
+    "sprite": "miltank.gif",
+    "name": "Miltank"
+  },
+  "blissey": {
+    "api": 242,
+    "sprite": "blissey.gif",
+    "name": "Blissey"
+  },
+  "raikou": {
+    "api": 243,
+    "sprite": "raikou.gif",
+    "name": "Raikou"
+  },
+  "entei": {
+    "api": 244,
+    "sprite": "entei.gif",
+    "name": "Entei"
+  },
+  "suicune": {
+    "api": 245,
+    "sprite": "suicune.gif",
+    "name": "Suicune"
+  },
+  "larvitar": {
+    "api": 246,
+    "sprite": "larvitar.gif",
+    "name": "Larvitar"
+  },
+  "pupitar": {
+    "api": 247,
+    "sprite": "pupitar.gif",
+    "name": "Pupitar"
+  },
+  "tyranitar": {
+    "api": 248,
+    "sprite": "tyranitar.gif",
+    "name": "Tyranitar"
+  },
+  "lugia": {
+    "api": 249,
+    "sprite": "lugia.gif",
+    "name": "Lugia"
+  },
+  "ho-oh": {
+    "api": 250,
+    "sprite": "hooh.gif",
+    "name": "Ho-Oh"
+  },
+  "celebi": {
+    "api": 251,
+    "sprite": "celebi.gif",
+    "name": "Celebi"
+  },
+  "treecko": {
+    "api": 252,
+    "sprite": "treecko.gif",
+    "name": "Treecko"
+  },
+  "grovyle": {
+    "api": 253,
+    "sprite": "grovyle.gif",
+    "name": "Grovyle"
+  },
+  "sceptile": {
+    "api": 254,
+    "sprite": "sceptile.gif",
+    "name": "Sceptile"
+  },
+  "torchic": {
+    "api": 255,
+    "sprite": "torchic.gif",
+    "name": "Torchic"
+  },
+  "combusken": {
+    "api": 256,
+    "sprite": "combusken.gif",
+    "name": "Combusken"
+  },
+  "blaziken": {
+    "api": 257,
+    "sprite": "blaziken.gif",
+    "name": "Blaziken"
+  },
+  "mudkip": {
+    "api": 258,
+    "sprite": "mudkip.gif",
+    "name": "Mudkip"
+  },
+  "marshtomp": {
+    "api": 259,
+    "sprite": "marshtomp.gif",
+    "name": "Marshtomp"
+  },
+  "swampert": {
+    "api": 260,
+    "sprite": "swampert.gif",
+    "name": "Swampert"
+  },
+  "poochyena": {
+    "api": 261,
+    "sprite": "poochyena.gif",
+    "name": "Poochyena"
+  },
+  "mightyena": {
+    "api": 262,
+    "sprite": "mightyena.gif",
+    "name": "Mightyena"
+  },
+  "zigzagoon": {
+    "api": 263,
+    "sprite": "zigzagoon.gif",
+    "name": "Zigzagoon"
+  },
+  "linoone": {
+    "api": 264,
+    "sprite": "linoone.gif",
+    "name": "Linoone"
+  },
+  "wurmple": {
+    "api": 265,
+    "sprite": "wurmple.gif",
+    "name": "Wurmple"
+  },
+  "silcoon": {
+    "api": 266,
+    "sprite": "silcoon.gif",
+    "name": "Silcoon"
+  },
+  "beautifly": {
+    "api": 267,
+    "sprite": "beautifly.gif",
+    "name": "Beautifly"
+  },
+  "cascoon": {
+    "api": 268,
+    "sprite": "cascoon.gif",
+    "name": "Cascoon"
+  },
+  "dustox": {
+    "api": 269,
+    "sprite": "dustox.gif",
+    "name": "Dustox"
+  },
+  "lotad": {
+    "api": 270,
+    "sprite": "lotad.gif",
+    "name": "Lotad"
+  },
+  "lombre": {
+    "api": 271,
+    "sprite": "lombre.gif",
+    "name": "Lombre"
+  },
+  "ludicolo": {
+    "api": 272,
+    "sprite": "ludicolo.gif",
+    "name": "Ludicolo"
+  },
+  "seedot": {
+    "api": 273,
+    "sprite": "seedot.gif",
+    "name": "Seedot"
+  },
+  "nuzleaf": {
+    "api": 274,
+    "sprite": "nuzleaf.gif",
+    "name": "Nuzleaf"
+  },
+  "shiftry": {
+    "api": 275,
+    "sprite": "shiftry.gif",
+    "name": "Shiftry"
+  },
+  "taillow": {
+    "api": 276,
+    "sprite": "taillow.gif",
+    "name": "Taillow"
+  },
+  "swellow": {
+    "api": 277,
+    "sprite": "swellow.gif",
+    "name": "Swellow"
+  },
+  "wingull": {
+    "api": 278,
+    "sprite": "wingull.gif",
+    "name": "Wingull"
+  },
+  "pelipper": {
+    "api": 279,
+    "sprite": "pelipper.gif",
+    "name": "Pelipper"
+  },
+  "ralts": {
+    "api": 280,
+    "sprite": "ralts.gif",
+    "name": "Ralts"
+  },
+  "kirlia": {
+    "api": 281,
+    "sprite": "kirlia.gif",
+    "name": "Kirlia"
+  },
+  "gardevoir": {
+    "api": 282,
+    "sprite": "gardevoir.gif",
+    "name": "Gardevoir"
+  },
+  "surskit": {
+    "api": 283,
+    "sprite": "surskit.gif",
+    "name": "Surskit"
+  },
+  "masquerain": {
+    "api": 284,
+    "sprite": "masquerain.gif",
+    "name": "Masquerain"
+  },
+  "shroomish": {
+    "api": 285,
+    "sprite": "shroomish.gif",
+    "name": "Shroomish"
+  },
+  "breloom": {
+    "api": 286,
+    "sprite": "breloom.gif",
+    "name": "Breloom"
+  },
+  "slakoth": {
+    "api": 287,
+    "sprite": "slakoth.gif",
+    "name": "Slakoth"
+  },
+  "vigoroth": {
+    "api": 288,
+    "sprite": "vigoroth.gif",
+    "name": "Vigoroth"
+  },
+  "slaking": {
+    "api": 289,
+    "sprite": "slaking.gif",
+    "name": "Slaking"
+  },
+  "nincada": {
+    "api": 290,
+    "sprite": "nincada.gif",
+    "name": "Nincada"
+  },
+  "ninjask": {
+    "api": 291,
+    "sprite": "ninjask.gif",
+    "name": "Ninjask"
+  },
+  "shedinja": {
+    "api": 292,
+    "sprite": "shedinja.gif",
+    "name": "Shedinja"
+  },
+  "whismur": {
+    "api": 293,
+    "sprite": "whismur.gif",
+    "name": "Whismur"
+  },
+  "loudred": {
+    "api": 294,
+    "sprite": "loudred.gif",
+    "name": "Loudred"
+  },
+  "exploud": {
+    "api": 295,
+    "sprite": "exploud.gif",
+    "name": "Exploud"
+  },
+  "makuhita": {
+    "api": 296,
+    "sprite": "makuhita.gif",
+    "name": "Makuhita"
+  },
+  "hariyama": {
+    "api": 297,
+    "sprite": "hariyama.gif",
+    "name": "Hariyama"
+  },
+  "azurill": {
+    "api": 298,
+    "sprite": "azurill.gif",
+    "name": "Azurill"
+  },
+  "nosepass": {
+    "api": 299,
+    "sprite": "nosepass.gif",
+    "name": "Nosepass"
+  },
+  "skitty": {
+    "api": 300,
+    "sprite": "skitty.gif",
+    "name": "Skitty"
+  },
+  "delcatty": {
+    "api": 301,
+    "sprite": "delcatty.gif",
+    "name": "Delcatty"
+  },
+  "sableye": {
+    "api": 302,
+    "sprite": "sableye.gif",
+    "name": "Sableye"
+  },
+  "mawile": {
+    "api": 303,
+    "sprite": "mawile.gif",
+    "name": "Mawile"
+  },
+  "aron": {
+    "api": 304,
+    "sprite": "aron.gif",
+    "name": "Aron"
+  },
+  "lairon": {
+    "api": 305,
+    "sprite": "lairon.gif",
+    "name": "Lairon"
+  },
+  "aggron": {
+    "api": 306,
+    "sprite": "aggron.gif",
+    "name": "Aggron"
+  },
+  "meditite": {
+    "api": 307,
+    "sprite": "meditite.gif",
+    "name": "Meditite"
+  },
+  "medicham": {
+    "api": 308,
+    "sprite": "medicham.gif",
+    "name": "Medicham"
+  },
+  "electrike": {
+    "api": 309,
+    "sprite": "electrike.gif",
+    "name": "Electrike"
+  },
+  "manectric": {
+    "api": 310,
+    "sprite": "manectric.gif",
+    "name": "Manectric"
+  },
+  "plusle": {
+    "api": 311,
+    "sprite": "plusle.gif",
+    "name": "Plusle"
+  },
+  "minun": {
+    "api": 312,
+    "sprite": "minun.gif",
+    "name": "Minun"
+  },
+  "volbeat": {
+    "api": 313,
+    "sprite": "volbeat.gif",
+    "name": "Volbeat"
+  },
+  "illumise": {
+    "api": 314,
+    "sprite": "illumise.gif",
+    "name": "Illumise"
+  },
+  "roselia": {
+    "api": 315,
+    "sprite": "roselia.gif",
+    "name": "Roselia"
+  },
+  "gulpin": {
+    "api": 316,
+    "sprite": "gulpin.gif",
+    "name": "Gulpin"
+  },
+  "swalot": {
+    "api": 317,
+    "sprite": "swalot.gif",
+    "name": "Swalot"
+  },
+  "carvanha": {
+    "api": 318,
+    "sprite": "carvanha.gif",
+    "name": "Carvanha"
+  },
+  "sharpedo": {
+    "api": 319,
+    "sprite": "sharpedo.gif",
+    "name": "Sharpedo"
+  },
+  "wailmer": {
+    "api": 320,
+    "sprite": "wailmer.gif",
+    "name": "Wailmer"
+  },
+  "wailord": {
+    "api": 321,
+    "sprite": "wailord.gif",
+    "name": "Wailord"
+  },
+  "numel": {
+    "api": 322,
+    "sprite": "numel.gif",
+    "name": "Numel"
+  },
+  "camerupt": {
+    "api": 323,
+    "sprite": "camerupt.gif",
+    "name": "Camerupt"
+  },
+  "torkoal": {
+    "api": 324,
+    "sprite": "torkoal.gif",
+    "name": "Torkoal"
+  },
+  "spoink": {
+    "api": 325,
+    "sprite": "spoink.gif",
+    "name": "Spoink"
+  },
+  "grumpig": {
+    "api": 326,
+    "sprite": "grumpig.gif",
+    "name": "Grumpig"
+  },
+  "spinda": {
+    "api": 327,
+    "sprite": "spinda.gif",
+    "name": "Spinda"
+  },
+  "trapinch": {
+    "api": 328,
+    "sprite": "trapinch.gif",
+    "name": "Trapinch"
+  },
+  "vibrava": {
+    "api": 329,
+    "sprite": "vibrava.gif",
+    "name": "Vibrava"
+  },
+  "flygon": {
+    "api": 330,
+    "sprite": "flygon.gif",
+    "name": "Flygon"
+  },
+  "cacnea": {
+    "api": 331,
+    "sprite": "cacnea.gif",
+    "name": "Cacnea"
+  },
+  "cacturne": {
+    "api": 332,
+    "sprite": "cacturne.gif",
+    "name": "Cacturne"
+  },
+  "swablu": {
+    "api": 333,
+    "sprite": "swablu.gif",
+    "name": "Swablu"
+  },
+  "altaria": {
+    "api": 334,
+    "sprite": "altaria.gif",
+    "name": "Altaria"
+  },
+  "zangoose": {
+    "api": 335,
+    "sprite": "zangoose.gif",
+    "name": "Zangoose"
+  },
+  "seviper": {
+    "api": 336,
+    "sprite": "seviper.gif",
+    "name": "Seviper"
+  },
+  "lunatone": {
+    "api": 337,
+    "sprite": "lunatone.gif",
+    "name": "Lunatone"
+  },
+  "solrock": {
+    "api": 338,
+    "sprite": "solrock.gif",
+    "name": "Solrock"
+  },
+  "barboach": {
+    "api": 339,
+    "sprite": "barboach.gif",
+    "name": "Barboach"
+  },
+  "whiscash": {
+    "api": 340,
+    "sprite": "whiscash.gif",
+    "name": "Whiscash"
+  },
+  "corphish": {
+    "api": 341,
+    "sprite": "corphish.gif",
+    "name": "Corphish"
+  },
+  "crawdaunt": {
+    "api": 342,
+    "sprite": "crawdaunt.gif",
+    "name": "Crawdaunt"
+  },
+  "baltoy": {
+    "api": 343,
+    "sprite": "baltoy.gif",
+    "name": "Baltoy"
+  },
+  "claydol": {
+    "api": 344,
+    "sprite": "claydol.gif",
+    "name": "Claydol"
+  },
+  "lileep": {
+    "api": 345,
+    "sprite": "lileep.gif",
+    "name": "Lileep"
+  },
+  "cradily": {
+    "api": 346,
+    "sprite": "cradily.gif",
+    "name": "Cradily"
+  },
+  "anorith": {
+    "api": 347,
+    "sprite": "anorith.gif",
+    "name": "Anorith"
+  },
+  "armaldo": {
+    "api": 348,
+    "sprite": "armaldo.gif",
+    "name": "Armaldo"
+  },
+  "feebas": {
+    "api": 349,
+    "sprite": "feebas.gif",
+    "name": "Feebas"
+  },
+  "milotic": {
+    "api": 350,
+    "sprite": "milotic.gif",
+    "name": "Milotic"
+  },
+  "castform": {
+    "api": 351,
+    "sprite": "castform.gif",
+    "name": "Castform"
+  },
+  "kecleon": {
+    "api": 352,
+    "sprite": "kecleon.gif",
+    "name": "Kecleon"
+  },
+  "shuppet": {
+    "api": 353,
+    "sprite": "shuppet.gif",
+    "name": "Shuppet"
+  },
+  "banette": {
+    "api": 354,
+    "sprite": "banette.gif",
+    "name": "Banette"
+  },
+  "duskull": {
+    "api": 355,
+    "sprite": "duskull.gif",
+    "name": "Duskull"
+  },
+  "dusclops": {
+    "api": 356,
+    "sprite": "dusclops.gif",
+    "name": "Dusclops"
+  },
+  "tropius": {
+    "api": 357,
+    "sprite": "tropius.gif",
+    "name": "Tropius"
+  },
+  "chimecho": {
+    "api": 358,
+    "sprite": "chimecho.gif",
+    "name": "Chimecho"
+  },
+  "absol": {
+    "api": 359,
+    "sprite": "absol.gif",
+    "name": "Absol"
+  },
+  "wynaut": {
+    "api": 360,
+    "sprite": "wynaut.gif",
+    "name": "Wynaut"
+  },
+  "snorunt": {
+    "api": 361,
+    "sprite": "snorunt.gif",
+    "name": "Snorunt"
+  },
+  "glalie": {
+    "api": 362,
+    "sprite": "glalie.gif",
+    "name": "Glalie"
+  },
+  "spheal": {
+    "api": 363,
+    "sprite": "spheal.gif",
+    "name": "Spheal"
+  },
+  "sealeo": {
+    "api": 364,
+    "sprite": "sealeo.gif",
+    "name": "Sealeo"
+  },
+  "walrein": {
+    "api": 365,
+    "sprite": "walrein.gif",
+    "name": "Walrein"
+  },
+  "clamperl": {
+    "api": 366,
+    "sprite": "clamperl.gif",
+    "name": "Clamperl"
+  },
+  "huntail": {
+    "api": 367,
+    "sprite": "huntail.gif",
+    "name": "Huntail"
+  },
+  "gorebyss": {
+    "api": 368,
+    "sprite": "gorebyss.gif",
+    "name": "Gorebyss"
+  },
+  "relicanth": {
+    "api": 369,
+    "sprite": "relicanth.gif",
+    "name": "Relicanth"
+  },
+  "luvdisc": {
+    "api": 370,
+    "sprite": "luvdisc.gif",
+    "name": "Luvdisc"
+  },
+  "bagon": {
+    "api": 371,
+    "sprite": "bagon.gif",
+    "name": "Bagon"
+  },
+  "shelgon": {
+    "api": 372,
+    "sprite": "shelgon.gif",
+    "name": "Shelgon"
+  },
+  "salamence": {
+    "api": 373,
+    "sprite": "salamence.gif",
+    "name": "Salamence"
+  },
+  "beldum": {
+    "api": 374,
+    "sprite": "beldum.gif",
+    "name": "Beldum"
+  },
+  "metang": {
+    "api": 375,
+    "sprite": "metang.gif",
+    "name": "Metang"
+  },
+  "metagross": {
+    "api": 376,
+    "sprite": "metagross.gif",
+    "name": "Metagross"
+  },
+  "regirock": {
+    "api": 377,
+    "sprite": "regirock.gif",
+    "name": "Regirock"
+  },
+  "regice": {
+    "api": 378,
+    "sprite": "regice.gif",
+    "name": "Regice"
+  },
+  "registeel": {
+    "api": 379,
+    "sprite": "registeel.gif",
+    "name": "Registeel"
+  },
+  "latias": {
+    "api": 380,
+    "sprite": "latias.gif",
+    "name": "Latias"
+  },
+  "latios": {
+    "api": 381,
+    "sprite": "latios.gif",
+    "name": "Latios"
+  },
+  "kyogre": {
+    "api": 382,
+    "sprite": "kyogre.gif",
+    "name": "Kyogre"
+  },
+  "groudon": {
+    "api": 383,
+    "sprite": "groudon.gif",
+    "name": "Groudon"
+  },
+  "rayquaza": {
+    "api": 384,
+    "sprite": "rayquaza.gif",
+    "name": "Rayquaza"
+  },
+  "jirachi": {
+    "api": 385,
+    "sprite": "jirachi.gif",
+    "name": "Jirachi"
+  },
+  "deoxys": {
+    "api": 386,
+    "sprite": "deoxys.gif",
+    "name": "Deoxys"
+  },
+  "turtwig": {
+    "api": 387,
+    "sprite": "turtwig.gif",
+    "name": "Turtwig"
+  },
+  "grotle": {
+    "api": 388,
+    "sprite": "grotle.gif",
+    "name": "Grotle"
+  },
+  "torterra": {
+    "api": 389,
+    "sprite": "torterra.gif",
+    "name": "Torterra"
+  },
+  "chimchar": {
+    "api": 390,
+    "sprite": "chimchar.gif",
+    "name": "Chimchar"
+  },
+  "monferno": {
+    "api": 391,
+    "sprite": "monferno.gif",
+    "name": "Monferno"
+  },
+  "infernape": {
+    "api": 392,
+    "sprite": "infernape.gif",
+    "name": "Infernape"
+  },
+  "piplup": {
+    "api": 393,
+    "sprite": "piplup.gif",
+    "name": "Piplup"
+  },
+  "prinplup": {
+    "api": 394,
+    "sprite": "prinplup.gif",
+    "name": "Prinplup"
+  },
+  "empoleon": {
+    "api": 395,
+    "sprite": "empoleon.gif",
+    "name": "Empoleon"
+  },
+  "starly": {
+    "api": 396,
+    "sprite": "starly.gif",
+    "name": "Starly"
+  },
+  "staravia": {
+    "api": 397,
+    "sprite": "staravia.gif",
+    "name": "Staravia"
+  },
+  "staraptor": {
+    "api": 398,
+    "sprite": "staraptor.gif",
+    "name": "Staraptor"
+  },
+  "bidoof": {
+    "api": 399,
+    "sprite": "bidoof.gif",
+    "name": "Bidoof"
+  },
+  "bibarel": {
+    "api": 400,
+    "sprite": "bibarel.gif",
+    "name": "Bibarel"
+  },
+  "kricketot": {
+    "api": 401,
+    "sprite": "kricketot.gif",
+    "name": "Kricketot"
+  },
+  "kricketune": {
+    "api": 402,
+    "sprite": "kricketune.gif",
+    "name": "Kricketune"
+  },
+  "shinx": {
+    "api": 403,
+    "sprite": "shinx.gif",
+    "name": "Shinx"
+  },
+  "luxio": {
+    "api": 404,
+    "sprite": "luxio.gif",
+    "name": "Luxio"
+  },
+  "luxray": {
+    "api": 405,
+    "sprite": "luxray.gif",
+    "name": "Luxray"
+  },
+  "budew": {
+    "api": 406,
+    "sprite": "budew.gif",
+    "name": "Budew"
+  },
+  "roserade": {
+    "api": 407,
+    "sprite": "roserade.gif",
+    "name": "Roserade"
+  },
+  "cranidos": {
+    "api": 408,
+    "sprite": "cranidos.gif",
+    "name": "Cranidos"
+  },
+  "rampardos": {
+    "api": 409,
+    "sprite": "rampardos.gif",
+    "name": "Rampardos"
+  },
+  "shieldon": {
+    "api": 410,
+    "sprite": "shieldon.gif",
+    "name": "Shieldon"
+  },
+  "bastiodon": {
+    "api": 411,
+    "sprite": "bastiodon.gif",
+    "name": "Bastiodon"
+  },
+  "burmy": {
+    "api": 412,
+    "sprite": "burmy.gif",
+    "name": "Burmy"
+  },
+  "wormadam": {
+    "api": 413,
+    "sprite": "wormadam.gif",
+    "name": "Wormadam"
+  },
+  "mothim": {
+    "api": 414,
+    "sprite": "mothim.gif",
+    "name": "Mothim"
+  },
+  "combee": {
+    "api": 415,
+    "sprite": "combee.gif",
+    "name": "Combee"
+  },
+  "vespiquen": {
+    "api": 416,
+    "sprite": "vespiquen.gif",
+    "name": "Vespiquen"
+  },
+  "pachirisu": {
+    "api": 417,
+    "sprite": "pachirisu.gif",
+    "name": "Pachirisu"
+  },
+  "buizel": {
+    "api": 418,
+    "sprite": "buizel.gif",
+    "name": "Buizel"
+  },
+  "floatzel": {
+    "api": 419,
+    "sprite": "floatzel.gif",
+    "name": "Floatzel"
+  },
+  "cherubi": {
+    "api": 420,
+    "sprite": "cherubi.gif",
+    "name": "Cherubi"
+  },
+  "cherrim": {
+    "api": 421,
+    "sprite": "cherrim.gif",
+    "name": "Cherrim"
+  },
+  "shellos": {
+    "api": 422,
+    "sprite": "shellos.gif",
+    "name": "Shellos"
+  },
+  "gastrodon": {
+    "api": 423,
+    "sprite": "gastrodon.gif",
+    "name": "Gastrodon"
+  },
+  "ambipom": {
+    "api": 424,
+    "sprite": "ambipom.gif",
+    "name": "Ambipom"
+  },
+  "drifloon": {
+    "api": 425,
+    "sprite": "drifloon.gif",
+    "name": "Drifloon"
+  },
+  "drifblim": {
+    "api": 426,
+    "sprite": "drifblim.gif",
+    "name": "Drifblim"
+  },
+  "buneary": {
+    "api": 427,
+    "sprite": "buneary.gif",
+    "name": "Buneary"
+  },
+  "lopunny": {
+    "api": 428,
+    "sprite": "lopunny.gif",
+    "name": "Lopunny"
+  },
+  "mismagius": {
+    "api": 429,
+    "sprite": "mismagius.gif",
+    "name": "Mismagius"
+  },
+  "honchkrow": {
+    "api": 430,
+    "sprite": "honchkrow.gif",
+    "name": "Honchkrow"
+  },
+  "glameow": {
+    "api": 431,
+    "sprite": "glameow.gif",
+    "name": "Glameow"
+  },
+  "purugly": {
+    "api": 432,
+    "sprite": "purugly.gif",
+    "name": "Purugly"
+  },
+  "chingling": {
+    "api": 433,
+    "sprite": "chingling.gif",
+    "name": "Chingling"
+  },
+  "stunky": {
+    "api": 434,
+    "sprite": "stunky.gif",
+    "name": "Stunky"
+  },
+  "skuntank": {
+    "api": 435,
+    "sprite": "skuntank.gif",
+    "name": "Skuntank"
+  },
+  "bronzor": {
+    "api": 436,
+    "sprite": "bronzor.gif",
+    "name": "Bronzor"
+  },
+  "bronzong": {
+    "api": 437,
+    "sprite": "bronzong.gif",
+    "name": "Bronzong"
+  },
+  "bonsly": {
+    "api": 438,
+    "sprite": "bonsly.gif",
+    "name": "Bonsly"
+  },
+  "mime jr.": {
+    "api": 439,
+    "sprite": "mime jr..gif",
+    "name": "Mime jr."
+  },
+  "happiny": {
+    "api": 440,
+    "sprite": "happiny.gif",
+    "name": "Happiny"
+  },
+  "chatot": {
+    "api": 441,
+    "sprite": "chatot.gif",
+    "name": "Chatot"
+  },
+  "spiritomb": {
+    "api": 442,
+    "sprite": "spiritomb.gif",
+    "name": "Spiritomb"
+  },
+  "gible": {
+    "api": 443,
+    "sprite": "gible.gif",
+    "name": "Gible"
+  },
+  "gabite": {
+    "api": 444,
+    "sprite": "gabite.gif",
+    "name": "Gabite"
+  },
+  "garchomp": {
+    "api": 445,
+    "sprite": "garchomp.gif",
+    "name": "Garchomp"
+  },
+  "munchlax": {
+    "api": 446,
+    "sprite": "munchlax.gif",
+    "name": "Munchlax"
+  },
+  "riolu": {
+    "api": 447,
+    "sprite": "riolu.gif",
+    "name": "Riolu"
+  },
+  "lucario": {
+    "api": 448,
+    "sprite": "lucario.gif",
+    "name": "Lucario"
+  },
+  "hippopotas": {
+    "api": 449,
+    "sprite": "hippopotas.gif",
+    "name": "Hippopotas"
+  },
+  "hippowdon": {
+    "api": 450,
+    "sprite": "hippowdon.gif",
+    "name": "Hippowdon"
+  },
+  "skorupi": {
+    "api": 451,
+    "sprite": "skorupi.gif",
+    "name": "Skorupi"
+  },
+  "drapion": {
+    "api": 452,
+    "sprite": "drapion.gif",
+    "name": "Drapion"
+  },
+  "croagunk": {
+    "api": 453,
+    "sprite": "croagunk.gif",
+    "name": "Croagunk"
+  },
+  "toxicroak": {
+    "api": 454,
+    "sprite": "toxicroak.gif",
+    "name": "Toxicroak"
+  },
+  "carnivine": {
+    "api": 455,
+    "sprite": "carnivine.gif",
+    "name": "Carnivine"
+  },
+  "finneon": {
+    "api": 456,
+    "sprite": "finneon.gif",
+    "name": "Finneon"
+  },
+  "lumineon": {
+    "api": 457,
+    "sprite": "lumineon.gif",
+    "name": "Lumineon"
+  },
+  "mantyke": {
+    "api": 458,
+    "sprite": "mantyke.gif",
+    "name": "Mantyke"
+  },
+  "snover": {
+    "api": 459,
+    "sprite": "snover.gif",
+    "name": "Snover"
+  },
+  "abomasnow": {
+    "api": 460,
+    "sprite": "abomasnow.gif",
+    "name": "Abomasnow"
+  },
+  "weavile": {
+    "api": 461,
+    "sprite": "weavile.gif",
+    "name": "Weavile"
+  },
+  "magnezone": {
+    "api": 462,
+    "sprite": "magnezone.gif",
+    "name": "Magnezone"
+  },
+  "lickilicky": {
+    "api": 463,
+    "sprite": "lickilicky.gif",
+    "name": "Lickilicky"
+  },
+  "rhyperior": {
+    "api": 464,
+    "sprite": "rhyperior.gif",
+    "name": "Rhyperior"
+  },
+  "tangrowth": {
+    "api": 465,
+    "sprite": "tangrowth.gif",
+    "name": "Tangrowth"
+  },
+  "electivire": {
+    "api": 466,
+    "sprite": "electivire.gif",
+    "name": "Electivire"
+  },
+  "magmortar": {
+    "api": 467,
+    "sprite": "magmortar.gif",
+    "name": "Magmortar"
+  },
+  "togekiss": {
+    "api": 468,
+    "sprite": "togekiss.gif",
+    "name": "Togekiss"
+  },
+  "yanmega": {
+    "api": 469,
+    "sprite": "yanmega.gif",
+    "name": "Yanmega"
+  },
+  "leafeon": {
+    "api": 470,
+    "sprite": "leafeon.gif",
+    "name": "Leafeon"
+  },
+  "glaceon": {
+    "api": 471,
+    "sprite": "glaceon.gif",
+    "name": "Glaceon"
+  },
+  "gliscor": {
+    "api": 472,
+    "sprite": "gliscor.gif",
+    "name": "Gliscor"
+  },
+  "mamoswine": {
+    "api": 473,
+    "sprite": "mamoswine.gif",
+    "name": "Mamoswine"
+  },
+  "porygon-z": {
+    "api": 474,
+    "sprite": "porygon-z.gif",
+    "name": "Porygon-z"
+  },
+  "gallade": {
+    "api": 475,
+    "sprite": "gallade.gif",
+    "name": "Gallade"
+  },
+  "probopass": {
+    "api": 476,
+    "sprite": "probopass.gif",
+    "name": "Probopass"
+  },
+  "dusknoir": {
+    "api": 477,
+    "sprite": "dusknoir.gif",
+    "name": "Dusknoir"
+  },
+  "froslass": {
+    "api": 478,
+    "sprite": "froslass.gif",
+    "name": "Froslass"
+  },
+  "rotom": {
+    "api": 479,
+    "sprite": "rotom.gif",
+    "name": "Rotom"
+  },
+  "uxie": {
+    "api": 480,
+    "sprite": "uxie.gif",
+    "name": "Uxie"
+  },
+  "mesprit": {
+    "api": 481,
+    "sprite": "mesprit.gif",
+    "name": "Mesprit"
+  },
+  "azelf": {
+    "api": 482,
+    "sprite": "azelf.gif",
+    "name": "Azelf"
+  },
+  "dialga": {
+    "api": 483,
+    "sprite": "dialga.gif",
+    "name": "Dialga"
+  },
+  "palkia": {
+    "api": 484,
+    "sprite": "palkia.gif",
+    "name": "Palkia"
+  },
+  "heatran": {
+    "api": 485,
+    "sprite": "heatran.gif",
+    "name": "Heatran"
+  },
+  "regigigas": {
+    "api": 486,
+    "sprite": "regigigas.gif",
+    "name": "Regigigas"
+  },
+  "giratina": {
+    "api": 487,
+    "sprite": "giratina.gif",
+    "name": "Giratina"
+  },
+  "cresselia": {
+    "api": 488,
+    "sprite": "cresselia.gif",
+    "name": "Cresselia"
+  },
+  "phione": {
+    "api": 489,
+    "sprite": "phione.gif",
+    "name": "Phione"
+  },
+  "manaphy": {
+    "api": 490,
+    "sprite": "manaphy.gif",
+    "name": "Manaphy"
+  },
+  "darkrai": {
+    "api": 491,
+    "sprite": "darkrai.gif",
+    "name": "Darkrai"
+  },
+  "shaymin": {
+    "api": 492,
+    "sprite": "shaymin.gif",
+    "name": "Shaymin"
+  },
+  "arceus": {
+    "api": 493,
+    "sprite": "arceus.gif",
+    "name": "Arceus"
+  },
+  "victini": {
+    "api": 494,
+    "sprite": "victini.gif",
+    "name": "Victini"
+  },
+  "snivy": {
+    "api": 495,
+    "sprite": "snivy.gif",
+    "name": "Snivy"
+  },
+  "servine": {
+    "api": 496,
+    "sprite": "servine.gif",
+    "name": "Servine"
+  },
+  "serperior": {
+    "api": 497,
+    "sprite": "serperior.gif",
+    "name": "Serperior"
+  },
+  "tepig": {
+    "api": 498,
+    "sprite": "tepig.gif",
+    "name": "Tepig"
+  },
+  "pignite": {
+    "api": 499,
+    "sprite": "pignite.gif",
+    "name": "Pignite"
+  },
+  "emboar": {
+    "api": 500,
+    "sprite": "emboar.gif",
+    "name": "Emboar"
+  },
+  "oshawott": {
+    "api": 501,
+    "sprite": "oshawott.gif",
+    "name": "Oshawott"
+  },
+  "dewott": {
+    "api": 502,
+    "sprite": "dewott.gif",
+    "name": "Dewott"
+  },
+  "samurott": {
+    "api": 503,
+    "sprite": "samurott.gif",
+    "name": "Samurott"
+  },
+  "patrat": {
+    "api": 504,
+    "sprite": "patrat.gif",
+    "name": "Patrat"
+  },
+  "watchog": {
+    "api": 505,
+    "sprite": "watchog.gif",
+    "name": "Watchog"
+  },
+  "lillipup": {
+    "api": 506,
+    "sprite": "lillipup.gif",
+    "name": "Lillipup"
+  },
+  "herdier": {
+    "api": 507,
+    "sprite": "herdier.gif",
+    "name": "Herdier"
+  },
+  "stoutland": {
+    "api": 508,
+    "sprite": "stoutland.gif",
+    "name": "Stoutland"
+  },
+  "purrloin": {
+    "api": 509,
+    "sprite": "purrloin.gif",
+    "name": "Purrloin"
+  },
+  "liepard": {
+    "api": 510,
+    "sprite": "liepard.gif",
+    "name": "Liepard"
+  },
+  "pansage": {
+    "api": 511,
+    "sprite": "pansage.gif",
+    "name": "Pansage"
+  },
+  "simisage": {
+    "api": 512,
+    "sprite": "simisage.gif",
+    "name": "Simisage"
+  },
+  "pansear": {
+    "api": 513,
+    "sprite": "pansear.gif",
+    "name": "Pansear"
+  },
+  "simisear": {
+    "api": 514,
+    "sprite": "simisear.gif",
+    "name": "Simisear"
+  },
+  "panpour": {
+    "api": 515,
+    "sprite": "panpour.gif",
+    "name": "Panpour"
+  },
+  "simipour": {
+    "api": 516,
+    "sprite": "simipour.gif",
+    "name": "Simipour"
+  },
+  "munna": {
+    "api": 517,
+    "sprite": "munna.gif",
+    "name": "Munna"
+  },
+  "musharna": {
+    "api": 518,
+    "sprite": "musharna.gif",
+    "name": "Musharna"
+  },
+  "pidove": {
+    "api": 519,
+    "sprite": "pidove.gif",
+    "name": "Pidove"
+  },
+  "tranquill": {
+    "api": 520,
+    "sprite": "tranquill.gif",
+    "name": "Tranquill"
+  },
+  "unfezant": {
+    "api": 521,
+    "sprite": "unfezant.gif",
+    "name": "Unfezant"
+  },
+  "blitzle": {
+    "api": 522,
+    "sprite": "blitzle.gif",
+    "name": "Blitzle"
+  },
+  "zebstrika": {
+    "api": 523,
+    "sprite": "zebstrika.gif",
+    "name": "Zebstrika"
+  },
+  "roggenrola": {
+    "api": 524,
+    "sprite": "roggenrola.gif",
+    "name": "Roggenrola"
+  },
+  "boldore": {
+    "api": 525,
+    "sprite": "boldore.gif",
+    "name": "Boldore"
+  },
+  "gigalith": {
+    "api": 526,
+    "sprite": "gigalith.gif",
+    "name": "Gigalith"
+  },
+  "woobat": {
+    "api": 527,
+    "sprite": "woobat.gif",
+    "name": "Woobat"
+  },
+  "swoobat": {
+    "api": 528,
+    "sprite": "swoobat.gif",
+    "name": "Swoobat"
+  },
+  "drilbur": {
+    "api": 529,
+    "sprite": "drilbur.gif",
+    "name": "Drilbur"
+  },
+  "excadrill": {
+    "api": 530,
+    "sprite": "excadrill.gif",
+    "name": "Excadrill"
+  },
+  "audino": {
+    "api": 531,
+    "sprite": "audino.gif",
+    "name": "Audino"
+  },
+  "timburr": {
+    "api": 532,
+    "sprite": "timburr.gif",
+    "name": "Timburr"
+  },
+  "gurdurr": {
+    "api": 533,
+    "sprite": "gurdurr.gif",
+    "name": "Gurdurr"
+  },
+  "conkeldurr": {
+    "api": 534,
+    "sprite": "conkeldurr.gif",
+    "name": "Conkeldurr"
+  },
+  "tympole": {
+    "api": 535,
+    "sprite": "tympole.gif",
+    "name": "Tympole"
+  },
+  "palpitoad": {
+    "api": 536,
+    "sprite": "palpitoad.gif",
+    "name": "Palpitoad"
+  },
+  "seismitoad": {
+    "api": 537,
+    "sprite": "seismitoad.gif",
+    "name": "Seismitoad"
+  },
+  "throh": {
+    "api": 538,
+    "sprite": "throh.gif",
+    "name": "Throh"
+  },
+  "sawk": {
+    "api": 539,
+    "sprite": "sawk.gif",
+    "name": "Sawk"
+  },
+  "sewaddle": {
+    "api": 540,
+    "sprite": "sewaddle.gif",
+    "name": "Sewaddle"
+  },
+  "swadloon": {
+    "api": 541,
+    "sprite": "swadloon.gif",
+    "name": "Swadloon"
+  },
+  "leavanny": {
+    "api": 542,
+    "sprite": "leavanny.gif",
+    "name": "Leavanny"
+  },
+  "venipede": {
+    "api": 543,
+    "sprite": "venipede.gif",
+    "name": "Venipede"
+  },
+  "whirlipede": {
+    "api": 544,
+    "sprite": "whirlipede.gif",
+    "name": "Whirlipede"
+  },
+  "scolipede": {
+    "api": 545,
+    "sprite": "scolipede.gif",
+    "name": "Scolipede"
+  },
+  "cottonee": {
+    "api": 546,
+    "sprite": "cottonee.gif",
+    "name": "Cottonee"
+  },
+  "whimsicott": {
+    "api": 547,
+    "sprite": "whimsicott.gif",
+    "name": "Whimsicott"
+  },
+  "petilil": {
+    "api": 548,
+    "sprite": "petilil.gif",
+    "name": "Petilil"
+  },
+  "lilligant": {
+    "api": 549,
+    "sprite": "lilligant.gif",
+    "name": "Lilligant"
+  },
+  "basculin": {
+    "api": 550,
+    "sprite": "basculin.gif",
+    "name": "Basculin"
+  },
+  "sandile": {
+    "api": 551,
+    "sprite": "sandile.gif",
+    "name": "Sandile"
+  },
+  "krokorok": {
+    "api": 552,
+    "sprite": "krokorok.gif",
+    "name": "Krokorok"
+  },
+  "krookodile": {
+    "api": 553,
+    "sprite": "krookodile.gif",
+    "name": "Krookodile"
+  },
+  "darumaka": {
+    "api": 554,
+    "sprite": "darumaka.gif",
+    "name": "Darumaka"
+  },
+  "darmanitan": {
+    "api": 555,
+    "sprite": "darmanitan.gif",
+    "name": "Darmanitan"
+  },
+  "maractus": {
+    "api": 556,
+    "sprite": "maractus.gif",
+    "name": "Maractus"
+  },
+  "dwebble": {
+    "api": 557,
+    "sprite": "dwebble.gif",
+    "name": "Dwebble"
+  },
+  "crustle": {
+    "api": 558,
+    "sprite": "crustle.gif",
+    "name": "Crustle"
+  },
+  "scraggy": {
+    "api": 559,
+    "sprite": "scraggy.gif",
+    "name": "Scraggy"
+  },
+  "scrafty": {
+    "api": 560,
+    "sprite": "scrafty.gif",
+    "name": "Scrafty"
+  },
+  "sigilyph": {
+    "api": 561,
+    "sprite": "sigilyph.gif",
+    "name": "Sigilyph"
+  },
+  "yamask": {
+    "api": 562,
+    "sprite": "yamask.gif",
+    "name": "Yamask"
+  },
+  "cofagrigus": {
+    "api": 563,
+    "sprite": "cofagrigus.gif",
+    "name": "Cofagrigus"
+  },
+  "tirtouga": {
+    "api": 564,
+    "sprite": "tirtouga.gif",
+    "name": "Tirtouga"
+  },
+  "carracosta": {
+    "api": 565,
+    "sprite": "carracosta.gif",
+    "name": "Carracosta"
+  },
+  "archen": {
+    "api": 566,
+    "sprite": "archen.gif",
+    "name": "Archen"
+  },
+  "archeops": {
+    "api": 567,
+    "sprite": "archeops.gif",
+    "name": "Archeops"
+  },
+  "trubbish": {
+    "api": 568,
+    "sprite": "trubbish.gif",
+    "name": "Trubbish"
+  },
+  "garbodor": {
+    "api": 569,
+    "sprite": "garbodor.gif",
+    "name": "Garbodor"
+  },
+  "zorua": {
+    "api": 570,
+    "sprite": "zorua.gif",
+    "name": "Zorua"
+  },
+  "zoroark": {
+    "api": 571,
+    "sprite": "zoroark.gif",
+    "name": "Zoroark"
+  },
+  "minccino": {
+    "api": 572,
+    "sprite": "minccino.gif",
+    "name": "Minccino"
+  },
+  "cinccino": {
+    "api": 573,
+    "sprite": "cinccino.gif",
+    "name": "Cinccino"
+  },
+  "gothita": {
+    "api": 574,
+    "sprite": "gothita.gif",
+    "name": "Gothita"
+  },
+  "gothorita": {
+    "api": 575,
+    "sprite": "gothorita.gif",
+    "name": "Gothorita"
+  },
+  "gothitelle": {
+    "api": 576,
+    "sprite": "gothitelle.gif",
+    "name": "Gothitelle"
+  },
+  "solosis": {
+    "api": 577,
+    "sprite": "solosis.gif",
+    "name": "Solosis"
+  },
+  "duosion": {
+    "api": 578,
+    "sprite": "duosion.gif",
+    "name": "Duosion"
+  },
+  "reuniclus": {
+    "api": 579,
+    "sprite": "reuniclus.gif",
+    "name": "Reuniclus"
+  },
+  "ducklett": {
+    "api": 580,
+    "sprite": "ducklett.gif",
+    "name": "Ducklett"
+  },
+  "swanna": {
+    "api": 581,
+    "sprite": "swanna.gif",
+    "name": "Swanna"
+  },
+  "vanillite": {
+    "api": 582,
+    "sprite": "vanillite.gif",
+    "name": "Vanillite"
+  },
+  "vanillish": {
+    "api": 583,
+    "sprite": "vanillish.gif",
+    "name": "Vanillish"
+  },
+  "vanilluxe": {
+    "api": 584,
+    "sprite": "vanilluxe.gif",
+    "name": "Vanilluxe"
+  },
+  "deerling": {
+    "api": 585,
+    "sprite": "deerling.gif",
+    "name": "Deerling"
+  },
+  "sawsbuck": {
+    "api": 586,
+    "sprite": "sawsbuck.gif",
+    "name": "Sawsbuck"
+  },
+  "emolga": {
+    "api": 587,
+    "sprite": "emolga.gif",
+    "name": "Emolga"
+  },
+  "karrablast": {
+    "api": 588,
+    "sprite": "karrablast.gif",
+    "name": "Karrablast"
+  },
+  "escavalier": {
+    "api": 589,
+    "sprite": "escavalier.gif",
+    "name": "Escavalier"
+  },
+  "foongus": {
+    "api": 590,
+    "sprite": "foongus.gif",
+    "name": "Foongus"
+  },
+  "amoonguss": {
+    "api": 591,
+    "sprite": "amoonguss.gif",
+    "name": "Amoonguss"
+  },
+  "frillish": {
+    "api": 592,
+    "sprite": "frillish.gif",
+    "name": "Frillish"
+  },
+  "jellicent": {
+    "api": 593,
+    "sprite": "jellicent.gif",
+    "name": "Jellicent"
+  },
+  "alomomola": {
+    "api": 594,
+    "sprite": "alomomola.gif",
+    "name": "Alomomola"
+  },
+  "joltik": {
+    "api": 595,
+    "sprite": "joltik.gif",
+    "name": "Joltik"
+  },
+  "galvantula": {
+    "api": 596,
+    "sprite": "galvantula.gif",
+    "name": "Galvantula"
+  },
+  "ferroseed": {
+    "api": 597,
+    "sprite": "ferroseed.gif",
+    "name": "Ferroseed"
+  },
+  "ferrothorn": {
+    "api": 598,
+    "sprite": "ferrothorn.gif",
+    "name": "Ferrothorn"
+  },
+  "klink": {
+    "api": 599,
+    "sprite": "klink.gif",
+    "name": "Klink"
+  },
+  "klang": {
+    "api": 600,
+    "sprite": "klang.gif",
+    "name": "Klang"
+  },
+  "klinklang": {
+    "api": 601,
+    "sprite": "klinklang.gif",
+    "name": "Klinklang"
+  },
+  "tynamo": {
+    "api": 602,
+    "sprite": "tynamo.gif",
+    "name": "Tynamo"
+  },
+  "eelektrik": {
+    "api": 603,
+    "sprite": "eelektrik.gif",
+    "name": "Eelektrik"
+  },
+  "eelektross": {
+    "api": 604,
+    "sprite": "eelektross.gif",
+    "name": "Eelektross"
+  },
+  "elgyem": {
+    "api": 605,
+    "sprite": "elgyem.gif",
+    "name": "Elgyem"
+  },
+  "beheeyem": {
+    "api": 606,
+    "sprite": "beheeyem.gif",
+    "name": "Beheeyem"
+  },
+  "litwick": {
+    "api": 607,
+    "sprite": "litwick.gif",
+    "name": "Litwick"
+  },
+  "lampent": {
+    "api": 608,
+    "sprite": "lampent.gif",
+    "name": "Lampent"
+  },
+  "chandelure": {
+    "api": 609,
+    "sprite": "chandelure.gif",
+    "name": "Chandelure"
+  },
+  "axew": {
+    "api": 610,
+    "sprite": "axew.gif",
+    "name": "Axew"
+  },
+  "fraxure": {
+    "api": 611,
+    "sprite": "fraxure.gif",
+    "name": "Fraxure"
+  },
+  "haxorus": {
+    "api": 612,
+    "sprite": "haxorus.gif",
+    "name": "Haxorus"
+  },
+  "cubchoo": {
+    "api": 613,
+    "sprite": "cubchoo.gif",
+    "name": "Cubchoo"
+  },
+  "beartic": {
+    "api": 614,
+    "sprite": "beartic.gif",
+    "name": "Beartic"
+  },
+  "cryogonal": {
+    "api": 615,
+    "sprite": "cryogonal.gif",
+    "name": "Cryogonal"
+  },
+  "shelmet": {
+    "api": 616,
+    "sprite": "shelmet.gif",
+    "name": "Shelmet"
+  },
+  "accelgor": {
+    "api": 617,
+    "sprite": "accelgor.gif",
+    "name": "Accelgor"
+  },
+  "stunfisk": {
+    "api": 618,
+    "sprite": "stunfisk.gif",
+    "name": "Stunfisk"
+  },
+  "mienfoo": {
+    "api": 619,
+    "sprite": "mienfoo.gif",
+    "name": "Mienfoo"
+  },
+  "mienshao": {
+    "api": 620,
+    "sprite": "mienshao.gif",
+    "name": "Mienshao"
+  },
+  "druddigon": {
+    "api": 621,
+    "sprite": "druddigon.gif",
+    "name": "Druddigon"
+  },
+  "golett": {
+    "api": 622,
+    "sprite": "golett.gif",
+    "name": "Golett"
+  },
+  "golurk": {
+    "api": 623,
+    "sprite": "golurk.gif",
+    "name": "Golurk"
+  },
+  "pawniard": {
+    "api": 624,
+    "sprite": "pawniard.gif",
+    "name": "Pawniard"
+  },
+  "bisharp": {
+    "api": 625,
+    "sprite": "bisharp.gif",
+    "name": "Bisharp"
+  },
+  "bouffalant": {
+    "api": 626,
+    "sprite": "bouffalant.gif",
+    "name": "Bouffalant"
+  },
+  "rufflet": {
+    "api": 627,
+    "sprite": "rufflet.gif",
+    "name": "Rufflet"
+  },
+  "braviary": {
+    "api": 628,
+    "sprite": "braviary.gif",
+    "name": "Braviary"
+  },
+  "vullaby": {
+    "api": 629,
+    "sprite": "vullaby.gif",
+    "name": "Vullaby"
+  },
+  "mandibuzz": {
+    "api": 630,
+    "sprite": "mandibuzz.gif",
+    "name": "Mandibuzz"
+  },
+  "heatmor": {
+    "api": 631,
+    "sprite": "heatmor.gif",
+    "name": "Heatmor"
+  },
+  "durant": {
+    "api": 632,
+    "sprite": "durant.gif",
+    "name": "Durant"
+  },
+  "deino": {
+    "api": 633,
+    "sprite": "deino.gif",
+    "name": "Deino"
+  },
+  "zweilous": {
+    "api": 634,
+    "sprite": "zweilous.gif",
+    "name": "Zweilous"
+  },
+  "hydreigon": {
+    "api": 635,
+    "sprite": "hydreigon.gif",
+    "name": "Hydreigon"
+  },
+  "larvesta": {
+    "api": 636,
+    "sprite": "larvesta.gif",
+    "name": "Larvesta"
+  },
+  "volcarona": {
+    "api": 637,
+    "sprite": "volcarona.gif",
+    "name": "Volcarona"
+  },
+  "cobalion": {
+    "api": 638,
+    "sprite": "cobalion.gif",
+    "name": "Cobalion"
+  },
+  "terrakion": {
+    "api": 639,
+    "sprite": "terrakion.gif",
+    "name": "Terrakion"
+  },
+  "virizion": {
+    "api": 640,
+    "sprite": "virizion.gif",
+    "name": "Virizion"
+  },
+  "tornadus": {
+    "api": 641,
+    "sprite": "tornadus.gif",
+    "name": "Tornadus"
+  },
+  "thundurus": {
+    "api": 642,
+    "sprite": "thundurus.gif",
+    "name": "Thundurus"
+  },
+  "reshiram": {
+    "api": 643,
+    "sprite": "reshiram.gif",
+    "name": "Reshiram"
+  },
+  "zekrom": {
+    "api": 644,
+    "sprite": "zekrom.gif",
+    "name": "Zekrom"
+  },
+  "landorus": {
+    "api": 645,
+    "sprite": "landorus.gif",
+    "name": "Landorus"
+  },
+  "kyurem": {
+    "api": 646,
+    "sprite": "kyurem.gif",
+    "name": "Kyurem"
+  },
+  "keldeo": {
+    "api": 647,
+    "sprite": "keldeo.gif",
+    "name": "Keldeo"
+  },
+  "meloetta": {
+    "api": 648,
+    "sprite": "meloetta.gif",
+    "name": "Meloetta"
+  },
+  "genesect": {
+    "api": 649,
+    "sprite": "genesect.gif",
+    "name": "Genesect"
+  },
+  "chespin": {
+    "api": 650,
+    "sprite": "chespin.gif",
+    "name": "Chespin"
+  },
+  "quilladin": {
+    "api": 651,
+    "sprite": "quilladin.gif",
+    "name": "Quilladin"
+  },
+  "chesnaught": {
+    "api": 652,
+    "sprite": "chesnaught.gif",
+    "name": "Chesnaught"
+  },
+  "fennekin": {
+    "api": 653,
+    "sprite": "fennekin.gif",
+    "name": "Fennekin"
+  },
+  "braixen": {
+    "api": 654,
+    "sprite": "braixen.gif",
+    "name": "Braixen"
+  },
+  "delphox": {
+    "api": 655,
+    "sprite": "delphox.gif",
+    "name": "Delphox"
+  },
+  "froakie": {
+    "api": 656,
+    "sprite": "froakie.gif",
+    "name": "Froakie"
+  },
+  "frogadier": {
+    "api": 657,
+    "sprite": "frogadier.gif",
+    "name": "Frogadier"
+  },
+  "greninja": {
+    "api": 658,
+    "sprite": "greninja.gif",
+    "name": "Greninja"
+  },
+  "bunnelby": {
+    "api": 659,
+    "sprite": "bunnelby.gif",
+    "name": "Bunnelby"
+  },
+  "diggersby": {
+    "api": 660,
+    "sprite": "diggersby.gif",
+    "name": "Diggersby"
+  },
+  "fletchling": {
+    "api": 661,
+    "sprite": "fletchling.gif",
+    "name": "Fletchling"
+  },
+  "fletchinder": {
+    "api": 662,
+    "sprite": "fletchinder.gif",
+    "name": "Fletchinder"
+  },
+  "talonflame": {
+    "api": 663,
+    "sprite": "talonflame.gif",
+    "name": "Talonflame"
+  },
+  "scatterbug": {
+    "api": 664,
+    "sprite": "scatterbug.gif",
+    "name": "Scatterbug"
+  },
+  "spewpa": {
+    "api": 665,
+    "sprite": "spewpa.gif",
+    "name": "Spewpa"
+  },
+  "vivillon": {
+    "api": 666,
+    "sprite": "vivillon.gif",
+    "name": "Vivillon"
+  },
+  "litleo": {
+    "api": 667,
+    "sprite": "litleo.gif",
+    "name": "Litleo"
+  },
+  "pyroar": {
+    "api": 668,
+    "sprite": "pyroar.gif",
+    "name": "Pyroar"
+  },
+  "flabébé": {
+    "api": 669,
+    "sprite": "flabébé.gif",
+    "name": "Flab�b�"
+  },
+  "floette": {
+    "api": 670,
+    "sprite": "floette.gif",
+    "name": "Floette"
+  },
+  "florges": {
+    "api": 671,
+    "sprite": "florges.gif",
+    "name": "Florges"
+  },
+  "skiddo": {
+    "api": 672,
+    "sprite": "skiddo.gif",
+    "name": "Skiddo"
+  },
+  "gogoat": {
+    "api": 673,
+    "sprite": "gogoat.gif",
+    "name": "Gogoat"
+  },
+  "pancham": {
+    "api": 674,
+    "sprite": "pancham.gif",
+    "name": "Pancham"
+  },
+  "pangoro": {
+    "api": 675,
+    "sprite": "pangoro.gif",
+    "name": "Pangoro"
+  },
+  "furfrou": {
+    "api": 676,
+    "sprite": "furfrou.gif",
+    "name": "Furfrou"
+  },
+  "espurr": {
+    "api": 677,
+    "sprite": "espurr.gif",
+    "name": "Espurr"
+  },
+  "meowstic": {
+    "api": 678,
+    "sprite": "meowstic.gif",
+    "name": "Meowstic"
+  },
+  "honedge": {
+    "api": 679,
+    "sprite": "honedge.gif",
+    "name": "Honedge"
+  },
+  "doublade": {
+    "api": 680,
+    "sprite": "doublade.gif",
+    "name": "Doublade"
+  },
+  "aegislash": {
+    "api": 681,
+    "sprite": "aegislash.gif",
+    "name": "Aegislash"
+  },
+  "spritzee": {
+    "api": 682,
+    "sprite": "spritzee.gif",
+    "name": "Spritzee"
+  },
+  "aromatisse": {
+    "api": 683,
+    "sprite": "aromatisse.gif",
+    "name": "Aromatisse"
+  },
+  "swirlix": {
+    "api": 684,
+    "sprite": "swirlix.gif",
+    "name": "Swirlix"
+  },
+  "slurpuff": {
+    "api": 685,
+    "sprite": "slurpuff.gif",
+    "name": "Slurpuff"
+  },
+  "inkay": {
+    "api": 686,
+    "sprite": "inkay.gif",
+    "name": "Inkay"
+  },
+  "malamar": {
+    "api": 687,
+    "sprite": "malamar.gif",
+    "name": "Malamar"
+  },
+  "binacle": {
+    "api": 688,
+    "sprite": "binacle.gif",
+    "name": "Binacle"
+  },
+  "barbaracle": {
+    "api": 689,
+    "sprite": "barbaracle.gif",
+    "name": "Barbaracle"
+  },
+  "skrelp": {
+    "api": 690,
+    "sprite": "skrelp.gif",
+    "name": "Skrelp"
+  },
+  "dragalge": {
+    "api": 691,
+    "sprite": "dragalge.gif",
+    "name": "Dragalge"
+  },
+  "clauncher": {
+    "api": 692,
+    "sprite": "clauncher.gif",
+    "name": "Clauncher"
+  },
+  "clawitzer": {
+    "api": 693,
+    "sprite": "clawitzer.gif",
+    "name": "Clawitzer"
+  },
+  "helioptile": {
+    "api": 694,
+    "sprite": "helioptile.gif",
+    "name": "Helioptile"
+  },
+  "heliolisk": {
+    "api": 695,
+    "sprite": "heliolisk.gif",
+    "name": "Heliolisk"
+  },
+  "tyrunt": {
+    "api": 696,
+    "sprite": "tyrunt.gif",
+    "name": "Tyrunt"
+  },
+  "tyrantrum": {
+    "api": 697,
+    "sprite": "tyrantrum.gif",
+    "name": "Tyrantrum"
+  },
+  "amaura": {
+    "api": 698,
+    "sprite": "amaura.gif",
+    "name": "Amaura"
+  },
+  "aurorus": {
+    "api": 699,
+    "sprite": "aurorus.gif",
+    "name": "Aurorus"
+  },
+  "sylveon": {
+    "api": 700,
+    "sprite": "sylveon.gif",
+    "name": "Sylveon"
+  },
+  "hawlucha": {
+    "api": 701,
+    "sprite": "hawlucha.gif",
+    "name": "Hawlucha"
+  },
+  "dedenne": {
+    "api": 702,
+    "sprite": "dedenne.gif",
+    "name": "Dedenne"
+  },
+  "carbink": {
+    "api": 703,
+    "sprite": "carbink.gif",
+    "name": "Carbink"
+  },
+  "goomy": {
+    "api": 704,
+    "sprite": "goomy.gif",
+    "name": "Goomy"
+  },
+  "sliggoo": {
+    "api": 705,
+    "sprite": "sliggoo.gif",
+    "name": "Sliggoo"
+  },
+  "goodra": {
+    "api": 706,
+    "sprite": "goodra.gif",
+    "name": "Goodra"
+  },
+  "klefki": {
+    "api": 707,
+    "sprite": "klefki.gif",
+    "name": "Klefki"
+  },
+  "phantump": {
+    "api": 708,
+    "sprite": "phantump.gif",
+    "name": "Phantump"
+  },
+  "trevenant": {
+    "api": 709,
+    "sprite": "trevenant.gif",
+    "name": "Trevenant"
+  },
+  "pumpkaboo": {
+    "api": 710,
+    "sprite": "pumpkaboo.gif",
+    "name": "Pumpkaboo"
+  },
+  "gourgeist": {
+    "api": 711,
+    "sprite": "gourgeist.gif",
+    "name": "Gourgeist"
+  },
+  "bergmite": {
+    "api": 712,
+    "sprite": "bergmite.gif",
+    "name": "Bergmite"
+  },
+  "avalugg": {
+    "api": 713,
+    "sprite": "avalugg.gif",
+    "name": "Avalugg"
+  },
+  "noibat": {
+    "api": 714,
+    "sprite": "noibat.gif",
+    "name": "Noibat"
+  },
+  "noivern": {
+    "api": 715,
+    "sprite": "noivern.gif",
+    "name": "Noivern"
+  },
+  "xerneas": {
+    "api": 716,
+    "sprite": "xerneas.gif",
+    "name": "Xerneas"
+  },
+  "yveltal": {
+    "api": 717,
+    "sprite": "yveltal.gif",
+    "name": "Yveltal"
+  },
+  "zygarde": {
+    "api": 718,
+    "sprite": "zygarde.gif",
+    "name": "Zygarde"
+  },
+  "diancie": {
+    "api": 719,
+    "sprite": "diancie.gif",
+    "name": "Diancie"
+  },
+  "hoopa": {
+    "api": 720,
+    "sprite": "hoopa.gif",
+    "name": "Hoopa"
+  },
+  "volcanion": {
+    "api": 721,
+    "sprite": "volcanion.gif",
+    "name": "Volcanion"
+  },
+  "rowlet": {
+    "api": 722,
+    "sprite": "rowlet.gif",
+    "name": "Rowlet"
+  },
+  "dartrix": {
+    "api": 723,
+    "sprite": "dartrix.gif",
+    "name": "Dartrix"
+  },
+  "decidueye": {
+    "api": 724,
+    "sprite": "decidueye.gif",
+    "name": "Decidueye"
+  },
+  "litten": {
+    "api": 725,
+    "sprite": "litten.gif",
+    "name": "Litten"
+  },
+  "torracat": {
+    "api": 726,
+    "sprite": "torracat.gif",
+    "name": "Torracat"
+  },
+  "incineroar": {
+    "api": 727,
+    "sprite": "incineroar.gif",
+    "name": "Incineroar"
+  },
+  "popplio": {
+    "api": 728,
+    "sprite": "popplio.gif",
+    "name": "Popplio"
+  },
+  "brionne": {
+    "api": 729,
+    "sprite": "brionne.gif",
+    "name": "Brionne"
+  },
+  "primarina": {
+    "api": 730,
+    "sprite": "primarina.gif",
+    "name": "Primarina"
+  },
+  "pikipek": {
+    "api": 731,
+    "sprite": "pikipek.gif",
+    "name": "Pikipek"
+  },
+  "trumbeak": {
+    "api": 732,
+    "sprite": "trumbeak.gif",
+    "name": "Trumbeak"
+  },
+  "toucannon": {
+    "api": 733,
+    "sprite": "toucannon.gif",
+    "name": "Toucannon"
+  },
+  "yungoos": {
+    "api": 734,
+    "sprite": "yungoos.gif",
+    "name": "Yungoos"
+  },
+  "gumshoos": {
+    "api": 735,
+    "sprite": "gumshoos.gif",
+    "name": "Gumshoos"
+  },
+  "grubbin": {
+    "api": 736,
+    "sprite": "grubbin.gif",
+    "name": "Grubbin"
+  },
+  "charjabug": {
+    "api": 737,
+    "sprite": "charjabug.gif",
+    "name": "Charjabug"
+  },
+  "vikavolt": {
+    "api": 738,
+    "sprite": "vikavolt.gif",
+    "name": "Vikavolt"
+  },
+  "crabrawler": {
+    "api": 739,
+    "sprite": "crabrawler.gif",
+    "name": "Crabrawler"
+  },
+  "crabominable": {
+    "api": 740,
+    "sprite": "crabominable.gif",
+    "name": "Crabominable"
+  },
+  "oricorio": {
+    "api": 741,
+    "sprite": "oricorio.gif",
+    "name": "Oricorio"
+  },
+  "cutiefly": {
+    "api": 742,
+    "sprite": "cutiefly.gif",
+    "name": "Cutiefly"
+  },
+  "ribombee": {
+    "api": 743,
+    "sprite": "ribombee.gif",
+    "name": "Ribombee"
+  },
+  "rockruff": {
+    "api": 744,
+    "sprite": "rockruff.gif",
+    "name": "Rockruff"
+  },
+  "lycanroc": {
+    "api": 745,
+    "sprite": "lycanroc.gif",
+    "name": "Lycanroc"
+  },
+  "wishiwashi": {
+    "api": 746,
+    "sprite": "wishiwashi.gif",
+    "name": "Wishiwashi"
+  },
+  "mareanie": {
+    "api": 747,
+    "sprite": "mareanie.gif",
+    "name": "Mareanie"
+  },
+  "toxapex": {
+    "api": 748,
+    "sprite": "toxapex.gif",
+    "name": "Toxapex"
+  },
+  "mudbray": {
+    "api": 749,
+    "sprite": "mudbray.gif",
+    "name": "Mudbray"
+  },
+  "mudsdale": {
+    "api": 750,
+    "sprite": "mudsdale.gif",
+    "name": "Mudsdale"
+  },
+  "dewpider": {
+    "api": 751,
+    "sprite": "dewpider.gif",
+    "name": "Dewpider"
+  },
+  "araquanid": {
+    "api": 752,
+    "sprite": "araquanid.gif",
+    "name": "Araquanid"
+  },
+  "fomantis": {
+    "api": 753,
+    "sprite": "fomantis.gif",
+    "name": "Fomantis"
+  },
+  "lurantis": {
+    "api": 754,
+    "sprite": "lurantis.gif",
+    "name": "Lurantis"
+  },
+  "morelull": {
+    "api": 755,
+    "sprite": "morelull.gif",
+    "name": "Morelull"
+  },
+  "shiinotic": {
+    "api": 756,
+    "sprite": "shiinotic.gif",
+    "name": "Shiinotic"
+  },
+  "salandit": {
+    "api": 757,
+    "sprite": "salandit.gif",
+    "name": "Salandit"
+  },
+  "salazzle": {
+    "api": 758,
+    "sprite": "salazzle.gif",
+    "name": "Salazzle"
+  },
+  "stufful": {
+    "api": 759,
+    "sprite": "stufful.gif",
+    "name": "Stufful"
+  },
+  "bewear": {
+    "api": 760,
+    "sprite": "bewear.gif",
+    "name": "Bewear"
+  },
+  "bounsweet": {
+    "api": 761,
+    "sprite": "bounsweet.gif",
+    "name": "Bounsweet"
+  },
+  "steenee": {
+    "api": 762,
+    "sprite": "steenee.gif",
+    "name": "Steenee"
+  },
+  "tsareena": {
+    "api": 763,
+    "sprite": "tsareena.gif",
+    "name": "Tsareena"
+  },
+  "comfey": {
+    "api": 764,
+    "sprite": "comfey.gif",
+    "name": "Comfey"
+  },
+  "oranguru": {
+    "api": 765,
+    "sprite": "oranguru.gif",
+    "name": "Oranguru"
+  },
+  "passimian": {
+    "api": 766,
+    "sprite": "passimian.gif",
+    "name": "Passimian"
+  },
+  "wimpod": {
+    "api": 767,
+    "sprite": "wimpod.gif",
+    "name": "Wimpod"
+  },
+  "golisopod": {
+    "api": 768,
+    "sprite": "golisopod.gif",
+    "name": "Golisopod"
+  },
+  "sandygast": {
+    "api": 769,
+    "sprite": "sandygast.gif",
+    "name": "Sandygast"
+  },
+  "palossand": {
+    "api": 770,
+    "sprite": "palossand.gif",
+    "name": "Palossand"
+  },
+  "pyukumuku": {
+    "api": 771,
+    "sprite": "pyukumuku.gif",
+    "name": "Pyukumuku"
+  },
+  "type null": {
+    "api": 772,
+    "sprite": "typenull.gif",
+    "name": "Type: null"
+  },
+  "silvally": {
+    "api": 773,
+    "sprite": "silvally.gif",
+    "name": "Silvally"
+  },
+  "minior": {
+    "api": 774,
+    "sprite": "minior.gif",
+    "name": "Minior"
+  },
+  "komala": {
+    "api": 775,
+    "sprite": "komala.gif",
+    "name": "Komala"
+  },
+  "turtonator": {
+    "api": 776,
+    "sprite": "turtonator.gif",
+    "name": "Turtonator"
+  },
+  "togedemaru": {
+    "api": 777,
+    "sprite": "togedemaru.gif",
+    "name": "Togedemaru"
+  },
+  "mimikyu": {
+    "api": 778,
+    "sprite": "mimikyu.gif",
+    "name": "Mimikyu"
+  },
+  "bruxish": {
+    "api": 779,
+    "sprite": "bruxish.gif",
+    "name": "Bruxish"
+  },
+  "drampa": {
+    "api": 780,
+    "sprite": "drampa.gif",
+    "name": "Drampa"
+  },
+  "dhelmise": {
+    "api": 781,
+    "sprite": "dhelmise.gif",
+    "name": "Dhelmise"
+  },
+  "jangmo-o": {
+    "api": 782,
+    "sprite": "jangmoo.gif",
+    "name": "Jangmo-o"
+  },
+  "hakamo-o": {
+    "api": 783,
+    "sprite": "hakamoo.gif",
+    "name": "Hakamo-o"
+  },
+  "kommo-o": {
+    "api": 784,
+    "sprite": "kommoo.gif",
+    "name": "Kommo-o"
+  },
+  "tapu-koko": {
+    "api": 785,
+    "sprite": "tapukoko.gif",
+    "name": "Tapu koko"
+  },
+  "tapu-lele": {
+    "api": 786,
+    "sprite": "tapulele.gif",
+    "name": "Tapu Lele"
+  },
+  "tapu-bulu": {
+    "api": 787,
+    "sprite": "tapubulu.gif",
+    "name": "Tapu Bulu"
+  },
+  "tapu-fini": {
+    "api": 788,
+    "sprite": "tapufini.gif",
+    "name": "Tapu Fini"
+  },
+  "cosmog": {
+    "api": 789,
+    "sprite": "cosmog.gif",
+    "name": "Cosmog"
+  },
+  "cosmoem": {
+    "api": 790,
+    "sprite": "cosmoem.gif",
+    "name": "Cosmoem"
+  },
+  "solgaleo": {
+    "api": 791,
+    "sprite": "solgaleo.gif",
+    "name": "Solgaleo"
+  },
+  "lunala": {
+    "api": 792,
+    "sprite": "lunala.gif",
+    "name": "Lunala"
+  },
+  "nihilego": {
+    "api": 793,
+    "sprite": "nihilego.gif",
+    "name": "Nihilego"
+  },
+  "buzzwole": {
+    "api": 794,
+    "sprite": "buzzwole.gif",
+    "name": "Buzzwole"
+  },
+  "pheromosa": {
+    "api": 795,
+    "sprite": "pheromosa.gif",
+    "name": "Pheromosa"
+  },
+  "xurkitree": {
+    "api": 796,
+    "sprite": "xurkitree.gif",
+    "name": "Xurkitree"
+  },
+  "celesteela": {
+    "api": 797,
+    "sprite": "celesteela.gif",
+    "name": "Celesteela"
+  },
+  "kartana": {
+    "api": 798,
+    "sprite": "kartana.gif",
+    "name": "Kartana"
+  },
+  "guzzlord": {
+    "api": 799,
+    "sprite": "guzzlord.gif",
+    "name": "Guzzlord"
+  },
+  "necrozma": {
+    "api": 800,
+    "sprite": "necrozma.gif",
+    "name": "Necrozma"
+  },
+  "magearna": {
+    "api": 801,
+    "sprite": "magearna.gif",
+    "name": "Magearna"
+  },
+  "marshadow": {
+    "api": 802,
+    "sprite": "marshadow.gif",
+    "name": "Marshadow"
+  },
+  "poipole": {
+    "api": 803,
+    "sprite": "poipole.gif",
+    "name": "Poipole"
+  },
+  "naganadel": {
+    "api": 804,
+    "sprite": "naganadel.gif",
+    "name": "Naganadel"
+  },
+  "stakataka": {
+    "api": 805,
+    "sprite": "stakataka.gif",
+    "name": "Stakataka"
+  },
+  "blacephalon": {
+    "api": 806,
+    "sprite": "blacephalon.gif",
+    "name": "Blacephalon"
+  },
+  "zeraora": {
+    "api": 807,
+    "sprite": "zeraora.gif",
+    "name": "Zeraora"
+  },
+  "deoxys-attack": {
+    "api": 10001,
+    "sprite": "deoxys-attack.gif",
+    "name": "Deoxys Attack"
+  },
+  "deoxys-defense": {
+    "api": 10002,
+    "sprite": "deoxys-defense.gif",
+    "name": "Deoxys Defense"
+  },
+  "deoxys-speed": {
+    "api": 10003,
+    "sprite": "deoxys-speed.gif",
+    "name": "Deoxys Speed"
+  },
+  "wormadam-sandy": {
+    "api": 10004,
+    "sprite": "wormadam-sandy.gif",
+    "name": "Wormadam Sandy"
+  },
+  "wormadam-trash": {
+    "api": 10005,
+    "sprite": "wormadam-trash.gif",
+    "name": "Wormadam Trash"
+  },
+  "shaymin-sky": {
+    "api": 10006,
+    "sprite": "shaymin-sky.gif",
+    "name": "Shaymin Sky"
+  },
+  "giratina-origin": {
+    "api": 10007,
+    "sprite": "giratina-origin.gif",
+    "name": "Giratina"
+  },
+  "rotom-heat": {
+    "api": 10008,
+    "sprite": "rotom-heat.gif",
+    "name": "Rotom Heat"
+  },
+  "rotom-wash": {
+    "api": 10009,
+    "sprite": "rotom-wash.gif",
+    "name": "Rotom Wash"
+  },
+  "rotom-frost": {
+    "api": 10010,
+    "sprite": "rotom-frost.gif",
+    "name": "Rotom Frost"
+  },
+  "rotom-fan": {
+    "api": 10011,
+    "sprite": "rotom-fan.gif",
+    "name": "Rotom Fan"
+  },
+  "rotom-mow": {
+    "api": 10012,
+    "sprite": "rotom-mow.gif",
+    "name": "Rotom Mow"
+  },
+  "castform-sunny": {
+    "api": 10013,
+    "sprite": "castform-sunny.gif",
+    "name": "Castform Sunny"
+  },
+  "castform-rainy": {
+    "api": 10014,
+    "sprite": "castform-rainy.gif",
+    "name": "Castform Rainy"
+  },
+  "castform-snowy": {
+    "api": 10015,
+    "sprite": "castform-snowy.gif",
+    "name": "Castform Snowy"
+  },
+  "basculin-bluestriped": {
+    "api": 10016,
+    "sprite": "basculin-bluestriped.gif",
+    "name": "Basculin Blue Striped"
+  },
+  "darmanitan-zen": {
+    "api": 10017,
+    "sprite": "darmanitan-zen.gif",
+    "name": "Darmanitan Zen"
+  },
+  "meloetta-pirouette": {
+    "api": 10018,
+    "sprite": "meloetta-pirouette.gif",
+    "name": "Meloetta Pirouette"
+  },
+  "tornadus-therian": {
+    "api": 10019,
+    "sprite": "tornadus-therian.gif",
+    "name": "Tornadus Therian"
+  },
+  "thundurus-therian": {
+    "api": 10020,
+    "sprite": "thundurus-therian.gif",
+    "name": "Thundurus Therian"
+  },
+  "landorus-therian": {
+    "api": 10021,
+    "sprite": "landorus-therian.gif",
+    "name": "Landorus Therian"
+  },
+  "kyurem-black": {
+    "api": 10022,
+    "sprite": "kyurem-black.gif",
+    "name": "Kyurem Black"
+  },
+  "kyurem-white": {
+    "api": 10023,
+    "sprite": "kyurem-white.gif",
+    "name": "Kyurem White"
+  },
+  "keldeo-resolute": {
+    "api": 10024,
+    "sprite": "keldeo-resolute.gif",
+    "name": "Keldeo Resolute"
+  },
+  "meowstic-f": {
+    "api": 10025,
+    "sprite": "meowstic-f.gif",
+    "name": "Meowstic"
+  },
+  "aegislash-blade": {
+    "api": 10026,
+    "sprite": "aegislash-blade.gif",
+    "name": "Aegislash"
+  },
+  "pumpkaboo-small": {
+    "api": 10027,
+    "sprite": "pumpkaboo-small.gif",
+    "name": "Pumpkaboo Small"
+  },
+  "pumpkaboo-large": {
+    "api": 10028,
+    "sprite": "pumpkaboo-large.gif",
+    "name": "Pumpkaboo Large"
+  },
+  "pumpkaboo-super": {
+    "api": 10029,
+    "sprite": "pumpkaboo-super.gif",
+    "name": "Pumpkaboo"
+  },
+  "gourgeist-small": {
+    "api": 10030,
+    "sprite": "gourgeist-small.gif",
+    "name": "Gourgeist"
+  },
+  "gourgeist-large": {
+    "api": 10031,
+    "sprite": "gourgeist-large.gif",
+    "name": "Gourgeist"
+  },
+  "gourgeist-super": {
+    "api": 10032,
+    "sprite": "gourgeist-super.gif",
+    "name": "Gourgeist"
+  },
+  "venusaur-mega": {
+    "api": 10033,
+    "sprite": "venusaur-mega.gif",
+    "name": "Mega Venusaur"
+  },
+  "charizard-mega-x": {
+    "api": 10034,
+    "sprite": "charizard-megax.gif",
+    "name": "Mega Charizard X"
+  },
+  "charizard-mega-y": {
+    "api": 10035,
+    "sprite": "charizard-megay.gif",
+    "name": "Mega Charizard Y"
+  },
+  "blastoise-mega": {
+    "api": 10036,
+    "sprite": "blastoise-mega.gif",
+    "name": "Mega Blastoise"
+  },
+  "alakazam-mega": {
+    "api": 10037,
+    "sprite": "alakazam-mega.gif",
+    "name": "Mega Alakazam"
+  },
+  "gengar-mega": {
+    "api": 10038,
+    "sprite": "gengar-mega.gif",
+    "name": "Mega Gengar"
+  },
+  "kangaskhan-mega": {
+    "api": 10039,
+    "sprite": "kangaskhan-mega.gif",
+    "name": "Mega Kangaskhan"
+  },
+  "pinsir-mega": {
+    "api": 10040,
+    "sprite": "pinsir-mega.gif",
+    "name": "Mega Pinsir"
+  },
+  "gyarados-mega": {
+    "api": 10041,
+    "sprite": "gyarados-mega.gif",
+    "name": "Mega Gyarados"
+  },
+  "aerodactyl-mega": {
+    "api": 10042,
+    "sprite": "aerodactyl-mega.gif",
+    "name": "Mega Aerodactyl"
+  },
+  "mewtwo-mega-x": {
+    "api": 10043,
+    "sprite": "mewtwo-megax.gif",
+    "name": "Mega Mewtwo X"
+  },
+  "mewtwo-mega-y": {
+    "api": 10044,
+    "sprite": "mewtwo-megay.gif",
+    "name": "Mega Mewtwo Y"
+  },
+  "ampharos-mega": {
+    "api": 10045,
+    "sprite": "ampharos-mega.gif",
+    "name": "Mega Ampharos"
+  },
+  "scizor-mega": {
+    "api": 10046,
+    "sprite": "scizor-mega.gif",
+    "name": "Mega Scizor"
+  },
+  "heracross-mega": {
+    "api": 10047,
+    "sprite": "heracross-mega.gif",
+    "name": "Mega Heracross"
+  },
+  "houndoom-mega": {
+    "api": 10048,
+    "sprite": "houndoom-mega.gif",
+    "name": "Mega Houndoom"
+  },
+  "tyranitar-mega": {
+    "api": 10049,
+    "sprite": "tyranitar-mega.gif",
+    "name": "Mega Tyranitar"
+  },
+  "blaziken-mega": {
+    "api": 10050,
+    "sprite": "blaziken-mega.gif",
+    "name": "Mega Blaziken"
+  },
+  "gardevoir-mega": {
+    "api": 10051,
+    "sprite": "gardevoir-mega.gif",
+    "name": "Mega Gardevoir"
+  },
+  "mawile-mega": {
+    "api": 10052,
+    "sprite": "mawile-mega.gif",
+    "name": "Mega Mawile"
+  },
+  "aggron-mega": {
+    "api": 10053,
+    "sprite": "aggron-mega.gif",
+    "name": "Mega Aggron"
+  },
+  "medicham-mega": {
+    "api": 10054,
+    "sprite": "medicham-mega.gif",
+    "name": "Mega Medicham"
+  },
+  "manectric-mega": {
+    "api": 10055,
+    "sprite": "manectric-mega.gif",
+    "name": "Mega Manectric"
+  },
+  "banette-mega": {
+    "api": 10056,
+    "sprite": "banette-mega.gif",
+    "name": "Mega Banette"
+  },
+  "absol-mega": {
+    "api": 10057,
+    "sprite": "absol-mega.gif",
+    "name": "Mega Absol"
+  },
+  "garchomp-mega": {
+    "api": 10058,
+    "sprite": "garchomp-mega.gif",
+    "name": "Mega Garchomp"
+  },
+  "lucario-mega": {
+    "api": 10059,
+    "sprite": "lucario-mega.gif",
+    "name": "Mega Lucario"
+  },
+  "abomasnow-mega": {
+    "api": 10060,
+    "sprite": "abomasnow-mega.gif",
+    "name": "Mega Abomasnow"
+  },
+  "latias-mega": {
+    "api": 10062,
+    "sprite": "latias-mega.gif",
+    "name": "Mega Latias"
+  },
+  "latios-mega": {
+    "api": 10063,
+    "sprite": "latios-mega.gif",
+    "name": "Mega Latios"
+  },
+  "swampert-mega": {
+    "api": 10064,
+    "sprite": "swampert-mega.gif",
+    "name": "Mega Swampert"
+  },
+  "sceptile-mega": {
+    "api": 10065,
+    "sprite": "sceptile-mega.gif",
+    "name": "Mega Sceptile"
+  },
+  "sableye-mega": {
+    "api": 10066,
+    "sprite": "sableye-mega.gif",
+    "name": "Mega Sableye"
+  },
+  "altaria-mega": {
+    "api": 10067,
+    "sprite": "altaria-mega.gif",
+    "name": "Mega Altaria"
+  },
+  "gallade-mega": {
+    "api": 10068,
+    "sprite": "gallade-mega.gif",
+    "name": "Mega Gallade"
+  },
+  "audino-mega": {
+    "api": 10069,
+    "sprite": "audino-mega.gif",
+    "name": "Mega Audino"
+  },
+  "sharpedo-mega": {
+    "api": 10070,
+    "sprite": "sharpedo-mega.gif",
+    "name": "Mega Sharpedo"
+  },
+  "slowbro-mega": {
+    "api": 10071,
+    "sprite": "slowbro-mega.gif",
+    "name": "Mega Slowbro"
+  },
+  "steelix-mega": {
+    "api": 10072,
+    "sprite": "steelix-mega.gif",
+    "name": "Mega Steelix"
+  },
+  "pidgeot-mega": {
+    "api": 10073,
+    "sprite": "pidgeot-mega.gif",
+    "name": "Mega Pidgeot"
+  },
+  "glalie-mega": {
+    "api": 10074,
+    "sprite": "glalie-mega.gif",
+    "name": "Mega Glalie"
+  },
+  "diancie-mega": {
+    "api": 10075,
+    "sprite": "diancie-mega.gif",
+    "name": "Mega Diancie"
+  },
+  "metagross-mega": {
+    "api": 10076,
+    "sprite": "metagross-mega.gif",
+    "name": "Mega Metagross"
+  },
+  "kyogre-primal": {
+    "api": 10077,
+    "sprite": "kyogre-primal.gif",
+    "name": "Primal Kyogre"
+  },
+  "groudon-primal": {
+    "api": 10078,
+    "sprite": "groudon-primal.gif",
+    "name": "Primal Groudon"
+  },
+  "rayquaza-mega": {
+    "api": 10079,
+    "sprite": "rayquaza-mega.gif",
+    "name": "Mega Rayquaza"
+  },
+  "pikachu-rockstar": {
+    "api": 10080,
+    "sprite": "pikachu-rockstar.gif",
+    "name": "Pikachu Rockstar"
+  },
+  "pikachu-belle": {
+    "api": 100781,
+    "sprite": "pikachu-belle.gif",
+    "name": "Pikachu Belle"
+  },
+  "pikachu-popstar": {
+    "api": 10082,
+    "sprite": "pikachu-popstar.gif",
+    "name": "Pikachu Popstar"
+  },
+  "pikachu-phd": {
+    "api": 10083,
+    "sprite": "pikachu-phd.gif",
+    "name": "Pikachu PhD"
+  },
+  "pikachu-libre": {
+    "api": 10084,
+    "sprite": "pikachu-libre.gif",
+    "name": "Pikachu Libre"
+  },
+  "pikachu-cosplay": {
+    "api": 10085,
+    "sprite": "pikachu-cosplay.gif",
+    "name": "Pikachu Cosplay"
+  },
+  "hoopa-unbound": {
+    "api": 10086,
+    "sprite": "hoopa-unbound.gif",
+    "name": "Hoopa Unbound"
+  },
+  "camerupt-mega": {
+    "api": 10087,
+    "sprite": "camerupt-mega.gif",
+    "name": "Mega Camerupt"
+  },
+  "lopunny-mega": {
+    "api": 10088,
+    "sprite": "lopunny-mega.gif",
+    "name": "Mega Lopunny"
+  },
+  "salamence-mega": {
+    "api": 10089,
+    "sprite": "salamence-mega.gif",
+    "name": "MegaSalamence"
+  },
+  "beedrill-mega": {
+    "api": 10090,
+    "sprite": "beedrill-mega.gif",
+    "name": "Mega Beedrill"
+  },
+  "rattata-alola": {
+    "api": 10091,
+    "sprite": "rattata-alola.gif",
+    "name": "Rattata Alola"
+  },
+  "raticate-alola": {
+    "api": 10092,
+    "sprite": "raticate-alola.gif",
+    "name": "Raticate Alola"
+  },
+  "raticate-totem": {
+    "api": 10093,
+    "sprite": "raticate-totem-a",
+    "name": "Raticate Totem"
+  },
+  "pikachu-original": {
+    "api": 10094,
+    "sprite": "pikachu-original.gif",
+    "name": "Pikachu Original"
+  },
+  "pikachu-hoenn": {
+    "api": 10095,
+    "sprite": "pikachu-hoenn.gif",
+    "name": "Pikachu Hoenn"
+  },
+  "pikachu-sinnoh": {
+    "api": 10096,
+    "sprite": "pikachu-sinnoh.gif",
+    "name": "Pikachu Sinnoh"
+  },
+  "pikachu-unova": {
+    "api": 10097,
+    "sprite": "pikachu-unova.gif",
+    "name": "Pikachu Unova"
+  },
+  "pikachu-kalos": {
+    "api": 10098,
+    "sprite": "pikachu-kalos.gif",
+    "name": "Pikachu Kalos"
+  },
+  "pikachu-alola": {
+    "api": 10099,
+    "sprite": "pikachu-alola.gif",
+    "name": "Pikachu Alola"
+  },
+  "raichu-alola": {
+    "api": 10100,
+    "sprite": "raichu-alola.gif",
+    "name": "Raichu Alola"
+  },
+  "sandshrew-alola": {
+    "api": 10101,
+    "sprite": "sandshrew-alola.gif",
+    "name": "Sandshrew Alola"
+  },
+  "sandslash-alola": {
+    "api": 10102,
+    "sprite": "sandslash-alola.gif",
+    "name": "Sandslash Alola"
+  },
+  "vulpix-alola": {
+    "api": 10103,
+    "sprite": "vulpix-alola.gif",
+    "name": "Vulpix Alola"
+  },
+  "ninetales-alola": {
+    "api": 10104,
+    "sprite": "ninetales-alola.gif",
+    "name": "Ninetales Alola"
+  },
+  "diglett-alola": {
+    "api": 10105,
+    "sprite": "diglett-alola.gif",
+    "name": "Diglett Alola"
+  },
+  "dugtrio-alola": {
+    "api": 10106,
+    "sprite": "dugtrio-alola.gif",
+    "name": "Dugtrio Alola"
+  },
+  "meowth-alola": {
+    "api": 10107,
+    "sprite": "meowth-alola.gif",
+    "name": "Meowth Alola"
+  },
+  "persian-alola": {
+    "api": 10108,
+    "sprite": "persian-alola.gif",
+    "name": "Persian Alola"
+  },
+  "geodude-alola": {
+    "api": 10109,
+    "sprite": "beedrill-mega.gif",
+    "name": "Geodude Alola"
+  },
+  "graveler-alola": {
+    "api": 10110,
+    "sprite": "graveler-alola.gif",
+    "name": "Graveler Alola"
+  },
+  "golem-alola": {
+    "api": 10111,
+    "sprite": "golem-alola.gif",
+    "name": "Golem Alola"
+  },
+  "grimer-alola": {
+    "api": 10112,
+    "sprite": "grimer-alola.gif",
+    "name": "Grimer Alola"
+  },
+  "muk-alola": {
+    "api": 10113,
+    "sprite": "muk-alola.gif",
+    "name": "Muk Alola"
+  },
+  "exeggutor-alola": {
+    "api": 10114,
+    "sprite": "exeggutor-alola.gif",
+    "name": "Exeggutor Alola"
+  },
+  "marowak-alola": {
+    "api": 10115,
+    "sprite": "marowak-alola.gif",
+    "name": "Marowak Alola"
+  },
+  "greninja-battlebond": {
+    "api": 10116,
+    "sprite": "greninja.gif",
+    "name": "Greninja Battlebond"
+  },
+  "greninja-ash": {
+    "api": 10117,
+    "sprite": "greninja-ash.gif",
+    "name": "Greninja Ash"
+  },
+  "zygarde-10": {
+    "api": 10118,
+    "sprite": "zygarde-10.gif",
+    "name": "Zygarde 10"
+  },
+  "zygarde-50": {
+    "api": 10119,
+    "sprite": "zygarde.gif",
+    "name": "Zygarde 50"
+  },
+  "zygarde-complete": {
+    "api": 10120,
+    "sprite": "zygarde-complete.gif",
+    "name": "Zygarde Complete"
+  },
+  "gumshoos-totem": {
+    "api": 10121,
+    "sprite": "gumshoos-totem.gif",
+    "name": "Gumshoos Totem"
+  },
+  "vikavolt-totem": {
+    "api": 10122,
+    "sprite": "vikavolt-totem.gif",
+    "name": "Vikavolt Totem"
+  },
+  "oricorio-pompom": {
+    "api": 10123,
+    "sprite": "oricorio-pompom.gif",
+    "name": "Oricorio Pom-Pom"
+  },
+  "oricorio-pau": {
+    "api": 10124,
+    "sprite": "beedrill-mega.gif",
+    "name": "Oricorio P'au"
+  },
+  "oricorio-sensu": {
+    "api": 10125,
+    "sprite": "oricorio-sensu.gif",
+    "name": "Oricorio Sensu"
+  },
+  "lycanroc-midnight": {
+    "api": 10126,
+    "sprite": "lycanroc-midnight.gif",
+    "name": "Lycanroc Midnight"
+  },
+  "wishiwashi-school": {
+    "api": 10127,
+    "sprite": "wishiwashi-school.gif",
+    "name": "Wishiwashi School"
+  },
+  "lurantis-totem": {
+    "api": 10128,
+    "sprite": "lurantis-totem.gif",
+    "name": "Lurantis Totem"
+  },
+  "salazzle-totem": {
+    "api": 10129,
+    "sprite": "salazzle-totem.gif",
+    "name": "Salazzle Totem"
+  },
+  "minior-orange-meteor": {
+    "api": 10130,
+    "sprite": "minior-meteor.gif",
+    "name": "Minior Orange Meteor"
+  },
+  "minior-yellow-meteor": {
+    "api": 10131,
+    "sprite": "minior-meteor.gif",
+    "name": "Minior Yellow Meteor"
+  },
+  "minior-green-meteor": {
+    "api": 10132,
+    "sprite": "minior-meteor.gif",
+    "name": "Minior Green Meteor"
+  },
+  "minior-blue-meteor": {
+    "api": 10133,
+    "sprite": "minior-meteor.gif",
+    "name": "Minior Blue Meteor"
+  },
+  "minior-indigo-meteor": {
+    "api": 10134,
+    "sprite": "minior-meteor.gif",
+    "name": "Minior Indigo Meteor"
+  },
+  "minior-violet-meteor": {
+    "api": 10135,
+    "sprite": "minior-meteor.gif",
+    "name": "Minior Violet Meteor"
+  },
+  "minior-red": {
+    "api": 10136,
+    "sprite": "minior-red.gif",
+    "name": "Minior Red"
+  },
+  "minior-orange": {
+    "api": 10137,
+    "sprite": "minior-orange.gif",
+    "name": "Minior Orange"
+  },
+  "minior-yellow": {
+    "api": 10138,
+    "sprite": "minior-yellow.gif",
+    "name": "Minior Yellow"
+  },
+  "minior-green": {
+    "api": 10139,
+    "sprite": "minior-green.gif",
+    "name": "Minior Green"
+  },
+  "minior-blue": {
+    "api": 10140,
+    "sprite": "minior-blue.gif",
+    "name": "Minior Blue"
+  },
+  "minior-indigo": {
+    "api": 10141,
+    "sprite": "minior Indigo.gif",
+    "name": "Minior Indigo"
+  },
+  "minior-violet": {
+    "api": 10142,
+    "sprite": "minior-violet.gif",
+    "name": "Minior Violet"
+  },
+  "mimikyu-busted": {
+    "api": 10143,
+    "sprite": "mimikyu-busted.gif",
+    "name": "Mimikyu"
+  },
+  "mimikyu-totem": {
+    "api": 10144,
+    "sprite": "mimikyu-totem.gif",
+    "name": "Mimikyu Totem"
+  },
+  "mimikyu-totem-busted": {
+    "api": 10145,
+    "sprite": "mimikyu-totem-busted.gif",
+    "name": "Mimikyu Totem"
+  },
+  "kommo-o-totem": {
+    "api": 10146,
+    "sprite": "kommo-o-totem.gif",
+    "name": "Kommo-o Totem"
+  },
+  "magearna-original": {
+    "api": 10147,
+    "sprite": "magearna-original.gif",
+    "name": "Magearna Original"
+  },
+  "pikachu-partner": {
+    "api": 10148,
+    "sprite": "pikachu-partner.gif",
+    "name": "Pikachu Partner"
+  },
+  "marowak-totem": {
+    "api": 10149,
+    "sprite": "marowak-totem.gif",
+    "name": "Marowak Totem"
+  },
+  "ribombee-totem": {
+    "api": 10150,
+    "sprite": "ribombee-totem.gif",
+    "name": "Ribombee Totem"
+  },
+  "rockruff-own-tempo": {
+    "api": 10151,
+    "sprite": "rockruff.gif",
+    "name": "Rockruff"
+  },
+  "lycanroc-dusk": {
+    "api": 10152,
+    "sprite": "lycanroc-dusk.gif",
+    "name": "Lycanroc Dusk"
+  },
+  "araquanid-totem": {
+    "api": 10153,
+    "sprite": "araquanid-totem.gif",
+    "name": "Araquanid Totem"
+  },
+  "togedemaru-totem": {
+    "api": 10154,
+    "sprite": "togedemaru-totem.gif",
+    "name": "Togedemaru Totem"
+  },
+  "necrozma-dusk": {
+    "api": 10155,
+    "sprite": "necrozma-duskmane.gif",
+    "name": "Necrozma Duskmane"
+  },
+  "necrozma-dawn": {
+    "api": 10156,
+    "sprite": "necrozma-dawnwings.gif",
+    "name": "Necrozma Dawnwings"
+  },
+  "necrozma-ultra": {
+    "api": 10157,
+    "sprite": "necrozma-ultra.gif",
+    "name": "Necrozma Ultra"
+  }
+}
