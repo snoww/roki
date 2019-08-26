@@ -48,6 +48,13 @@ namespace Roki.Modules.Searches.Services
             var pokemonData = JsonConvert.DeserializeObject<Dictionary<string, PokemonData>>(data);
             return pokemonData[query.Trim().Replace(' ', '-')];
         }
+
+        public PokemonData GetPokemonById(int id)
+        {
+            var pokemonData = JsonConvert.DeserializeObject<Dictionary<string, PokemonData>>(data);
+
+            return (from pokemon in pokemonData where pokemon.Value.Api == id select pokemonData[pokemon.ToString()]).FirstOrDefault();
+        }
         
         public string GetPokemonEvolutionChain(string pokemon, EvolutionChain evoChain)
         {
