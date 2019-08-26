@@ -46,7 +46,7 @@ namespace Roki.Modules.Searches.Services
         public PokemonData GetPokemonData(string query)
         {
             var pokemonData = JsonConvert.DeserializeObject<Dictionary<string, PokemonData>>(data);
-            return pokemonData[query];
+            return pokemonData[query.Trim().Replace(' ', '-')];
         }
         
         public string GetPokemonEvolutionChain(string pokemon, EvolutionChain evoChain)
