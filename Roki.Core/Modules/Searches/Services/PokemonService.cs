@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Discord;
@@ -11,7 +12,7 @@ namespace Roki.Modules.Searches.Services
 {
     public class PokemonService : INService
     {
-        private static readonly PokemonModel PokemonData = JsonConvert.DeserializeObject<PokemonModel>(File.ReadAllText("./_strings/pokemon/pokemon.json"));
+        private static readonly string data = File.ReadAllText("./_strings/pokemon/pokemon.json");
         
         public Color GetColorOfPokemon(string color)
         {
@@ -42,9 +43,10 @@ namespace Roki.Modules.Searches.Services
             }
         }
 
-        public PokemonModel.PokemonData GetPokemonData(string query)
+        public PokemonData GetPokemonData(string query)
         {
-            return PokemonData.Pokemon[query];
+            var pokemonData = JsonConvert.DeserializeObject<Dictionary<string, PokemonData>>(data);
+            return pokemonData[query];
         }
         
         public string GetPokemonEvolutionChain(string pokemon, EvolutionChain evoChain)
