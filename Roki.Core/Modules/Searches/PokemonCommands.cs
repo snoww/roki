@@ -33,8 +33,8 @@ namespace Roki.Modules.Searches
                     Pokemon pokemon;
                     if (int.TryParse(query, out var id))
                     {
+                        data = _service.GetPokemonById(id);
                         pokemon = await _pokeClient.GetResourceAsync<Pokemon>(id).ConfigureAwait(false);
-                        data = _service.GetPokemonData(pokemon.Name);
                     }
                     else
                     {
