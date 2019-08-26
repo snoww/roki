@@ -139,10 +139,10 @@
     "sprite": "sandslash.gif",
     "name": "Sandslash"
   },
-  "nidoran♀": {
+  "nidoran-f": {
     "api": 29,
-    "sprite": "nidoran♀.gif",
-    "name": "Nidoran♀"
+    "sprite": "nidoran-f.gif",
+    "name": "Nidoran"
   },
   "nidorina": {
     "api": 30,
@@ -154,10 +154,10 @@
     "sprite": "nidoqueen.gif",
     "name": "Nidoqueen"
   },
-  "nidoran♂": {
+  "nidoran": {
     "api": 32,
-    "sprite": "nidoran♂.gif",
-    "name": "Nidoran♂"
+    "sprite": "nidoranf.gif",
+    "name": "Nidoran"
   },
   "nidorino": {
     "api": 33,
@@ -3339,10 +3339,10 @@
     "sprite": "pyroar.gif",
     "name": "Pyroar"
   },
-  "flabébé": {
+  "flabebe": {
     "api": 669,
-    "sprite": "flabébé.gif",
-    "name": "Flab�b�"
+    "sprite": "flabebé.gif",
+    "name": "Flabébé"
   },
   "floette": {
     "api": 670,
@@ -3922,7 +3922,7 @@
   "tapu-koko": {
     "api": 785,
     "sprite": "tapukoko.gif",
-    "name": "Tapu koko"
+    "name": "Tapu Koko"
   },
   "tapu-lele": {
     "api": 786,
