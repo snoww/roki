@@ -17,18 +17,18 @@ namespace Roki.Modules.Help
     {
         private readonly CommandService _command;
         private readonly IConfiguration _config;
-        private readonly IServiceProvider _service;
+        private readonly IServiceProvider _services;
 
 //        public EmbedBuilder GetHelpStringEmbed()
 //        {
 //            
 //        }
 
-        public Help(IConfiguration config, CommandService command, IServiceProvider service)
+        public Help(IConfiguration config, CommandService command, IServiceProvider services)
         {
             _config = config;
             _command = command;
-            _service = service;
+            _services = services;
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -62,7 +62,7 @@ namespace Roki.Modules.Help
             {
                 success = new HashSet<CommandInfo>((await Task.WhenAll(cmds.Select(async x =>
                     {
-                        var pre = await x.CheckPreconditionsAsync(Context, _service).ConfigureAwait(false);
+                        var pre = await x.CheckPreconditionsAsync(Context, _services).ConfigureAwait(false);
                         return (Command: x, Success: pre.IsSuccess);
                     })).ConfigureAwait(false))
                     .Where(x => x.Success)
@@ -86,7 +86,7 @@ namespace Roki.Modules.Help
             var i = 0;
             var groups = cmdsWithGroup.GroupBy(x => i++ / 48).ToArray();
             var embed = new EmbedBuilder().WithOkColor();
-            // abcie
+
             foreach (var group in groups)
             {
                 var last = group.Count();
@@ -106,12 +106,7 @@ namespace Roki.Modules.Help
                         var count = transformed.Count();
                         transformed = transformed
                             .GroupBy(x => grp++ % count / 2)
-                            .Select(x =>
-                            {
-                                if (x.Count() == 1)
-                                    return $"{x.First()}";
-                                return string.Concat(x);
-                            });
+                            .Select(x => x.Count() == 1 ? $"{x.First()}" : string.Concat(x));
                     }
 
                     embed.AddField(group.ElementAt(i).Key, "```css\n" + string.Join("\n", transformed) + "\n```", true);
@@ -122,36 +117,38 @@ namespace Roki.Modules.Help
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
-//        [RokiCommand, Description, Usage, Aliases]
-//        [Priority(0)]
-//        public async Task H([Leftover] string fail)
-//        {
-//            var preflixless = _command.Commands.FirstOrDefault(x => x.Aliases.Any(cmdName => cmdName.ToLowerInvariant() == fail));
-//            if (preflixless != null)
-//            {
-//                await (H(preflixless).ConfigureAwait(false));
-//                return;
-//            }
-//            var embed = new EmbedBuilder().WithErrorColor()
-//                .WithDescription("Command not found");
-//            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
-//        }
-//
-//        [RokiCommand, Description, Usage, Aliases]
-//        [Priority(1)]
-//        public async Task H([Leftover] CommandInfo cmd = null)
-//        {
-//            var channel = ctx.Channel;
-//
+        [RokiCommand, Description, Usage, Aliases]
+        [Priority(0)]
+        public async Task H([Leftover] string fail)
+        {
+            var prefixless = _command.Commands.FirstOrDefault(x => x.Aliases.Any(cmdName => cmdName.ToLowerInvariant() == fail));
+            if (prefixless != null)
+            {
+                await H(prefixless).ConfigureAwait(false);
+                return;
+            }
+            var embed = new EmbedBuilder().WithErrorColor()
+                .WithDescription("Command not found");
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+        }
+
+        [RokiCommand, Description, Usage, Aliases]
+        [Priority(1)]
+        public async Task H([Leftover] CommandInfo cmd = null)
+        {
+            var channel = ctx.Channel;
+
 //            if (cmd == null)
 //            {
-//                IMessageChannel ch = channel is ITextChannel
+//                var ch = channel is ITextChannel
 //                    ? await ((IGuildUser) ctx.User).GetOrCreateDMChannelAsync().ConfigureAwait(false)
 //                    : channel;
-//                // TODO add help command
-////                await ch.
+//
+//                await ch.
 //            }
-//        }
+            var embed = _service.GetCommandHelp(cmd, ctx.Guild);
+            await channel.EmbedAsync(embed).ConfigureAwait(false);
+        }
 
         public class CommandTextEqualityComparer : IEqualityComparer<CommandInfo>
         {
