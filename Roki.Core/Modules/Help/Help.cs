@@ -127,9 +127,8 @@ namespace Roki.Modules.Help
                 await H(prefixless).ConfigureAwait(false);
                 return;
             }
-            var embed = new EmbedBuilder().WithErrorColor()
-                .WithDescription("Command not found");
-            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            
+            await ctx.Channel.SendErrorAsync("Command not found").ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
