@@ -17,4 +17,8 @@
       <ProjectReference Include="..\Roki.Core\Roki.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Properties" />
+    </ItemGroup>
+
 </Project>
