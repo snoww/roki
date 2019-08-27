@@ -196,5 +196,12 @@
     "Usage": [
       "{0}item master ball"
     ]
+  },
+  "pins": {
+    "Command": "pins pin",
+    "Description": "Returns the latest pin in the current channel",
+    "Usage": [
+      "{0}pin"
+    ]
   }
 }

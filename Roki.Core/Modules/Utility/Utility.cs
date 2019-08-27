@@ -1,5 +1,7 @@
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
@@ -40,6 +42,25 @@ namespace Roki.Modules.Utility
                     .AddField("Owner ID", ownerId, true)
                     .AddField("Uptime", _stats.GetUptimeString("\n"), true)
                     .AddField("Presence", $"{_stats.TextChannels} Text Channels\n{_stats.VoiceChannels} Voice Channels", true));
+        }
+
+        [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
+        public async Task Pins()
+        {
+            var pins = await ctx.Channel.GetPinnedMessagesAsync().ConfigureAwait(false);
+            if (pins == null)
+            {
+                await ctx.Channel.SendErrorAsync("No pins in this channel");
+                return;
+            }
+            var pin = pins.First();
+
+            var embed = new EmbedBuilder().WithOkColor()
+                .WithTitle(pin.Author.Username)
+                .WithDescription(pin.Content)
+                .WithFooter($"{pin.Timestamp.ToLocalTime():td}");
+            
+            await ctx.Channel.EmbedAsync(embed);
         }
     }
 }
