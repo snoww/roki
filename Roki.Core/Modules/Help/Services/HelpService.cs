@@ -44,9 +44,9 @@ namespace Roki.Modules.Help.Services
         {
             var prefix = _command.DefaultPrefix;
 
-            var str = string.Format("**`{0}`**", prefix + info.Aliases.First());
+            var str = $"**`{prefix + info.Aliases.First()}`**";
             var alias = info.Aliases.Skip(1).FirstOrDefault();
-            if (alias != null) str += string.Format(" **/ `{0}`**", prefix + alias);
+            if (alias != null) str += $" **/ `{prefix + alias}`**";
             var embed = new EmbedBuilder().AddField(str, info.RealSummary(prefix), true);
 
             var reqs = GetCommandRequirements(info);
