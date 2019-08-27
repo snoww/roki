@@ -48,17 +48,17 @@ namespace Roki.Modules.Utility
         public async Task Pins()
         {
             var pins = await ctx.Channel.GetPinnedMessagesAsync().ConfigureAwait(false);
-            if (pins == null)
+            if (pins.Count < 1)
             {
                 await ctx.Channel.SendErrorAsync("No pins in this channel");
                 return;
             }
             var pin = pins.First();
-
+// TODO handle pinned embeds?
             var embed = new EmbedBuilder().WithOkColor()
                 .WithTitle(pin.Author.Username)
                 .WithDescription(pin.Content)
-                .WithFooter($"{pin.Timestamp.ToLocalTime():td}");
+                .WithFooter($"{pin.Timestamp.ToLocalTime():hh:mm tt MM/dd/yyyy}");
             
             await ctx.Channel.EmbedAsync(embed);
         }
