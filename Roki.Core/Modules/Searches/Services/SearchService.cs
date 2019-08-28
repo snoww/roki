@@ -13,7 +13,7 @@ using Roki.Modules.Searches.Common;
 
 namespace Roki.Modules.Searches.Services
 {
-    public class SearchService : INService, IUnloadableService
+    public class SearchService : IRService, IUnloadableService
     {
         private readonly DiscordSocketClient _client;
         private readonly IConfiguration _config;

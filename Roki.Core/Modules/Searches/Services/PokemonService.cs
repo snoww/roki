@@ -10,7 +10,7 @@ using Roki.Modules.Searches.Common;
 
 namespace Roki.Modules.Searches.Services
 {
-    public class PokemonService : INService
+    public class PokemonService : IRService
     {
         private static readonly Dictionary<string, PokemonData> Data = JsonConvert.DeserializeObject<Dictionary<string, PokemonData>>(File.ReadAllText("./_strings/pokemon/pokemon.json"));
         
