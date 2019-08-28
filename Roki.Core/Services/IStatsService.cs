@@ -2,7 +2,7 @@ using System;
 
 namespace Roki.Core.Services
 {
-    public interface IStatsService : INService
+    public interface IStatsService : IRService
     {
         string Author { get; }
         long CommandsRan { get; }

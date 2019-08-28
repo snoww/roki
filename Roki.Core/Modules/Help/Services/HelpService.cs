@@ -13,7 +13,7 @@ using Roki.Extensions;
 
 namespace Roki.Modules.Help.Services
 {
-    public class HelpService : ILateExecutor, INService
+    public class HelpService : ILateExecutor, IRService
     {
         private readonly CommandHandler _command;
         private readonly Logger _log;

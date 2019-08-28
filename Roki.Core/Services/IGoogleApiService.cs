@@ -4,7 +4,7 @@ using Google.Apis.Customsearch.v1.Data;
 
 namespace Roki.Core.Services
 {
-    public interface IGoogleApiService : INService
+    public interface IGoogleApiService : IRService
     {
         Task<IEnumerable<string>> GetVideoLinksByKeywordAsync(string keywords, int count = 1);
         Task<IEnumerable<(string Name, string Id, string Url)>> GetVideoInfoByKeywordAsync(string keywords, int count = 1);
