@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Roki.Common.Attributes;
@@ -32,6 +33,7 @@ namespace Roki.Modules.Utility
                 proc.WaitForExit();
 
                 await ctx.Channel.SendFileAsync("tex.png").ConfigureAwait(false);
+                File.Delete("tex.png");
             }
         }
     }
