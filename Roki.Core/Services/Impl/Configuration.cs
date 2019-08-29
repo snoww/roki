@@ -12,6 +12,20 @@ namespace Roki.Core.Services.Impl
     {
         private readonly string _credsFileName = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
         private readonly Logger _log;
+        
+        public ulong ClientId { get; }
+        public string Token { get; }
+        public string GoogleApi { get; }
+        public string OmdbApi { get; }
+        public string DarkSkyApi { get; }
+        public ImmutableArray<ulong> OwnerIds { get; }
+
+        public DbConfig Db { get; }
+
+        public bool IsOwner(IUser u)
+        {
+            return OwnerIds.Contains(u.Id);
+        }
 
         public Configuration()
         {
@@ -36,6 +50,8 @@ namespace Roki.Core.Services.Impl
 
                 OwnerIds = data.GetSection("OwnerIds").GetChildren().Select(c => ulong.Parse(c.Value)).ToImmutableArray();
                 GoogleApi = data[nameof(GoogleApi)];
+                OmdbApi = data[nameof(OmdbApi)];
+                DarkSkyApi = data[nameof(DarkSkyApi)];
 
                 if (!ulong.TryParse(data[nameof(ClientId)], out var clId))
                     clId = 0;
@@ -55,19 +71,6 @@ namespace Roki.Core.Services.Impl
                 _log.Fatal(e);
                 throw;
             }
-        }
-
-        public ulong ClientId { get; }
-        public string Token { get; }
-        public string GoogleApi { get; }
-
-        public ImmutableArray<ulong> OwnerIds { get; }
-
-        public DbConfig Db { get; }
-
-        public bool IsOwner(IUser u)
-        {
-            return OwnerIds.Contains(u.Id);
         }
     }
 }

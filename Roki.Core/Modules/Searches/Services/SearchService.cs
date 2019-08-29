@@ -58,7 +58,7 @@ namespace Roki.Modules.Searches.Services
                         return (null, null);
                     }
 
-                    var darkSky = new DarkSkyService("a4e7bd45cb9c191eec7cda6c2559b413");
+                    var darkSky = new DarkSkyService(_config.DarkSkyApi);
                     var forecast = await darkSky.GetForecast(obj.Results[0].Geometry.Location.Lat, obj.Results[0].Geometry.Location.Lng,
                         new DarkSkyService.OptionalParameters
                         {
@@ -135,12 +135,9 @@ namespace Roki.Modules.Searches.Services
         {
             using (var http = _httpFactory.CreateClient())
             {
-                var result = await http.GetStringAsync(string.Format("http://www.omdbapi.com/?t={0}&apikey=f9c978ed&y=&plot=full&r=json",
-                    name.Trim().Replace(' ', '+'))).ConfigureAwait(false);
+                var result = await http.GetStringAsync($"http://www.omdbapi.com/?t={name.Trim().Replace(' ', '+')}&apikey={_config.OmdbApi}&y=&plot=full&r=json").ConfigureAwait(false);
                 var movie = JsonConvert.DeserializeObject<OmdbMovie>(result);
-                if (movie?.Title == null)
-                    return null;
-                return movie;
+                return movie?.Title == null ? null : movie;
             }
         }
     }

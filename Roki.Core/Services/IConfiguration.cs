@@ -8,6 +8,8 @@ namespace Roki.Core.Services
         ulong ClientId { get; }
         string Token { get; }
         string GoogleApi { get; }
+        string OmdbApi { get; }
+        string DarkSkyApi { get; }
 
         ImmutableArray<ulong> OwnerIds { get; }
 
