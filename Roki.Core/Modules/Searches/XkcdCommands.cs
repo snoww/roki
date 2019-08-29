@@ -1,0 +1,50 @@
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Discord;
+using Discord.Commands;
+using Newtonsoft.Json;
+using Roki.Common.Attributes;
+using Roki.Extensions;
+using Roki.Modules.Searches.Common;
+
+namespace Roki.Modules.Searches
+{
+    public class XkcdCommands : RokiSubmodule
+    {
+        private const string XkcdUrl = "https://xkcd.com";
+        private readonly IHttpClientFactory _httpFactory;
+
+        public XkcdCommands(IHttpClientFactory httpFactory)
+        {
+            _httpFactory = httpFactory;
+        }
+
+        [RokiCommand, Description, Usage, Aliases, Priority(0)]
+        public async Task Xkcd(int num = 0)
+        {
+            try
+            {
+                using (var http = _httpFactory.CreateClient())
+                {
+                    var result = num == 0
+                        ? await http.GetStringAsync($"{XkcdUrl}/info.0.json").ConfigureAwait(false)
+                        : await http.GetStringAsync($"{XkcdUrl}/{num}/info.0.json").ConfigureAwait(false);
+
+                    var xkcd = JsonConvert.DeserializeObject<XkcdModel>(result);
+                    var embed = new EmbedBuilder().WithOkColor()
+                        .WithAuthor(xkcd.Title, "https://xkcd.com/s/919f27.ico", $"{XkcdUrl}/{xkcd.Num}")
+                        .WithImageUrl(xkcd.Img)
+                        .AddField("Comic #", xkcd.Num, true)
+                        .AddField("Date", $"{xkcd.Month}/{xkcd.Year}");
+
+                    await ctx.Channel.EmbedAsync(embed);
+                }
+            }
+            catch (HttpRequestException)
+            {
+                await ctx.Channel.SendErrorAsync("Comic not found").ConfigureAwait(false);
+            }
+        }
+    }
+}

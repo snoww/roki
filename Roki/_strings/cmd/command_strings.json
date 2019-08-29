@@ -203,5 +203,13 @@
     "Usage": [
       "{0}pin"
     ]
+  },
+  "xkcd": {
+    "Command": "xkcd",
+    "Description": "Returns the specified xkcd comic, if no comic is specified, latest comic is shown",
+    "Usage": [
+      "{0}xkcd",
+      "{0}xkcd 912"
+    ]
   }
 }
