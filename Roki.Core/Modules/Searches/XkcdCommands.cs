@@ -10,40 +10,44 @@ using Roki.Modules.Searches.Common;
 
 namespace Roki.Modules.Searches
 {
-    public class XkcdCommands : RokiSubmodule
+    public partial class Searches
     {
-        private const string XkcdUrl = "https://xkcd.com";
-        private readonly IHttpClientFactory _httpFactory;
-
-        public XkcdCommands(IHttpClientFactory httpFactory)
+        [Group]
+        public class XkcdCommands : RokiSubmodule
         {
-            _httpFactory = httpFactory;
-        }
+            private const string XkcdUrl = "https://xkcd.com";
+            private readonly IHttpClientFactory _httpFactory;
 
-        [RokiCommand, Description, Usage, Aliases, Priority(0)]
-        public async Task Xkcd(int num = 0)
-        {
-            try
+            public XkcdCommands(IHttpClientFactory httpFactory)
             {
-                using (var http = _httpFactory.CreateClient())
-                {
-                    var result = num == 0
-                        ? await http.GetStringAsync($"{XkcdUrl}/info.0.json").ConfigureAwait(false)
-                        : await http.GetStringAsync($"{XkcdUrl}/{num}/info.0.json").ConfigureAwait(false);
-
-                    var xkcd = JsonConvert.DeserializeObject<XkcdModel>(result);
-                    var embed = new EmbedBuilder().WithOkColor()
-                        .WithAuthor(xkcd.Title, "https://xkcd.com/s/919f27.ico", $"{XkcdUrl}/{xkcd.Num}")
-                        .WithImageUrl(xkcd.Img)
-                        .AddField("Comic #", xkcd.Num, true)
-                        .AddField("Date", $"{xkcd.Month}/{xkcd.Year}");
-
-                    await ctx.Channel.EmbedAsync(embed);
-                }
+                _httpFactory = httpFactory;
             }
-            catch (HttpRequestException)
+
+            [RokiCommand, Description, Usage, Aliases, Priority(0)]
+            public async Task Xkcd(int num = 0)
             {
-                await ctx.Channel.SendErrorAsync("Comic not found").ConfigureAwait(false);
+                try
+                {
+                    using (var http = _httpFactory.CreateClient())
+                    {
+                        var result = num == 0
+                            ? await http.GetStringAsync($"{XkcdUrl}/info.0.json").ConfigureAwait(false)
+                            : await http.GetStringAsync($"{XkcdUrl}/{num}/info.0.json").ConfigureAwait(false);
+
+                        var xkcd = JsonConvert.DeserializeObject<XkcdModel>(result);
+                        var embed = new EmbedBuilder().WithOkColor()
+                            .WithAuthor(xkcd.Title, "https://xkcd.com/s/919f27.ico", $"{XkcdUrl}/{xkcd.Num}")
+                            .WithImageUrl(xkcd.Img)
+                            .AddField("Comic #", xkcd.Num, true)
+                            .AddField("Date", $"{xkcd.Month}/{xkcd.Year}");
+
+                        await ctx.Channel.EmbedAsync(embed);
+                    }
+                }
+                catch (HttpRequestException)
+                {
+                    await ctx.Channel.SendErrorAsync("Comic not found").ConfigureAwait(false);
+                }
             }
         }
     }
