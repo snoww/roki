@@ -6,6 +6,8 @@
     125025504548880384
   ],
   "GoogleApi": "AIzaSyAQrcfZcXpt5rx8JkWAfDUVwybevjQbtgo",
+  "OmdbApi": "f9c978ed",
+  "DarkSkyApi": "a4e7bd45cb9c191eec7cda6c2559b413",
   "Db": {
     "Type": "sqlite",
     "ConnectionString": "Data Source=data/roki.db"
