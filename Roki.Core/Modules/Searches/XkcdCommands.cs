@@ -39,7 +39,7 @@ namespace Roki.Modules.Searches
                             .WithAuthor(xkcd.Title, "https://xkcd.com/s/919f27.ico", $"{XkcdUrl}/{xkcd.Num}")
                             .WithImageUrl(xkcd.Img)
                             .AddField("Comic #", xkcd.Num, true)
-                            .AddField("Date", $"{xkcd.Month}/{xkcd.Year}");
+                            .AddField("Date", $"{xkcd.Month}/{xkcd.Year}", true);
 
                         await ctx.Channel.EmbedAsync(embed);
                     }
