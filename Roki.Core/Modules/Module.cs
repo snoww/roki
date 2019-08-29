@@ -57,17 +57,17 @@ namespace Roki.Modules
             var client = (DiscordSocketClient) ctx.Client;
             try
             {
-                client.MessageReceived += MessageRecieved;
+                client.MessageReceived += MessageReceived;
                 if (await Task.WhenAny(userInputTask.Task, Task.Delay(10000)).ConfigureAwait(false) != userInputTask.Task) return null;
 
                 return await userInputTask.Task.ConfigureAwait(false);
             }
             finally
             {
-                client.MessageReceived -= MessageRecieved;
+                client.MessageReceived -= MessageReceived;
             }
 
-            Task MessageRecieved(SocketMessage arg)
+            Task MessageReceived(SocketMessage arg)
             {
                 var _ = Task.Run(() =>
                 {
