@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Core.Services;
 using Roki.Extensions;
+using Roki.Modules.Music.Services;
 using Victoria;
 using Configuration = Roki.Core.Services.Impl.Configuration;
 
@@ -181,6 +182,9 @@ namespace Roki
 
             var _ = await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
 
+            var music = Services.GetService<MusicService>();
+            await music.InitializeAsync();
+            
             Ready.TrySetResult(true);
             _log.Info("Roki is ready");
         }
