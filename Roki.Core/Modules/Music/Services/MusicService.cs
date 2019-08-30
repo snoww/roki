@@ -27,6 +27,7 @@ namespace Roki.Modules.Music.Services
 
         public Task InitializeAsync()
         {
+            _client.Ready += ClientReadyAsync;
             _lavaSocketClient.Log += LogAsync;
             _lavaSocketClient.OnTrackFinished += TrackFinished;
             return Task.CompletedTask;
