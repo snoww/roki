@@ -181,9 +181,6 @@ namespace Roki
             await commandHandler.StartHandling().ConfigureAwait(false);
 
             var _ = await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
-
-            var music = Services.GetService<MusicService>();
-            await music.InitializeAsync();
             
             Ready.TrySetResult(true);
             _log.Info("Roki is ready");

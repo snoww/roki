@@ -23,14 +23,9 @@ namespace Roki.Modules.Music.Services
             _lavaRestClient = lavaRestClient;
             _lavaSocketClient = lavaSocketClient;
             _log = LogManager.GetCurrentClassLogger();
-        }
-
-        public Task InitializeAsync()
-        {
-            _client.Ready += ClientReadyAsync;
-            _lavaSocketClient.Log += LogAsync;
+            
+            client.Ready += OnReady;
             _lavaSocketClient.OnTrackFinished += TrackFinished;
-            return Task.CompletedTask;
         }
 
         public async Task ConnectAsync(SocketVoiceChannel voiceChannel, ITextChannel textChannel)
@@ -67,7 +62,7 @@ namespace Roki.Modules.Music.Services
         }
         
 
-        private async Task ClientReadyAsync()
+        private async Task OnReady()
         {
             await _lavaSocketClient.StartAsync(_client).ConfigureAwait(false);
         }
@@ -84,12 +79,6 @@ namespace Roki.Modules.Music.Services
             }
 
             await player.PlayAsync(nextTrack);
-        }
-
-        private Task LogAsync(LogMessage message)
-        {
-            _log.Info(message);
-            return Task.CompletedTask;
         }
     }
 }
