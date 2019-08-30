@@ -10,8 +10,9 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Core.Services;
-using Roki.Core.Services.Impl;
 using Roki.Extensions;
+using Victoria;
+using Configuration = Roki.Core.Services.Impl.Configuration;
 
 namespace Roki
 {
@@ -87,6 +88,8 @@ namespace Roki
                 .AddSingleton(_db)
                 .AddSingleton(Client)
                 .AddSingleton(CommandService)
+                .AddSingleton<LavaSocketClient>()
+                .AddSingleton<LavaRestClient>()
                 .AddSingleton(_db.GetDbContext())
                 .AddSingleton(this);
 
