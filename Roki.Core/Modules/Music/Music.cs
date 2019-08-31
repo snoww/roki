@@ -18,9 +18,16 @@ namespace Roki.Modules.Music
                 await ctx.Channel.SendErrorAsync("You need to connect to a voice channel").ConfigureAwait(false);
                 return;
             }
-
-            await _service.ConnectAsync(user.VoiceChannel, ctx.Channel as ITextChannel).ConfigureAwait(false);
+            
+            await _service.ConnectAsync(user.VoiceChannel, ctx.Channel as ITextChannel);
             await ReplyAsync($"now connected to {user.VoiceChannel.Name}");
+        }
+
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task Leave()
+        {
+            var user = ctx.User as SocketGuildUser;
+            await _service.LeaveAsync(user.VoiceChannel);
         }
 
         [RokiCommand, Description, Usage, Aliases]

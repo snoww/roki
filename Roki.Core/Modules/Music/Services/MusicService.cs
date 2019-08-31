@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -23,14 +24,13 @@ namespace Roki.Modules.Music.Services
             _lavaRestClient = lavaRestClient;
             _lavaSocketClient = lavaSocketClient;
             _log = LogManager.GetCurrentClassLogger();
-            
-            client.Ready += OnReady;
+            OnReady();
             _lavaSocketClient.OnTrackFinished += TrackFinished;
         }
 
         public async Task ConnectAsync(SocketVoiceChannel voiceChannel, ITextChannel textChannel)
-            => await _lavaSocketClient.ConnectAsync(voiceChannel, textChannel).ConfigureAwait(false);
-
+            => await _lavaSocketClient.ConnectAsync(voiceChannel);
+        
         public async Task LeaveAsync(SocketVoiceChannel voiceChannel)
             => await _lavaSocketClient.DisconnectAsync(voiceChannel).ConfigureAwait(false);
 
@@ -62,8 +62,9 @@ namespace Roki.Modules.Music.Services
         }
         
 
-        private async Task OnReady()
+        public async Task OnReady()
         {
+//            Console.WriteLine(_lavaSocketClient is null);
             await _lavaSocketClient.StartAsync(_client).ConfigureAwait(false);
         }
 
