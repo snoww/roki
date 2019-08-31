@@ -10,28 +10,39 @@ namespace Roki.Modules.Music
     public partial class Music : RokiTopLevelModule<MusicService>
     {
         [RokiCommand, Description, Usage, Aliases]
-        public async Task Join()
+        public async Task Queue([Leftover] string query)
         {
             var user = ctx.User as SocketGuildUser;
-            if (user.VoiceChannel is null)
+            if (user?.VoiceChannel == null)
             {
                 await ctx.Channel.SendErrorAsync("You need to connect to a voice channel").ConfigureAwait(false);
                 return;
             }
             
-            await _service.ConnectAsync(user.VoiceChannel, ctx.Channel as ITextChannel);
-            await ReplyAsync($"now connected to {user.VoiceChannel.Name}");
+            await _service.ConnectAsync(user.VoiceChannel, ctx.Channel as ITextChannel).ConfigureAwait(false);
+            await _service.QueueAsync(ctx, query).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task Leave()
+        public async Task Destroy()
         {
             var user = ctx.User as SocketGuildUser;
-            await _service.LeaveAsync(user.VoiceChannel);
+            if (user?.VoiceChannel == null)
+            {
+                await ctx.Channel.SendErrorAsync("You need to connect to a voice channel").ConfigureAwait(false);
+                return;
+            }
+            await _service.LeaveAsync(user.VoiceChannel).ConfigureAwait(false);
+            
+            var embed = new EmbedBuilder().WithOkColor()
+                .WithDescription($"Disconnected from {user.VoiceChannel.Name}");
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
-        [RokiCommand, Description, Usage, Aliases]
-        public async Task Play([Leftover] string query)
-            => await ReplyAsync(await _service.PlayAsync(query, ctx.Guild.Id).ConfigureAwait(false)).ConfigureAwait(false);
+//        [RokiCommand, Description, Usage, Aliases]
+//        public async Task Queue([Leftover] string query)
+//        {
+//            
+//        }
     }
 }
