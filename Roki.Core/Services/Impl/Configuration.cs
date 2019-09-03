@@ -20,6 +20,8 @@ namespace Roki.Core.Services.Impl
         public string DarkSkyApi { get; }
         public string TwitterConsumer { get; }
         public string TwitterConsumerSecret { get; }
+        public string TwitterAccessToken { get; }
+        public string TwitterAccessSecret { get; }
         public ImmutableArray<ulong> OwnerIds { get; }
 
         public DbConfig Db { get; }
@@ -56,6 +58,8 @@ namespace Roki.Core.Services.Impl
                 DarkSkyApi = data[nameof(DarkSkyApi)];
                 TwitterConsumer = data[nameof(TwitterConsumer)];
                 TwitterConsumerSecret = data[nameof(TwitterConsumerSecret)];
+                TwitterAccessToken = data[nameof(TwitterAccessToken)];
+                TwitterAccessSecret = data[nameof(TwitterAccessSecret)];
 
                 if (!ulong.TryParse(data[nameof(ClientId)], out var clId))
                     clId = 0;
