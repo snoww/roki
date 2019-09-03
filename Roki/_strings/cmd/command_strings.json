@@ -211,5 +211,12 @@
       "{0}xkcd",
       "{0}xkcd 912"
     ]
+  },
+  "twitter": {
+    "Command": "twitter",
+    "Description": "Returns the latest tweet by the specified user.",
+    "Usage": [
+      "{0}twitter xqcow"
+    ]
   }
 }
