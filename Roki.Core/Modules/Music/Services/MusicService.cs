@@ -65,40 +65,24 @@ namespace Roki.Modules.Music.Services
             await ctx.Channel.EmbedAsync(embed);
         }
         
-
-//        public async Task<string> PlayAsync(string query, ulong guildId)
-//        {
-//            var player = _lavaSocketClient.GetPlayer(guildId);
-//            var result = await _lavaRestClient.SearchYouTubeAsync(query).ConfigureAwait(false);
-//            if (result.LoadType == LoadType.NoMatches || result.LoadType == LoadType.LoadFailed)
-//                return "No matches found";
-//
-//            var track = result.Tracks.FirstOrDefault();
-//
-//            if (player.IsPlaying)
-//            {
-//                player.Queue.Enqueue(track);
-//                return $"{track?.Title} has been added to the queue.";
-//            }
-//            await player.PlayAsync(track).ConfigureAwait(false);
-//            return $"Now playing: {track?.Title}";
-//        }
-
-        public async Task<string> StopAsync(ulong guildId)
+        public async Task PauseAsync(ICommandContext ctx, ulong guildId)
         {
             var player = _lavaSocketClient.GetPlayer(guildId);
-            if (player is null)
-                return "Error with player.";
-            await player.StopAsync().ConfigureAwait(false);
-            return "Music playback stopped.";
+            if (player == null)
+            {
+                await ctx.Channel.SendErrorAsync("Error with player.");
+                return;
+            }
+            
+            await player.PauseAsync().ConfigureAwait(false);
+            var embed = new EmbedBuilder().WithOkColor()
+                .WithDescription("Music playback paused.");
+            
+            await ctx.Channel.EmbedAsync(embed);
         }
-        
 
-        public async Task OnReady()
-        {
-//            Console.WriteLine(_lavaSocketClient is null);
-            await _lavaSocketClient.StartAsync(_client).ConfigureAwait(false);
-        }
+        private async Task OnReady()
+            => await _lavaSocketClient.StartAsync(_client).ConfigureAwait(false);
 
         private static async Task TrackFinished(LavaPlayer player, LavaTrack track, TrackEndReason reason)
         {
