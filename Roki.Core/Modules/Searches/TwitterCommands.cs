@@ -12,21 +12,18 @@ namespace Roki.Modules.Searches
     public partial class Searches
     {
         [Group]
-        public class TwitterSearch : RokiSubmodule
+        public class TwitterCommands : RokiSubmodule
         {
-            private readonly IConfiguration _config;
             private readonly TwitterContext _twitterCtx;
             
-            public TwitterSearch(TwitterContext twitterCtx, IConfiguration config)
+            public TwitterCommands(IConfiguration config)
             {
-                _twitterCtx = twitterCtx;
-                _config = config;
                 _twitterCtx = new TwitterContext(new ApplicationOnlyAuthorizer
                 {
-                    CredentialStore = new InMemoryCredentialStore()
+                    CredentialStore = new InMemoryCredentialStore
                     {
-                        ConsumerKey = _config.TwitterConsumer,
-                        ConsumerSecret = _config.TwitterConsumerSecret
+                        ConsumerKey = config.TwitterConsumer,
+                        ConsumerSecret = config.TwitterConsumerSecret
                     }
                 });
             }
