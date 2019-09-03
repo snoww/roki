@@ -24,6 +24,19 @@ namespace Roki.Modules.Music
         }
 
         [RokiCommand, Description, Usage, Aliases]
+        public async Task Pause()
+        {
+            var user = ctx.User as SocketGuildUser;
+            if (user?.VoiceChannel == null)
+            {
+                await ctx.Channel.SendErrorAsync("You need to connect to a voice channel").ConfigureAwait(false);
+                return;
+            }
+
+            await _service.PauseAsync(ctx, ctx.Guild.Id);
+        }
+
+        [RokiCommand, Description, Usage, Aliases]
         public async Task Destroy()
         {
             var user = ctx.User as SocketGuildUser;
@@ -39,10 +52,10 @@ namespace Roki.Modules.Music
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
-//        [RokiCommand, Description, Usage, Aliases]
-//        public async Task Queue([Leftover] string query)
-//        {
-//            
-//        }
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task ListQueue([Leftover] string query)
+        {
+            
+        }
     }
 }
