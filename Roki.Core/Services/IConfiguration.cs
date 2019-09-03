@@ -10,6 +10,8 @@ namespace Roki.Core.Services
         string GoogleApi { get; }
         string OmdbApi { get; }
         string DarkSkyApi { get; }
+        string TwitterConsumer { get; }
+        string TwitterConsumerSecret { get; }
 
         ImmutableArray<ulong> OwnerIds { get; }
 
