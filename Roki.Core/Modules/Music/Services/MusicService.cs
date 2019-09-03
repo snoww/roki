@@ -70,7 +70,7 @@ namespace Roki.Modules.Music.Services
             var player = _lavaSocketClient.GetPlayer(guildId);
             if (player == null)
             {
-                await ctx.Channel.SendErrorAsync("Error with player.");
+                await ctx.Channel.SendErrorAsync("No music player active.");
                 return;
             }
             
@@ -80,6 +80,29 @@ namespace Roki.Modules.Music.Services
             
             await ctx.Channel.EmbedAsync(embed);
         }
+
+//        public async Task ListQueueAsync(ICommandContext ctx, ulong guildId)
+//        {
+//            var player = _lavaSocketClient.GetPlayer(guildId);
+//            if (player == null)
+//            {
+//                await ctx.Channel.SendErrorAsync("No music player active.");
+//                return;
+//            }
+//
+//            var queue = player.Queue.Items;
+//            if (queue.Any())
+//            {
+//                await ctx.SendPaginatedConfirmAsync(0, p =>
+//                {
+//                    foreach (var item in queue)
+//                    {
+//                        
+//                    }
+//                })
+//            }
+//            
+//        }
 
         private async Task OnReady()
             => await _lavaSocketClient.StartAsync(_client).ConfigureAwait(false);

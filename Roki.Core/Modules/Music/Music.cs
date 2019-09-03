@@ -52,10 +52,10 @@ namespace Roki.Modules.Music
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
-        [RokiCommand, Description, Usage, Aliases]
-        public async Task ListQueue([Leftover] string query)
-        {
-            
-        }
+//        [RokiCommand, Description, Usage, Aliases]
+//        public async Task ListQueue([Leftover] string query)
+//        {
+//            
+//        }
     }
 }
