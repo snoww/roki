@@ -12,6 +12,8 @@ namespace Roki.Core.Services
         string DarkSkyApi { get; }
         string TwitterConsumer { get; }
         string TwitterConsumerSecret { get; }
+        string TwitterAccessToken { get; }
+        string TwitterAccessSecret { get; }
 
         ImmutableArray<ulong> OwnerIds { get; }
 

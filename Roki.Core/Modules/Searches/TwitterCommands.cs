@@ -18,12 +18,14 @@ namespace Roki.Modules.Searches
             
             public TwitterCommands(IConfiguration config)
             {
-                _twitterCtx = new TwitterContext(new ApplicationOnlyAuthorizer
+                _twitterCtx = new TwitterContext(new SingleUserAuthorizer()
                 {
-                    CredentialStore = new InMemoryCredentialStore
+                    CredentialStore = new SingleUserInMemoryCredentialStore()
                     {
                         ConsumerKey = config.TwitterConsumer,
-                        ConsumerSecret = config.TwitterConsumerSecret
+                        ConsumerSecret = config.TwitterConsumerSecret,
+                        AccessToken = config.TwitterAccessToken,
+                        AccessTokenSecret = config.TwitterAccessSecret
                     }
                 });
             }
@@ -56,10 +58,10 @@ namespace Roki.Modules.Searches
 
                 var latest = tweets[0];
                 var embed = new EmbedBuilder().WithOkColor()
-                    .WithAuthor($"{latest.User.Name} (@{latest.User.ScreenName})", latest.User.ProfileImageUrl)
-                    .WithDescription(latest.Text)
-                    .AddField("Likes", latest.FavoriteCount ?? 0, true)
-                    .AddField("Retweets", latest.RetweetCount, true);
+                    .WithAuthor($"{latest.User.Name}", latest.User.ProfileImageUrl)
+                    .WithDescription(latest.FullText)
+                    .AddField("Retweets", latest.RetweetCount, true)
+                    .AddField("Likes", latest.FavoriteCount ?? 0, true);
                 
                 await ctx.Channel.EmbedAsync(embed);
             }
