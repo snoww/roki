@@ -77,9 +77,7 @@ namespace Roki.Modules.Searches
                 }
                 
                 const int maxTweetsToReturn = 5;
-                const int maxTotalResults = 10;
-                ulong sinceID = 1;
-                ulong maxId;
+                const int sinceId = 1;
 
                 var combinedSearch = new List<Status>();
                 
@@ -88,7 +86,7 @@ namespace Roki.Modules.Searches
                         where search.Type == SearchType.Search &&
                               search.Query == query &&
                               search.Count == maxTweetsToReturn &&
-                              search.SinceID == sinceID &&
+                              search.SinceID == sinceId &&
                               search.TweetMode == TweetMode.Extended
                         select search.Statuses)
                     .SingleOrDefaultAsync().ConfigureAwait(false);
@@ -96,26 +94,7 @@ namespace Roki.Modules.Searches
                 if (searchResponse != null)
                 {
                     combinedSearch.AddRange(searchResponse);
-                    var prevMaxId = ulong.MaxValue;
-                    do
-                    {
-                        maxId = searchResponse.Min(status => status.StatusID) - 1;
-                        Debug.Assert(maxId < prevMaxId);
-                        prevMaxId = maxId;
-
-                        searchResponse = await
-                            (from search in _twitterCtx.Search
-                                where search.Type == SearchType.Search &&
-                                      search.Query == query &&
-                                      search.Count == maxTweetsToReturn &&
-                                      search.MaxID == maxId &&
-                                      search.SinceID == sinceID &&
-                                      search.TweetMode == TweetMode.Extended
-                                select search.Statuses)
-                            .SingleOrDefaultAsync().ConfigureAwait(false);
-
-                    } while (searchResponse.Any() && combinedSearch.Count < maxTotalResults);
-                    
+                   
                     await ctx.SendPaginatedConfirmAsync(0, p =>
                     {
                         var tweet = combinedSearch[p];
