@@ -60,7 +60,7 @@ namespace Roki.Modules.Searches
 
                 var tweet = tweets[0];
                 var embed = new EmbedBuilder().WithOkColor()
-                    .WithAuthor($"{tweet.User.ScreenNameResponse} (@{tweet.User.UserIDResponse})", tweet.User.ProfileImageUrl)
+                    .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
                     .WithDescription(tweet.Text ?? tweet.FullText)
                     .AddField("Retweets", tweet.RetweetCount, true)
                     .AddField("Likes", tweet.FavoriteCount ?? 0, true);
@@ -114,17 +114,17 @@ namespace Roki.Modules.Searches
                                 select search.Statuses)
                             .SingleOrDefaultAsync().ConfigureAwait(false);
 
-                        await ctx.SendPaginatedConfirmAsync(0, p =>
-                        {
-                            var tweet = combinedSearch[p];
-                            return new EmbedBuilder().WithOkColor()
-                                .WithAuthor($"{tweet.User.ScreenNameResponse} (@{tweet.User.UserIDResponse})", tweet.User.ProfileImageUrl)
-                                .WithDescription(tweet.Text ?? tweet.FullText)
-                                .AddField("Retweets", tweet.RetweetCount, true)
-                                .AddField("Likes", tweet.FavoriteCount ?? 0, true);
-                        }, combinedSearch.Count, 1).ConfigureAwait(false);
-
                     } while (searchResponse.Any() && combinedSearch.Count < maxTotalResults);
+                    
+                    await ctx.SendPaginatedConfirmAsync(0, p =>
+                    {
+                        var tweet = combinedSearch[p];
+                        return new EmbedBuilder().WithOkColor()
+                            .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
+                            .WithDescription(tweet.Text ?? tweet.FullText)
+                            .AddField("Retweets", tweet.RetweetCount, true)
+                            .AddField("Likes", tweet.FavoriteCount ?? 0, true);
+                    }, combinedSearch.Count, 1).ConfigureAwait(false);
                 }
                 else
                 {
