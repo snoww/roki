@@ -65,12 +65,12 @@ namespace Roki.Modules.Music.Services
             await ctx.Channel.EmbedAsync(embed);
         }
         
-        public async Task PauseAsync(ICommandContext ctx, ulong guildId)
+        public async Task PauseAsync(ICommandContext ctx)
         {
-            var player = _lavaSocketClient.GetPlayer(guildId);
+            var player = _lavaSocketClient.GetPlayer(ctx.Guild.Id);
             if (player == null)
             {
-                await ctx.Channel.SendErrorAsync("No music player active.");
+                await ctx.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
                 return;
             }
             
@@ -81,15 +81,44 @@ namespace Roki.Modules.Music.Services
             await ctx.Channel.EmbedAsync(embed);
         }
 
-//        public async Task ListQueueAsync(ICommandContext ctx, ulong guildId)
-//        {
-//            var player = _lavaSocketClient.GetPlayer(guildId);
-//            if (player == null)
+        public async Task SkipAsync(ICommandContext ctx)
+        {
+            var player = _lavaSocketClient.GetPlayer(ctx.Guild.Id);
+            if (player == null)
+            {
+                await ctx.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
+                return;
+            }
+
+            try
+            {
+                var currTrack = player.CurrentTrack;
+                await player.SkipAsync().ConfigureAwait(false);
+                var embed = new EmbedBuilder().WithOkColor()
+                    .WithDescription($"Skipped song: {currTrack.Title}");
+
+                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            }
+            catch
+            {
+                await ctx.Channel.SendErrorAsync("There are no more tracks in the queue.");
+            }
+        }
+
+        public async Task ListQueueAsync(ICommandContext ctx)
+        {
+            var player = _lavaSocketClient.GetPlayer(ctx.Guild.Id);
+            if (player == null)
+            {
+                await ctx.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
+                return;
+            }
+
+//            foreach (var track in player.Queue.Items)
 //            {
-//                await ctx.Channel.SendErrorAsync("No music player active.");
-//                return;
+//                track.
 //            }
-//
+            
 //            var queue = player.Queue.Items;
 //            if (queue.Any())
 //            {
@@ -97,12 +126,12 @@ namespace Roki.Modules.Music.Services
 //                {
 //                    foreach (var item in queue)
 //                    {
-//                        
+//                        item.
 //                    }
 //                })
 //            }
-//            
-//        }
+            
+        }
 
         private async Task OnReady()
             => await _lavaSocketClient.StartAsync(_client).ConfigureAwait(false);

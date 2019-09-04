@@ -199,17 +199,39 @@
   },
   "pins": {
     "Command": "pins pin",
-    "Description": "Returns the latest pin in the current channel",
+    "Description": "Returns the latest pin in the current channel.",
     "Usage": [
       "{0}pin"
     ]
   },
   "xkcd": {
     "Command": "xkcd",
-    "Description": "Returns the specified xkcd comic, if no comic is specified, latest comic is shown",
+    "Description": "Returns the specified xkcd comic, if no comic is specified, latest comic is shown.",
     "Usage": [
       "{0}xkcd",
       "{0}xkcd 912"
+    ]
+  },
+  "queue": {
+    "Command": "queue q",
+    "Description": "Searches and plays the query for the specified song, or plays the url provided. Must be in a voice channel.",
+    "Usage": [
+      "{0}q hello",
+      "{0}q https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+    ]
+  },
+  "pause": {
+    "Command": "pause",
+    "Description": "Pauses the current track playing. Must be in a voice channel.",
+    "Usage": [
+      "{0}pause"
+    ]
+  },
+  "destroy": {
+    "Command": "destroy d",
+    "Description": "Stops the bot from playing music. Must be in a voice channel.",
+    "Usage": [
+      "{0}d"
     ]
   }
 }
