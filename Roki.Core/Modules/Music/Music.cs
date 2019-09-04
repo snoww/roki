@@ -33,7 +33,7 @@ namespace Roki.Modules.Music
                 return;
             }
 
-            await _service.PauseAsync(ctx, ctx.Guild.Id);
+            await _service.PauseAsync(ctx);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -51,6 +51,10 @@ namespace Roki.Modules.Music
                 .WithDescription($"Disconnected from {user.VoiceChannel.Name}");
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
+
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task Next()
+            => await _service.SkipAsync(ctx).ConfigureAwait(false);
 
 //        [RokiCommand, Description, Usage, Aliases]
 //        public async Task ListQueue([Leftover] string query)
