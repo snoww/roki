@@ -91,24 +91,23 @@ namespace Roki.Modules.Searches
                         select search.Statuses)
                     .SingleOrDefaultAsync().ConfigureAwait(false);
 
-                if (searchResponse != null)
-                {
-                    combinedSearch.AddRange(searchResponse);
-                   
-                    await ctx.SendPaginatedConfirmAsync(0, p =>
-                    {
-                        var tweet = combinedSearch[p];
-                        return new EmbedBuilder().WithOkColor()
-                            .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
-                            .WithDescription(tweet.Text ?? tweet.FullText)
-                            .AddField("Retweets", tweet.RetweetCount, true)
-                            .AddField("Likes", tweet.FavoriteCount ?? 0, true);
-                    }, combinedSearch.Count, 1).ConfigureAwait(false);
-                }
-                else
+                if (searchResponse == null)
                 {
                     await ctx.Channel.SendErrorAsync("No results found.");
+                    return;
                 }
+                
+                combinedSearch.AddRange(searchResponse);
+                   
+                await ctx.SendPaginatedConfirmAsync(0, p =>
+                {
+                    var tweet = combinedSearch[p];
+                    return new EmbedBuilder().WithOkColor()
+                        .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
+                        .WithDescription(tweet.Text ?? tweet.FullText)
+                        .AddField("Retweets", tweet.RetweetCount, true)
+                        .AddField("Likes", tweet.FavoriteCount ?? 0, true);
+                }, combinedSearch.Count, 1).ConfigureAwait(false);
             }
         }
     }
