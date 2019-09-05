@@ -124,6 +124,14 @@ namespace Roki.Modules.Music.Services
             
         }
 
+//        public async Task RemoveSongAsync(ICommandContext ctx, int index)
+//        {
+//            if (!await IsPlayerActive(ctx))
+//                return;
+//            var player = _lavaSocketClient.GetPlayer(ctx.Guild.Id);
+//            
+//        }
+
         public async Task SetVolumeAsync(ICommandContext ctx, int volume)
         {
             if (!await IsPlayerActive(ctx))
