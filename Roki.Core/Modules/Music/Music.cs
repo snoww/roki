@@ -59,12 +59,13 @@ namespace Roki.Modules.Music
 //            
 //        }
 
-        [RokiCommand, Description, Usage, Aliases]
-        public async Task SongRemove([Leftover] int index)
-        {
-            if (!await IsUserInVoice().ConfigureAwait(false))
-                return;
-        }
+//        [RokiCommand, Description, Usage, Aliases]
+//        public async Task SongRemove([Leftover] int index)
+//        {
+//            if (!await IsUserInVoice().ConfigureAwait(false))
+//                return;
+//            
+//        }
         
         [RokiCommand, Description, Usage, Aliases]
         public async Task Volume([Leftover] int volume)
@@ -73,6 +74,7 @@ namespace Roki.Modules.Music
                 return;
             if (volume < 0 || volume > 100)
                 await ctx.Channel.SendErrorAsync("Volume must be from 0-100.");
+            
             await _service.SetVolumeAsync(ctx, volume);
         }
 

@@ -233,5 +233,12 @@
     "Usage": [
       "{0}d"
     ]
+  },
+  "volume": {
+    "Command": "volume vol",
+    "Description": "Sets the volume for the music player. Between 0-100. Must be in a voice channel",
+    "Usage": [
+      "{0}vol 50"
+    ]
   }
 }
