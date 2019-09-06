@@ -10,8 +10,10 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Core.Services;
-using Roki.Core.Services.Impl;
 using Roki.Extensions;
+using Roki.Modules.Music.Services;
+using Victoria;
+using Configuration = Roki.Core.Services.Impl.Configuration;
 
 namespace Roki
 {
@@ -52,7 +54,6 @@ namespace Roki
         public Configuration Config { get; }
         public DiscordSocketClient Client { get; }
         public CommandService CommandService { get; }
-
         public static Color OkColor { get; set; }
         public static Color ErrorColor { get; set; }
 
@@ -87,6 +88,8 @@ namespace Roki
                 .AddSingleton(_db)
                 .AddSingleton(Client)
                 .AddSingleton(CommandService)
+                .AddSingleton<LavaSocketClient>()
+                .AddSingleton<LavaRestClient>()
                 .AddSingleton(_db.GetDbContext())
                 .AddSingleton(this);
 
@@ -177,7 +180,7 @@ namespace Roki
             await commandHandler.StartHandling().ConfigureAwait(false);
 
             var _ = await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
-
+            
             Ready.TrySetResult(true);
             _log.Info("Roki is ready");
         }
