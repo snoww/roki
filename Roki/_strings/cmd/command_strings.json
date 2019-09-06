@@ -247,5 +247,19 @@
     "Usage": [
       "{0}liqu 2"
     ]
+  },
+  "next": {
+    "Command": "next n",
+    "Description": "Skips current song.",
+    "Usage": [
+      "{0}n"
+    ]
+  },
+  "songremove": {
+    "Command": "songremove srm",
+    "Description": "Removes the specified song in the queue.",
+    "Usage": [
+      "{0}srm 5"
+    ]
   }
 }

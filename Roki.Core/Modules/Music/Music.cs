@@ -57,16 +57,23 @@ namespace Roki.Modules.Music
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
             
-            await _service.ListQueueAsync(ctx, page);
+            await _service.ListQueueAsync(ctx, page).ConfigureAwait(false);
         }
 
-//        [RokiCommand, Description, Usage, Aliases]
-//        public async Task SongRemove([Leftover] int index)
-//        {
-//            if (!await IsUserInVoice().ConfigureAwait(false))
-//                return;
-//            
-//        }
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task SongRemove([Leftover] int index = 0)
+        {
+            if (!await IsUserInVoice().ConfigureAwait(false))
+                return;
+
+            if (index == 0)
+            {
+                await ctx.Channel.SendErrorAsync("Please provide the index of the song in the queue.").ConfigureAwait(false);
+                return;
+            }
+
+            await _service.RemoveSongAsync(ctx, index).ConfigureAwait(false);
+        }
         
         [RokiCommand, Description, Usage, Aliases]
         public async Task Volume([Leftover] int volume)
