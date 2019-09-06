@@ -242,7 +242,7 @@
     ]
   },
   "listqueue": {
-    "Command": "listqueue liqu",
+    "Command": "listqueue lq",
     "Description": "Shows the current track queue (10 tracks per page).",
     "Usage": [
       "{0}liqu 2"
