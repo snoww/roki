@@ -109,7 +109,7 @@ namespace Roki.Modules.Music.Services
             var queue = player.Queue.Items.Cast<LavaTrack>().ToArray();
             if (--page < -1)
                 return;
-            const int itemsPerPage = 3;
+            const int itemsPerPage = 10;
 
             if (page == -1)
                 page = 0;
@@ -136,7 +136,7 @@ namespace Roki.Modules.Music.Services
                     desc = pStatus + "\n" + desc;
                 
                 var embed = new EmbedBuilder().WithOkColor()
-                    .WithAuthor($"Player queue - Page {curPage + 1}/{queue.Length / itemsPerPage + 1}", "http://i.imgur.com/nhKS3PT.png")
+                    .WithAuthor($"Player queue - Page {curPage + 1}/{Math.Ceiling((double) queue.Length / itemsPerPage)}", "http://i.imgur.com/nhKS3PT.png")
                     .WithDescription(desc)
                     .WithFooter($"🔉 {player.CurrentVolume}% | {queue.Length} tracks | {totalStr}");
                 return embed;
