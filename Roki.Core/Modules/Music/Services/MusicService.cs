@@ -123,9 +123,9 @@ namespace Roki.Modules.Music.Services
                 var number = 0 + startAt;
                 var desc = string.Join("\n", queue
                     .Take(itemsPerPage)
-                    .Select(t => $"`{number}.` {t.Title.TrimTo(15)}"));
+                    .Select(t => $"`{number++}.` {t.PrettyFullTrack()}"));
 
-                desc = $"`🔊` {player.CurrentTrack.Title.TrimTo(15)}" + desc;
+                desc = $"`🔊` {player.CurrentTrack.PrettyFullTrack()}\n\n" + desc;
 
                 var pStatus = "";
                 if (player.IsPaused)
@@ -135,9 +135,9 @@ namespace Roki.Modules.Music.Services
                     desc = pStatus + "\n" + desc;
                 
                 var embed = new EmbedBuilder().WithOkColor()
-                    .WithAuthor($"Player queue - Page {curPage}/{queue.Length / itemsPerPage + 1}", "http://i.imgur.com/nhKS3PT.png")
+                    .WithAuthor($"Player queue - Page {curPage + 1}/{queue.Length / itemsPerPage + 1}", "http://i.imgur.com/nhKS3PT.png")
                     .WithDescription(desc)
-                    .WithFooter($"{player.CurrentVolume} | {queue.Length} track(s)| {totalStr}");
+                    .WithFooter($"🔉 {player.CurrentVolume}% | {queue.Length} tracks | {totalStr}");
                 return embed;
             }
 

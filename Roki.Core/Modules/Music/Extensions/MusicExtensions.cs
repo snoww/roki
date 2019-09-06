@@ -1,8 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using NLog;
+using Roki.Extensions;
 using Victoria.Entities;
-using Victoria.Queue;
 
 namespace Roki.Modules.Music.Extensions
 {
@@ -10,9 +11,29 @@ namespace Roki.Modules.Music.Extensions
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
 
-        public static TimeSpan TotalPlaytime(this LavaTrack[] queue)
+        public static TimeSpan TotalPlaytime(this IEnumerable<LavaTrack> queue)
         {
             return new TimeSpan(queue.Sum(t => t.Length.Ticks));
+        }
+
+        public static string PrettyTrack(this LavaTrack track)
+        {
+            return $"**[{track.Title.TrimTo(65)}]({track.Uri})**";
+        }
+
+        public static string PrettyFullTrack(this LavaTrack track)
+        {
+            return $"{track.PrettyTrack()}\n\t\t`{track.PrettyLength()} | {track.Provider.ToTitleCase()}`";
+        }
+
+        public static string PrettyLength(this LavaTrack track)
+        {
+            var time = track.Length.ToString(@"mm\:ss");
+            var hrs = (int) track.Length.TotalHours;
+
+            if (hrs > 0)
+                return hrs + ":" + time;
+            return time;
         }
     }
 }
