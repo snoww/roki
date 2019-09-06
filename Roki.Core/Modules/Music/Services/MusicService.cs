@@ -117,6 +117,32 @@ namespace Roki.Modules.Music.Services
             var total = queue.TotalPlaytime();
             var totalStr = total.ToString(@"hh\:mm\:ss");
 
+            EmbedBuilder QueueEmbed(int curPage)
+            {
+                var startAt = itemsPerPage + curPage;
+                var number = 0 + startAt;
+                var desc = string.Join("\n", queue
+                    .Skip(startAt)
+                    .Take(itemsPerPage)
+                    .Select(t => $"`{number}.` {t.Title.TrimTo(15)}"));
+
+                desc = $"`🔊` {player.CurrentTrack.Title.TrimTo(15)}" + desc;
+
+                var pStatus = "";
+                if (player.IsPaused)
+                    pStatus += Format.Bold($"Player is paused. Use {Format.Code(".play")}` command to start playing.");
+
+                if (!string.IsNullOrWhiteSpace(pStatus))
+                    desc = pStatus + "\n" + desc;
+                
+                var embed = new EmbedBuilder().WithOkColor()
+                    .WithAuthor($"Player queue - Page {curPage}/{queue.Length / itemsPerPage + 1}", "http://i.imgur.com/nhKS3PT.png")
+                    .WithDescription(desc)
+                    .WithFooter($"{player.CurrentVolume} | {queue.Length} track(s)| {totalStr}");
+                return embed;
+            }
+
+            await ctx.SendPaginatedConfirmAsync(page, QueueEmbed, queue.Length, itemsPerPage, false).ConfigureAwait(false);
         }
 
 //        public async Task RemoveSongAsync(ICommandContext ctx, int index)
