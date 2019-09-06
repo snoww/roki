@@ -261,5 +261,19 @@
     "Usage": [
       "{0}srm 5"
     ]
+  },
+  "twitter": {
+    "Command": "twitter",
+    "Description": "Returns the latest tweet by the specified user.",
+    "Usage": [
+      "{0}twitter xqc"
+    ]
+  },
+  "twittersearch": {
+    "Command": "twittersearch tsearch",
+    "Description": "Searches twitter with the specified query, and returns the top 5 results.",
+    "Usage": [
+      "{0}tsearch pokemon sword shield"
+    ]
   }
 }
