@@ -119,10 +119,9 @@ namespace Roki.Modules.Music.Services
 
             EmbedBuilder QueueEmbed(int curPage)
             {
-                var startAt = itemsPerPage + curPage;
+                var startAt = itemsPerPage * curPage;
                 var number = 0 + startAt;
                 var desc = string.Join("\n", queue
-                    .Skip(startAt)
                     .Take(itemsPerPage)
                     .Select(t => $"`{number}.` {t.Title.TrimTo(15)}"));
 

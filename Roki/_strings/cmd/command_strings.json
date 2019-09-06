@@ -240,5 +240,12 @@
     "Usage": [
       "{0}vol 50"
     ]
+  },
+  "listqueue": {
+    "Command": "listqueue liqu",
+    "Description": "Shows the current track queue (10 tracks per page).",
+    "Usage": [
+      "{0}liqu 2"
+    ]
   }
 }
