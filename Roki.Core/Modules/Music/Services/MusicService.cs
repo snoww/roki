@@ -7,6 +7,7 @@ using Discord.WebSocket;
 using NLog;
 using Roki.Core.Services;
 using Roki.Extensions;
+using Roki.Modules.Music.Extensions;
 using Victoria;
 using Victoria.Entities;
 
@@ -99,29 +100,23 @@ namespace Roki.Modules.Music.Services
             }
         }
 
-        public async Task ListQueueAsync(ICommandContext ctx)
+        public async Task ListQueueAsync(ICommandContext ctx, int page = 0)
         {
             if (!await IsPlayerActive(ctx))
                 return;
             var player = _lavaSocketClient.GetPlayer(ctx.Guild.Id);
+            
+            var queue = player.Queue.Items.Cast<LavaTrack>().ToArray();
+            if (--page < -1)
+                return;
+            const int itemsPerPage = 10;
 
-//            foreach (var track in player.Queue.Items)
-//            {
-//                track.
-//            }
-            
-//            var queue = player.Queue.Items;
-//            if (queue.Any())
-//            {
-//                await ctx.SendPaginatedConfirmAsync(0, p =>
-//                {
-//                    foreach (var item in queue)
-//                    {
-//                        item.
-//                    }
-//                })
-//            }
-            
+            if (page == -1)
+                page = 0;
+
+            var total = queue.TotalPlaytime();
+            var totalStr = total.ToString(@"hh\:mm\:ss");
+
         }
 
 //        public async Task RemoveSongAsync(ICommandContext ctx, int index)
@@ -139,6 +134,9 @@ namespace Roki.Modules.Music.Services
             var player = _lavaSocketClient.GetPlayer(ctx.Guild.Id);
 
             await player.SetVolumeAsync(volume).ConfigureAwait(false);
+            var embed = new EmbedBuilder().WithOkColor()
+                .WithDescription($"Volume set to {player.CurrentVolume}.");
+            await ctx.Channel.EmbedAsync(embed);
         }
 
         private async Task OnReady()
