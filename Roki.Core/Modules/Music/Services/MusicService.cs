@@ -178,8 +178,11 @@ namespace Roki.Modules.Music.Services
             await ctx.Channel.EmbedAsync(embed);
         }
 
-        private async Task OnReady()
-            => await _lavaSocketClient.StartAsync(_client).ConfigureAwait(false);
+        private Task OnReady()
+        {
+            _lavaSocketClient.StartAsync(_client).ConfigureAwait(false);
+            return Task.CompletedTask;
+        }
 
         private static async Task TrackFinished(LavaPlayer player, LavaTrack track, TrackEndReason reason)
         {
