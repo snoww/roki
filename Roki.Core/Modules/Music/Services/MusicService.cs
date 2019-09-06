@@ -109,7 +109,7 @@ namespace Roki.Modules.Music.Services
             var queue = player.Queue.Items.Cast<LavaTrack>().ToArray();
             if (--page < -1)
                 return;
-            const int itemsPerPage = 10;
+            const int itemsPerPage = 3;
 
             if (page == -1)
                 page = 0;
@@ -120,8 +120,9 @@ namespace Roki.Modules.Music.Services
             EmbedBuilder QueueEmbed(int curPage)
             {
                 var startAt = itemsPerPage * curPage;
-                var number = 0 + startAt;
+                var number = 1 + startAt;
                 var desc = string.Join("\n", queue
+                    .Skip(startAt)
                     .Take(itemsPerPage)
                     .Select(t => $"`{number++}.` {t.PrettyFullTrack()}"));
 
