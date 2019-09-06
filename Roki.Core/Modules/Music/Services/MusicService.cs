@@ -54,13 +54,13 @@ namespace Roki.Modules.Music.Services
             {
                 player.Queue.Enqueue(track);
                 embed.WithAuthor($"Queued: #{player.Queue.Count}", "http://i.imgur.com/nhKS3PT.png")
-                    .WithDescription($"{track?.Uri}");
+                    .WithDescription($"{track.PrettyFullTrack()}");
             }
             else
             {
                 await player.PlayAsync(track).ConfigureAwait(false);
                 embed.WithAuthor($"Playing {track?.Title.TrimTo(65)}", "http://i.imgur.com/nhKS3PT.png")
-                    .WithDescription($"{track?.Uri}");
+                    .WithDescription($"{track.PrettyFullTrack()}");
             }
             
             await ctx.Channel.EmbedAsync(embed);
@@ -90,7 +90,7 @@ namespace Roki.Modules.Music.Services
                 var currTrack = player.CurrentTrack;
                 await player.SkipAsync().ConfigureAwait(false);
                 var embed = new EmbedBuilder().WithOkColor()
-                    .WithDescription($"Skipped song: {currTrack.Title}");
+                    .WithDescription($"Skipped song: {currTrack.PrettyTrack()}");
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
@@ -145,13 +145,26 @@ namespace Roki.Modules.Music.Services
             await ctx.SendPaginatedConfirmAsync(page, QueueEmbed, queue.Length, itemsPerPage, false).ConfigureAwait(false);
         }
 
-//        public async Task RemoveSongAsync(ICommandContext ctx, int index)
-//        {
-//            if (!await IsPlayerActive(ctx))
-//                return;
-//            var player = _lavaSocketClient.GetPlayer(ctx.Guild.Id);
-//            
-//        }
+        public async Task RemoveSongAsync(ICommandContext ctx, int index)
+        {
+            if (!await IsPlayerActive(ctx))
+                return;
+            var player = _lavaSocketClient.GetPlayer(ctx.Guild.Id);
+            index -= 1;
+            if (index < 0 || index > player.Queue.Count)
+            {
+                await ctx.Channel.SendErrorAsync($"Song not in range.");
+                return;
+            }
+
+            var removedSong = (LavaTrack) player.Queue.Items.ElementAt(index);
+
+            player.Queue.RemoveAt(index);
+            var embed = new EmbedBuilder().WithOkColor()
+                .WithDescription($"Removed song: {removedSong.PrettyTrack()}");
+
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+        }
 
         public async Task SetVolumeAsync(ICommandContext ctx, int volume)
         {
