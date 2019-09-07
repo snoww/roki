@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NLog;
 using Roki.Extensions;
+using Victoria;
 using Victoria.Entities;
 
 namespace Roki.Modules.Music.Extensions
@@ -24,6 +25,11 @@ namespace Roki.Modules.Music.Extensions
         public static string PrettyFullTrack(this LavaTrack track)
         {
             return $"{track.PrettyTrack()}\n\t\t`{track.PrettyLength()} | {track.Provider.ToTitleCase()}`";
+        }
+
+        public static string PrettyFooter(this LavaTrack track, int volume)
+        {
+            return $"🔉 {volume}% | {track.PrettyLength()} | {track.Provider.ToTitleCase()}";
         }
 
         public static string PrettyLength(this LavaTrack track)

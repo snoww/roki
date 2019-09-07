@@ -54,13 +54,15 @@ namespace Roki.Modules.Music.Services
             {
                 player.Queue.Enqueue(track);
                 embed.WithAuthor($"Queued: #{player.Queue.Count}", "http://i.imgur.com/nhKS3PT.png")
-                    .WithDescription($"{track.PrettyFullTrack()}");
+                    .WithDescription($"{track.PrettyTrack()}")
+                    .WithFooter(track.PrettyFooter(player.CurrentVolume));
             }
             else
             {
                 await player.PlayAsync(track).ConfigureAwait(false);
-                embed.WithAuthor($"Playing {track?.Title.TrimTo(65)}", "http://i.imgur.com/nhKS3PT.png")
-                    .WithDescription($"{track.PrettyFullTrack()}");
+                embed.WithAuthor($"Playing song", "http://i.imgur.com/nhKS3PT.png")
+                    .WithDescription($"{track.PrettyTrack()}")
+                    .WithFooter(track.PrettyFooter(player.CurrentVolume));
             }
             
             await ctx.Channel.EmbedAsync(embed);
@@ -90,7 +92,8 @@ namespace Roki.Modules.Music.Services
                 var currTrack = player.CurrentTrack;
                 await player.SkipAsync().ConfigureAwait(false);
                 var embed = new EmbedBuilder().WithOkColor()
-                    .WithDescription($"Skipped song: {currTrack.PrettyTrack()}");
+                    .WithAuthor("Skipped song")
+                    .WithDescription(currTrack.PrettyFullTrack());
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
@@ -153,7 +156,7 @@ namespace Roki.Modules.Music.Services
             index -= 1;
             if (index < 0 || index > player.Queue.Count)
             {
-                await ctx.Channel.SendErrorAsync($"Song not in range.");
+                await ctx.Channel.SendErrorAsync("Song not in range.");
                 return;
             }
 
@@ -161,7 +164,8 @@ namespace Roki.Modules.Music.Services
 
             player.Queue.RemoveAt(index);
             var embed = new EmbedBuilder().WithOkColor()
-                .WithDescription($"Removed song: {removedSong.PrettyTrack()}");
+                .WithAuthor("Removed song")
+                .WithDescription(removedSong.PrettyFullTrack());
 
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
@@ -189,12 +193,21 @@ namespace Roki.Modules.Music.Services
             if (!reason.ShouldPlayNext())
                 return;
 
+            await player.TextChannel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                .WithAuthor($"Finished song", "http://i.imgur.com/nhKS3PT.png")
+                .WithDescription(track.PrettyTrack())
+                .WithFooter(track.PrettyFooter(player.CurrentVolume)));
+
             if (!player.Queue.TryDequeue(out var item) || !(item is LavaTrack nextTrack))
             {
-                await player.TextChannel.SendErrorAsync("There are no more tracks in the queue").ConfigureAwait(false);
+                await player.TextChannel.SendErrorAsync("Finished player queue").ConfigureAwait(false);
                 return;
             }
 
+            await player.TextChannel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                .WithAuthor($"Playing song", "http://i.imgur.com/nhKS3PT.png")
+                .WithDescription($"{track.PrettyTrack()}")
+                .WithFooter(track.PrettyFooter(player.CurrentVolume)));
             await player.PlayAsync(nextTrack);
         }
 
