@@ -41,7 +41,7 @@ namespace Roki.Modules.Searches
 //                return;
 //            }
 
-            await ctx.Channel.SendFileAsync($"https://wttr.in/{query}_0Fnpqm.png").ConfigureAwait(false);
+            await ctx.Channel.SendMessageAsync($"https://wttr.in/{query}_0Fnpqm.png").ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
