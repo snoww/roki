@@ -39,8 +39,7 @@ namespace Roki.Modules.Searches.Services
                 using (var http = _httpFactory.CreateClient())
                 {
                     var result = await http.GetStringAsync($"http://wttr.in/{query}?A&T").ConfigureAwait(false);
-                    var index = result.IndexOf('┘', result.IndexOf('┘') + 1);
-                    return result.Substring(0, index + 1);
+                    return result;
                 }
 
             }
