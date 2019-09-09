@@ -1,9 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using DarkSky.Models;
-using DarkSky.Services;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using NLog;
@@ -41,10 +38,9 @@ namespace Roki.Modules.Searches.Services
             {
                 using (var http = _httpFactory.CreateClient())
                 {
-                    var result = await http.GetStringAsync($"https://wttr.in/{query}").ConfigureAwait(false);
-                    var end = result.IndexOf(result, result.IndexOf("┘", StringComparison.InvariantCulture) + 1, StringComparison.InvariantCulture);
-    
-                    return result.Substring(0, end);
+                    var result = await http.GetStringAsync($"http://wttr.in/{query}?A&T").ConfigureAwait(false);
+                    var index = result.IndexOf('┘', result.IndexOf('┘') + 1);
+                    return result.Substring(0, index + 1);
                 }
 
             }
