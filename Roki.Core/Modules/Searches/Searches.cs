@@ -33,15 +33,15 @@ namespace Roki.Modules.Searches
                 return;
             query = query.Trim().Replace(" ", "+");
 
-            var weather = await _service.GetWeatherDataAsync(query).ConfigureAwait(false);
+//            var weather = await _service.GetWeatherDataAsync(query).ConfigureAwait(false);
+//
+//            if (weather == null)
+//            {
+//                await ctx.Channel.SendErrorAsync("Weather not found.").ConfigureAwait(false);
+//                return;
+//            }
 
-            if (weather == null)
-            {
-                await ctx.Channel.SendErrorAsync("Weather not found.").ConfigureAwait(false);
-                return;
-            }
-
-            await ctx.Channel.SendMessageAsync(Format.Code(weather)).ConfigureAwait(false);
+            await ctx.Channel.SendFileAsync($"https://wttr.in/{query}_0Fnpqm.png").ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
