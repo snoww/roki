@@ -1,7 +1,9 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Newtonsoft.Json;
@@ -27,46 +29,23 @@ namespace Roki.Modules.Searches
         }
 
         [RokiCommand, Usage, Description, Aliases]
-        public async Task Weather([Leftover] string query = "toronto")
+        public async Task Weather([Leftover] string query = "Toronto")
         {
-            var (forecast, address) = await _service.GetWeatherDataAsync(query).ConfigureAwait(false);
-            var data = forecast.Response.Daily.Data;
-            var embed = new EmbedBuilder();
-            await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
-
-            if (!forecast.IsSuccessStatus || address == null)
+            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+                return;
+            query = query.Trim().Replace(" ", "+");
+            try
             {
-                embed.WithErrorColor()
-                    .WithDescription("City not found.");
-            }
-            else
-            {
-                embed = new EmbedBuilder().WithOkColor()
-                    .WithTitle($"Current weather for {address}")
-                    .WithDescription(data.Select(d => d.Summary).First())
-                    .WithThumbnailUrl(WeatherIcon.GetWeatherIconUrl(forecast.Response.Currently.Icon.ToString()))
-                    .AddField("Temperature", $"{(int) forecast.Response.Currently.Temperature} °C", true)
-                    .AddField("Precip %", $"{data.Select(d => d.PrecipProbability).First() * 100}%", true)
-                    .AddField("Humidity", $"{data.Select(d => d.Humidity).First() * 100}%", true)
-                    .AddField("Wind",
-                        $"{Math.Round((double) data.Select(d => d.WindSpeed).First())} km/h {((double) data.Select(d => d.WindBearing).First()).DegreesToCardinal()}",
-                        true)
-                    .AddField("UV Index", $"{data.Select(d => d.UvIndex).First()}", true)
-                    .AddField("Low / High",
-                        $"{(int) data.Select(d => d.TemperatureLow).First()} °C / {(int) data.Select(d => d.TemperatureHigh).First()} °C", true)
-                    .AddField("Sunrise", $"{data.Select(d => d.SunriseDateTime).First():t}", true)
-                    .AddField("Sunset", $"{data.Select(d => d.SunsetDateTime).First():t}", true)
-                    .WithFooter("Powered by Dark Sky");
-                if (forecast.Response.Alerts != null)
-                    embed.AddField("⚠️ Active Alerts", $"**{forecast.Response.Alerts.Select(d => d.Title).First()}**")
-                        .AddField("Severity", $"{forecast.Response.Alerts.Select(d => d.Severity).First().FirstLetterToUpperCase()}", true)
-                        .AddField("Expires", $"{forecast.Response.Alerts.Select(d => d.ExpiresDateTime).First():t}", true)
-                        .AddField("Description", $"{forecast.Response.Alerts.Select(d => d.Description).First()}")
-                        .AddField("Source", $"{forecast.Response.Alerts.Select(d => d.Uri).First()}", true)
-                        .WithErrorColor();
-            }
+                await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+                await _service.GetWeatherDataAsync(query).ConfigureAwait(false);
 
-            await ctx.Channel.EmbedAsync(embed);
+                await ctx.Channel.SendFileAsync("weather.png").ConfigureAwait(false);
+                File.Delete("weather.png");
+            }
+            catch
+            {
+                await ctx.Channel.SendErrorAsync("Failed to get weather.");
+            }
         }
 
         [RokiCommand, Description, Usage, Aliases]

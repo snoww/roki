@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using DarkSky.Models;
-using DarkSky.Services;
 using Discord.WebSocket;
 using Newtonsoft.Json;
 using NLog;
@@ -34,50 +32,19 @@ namespace Roki.Modules.Searches.Services
         {
             throw new NotImplementedException();
         }
-
-//        TODO use redis cache
-        public Task<(DarkSkyResponse, string)> GetWeatherDataAsync(string query)
+        
+        public async Task GetWeatherDataAsync(string query)
         {
-            query = query.Trim().ToLowerInvariant();
-            return GetWeatherDataFactory(query);
-        }
-
-        private async Task<(DarkSkyResponse, string)> GetWeatherDataFactory(string query)
-        {
-            using (var http = _httpFactory.CreateClient())
+            try
             {
-                try
+                using (var client = new WebClient())
                 {
-                    var result = await http
-                        .GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={query}&key={_config.GoogleApi}")
-                        .ConfigureAwait(false);
-                    var obj = JsonConvert.DeserializeObject<GeolocationResult>(result);
-                    if (obj?.Results == null || obj.Results.Length == 0)
-                    {
-                        _log.Warn("Geocode lookup failed for {0}", query);
-                        return (null, null);
-                    }
-
-                    var darkSky = new DarkSkyService(_config.DarkSkyApi);
-                    var forecast = await darkSky.GetForecast(obj.Results[0].Geometry.Location.Lat, obj.Results[0].Geometry.Location.Lng,
-                        new DarkSkyService.OptionalParameters
-                        {
-                            MeasurementUnits = "ca",
-                            DataBlocksToExclude = new List<ExclusionBlock>
-                            {
-                                ExclusionBlock.Hourly,
-                                ExclusionBlock.Minutely,
-                                ExclusionBlock.Flags
-                            }
-                        });
-
-                    return (forecast, obj.Results[0].FormattedAddress);
+                    await client.DownloadFileTaskAsync(new Uri($"https://wttr.in/{query}_0Fmnpqt.png"), "weather.png");
                 }
-                catch (Exception e)
-                {
-                    _log.Warn(e.Message);
-                    return (null, null);
-                }
+            }
+            catch (Exception e)
+            {
+                _log.Warn(e);
             }
         }
 
