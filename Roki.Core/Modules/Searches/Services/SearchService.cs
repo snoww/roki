@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Discord.WebSocket;
@@ -32,21 +33,18 @@ namespace Roki.Modules.Searches.Services
             throw new NotImplementedException();
         }
         
-        public async Task<string> GetWeatherDataAsync(string query)
+        public async Task GetWeatherDataAsync(string query)
         {
             try
             {
-                using (var http = _httpFactory.CreateClient())
+                using (var client = new WebClient())
                 {
-                    var result = await http.GetStringAsync($"http://wttr.in/{query}?A&T").ConfigureAwait(false);
-                    return result;
+                    await client.DownloadFileTaskAsync(new Uri($"https://wttr.in/{query}_0Fmnpqt.png"), "weather.png");
                 }
-
             }
             catch (Exception e)
             {
                 _log.Warn(e);
-                return null;
             }
         }
 

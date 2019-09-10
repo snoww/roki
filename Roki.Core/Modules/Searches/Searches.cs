@@ -1,7 +1,9 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Newtonsoft.Json;
@@ -32,16 +34,18 @@ namespace Roki.Modules.Searches
             if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
                 return;
             query = query.Trim().Replace(" ", "+");
+            try
+            {
+                await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+                await _service.GetWeatherDataAsync(query).ConfigureAwait(false);
 
-//            var weather = await _service.GetWeatherDataAsync(query).ConfigureAwait(false);
-//
-//            if (weather == null)
-//            {
-//                await ctx.Channel.SendErrorAsync("Weather not found.").ConfigureAwait(false);
-//                return;
-//            }
-
-            await ctx.Channel.SendMessageAsync($"https://wttr.in/{query}_0Fnpqm.png").ConfigureAwait(false);
+                await ctx.Channel.SendFileAsync("weather.png").ConfigureAwait(false);
+                File.Delete("weather.png");
+            }
+            catch
+            {
+                await ctx.Channel.SendErrorAsync("Failed to get weather.");
+            }
         }
 
         [RokiCommand, Description, Usage, Aliases]
