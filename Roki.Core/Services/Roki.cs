@@ -11,7 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Core.Services;
 using Roki.Extensions;
-using Roki.Modules.Music.Services;
 using Victoria;
 using Configuration = Roki.Core.Services.Impl.Configuration;
 
