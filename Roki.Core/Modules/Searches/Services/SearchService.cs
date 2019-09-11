@@ -119,7 +119,6 @@ namespace Roki.Modules.Searches.Services
                 using (var client = new WebClient())
                 {
                     var uri = new Uri(cat);
-                    if (!uri.IsFile) return null;
                     var fileName = "./temp/" + Path.GetFileName(uri.LocalPath);
                     await client.DownloadFileTaskAsync(uri, fileName).ConfigureAwait(false);
                     return fileName;
@@ -137,7 +136,6 @@ namespace Roki.Modules.Searches.Services
                 using (var client = new WebClient())
                 {
                     var uri = new Uri(dog);
-                    if (!uri.IsFile) return null;
                     var fileName = "./temp/" + Path.GetFileName(uri.LocalPath);
                     await client.DownloadFileTaskAsync(uri, fileName).ConfigureAwait(false);
                     return fileName;
