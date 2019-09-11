@@ -109,7 +109,7 @@ namespace Roki.Modules.Searches.Services
             }
         }
 
-        public async Task<string> GetRandomCat()
+        public async Task<string> GetRandomCatAsync()
         {
             using (var http = _httpFactory.CreateClient())
             {
@@ -126,7 +126,7 @@ namespace Roki.Modules.Searches.Services
             }
         }
         
-        public async Task<string> GetRandomDog()
+        public async Task<string> GetRandomDogAsync()
         {
             using (var http = _httpFactory.CreateClient())
             {
@@ -140,6 +140,17 @@ namespace Roki.Modules.Searches.Services
                     await client.DownloadFileTaskAsync(uri, fileName).ConfigureAwait(false);
                     return fileName;
                 }
+            }
+        }
+
+        public async Task<string> GetCatFactAsync()
+        {
+            using (var http = _httpFactory.CreateClient())
+            {
+                var result = await http.GetStringAsync("https://catfact.ninja/fact").ConfigureAwait(false);
+                var fact = JsonConvert.DeserializeAnonymousType(result, new {Fact = ""}).Fact;
+
+                return fact;
             }
         }
     }

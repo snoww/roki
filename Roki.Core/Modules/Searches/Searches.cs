@@ -183,7 +183,7 @@ namespace Roki.Modules.Searches
         {
             try
             {
-                var file = await _service.GetRandomCat().ConfigureAwait(false);
+                var file = await _service.GetRandomCatAsync().ConfigureAwait(false);
                 await ctx.Channel.SendFileAsync(file).ConfigureAwait(false);
                 File.Delete(file);
             }
@@ -198,9 +198,25 @@ namespace Roki.Modules.Searches
         {
             try
             {
-                var file = await _service.GetRandomDog().ConfigureAwait(false);
+                var file = await _service.GetRandomDogAsync().ConfigureAwait(false);
                 await ctx.Channel.SendFileAsync(file).ConfigureAwait(false);
                 File.Delete(file);
+            }
+            catch
+            {
+                await ctx.Channel.SendErrorAsync("Something went wrong :(").ConfigureAwait(false);
+            }
+        }
+
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task CatFact()
+        {
+            try
+            {
+                var fact = await _service.GetCatFactAsync().ConfigureAwait(false);
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    .WithTitle("Random Cat Fact")
+                    .WithDescription(fact));
             }
             catch
             {

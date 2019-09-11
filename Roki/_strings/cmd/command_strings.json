@@ -289,5 +289,12 @@
     "Usage": [
       "{0}dog"
     ]
+  },
+  "catfact": {
+    "Command": "catfact",
+    "Description": "Returns a random cat fact.",
+    "Usage": [
+      "{0}catfact"
+    ]
   }
 }
