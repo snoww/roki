@@ -76,7 +76,7 @@
     ]
   },
   "image": {
-    "Command": "image, img",
+    "Command": "image img",
     "Description": "Searches Google Images with the specified query, returns first result.",
     "Usage": [
       "{0}image cats",
@@ -84,7 +84,7 @@
     ]
   },
   "randomimage": {
-    "Command": "randomimage, rimg",
+    "Command": "randomimage rimg",
     "Description": "Searches Google Images with the specified query, returns a random result.",
     "Usage": [
       "{0}randomimage cats",
