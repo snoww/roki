@@ -275,5 +275,19 @@
     "Usage": [
       "{0}tsearch pokemon sword shield"
     ]
+  },
+  "randomcat": {
+    "Command": "cat",
+    "Description": "Returns a random cat pic.",
+    "Usage": [
+      "{0}cat"
+    ]
+  },
+  "randomdog": {
+    "Command": "dog",
+    "Description": "Returns a random dog pic.",
+    "Usage": [
+      "{0}dog"
+    ]
   }
 }

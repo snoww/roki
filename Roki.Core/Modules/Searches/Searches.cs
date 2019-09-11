@@ -192,6 +192,21 @@ namespace Roki.Modules.Searches
                 await ctx.Channel.SendErrorAsync("Something went wrong :(").ConfigureAwait(false);
             }
         }
+        
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task RandomDog()
+        {
+            try
+            {
+                var file = await _service.GetRandomDog().ConfigureAwait(false);
+                await ctx.Channel.SendFileAsync(file).ConfigureAwait(false);
+                File.Delete(file);
+            }
+            catch
+            {
+                await ctx.Channel.SendErrorAsync("Something went wrong :(").ConfigureAwait(false);
+            }
+        }
 
         public async Task<bool> ValidateQuery(IMessageChannel channel, string query)
         {
