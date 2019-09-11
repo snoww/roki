@@ -119,16 +119,30 @@ namespace Roki.Modules.Searches.Services
                 using (var client = new WebClient())
                 {
                     var uri = new Uri(cat);
-                    if (uri.IsFile)
-                    {
-                        var fileName = "./temp/" + Path.GetFileName(uri.LocalPath);
-                        await client.DownloadFileTaskAsync(uri, fileName).ConfigureAwait(false);
-                        return fileName;
-                    }
+                    if (!uri.IsFile) return null;
+                    var fileName = "./temp/" + Path.GetFileName(uri.LocalPath);
+                    await client.DownloadFileTaskAsync(uri, fileName).ConfigureAwait(false);
+                    return fileName;
                 }
             }
+        }
+        
+        public async Task<string> GetRandomDog()
+        {
+            using (var http = _httpFactory.CreateClient())
+            {
+                var result = await http.GetStringAsync("https://random.dog/woof.json").ConfigureAwait(false);
+                var dog = JsonConvert.DeserializeAnonymousType(result, new {Url = ""}).Url;
 
-            return null;
+                using (var client = new WebClient())
+                {
+                    var uri = new Uri(dog);
+                    if (!uri.IsFile) return null;
+                    var fileName = "./temp/" + Path.GetFileName(uri.LocalPath);
+                    await client.DownloadFileTaskAsync(uri, fileName).ConfigureAwait(false);
+                    return fileName;
+                }
+            }
         }
     }
 }
