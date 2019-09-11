@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -106,6 +107,28 @@ namespace Roki.Modules.Searches.Services
                 var movie = JsonConvert.DeserializeObject<OmdbMovie>(result);
                 return movie?.Title == null ? null : movie;
             }
+        }
+
+        public async Task<string> GetRandomCat()
+        {
+            using (var http = _httpFactory.CreateClient())
+            {
+                var result = await http.GetStringAsync("https://aws.random.cat/meow").ConfigureAwait(false);
+                var cat = JsonConvert.DeserializeAnonymousType(result, new {File = ""}).File;
+
+                using (var client = new WebClient())
+                {
+                    var uri = new Uri(cat);
+                    if (uri.IsFile)
+                    {
+                        var fileName = "./temp/" + Path.GetFileName(uri.LocalPath);
+                        await client.DownloadFileTaskAsync(uri, fileName).ConfigureAwait(false);
+                        return fileName;
+                    }
+                }
+            }
+
+            return null;
         }
     }
 }

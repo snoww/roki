@@ -19,7 +19,7 @@
 
     <ItemGroup>
       <Folder Include="Properties" />
-      <Folder Include="Resources" />
+      <Folder Include="temp" />
     </ItemGroup>
 
 </Project>
