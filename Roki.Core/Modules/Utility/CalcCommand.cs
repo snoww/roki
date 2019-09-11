@@ -22,8 +22,8 @@ namespace Roki.Modules.Utility
                 {
                     StartInfo = new ProcessStartInfo
                     {
-                        FileName = "./Resources/tex2pic",
-                        Arguments = $"-r 150 -o tex.png \"{trim}\"",
+                        FileName = "tex2pic",
+                        Arguments = $"-r 150 -o ./temp/tex.png \"{trim}\"",
                         RedirectStandardOutput = false,
                         UseShellExecute = false,
                         CreateNoWindow = true,
@@ -32,8 +32,8 @@ namespace Roki.Modules.Utility
                 proc.Start();
                 proc.WaitForExit();
 
-                await ctx.Channel.SendFileAsync("tex.png").ConfigureAwait(false);
-                File.Delete("tex.png");
+                await ctx.Channel.SendFileAsync("./temp/tex.png").ConfigureAwait(false);
+                File.Delete("./temp/tex.png");
             }
         }
     }
