@@ -40,7 +40,7 @@ namespace Roki.Modules.Searches.Services
             {
                 using (var client = new WebClient())
                 {
-                    await client.DownloadFileTaskAsync(new Uri($"https://wttr.in/{query}_0Fmnpqt.png"), "weather.png");
+                    await client.DownloadFileTaskAsync(new Uri($"https://wttr.in/{query}_0Fmnpqt.png"), "./temp/weather.png");
                 }
             }
             catch (Exception e)

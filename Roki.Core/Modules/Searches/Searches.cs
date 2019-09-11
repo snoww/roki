@@ -39,8 +39,8 @@ namespace Roki.Modules.Searches
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
                 await _service.GetWeatherDataAsync(query).ConfigureAwait(false);
 
-                await ctx.Channel.SendFileAsync("weather.png").ConfigureAwait(false);
-                File.Delete("weather.png");
+                await ctx.Channel.SendFileAsync("./temp/weather.png").ConfigureAwait(false);
+                File.Delete("./temp/weather.png");
             }
             catch
             {
