@@ -23,20 +23,21 @@ namespace Roki.Modules.Searches
                 }
 
                 var media = await _service.GetAnimeDataAsync(query).ConfigureAwait(false);
-                if (media != null)
-                {
-                    await ctx.Channel.SendErrorAsync("Couldn't find that anime :(").ConfigureAwait(false);
-                    return;
-                }
+//                if (media != null)
+//                {
+//                    await ctx.Channel.SendErrorAsync("Couldn't find that anime :(").ConfigureAwait(false);
+//                    return;
+//                }
 
                 EmbedBuilder AnimeList(int curPage)
                 {
                     var item = media[curPage];
-                    var title = ((string) (item.title.english + " | " + item.title.romaji + " | " + item.title.native).ToString()).TrimTo(256);
+                    var title = ((string) (item.title.romaji + " | " + item.title.native).ToString()).TrimTo(256);
                     var desc = ((string) item.description).TrimTo(2048).StripHtml();
                     var release = ((int) item.seasonInt).GetReleaseYear();
 
                     var embed = new EmbedBuilder().WithOkColor()
+                        .WithAuthor((string) item.title.english)
                         .WithTitle(title)
                         .WithThumbnailUrl(item.coverImage.large.ToString())
                         .WithDescription(desc)
