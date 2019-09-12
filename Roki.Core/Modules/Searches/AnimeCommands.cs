@@ -23,26 +23,31 @@ namespace Roki.Modules.Searches
                 }
 
                 var media = await _service.GetAnimeDataAsync(query).ConfigureAwait(false);
-                if (media == null)
-                {
-                    await ctx.Channel.SendErrorAsync("Couldn't find that anime :(").ConfigureAwait(false);
-                    return;
-                }
+//                if (string.IsNullOrWhiteSpace(media))
+//                {
+//                    await ctx.Channel.SendErrorAsync("Couldn't find that anime :(").ConfigureAwait(false);
+//                    Console.WriteLine("asdasdasdsadsad");
+//                    return;
+//                }
 
                 EmbedBuilder AnimeList(int curPage)
                 {
-                    var a = new EmbedBuilder().WithImageUrl("asd");
                     var item = media[curPage];
-                    var embed = new EmbedBuilder().WithColor(Convert.ToUInt32(item.coverImage.color.ToString().Substring(1), 16))
-                        .WithTitle((item.title.english + " | " + item.title.romaji + " | " + item.title.native).ToString().TrimTo(256))
-                        .WithDescription(item.description.ToString().TrimTo(2048))
+                    string title = (item.title.english + " | " + item.title.romaji + " | " + item.title.native).ToString().TrimTo(256);
+                    string desc = item.description.ToString().TrimTo(2048);
+                    string release = item.seasonInt.GetReleaseYear();
+
+                    var embed = new EmbedBuilder().WithOkColor()
+                        .WithTitle(title)
+                        .WithDescription(desc)
                         .WithImageUrl(item.coverImage.large)
                         .AddField("Type", item.type, true)
                         .AddField("Genres", string.Join(", ", item.genres), true)
                         .AddField("Status", item.status, true)
                         .AddField("Episodes", item.episodes, true)
-                        .AddField("Release Year", item.seasonInt.GetReleaseYear(), true)
+                        .AddField("Release Year", release, true)
                         .AddField("Rating", $"{item.averageScore}/100");
+                   
                     return embed;
                 }
 
