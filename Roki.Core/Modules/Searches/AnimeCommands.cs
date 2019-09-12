@@ -33,14 +33,14 @@ namespace Roki.Modules.Searches
                 EmbedBuilder AnimeList(int curPage)
                 {
                     var item = media[curPage];
-                    string title = (item.title.english + " | " + item.title.romaji + " | " + item.title.native).ToString().TrimTo(256);
-                    string desc = item.description.ToString().TrimTo(2048);
-                    string release = item.seasonInt.GetReleaseYear();
+                    var title = ((string) (item.title.english + " | " + item.title.romaji + " | " + item.title.native).ToString()).TrimTo(256);
+                    var desc = ((string) item.description).TrimTo(2048);
+                    var release = ((int) item.seasonInt).GetReleaseYear();
 
                     var embed = new EmbedBuilder().WithOkColor()
                         .WithTitle(title)
+                        .WithThumbnailUrl(item.coverImage.large.ToString())
                         .WithDescription(desc)
-                        .WithImageUrl(item.coverImage.large)
                         .AddField("Type", item.type, true)
                         .AddField("Genres", string.Join(", ", item.genres), true)
                         .AddField("Status", item.status, true)
@@ -51,13 +51,13 @@ namespace Roki.Modules.Searches
                     return embed;
                 }
 
-                await ctx.SendPaginatedConfirmAsync((int) 0, (Func<int, EmbedBuilder>) AnimeList, (int) media.Count, (int) 1, (bool) false).ConfigureAwait(false);
+                await ctx.SendPaginatedConfirmAsync( 0, AnimeList, (int) media.Count, 1, false).ConfigureAwait(false);
             }
         }
     }
     public static class AnimeExtensions
     {
-        public static string GetReleaseYear(int seasonInt)
+        public static string GetReleaseYear(this int seasonInt)
         {
             var year = seasonInt.ToString().Substring(0, seasonInt.ToString().Length - 1);
             var season = seasonInt.ToString().Substring(seasonInt.ToString().Length - 1);
@@ -68,7 +68,9 @@ namespace Roki.Modules.Searches
                 year = "200" + year;
             else if (int.Parse(year) > 30)
                 year = "19" + year;
-            
+            else
+                year = "20" + year;
+
             switch (season)
             {
                 case "1":
