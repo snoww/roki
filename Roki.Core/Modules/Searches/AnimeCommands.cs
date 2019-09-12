@@ -40,12 +40,12 @@ namespace Roki.Modules.Searches
                         .WithTitle(title)
                         .WithThumbnailUrl(item.coverImage.large.ToString())
                         .WithDescription(desc)
-                        .AddField("Type", item.type, true)
+                        .AddField("Type", ((string) item.type).ToTitleCase(), true)
                         .AddField("Genres", string.Join(", ", item.genres), true)
-                        .AddField("Status", item.status, true)
+                        .AddField("Status", ((string) item.status).ToTitleCase(), true)
                         .AddField("Episodes", item.episodes, true)
                         .AddField("Release Year", release, true)
-                        .AddField("Rating", $"{item.averageScore}/100");
+                        .AddField("Rating", $"{item.averageScore} / 100", true);
                    
                     return embed;
                 }
@@ -83,6 +83,9 @@ namespace Roki.Modules.Searches
                     break;
                 case "4":
                     season = "Winter";
+                    break;
+                default:
+                    season = "Spring";
                     break;
             }
 
