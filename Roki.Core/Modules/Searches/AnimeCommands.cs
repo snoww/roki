@@ -23,12 +23,11 @@ namespace Roki.Modules.Searches
                 }
 
                 var media = await _service.GetAnimeDataAsync(query).ConfigureAwait(false);
-//                if (string.IsNullOrWhiteSpace(media))
-//                {
-//                    await ctx.Channel.SendErrorAsync("Couldn't find that anime :(").ConfigureAwait(false);
-//                    Console.WriteLine("asdasdasdsadsad");
-//                    return;
-//                }
+                if (media != null)
+                {
+                    await ctx.Channel.SendErrorAsync("Couldn't find that anime :(").ConfigureAwait(false);
+                    return;
+                }
 
                 EmbedBuilder AnimeList(int curPage)
                 {
