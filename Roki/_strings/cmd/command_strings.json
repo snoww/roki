@@ -296,5 +296,12 @@
     "Usage": [
       "{0}catfact"
     ]
+  },
+  "anime": {
+    "Command": "anime",
+    "Description": "Returns top 5 anime results provided from the query.",
+    "Usage": [
+      "{0}anime sao"
+    ]
   }
 }
