@@ -34,7 +34,7 @@ namespace Roki.Modules.Searches
                 {
                     var item = media[curPage];
                     var title = ((string) (item.title.english + " | " + item.title.romaji + " | " + item.title.native).ToString()).TrimTo(256);
-                    var desc = ((string) item.description).TrimTo(2048);
+                    var desc = ((string) item.description).TrimTo(2048).StripHtml();
                     var release = ((int) item.seasonInt).GetReleaseYear();
 
                     var embed = new EmbedBuilder().WithOkColor()
