@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using NLog;
 
 namespace Roki.Extensions
@@ -48,6 +49,11 @@ namespace Roki.Extensions
         public static string SanitizeString(this string dirtyString)
         {
             return new string(dirtyString.Where(char.IsLetterOrDigit).ToArray());
+        }
+        
+        public static string StripHtml(this string input)
+        {
+            return Regex.Replace(input, "<.*?>", string.Empty);
         }
     }
 }
