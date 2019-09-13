@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -40,9 +41,10 @@ namespace Roki.Modules.Music
                     var tts = JsonConvert.DeserializeObject<TtsModel>(await result.Content.ReadAsStringAsync().ConfigureAwait(false));
                     if (tts.Success)
                     {
+                        var guid = Guid.NewGuid();
                         using (var client = new WebClient())
                         {
-                            await client.DownloadFileTaskAsync(tts.SpeakUrl, "./temp/tts.ogg").ConfigureAwait(false);
+                            await client.DownloadFileTaskAsync(tts.SpeakUrl, $"./temp/tts-{guid}.ogg").ConfigureAwait(false);
                         }
 
                         using (var proc = new Process())
@@ -50,7 +52,7 @@ namespace Roki.Modules.Music
                             proc.StartInfo = new ProcessStartInfo
                             {
                                 FileName = "ffmpeg",
-                                Arguments = $"-i ./temp/tts.ogg ./temp/tts.mp3",
+                                Arguments = $"-i ./temp/tts-{guid}.ogg ./temp/tts-{guid}.mp3",
                                 RedirectStandardOutput = false,
                                 UseShellExecute = false,
                                 CreateNoWindow = true,
@@ -59,9 +61,9 @@ namespace Roki.Modules.Music
                             proc.WaitForExit();
                         }
 
-                        await ctx.Channel.SendFileAsync("./temp/tts.mp3").ConfigureAwait(false);
-                        File.Delete("./temp/tts.ogg");
-                        File.Delete("./temp/tts.mp3");
+                        await ctx.Channel.SendFileAsync($"./temp/tts-{guid}.mp3").ConfigureAwait(false);
+                        File.Delete($"./temp/tts-{guid}.ogg");
+                        File.Delete($"./temp/tts-{guid}.mp3");
                     }
                     else
                     {
