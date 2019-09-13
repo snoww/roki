@@ -45,7 +45,8 @@ namespace Roki.Modules.Searches
                         .AddField("Status", ((string) item.status).ToTitleCase(), true)
                         .AddField("Episodes", item.episodes, true)
                         .AddField("Release Year", release, true)
-                        .AddField("Rating", $"{item.averageScore} / 100", true);
+                        .AddField("Rating", $"{item.averageScore} / 100", true)
+                        .WithFooter($"Page {curPage + 1} / {media.Count}");
                    
                     return embed;
                 }
