@@ -32,6 +32,12 @@ namespace Roki.Modules.Music
                     return;
                 }
 
+                if (query.Length > 300)
+                {
+                    await ctx.Channel.SendErrorAsync("TTS message too long. Max 300 characters.");
+                    return;
+                }
+
                 using (var http = new HttpClient())
                 {
                     var queryString = _queryJson.Replace("textString", query);
