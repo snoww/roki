@@ -47,7 +47,7 @@ namespace Roki.Modules.Music
                     var tts = JsonConvert.DeserializeObject<TtsModel>(await result.Content.ReadAsStringAsync().ConfigureAwait(false));
                     if (tts.Success)
                     {
-                        var guid = Guid.NewGuid();
+                        var guid = Guid.NewGuid().ToString().Substring(0, 7);
                         using (var client = new WebClient())
                         {
                             await client.DownloadFileTaskAsync(tts.SpeakUrl, $"./temp/tts-{guid}.ogg").ConfigureAwait(false);
