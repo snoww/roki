@@ -41,11 +41,11 @@ namespace Roki.Modules.Music
                     {
                         using (var client = new WebClient())
                         {
-                            await client.DownloadFileTaskAsync(tts.SpeakUrl, "/temp/tts.ogg");
+                            await client.DownloadFileTaskAsync(tts.SpeakUrl, "./temp/tts.ogg").ConfigureAwait(false);
                         }
 
-                        await ctx.Channel.SendFileAsync("/temp/tts.ogg").ConfigureAwait(false);
-                        File.Delete("/temp/tts.ogg");
+                        await ctx.Channel.SendFileAsync("./temp/tts.ogg").ConfigureAwait(false);
+                        File.Delete("./temp/tts.ogg");
                     }
                     else
                     {
