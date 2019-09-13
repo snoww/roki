@@ -38,11 +38,11 @@ namespace Roki.Modules.Searches
                         .WithImageUrl(anime.CoverImage.Large)
                         .WithDescription(anime.Description.StripHtml().TrimTo(2048))
                         .AddField("Type", anime.Type.ToTitleCase(), true)
-                        .AddField("Genres", string.Join(", ", anime.Genres), true)
                         .AddField("Status", anime.Status.ToTitleCase(), true)
-                        .AddField("Episodes", anime.Episodes, true)
+                        .AddField("Episodes", anime.Episodes != null ? anime.Episodes.ToString() : "N/A", true)
                         .AddField("Release Year", anime.SeasonInt.GetReleaseYear(), true)
-                        .AddField("Rating", $"{anime.AverageScore} / 100", true)
+                        .AddField("Rating", anime.AverageScore != null ? $"{anime.AverageScore}  / 100" : "N/A", true)
+                        .AddField("Genres", string.Join(", ", anime.Genres), true)
                         .WithFooter($"Page {p + 1} / {media.Count}");
                     return embed;
                 }, media.Count, 1, false).ConfigureAwait(false);
@@ -65,8 +65,11 @@ namespace Roki.Modules.Searches
             return string.Join(" | ", titles);
         }
         
-        public static string GetReleaseYear(this int seasonInt)
+        public static string GetReleaseYear(this int? seasonInt)
         {
+            if (seasonInt == null)
+                return "N/A";
+            
             var year = seasonInt.ToString().Substring(0, seasonInt.ToString().Length - 1);
             var season = seasonInt.ToString().Substring(seasonInt.ToString().Length - 1);
             

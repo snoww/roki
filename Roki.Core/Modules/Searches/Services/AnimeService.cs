@@ -64,10 +64,10 @@ namespace Roki.Modules.Searches.Services
         public string Description { get; set; }
         public string Type { get; set; }
         public string Status { get; set; }
-        public int SeasonInt { get; set; }
+        public int? SeasonInt { get; set; }
         public List<string> Genres { get; set; }
-        public int Episodes { get; set; }
-        public int AverageScore { get; set; }
+        public int? Episodes { get; set; }
+        public int? AverageScore { get; set; }
         public AnimeCover CoverImage { get; set; }
     }
     
