@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -44,8 +45,23 @@ namespace Roki.Modules.Music
                             await client.DownloadFileTaskAsync(tts.SpeakUrl, "./temp/tts.ogg").ConfigureAwait(false);
                         }
 
-                        await ctx.Channel.SendFileAsync("./temp/tts.ogg").ConfigureAwait(false);
+                        using (var proc = new Process())
+                        {
+                            proc.StartInfo = new ProcessStartInfo
+                            {
+                                FileName = "ffmpeg",
+                                Arguments = $"-i ./temp/tts.ogg ./temp/tts.mp3",
+                                RedirectStandardOutput = false,
+                                UseShellExecute = false,
+                                CreateNoWindow = true,
+                            };
+                            proc.Start();
+                            proc.WaitForExit();
+                        }
+
+                        await ctx.Channel.SendFileAsync("./temp/tts.mp3").ConfigureAwait(false);
                         File.Delete("./temp/tts.ogg");
+                        File.Delete("./temp/tts.mp3");
                     }
                     else
                     {
