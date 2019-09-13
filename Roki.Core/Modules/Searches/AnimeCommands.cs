@@ -32,13 +32,13 @@ namespace Roki.Modules.Searches
                 EmbedBuilder AnimeList(int curPage)
                 {
                     var item = media[curPage];
-                    var title = ((string) (item.title.english + " | " + item.title.romaji + " | " + item.title.native).ToString()).TrimTo(256);
-                    var desc = ((string) item.description).TrimTo(2048).StripHtml();
+                    var title = ((string) (item.title.romaji + " | " + item.title.english + " | " + item.title.native).ToString()).TrimTo(256);
+                    var desc = ((string) item.description).StripHtml().TrimTo(2048);
                     var release = ((int) item.seasonInt).GetReleaseYear();
-
+                    
                     var embed = new EmbedBuilder().WithOkColor()
                         .WithTitle(title)
-                        .WithThumbnailUrl(item.coverImage.large.ToString())
+                        .WithImageUrl(item.coverImage.large.ToString())
                         .WithDescription(desc)
                         .AddField("Type", ((string) item.type).ToTitleCase(), true)
                         .AddField("Genres", string.Join(", ", item.genres), true)
