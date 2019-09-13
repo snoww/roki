@@ -16,7 +16,8 @@ namespace Roki.Modules.Searches.Common
 
         public class GeolocationModel
         {
-            [JsonProperty("formatted_address")] public string FormattedAddress { get; set; }
+            [JsonProperty("formatted_address")] 
+            public string FormattedAddress { get; set; }
 
             public GeometryModel Geometry { get; set; }
 
