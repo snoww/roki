@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -23,40 +24,47 @@ namespace Roki.Modules.Searches
                 }
 
                 var media = await _service.GetAnimeDataAsync(query).ConfigureAwait(false);
-                if ((int) media.Count < 1)
+                if (media.Count < 1)
                 {
                     await ctx.Channel.SendErrorAsync("Couldn't find that anime :(").ConfigureAwait(false);
                     return;
                 }
 
-                EmbedBuilder AnimeList(int curPage)
+                await ctx.SendPaginatedConfirmAsync( 0, p =>
                 {
-                    var item = media[curPage];
-                    var title = ((string) (item.title.romaji + " | " + item.title.english + " | " + item.title.native).ToString()).TrimTo(256);
-                    var desc = ((string) item.description).StripHtml().TrimTo(2048);
-                    var release = ((int) item.seasonInt).GetReleaseYear();
-                    
+                    var anime = media[p];
                     var embed = new EmbedBuilder().WithOkColor()
-                        .WithTitle(title)
-                        .WithImageUrl(item.coverImage.large.ToString())
-                        .WithDescription(desc)
-                        .AddField("Type", ((string) item.type).ToTitleCase(), true)
-                        .AddField("Genres", string.Join(", ", item.genres), true)
-                        .AddField("Status", ((string) item.status).ToTitleCase(), true)
-                        .AddField("Episodes", item.episodes, true)
-                        .AddField("Release Year", release, true)
-                        .AddField("Rating", $"{item.averageScore} / 100", true)
-                        .WithFooter($"Page {curPage + 1} / {media.Count}");
-                   
+                        .WithTitle(anime.Title.GetTitle())
+                        .WithImageUrl(anime.CoverImage.Large)
+                        .WithDescription(anime.Description.StripHtml().TrimTo(2048))
+                        .AddField("Type", anime.Type.ToTitleCase(), true)
+                        .AddField("Genres", string.Join(", ", anime.Genres), true)
+                        .AddField("Status", anime.Status.ToTitleCase(), true)
+                        .AddField("Episodes", anime.Episodes, true)
+                        .AddField("Release Year", anime.SeasonInt.GetReleaseYear(), true)
+                        .AddField("Rating", $"{anime.AverageScore} / 100", true)
+                        .WithFooter($"Page {p + 1} / {media.Count}");
                     return embed;
-                }
-
-                await ctx.SendPaginatedConfirmAsync( 0, AnimeList, (int) media.Count, 1, false).ConfigureAwait(false);
+                }, media.Count, 1, false).ConfigureAwait(false);
             }
         }
     }
     public static class AnimeExtensions
     {
+        public static string GetTitle(this AnimeTitle title)
+        {
+            var titles = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(title.Romaji))
+                titles.Add(title.Romaji);
+            if (!string.IsNullOrWhiteSpace(title.English))
+                titles.Add(title.English);
+            if (!string.IsNullOrWhiteSpace(title.Native))
+                titles.Add(title.Native);
+
+            return string.Join(" | ", titles);
+        }
+        
         public static string GetReleaseYear(this int seasonInt)
         {
             var year = seasonInt.ToString().Substring(0, seasonInt.ToString().Length - 1);
