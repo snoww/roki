@@ -56,6 +56,8 @@ namespace Roki.Modules.Music.Services
                 embed.WithAuthor($"Queued: #{player.Queue.Count}", "http://i.imgur.com/nhKS3PT.png")
                     .WithDescription($"{track.PrettyTrack()}")
                     .WithFooter(track.PrettyFooter(player.CurrentVolume));
+                var msg = await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                msg.DeleteAfter(10);
             }
             else
             {
@@ -63,9 +65,10 @@ namespace Roki.Modules.Music.Services
                 embed.WithAuthor($"Playing song", "http://i.imgur.com/nhKS3PT.png")
                     .WithDescription($"{track.PrettyTrack()}")
                     .WithFooter(track.PrettyFooter(player.CurrentVolume));
+                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
             
-            await ctx.Channel.EmbedAsync(embed);
+            await ctx.Message.DeleteAsync().ConfigureAwait(false);
         }
         
         public async Task PauseAsync(ICommandContext ctx)
@@ -78,7 +81,7 @@ namespace Roki.Modules.Music.Services
             var embed = new EmbedBuilder().WithOkColor()
                 .WithDescription("Music playback paused.");
             
-            await ctx.Channel.EmbedAsync(embed);
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         public async Task SkipAsync(ICommandContext ctx)
