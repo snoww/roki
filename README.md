@@ -1,3 +1,11 @@
-# Roki written in C# by Snow
+# Roki 
 
-General purpose discord bot written in C#, inspired by NadekoBot by Kwoth.
+[![forthebadge](https://forthebadge.com/images/badges/made-with-crayons.svg)](https://forthebadge.com)
+
+General purpose discord bot by Snow
+
+Project is WIP
+
+### Acknowledgements
+
+NadekoBot by Kwoth
