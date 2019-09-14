@@ -1,0 +1,20 @@
+
+{
+  "ClientId": 123,
+  "BotId": 123,
+  "Token": "",
+  "OwnerIds": [
+    123
+  ],
+  "GoogleApi": "",
+  "OmdbApi": "",
+  "DarkSkyApi": "",
+  "TwitterConsumer": "",
+  "TwitterConsumerSecret": "",
+  "TwitterAccessToken": "",
+  "TwitterAccessSecret": "",
+  "Db": {
+    "Type": "sqlite",
+    "ConnectionString": "Data Source=data/roki.db"
+  }
+}
