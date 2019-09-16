@@ -15,12 +15,12 @@ namespace Roki.Modules.Searches.Services
     public class SearchService : IRService, IUnloadableService
     {
         private readonly DiscordSocketClient _client;
-        private readonly IConfiguration _config;
+        private readonly IRokiConfig _config;
         private readonly IGoogleApiService _google;
         private readonly IHttpClientFactory _httpFactory;
         private readonly Logger _log;
 
-        public SearchService(DiscordSocketClient client, IHttpClientFactory httpFactory, IGoogleApiService google, IConfiguration config)
+        public SearchService(DiscordSocketClient client, IHttpClientFactory httpFactory, IGoogleApiService google, IRokiConfig config)
         {
             _client = client;
             _httpFactory = httpFactory;

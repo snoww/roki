@@ -15,13 +15,13 @@ namespace Roki.Core.Services.Impl
     {
         private const string search_engine_id = "009851753967553605166:ffip6ctnuaq";
 
-        private readonly IConfiguration _config;
+        private readonly IRokiConfig _config;
         private readonly IHttpClientFactory _httpFactory;
         private readonly CustomsearchService cs;
 
         private readonly YouTubeService yt;
 
-        public GoogleApiService(IConfiguration config, IHttpClientFactory httpFactory)
+        public GoogleApiService(IRokiConfig config, IHttpClientFactory httpFactory)
         {
             _config = config;
             _httpFactory = httpFactory;

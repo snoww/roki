@@ -8,7 +8,7 @@ using NLog;
 
 namespace Roki.Core.Services.Impl
 {
-    public class Configuration : IConfiguration
+    public class RokiConfig : IRokiConfig
     {
         private readonly string _credsFileName = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
         private readonly Logger _log;
@@ -31,7 +31,7 @@ namespace Roki.Core.Services.Impl
             return OwnerIds.Contains(u.Id);
         }
 
-        public Configuration()
+        public RokiConfig()
         {
             _log = LogManager.GetCurrentClassLogger();
             try

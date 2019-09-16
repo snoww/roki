@@ -18,7 +18,7 @@ namespace Roki.Modules.Searches
         {
             private readonly TwitterContext _twitterCtx;
             
-            public TwitterCommands(IConfiguration config)
+            public TwitterCommands(IRokiConfig config)
             {
                 _twitterCtx = new TwitterContext(new SingleUserAuthorizer()
                 {
