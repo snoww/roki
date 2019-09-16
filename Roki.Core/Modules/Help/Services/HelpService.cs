@@ -54,7 +54,7 @@ namespace Roki.Modules.Help.Services
 
             embed.WithOkColor()
                 .AddField("Usage", info.RealRemarks(prefix), true)
-                .WithFooter("Module", info.Module.GetTopLevelModule().Name);
+                .WithFooter($"Module: {info.Module.GetTopLevelModule().Name}");
 
             var options = ((RokiOptionsAttribute) info.Attributes.FirstOrDefault(x => x is RokiOptionsAttribute))?.OptionType;
             if (options != null)
