@@ -15,7 +15,7 @@ namespace Roki.Modules.Searches
         public class AnimeCommands : RokiSubmodule<AnimeService>
         {
             [RokiCommand, Usage, Description, Aliases]
-            public async Task Anime([Leftover] string query)
+            public async Task Anime([Leftover] string query = null)
             {
                 if (string.IsNullOrWhiteSpace(query))
                 {
