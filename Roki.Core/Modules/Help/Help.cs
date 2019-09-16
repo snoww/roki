@@ -137,14 +137,16 @@ namespace Roki.Modules.Help
         {
             var channel = ctx.Channel;
 
-//            if (cmd == null)
-//            {
+            if (cmd == null)
+            {
+                await ctx.Channel.SendErrorAsync("Command not found.").ConfigureAwait(false);
 //                var ch = channel is ITextChannel
 //                    ? await ((IGuildUser) ctx.User).GetOrCreateDMChannelAsync().ConfigureAwait(false)
 //                    : channel;
 //
 //                await ch.
-//            }
+            }
+
             var embed = _service.GetCommandHelp(cmd, ctx.Guild);
             await channel.EmbedAsync(embed).ConfigureAwait(false);
         }
