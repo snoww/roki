@@ -42,10 +42,9 @@ namespace Roki.Modules.Searches
                         .AddField("Episodes", anime.Episodes != null ? anime.Episodes.ToString() : "N/A", true)
                         .AddField("Release Year", anime.SeasonInt.GetReleaseYear(), true)
                         .AddField("Rating", anime.AverageScore != null ? $"{anime.AverageScore}  / 100" : "N/A", true)
-                        .AddField("Genres", string.Join(", ", anime.Genres), true)
-                        .WithFooter($"Page {p + 1} / {media.Count}");
+                        .AddField("Genres", string.Join(", ", anime.Genres), true);
                     return embed;
-                }, media.Count, 1, false).ConfigureAwait(false);
+                }, media.Count, 1).ConfigureAwait(false);
             }
         }
     }
