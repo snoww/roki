@@ -12,7 +12,7 @@ namespace Roki.Core.Services.Database
         public RokiContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<RokiContext>();
-            IConfiguration config = new Configuration();
+            IRokiConfig config = new RokiConfig();
             var builder = new SqliteConnectionStringBuilder(config.Db.ConnectionString);
             builder.DataSource = Path.Combine(Directory.GetCurrentDirectory(), builder.DataSource);
             optionsBuilder.UseSqlite(builder.ToString());

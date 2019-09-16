@@ -14,7 +14,7 @@ namespace Roki.Core.Services.Impl
     {
         public const string BotVersion = "0.2.1";
         private readonly DiscordSocketClient _client;
-        private readonly IConfiguration _config;
+        private readonly IRokiConfig _config;
         private readonly Logger _log;
         private readonly DateTime _started;
         private long _commandsRan;
@@ -29,7 +29,7 @@ namespace Roki.Core.Services.Impl
 //        private readonly ConnectionMultiplexer _redis;
 //        private readonly IHttpClientFactory _httpFactory;
 
-        public StatsService(DiscordSocketClient client, CommandHandler cmdHandler, IConfiguration config, Roki roki)
+        public StatsService(DiscordSocketClient client, CommandHandler cmdHandler, IRokiConfig config, Roki roki)
         {
             _log = LogManager.GetCurrentClassLogger();
             _client = client;

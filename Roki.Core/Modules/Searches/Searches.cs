@@ -17,11 +17,11 @@ namespace Roki.Modules.Searches
 {
     public partial class Searches : RokiTopLevelModule<SearchService>
     {
-        private readonly IConfiguration _config;
+        private readonly IRokiConfig _config;
         private readonly IGoogleApiService _google;
         private readonly IHttpClientFactory _httpFactory;
 
-        public Searches(IConfiguration config, IGoogleApiService google, IHttpClientFactory httpFactory)
+        public Searches(IRokiConfig config, IGoogleApiService google, IHttpClientFactory httpFactory)
         {
             _config = config;
             _google = google;

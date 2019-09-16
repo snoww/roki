@@ -10,9 +10,9 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Core.Services;
+using Roki.Core.Services.Impl;
 using Roki.Extensions;
 using Victoria;
-using Configuration = Roki.Core.Services.Impl.Configuration;
 
 namespace Roki
 {
@@ -28,7 +28,7 @@ namespace Roki
             // TODO elevated permission check?
 
 
-            Config = new Configuration();
+            Config = new RokiConfig();
             _db = new DbService(Config);
             _db.Setup();
 
@@ -50,7 +50,7 @@ namespace Roki
             Client.Log += ClientLog;
         }
 
-        public Configuration Config { get; }
+        public RokiConfig Config { get; }
         public DiscordSocketClient Client { get; }
         public CommandService CommandService { get; }
         public static Color OkColor { get; set; }
@@ -83,7 +83,7 @@ namespace Roki
 //            var _bot = Client.CurrentUser;
 
             var service = new ServiceCollection()
-                .AddSingleton<IConfiguration>(Config)
+                .AddSingleton<IRokiConfig>(Config)
                 .AddSingleton(_db)
                 .AddSingleton(Client)
                 .AddSingleton(CommandService)

@@ -16,7 +16,7 @@ namespace Roki.Modules.Help
     public class Help : RokiTopLevelModule<HelpService>
     {
         private readonly CommandService _command;
-        private readonly IConfiguration _config;
+        private readonly IRokiConfig _config;
         private readonly IServiceProvider _services;
 
 //        public EmbedBuilder GetHelpStringEmbed()
@@ -24,7 +24,7 @@ namespace Roki.Modules.Help
 //            
 //        }
 
-        public Help(IConfiguration config, CommandService command, IServiceProvider services)
+        public Help(IRokiConfig config, CommandService command, IServiceProvider services)
         {
             _config = config;
             _command = command;

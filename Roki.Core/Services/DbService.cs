@@ -9,7 +9,7 @@ namespace Roki.Core.Services
     {
         private readonly DbContextOptions<RokiContext> _options;
 
-        public DbService(IConfiguration config)
+        public DbService(IRokiConfig config)
         {
             var builder = new SqliteConnectionStringBuilder(config.Db.ConnectionString);
             builder.DataSource = Path.Combine(Directory.GetCurrentDirectory(), builder.DataSource);

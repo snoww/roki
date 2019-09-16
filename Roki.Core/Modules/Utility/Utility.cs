@@ -13,11 +13,11 @@ namespace Roki.Modules.Utility
     public partial class Utility : RokiTopLevelModule
     {
         private readonly DiscordSocketClient _client;
-        private readonly IConfiguration _config;
+        private readonly IRokiConfig _config;
         private readonly Roki _roki;
         private readonly IStatsService _stats;
 
-        public Utility(Roki roki, DiscordSocketClient client, IStatsService stats, IConfiguration config)
+        public Utility(Roki roki, DiscordSocketClient client, IStatsService stats, IRokiConfig config)
         {
             _client = client;
             _stats = stats;

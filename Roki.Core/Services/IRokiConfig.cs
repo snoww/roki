@@ -3,7 +3,7 @@ using Discord;
 
 namespace Roki.Core.Services
 {
-    public interface IConfiguration
+    public interface IRokiConfig
     {
         ulong ClientId { get; }
         string Token { get; }
