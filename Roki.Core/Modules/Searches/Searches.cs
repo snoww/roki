@@ -28,6 +28,8 @@ namespace Roki.Modules.Searches
             _httpFactory = httpFactory;
         }
 
+        // TODO sanitize inputs!!
+        
         [RokiCommand, Usage, Description, Aliases]
         public async Task Weather([Leftover] string query = "Toronto")
         {
@@ -91,7 +93,7 @@ namespace Roki.Modules.Searches
             var encode = query?.Trim();
             if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
                 return;
-            query = WebUtility.UrlEncode(encode).Replace(" ", "+");
+            query = WebUtility.UrlEncode(encode)?.Replace(" ", "+");
             var result = await _google.GetImagesAsync(encode).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithOkColor()
                 .WithAuthor("Image search for: " + encode.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
@@ -109,7 +111,7 @@ namespace Roki.Modules.Searches
             var encode = query?.Trim();
             if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
                 return;
-            query = WebUtility.UrlEncode(encode).Replace(" ", "+");
+            query = WebUtility.UrlEncode(encode)?.Replace(" ", "+");
             var result = await _google.GetImagesAsync(encode, true).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithOkColor()
                 .WithAuthor("Image search for: " + encode.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
