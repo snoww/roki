@@ -263,8 +263,8 @@
     ]
   },
   "twitter": {
-    "Command": "twitter",
-    "Description": "Returns the latest tweet by the specified user.",
+    "Command": "twitter tweet",
+    "Description": "Returns the latest tweets by the specified user.",
     "Usage": [
       "{0}twitter xqc"
     ]

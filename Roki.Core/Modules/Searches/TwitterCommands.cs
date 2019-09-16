@@ -58,14 +58,17 @@ namespace Roki.Modules.Searches
                     return;
                 }
 
-                var tweet = tweets[0];
-                var embed = new EmbedBuilder().WithOkColor()
-                    .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
-                    .WithDescription(tweet.Text ?? tweet.FullText)
-                    .AddField("Retweets", tweet.RetweetCount, true)
-                    .AddField("Likes", tweet.FavoriteCount ?? 0, true);
-                
-                await ctx.Channel.EmbedAsync(embed);
+                await ctx.SendPaginatedConfirmAsync(0, p =>
+                {
+                    var tweet = tweets[p];
+                    var embed = new EmbedBuilder().WithOkColor()
+                        .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
+                        .WithDescription(tweet.Text ?? tweet.FullText)
+                        .AddField("Retweets", tweet.RetweetCount, true)
+                        .AddField("Likes", tweet.FavoriteCount ?? 0, true)
+                        .WithFooter($"{tweet.CreatedAt:g}");
+                    return embed;
+                }, tweets.Count, 1, false);
             }
             [RokiCommand, Usage, Description, Aliases]
             public async Task TwitterSearch([Leftover] string query = null)
@@ -106,7 +109,8 @@ namespace Roki.Modules.Searches
                         .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
                         .WithDescription(tweet.Text ?? tweet.FullText)
                         .AddField("Retweets", tweet.RetweetCount, true)
-                        .AddField("Likes", tweet.FavoriteCount ?? 0, true);
+                        .AddField("Likes", tweet.FavoriteCount ?? 0, true)
+                        .WithFooter($"{tweet.CreatedAt:g}");
                 }, combinedSearch.Count, 1).ConfigureAwait(false);
             }
         }
