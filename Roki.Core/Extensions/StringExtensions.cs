@@ -38,15 +38,19 @@ namespace Roki.Extensions
 
         public static string FirstLetterToUpperCase(this string str)
         {
-            if (string.IsNullOrEmpty(str))
+            if (string.IsNullOrWhiteSpace(str))
+            {
                 _log.Warn("No first letter");
+                return null;
+            }
+                
 
             var a = str.ToCharArray();
             a[0] = char.ToUpper(a[0]);
             return new string(a);
         }
         
-        public static string SanitizeString(this string dirtyString)
+        public static string SanitizeStringFull(this string dirtyString)
         {
             return new string(dirtyString.Where(char.IsLetterOrDigit).ToArray());
         }

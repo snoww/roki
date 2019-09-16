@@ -25,7 +25,7 @@ namespace Roki.Modules.Searches.Services
         {
             try
             {
-                query = query.SanitizeString();
+                query = query.SanitizeStringFull();
                 using (var http = _httpFactory.CreateClient())
                 {
                     var newQuery = _queryJson.Replace("searchString", query);
