@@ -1,5 +1,6 @@
 **.db-shm
 **.db-wal
+**.db
 
 Roki/config.json
 
