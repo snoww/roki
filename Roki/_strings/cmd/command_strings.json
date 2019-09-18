@@ -250,16 +250,23 @@
   },
   "next": {
     "Command": "next n",
-    "Description": "Skips current song.",
+    "Description": "Skips current track.",
     "Usage": [
       "{0}n"
     ]
   },
   "songremove": {
     "Command": "songremove srm",
-    "Description": "Removes the specified song in the queue.",
+    "Description": "Removes the specified track in the queue.",
     "Usage": [
       "{0}srm 5"
+    ]
+  },
+  "songseek": {
+    "Command": "songseek seek",
+    "Description": "Seeks the given number of seconds forward in the current track.",
+    "Usage": [
+      "{0}seek 15"
     ]
   },
   "twitter": {
