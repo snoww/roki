@@ -182,7 +182,27 @@ namespace Roki.Modules.Music.Services
             await player.SetVolumeAsync(volume).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithOkColor()
                 .WithDescription($"Volume set to {player.CurrentVolume}.");
-            await ctx.Channel.EmbedAsync(embed);
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+        }
+
+        public async Task SeekAsync(ICommandContext ctx, int seconds)
+        {
+            if (!await IsPlayerActive(ctx))
+                return;
+            var player = _lavaSocketClient.GetPlayer(ctx.Guild.Id);
+
+            var currTime = player.CurrentTrack.Position;
+            var addedTime = currTime.Add(new TimeSpan(0, 0, seconds));
+
+            if (addedTime > player.CurrentTrack.Length)
+            {
+                await ctx.Channel.SendErrorAsync("Cannot seek that far.").ConfigureAwait(false);
+                return;
+            }
+            
+            await player.SeekAsync(addedTime).ConfigureAwait(false);
+            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                .WithDescription($"Skipped {seconds} seconds.")).ConfigureAwait(false);
         }
 
         private Task OnReady()
@@ -199,7 +219,7 @@ namespace Roki.Modules.Music.Services
             await player.TextChannel.EmbedAsync(new EmbedBuilder().WithOkColor()
                 .WithAuthor($"Finished song", "http://i.imgur.com/nhKS3PT.png")
                 .WithDescription(track.PrettyTrack())
-                .WithFooter(track.PrettyFooter(player.CurrentVolume)));
+                .WithFooter(track.PrettyFooter(player.CurrentVolume))).ConfigureAwait(false);
 
             if (!player.Queue.TryDequeue(out var item) || !(item is LavaTrack nextTrack))
             {
@@ -210,8 +230,8 @@ namespace Roki.Modules.Music.Services
             await player.TextChannel.EmbedAsync(new EmbedBuilder().WithOkColor()
                 .WithAuthor($"Playing song", "http://i.imgur.com/nhKS3PT.png")
                 .WithDescription($"{track.PrettyTrack()}")
-                .WithFooter(track.PrettyFooter(player.CurrentVolume)));
-            await player.PlayAsync(nextTrack);
+                .WithFooter(track.PrettyFooter(player.CurrentVolume))).ConfigureAwait(false);
+            await player.PlayAsync(nextTrack).ConfigureAwait(false);
         }
 
         private async Task<bool> IsPlayerActive(ICommandContext ctx)

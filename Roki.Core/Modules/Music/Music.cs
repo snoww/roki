@@ -81,9 +81,26 @@ namespace Roki.Modules.Music
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
             if (volume < 0 || volume > 100)
-                await ctx.Channel.SendErrorAsync("Volume must be from 0-100.");
+            {
+                await ctx.Channel.SendErrorAsync("Volume must be from 0-100.").ConfigureAwait(false);
+                return;
+            }
             
-            await _service.SetVolumeAsync(ctx, volume);
+            await _service.SetVolumeAsync(ctx, volume).ConfigureAwait(false);
+        }
+
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task Seek([Leftover] int seconds = 0)
+        {
+            if (!await IsUserInVoice().ConfigureAwait(false))
+                return;
+            if (seconds == 0)
+            {
+                await ctx.Channel.SendErrorAsync("Cannot skip that far.").ConfigureAwait(false);
+                return;
+            }
+
+            await _service.SeekAsync(ctx, seconds).ConfigureAwait(false);
         }
 
         private async Task<bool> IsUserInVoice()
