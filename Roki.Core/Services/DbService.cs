@@ -1,6 +1,5 @@
-using System.IO;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using MySql.Data.MySqlClient;
 using Roki.Core.Services.Database;
 
 namespace Roki.Core.Services
@@ -11,22 +10,21 @@ namespace Roki.Core.Services
 
         public DbService(IRokiConfig config)
         {
-            var builder = new SqliteConnectionStringBuilder(config.Db.ConnectionString);
-            builder.DataSource = Path.Combine(Directory.GetCurrentDirectory(), builder.DataSource);
+            var builder = new MySqlConnectionStringBuilder(config.Db.ConnectionString);
+
+//            var builder = new SqliteConnectionStringBuilder(config.Db.ConnectionString);
+//            builder.DataSource = Path.Combine(Directory.GetCurrentDirectory(), builder.DataSource);
 
             var optionsBuilder = new DbContextOptionsBuilder<RokiContext>();
-            optionsBuilder.UseSqlite(builder.ToString());
+            optionsBuilder.UseMySQL(builder.ToString());
             _options = optionsBuilder.Options;
-
-            optionsBuilder = new DbContextOptionsBuilder<RokiContext>();
-            optionsBuilder.UseSqlite(builder.ToString(), x => x.SuppressForeignKeyEnforcement());
         }
 
         public void Setup()
         {
             using (var context = new RokiContext(_options))
             {
-                context.Database.ExecuteSqlCommand("PRAGMA journal_mode=WAL");
+                context.Database.EnsureCreated();
                 context.SaveChanges();
             }
         }
@@ -39,8 +37,8 @@ namespace Roki.Core.Services
             conn.Open();
             using (var com = conn.CreateCommand())
             {
-                com.CommandText = "PRAGMA journal_mode=WAL; PRAGMA synchronous=OFF";
-                com.ExecuteNonQuery();
+//                com.CommandText = "PRAGMA journal_mode=WAL; PRAGMA synchronous=OFF";
+//                com.ExecuteNonQuery();
             }
 
             return context;
