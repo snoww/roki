@@ -41,12 +41,11 @@ namespace Roki.Core.Services
 //                com.CommandText = "PRAGMA journal_mode=WAL; PRAGMA synchronous=OFF";
 //                com.ExecuteNonQuery();
             }
-            var quotes = context.Quotes;
-            foreach (var quote in quotes)
-            {
-                Console.WriteLine(quote.Keyword + ": " + quote.Text);
-            }
-
+//            var quotes = context.Quotes;
+//            foreach (var quote in quotes)
+//            {
+//                Console.WriteLine(quote.Keyword + ": " + quote.Text);
+//            }
 
             return context;
         }
