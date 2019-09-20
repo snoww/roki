@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Roki.Core.Services.Database.Repositories;
-using Roki.Core.Services.Database.Repositories.Impl;
 
 namespace Roki.Core.Services.Database
 {
