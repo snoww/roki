@@ -98,7 +98,7 @@ namespace Roki.Modules.Utility
                 {
                     var q = uow.Quotes.GetById(id);
 
-                    if (ulong.Parse(q.GuildId) != ctx.Guild.Id || !isAdmin && ulong.Parse(q.AuthorId) != ctx.Message.Author.Id)
+                    if (q.GuildId.ToUlong() != ctx.Guild.Id || !isAdmin && q.AuthorId.ToUlong() != ctx.Message.Author.Id)
                     {
                         response = "No quotes found which you can remove.";
                     }
@@ -147,7 +147,7 @@ namespace Roki.Modules.Utility
                 using (var uow = _db.GetDbContext())
                 {
                     quote = uow.Quotes.GetById(id);
-                    if (ulong.Parse(quote.GuildId) != ctx.Guild.Id)
+                    if (quote.GuildId.ToUlong() != ctx.Guild.Id)
                         quote = null;
                 }
 
