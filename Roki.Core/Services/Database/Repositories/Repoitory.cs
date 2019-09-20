@@ -3,8 +3,24 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Roki.Core.Services.Database.Models;
 
-namespace Roki.Core.Services.Database.Repositories.Impl
+namespace Roki.Core.Services.Database.Repositories
 {
+    public interface IRepository<T> where T : DbEntity
+    {
+        T GetById(int id);
+        IEnumerable<T> GetAll();
+
+        void Add(T obj);
+        void AddRange(params T[] objs);
+
+        void Remove(int id);
+        void Remove(T obj);
+        void RemoveRange(params T[] objs);
+
+        void Update(T obj);
+        void UpdateRange(params T[] objs);
+    }
+    
     public class Repository<T> : IRepository<T> where T : DbEntity
     {
         public Repository(DbContext context)

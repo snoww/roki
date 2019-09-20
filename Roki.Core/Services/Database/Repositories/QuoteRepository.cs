@@ -3,11 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Roki.Extensions;
 using Roki.Core.Services.Database.Models;
+using Roki.Extensions;
 
-namespace Roki.Core.Services.Database.Repositories.Impl
+namespace Roki.Core.Services.Database.Repositories
 {
+    public interface IQuoteRepository : IRepository<Quote>
+    {
+        Task<Quote> GetRandomQuoteByKeywordAsync(ulong guildId, string keyword);
+        Task<Quote> SearchQuoteKeywordTextAsync(ulong guildId, string keyword, string text);
+        IEnumerable<Quote> GetGroup(ulong guildId, int page, OrderType order);
+        void RemoveAllByKeyword(ulong guildId, string keyword);
+    }
+    
     public class QuoteRepository : Repository<Quote>, IQuoteRepository
     {
         public QuoteRepository(DbContext context) : base(context)
