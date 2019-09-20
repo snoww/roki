@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 using MySql.Data.MySqlClient;
 using Roki.Core.Services.Database;
@@ -40,6 +41,12 @@ namespace Roki.Core.Services
 //                com.CommandText = "PRAGMA journal_mode=WAL; PRAGMA synchronous=OFF";
 //                com.ExecuteNonQuery();
             }
+            var quotes = context.Quotes;
+            foreach (var quote in quotes)
+            {
+                Console.WriteLine(quote.Keyword + ": " + quote.Text);
+            }
+
 
             return context;
         }

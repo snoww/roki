@@ -25,20 +25,20 @@ namespace Roki.Core.Services.Database.Repositories
         public Task<Quote> GetRandomQuoteByKeywordAsync(ulong guildId, string keyword)
         {
             var rand = new Random();
-            return Set.Where(q => q.GuildId == guildId && q.Keyword == keyword).OrderBy(q => rand.Next()).FirstOrDefaultAsync();
+            return Set.Where(q => ulong.Parse(q.GuildId) == guildId && q.Keyword == keyword).OrderBy(q => rand.Next()).FirstOrDefaultAsync();
         }
 
         public Task<Quote> SearchQuoteKeywordTextAsync(ulong guildId, string keyword, string text)
         {
             var rand = new Random();
-            return Set.Where(q => q.Text.ContainsNoCase(text, StringComparison.OrdinalIgnoreCase) && q.GuildId == guildId && q.Keyword == keyword)
+            return Set.Where(q => q.Text.ContainsNoCase(text, StringComparison.OrdinalIgnoreCase) && ulong.Parse(q.GuildId) == guildId && q.Keyword == keyword)
                 .OrderBy(q => rand.Next())
                 .FirstOrDefaultAsync();
         }
 
         public IEnumerable<Quote> GetGroup(ulong guildId, int page, OrderType order)
         {
-            var q = Set.Where(x => x.GuildId == guildId);
+            var q = Set.Where(x => ulong.Parse(x.GuildId) == guildId);
             if (order == OrderType.Keyword)
                 q.OrderBy(x => x.Keyword);
             else
@@ -49,7 +49,7 @@ namespace Roki.Core.Services.Database.Repositories
 
         public void RemoveAllByKeyword(ulong guildId, string keyword)
         {
-            Set.RemoveRange(Set.Where(x => x.GuildId == guildId && x.Keyword.ToUpperInvariant() == keyword));
+            Set.RemoveRange(Set.Where(x => ulong.Parse(x.GuildId) == guildId && x.Keyword.ToUpperInvariant() == keyword));
         }
     }
 }
