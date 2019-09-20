@@ -29,10 +29,10 @@ namespace Roki.Core.Services.Database
 
         public DbSet<Quote> Quotes { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseMySQL("server=localhost;database=roki;user=roki;password=roki");
-        }
+//        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+//        {
+//            optionsBuilder.UseMySQL("server=localhost;database=roki;user=roki;password=roki");
+//        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
