@@ -5,6 +5,16 @@ using Roki.Core.Services.Database.Repositories.Impl;
 
 namespace Roki.Core.Services.Database
 {
+    public interface IUnitOfWork : IDisposable
+    {
+        RokiContext Context { get; }
+
+        IQuoteRepository Quotes { get; }
+
+        int SaveChanges();
+        Task<int> SaveChangesAsync();
+    }
+    
     public sealed class UnitOfWork : IUnitOfWork
     {
         private IQuoteRepository _quotes;
