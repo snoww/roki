@@ -81,10 +81,10 @@ namespace Roki.Modules.Utility
                         Keyword = keyword,
                         Text = text
                     });
-                    await uow.SaveChangesAsync();
+                    await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
 
-                await ctx.Channel.SendMessageAsync("Quote added.");
+                await ctx.Channel.SendMessageAsync("Quote added.").ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
@@ -105,7 +105,7 @@ namespace Roki.Modules.Utility
                     else
                     {
                         uow.Quotes.Remove(q);
-                        await uow.SaveChangesAsync();
+                        await uow.SaveChangesAsync().ConfigureAwait(false);
                         success = true;
                         response = $"Quote #{id} deleted";
                     }
