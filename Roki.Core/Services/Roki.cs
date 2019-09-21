@@ -12,6 +12,7 @@ using NLog;
 using Roki.Core.Services;
 using Roki.Core.Services.Impl;
 using Roki.Extensions;
+using Roki.Services;
 using Victoria;
 
 namespace Roki
@@ -175,8 +176,10 @@ namespace Roki
             stats.Initialize();
             var commandHandler = Services.GetService<CommandHandler>();
             var commandService = Services.GetService<CommandService>();
+            var messageLogger = Services.GetService<MessageLogger>();
 
             await commandHandler.StartHandling().ConfigureAwait(false);
+            await messageLogger.StartLogging().ConfigureAwait(false);
 
             var _ = await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
             
