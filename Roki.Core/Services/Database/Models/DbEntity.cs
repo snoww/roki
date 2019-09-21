@@ -7,7 +7,5 @@ namespace Roki.Core.Services.Database.Models
     {
         [Key] 
         public int Id { get; set; }
-
-        public DateTime? DateAdded { get; set; } = DateTime.UtcNow;
     }
 }

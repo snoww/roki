@@ -1,7 +1,9 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Roki.Core.Services.Database.Models
 {
+    [Table("users")]
     public class DUser : DbEntity
     {
         public ulong UserId { get; set; }
@@ -12,6 +14,7 @@ namespace Roki.Core.Services.Database.Models
         public DateTime LastLevelUp { get; set; }
         public DateTime LastXpGain { get; set; }
         public long Currency { get; set; }
+        public DateTime? DateAdded { get; set; } = DateTime.UtcNow;
         
         public override bool Equals(object obj) => 
             obj is DUser dUser && dUser.UserId == UserId;

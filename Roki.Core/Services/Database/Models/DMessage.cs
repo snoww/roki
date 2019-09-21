@@ -1,7 +1,9 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Roki.Core.Services.Database.Models
 {
+    [Table("messages")]
     public class DMessage : DbEntity
     {
         public ulong AuthorId { get; set; }

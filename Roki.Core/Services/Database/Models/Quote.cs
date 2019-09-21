@@ -1,7 +1,10 @@
+using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Roki.Core.Services.Database.Models
 {
+    [Table("quotes")]
     public class Quote : DbEntity
     {
         public ulong GuildId { get; set; }
@@ -16,6 +19,8 @@ namespace Roki.Core.Services.Database.Models
 
         [Required]
         public string Text { get; set; }
+        
+        public DateTime? DateAdded { get; set; } = DateTime.UtcNow;
 
 //        public ulong UseCount { get; set; }
     }
