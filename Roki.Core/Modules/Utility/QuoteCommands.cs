@@ -75,9 +75,9 @@ namespace Roki.Modules.Utility
                 {
                     uow.Quotes.Add(new Quote
                     {
-                        AuthorId = ctx.Message.Author.Id.ToString(),
+                        AuthorId = ctx.Message.Author.Id,
                         AuthorName = ctx.Message.Author.Username,
-                        GuildId = ctx.Guild.Id.ToString(),
+                        GuildId = ctx.Guild.Id,
                         Keyword = keyword,
                         Text = text
                     });
@@ -98,7 +98,7 @@ namespace Roki.Modules.Utility
                 {
                     var q = uow.Quotes.GetById(id);
 
-                    if (q.GuildId.ToUlong() != ctx.Guild.Id || !isAdmin && q.AuthorId.ToUlong() != ctx.Message.Author.Id)
+                    if (q.GuildId != ctx.Guild.Id || !isAdmin && q.AuthorId != ctx.Message.Author.Id)
                     {
                         response = "No quotes found which you can remove.";
                     }
@@ -147,7 +147,7 @@ namespace Roki.Modules.Utility
                 using (var uow = _db.GetDbContext())
                 {
                     quote = uow.Quotes.GetById(id);
-                    if (quote.GuildId.ToUlong() != ctx.Guild.Id)
+                    if (quote.GuildId != ctx.Guild.Id)
                         quote = null;
                 }
 
