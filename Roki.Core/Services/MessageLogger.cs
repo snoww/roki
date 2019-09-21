@@ -6,7 +6,7 @@ using Roki.Core.Services.Database.Models;
 
 namespace Roki.Services
 {
-    public class MessageLogger
+    public class MessageLogger : IRService
     {
         private readonly DiscordSocketClient _client;
         private readonly DbService _db;

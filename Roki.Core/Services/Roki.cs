@@ -96,6 +96,7 @@ namespace Roki
             service.AddHttpClient();
 
             service.LoadFrom(Assembly.GetAssembly(typeof(CommandHandler)));
+            service.LoadFrom(Assembly.GetAssembly(typeof(MessageLogger)));
 
             Services = service.BuildServiceProvider();
             var commandHandler = Services.GetService<CommandHandler>();
