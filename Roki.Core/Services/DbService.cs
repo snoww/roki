@@ -17,7 +17,7 @@ namespace Roki.Core.Services
 //            builder.DataSource = Path.Combine(Directory.GetCurrentDirectory(), builder.DataSource);
 
             var optionsBuilder = new DbContextOptionsBuilder<RokiContext>();
-            optionsBuilder.UseMySQL(builder.ToString());
+            optionsBuilder.UseMySql(builder.ToString());
             _options = optionsBuilder.Options;
         }
 
