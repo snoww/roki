@@ -11,7 +11,7 @@ namespace Roki.Core.Services.Database.Models
         public int TotalXp { get; set; }
         public DateTime LastLevelUp { get; set; }
         public DateTime LastXpGain { get; set; }
-        public long CurrencyAmount { get; set; }
+        public long Currency { get; set; }
         
         public override bool Equals(object obj) => 
             obj is DUser dUser && dUser.UserId == UserId;

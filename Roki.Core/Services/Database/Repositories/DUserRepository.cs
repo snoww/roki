@@ -54,6 +54,6 @@ VALUES ({userId}, {username}, {discriminator}, {avatarId});
         }
 
         public long GetUserCurrency(ulong userId) =>
-                Set.FirstOrDefault(x => x.UserId == userId)?.CurrencyAmount ?? 0;
+                Set.FirstOrDefault(x => x.UserId == userId)?.Currency ?? 0;
     }
 }
