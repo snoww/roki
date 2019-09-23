@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -40,7 +41,10 @@ namespace Roki.Services
                         });
 
                         var user = uow.DUsers.GetOrCreate(message.Author);
-//                        if ()
+                        if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(5))
+                        {
+                            await uow.DUsers.UpdateXp(user).ConfigureAwait(false);
+                        }
 
                         await uow.SaveChangesAsync().ConfigureAwait(false);
                     }
