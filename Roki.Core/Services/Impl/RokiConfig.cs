@@ -67,10 +67,10 @@ namespace Roki.Core.Services.Impl
 
                 var dbSection = data.GetSection("db");
                 Db = new DbConfig(string.IsNullOrWhiteSpace(dbSection["Type"])
-                        ? "sqlite"
+                        ? "mysql"
                         : dbSection["Type"],
                     string.IsNullOrWhiteSpace(dbSection["ConnectionString"])
-                        ? "Data Source=data/roki.db"
+                        ? "server=localhost;database=roki;user=roki;password=roki-snow"
                         : dbSection["ConnectionString"]);
             }
             catch (Exception e)
