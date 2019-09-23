@@ -22,16 +22,28 @@ namespace Roki.Core.Services.Database.Repositories
 
         public void EnsureCreated(ulong userId, string username, string discriminator, string avatarId)
         {
-            Context.Database.ExecuteSqlCommand($@"
-UPDATE IGNORE User
-SET Username={username},
-    Discriminator={discriminator},
-    AvatarId={avatarId},
-Where UserId={userId};
+            var user = Set.FirstOrDefault(u => u.UserId == userId);
 
-INSERT IGNORE INTO User (UserId, Username, Discriminator, AvatarId)
-VALUES ({userId}, {username}, {discriminator}, {avatarId});
-");
+            if (user == null)
+            {
+                Context.Add(user = new DUser
+                {
+                    UserId = userId,
+                    Username = username,
+                    Discriminator = discriminator,
+                    AvatarId = avatarId
+                });
+            }
+//            Context.Database.ExecuteSqlCommand($@"
+//UPDATE IGNORE User
+//SET Username={username},
+//    Discriminator={discriminator},
+//    AvatarId={avatarId},
+//Where UserId={userId};
+//
+//INSERT IGNORE INTO User (UserId, Username, Discriminator, AvatarId)
+//VALUES ({userId}, {username}, {discriminator}, {avatarId});
+//");
         }
 
         public DUser GetOrCreate(ulong userId, string username, string discriminator, string avatarId)
