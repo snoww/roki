@@ -45,8 +45,8 @@ SET Username={username},
     AvatarId={avatarId}
 WHERE UserId={userId};
 
-INSERT IGNORE INTO users (UserId, Username, Discriminator, AvatarId)
-VALUES ({userId}, {username}, {discriminator}, {avatarId});
+INSERT IGNORE INTO users (UserId, Username, Discriminator, AvatarId, LastLevelUp, LastXpGain)
+VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.UtcNow}, {DateTime.MinValue});
 ");
         }
 
