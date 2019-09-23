@@ -56,7 +56,7 @@ namespace Roki.Services
                         Author = after.Author.Username,
                         ChannelId = after.Channel.Id,
                         Channel = after.Channel.Name,
-                        GuildId = ((ITextChannel) after.Channel).GuildId,
+                        GuildId = after.Channel is ITextChannel channel ? channel.GuildId : (ulong?) null,
                         Guild = ((ITextChannel) after.Channel).Guild.Name,
                         MessageId = after.Id,
                         Content = after.Content,
