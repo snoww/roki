@@ -39,10 +39,7 @@ namespace Roki.Core.Services.Database.Repositories
         public IEnumerable<Quote> GetGroup(ulong guildId, int page, OrderType order)
         {
             var q = Set.Where(x => x.GuildId == guildId);
-            if (order == OrderType.Keyword)
-                q.OrderBy(x => x.Keyword);
-            else
-                q = q.OrderBy(x => x.Id);
+            q = order == OrderType.Keyword ? q.OrderBy(x => x.Keyword) : q.OrderBy(x => x.Id);
 
             return q.Skip(15 * page).Take(15).ToArray();
         }
