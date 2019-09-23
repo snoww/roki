@@ -42,7 +42,7 @@ namespace Roki.Core.Services.Database.Repositories
 UPDATE IGNORE users
 SET Username={username},
     Discriminator={discriminator},
-    AvatarId={avatarId},
+    AvatarId={avatarId}
 WHERE UserId={userId};
 
 INSERT IGNORE INTO users (UserId, Username, Discriminator, AvatarId)
