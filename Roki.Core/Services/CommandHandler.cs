@@ -12,6 +12,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Common.ModuleBehaviors;
+using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
 
 namespace Roki.Core.Services
@@ -34,6 +35,7 @@ namespace Roki.Core.Services
         private const float OneThousandth = 1.0f / 1000;
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commandService;
+        private readonly DbService _db;
         private readonly object _errorLogLock = new object();
 
         private readonly Logger _log;
@@ -48,12 +50,14 @@ namespace Roki.Core.Services
 
         public CommandHandler(DiscordSocketClient client,
             CommandService commandService,
+            DbService db,
 //            Configuration config,
             Roki roki,
             IServiceProvider services)
         {
             _client = client;
             _commandService = commandService;
+            _db = db;
 //            _config = config;
             _roki = roki;
             _services = services;
@@ -98,6 +102,7 @@ namespace Roki.Core.Services
                 var _ = Task.Run(() => MessageReceivedHandler(message));
                 return Task.CompletedTask;
             };
+            
             return Task.CompletedTask;
         }
 

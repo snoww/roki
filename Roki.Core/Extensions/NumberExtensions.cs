@@ -79,5 +79,10 @@ namespace Roki.Extensions
             string[] cardinals = {"N", "NE", "E", "SE", "S", "SW", "W", "NW", "N"};
             return cardinals[(int) Math.Round(degrees % 360 / 45)];
         }
+
+        public static ulong ToUlong(this string str)
+        {
+            return ulong.Parse(str);
+        }
     }
 }
