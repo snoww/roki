@@ -39,13 +39,13 @@ namespace Roki.Core.Services.Database.Repositories
 //                });
 //            }
             Context.Database.ExecuteSqlCommand($@"
-UPDATE IGNORE Users
+UPDATE IGNORE users
 SET Username={username},
     Discriminator={discriminator},
     AvatarId={avatarId},
 WHERE UserId={userId};
 
-INSERT IGNORE INTO Users (UserId, Username, Discriminator, AvatarId)
+INSERT IGNORE INTO users (UserId, Username, Discriminator, AvatarId)
 VALUES ({userId}, {username}, {discriminator}, {avatarId});
 ");
         }
