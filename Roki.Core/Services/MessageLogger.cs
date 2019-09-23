@@ -39,6 +39,9 @@ namespace Roki.Services
                             Timestamp = message.Timestamp.UtcDateTime
                         });
 
+                        var user = uow.DUsers.GetOrCreate(message.Author);
+//                        if ()
+
                         await uow.SaveChangesAsync().ConfigureAwait(false);
                     }
                 }

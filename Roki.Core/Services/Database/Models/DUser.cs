@@ -11,8 +11,8 @@ namespace Roki.Core.Services.Database.Models
         public string Discriminator { get; set; }
         public string AvatarId { get; set; }
         public int TotalXp { get; set; }
-        public DateTime LastLevelUp { get; set; }
-        public DateTime LastXpGain { get; set; }
+        public DateTime LastLevelUp { get; set; } = DateTime.UtcNow;
+        public DateTime LastXpGain { get; set; } = DateTime.MinValue;
         public long Currency { get; set; }
         public DateTime? DateAdded { get; set; } = DateTime.UtcNow;
         
