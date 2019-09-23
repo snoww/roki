@@ -310,5 +310,13 @@
     "Usage": [
       "{0}anime sao"
     ]
+  },
+  "experience": {
+    "Command": "xp",
+    "Description": "Shows the current level and xp of the specified user, if none provided, shows the message author's level and xp",
+    "Usage": [
+      "{0}xp",
+      "{0}xp @snow"
+    ]
   }
 }
