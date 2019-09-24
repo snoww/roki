@@ -13,6 +13,7 @@ namespace Roki.Core.Services.Database.Repositories
         void EnsureCreated(ulong userId, string username, string discriminator, string avatarId);
         DUser GetOrCreate(ulong userId, string username, string discriminator, string avatarId);
         DUser GetOrCreate(IUser original);
+        DUser GetUserById(int id);
         DUser[] GetUsersXpLeaderboard(int page);
         long GetUserCurrency(ulong userId);
         Task UpdateXp(DUser dUser);
@@ -58,6 +59,11 @@ VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.UtcNow}, {D
 
         public DUser GetOrCreate(IUser original) => 
             GetOrCreate(original.Id, original.Username, original.Discriminator, original.AvatarId);
+
+        public DUser GetUserById(int id)
+        {
+            return Set.First(u => u.Id == id);
+        }
 
         public DUser[] GetUsersXpLeaderboard(int page)
         {

@@ -26,16 +26,26 @@ namespace Roki.Modules.Xp
                 var xp = new XpLevel(dUser.TotalXp);
                 await ctx.Channel.SendMessageAsync($"{user.Username}\nLevel: {xp.Level}\nTotal XP: {xp.TotalXp}\nXP to next Level: {xp.RequiredXp}");
             }
-        }
-
+        } 
+        
         [RokiCommand, Description, Usage, Aliases]
-        public async Task Message([Leftover] int id)
+        public async Task UserId([Leftover] int id)
         {
             using (var uow = _db.GetDbContext())
             {
-                var message = uow.DMessages.GetMessageById(id);
-                await ctx.Channel.SendMessageAsync(message.Content);
+                var message = uow.DUsers.GetUserById(id);
+                await ctx.Channel.SendMessageAsync(message.Username);
             }
         }
+
+//        [RokiCommand, Description, Usage, Aliases]
+//        public async Task Message([Leftover] int id)
+//        {
+//            using (var uow = _db.GetDbContext())
+//            {
+//                var message = uow.DMessages.GetMessageById(id);
+//                await ctx.Channel.SendMessageAsync(message.Content);
+//            }
+//        }
     }
 }
