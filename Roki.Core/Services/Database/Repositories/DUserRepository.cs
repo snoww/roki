@@ -87,6 +87,7 @@ UPDATE IGNORE User
 SET TotalXp={xp}
     LastLevelUp={DateTime.UtcNow}
     LastXpGain={DateTime.UtcNow}
+WHERE UserId={user.UserId}
 ").ConfigureAwait(false);
             }
             else
@@ -95,6 +96,7 @@ SET TotalXp={xp}
 UPDATE IGNORE User
 SET TotalXp={xp}
     LastXpGain={DateTime.UtcNow}
+WHERE UserId={user.UserId}
 ").ConfigureAwait(false);
             }
         }
