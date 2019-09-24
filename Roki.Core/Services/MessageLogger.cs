@@ -1,8 +1,13 @@
+using System;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using Roki.Core.Services;
 using Roki.Core.Services.Database.Models;
+using Roki.Core.Services.Database.Repositories;
+using Roki.Modules.Xp;
+using Roki.Modules.Xp.Common;
 
 namespace Roki.Services
 {
@@ -40,9 +45,10 @@ namespace Roki.Services
                         });
 
                         var user = uow.DUsers.GetOrCreate(message.Author);
-//                        if ()
-
-                        await uow.SaveChangesAsync().ConfigureAwait(false);
+                        if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(5))
+                        {
+                            await uow.DUsers.UpdateXp(user, message).ConfigureAwait(false);
+                        }
                     }
                 }
             };
