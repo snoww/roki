@@ -55,8 +55,14 @@ VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.MinValue}, 
 
         public DUser GetOrCreate(ulong userId, string username, string discriminator, string avatarId)
         {
-            EnsureCreated(userId, username, discriminator, avatarId);
-            return Set.First(u => u.UserId == userId);
+            var user = Set.First(u => u.UserId == userId);
+            if (user == null) 
+            {
+                EnsureCreated(userId, username, discriminator, avatarId);
+                user = Set.First(u => u.UserId == userId);
+            }
+            
+            return user;
         }
 
         public DUser GetOrCreate(IUser original) => 
