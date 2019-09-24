@@ -83,7 +83,7 @@ VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.UtcNow}, {D
             if (newLevel.Level > level.Level)
             {
                 await Context.Database.ExecuteSqlCommandAsync($@"
-UPDATE OR IGNORE User
+UPDATE IGNORE User
 SET TotalXp={xp}
     LastLevelUp={DateTime.UtcNow}
     LastXpGain={DateTime.UtcNow}
@@ -92,7 +92,7 @@ SET TotalXp={xp}
             else
             {
                 await Context.Database.ExecuteSqlCommandAsync($@"
-UPDATE OR IGNORE User
+UPDATE IGNORE User
 SET TotalXp={xp}
     LastXpGain={DateTime.UtcNow}
 ").ConfigureAwait(false);
