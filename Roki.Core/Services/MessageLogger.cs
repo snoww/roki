@@ -15,13 +15,11 @@ namespace Roki.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly DbService _db;
-        private readonly ICommandContext _ctx;
 
-        public MessageLogger(DiscordSocketClient client, DbService db, ICommandContext ctx)
+        public MessageLogger(DiscordSocketClient client, DbService db)
         {
             _client = client;
             _db = db;
-            _ctx = ctx;
         }
 
         public async Task StartLogging()
@@ -49,13 +47,7 @@ namespace Roki.Services
                         var user = uow.DUsers.GetOrCreate(message.Author);
                         if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(5))
                         {
-                            var status = await uow.DUsers.UpdateXp(user).ConfigureAwait(false);
-                            if (status == DUserRepository.XpStatus.LevelGained)
-                            {
-                                await _ctx.Channel
-                                    .SendMessageAsync($"Congratulations @{user.UserId}, you reached level {new XpLevel(user.TotalXp).Level}!")
-                                    .ConfigureAwait(false);
-                            }
+                            await uow.DUsers.UpdateXp(user, message).ConfigureAwait(false);
                         }
                     }
                 }

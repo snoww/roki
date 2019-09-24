@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Roki.Core.Services.Database.Models;
 using Roki.Core.Services.Impl;
@@ -17,7 +18,7 @@ namespace Roki.Core.Services.Database.Repositories
         DUser GetOrCreate(IUser original);
         DUser[] GetUsersXpLeaderboard(int page);
         long GetUserCurrency(ulong userId);
-        Task<DUserRepository.XpStatus> UpdateXp(DUser dUser);
+        Task UpdateXp(DUser dUser, SocketMessage message);
     }
 
     public class DUserRepository : Repository<DUser>, IDUserRepository
@@ -74,10 +75,10 @@ VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.MinValue}, 
         public long GetUserCurrency(ulong userId) =>
                 Set.FirstOrDefault(x => x.UserId == userId)?.Currency ?? 0;
 
-        public async Task<XpStatus> UpdateXp(DUser dUser)
+        public async Task UpdateXp(DUser dUser, SocketMessage message)
         {
             var user = Set.FirstOrDefault(u => u.Equals(dUser));
-            if (user == null) return XpStatus.NoUser;
+            if (user == null) return;
             var level = new XpLevel(user.TotalXp);
             // TODO lower xp per message afterwards
             var xp = user.TotalXp + 5;
@@ -91,7 +92,8 @@ SET TotalXp={xp},
     LastXpGain={DateTime.UtcNow}
 WHERE UserId={user.UserId};
 ").ConfigureAwait(false);
-                return XpStatus.LevelGained;
+                
+                await message.Channel.SendMessageAsync($"Congratulations @{user.UserId}! You've reached Level {new XpLevel(user.TotalXp).Level}").ConfigureAwait(false);
             }
             
             await Context.Database.ExecuteSqlCommandAsync($@"
@@ -100,15 +102,6 @@ SET TotalXp={xp},
     LastXpGain={DateTime.UtcNow}
 WHERE UserId={user.UserId};
 ").ConfigureAwait(false);
-            
-            return XpStatus.XpGained;
-        }
-        
-        public enum XpStatus
-        {
-            NoUser,
-            XpGained,
-            LevelGained
         }
     }
 }
