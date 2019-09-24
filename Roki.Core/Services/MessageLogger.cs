@@ -51,6 +51,8 @@ namespace Roki.Services
                         }
                     }
                 }
+
+                await Task.CompletedTask;
             };
             
             _client.MessageUpdated += async (_, after, __) =>
@@ -72,10 +74,26 @@ namespace Roki.Services
                         EditedTimestamp = after.EditedTimestamp?.UtcDateTime,
                         Timestamp = after.Timestamp.UtcDateTime
                     });
+                    
                     await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
+                
                 await Task.CompletedTask;
-            }; 
+            };
+
+            _client.MessageDeleted += async (_, channel) =>
+            {
+                if (_.Value.Author.IsBot)
+                    return;
+                using (var uow = _db.GetDbContext())
+                {
+                    uow.DMessages.MessageDeleted(_.Value.Id);
+                    
+                    await uow.SaveChangesAsync().ConfigureAwait(false);
+                }
+
+                await Task.CompletedTask;
+            };
             
             await Task.CompletedTask;
         }

@@ -16,5 +16,6 @@ namespace Roki.Core.Services.Database.Models
         public string Content { get; set; }
         public DateTime? EditedTimestamp { get; set; }
         public DateTime Timestamp { get; set; }
+        public bool IsDeleted { get; set; } = false;
     }
 }

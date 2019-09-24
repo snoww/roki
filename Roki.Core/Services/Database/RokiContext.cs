@@ -67,6 +67,8 @@ namespace Roki.Core.Services.Database
                 entity.HasAlternateKey(m => m.MessageId);
                 entity.HasIndex(m => m.MessageId);
                 entity.HasIndex(m => m.Timestamp);
+                entity.Property(m => m.IsDeleted)
+                    .HasDefaultValue(false);
             });
 
             #endregion
