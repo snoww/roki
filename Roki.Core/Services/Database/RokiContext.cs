@@ -51,10 +51,10 @@ namespace Roki.Core.Services.Database
             modelBuilder.Entity<DUser>(entity =>
             {
                 entity.HasAlternateKey(u => u.UserId);
-//                entity.Property(u => u.LastLevelUp)
-//                    .HasDefaultValue(new DateTime(2017, 1, 1, 1, 1, 1, 1, DateTimeKind.Utc));
-//                entity.HasIndex(u => u.TotalXp);
-//                entity.HasIndex(u => u.Currency);
+                entity.Property(u => u.LastLevelUp)
+                    .HasDefaultValue(new DateTime(2017, 1, 1, 1, 1, 1, 1, DateTimeKind.Utc));
+                entity.HasIndex(u => u.TotalXp);
+                entity.HasIndex(u => u.Currency);
                 entity.HasIndex(u => u.UserId);
             });
 
