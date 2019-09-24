@@ -1,6 +1,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using MySql.Data.MySqlClient;
+using NLog;
 using Roki.Core.Services.Database;
 
 namespace Roki.Core.Services
@@ -8,6 +9,7 @@ namespace Roki.Core.Services
     public class DbService
     {
         private readonly DbContextOptions<RokiContext> _options;
+        private readonly Logger _log = LogManager.GetCurrentClassLogger();
 
         public DbService(IRokiConfig config)
         {
@@ -32,6 +34,7 @@ namespace Roki.Core.Services
             context.Database.SetCommandTimeout(60);
             var conn = context.Database.GetDbConnection();
             conn.Open();
+            _log.Info("Connected to MySQL.");
             return context;
         }
 

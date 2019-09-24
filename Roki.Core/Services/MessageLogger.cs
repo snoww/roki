@@ -49,6 +49,8 @@ namespace Roki.Services
                         {
                             await uow.DUsers.UpdateXp(user, message).ConfigureAwait(false);
                         }
+                        
+                        await uow.SaveChangesAsync().ConfigureAwait(false);
                     }
                 }
 
