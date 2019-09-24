@@ -13,10 +13,9 @@ namespace Roki.Core.Services.Database.Repositories
         void EnsureCreated(ulong userId, string username, string discriminator, string avatarId);
         DUser GetOrCreate(ulong userId, string username, string discriminator, string avatarId);
         DUser GetOrCreate(IUser original);
-        DUser GetUserById(int id);
-//        DUser[] GetUsersXpLeaderboard(int page);
-//        long GetUserCurrency(ulong userId);
-//        Task UpdateXp(DUser dUser);
+        DUser[] GetUsersXpLeaderboard(int page);
+        long GetUserCurrency(ulong userId);
+        Task UpdateXp(DUser dUser);
     }
 
     public class DUserRepository : Repository<DUser>, IDUserRepository
@@ -46,8 +45,8 @@ SET Username={username},
     AvatarId={avatarId}
 WHERE UserId={userId};
 
-INSERT IGNORE INTO users (UserId, Username, Discriminator, AvatarId)
-VALUES ({userId}, {username}, {discriminator}, {avatarId});
+INSERT IGNORE INTO users (UserId, Username, Discriminator, AvatarId, LastLevelUp, LastXpGain)
+VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.UtcNow}, {DateTime.MinValue});
 ");
         }
 
@@ -60,49 +59,44 @@ VALUES ({userId}, {username}, {discriminator}, {avatarId});
         public DUser GetOrCreate(IUser original) => 
             GetOrCreate(original.Id, original.Username, original.Discriminator, original.AvatarId);
 
-        public DUser GetUserById(int id)
+        public DUser[] GetUsersXpLeaderboard(int page)
         {
-            return Set.First(u => u.Id == id);
+            return Set
+                .OrderByDescending(x => x.TotalXp)
+                .Skip(page * 9)
+                .Take(9)
+                .AsEnumerable()
+                .ToArray();
         }
 
-//        public DUser[] GetUsersXpLeaderboard(int page)
-//        {
-//            return Set
-//                .OrderByDescending(x => x.TotalXp)
-//                .Skip(page * 9)
-//                .Take(9)
-//                .AsEnumerable()
-//                .ToArray();
-//        }
+        public long GetUserCurrency(ulong userId) =>
+                Set.FirstOrDefault(x => x.UserId == userId)?.Currency ?? 0;
 
-//        public long GetUserCurrency(ulong userId) =>
-//                Set.FirstOrDefault(x => x.UserId == userId)?.Currency ?? 0;
-//
-//        public async Task UpdateXp(DUser dUser)
-//        {
-//            var user = Set.FirstOrDefault(u => u.Equals(dUser));
-//            if (user == null) return;
-//            var level = new XpLevel(user.TotalXp);
-//            // TODO lower xp per message afterwards
-//            var xp = user.TotalXp + 18;
-//            var newLevel = new XpLevel(xp);
-//            if (newLevel.Level > level.Level)
-//            {
-//                await Context.Database.ExecuteSqlCommandAsync($@"
-//UPDATE OR IGNORE users
-//SET TotalXp={xp}
-//    LastLevelUp={DateTime.UtcNow}
-//    LastXpGain={DateTime.UtcNow}
-//").ConfigureAwait(false);
-//            }
-//            else
-//            {
-//                await Context.Database.ExecuteSqlCommandAsync($@"
-//UPDATE OR IGNORE users
-//SET TotalXp={xp}
-//    LastXpGain={DateTime.UtcNow}
-//").ConfigureAwait(false);
-//            }
-//        }
+        public async Task UpdateXp(DUser dUser)
+        {
+            var user = Set.FirstOrDefault(u => u.Equals(dUser));
+            if (user == null) return;
+            var level = new XpLevel(user.TotalXp);
+            // TODO lower xp per message afterwards
+            var xp = user.TotalXp + 18;
+            var newLevel = new XpLevel(xp);
+            if (newLevel.Level > level.Level)
+            {
+                await Context.Database.ExecuteSqlCommandAsync($@"
+UPDATE OR IGNORE User
+SET TotalXp={xp}
+    LastLevelUp={DateTime.UtcNow}
+    LastXpGain={DateTime.UtcNow}
+").ConfigureAwait(false);
+            }
+            else
+            {
+                await Context.Database.ExecuteSqlCommandAsync($@"
+UPDATE OR IGNORE User
+SET TotalXp={xp}
+    LastXpGain={DateTime.UtcNow}
+").ConfigureAwait(false);
+            }
+        }
     }
 }
