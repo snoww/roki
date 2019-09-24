@@ -318,5 +318,13 @@
       "{0}xp",
       "{0}xp @snow"
     ]
+  },
+  "xpleaderboard": {
+    "Command": "xplb",
+    "Description": "Shows the current xp leaderboard, you can specify the page, default is the top 9",
+    "Usage": [
+      "{0}xplb",
+      "{0}xplb 1"
+    ]
   }
 }
