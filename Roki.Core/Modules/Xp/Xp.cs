@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Discord;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
+using Roki.Extensions;
 using Roki.Modules.Xp.Common;
 
 namespace Roki.Modules.Xp
@@ -28,9 +29,24 @@ namespace Roki.Modules.Xp
             }
         }
 
-        public async Task XpNotify(ulong userId, int level)
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task XpLeaderboard([Leftover] int page = 0)
         {
-            await ctx.Channel.SendMessageAsync($"Congratulations @{userId}, you reached level {level}!").ConfigureAwait(false);
+            if (page < 0)
+                return;
+            using (var uow = _db.GetDbContext())
+            {
+                var list = uow.DUsers.GetUsersXpLeaderboard(page);
+                var embed = new EmbedBuilder().WithOkColor()
+                    .WithTitle("XP Leaderboard");
+                var i = 9 * page + 1;
+                foreach (var user in list)
+                {
+                    embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"Level {new XpLevel(user.TotalXp).Level} - {user.TotalXp}xp");
+                }
+
+                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            }
         }
     }
 }
