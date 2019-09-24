@@ -21,12 +21,11 @@ namespace Roki.Core.Services.Database.Repositories
 
         public void MessageDeleted(ulong messageId)
         {
-            var messages = Set.Where(m => m.MessageId == messageId).ToList();
-
-            foreach (var message in messages.Select(msg => new DMessage { Id = msg.Id, IsDeleted = true}))
-            {
-                Set.Update(message);
-            }
+            Context.Database.ExecuteSqlCommand($@"
+UPDATE IGNORE messages
+SET IsDeleted=1
+WHERE MessageId={messageId}
+");
         }
 
         public DMessage GetMessageById(int id)
