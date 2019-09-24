@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Discord;
 using Microsoft.EntityFrameworkCore;
 using Roki.Core.Services.Database.Models;
+using Roki.Core.Services.Impl;
+using Roki.Modules.Xp;
 using Roki.Modules.Xp.Common;
 
 namespace Roki.Core.Services.Database.Repositories
@@ -15,7 +17,7 @@ namespace Roki.Core.Services.Database.Repositories
         DUser GetOrCreate(IUser original);
         DUser[] GetUsersXpLeaderboard(int page);
         long GetUserCurrency(ulong userId);
-        Task UpdateXp(DUser dUser);
+        Task<DUserRepository.XpStatus> UpdateXp(DUser dUser);
     }
 
     public class DUserRepository : Repository<DUser>, IDUserRepository
@@ -46,7 +48,7 @@ SET Username={username},
 WHERE UserId={userId};
 
 INSERT IGNORE INTO users (UserId, Username, Discriminator, AvatarId, LastLevelUp, LastXpGain)
-VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.UtcNow}, {DateTime.MinValue});
+VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.MinValue}, {DateTime.MinValue});
 ");
         }
 
@@ -72,13 +74,13 @@ VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.UtcNow}, {D
         public long GetUserCurrency(ulong userId) =>
                 Set.FirstOrDefault(x => x.UserId == userId)?.Currency ?? 0;
 
-        public async Task UpdateXp(DUser dUser)
+        public async Task<XpStatus> UpdateXp(DUser dUser)
         {
             var user = Set.FirstOrDefault(u => u.Equals(dUser));
-            if (user == null) return;
+            if (user == null) return XpStatus.NoUser;
             var level = new XpLevel(user.TotalXp);
             // TODO lower xp per message afterwards
-            var xp = user.TotalXp + 18;
+            var xp = user.TotalXp + 5;
             var newLevel = new XpLevel(xp);
             if (newLevel.Level > level.Level)
             {
@@ -89,16 +91,24 @@ SET TotalXp={xp},
     LastXpGain={DateTime.UtcNow}
 WHERE UserId={user.UserId};
 ").ConfigureAwait(false);
+                return XpStatus.LevelGained;
             }
-            else
-            {
-                await Context.Database.ExecuteSqlCommandAsync($@"
+            
+            await Context.Database.ExecuteSqlCommandAsync($@"
 UPDATE IGNORE users
 SET TotalXp={xp},
     LastXpGain={DateTime.UtcNow}
 WHERE UserId={user.UserId};
 ").ConfigureAwait(false);
-            }
+            
+            return XpStatus.XpGained;
+        }
+        
+        public enum XpStatus
+        {
+            NoUser,
+            XpGained,
+            LevelGained
         }
     }
 }

@@ -24,28 +24,13 @@ namespace Roki.Modules.Xp
             {
                 var dUser = uow.DUsers.GetOrCreate(user);
                 var xp = new XpLevel(dUser.TotalXp);
-                await ctx.Channel.SendMessageAsync($"{user.Username}\nLevel: {xp.Level}\nTotal XP: {xp.TotalXp}\nXP to next Level: {xp.RequiredXp}");
+                await ctx.Channel.SendMessageAsync($"{user.Username}\nLevel: {xp.Level}\nTotal XP: {xp.TotalXp}\nXP Progress: {xp.LevelXp}/{xp.RequiredXp}");
             }
-        } 
-        
-//        [RokiCommand, Description, Usage, Aliases]
-//        public async Task UserId([Leftover] int id)
-//        {
-//            using (var uow = _db.GetDbContext())
-//            {
-//                var message = uow.DUsers.GetUserById(id);
-//                await ctx.Channel.SendMessageAsync(message.Username);
-//            }
-//        }
+        }
 
-//        [RokiCommand, Description, Usage, Aliases]
-//        public async Task Message([Leftover] int id)
-//        {
-//            using (var uow = _db.GetDbContext())
-//            {
-//                var message = uow.DMessages.GetMessageById(id);
-//                await ctx.Channel.SendMessageAsync(message.Content);
-//            }
-//        }
+        public async Task XpNotify(ulong userId, int level)
+        {
+            await ctx.Channel.SendMessageAsync($"Congratulations @{userId}, you reached level {level}!").ConfigureAwait(false);
+        }
     }
 }
