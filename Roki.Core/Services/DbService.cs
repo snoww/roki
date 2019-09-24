@@ -9,7 +9,6 @@ namespace Roki.Core.Services
     public class DbService
     {
         private readonly DbContextOptions<RokiContext> _options;
-        private readonly Logger _log = LogManager.GetCurrentClassLogger();
 
         public DbService(IRokiConfig config)
         {
@@ -34,7 +33,6 @@ namespace Roki.Core.Services
             context.Database.SetCommandTimeout(60);
             var conn = context.Database.GetDbConnection();
             conn.Open();
-            _log.Info("MySQL Connection Opned");
             return context;
         }
 

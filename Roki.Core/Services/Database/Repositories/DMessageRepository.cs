@@ -23,10 +23,9 @@ namespace Roki.Core.Services.Database.Repositories
         {
             var messages = Set.Where(m => m.MessageId == messageId).ToList();
 
-            foreach (var message in messages.Select(msg => new DMessage { Id = msg.Id, IsDeleted = true}))            {
-                Set.Attach(message);
-                Context.Entry(message).Property(m => m.IsDeleted).IsModified = true;
-                Context.SaveChanges();
+            foreach (var message in messages.Select(msg => new DMessage { Id = msg.Id, IsDeleted = true}))
+            {
+                Set.Update(message);
             }
         }
 
