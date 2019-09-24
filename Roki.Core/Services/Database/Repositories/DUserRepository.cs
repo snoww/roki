@@ -93,7 +93,7 @@ SET TotalXp={xp},
 WHERE UserId={user.UserId};
 ").ConfigureAwait(false);
                 
-                await message.Channel.SendMessageAsync($"Congratulations @{user.UserId}! You've reached Level {new XpLevel(user.TotalXp).Level}").ConfigureAwait(false);
+                await message.Channel.SendMessageAsync($"Congratulations {message.Author.Mention}! You've reached Level {new XpLevel(xp).Level}").ConfigureAwait(false);
             }
             
             await Context.Database.ExecuteSqlCommandAsync($@"
