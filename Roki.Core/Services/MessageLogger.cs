@@ -39,12 +39,12 @@ namespace Roki.Services
                             EditedTimestamp = message.EditedTimestamp?.UtcDateTime,
                             Timestamp = message.Timestamp.UtcDateTime
                         });
-
-                        var user = uow.DUsers.GetOrCreate(message.Author);
-                        if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(5))
-                        {
-                            await uow.DUsers.UpdateXp(user).ConfigureAwait(false);
-                        }
+//
+//                        var user = uow.DUsers.GetOrCreate(message.Author);
+//                        if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(5))
+//                        {
+//                            await uow.DUsers.UpdateXp(user).ConfigureAwait(false);
+//                        }
 
                         await uow.SaveChangesAsync().ConfigureAwait(false);
                     }
