@@ -22,10 +22,10 @@ namespace Roki.Core.Services.Database.Repositories
         public void MessageDeleted(ulong messageId)
         {
             var messages = Set.Where(m => m.MessageId == messageId).ToList();
-            foreach (var msg in messages.Select(message => new DMessage { MessageId = messageId, IsDeleted = true}))
-            {
-                Set.Attach(msg);
-                Context.Entry(msg).Property(m => m.IsDeleted).IsModified = true;
+
+            foreach (var message in messages.Select(msg => new DMessage { Id = msg.Id, IsDeleted = true}))            {
+                Set.Attach(message);
+                Context.Entry(message).Property(m => m.IsDeleted).IsModified = true;
                 Context.SaveChanges();
             }
         }

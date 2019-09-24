@@ -34,7 +34,7 @@ namespace Roki.Core.Services
             context.Database.SetCommandTimeout(60);
             var conn = context.Database.GetDbConnection();
             conn.Open();
-            _log.Info("Connected to MySQL.");
+            _log.Info("MySQL Connection Opned");
             return context;
         }
 
