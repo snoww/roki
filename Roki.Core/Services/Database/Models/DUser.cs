@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Roki.Core.Services.Database.Models
 {
-    [Table("userstest")]
+    [Table("users")]
     public class DUser : DbEntity
     {
         public ulong UserId { get; set; }
