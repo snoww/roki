@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using NLog;
 using Roki.Core.Services.Database.Repositories;
 
 namespace Roki.Core.Services.Database
@@ -21,6 +22,7 @@ namespace Roki.Core.Services.Database
         private IQuoteRepository _quotes;
         private IDUserRepository _dUsers;
         private IDMessageRepository _dMessages;
+        private Logger _log = LogManager.GetCurrentClassLogger();
 
         public UnitOfWork(RokiContext context)
         {
@@ -45,6 +47,7 @@ namespace Roki.Core.Services.Database
         public void Dispose()
         {
             Context.Dispose();
+            _log.Info("MySQL Connection Closed");
             GC.SuppressFinalize(this);
         }
     }
