@@ -18,6 +18,7 @@ namespace Roki.Core.Services.Database.Repositories
         DUser GetOrCreate(IUser original);
         DUser[] GetUsersXpLeaderboard(int page);
         long GetUserCurrency(ulong userId);
+        Task UpdateCurrency(IUser user, int amount);
         Task UpdateXp(DUser dUser, SocketMessage message);
         Task ChangeNotificationLocation(ulong userId, byte notify);
     }
@@ -57,12 +58,11 @@ VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.MinValue}, 
         public DUser GetOrCreate(ulong userId, string username, string discriminator, string avatarId)
         {
             var user = Set.First(u => u.UserId == userId);
-            if (user == null) 
-            {
-                EnsureCreated(userId, username, discriminator, avatarId);
-                user = Set.First(u => u.UserId == userId);
-            }
-            
+            if (user != null && user.Username == username && user.Discriminator == discriminator && user.AvatarId == avatarId) 
+                return user;
+            EnsureCreated(userId, username, discriminator, avatarId);
+            user = Set.First(u => u.UserId == userId);
+
             return user;
         }
 
@@ -81,6 +81,18 @@ VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.MinValue}, 
 
         public long GetUserCurrency(ulong userId) =>
                 Set.FirstOrDefault(x => x.UserId == userId)?.Currency ?? 0;
+
+        public async Task UpdateCurrency(IUser user, int amount)
+        {
+            if (amount == 0)
+                return;
+            var dUser = GetOrCreate(user);
+            await Context.Database.ExecuteSqlCommandAsync($@"
+UPDATE IGNORE users
+SET Currency=Currency+{amount}
+WHERE UserId={dUser.UserId}
+").ConfigureAwait(false);
+        }
 
         public async Task UpdateXp(DUser dUser, SocketMessage message)
         {
