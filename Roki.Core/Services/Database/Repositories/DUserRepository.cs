@@ -100,7 +100,7 @@ SET TotalXp={xp},
 WHERE UserId={user.UserId};
 ").ConfigureAwait(false);
                 
-                await SendNotification(user, message).ConfigureAwait(false);
+                await SendNotification(user, message, new XpLevel(xp).Level).ConfigureAwait(false);
             }
             
             await Context.Database.ExecuteSqlCommandAsync($@"
@@ -120,18 +120,18 @@ WHERE UserId={userId}
 ").ConfigureAwait(false);
         }
 
-        private static async Task SendNotification(DUser user, SocketMessage msg)
+        private static async Task SendNotification(DUser user, SocketMessage msg, int level)
         {
             switch (user.NotificationLocation)
             {
                 case 0:
                     return;
                 case 1:
-                    await msg.Channel.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {new XpLevel(user.TotalXp).Level}").ConfigureAwait(false);
+                    await msg.Channel.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
                     return;
                 case 2:
                     var dm = await msg.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
-                    await dm.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {new XpLevel(user.TotalXp).Level}").ConfigureAwait(false);
+                    await dm.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
                     return;
             }
         }
