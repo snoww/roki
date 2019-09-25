@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -19,6 +20,7 @@ namespace Roki.Core.Services.Database.Repositories
         DUser[] GetUsersXpLeaderboard(int page);
         long GetUserCurrency(ulong userId);
         Task UpdateCurrency(IUser user, int amount);
+        IEnumerable<DUser> GetCurrencyLeaderboard(int page);
         Task UpdateXp(DUser dUser, SocketMessage message);
         Task ChangeNotificationLocation(ulong userId, byte notify);
     }
@@ -92,6 +94,15 @@ UPDATE IGNORE users
 SET Currency=Currency+{amount}
 WHERE UserId={dUser.UserId}
 ").ConfigureAwait(false);
+        }
+
+        public IEnumerable<DUser> GetCurrencyLeaderboard(int page)
+        {
+            return Set.Where(c => c.Currency > 0)
+                .OrderByDescending(c => c.Currency)
+                .Skip(page * 9)
+                .Take(9)
+                .ToList();
         }
 
         public async Task UpdateXp(DUser dUser, SocketMessage message)
