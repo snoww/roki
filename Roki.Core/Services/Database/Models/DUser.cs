@@ -13,9 +13,8 @@ namespace Roki.Core.Services.Database.Models
         public int TotalXp { get; set; }
         public DateTime LastLevelUp { get; set; } = DateTime.UtcNow;
         public DateTime LastXpGain { get; set; } = DateTime.MinValue;
-        public byte Notify { get; set; } = 1;
+        public byte NotificationLocation { get; set; } = 1;
         public long Currency { get; set; } = 0;
-//        public DateTime? DateAdded { get; set; } = DateTime.UtcNow;
         
         public override bool Equals(object obj) => 
             obj is DUser dUser && dUser.UserId == UserId;
