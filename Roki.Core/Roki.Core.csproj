@@ -53,6 +53,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Modules\Currency" />
       <Folder Include="Modules\Utility\Services" />
     </ItemGroup>
 
