@@ -56,20 +56,13 @@ VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.MinValue}, 
 
         public DUser GetOrCreate(ulong userId, string username, string discriminator, string avatarId)
         {
-            DUser user;
-            try
-            {
-                user = Set.First(u => u.UserId == userId);
-                if (user.UserId == userId && user.Username == username && user.Discriminator == discriminator && user.AvatarId == avatarId)
-                    return user;
-                throw new Exception("No User Found");
-            }
-            catch
+            var user = Set.First(u => u.UserId == userId);
+            if (user == null) 
             {
                 EnsureCreated(userId, username, discriminator, avatarId);
                 user = Set.First(u => u.UserId == userId);
             }
-
+            
             return user;
         }
 
