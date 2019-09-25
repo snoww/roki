@@ -88,6 +88,8 @@ namespace Roki.Modules.Xp
             using (var uow = _db.GetDbContext())
             {
                 await uow.DUsers.ChangeNotificationLocation(ctx.User.Id, notif).ConfigureAwait(false);
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Successfully changed notification preferences"))
+                    .ConfigureAwait(false);
             }
         }
     }
