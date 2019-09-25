@@ -96,7 +96,7 @@ namespace Roki
             service.AddHttpClient();
 
             service.LoadFrom(Assembly.GetAssembly(typeof(CommandHandler)));
-            service.LoadFrom(Assembly.GetAssembly(typeof(MessageLogger)));
+            service.LoadFrom(Assembly.GetAssembly(typeof(MessageService)));
 
             Services = service.BuildServiceProvider();
             var commandHandler = Services.GetService<CommandHandler>();
@@ -177,10 +177,10 @@ namespace Roki
             stats.Initialize();
             var commandHandler = Services.GetService<CommandHandler>();
             var commandService = Services.GetService<CommandService>();
-            var messageLogger = Services.GetService<MessageLogger>();
+            var messageLogger = Services.GetService<MessageService>();
 
             await commandHandler.StartHandling().ConfigureAwait(false);
-            await messageLogger.StartLogging().ConfigureAwait(false);
+            await messageLogger.StartService().ConfigureAwait(false);
 
             var _ = await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
             
