@@ -120,7 +120,7 @@ WHERE UserId={userId}
 ").ConfigureAwait(false);
         }
 
-        private async Task SendNotification(DUser user, SocketMessage msg)
+        private static async Task SendNotification(DUser user, SocketMessage msg)
         {
             switch (user.Notify)
             {

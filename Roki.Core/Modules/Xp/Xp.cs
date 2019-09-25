@@ -53,7 +53,7 @@ namespace Roki.Modules.Xp
 
         [RokiCommand, Description, Usage, Aliases]
         [RequireContext(ContextType.Guild)]
-        public async Task XpNotification([Leftover] string notify = null, IUser user = null)
+        public async Task XpNotification(string notify = null, IUser user = null)
         {
             var usr = ctx.User as SocketGuildUser;
             if (user != null && !usr.GuildPermissions.Administrator)
