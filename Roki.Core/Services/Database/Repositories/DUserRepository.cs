@@ -19,6 +19,7 @@ namespace Roki.Core.Services.Database.Repositories
         DUser[] GetUsersXpLeaderboard(int page);
         long GetUserCurrency(ulong userId);
         Task UpdateXp(DUser dUser, SocketMessage message);
+        Task ChangeNotificationLocation(ulong userId, byte notify);
     }
 
     public class DUserRepository : Repository<DUser>, IDUserRepository
@@ -99,7 +100,7 @@ SET TotalXp={xp},
 WHERE UserId={user.UserId};
 ").ConfigureAwait(false);
                 
-                await message.Channel.SendMessageAsync($"Congratulations {message.Author.Mention}! You've reached Level {new XpLevel(xp).Level}").ConfigureAwait(false);
+                await SendNotification(user, message).ConfigureAwait(false);
             }
             
             await Context.Database.ExecuteSqlCommandAsync($@"
@@ -108,6 +109,31 @@ SET TotalXp={xp},
     LastXpGain={DateTime.UtcNow}
 WHERE UserId={user.UserId};
 ").ConfigureAwait(false);
+        }
+
+        public async Task ChangeNotificationLocation(ulong userId, byte notify)
+        {
+            await Context.Database.ExecuteSqlCommandAsync($@"
+UPDATE IGNORE users
+SET Notify={notify}
+WHERE UserId={userId}
+").ConfigureAwait(false);
+        }
+
+        private async Task SendNotification(DUser user, SocketMessage msg)
+        {
+            switch (user.Notify)
+            {
+                case 0:
+                    return;
+                case 1:
+                    await msg.Channel.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {new XpLevel(user.TotalXp).Level}").ConfigureAwait(false);
+                    return;
+                case 2:
+                    var dm = await msg.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
+                    await dm.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {new XpLevel(user.TotalXp).Level}").ConfigureAwait(false);
+                    return;
+            }
         }
     }
 }

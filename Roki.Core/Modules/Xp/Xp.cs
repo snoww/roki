@@ -1,5 +1,7 @@
 using System.Threading.Tasks;
 using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
 using Roki.Extensions;
@@ -46,6 +48,46 @@ namespace Roki.Modules.Xp
                 }
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            }
+        }
+
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
+        public async Task XpNotification([Leftover] string notify = null, IUser user = null)
+        {
+            var usr = ctx.User as SocketGuildUser;
+            if (user != null && !usr.GuildPermissions.Administrator)
+                return;
+            if (string.IsNullOrWhiteSpace(notify))
+            {
+                await ctx.Channel
+                    .EmbedAsync(new EmbedBuilder().WithErrorColor().WithDescription("Please provide notification location for xp: none, dm, server."))
+                    .ConfigureAwait(false);
+                return;
+            }
+
+            byte notif;
+            switch (notify.ToUpperInvariant())
+            {
+                case "NONE":
+                    notif = 0;
+                    break;
+                case "DM":
+                    notif = 1;
+                    break;
+                case "SERVER":
+                    notif = 2;
+                    break;
+                default:
+                    await ctx.Channel
+                        .EmbedAsync(new EmbedBuilder().WithErrorColor().WithDescription("Not a valid option. Options are dm, server, or server."))
+                        .ConfigureAwait(false);
+                    return;
+            }
+
+            using (var uow = _db.GetDbContext())
+            {
+                await uow.DUsers.ChangeNotificationLocation(ctx.User.Id, notif).ConfigureAwait(false);
             }
         }
     }
