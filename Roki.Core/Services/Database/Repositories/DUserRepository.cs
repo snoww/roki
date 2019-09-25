@@ -127,11 +127,11 @@ WHERE UserId={userId}
                 case 0:
                     return;
                 case 1:
-                    await msg.Channel.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
-                    return;
-                case 2:
                     var dm = await msg.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
                     await dm.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
+                    return;
+                case 2:
+                    await msg.Channel.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
                     return;
             }
         }

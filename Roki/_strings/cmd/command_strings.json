@@ -326,5 +326,12 @@
       "{0}xplb",
       "{0}xplb 1"
     ]
+  },
+  "xpnotification": {
+    "Command": "xpnotification xpnotif",
+    "Description": "Sets the preferred location of xp level up notifications (Server, Dm, or None).",
+    "Usage": [
+      "{0}xpnotif server"
+    ]
   }
 }
