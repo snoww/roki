@@ -1,28 +1,24 @@
 using System;
 using System.Threading.Tasks;
 using Discord;
-using Discord.Commands;
 using Discord.WebSocket;
 using Roki.Core.Services;
 using Roki.Core.Services.Database.Models;
-using Roki.Core.Services.Database.Repositories;
-using Roki.Modules.Xp;
-using Roki.Modules.Xp.Common;
 
 namespace Roki.Services
 {
-    public class MessageLogger : IRService
+    public class MessageService : IRService
     {
         private readonly DiscordSocketClient _client;
         private readonly DbService _db;
 
-        public MessageLogger(DiscordSocketClient client, DbService db)
+        public MessageService(DiscordSocketClient client, DbService db)
         {
             _client = client;
             _db = db;
         }
 
-        public async Task StartLogging()
+        public async Task StartService()
         {
             _client.MessageReceived += async message =>
             {
