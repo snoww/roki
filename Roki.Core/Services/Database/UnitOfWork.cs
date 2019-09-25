@@ -12,6 +12,7 @@ namespace Roki.Core.Services.Database
         IQuoteRepository Quotes { get; }
         IDUserRepository DUsers { get; }
         IDMessageRepository DMessages { get; }
+        ICurrencyTransactionRepository Transaction { get; }
 
         int SaveChanges();
         Task<int> SaveChangesAsync();
@@ -22,6 +23,7 @@ namespace Roki.Core.Services.Database
         private IQuoteRepository _quotes;
         private IDUserRepository _dUsers;
         private IDMessageRepository _dMessages;
+        private ICurrencyTransactionRepository _transaction;
 
         public UnitOfWork(RokiContext context)
         {
@@ -32,6 +34,7 @@ namespace Roki.Core.Services.Database
         public IQuoteRepository Quotes => _quotes ?? (_quotes = new QuoteRepository(Context));
         public IDUserRepository DUsers => _dUsers ?? (_dUsers = new DUserRepository(Context));
         public IDMessageRepository DMessages => _dMessages ?? (_dMessages = new DMessageRepository(Context));
+        public ICurrencyTransactionRepository Transaction => _transaction ?? (_transaction = new CurrencyTransactionRepository(Context));
 
         public int SaveChanges()
         {
