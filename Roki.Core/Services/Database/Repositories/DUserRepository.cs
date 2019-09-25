@@ -122,7 +122,7 @@ WHERE UserId={userId}
 
         private static async Task SendNotification(DUser user, SocketMessage msg)
         {
-            switch (user.Notify)
+            switch (user.NotificationLocation)
             {
                 case 0:
                     return;
