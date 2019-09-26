@@ -139,12 +139,17 @@ namespace Roki.Modules.Help
 
             if (cmd == null)
             {
-                await ctx.Channel.SendErrorAsync("Command not found.\nTry `.modules` to find the correct module, then `.commands Module` to find the specific command.").ConfigureAwait(false);
-//                var ch = channel is ITextChannel
-//                    ? await ((IGuildUser) ctx.User).GetOrCreateDMChannelAsync().ConfigureAwait(false)
-//                    : channel;
-//
-//                await ch.
+                var ch = channel is ITextChannel
+                    ? await ((IGuildUser) ctx.User).GetOrCreateDMChannelAsync().ConfigureAwait(false)
+                    : channel;
+
+                await ch.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    // TODO add this in botconfig
+                    .WithDescription(string.Format(@"
+You can use `{0}modules` command to see a list of all modules.
+You can use `{0}commands ModuleName` to see a list of all the commands in that module (e.g. `{0}commands Utility`).
+You can use `{0}h CommandName` to get help for a specific command (e.g. `{0}h listquotes`).
+", Prefix))).ConfigureAwait(false);
             }
 
             var embed = _service.GetCommandHelp(cmd, ctx.Guild);
