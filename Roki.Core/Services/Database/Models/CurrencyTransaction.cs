@@ -8,8 +8,8 @@ namespace Roki.Core.Services.Database.Models
     {
         public long Amount { get; set; }
         public string Reason { get; set; }
-        public ulong UserIdFrom { get; set; }
         public ulong UserIdTo { get; set; }
+        public string UserIdFrom { get; set; }
         public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
     }
 }
