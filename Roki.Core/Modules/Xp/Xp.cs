@@ -80,7 +80,7 @@ namespace Roki.Modules.Xp
                     break;
                 default:
                     await ctx.Channel
-                        .EmbedAsync(new EmbedBuilder().WithErrorColor().WithDescription("Not a valid option. Options are dm, server, or server."))
+                        .EmbedAsync(new EmbedBuilder().WithErrorColor().WithDescription("Not a valid option. Options are none, dm, or server."))
                         .ConfigureAwait(false);
                     return;
             }

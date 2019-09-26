@@ -115,7 +115,7 @@ WHERE UserId={user.UserId};
         {
             await Context.Database.ExecuteSqlCommandAsync($@"
 UPDATE IGNORE users
-SET Notify={notify}
+SET NotificationLocation={notify}
 WHERE UserId={userId}
 ").ConfigureAwait(false);
         }
