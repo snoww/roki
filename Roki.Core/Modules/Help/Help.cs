@@ -128,7 +128,7 @@ namespace Roki.Modules.Help
                 return;
             }
             
-            await ctx.Channel.SendErrorAsync("Command not found").ConfigureAwait(false);
+            await ctx.Channel.SendErrorAsync("Command not found. Try `.modules` to find the correct module, then `.commands Module` to find the specific command.").ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -139,7 +139,7 @@ namespace Roki.Modules.Help
 
             if (cmd == null)
             {
-                await ctx.Channel.SendErrorAsync("Command not found.").ConfigureAwait(false);
+                await ctx.Channel.SendErrorAsync("Command not found. Try `.modules` to find the correct module, then `.commands Module` to find the specific command.").ConfigureAwait(false);
 //                var ch = channel is ITextChannel
 //                    ? await ((IGuildUser) ctx.User).GetOrCreateDMChannelAsync().ConfigureAwait(false)
 //                    : channel;
