@@ -52,7 +52,7 @@
       "{0}Commands Admin --view 1"
     ]
   },
-  "help": {
+  "h": {
     "Command": "help h",
     "Description": "Either shows a help for a single command, or DMs you help link if no parameters are specified.",
     "Usage": [
