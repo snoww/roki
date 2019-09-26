@@ -326,5 +326,12 @@
       "{0}xplb",
       "{0}xplb 1"
     ]
+  },
+  "pick": {
+    "Command": "pick",
+    "Description": "Picks up currency that is generated or dropped in the current channel.",
+    "Usage": [
+      "{0}pick"
+    ]
   }
 }
