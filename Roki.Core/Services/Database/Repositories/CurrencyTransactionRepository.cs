@@ -24,7 +24,7 @@ namespace Roki.Core.Services.Database.Repositories
             var toReturn = (trans.Sum(t => t.Amount), trans.Select(t => t.MessageId).ToArray());
             await Context.Database.ExecuteSqlCommandAsync($@"
 UPDATE IGNORE transactions
-SET `Reason`={"GCPicked"},
+SET `Reason`={"Picked"},
     `To`={userId}
 WHERE `ChannelId`={channelId} AND (`Reason`={"GCA"} OR `Reason`={"UserDrop"})
 ").ConfigureAwait(false);
