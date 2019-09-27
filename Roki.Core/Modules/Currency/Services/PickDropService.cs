@@ -54,7 +54,7 @@ namespace Roki.Modules.Currency.Services
                     var prefix = _cmdHandler.DefaultPrefix;
                     var toSend = drop == 1
                         ? $"<:stone:269130892100763649> A random stone appeared! Type `{prefix}pick` to pick it up."
-                        : $"<:stone:269130892100763649> Some random stones appeared! Type `{prefix}pick` to pick them up.";
+                        : $"<:stone:269130892100763649> {drop} random stones appeared! Type `{prefix}pick` to pick them up.";
                     // TODO add images to send with drop
                     var curMessage = await channel.SendMessageAsync(toSend).ConfigureAwait(false);
                     using (var uow = _db.GetDbContext())
