@@ -39,7 +39,8 @@ namespace Roki.Modules.Currency.Services
             if (DateTime.UtcNow - TimeSpan.FromMinutes(5) < lastGeneration)
                 return;
 
-            var num = rng.Next(1, 101) + 1.5 * 100;
+            // 50% chance for stone to drop when testing
+            var num = rng.Next(1, 101) + 50 * 100;
             if (num > 100 && LastGenerations.TryUpdate(channel.Id, DateTime.UtcNow, lastGeneration))
             {
                 var drop = 1;
@@ -52,8 +53,8 @@ namespace Roki.Modules.Currency.Services
                 {
                     var prefix = _cmdHandler.DefaultPrefix;
                     var toSend = drop == 1
-                        ? $"A random stone appeared! Type `{prefix}pick` to pick it up."
-                        : $"Some random stones appeared! Type `{prefix}pick` to pick them up.";
+                        ? $"<:stone:269130892100763649> A random stone appeared! Type `{prefix}pick` to pick it up."
+                        : $"<:stone:269130892100763649> Some random stones appeared! Type `{prefix}pick` to pick them up.";
                     // TODO add images to send with drop
                     var curMessage = await channel.SendMessageAsync(toSend).ConfigureAwait(false);
                     using (var uow = _db.GetDbContext())
