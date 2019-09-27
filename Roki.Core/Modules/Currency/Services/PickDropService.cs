@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -96,6 +97,8 @@ namespace Roki.Modules.Currency.Services
 
                 try
                 {
+                    if (ids[0] == 0)
+                        return 0;
                     var _ = channel.DeleteMessagesAsync(ids);
                 }
                 catch
