@@ -38,7 +38,7 @@ namespace Roki.Modules.Currency
                 {
                     await ctx.Message.DeleteAsync().ConfigureAwait(false);
                 }
-                catch (Exception e)
+                catch
                 {
                     //
                 }
