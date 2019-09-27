@@ -126,7 +126,7 @@ namespace Roki.Modules.Currency.Services
 
                 if (!updated) return false;
                 
-                var msg = await ctx.Channel.SendMessageAsync($"{user.Discriminator} dropped {amount} <:stone:269130892100763649>\nType `pick` to pick it up.");
+                var msg = await ctx.Channel.SendMessageAsync($"{user.Username} dropped {amount} <:stone:269130892100763649>\nType `.pick` to pick it up.");
 
                 uow.Transaction.Add(new CurrencyTransaction
                 {
