@@ -59,9 +59,10 @@ VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.MinValue}, 
 
         public DUser GetOrCreate(ulong userId, string username, string discriminator, string avatarId)
         {
-            var user = Set.First(u => u.UserId == userId);
+            var user = Set.FirstOrDefault(u => u.UserId == userId);
             if (user != null && user.Username == username && user.Discriminator == discriminator && user.AvatarId == avatarId) 
                 return user;
+            
             EnsureCreated(userId, username, discriminator, avatarId);
             user = Set.First(u => u.UserId == userId);
 
@@ -124,7 +125,7 @@ SET TotalXp={xp},
 WHERE UserId={user.UserId};
 ").ConfigureAwait(false);
                 
-                await SendNotification(user, message).ConfigureAwait(false);
+                await SendNotification(user, message, new XpLevel(xp).Level).ConfigureAwait(false);
             }
             
             await Context.Database.ExecuteSqlCommandAsync($@"
@@ -139,23 +140,23 @@ WHERE UserId={user.UserId};
         {
             await Context.Database.ExecuteSqlCommandAsync($@"
 UPDATE IGNORE users
-SET Notify={notify}
+SET NotificationLocation={notify}
 WHERE UserId={userId}
 ").ConfigureAwait(false);
         }
 
-        private static async Task SendNotification(DUser user, SocketMessage msg)
+        private static async Task SendNotification(DUser user, SocketMessage msg, int level)
         {
             switch (user.NotificationLocation)
             {
                 case 0:
                     return;
                 case 1:
-                    await msg.Channel.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {new XpLevel(user.TotalXp).Level}").ConfigureAwait(false);
+                    var dm = await msg.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
+                    await dm.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
                     return;
                 case 2:
-                    var dm = await msg.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
-                    await dm.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {new XpLevel(user.TotalXp).Level}").ConfigureAwait(false);
+                    await msg.Channel.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
                     return;
             }
         }
