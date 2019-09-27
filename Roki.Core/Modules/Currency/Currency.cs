@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Discord;
+using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
@@ -16,6 +17,8 @@ namespace Roki.Modules.Currency
             _db = db;
         }
 
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
         public async Task Leaderboard([Leftover] int page = 0)
         {
             if (page < 0)
