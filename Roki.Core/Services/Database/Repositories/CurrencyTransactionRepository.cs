@@ -18,7 +18,7 @@ namespace Roki.Core.Services.Database.Repositories
 
         public async Task<(long, ulong[])> GetAndUpdateGeneratedCurrency(ulong channelId, ulong userId)
         {
-            var trans = Set.Where(t => t.ChannelId == channelId && t.Reason == "GCA").ToArray();
+            var trans = Set.Where(t => t.ChannelId == channelId && (t.Reason == "GCA" || t.Reason == "UserDrop")).ToArray();
             if (!trans.Any())
                 return (0, new ulong[0]);
             var toReturn = (trans.Sum(t => t.Amount), trans.Select(t => t.MessageId).ToArray());
