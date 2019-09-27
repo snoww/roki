@@ -23,7 +23,7 @@ namespace Roki.Core.Services.Database.Repositories
                 return (0, new ulong[channelId]);
             var toReturn = (trans.Sum(t => t.Amount), trans.Select(t => t.MessageId).ToArray());
             await Context.Database.ExecuteSqlCommandAsync($@"
-UPDATE IGNORE currencytransactions
+UPDATE IGNORE transactions
 SET Reason={"GCPicked"}
     To={userId}
 WHERE ChannelId={channelId} AND Reason={"GCA"}
