@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -23,77 +24,99 @@ namespace Roki.Services
 
         public async Task StartService()
         {
-            _client.MessageReceived += async message =>
-            {
-                using (var uow = _db.GetDbContext())
-                {
-                    if (!message.Author.IsBot)
-                    {
-                        var user = uow.DUsers.GetOrCreate(message.Author);
-                        
-                        if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(5))
-                            await uow.DUsers.UpdateXp(user, message).ConfigureAwait(false);
-
-                        uow.DMessages.Add(new DMessage
-                        {
-                            AuthorId = message.Author.Id,
-                            Author = message.Author.Username,
-                            ChannelId = message.Channel.Id,
-                            Channel = message.Channel.Name,
-                            GuildId = message.Channel is ITextChannel chId ? chId.GuildId : (ulong?) null,
-                            Guild = message.Channel is ITextChannel ch ? ch.Guild.Name : null,
-                            MessageId = message.Id,
-                            Content = message.Content,
-                            EditedTimestamp = message.EditedTimestamp?.UtcDateTime,
-                            Timestamp = message.Timestamp.UtcDateTime
-                        });
-
-                        await uow.SaveChangesAsync().ConfigureAwait(false);
-                    }
-                }
-
-                await Task.CompletedTask;
-            };
+            _client.MessageReceived += MessageReceived;
+            _client.MessageUpdated += MessageUpdated;
+            _client.MessageDeleted += MessageDeleted;
+            _client.MessagesBulkDeleted += MessagesBulkDeleted;
             
-            _client.MessageUpdated += async (_, after, __) =>
+            await Task.CompletedTask;
+        }
+
+        private async Task MessageReceived(SocketMessage message)
+        {
+            using (var uow = _db.GetDbContext())
             {
-                if (_.Value.Author.IsBot)
-                    return;
-                using (var uow = _db.GetDbContext())
+                if (!message.Author.IsBot)
                 {
+                    var user = uow.DUsers.GetOrCreate(message.Author);
+                        
+                    if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(5))
+                        await uow.DUsers.UpdateXp(user, message).ConfigureAwait(false);
+
                     uow.DMessages.Add(new DMessage
                     {
-                        AuthorId = after.Author.Id,
-                        Author = after.Author.Username,
-                        ChannelId = after.Channel.Id,
-                        Channel = after.Channel.Name,
-                        GuildId = after.Channel is ITextChannel chId ? chId.GuildId : (ulong?) null,
-                        Guild = after.Channel is ITextChannel ch ? ch.Guild.Name : null,
-                        MessageId = after.Id,
-                        Content = after.Content,
-                        EditedTimestamp = after.EditedTimestamp?.UtcDateTime,
-                        Timestamp = after.Timestamp.UtcDateTime
+                        AuthorId = message.Author.Id,
+                        Author = message.Author.Username,
+                        ChannelId = message.Channel.Id,
+                        Channel = message.Channel.Name,
+                        GuildId = message.Channel is ITextChannel chId ? chId.GuildId : (ulong?) null,
+                        Guild = message.Channel is ITextChannel ch ? ch.Guild.Name : null,
+                        MessageId = message.Id,
+                        Content = message.Content,
+                        EditedTimestamp = message.EditedTimestamp?.UtcDateTime,
+                        Timestamp = message.Timestamp.UtcDateTime
                     });
-                    
+
                     await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
-                
-                await Task.CompletedTask;
-            };
+            }
 
-            _client.MessageDeleted += async (_, channel) =>
+            await Task.CompletedTask;
+        }
+
+        private async Task MessageUpdated(Cacheable<IMessage, ulong> cache, SocketMessage after, ISocketMessageChannel channel)
+        {
+            if (after.Author.IsBot || cache.Value.Author.IsBot)
+                return;
+            using (var uow = _db.GetDbContext())
             {
-                if (_.Value.Author.IsBot)
-                    return;
+                uow.DMessages.Add(new DMessage
+                {
+                    AuthorId = after.Author.Id,
+                    Author = after.Author.Username,
+                    ChannelId = after.Channel.Id,
+                    Channel = after.Channel.Name,
+                    GuildId = after.Channel is ITextChannel chId ? chId.GuildId : (ulong?) null,
+                    Guild = after.Channel is ITextChannel ch ? ch.Guild.Name : null,
+                    MessageId = after.Id,
+                    Content = after.Content,
+                    EditedTimestamp = after.EditedTimestamp?.UtcDateTime,
+                    Timestamp = after.Timestamp.UtcDateTime
+                });
+                    
+                await uow.SaveChangesAsync().ConfigureAwait(false);
+            }
+                
+            await Task.CompletedTask;
+        }
+
+        private async Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
+        {
+            if (cache.Value.Author.IsBot)
+                return;
+            using (var uow = _db.GetDbContext())
+            {
+                uow.DMessages.MessageDeleted(cache.Value.Id);
+                
+                await uow.SaveChangesAsync().ConfigureAwait(false);
+            }
+            
+            await Task.CompletedTask;
+        }
+
+        private async Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> caches, ISocketMessageChannel channel)
+        {
+            foreach (var cache in caches)
+            {
+                if (cache.Value.Author.IsBot)
+                    continue;
                 using (var uow = _db.GetDbContext())
                 {
-                    uow.DMessages.MessageDeleted(_.Value.Id);
-                    
+                    uow.DMessages.MessageDeleted(cache.Value.Id);
+                
                     await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
-
-                await Task.CompletedTask;
-            };
+            }
             
             await Task.CompletedTask;
         }
