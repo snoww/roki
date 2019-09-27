@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -18,6 +19,8 @@ namespace Roki.Core.Services.Database.Repositories
         DUser GetOrCreate(IUser original);
         DUser[] GetUsersXpLeaderboard(int page);
         long GetUserCurrency(ulong userId);
+        Task<bool> UpdateCurrency(IUser user, long amount);
+        IEnumerable<DUser> GetCurrencyLeaderboard(int page);
         Task UpdateXp(DUser dUser, SocketMessage message);
         Task ChangeNotificationLocation(ulong userId, byte notify);
     }
@@ -81,6 +84,28 @@ VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.MinValue}, 
 
         public long GetUserCurrency(ulong userId) =>
                 Set.FirstOrDefault(x => x.UserId == userId)?.Currency ?? 0;
+
+        public async Task<bool> UpdateCurrency(IUser user, long amount)
+        {
+            if (amount == 0)
+                return false;
+            var dUser = GetOrCreate(user);
+            await Context.Database.ExecuteSqlCommandAsync($@"
+UPDATE IGNORE users
+SET Currency=Currency+{amount}
+WHERE UserId={dUser.UserId}
+").ConfigureAwait(false);
+            return true;
+        }
+
+        public IEnumerable<DUser> GetCurrencyLeaderboard(int page)
+        {
+            return Set.Where(c => c.Currency > 0)
+                .OrderByDescending(c => c.Currency)
+                .Skip(page * 9)
+                .Take(9)
+                .ToList();
+        }
 
         public async Task UpdateXp(DUser dUser, SocketMessage message)
         {
