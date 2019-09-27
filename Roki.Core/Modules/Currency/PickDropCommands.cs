@@ -17,6 +17,7 @@ namespace Roki.Modules.Currency
             [RequireContext(ContextType.Guild)]
             public async Task Pick()
             {
+                await ctx.Message.DeleteAsync().ConfigureAwait(false);
                 var picked = await _service.PickAsync(ctx.Guild.Id, (ITextChannel) ctx.Channel, ctx.User).ConfigureAwait(false);
 
                 if (picked > 0)
@@ -33,21 +34,13 @@ namespace Roki.Modules.Currency
 
                     msg.DeleteAfter(10);
                 }
-
-                try
-                {
-                    await ctx.Message.DeleteAsync().ConfigureAwait(false);
-                }
-                catch
-                {
-                    //
-                }
             }
 
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
             public async Task Drop([Leftover] long amount = 1)
             {
+                ctx.Message.DeleteAfter(10);
                 if (amount < 0)
                     return;
                 
@@ -56,14 +49,6 @@ namespace Roki.Modules.Currency
                 if (!success)
                     await ctx.Channel.SendMessageAsync("You do not have enough <:stone:269130892100763649> to drop.").ConfigureAwait(false);
 
-                try
-                {
-                    await ctx.Message.DeleteAsync().ConfigureAwait(false);
-                }
-                catch
-                {
-                    //
-                }
             }
         }
     }
