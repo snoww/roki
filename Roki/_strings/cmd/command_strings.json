@@ -52,7 +52,7 @@
       "{0}Commands Admin --view 1"
     ]
   },
-  "help": {
+  "h": {
     "Command": "help h",
     "Description": "Either shows a help for a single command, or DMs you help link if no parameters are specified.",
     "Usage": [
@@ -327,11 +327,11 @@
       "{0}xplb 1"
     ]
   },
-  "pick": {
-    "Command": "pick",
-    "Description": "Picks up currency that is generated or dropped in the current channel.",
+  "xpnotification": {
+    "Command": "xpnotification xpnotif",
+    "Description": "Sets the preferred location of xp level up notifications (Server, Dm, or None).",
     "Usage": [
-      "{0}pick"
+      "{0}xpnotif server"
     ]
   }
 }

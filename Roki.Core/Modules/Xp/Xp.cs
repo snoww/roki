@@ -55,9 +55,13 @@ namespace Roki.Modules.Xp
         [RequireContext(ContextType.Guild)]
         public async Task XpNotification(string notify = null, IUser user = null)
         {
-            var usr = ctx.User as SocketGuildUser;
-            if (user != null && !usr.GuildPermissions.Administrator)
+            var caller = ctx.User as SocketGuildUser;
+            var isAdmin = false;
+            if (user != null && !caller.GuildPermissions.Administrator)
                 return;
+            if (user != null && caller.GuildPermissions.Administrator)
+                isAdmin = true;
+            
             if (string.IsNullOrWhiteSpace(notify))
             {
                 await ctx.Channel
@@ -80,14 +84,19 @@ namespace Roki.Modules.Xp
                     break;
                 default:
                     await ctx.Channel
-                        .EmbedAsync(new EmbedBuilder().WithErrorColor().WithDescription("Not a valid option. Options are dm, server, or server."))
+                        .EmbedAsync(new EmbedBuilder().WithErrorColor().WithDescription("Not a valid option. Options are none, dm, or server."))
                         .ConfigureAwait(false);
                     return;
             }
 
             using (var uow = _db.GetDbContext())
             {
-                await uow.DUsers.ChangeNotificationLocation(ctx.User.Id, notif).ConfigureAwait(false);
+                if (!isAdmin)
+                    await uow.DUsers.ChangeNotificationLocation(ctx.User.Id, notif).ConfigureAwait(false);
+                else
+                    await uow.DUsers.ChangeNotificationLocation(user.Id, notif).ConfigureAwait(false);
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Successfully changed xp notification preferences."))
+                    .ConfigureAwait(false);
             }
         }
     }
