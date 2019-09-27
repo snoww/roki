@@ -40,7 +40,7 @@ namespace Roki.Modules.Currency.Services
             if (DateTime.UtcNow - TimeSpan.FromMinutes(5) < lastGeneration)
                 return;
 
-            var num = rng.Next(1, 101) + 0.5 * 100;
+            var num = rng.Next(0, 100) + 5;
             if (num > 100 && LastGenerations.TryUpdate(channel.Id, DateTime.UtcNow, lastGeneration))
             {
                 var drop = 1;
