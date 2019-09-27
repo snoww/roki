@@ -20,7 +20,7 @@ namespace Roki.Core.Services.Database.Repositories
         {
             var trans = Set.Where(t => t.ChannelId == channelId && t.Reason == "GCA").ToArray();
             if (!trans.Any())
-                return (0, new ulong[channelId]);
+                return (0, new ulong[0]);
             var toReturn = (trans.Sum(t => t.Amount), trans.Select(t => t.MessageId).ToArray());
             await Context.Database.ExecuteSqlCommandAsync($@"
 UPDATE IGNORE transactions
