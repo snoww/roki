@@ -36,6 +36,8 @@ namespace Roki.Modules.Xp
         {
             if (page < 0)
                 return;
+            if (page > 0)
+                page -= 1;
             using (var uow = _db.GetDbContext())
             {
                 var list = uow.DUsers.GetUsersXpLeaderboard(page);

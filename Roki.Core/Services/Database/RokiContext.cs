@@ -72,6 +72,15 @@ namespace Roki.Core.Services.Database
             });
 
             #endregion
+
+            #region CurrencyTransaction
+
+            modelBuilder.Entity<CurrencyTransaction>(entity =>
+            {
+                entity.HasIndex(c => c.TransactionDate);
+            });
+
+            #endregion
         }
     }
 }

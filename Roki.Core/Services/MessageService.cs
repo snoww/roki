@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Roki.Core.Services;
+using Roki.Core.Services.Database;
 using Roki.Core.Services.Database.Models;
 
 namespace Roki.Services
@@ -12,7 +15,7 @@ namespace Roki.Services
         private readonly DiscordSocketClient _client;
         private readonly DbService _db;
 
-        public MessageService(DiscordSocketClient client, DbService db)
+        public MessageService(DiscordSocketClient client, DbService db, CommandHandler cmdHandler)
         {
             _client = client;
             _db = db;
@@ -26,6 +29,11 @@ namespace Roki.Services
                 {
                     if (!message.Author.IsBot)
                     {
+                        var user = uow.DUsers.GetOrCreate(message.Author);
+                        
+                        if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(5))
+                            await uow.DUsers.UpdateXp(user, message).ConfigureAwait(false);
+
                         uow.DMessages.Add(new DMessage
                         {
                             AuthorId = message.Author.Id,
@@ -40,12 +48,6 @@ namespace Roki.Services
                             Timestamp = message.Timestamp.UtcDateTime
                         });
 
-                        var user = uow.DUsers.GetOrCreate(message.Author);
-                        if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(5))
-                        {
-                            await uow.DUsers.UpdateXp(user, message).ConfigureAwait(false);
-                        }
-                        
                         await uow.SaveChangesAsync().ConfigureAwait(false);
                     }
                 }
