@@ -321,7 +321,7 @@
   },
   "xpleaderboard": {
     "Command": "xplb",
-    "Description": "Shows the current xp leaderboard, you can specify the page, default is the top 9",
+    "Description": "Shows the current xp leaderboard, you can specify the page, default is the top 9.",
     "Usage": [
       "{0}xplb",
       "{0}xplb 1"
@@ -332,6 +332,21 @@
     "Description": "Sets the preferred location of xp level up notifications (Server, Dm, or None).",
     "Usage": [
       "{0}xpnotif server"
+    ]
+  },
+  "pick": {
+    "Command": "pick",
+    "Description": "Picks up all the currency dropped in the current channel.",
+    "Usage": [
+      "{0}pick"
+    ]
+  },
+  "leaderboard": {
+    "Command": "leaderboard lb",
+    "Description": "Shows the current currency leaderboard. you can specify the page, default is the top 9.",
+    "Usage": [
+      "{0}lb",
+      "{0}lb 1"
     ]
   }
 }
