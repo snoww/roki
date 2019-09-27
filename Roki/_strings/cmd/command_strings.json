@@ -348,5 +348,13 @@
       "{0}lb",
       "{0}lb 1"
     ]
+  },
+  "drop": {
+    "Command": "drop",
+    "Description": "Drops the specified number of currency, default is 1. Must have enough in your balance to drop.",
+    "Usage": [
+      "{0}drop",
+      "{0}drop 3"
+    ]
   }
 }

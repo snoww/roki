@@ -43,6 +43,28 @@ namespace Roki.Modules.Currency
                     //
                 }
             }
+
+            [RokiCommand, Description, Usage, Aliases]
+            [RequireContext(ContextType.Guild)]
+            public async Task Drop([Leftover] long amount = 1)
+            {
+                if (amount < 0)
+                    return;
+                
+                var success = await _service.DropAsync(ctx, ctx.User, amount).ConfigureAwait(false);
+
+                if (!success)
+                    await ctx.Channel.SendMessageAsync("You do not have enough <:stone:269130892100763649> to drop.").ConfigureAwait(false);
+
+                try
+                {
+                    await ctx.Message.DeleteAsync().ConfigureAwait(false);
+                }
+                catch
+                {
+                    //
+                }
+            }
         }
     }
 }

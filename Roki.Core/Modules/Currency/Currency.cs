@@ -33,7 +33,7 @@ namespace Roki.Modules.Currency
                 var i = 9 * page + 1;
                 foreach (var user in list)
                 {
-                    embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", user.Currency);
+                    embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"{user.Currency} <:stone:269130892100763649>");
                 }
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);

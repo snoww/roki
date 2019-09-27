@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using Roki.Core.Services;
 using Roki.Core.Services.Database.Models;
@@ -88,7 +89,7 @@ namespace Roki.Modules.Currency.Services
 
                     if (amount > 0)
                     {
-                        await uow.DUsers.UpdateCurrency(user, amount).ConfigureAwait(false);
+                        await uow.DUsers.UpdateCurrencyAsync(user, amount).ConfigureAwait(false);
                     }
 
                     await uow.SaveChangesAsync().ConfigureAwait(false);
@@ -110,6 +111,36 @@ namespace Roki.Modules.Currency.Services
             finally
             {
                 _pickLock.Release();
+            }
+        }
+
+        public async Task<bool> DropAsync(ICommandContext ctx, IUser user, long amount)
+        {
+            using (var uow = _db.GetDbContext())
+            {
+                var dUser = uow.DUsers.GetOrCreate(user);
+                if (dUser.Currency < amount)
+                    return false;
+
+                var updated = await uow.DUsers.UpdateCurrencyAsync(user, -amount).ConfigureAwait(false);
+
+                if (!updated) return false;
+                
+                var msg = await ctx.Channel.SendMessageAsync($"{user.Discriminator} dropped {amount} <:stone:269130892100763649>\nType `pick` to pick it up.");
+
+                uow.Transaction.Add(new CurrencyTransaction
+                {
+                    Amount = amount,
+                    Reason = "UserDrop",
+                    From = dUser.Id.ToString(),
+                    To = "-",
+                    GuildId = ctx.Guild.Id,
+                    ChannelId = msg.Channel.Id,
+                    MessageId = msg.Id
+                });
+                
+                await uow.SaveChangesAsync().ConfigureAwait(false);
+                return true;
             }
         }
     }
