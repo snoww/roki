@@ -26,7 +26,7 @@ namespace Roki.Core.Services.Database.Repositories
 UPDATE IGNORE transactions
 SET `Reason`={"GCPicked"},
     `To`={userId}
-WHERE `ChannelId`={channelId} AND `Reason`={"GCA"}
+WHERE `ChannelId`={channelId} AND (`Reason`={"GCA"} OR `Reason`={"UserDrop"})
 ").ConfigureAwait(false);
             return toReturn;
         }

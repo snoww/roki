@@ -19,7 +19,7 @@ namespace Roki.Core.Services.Database.Repositories
         DUser GetOrCreate(IUser original);
         DUser[] GetUsersXpLeaderboard(int page);
         long GetUserCurrency(ulong userId);
-        Task<bool> UpdateCurrency(IUser user, long amount);
+        Task<bool> UpdateCurrencyAsync(IUser user, long amount);
         IEnumerable<DUser> GetCurrencyLeaderboard(int page);
         Task UpdateXp(DUser dUser, SocketMessage message);
         Task ChangeNotificationLocation(ulong userId, byte notify);
@@ -85,7 +85,7 @@ VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.MinValue}, 
         public long GetUserCurrency(ulong userId) =>
                 Set.FirstOrDefault(x => x.UserId == userId)?.Currency ?? 0;
 
-        public async Task<bool> UpdateCurrency(IUser user, long amount)
+        public async Task<bool> UpdateCurrencyAsync(IUser user, long amount)
         {
             if (amount == 0)
                 return false;
