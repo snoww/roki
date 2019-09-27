@@ -25,11 +25,11 @@ namespace Roki.Modules.Currency
                     IUserMessage msg;
                     if (picked == 1)
                     {
-                        msg = await ctx.Channel.SendMessageAsync("You picked up 1 stone.").ConfigureAwait(false);
+                        msg = await ctx.Channel.SendMessageAsync($"{ctx.User.Username} picked up 1 stone.").ConfigureAwait(false);
                     }
                     else
                     {
-                        msg = await ctx.Channel.SendMessageAsync($"You picked up {picked} stones.").ConfigureAwait(false);
+                        msg = await ctx.Channel.SendMessageAsync($"{ctx.User.Username} picked up {picked} stones.").ConfigureAwait(false);
                     }
 
                     msg.DeleteAfter(10);
