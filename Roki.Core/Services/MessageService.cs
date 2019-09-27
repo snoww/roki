@@ -66,7 +66,7 @@ namespace Roki.Services
 
         private async Task MessageUpdated(Cacheable<IMessage, ulong> cache, SocketMessage after, ISocketMessageChannel channel)
         {
-            if (after.Author.IsBot || cache.Value.Author.IsBot)
+            if (after.Author.IsBot)
                 return;
             using (var uow = _db.GetDbContext())
             {
