@@ -132,7 +132,7 @@ namespace Roki.Modules.Currency.Services
                 {
                     Amount = amount,
                     Reason = "UserDrop",
-                    From = dUser.Id.ToString(),
+                    From = dUser.UserId.ToString(),
                     To = "-",
                     GuildId = ctx.Guild.Id,
                     ChannelId = msg.Channel.Id,
