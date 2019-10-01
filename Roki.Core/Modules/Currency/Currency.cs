@@ -19,9 +19,9 @@ namespace Roki.Modules.Currency
 
         [RokiCommand, Description, Usage, Aliases]
         [RequireContext(ContextType.Guild)]
-        public async Task Leaderboard([Leftover] int page = 0)
+        public async Task Leaderboard([Leftover] int page = 1)
         {
-            if (page < 0)
+            if (page <= 0)
                 return;
             if (page > 0)
                 page -= 1;
