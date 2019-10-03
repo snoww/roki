@@ -53,6 +53,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Modules\Gambling\Services" />
       <Folder Include="Modules\Utility\Services" />
     </ItemGroup>
 

@@ -356,5 +356,12 @@
       "{0}drop",
       "{0}drop 3"
     ]
+  },
+  "betflip": {
+    "Command": "betflip bf",
+    "Description": "Bet to guess result if heads or tails. Guessing correctly awards you currency.",
+    "Usage": [
+      "{0}bf 10"
+    ]
   }
 }
