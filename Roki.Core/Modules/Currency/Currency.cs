@@ -113,7 +113,7 @@ namespace Roki.Modules.Currency
             {
                 var type = tran.Amount > 0 ? "🔵" : "🔴";
                 var date = Format.Code($"{tran.TransactionDate.ToLocalTime():HH:mm yyyy-MM-dd}");
-                desc += $"{type} {date} - {tran.Reason?.Trim()}\n\t{Format.Bold(tran.Amount.ToString())}\n";
+                desc += $"{type} {tran.Reason?.Trim()} {date}\n\t\t{Format.Bold(tran.Amount.ToString())} <:stone:269130892100763649>\n";
             }
 
             embed.WithDescription(desc)
