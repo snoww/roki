@@ -34,7 +34,7 @@ namespace Roki.Modules.Currency
         {
             user = user ?? ctx.User;
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"You have {GetCurrency(user.Id)} stones")).ConfigureAwait(false);
+                .WithDescription($"{user.Mention} has {GetCurrency(user.Id)} stones")).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
