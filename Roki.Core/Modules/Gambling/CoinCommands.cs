@@ -61,21 +61,18 @@ namespace Roki.Modules.Gambling
                     result = BetFlipGuess.Tails;
                 }
                 
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                    .WithDescription($"Result is: {result}")).ConfigureAwait(false);
-                
                 if (guess == result)
                 {
-                    var won = (long) (amount * 1.98);
+                    var won = (long) Math.Ceiling(amount * 1.95);
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                        .WithDescription($"{ctx.User.Mention} Congratulations! You've won {won} stones")).ConfigureAwait(false);
+                        .WithDescription($"Result is: {result}\n{ctx.User.Mention} Congratulations! You've won {won} stones")).ConfigureAwait(false);
                     await _currency.ChangeAsync(ctx.User, "Betflip Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
                     return;
                 }
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                    .WithDescription($"{ctx.User.Mention} Better luck next time!")).ConfigureAwait(false);
+                    .WithDescription($"Result is: {result}\n{ctx.User.Mention} Better luck next time!")).ConfigureAwait(false);
             }
         }
     }
