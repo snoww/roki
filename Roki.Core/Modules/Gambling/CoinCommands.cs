@@ -52,7 +52,7 @@ namespace Roki.Modules.Gambling
                 }
 
                 BetFlipGuess result;
-                if (Rng.Next(0, 1) == 1)
+                if (Rng.Next(0, 2) == 1)
                 {
                     result = BetFlipGuess.Heads;
                 }
