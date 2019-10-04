@@ -63,10 +63,12 @@ namespace Roki.Modules.Gambling
                 
                 if (guess == result)
                 {
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                        .WithDescription($"Result is: {result}")).ConfigureAwait(false);
                     var won = (long) (amount * 1.98);
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithDescription($"{ctx.User.Mention} Congratulations! You've won {won} stones")).ConfigureAwait(false);
-                    await _currency.ChangeAsync(ctx.User, "Betflip Award", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
+                    await _currency.ChangeAsync(ctx.User, "Betflip Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
                     return;
                 }
