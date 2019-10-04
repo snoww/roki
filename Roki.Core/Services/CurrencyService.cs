@@ -11,6 +11,7 @@ namespace Roki.Services
     public interface ICurrencyService : IRService
     {
         Task<bool> ChangeAsync(IUser user, string reason, long amount, string from, string to, ulong guildId, ulong channelId, ulong messageId);
+        Task<bool> TransferAsync(IUser userFrom, IUser userTo, string reason, long amount, ulong guildId, ulong channelId, ulong messageId);
         Task ChangeListAsync(IEnumerable<IUser> users, IEnumerable<string> reasons, IEnumerable<long> amounts, IEnumerable<string> from, 
             IEnumerable<string> to, IEnumerable<ulong> guildIds, IEnumerable<ulong> channelIds, IEnumerable<ulong> messageIds);
     }
@@ -24,7 +25,7 @@ namespace Roki.Services
             _db = db;
         }
         
-        private CurrencyTransaction CreateTransaction(ulong userId, string reason, long amount, string from, string to, ulong guildId, ulong channelId, ulong messageId) =>
+        private CurrencyTransaction CreateTransaction(string reason, long amount, string from, string to, ulong guildId, ulong channelId, ulong messageId) =>
             new CurrencyTransaction
             {
                 Amount = amount,
@@ -36,14 +37,33 @@ namespace Roki.Services
                 MessageId = messageId
             };
 
-        private async Task<bool> InternalChangeAsync(IUser user, string reason, long amount, string from, string to, ulong guildId, ulong channelId, ulong messageId)
+        private async Task<bool> InternalChangeAsync(IUser user, string reason, long amount, string from, string to, ulong guildId, ulong channelId, 
+            ulong messageId)
         {
             using (var uow = _db.GetDbContext())
             {
                 var success = await uow.DUsers.UpdateCurrencyAsync(user, amount).ConfigureAwait(false);
                 if (success)
                 {
-                    var _ = CreateTransaction(user.Id, reason, amount, from, to, guildId, channelId, messageId);
+                    var _ = CreateTransaction(reason, amount, from, to, guildId, channelId, messageId);
+                    uow.Transaction.Add(_);
+                }
+
+                await uow.SaveChangesAsync().ConfigureAwait(false);
+                return success;
+            }
+        }
+
+        private async Task<bool> InternalTransferAsync(IUser userFrom, IUser userTo, string reason, long amount, ulong guildId, ulong channelId, 
+            ulong messageId)
+        {
+            using (var uow = _db.GetDbContext())
+            {
+                var success = await uow.DUsers.UpdateCurrencyAsync(userFrom, amount).ConfigureAwait(false);
+                if (success)
+                {
+                    await uow.DUsers.UpdateCurrencyAsync(userTo, amount).ConfigureAwait(false);
+                    var _ = CreateTransaction(reason, amount, userFrom.Id.ToString(), userTo.Id.ToString(), guildId, channelId, messageId);
                     uow.Transaction.Add(_);
                 }
 
@@ -55,6 +75,11 @@ namespace Roki.Services
         public async Task<bool> ChangeAsync(IUser user, string reason, long amount, string from, string to, ulong guildId, ulong channelId, ulong messageId)
         {
             return await InternalChangeAsync(user, reason, amount, from, to, guildId, channelId, messageId).ConfigureAwait(false);
+        }
+
+        public async Task<bool> TransferAsync(IUser userFrom, IUser userTo, string reason, long amount, ulong guildId, ulong channelId, ulong messageId)
+        {
+            return await InternalTransferAsync(userFrom, userTo, reason, amount, guildId, channelId, messageId);
         }
 
         public async Task ChangeListAsync(IEnumerable<IUser> users, IEnumerable<string> reasons, IEnumerable<long> amounts, IEnumerable<string> from,

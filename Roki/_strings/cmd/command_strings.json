@@ -364,5 +364,13 @@
       "{0}bf 10 h",
       "{0}bf 5 tails"
     ]
+  },
+  "give": {
+    "Command": "give",
+    "Description": "Transfers currency to the specified user, optionally with a message. Must have sufficient balance.",
+    "Usage": [
+      "{0}give 5 @snow",
+      "{0}give 10 @user a nice message"
+    ]
   }
 }
