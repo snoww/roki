@@ -382,10 +382,17 @@
     ]
   },
   "betroll": {
-  "Command": "betroll br",
-  "Description": "Bet to roll a dice. Rolling over 66 yields x2.5, over 90 yields x4, and 100 yields x10.",
-  "Usage": [
-    "{0}br 10"
-  ]
-},
+    "Command": "betroll br",
+    "Description": "Bet to roll a dice. Rolling over 66 yields x2.5, over 90 yields x4, and 100 yields x10.",
+    "Usage": [
+      "{0}br 10"
+    ]
+  },
+  "currencytransactions": {
+    "Command": "transactions trs",
+    "Description": "Shows your currency transactions on the specified page.",
+    "Usage": [
+      "{0}trs 2"
+    ]
+  }
 }
