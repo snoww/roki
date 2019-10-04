@@ -361,7 +361,8 @@
     "Command": "betflip bf",
     "Description": "Bet to guess result if heads or tails. Guessing correctly awards you currency.",
     "Usage": [
-      "{0}bf 10"
+      "{0}bf 10 h",
+      "{0}bf 5 tails"
     ]
   }
 }
