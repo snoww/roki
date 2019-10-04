@@ -29,7 +29,7 @@ namespace Roki.Services
             {
                 Amount = amount,
                 Reason = reason ?? "-",
-                To = userId.ToString(),
+                To = to ?? "-",
                 From = from ?? "-",
                 GuildId = guildId,
                 ChannelId = channelId,
