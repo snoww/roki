@@ -42,7 +42,7 @@ namespace Roki.Modules.Gambling
             long win;
             if (roll < 91)
             {
-                win = amount * 2;
+                win = (long) Math.Ceiling(amount * 2.5);
             }
             else if (roll < 100)
             {
