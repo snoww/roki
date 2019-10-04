@@ -12,9 +12,9 @@ namespace Roki.Modules.Currency
     public partial class Currency : RokiTopLevelModule
     {
         private readonly DbService _db;
-        private readonly CurrencyService _currency;
+        private readonly ICurrencyService _currency;
 
-        public Currency(DbService db, CurrencyService currency)
+        public Currency(DbService db, ICurrencyService currency)
         {
             _db = db;
             _currency = currency;
