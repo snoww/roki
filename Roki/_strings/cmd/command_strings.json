@@ -372,5 +372,13 @@
       "{0}give 5 @snow",
       "{0}give 10 @user a nice message"
     ]
+  },
+  "cash": {
+    "Command": "currency $ cash $$ $$$",
+    "Description": "Shows how much currency the user has.",
+    "Usage": [
+      "{0}$",
+      "{0}$ @user"
+    ]
   }
 }

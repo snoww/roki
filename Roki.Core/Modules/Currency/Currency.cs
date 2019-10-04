@@ -20,6 +20,23 @@ namespace Roki.Modules.Currency
             _currency = currency;
         }
 
+        private long GetCurrency(ulong userId)
+        {
+            using (var uow = _db.GetDbContext())
+            {
+                return uow.DUsers.GetUserCurrency(userId);
+            }
+        }
+
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
+        public async Task Cash([Leftover] IUser user = null)
+        {
+            user = user ?? ctx.User;
+            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                .WithDescription($"You have {GetCurrency(user.Id)} stones")).ConfigureAwait(false);
+        }
+
         [RokiCommand, Description, Usage, Aliases]
         [RequireContext(ContextType.Guild)]
         public async Task Leaderboard([Leftover] int page = 1)
