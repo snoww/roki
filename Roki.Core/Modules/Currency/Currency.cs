@@ -106,14 +106,14 @@ namespace Roki.Modules.Currency
             }
             
             var embed = new EmbedBuilder().WithOkColor()
-                .WithTitle($"Transactions of {((SocketGuild) ctx.Guild)?.GetUser(userId)?.Username ?? userId.ToString()}");
+                .WithTitle($"{((SocketGuild) ctx.Guild)?.GetUser(userId)?.Username ?? userId.ToString()}'s Transactions History");
 
             var desc = "";
             foreach (var tran in trans)
             {
                 var type = tran.Amount > 0 ? "🔵" : "🔴";
                 var date = Format.Code($"{tran.TransactionDate.ToLocalTime():HH:mm yyyy-MM-dd}");
-                desc += $"\\{type} {date} {Format.Bold(tran.Amount.ToString())}\n\t{tran.Reason?.Trim()}\n";
+                desc += $"{type} {date} - {Format.Bold(tran.Amount.ToString())} <:stone:269130892100763649>\n\t{tran.Reason?.Trim()}\n";
             }
 
             embed.WithDescription(desc)
