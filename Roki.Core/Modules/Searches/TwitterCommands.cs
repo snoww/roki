@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -57,18 +56,26 @@ namespace Roki.Modules.Searches
                     await ctx.Channel.SendErrorAsync("No tweets found.");
                     return;
                 }
-
+                
                 await ctx.SendPaginatedConfirmAsync(0, p =>
                 {
                     var tweet = tweets[p];
-                    var embed = new EmbedBuilder().WithOkColor()
-                        .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
-                        .WithDescription(tweet.Text ?? tweet.FullText)
-                        .AddField("Retweets", tweet.RetweetCount, true)
-                        .AddField("Likes", tweet.FavoriteCount ?? 0, true)
-                        .WithFooter($"{tweet.CreatedAt:g}");
-                    return embed;
-                }, tweets.Count, 1, false);
+                    var tweetUrl = "https://twitter.com/{0}/status/{1}";
+                    tweetUrl = string.Format(tweetUrl, tweet.User.ScreenNameResponse, tweet.ID.ToString());
+                    return tweetUrl;
+                }, tweets.Count, 1).ConfigureAwait(false);
+
+//                await ctx.SendPaginatedConfirmAsync(0, p =>
+//                {
+//                    var tweet = tweets[p];
+//                    var embed = new EmbedBuilder().WithOkColor()
+//                        .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
+//                        .WithDescription(tweet.Text ?? tweet.FullText)
+//                        .AddField("Retweets", tweet.RetweetCount, true)
+//                        .AddField("Likes", tweet.FavoriteCount ?? 0, true)
+//                        .WithFooter($"{tweet.CreatedAt:g}");
+//                    return embed;
+//                }, tweets.Count, 1, false);
             }
             [RokiCommand, Usage, Description, Aliases]
             public async Task TwitterSearch([Leftover] string query = null)
@@ -101,17 +108,25 @@ namespace Roki.Modules.Searches
                 }
                 
                 combinedSearch.AddRange(searchResponse);
-                   
+
                 await ctx.SendPaginatedConfirmAsync(0, p =>
                 {
                     var tweet = combinedSearch[p];
-                    return new EmbedBuilder().WithOkColor()
-                        .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
-                        .WithDescription(tweet.Text ?? tweet.FullText)
-                        .AddField("Retweets", tweet.RetweetCount, true)
-                        .AddField("Likes", tweet.FavoriteCount ?? 0, true)
-                        .WithFooter($"{tweet.CreatedAt:g}");
+                    var tweetUrl = "https://twitter.com/{0}/status/{1}";
+                    tweetUrl = string.Format(tweetUrl, tweet.User.ScreenNameResponse, tweet.ID.ToString());
+                    return tweetUrl;
                 }, combinedSearch.Count, 1).ConfigureAwait(false);
+
+//                await ctx.SendPaginatedConfirmAsync(0, p =>
+//                {
+//                    var tweet = combinedSearch[p];
+//                    return new EmbedBuilder().WithOkColor()
+//                        .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
+//                        .WithDescription(tweet.Text ?? tweet.FullText)
+//                        .AddField("Retweets", tweet.RetweetCount, true)
+//                        .AddField("Likes", tweet.FavoriteCount ?? 0, true)
+//                        .WithFooter($"{tweet.CreatedAt:g}");
+//                }, combinedSearch.Count, 1).ConfigureAwait(false);
             }
         }
     }

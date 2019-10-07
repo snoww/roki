@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -40,11 +41,88 @@ namespace Roki.Extensions
         }
 
         public static Task SendPaginatedConfirmAsync(this ICommandContext ctx,
+            int currentPage, Func<int, string> pageFunc, int totalElements,
+            int itemsPerPage)
+        {
+            return ctx.SendPaginatedStringAsync(currentPage,
+                x => Task.FromResult(pageFunc(x)), totalElements, itemsPerPage);
+        }
+        
+        public static Task SendPaginatedConfirmAsync(this ICommandContext ctx,
             int currentPage, Func<int, EmbedBuilder> pageFunc, int totalElements,
             int itemsPerPage, bool addPaginatedFooter = true)
         {
             return ctx.SendPaginatedConfirmAsync(currentPage,
                 x => Task.FromResult(pageFunc(x)), totalElements, itemsPerPage, addPaginatedFooter);
+        }
+
+        private static async Task SendPaginatedStringAsync(this ICommandContext ctx, int currentPage,
+            Func<int, Task<string>> pageFunc, int totalElements, int itemsPerPage)
+        {
+            var str = await pageFunc(currentPage).ConfigureAwait(false);
+
+            var lastPage = (totalElements - 1) / itemsPerPage;
+
+            var msg = await ctx.Channel.SendMessageAsync(str).ConfigureAwait(false);
+            
+            if (lastPage == 0)
+                return;
+            
+            await msg.AddReactionAsync(arrow_left).ConfigureAwait(false);
+            await msg.AddReactionAsync(arrow_right).ConfigureAwait(false);
+
+            await Task.Delay(2000).ConfigureAwait(false);
+            var lastPageChange = DateTime.MinValue;
+
+            async Task ChangePage(SocketReaction r)
+            {
+                try
+                {
+                    if (r.UserId != ctx.User.Id)
+                        return;
+                    if (DateTime.UtcNow - lastPageChange < TimeSpan.FromSeconds(1))
+                        return;
+                    if (r.Emote.Name == arrow_left.Name)
+                    {
+                        if (currentPage == 0)
+                            return;
+                        lastPageChange = DateTime.UtcNow;
+                        var toSend = await pageFunc(--currentPage).ConfigureAwait(false);
+                        await msg.ModifyAsync(m => m.Content = toSend).ConfigureAwait(false);
+                    }
+                    else if (r.Emote.Name == arrow_right.Name)
+                    {
+                        if (lastPage > currentPage)
+                        {
+                            lastPageChange = DateTime.UtcNow;
+                            var toSend = await pageFunc(++currentPage).ConfigureAwait(false);
+                            await msg.ModifyAsync(m => m.Content = toSend).ConfigureAwait(false);
+                        }
+                    }
+                }
+                catch
+                {
+                    //
+                }
+            }
+            
+            using (msg.OnReaction((DiscordSocketClient) ctx.Client, ChangePage, ChangePage))
+            {
+                await Task.Delay(30000).ConfigureAwait(false);
+            }
+
+            try
+            {
+                if (msg.Channel is ITextChannel && ((SocketGuild) ctx.Guild).CurrentUser.GuildPermissions.ManageMessages)
+                    await msg.RemoveAllReactionsAsync().ConfigureAwait(false);
+                else
+                    await Task.WhenAll(msg.Reactions.Where(r => r.Value.IsMe)
+                        .Select(r => msg.RemoveReactionAsync(r.Key, ctx.Client.CurrentUser)));
+            }
+            catch
+            {
+                //
+            }
         }
 
         private static async Task SendPaginatedConfirmAsync(this ICommandContext ctx, int currentPage,
