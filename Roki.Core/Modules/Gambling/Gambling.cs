@@ -33,7 +33,7 @@ namespace Roki.Modules.Gambling
             }
             var roll = new Random().Next(0, 101);
             var rollStr = $"{ctx.User.Mention} rolled {roll}.";
-            if (roll < 67)
+            if (roll < 70)
             {
                 await ctx.Channel.SendErrorAsync($"{rollStr}\nBetter luck next time.");
                 return;
