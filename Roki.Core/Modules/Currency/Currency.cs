@@ -65,10 +65,13 @@ namespace Roki.Modules.Currency
 
         [RokiCommand, Description, Usage, Aliases]
         [RequireContext(ContextType.Guild)]
-        public async Task Give(long amount, IGuildUser user, [Leftover] string message)
+        public async Task Give(long amount, IGuildUser user, [Leftover] string message = null)
         {
             if (amount <= 0 || ctx.User.Id == user.Id || user.IsBot)
                 return;
+
+            if (string.IsNullOrWhiteSpace(message))
+                message = "-";
             message = $"Gift from {ctx.User.Username} - {message}";
             var success = await _currency.TransferAsync(ctx.User, user, message, amount, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
                 .ConfigureAwait(false);
