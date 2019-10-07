@@ -31,7 +31,7 @@ namespace Roki.Modules.Gambling
                 await ctx.Channel.SendErrorAsync("Not enough stones.").ConfigureAwait(false);
                 return;
             }
-            var roll = new Random().Next(0, 101);
+            var roll = new Random().Next(1, 101);
             var rollStr = $"{ctx.User.Mention} rolled {roll}.";
             if (roll < 70)
             {
