@@ -61,7 +61,7 @@ namespace Roki.Modules.Searches
                 {
                     var tweet = tweets[p];
                     var tweetUrl = "https://twitter.com/{0}/status/{1}";
-                    tweetUrl = string.Format(tweetUrl, tweet.User.ScreenNameResponse, tweet.ID.ToString());
+                    tweetUrl = string.Format(tweetUrl, tweet.User.ScreenNameResponse, tweet.StatusID.ToString());
                     return tweetUrl;
                 }, tweets.Count, 1).ConfigureAwait(false);
 
@@ -113,7 +113,7 @@ namespace Roki.Modules.Searches
                 {
                     var tweet = combinedSearch[p];
                     var tweetUrl = "https://twitter.com/{0}/status/{1}";
-                    tweetUrl = string.Format(tweetUrl, tweet.User.ScreenNameResponse, tweet.ID.ToString());
+                    tweetUrl = string.Format(tweetUrl, tweet.User.ScreenNameResponse, tweet.StatusID.ToString());
                     return tweetUrl;
                 }, combinedSearch.Count, 1).ConfigureAwait(false);
 
