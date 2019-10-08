@@ -56,20 +56,8 @@ namespace Roki.Modules.Gambling
                     die.Add(GetDice(rng));
                     rolls += 1;
                 }
-                
-                using (var bitmap = die.Merge(out var format))
-                using (var ms = bitmap.ToStream(format))
-                {
-                    foreach (var dice in die)
-                    {
-                        dice.Dispose();
-                    }
 
-                    await ctx.Channel.SendFileAsync(ms, $"dice.{format.FileExtensions.First()}",
-                        $"{ctx.User.Mention} You rolled a total of {total}");
-                }
-
-                long won = 0;
+                long won;
                 if (total >= 19 && total <= 23)
                     won = 0;
                 else if (total == 18 || total == 24)
@@ -98,18 +86,29 @@ namespace Roki.Modules.Gambling
                     won = amount * 50;
                 else
                     won = amount * 100;
+                
+                using (var bitmap = die.Merge(out var format))
+                using (var ms = bitmap.ToStream(format))
+                {
+                    foreach (var dice in die)
+                    {
+                        dice.Dispose();
+                    }
 
+                    await ctx.Channel.SendFileAsync(ms, $"dice.{format.FileExtensions.First()}",
+                        $"{ctx.User.Mention} You rolled a total of {total}");
+                }
                 if (won > 0)
                 {
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                        .WithDescription($"Result is: {total}\n{ctx.User.Mention} Congratulations! You've won {won} stones")).ConfigureAwait(false);
+                        .WithDescription($"{ctx.User.Mention} Congratulations! You've won {won} stones")).ConfigureAwait(false);
                     await _currency.ChangeAsync(ctx.User, "BetDie Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
                     return;
                 }
                 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                    .WithDescription($"Result is: {total}\n{ctx.User.Mention} Better luck next time!")).ConfigureAwait(false);
+                    .WithDescription($"{ctx.User.Mention} Better luck next time!")).ConfigureAwait(false);
             }
 
             private Image<Rgba32> GetDice(int num)
