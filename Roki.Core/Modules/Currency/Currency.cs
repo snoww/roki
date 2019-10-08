@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
@@ -115,8 +116,14 @@ namespace Roki.Modules.Currency
             foreach (var tran in trans)
             {
                 var type = tran.Amount > 0 ? "🔵" : "🔴";
+                var amount = tran.Amount.ToString();
+                if (tran.Reason.StartsWith("Gift from") && tran.From == userId.ToString())
+                {
+                    type = "🔴";
+                    amount = amount.Insert(0, "-");
+                }
                 var date = Format.Code($"{tran.TransactionDate.ToLocalTime():HH:mm yyyy-MM-dd}");
-                desc += $"{type} {tran.Reason?.Trim()} {date}\n\t\t{Format.Bold(tran.Amount.ToString())} <:stone:269130892100763649>\n";
+                desc += $"{type} {tran.Reason?.Trim()} {date}\n\t\t{Format.Bold(amount)} <:stone:269130892100763649>\n";
             }
 
             embed.WithDescription(desc)
