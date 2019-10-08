@@ -59,7 +59,7 @@ namespace Roki.Services
         {
             using (var uow = _db.GetDbContext())
             {
-                var success = await uow.DUsers.UpdateCurrencyAsync(userFrom, amount).ConfigureAwait(false);
+                var success = await uow.DUsers.UpdateCurrencyAsync(userFrom, -amount).ConfigureAwait(false);
                 if (success)
                 {
                     await uow.DUsers.UpdateCurrencyAsync(userTo, amount).ConfigureAwait(false);
