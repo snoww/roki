@@ -383,7 +383,7 @@
   },
   "betroll": {
     "Command": "betroll br",
-    "Description": "Bet to roll a dice. Rolling over 66 yields x2.5, over 90 yields x4, and 100 yields x10.",
+    "Description": "Bet to roll a dice. Rolling over 70 yields x2.5, over 90 yields x4, and 100 yields x10.",
     "Usage": [
       "{0}br 10"
     ]
@@ -393,6 +393,13 @@
     "Description": "Shows your currency transactions on the specified page.",
     "Usage": [
       "{0}trs 2"
+    ]
+  },
+  "betdie": {
+    "Command": "betdie bd",
+    "Description": "Bet an amount to roll 6 die. Rolling 18/24 yields x1.95 stones, 17/25 x2, 16/26 x2.3, 15/27 x2.8, 14/28 x3, 13/29 x4, 12/30 x5, 11/31 x8, 10/32 x10, 9/33 x15, 8/34 x20, 7/35 x50, 6/36 x100",
+    "Usage": [
+      "{0}bd 10"
     ]
   }
 }
