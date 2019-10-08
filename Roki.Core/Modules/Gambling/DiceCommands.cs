@@ -119,7 +119,7 @@ namespace Roki.Modules.Gambling
                 var image = Image.Load(path + $"{num}.png");
                 using (var ms = new MemoryStream())
                 {
-                    image.Save(ms, ImageFormats.Png);
+                    image.Save(ms, PngFormat.Instance);
                     return Image.Load(ms.ToArray());
                 }
             }

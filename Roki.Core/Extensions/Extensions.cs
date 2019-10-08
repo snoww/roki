@@ -14,10 +14,10 @@ using Roki.Common;
 using Roki.Core.Services;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Processing.Drawing;
 using SixLabors.Primitives;
 
 namespace Roki.Extensions
@@ -178,14 +178,14 @@ namespace Roki.Extensions
         }
         public static Image<Rgba32> Merge(this IEnumerable<Image<Rgba32>> images, out IImageFormat format)
         {
-            format = ImageFormats.Png;
+            format = PngFormat.Instance;
             void DrawFrame(Image<Rgba32>[] imgArray, Image<Rgba32> imgFrame, int frameNumber)
             {
                 var xOffset = 0;
                 for (int i = 0; i < imgArray.Length; i++)
                 {
                     var frame = imgArray[i].Frames.CloneFrame(frameNumber % imgArray[i].Frames.Count);
-                    imgFrame.Mutate(x => x.DrawImage(GraphicsOptions.Default, frame, new Point(xOffset, 0)));
+                    imgFrame.Mutate(x => x.DrawImage(frame, new Point(xOffset, 0), GraphicsOptions.Default));
                     xOffset += imgArray[i].Bounds().Width;
                 }
             }
@@ -202,15 +202,14 @@ namespace Roki.Extensions
                 return canvas;
             }
 
-            format = ImageFormats.Gif;
+            format = GifFormat.Instance;
             for (int j = 0; j < frames; j++)
             {
                 using (var imgFrame = new Image<Rgba32>(width, height))
                 {
                     DrawFrame(imgs, imgFrame, j);
 
-                    var frameToAdd = imgFrame.Frames.First();
-                    frameToAdd.MetaData.DisposalMethod = SixLabors.ImageSharp.Formats.Gif.DisposalMethod.RestoreToBackground;
+                    var frameToAdd = imgFrame.Frames.RootFrame;
                     canvas.Frames.AddFrame(frameToAdd);
                 }
             }
