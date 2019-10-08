@@ -19,7 +19,7 @@ namespace Roki.Modules.Gambling
         public class DiceCommands : RokiSubmodule
         {
             private readonly ICurrencyService _currency;
-            private const string path = "./data/dice/{0}";
+            private const string path = "./data/dice/";
             
             public DiceCommands(ICurrencyService currency)
             {
@@ -37,7 +37,7 @@ namespace Roki.Modules.Gambling
                     
 
                 var removed = await _currency
-                    .ChangeAsync(ctx.User, "BetRoll Entry", -amount, ctx.User.Id.ToString(), "Server", ctx.Guild.Id, ctx.Channel.Id, 
+                    .ChangeAsync(ctx.User, "BetDie Entry", -amount, ctx.User.Id.ToString(), "Server", ctx.Guild.Id, ctx.Channel.Id, 
                         ctx.Message.Id)
                     .ConfigureAwait(false);
                 if (!removed)
@@ -96,14 +96,14 @@ namespace Roki.Modules.Gambling
                     won = amount * 20;
                 else if (total == 7 || total == 35)
                     won = amount * 50;
-                else if (total == 6 || total == 36)
+                else
                     won = amount * 100;
 
                 if (won > 0)
                 {
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithDescription($"Result is: {total}\n{ctx.User.Mention} Congratulations! You've won {won} stones")).ConfigureAwait(false);
-                    await _currency.ChangeAsync(ctx.User, "BetFlip Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
+                    await _currency.ChangeAsync(ctx.User, "BetDie Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
                     return;
                 }
@@ -117,7 +117,7 @@ namespace Roki.Modules.Gambling
                 if (num < 0 || num > 6)
                     throw new ArgumentOutOfRangeException(nameof(num));
 
-                var image = Image.Load(path);
+                var image = Image.Load(path + $"{num}.png");
                 using (var ms = new MemoryStream())
                 {
                     image.Save(ms, ImageFormats.Png);
