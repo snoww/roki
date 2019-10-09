@@ -84,7 +84,7 @@ namespace Roki.Modules.Gambling
                 if (amount < 0)
                     return;
 
-                if (guesses.Length < 2)
+                if (guesses.Length <= 2)
                 {
                     await ctx.Channel.SendErrorAsync("Needs at least 3 guesses.").ConfigureAwait(false);
                     return;
