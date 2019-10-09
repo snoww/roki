@@ -90,6 +90,8 @@ VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.MinValue}, 
             if (amount == 0)
                 return false;
             var dUser = GetOrCreate(user);
+            if (dUser.Currency + amount < 0)
+                return false;
             await Context.Database.ExecuteSqlCommandAsync($@"
 UPDATE IGNORE users
 SET Currency=Currency+{amount}

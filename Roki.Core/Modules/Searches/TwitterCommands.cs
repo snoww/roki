@@ -56,27 +56,32 @@ namespace Roki.Modules.Searches
                     await ctx.Channel.SendErrorAsync("No tweets found.");
                     return;
                 }
-                
+
                 await ctx.SendPaginatedConfirmAsync(0, p =>
                 {
                     var tweet = tweets[p];
-                    var tweetUrl = "https://twitter.com/{0}/status/{1}";
-                    tweetUrl = string.Format(tweetUrl, tweet.User.ScreenNameResponse, tweet.StatusID.ToString());
-                    return tweetUrl;
-                }, tweets.Count, 1).ConfigureAwait(false);
 
-//                await ctx.SendPaginatedConfirmAsync(0, p =>
-//                {
-//                    var tweet = tweets[p];
-//                    var embed = new EmbedBuilder().WithOkColor()
-//                        .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
-//                        .WithDescription(tweet.Text ?? tweet.FullText)
-//                        .AddField("Retweets", tweet.RetweetCount, true)
-//                        .AddField("Likes", tweet.FavoriteCount ?? 0, true)
-//                        .WithFooter($"{tweet.CreatedAt:g}");
-//                    return embed;
-//                }, tweets.Count, 1, false);
+                    if (tweet.Entities.MediaEntities.Count > 0)
+                    {
+                        return new EmbedBuilder().WithOkColor()
+                            .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
+                            .WithDescription(tweet.Text ?? tweet.FullText)
+                            .AddField("Retweets", tweet.RetweetCount, true)
+                            .AddField("Likes", tweet.FavoriteCount ?? 0, true)
+                            .WithImageUrl(tweet.Entities.MediaEntities[0].MediaUrlHttps)
+                            .WithFooter($"{tweet.CreatedAt:g}");
+                    }
+                    
+                    return new EmbedBuilder().WithOkColor()
+                    .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
+                    .WithDescription(tweet.Text ?? tweet.FullText)
+                    .AddField("Retweets", tweet.RetweetCount, true)
+                    .AddField("Likes", tweet.FavoriteCount ?? 0, true)
+                    .WithFooter($"{tweet.CreatedAt:g}");
+                    
+                }, tweets.Count, 1, false);
             }
+            
             [RokiCommand, Usage, Description, Aliases]
             public async Task TwitterSearch([Leftover] string query = null)
             {
@@ -108,27 +113,31 @@ namespace Roki.Modules.Searches
                 }
                 
                 combinedSearch.AddRange(searchResponse);
-
+                
                 await ctx.SendPaginatedConfirmAsync(0, p =>
                 {
                     var tweet = combinedSearch[p];
-                    var tweetUrl = "https://twitter.com/{0}/status/{1}";
-                    tweetUrl = string.Format(tweetUrl, tweet.User.ScreenNameResponse, tweet.StatusID.ToString());
-                    return tweetUrl;
-                }, combinedSearch.Count, 1).ConfigureAwait(false);
 
-//                await ctx.SendPaginatedConfirmAsync(0, p =>
-//                {
-//                    var tweet = combinedSearch[p];
-//                    return new EmbedBuilder().WithOkColor()
-//                        .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
-//                        .WithDescription(tweet.Text ?? tweet.FullText)
-//                        .AddField("Retweets", tweet.RetweetCount, true)
-//                        .AddField("Likes", tweet.FavoriteCount ?? 0, true)
-//                        .WithFooter($"{tweet.CreatedAt:g}");
-//                }, combinedSearch.Count, 1).ConfigureAwait(false);
+                    if (tweet.Entities.MediaEntities.Count > 0)
+                    {
+                        return new EmbedBuilder().WithOkColor()
+                            .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
+                            .WithDescription(tweet.Text ?? tweet.FullText)
+                            .AddField("Retweets", tweet.RetweetCount, true)
+                            .AddField("Likes", tweet.FavoriteCount ?? 0, true)
+                            .WithImageUrl(tweet.Entities.MediaEntities[0].MediaUrlHttps)
+                            .WithFooter($"{tweet.CreatedAt:g}");
+                    }
+                    
+                    return new EmbedBuilder().WithOkColor()
+                        .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
+                        .WithDescription(tweet.Text ?? tweet.FullText)
+                        .AddField("Retweets", tweet.RetweetCount, true)
+                        .AddField("Likes", tweet.FavoriteCount ?? 0, true)
+                        .WithFooter($"{tweet.CreatedAt:g}");
+                    
+                }, combinedSearch.Count, 1).ConfigureAwait(false);
             }
         }
     }
-    
 }
