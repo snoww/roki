@@ -84,14 +84,14 @@ namespace Roki.Modules.Gambling
                 if (amount <= 0)
                     return;
 
-                if (guesses.Length <= 2)
+                if (guesses.Length < 6)
                 {
-                    await ctx.Channel.SendErrorAsync("Needs at least 3 guesses.").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync("Needs at least 6 guesses.").ConfigureAwait(false);
                     return;
                 }
 
                 var minAmount = guesses.Length * 2;
-                if (guesses.Length >= 5 && amount < minAmount)
+                if (guesses.Length >= 6 && amount < minAmount)
                 {
                     await ctx.Channel.SendErrorAsync($"{guesses.Length} guesses requires you to bet at least {minAmount} stones.").ConfigureAwait(false);
                     return;
@@ -116,7 +116,7 @@ namespace Roki.Modules.Gambling
 
                 var correct = guesses.Where((t, i) => t == results[i]).Count();
 
-                if (guesses.Length / 2 <= correct)
+                if ((float) correct / guesses.Length >= 0.75)
                 {
                     var won = (long) Math.Ceiling(amount * Math.Pow(correct, 1.1));
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
