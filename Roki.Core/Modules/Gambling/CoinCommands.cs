@@ -40,7 +40,7 @@ namespace Roki.Modules.Gambling
             public async Task BetFlip(long amount, BetFlipGuess guess)
             {
                 // TODO min/max bet amounts
-                if (amount < 0)
+                if (amount <= 0)
                     return;
 
                 var removed = await _currency
@@ -81,7 +81,7 @@ namespace Roki.Modules.Gambling
             [RokiCommand, Description, Aliases, Usage]
             public async Task BetFlipMulti(long amount, params BetFlipGuess[] guesses)
             {
-                if (amount < 0)
+                if (amount <= 0)
                     return;
 
                 if (guesses.Length <= 2)
@@ -89,6 +89,7 @@ namespace Roki.Modules.Gambling
                     await ctx.Channel.SendErrorAsync("Needs at least 3 guesses.").ConfigureAwait(false);
                     return;
                 }
+                
 
                 var removed = await _currency
                     .ChangeAsync(ctx.User, "BetFlipMulti Entry", -amount, ctx.User.Id.ToString(), "Server", ctx.Guild.Id, ctx.Channel.Id, 

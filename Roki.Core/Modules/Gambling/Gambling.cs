@@ -22,6 +22,9 @@ namespace Roki.Modules.Gambling
         [RokiCommand, Description, Usage, Aliases]
         public async Task BetRoll(long amount)
         {
+            if (amount <= 0)
+                return;
+            
             var removed = await _currency
                 .ChangeAsync(ctx.User, "BetRoll Entry", -amount, ctx.User.Id.ToString(), "Server", ctx.Guild.Id, ctx.Channel.Id, 
                     ctx.Message.Id)
