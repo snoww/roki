@@ -356,5 +356,50 @@
       "{0}drop",
       "{0}drop 3"
     ]
+  },
+  "betflip": {
+    "Command": "betflip bf",
+    "Description": "Bet to guess result if heads or tails. Guessing correctly awards you currency.",
+    "Usage": [
+      "{0}bf 10 h",
+      "{0}bf 5 tails"
+    ]
+  },
+  "give": {
+    "Command": "give",
+    "Description": "Transfers currency to the specified user, optionally with a message. Must have sufficient balance.",
+    "Usage": [
+      "{0}give 5 @snow",
+      "{0}give 10 @user a nice message"
+    ]
+  },
+  "cash": {
+    "Command": "currency $ cash $$ $$$",
+    "Description": "Shows how much currency the user has.",
+    "Usage": [
+      "{0}$",
+      "{0}$ @user"
+    ]
+  },
+  "betroll": {
+    "Command": "betroll br",
+    "Description": "Bet to roll a dice. Rolling over 70 yields x2.5, over 90 yields x4, and 100 yields x10.",
+    "Usage": [
+      "{0}br 10"
+    ]
+  },
+  "currencytransactions": {
+    "Command": "transactions trs",
+    "Description": "Shows your currency transactions on the specified page.",
+    "Usage": [
+      "{0}trs 2"
+    ]
+  },
+  "betdie": {
+    "Command": "betdie bd",
+    "Description": "Bet an amount to roll 6 die. Rolling 18/24 yields x1.95 stones, 17/25 x2, 16/26 x2.3, 15/27 x2.8, 14/28 x3, 13/29 x4, 12/30 x5, 11/31 x8, 10/32 x10, 9/33 x15, 8/34 x20, 7/35 x50, 6/36 x100",
+    "Usage": [
+      "{0}bd 10"
+    ]
   }
 }

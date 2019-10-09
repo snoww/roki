@@ -85,7 +85,7 @@ namespace Roki.Modules.Currency.Services
                 ulong[] ids;
                 using (var uow = _db.GetDbContext())
                 {
-                    (amount, ids) = await uow.Transaction.GetAndUpdateGeneratedCurrency(channel.Id, user.Id).ConfigureAwait(false);
+                    (amount, ids) = await uow.Transaction.PickCurrency(channel.Id, user.Id).ConfigureAwait(false);
 
                     if (amount > 0)
                     {

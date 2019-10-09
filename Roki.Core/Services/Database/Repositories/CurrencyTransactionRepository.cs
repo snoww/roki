@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +8,8 @@ namespace Roki.Core.Services.Database.Repositories
 {
     public interface ICurrencyTransactionRepository : IRepository<CurrencyTransaction>
     {
-        Task<(long, ulong[])> GetAndUpdateGeneratedCurrency(ulong channelId, ulong userId);
+        Task<(long, ulong[])> PickCurrency(ulong channelId, ulong userId);
+        List<CurrencyTransaction> GetTransactions(ulong userId, int page);
     }
 
     public class CurrencyTransactionRepository : Repository<CurrencyTransaction>, ICurrencyTransactionRepository
@@ -16,7 +18,7 @@ namespace Roki.Core.Services.Database.Repositories
         {
         }
 
-        public async Task<(long, ulong[])> GetAndUpdateGeneratedCurrency(ulong channelId, ulong userId)
+        public async Task<(long, ulong[])> PickCurrency(ulong channelId, ulong userId)
         {
             var trans = Set.Where(t => t.ChannelId == channelId && (t.Reason == "GCA" || t.Reason == "UserDrop")).ToArray();
             if (!trans.Any())
@@ -29,6 +31,15 @@ SET `Reason`={"Picked"},
 WHERE `ChannelId`={channelId} AND (`Reason`={"GCA"} OR `Reason`={"UserDrop"})
 ").ConfigureAwait(false);
             return toReturn;
+        }
+
+        public List<CurrencyTransaction> GetTransactions(ulong userId, int page)
+        {
+            return Set.Where(t => t.From == userId.ToString() || t.To == userId.ToString())
+                .OrderByDescending(t => t.TransactionDate)
+                .Skip(15 * page)
+                .Take(15)
+                .ToList();
         }
     }
 }

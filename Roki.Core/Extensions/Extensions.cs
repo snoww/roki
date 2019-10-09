@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -11,6 +12,13 @@ using Newtonsoft.Json;
 using NLog;
 using Roki.Common;
 using Roki.Core.Services;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Gif;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.Primitives;
 
 namespace Roki.Extensions
 {
@@ -147,6 +155,66 @@ namespace Roki.Extensions
         public static double UnixTimestamp(this DateTime dt)
         {
             return dt.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
+        }
+        
+        public static MemoryStream ToStream(this Image<Rgba32> img, IImageFormat format = null)
+        {
+            var imageStream = new MemoryStream();
+            if (format?.Name == "GIF")
+            {
+                img.SaveAsGif(imageStream);
+            }
+            else
+            {
+                img.SaveAsPng(imageStream, new PngEncoder { CompressionLevel = 9 });
+            }
+            imageStream.Position = 0;
+            return imageStream;
+        }
+        
+        public static Image<Rgba32> Merge(this IEnumerable<Image<Rgba32>> images)
+        {
+            return images.Merge(out _);
+        }
+        public static Image<Rgba32> Merge(this IEnumerable<Image<Rgba32>> images, out IImageFormat format)
+        {
+            format = PngFormat.Instance;
+            void DrawFrame(Image<Rgba32>[] imgArray, Image<Rgba32> imgFrame, int frameNumber)
+            {
+                var xOffset = 0;
+                for (int i = 0; i < imgArray.Length; i++)
+                {
+                    var frame = imgArray[i].Frames.CloneFrame(frameNumber % imgArray[i].Frames.Count);
+                    imgFrame.Mutate(x => x.DrawImage(frame, new Point(xOffset, 0), GraphicsOptions.Default));
+                    xOffset += imgArray[i].Bounds().Width;
+                }
+            }
+
+            var imgs = images.ToArray();
+            int frames = images.Max(x => x.Frames.Count);
+
+            var width = imgs.Sum(img => img.Width);
+            var height = imgs.Max(img => img.Height);
+            var canvas = new Image<Rgba32>(width, height);
+            if (frames == 1)
+            {
+                DrawFrame(imgs, canvas, 0);
+                return canvas;
+            }
+
+            format = GifFormat.Instance;
+            for (int j = 0; j < frames; j++)
+            {
+                using (var imgFrame = new Image<Rgba32>(width, height))
+                {
+                    DrawFrame(imgs, imgFrame, j);
+
+                    var frameToAdd = imgFrame.Frames.RootFrame;
+                    canvas.Frames.AddFrame(frameToAdd);
+                }
+            }
+            canvas.Frames.RemoveFrame(0);
+            return canvas;
         }
     }
 }
