@@ -11,6 +11,7 @@ namespace Roki.Modules.Currency
 {
     public partial class Currency
     {
+        [Group]
         public class PickDropCommands : RokiSubmodule<PickDropService>
         {
             [RokiCommand, Description, Usage, Aliases]

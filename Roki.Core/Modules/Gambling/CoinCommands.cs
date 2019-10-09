@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Discord;
-using LinqToTwitter;
+using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
 using Roki.Extensions;
@@ -11,6 +11,7 @@ namespace Roki.Modules.Gambling
 {
     public partial class Gambling
     {
+        [Group]
         public class CoinCommands : RokiSubmodule
         {
             private readonly DbService _db;

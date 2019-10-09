@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Services;
@@ -16,6 +17,7 @@ namespace Roki.Modules.Gambling
 {
     public partial class Gambling
     {
+        [Group]
         public class DiceCommands : RokiSubmodule
         {
             private readonly ICurrencyService _currency;
