@@ -25,7 +25,7 @@ namespace Roki.Modules.Gambling
             {
                 _currency = currency;
             }
-            
+
             [RokiCommand, Description, Aliases, Usage]
             public async Task BetDie(long amount)
             {
@@ -34,10 +34,10 @@ namespace Roki.Modules.Gambling
                     await ctx.Channel.SendErrorAsync("The minimum bet for this game is 10 stones").ConfigureAwait(false);
                     return;
                 }
-                    
+
 
                 var removed = await _currency
-                    .ChangeAsync(ctx.User, "BetDie Entry", -amount, ctx.User.Id.ToString(), "Server", ctx.Guild.Id, ctx.Channel.Id, 
+                    .ChangeAsync(ctx.User, "BetDie Entry", -amount, ctx.User.Id.ToString(), "Server", ctx.Guild.Id, ctx.Channel.Id,
                         ctx.Message.Id)
                     .ConfigureAwait(false);
                 if (!removed)
@@ -86,7 +86,7 @@ namespace Roki.Modules.Gambling
                     won = amount * 50;
                 else
                     won = amount * 100;
-                
+
                 using (var bitmap = die.Merge(out var format))
                 using (var ms = bitmap.ToStream(format))
                 {
@@ -95,20 +95,24 @@ namespace Roki.Modules.Gambling
                         dice.Dispose();
                     }
 
-                    await ctx.Channel.SendFileAsync(ms, $"dice.{format.FileExtensions.First()}",
-                        $"{ctx.User.Mention} You rolled a total of {total}");
+                    var embed = new EmbedBuilder()
+                        .WithImageUrl($"attachment://dice.{format.FileExtensions.First()}");
+
+                    if (won > 0)
+                    {
+                        embed.WithOkColor()
+                            .WithDescription($"{ctx.User.Mention} You rolled a total of {total}\nCongratulations! You've won {won} stones");
+                        await _currency.ChangeAsync(ctx.User, "BetDie Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
+                            ctx.Channel.Id, ctx.Message.Id);
+                    }
+                    else
+                    {
+                        embed.WithErrorColor()
+                            .WithDescription($"{ctx.User.Mention} You rolled a total of {total}\nBetter luck next time!");
+                    }
+
+                    await ctx.Channel.SendFileAsync(ms, $"dice.{format.FileExtensions.First()}", embed: embed.Build()).ConfigureAwait(false);
                 }
-                if (won > 0)
-                {
-                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                        .WithDescription($"{ctx.User.Mention} Congratulations! You've won {won} stones")).ConfigureAwait(false);
-                    await _currency.ChangeAsync(ctx.User, "BetDie Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
-                        ctx.Channel.Id, ctx.Message.Id);
-                    return;
-                }
-                
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                    .WithDescription($"{ctx.User.Mention} Better luck next time!")).ConfigureAwait(false);
             }
 
             private Image<Rgba32> GetDice(int num)
