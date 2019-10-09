@@ -91,7 +91,7 @@ namespace Roki.Modules.Gambling
                 }
 
                 var minAmount = guesses.Length * 2;
-                if (guesses.Length >= 5 && amount <= minAmount)
+                if (guesses.Length >= 5 && amount < minAmount)
                 {
                     await ctx.Channel.SendErrorAsync($"{guesses.Length} guesses requires you to bet at least {minAmount} stones.").ConfigureAwait(false);
                     return;
