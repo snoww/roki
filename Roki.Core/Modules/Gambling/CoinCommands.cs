@@ -113,7 +113,7 @@ namespace Roki.Modules.Gambling
                 {
                     var won = (long) Math.Ceiling(amount * Math.Pow(correct, 1.1));
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                        .WithDescription($"Results are: {string.Join(',', results)}\n{ctx.User.Mention} Congratulations! You've won {won} stones"))
+                        .WithDescription($"Results are: {string.Join(", ", results)}\n{ctx.User.Mention} Congratulations! You've won {won} stones"))
                         .ConfigureAwait(false);
                     await _currency.ChangeAsync(ctx.User, "BetFlipMulti Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
@@ -121,7 +121,7 @@ namespace Roki.Modules.Gambling
                 }
                 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                    .WithDescription($"Results are: {string.Join(',', results)}\n{ctx.User.Mention} Better luck next time!")).ConfigureAwait(false);
+                    .WithDescription($"Results are: {string.Join(", ", results)}\n{ctx.User.Mention} Better luck next time!")).ConfigureAwait(false);
             }
         }
     }
