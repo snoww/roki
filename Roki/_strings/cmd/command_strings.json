@@ -407,7 +407,7 @@
     "Description": "Bet to guess multiple coin flips. You need to bet at least twice the amount of guesses in stones. Needs 3/4 to be correct. The more correct guess rewards more currency. (amount * correct ^ 1.1)",
     "Usage": [
       "{0}bfm 10 h h t h t",
-      "{0}bfm 5 tails h heads"
+      "{0}bfm 10 tails h heads tails t"
     ]
   }
 }
