@@ -60,32 +60,60 @@ namespace Roki.Modules.Gambling
                 long won;
                 if (total >= 19 && total <= 23)
                     won = 0;
-                else if (total == 18 || total == 24)
-                    won = (long) Math.Ceiling(amount * 1.95);
-                else if (total == 17 || total == 25)
-                    won = amount * 2;
-                else if (total == 16 || total == 26)
-                    won = (long) Math.Ceiling(amount * 2.3);
-                else if (total == 15 || total == 27)
-                    won = (long) Math.Ceiling(amount * 2.8);
-                else if (total == 14 || total == 28)
-                    won = amount * 3;
-                else if (total == 13 || total == 29)
-                    won = amount * 4;
-                else if (total == 12 || total == 30)
-                    won = amount * 5;
-                else if (total == 11 || total == 31)
-                    won = amount * 8;
-                else if (total == 10 || total == 32)
-                    won = amount * 10;
-                else if (total == 9 || total == 33)
-                    won = amount * 15;
-                else if (total == 8 || total == 34)
-                    won = amount * 20;
-                else if (total == 7 || total == 35)
-                    won = amount * 50;
-                else
-                    won = amount * 100;
+                else switch (total)
+                {
+                    case 18:
+                    case 24:
+                        won = (long) Math.Ceiling(amount * 1.6);
+                        break;
+                    case 17:
+                    case 25:
+                        won = (long) Math.Ceiling(amount * 1.95);
+                        break;
+                    case 16:
+                    case 26:
+                        won = amount * 2;
+                        break;
+                    case 15:
+                    case 27:
+                        won = amount * 3;
+                        break;
+                    case 14:
+                    case 28:
+                        won = amount * 4;
+                        break;
+                    case 13:
+                    case 29:
+                        won = amount * 5;
+                        break;
+                    case 12:
+                    case 30:
+                        won = amount * 6;
+                        break;
+                    case 11:
+                    case 31:
+                        won = amount * 8;
+                        break;
+                    case 10:
+                    case 32:
+                        won = amount * 10;
+                        break;
+                    case 9:
+                    case 33:
+                        won = amount * 15;
+                        break;
+                    case 8:
+                    case 34:
+                        won = amount * 20;
+                        break;
+                    case 7:
+                    case 35:
+                        won = amount * 50;
+                        break;
+                    default:
+                        won = amount * 100;
+                        break;
+                }
 
                 using (var bitmap = die.Merge(out var format))
                 using (var ms = bitmap.ToStream(format))
