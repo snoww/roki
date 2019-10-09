@@ -404,7 +404,7 @@
   },
   "betflipmulti": {
     "Command": "betflipmulti bfm",
-    "Description": "Bet to guess multiple coin flips (at least 3). More than 5 guesses requires you to bet 2x the number of guesses as your bet amount. The more correct guess rewards more currency. (amount * correct ^ 1.1)",
+    "Description": "Bet to guess multiple coin flips (at least 3). More than 5 guesses requires you to bet 2x the number of guesses as your bet amount. Needs at least half to be correct. The more correct guess rewards more currency. (amount * correct ^ 1.1)",
     "Usage": [
       "{0}bfm 10 h h t h t",
       "{0}bfm 5 tails h heads"
