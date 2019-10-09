@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -26,12 +28,12 @@ namespace Roki.Modules.Gambling
             
             public enum BetFlipGuess
             {
-                H = 0,
-                Head = 0,
                 Heads = 0,
+                Tails = 1,
+                H = 0,
                 T = 1,
+                Head = 0,
                 Tail = 1,
-                Tails = 1
             }
             
             [RokiCommand, Description, Aliases, Usage]
@@ -75,7 +77,52 @@ namespace Roki.Modules.Gambling
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
                     .WithDescription($"Result is: {result}\n{ctx.User.Mention} Better luck next time!")).ConfigureAwait(false);
             }
+
+            [RokiCommand, Description, Aliases, Usage]
+            public async Task BetFlipMulti(long amount, params BetFlipGuess[] guesses)
+            {
+                if (amount < 0)
+                    return;
+
+                if (guesses.Length < 2)
+                {
+                    await ctx.Channel.SendErrorAsync("Needs at least 3 guesses.").ConfigureAwait(false);
+                    return;
+                }
+
+                var removed = await _currency
+                    .ChangeAsync(ctx.User, "BetFlipMulti Entry", -amount, ctx.User.Id.ToString(), "Server", ctx.Guild.Id, ctx.Channel.Id, 
+                        ctx.Message.Id)
+                    .ConfigureAwait(false);
+
+                if (!removed)
+                {
+                    await ctx.Channel.SendErrorAsync("Not enough stones.").ConfigureAwait(false);
+                    return;
+                }
+
+                var results = new List<BetFlipGuess>();
+                for (int i = 0; i < guesses.Length; i++)
+                {
+                    results.Add(Rng.Next(0, 2) == 1 ? BetFlipGuess.Heads : BetFlipGuess.Tails);
+                }
+
+                var correct = guesses.Where((t, i) => t == results[i]).Count();
+
+                if (guesses.Length / 2 <= correct)
+                {
+                    var won = (long) Math.Ceiling(amount * Math.Pow(correct, 1.1));
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                        .WithDescription($"Results are: {string.Join(',', results)}\n{ctx.User.Mention} Congratulations! You've won {won} stones"))
+                        .ConfigureAwait(false);
+                    await _currency.ChangeAsync(ctx.User, "BetFlipMulti Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
+                        ctx.Channel.Id, ctx.Message.Id);
+                    return;
+                }
+                
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
+                    .WithDescription($"Results are: {string.Join(',', results)}\n{ctx.User.Mention} Better luck next time!")).ConfigureAwait(false);
+            }
         }
     }
-    
 }
