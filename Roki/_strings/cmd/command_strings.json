@@ -401,5 +401,13 @@
     "Usage": [
       "{0}bd 10"
     ]
+  },
+  "betflipmulti": {
+    "Command": "betflipmulti bfm",
+    "Description": "Bet to guess multiple coin flips (at least 3). The more correct guess rewards more currency. (amount * correct ^ 1.1)",
+    "Usage": [
+      "{0}bfm 10 h h t h t",
+      "{0}bfm 5 tails h heads"
+    ]
   }
 }
