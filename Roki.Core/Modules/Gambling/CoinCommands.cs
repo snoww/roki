@@ -89,7 +89,13 @@ namespace Roki.Modules.Gambling
                     await ctx.Channel.SendErrorAsync("Needs at least 3 guesses.").ConfigureAwait(false);
                     return;
                 }
-                
+
+                var minAmount = guesses.Length * 2;
+                if (guesses.Length <= 5 && amount < minAmount)
+                {
+                    await ctx.Channel.SendErrorAsync("More than 5 guesses requires at least 2x (# guesses) or more stones to bet.").ConfigureAwait(false);
+                    return;
+                }
 
                 var removed = await _currency
                     .ChangeAsync(ctx.User, "BetFlipMulti Entry", -amount, ctx.User.Id.ToString(), "Server", ctx.Guild.Id, ctx.Channel.Id, 
