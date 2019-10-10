@@ -180,26 +180,30 @@ namespace Roki.Modules.Games.Services
                                 : $"{action[2].Substring(5)} took damage and is now at {action[3]} HP");
                             break;
                         case "-heal":
-                            turnDetails.Add(action.Length >= 4 && action[4].StartsWith("[from]")
-                                ? action[4].Contains("item:")
-                                    ? $"{action[2].Substring(5)} restored health from its {action[4].Substring(13)} and is now at {action[3]} HP"
-                                    : $"{action[2].Substring(5)} restored health from {action[5].Substring(5)}'s {action[4].Substring(7)} and is now at {action[3]} HP"
-                                : $"{action[2].Substring(5)} restored health and is now at {action[3]} HP");
+                            if (action.Length >= 4 && action[4].StartsWith("[from]"))
+                            {
+                                if (action[4].Contains("item:"))
+                                    turnDetails.Add($"{action[2].Substring(5)} restored health from its {action[4].Substring(13)} and is now at {action[3]} HP");
+                                else if (action[4].Contains("move:"))
+                                    turnDetails.Add($"{action[2].Substring(5)} restored health from {action[5].Substring(5)}'s {action[4].Substring(7)} and is now at {action[3]} HP");
+                                else
+                                    turnDetails.Add($"{action[2].Substring(5)} restored health from its {action[4].Substring(16)} and is now at {action[3]} HP");
+                            }
+                            else
+                                turnDetails.Add($"{action[2].Substring(5)} restored health and is now at {action[3]} HP");
                             break;
                         case "-sethp":
                             turnDetails.Add(action.Length >= 4 && action[4].StartsWith("[from]")
-                                ? action[4].Contains("move:")
-                                    ? $"{action[2].Substring(5)}'s HP has been set by {action[4].Substring(13)} and is now at {action[3]} HP"
-                                    : $"{action[2].Substring(5)}'s HP has been set by {action[4].Substring(7)} and is now at {action[3]} HP" // should never see this
+                                ? $"{action[2].Substring(5)}'s HP has been set by {action[4].Substring(13)} and is now at {action[3]} HP"
                                 : $"{action[2].Substring(5)}'s HP has been set to {action[3]} HP"); // should never see this
                             break;
                         case "-status":
                             turnDetails.Add(action.Length >= 4 && action[4].StartsWith("[from]")
-                                ? action[4].Contains("item:")
-                                    ? $"{action[2].Substring(5)}'s HP has been set from its {action[4].Substring(12)} and is now at {action[3]} HP"
-                                    : $"{action[2].Substring(5)}'s HP has been set from {action[4].Substring(7)} and is now at {action[3]} HP"
+                                ? action[4].Contains("move:")
+                                    ? $"{action[2].Substring(5)} has been inflicted with {action[3]} from {action[4].Substring(13)}"
+                                    : $"{action[2].Substring(5)} has been inflicted with {action[3]} with its {action[4].Substring(13)}"
                                 : $"{action[2].Substring(5)} restored health and is now at {action[3]} HP");
-                            turnDetails.Add($"{action[2].Substring(5)} has been inflicted with {action[3]}");
+                            turnDetails.Add($"{action[2].Substring(5)} has status: {action[3]}");
                             break;
                         case "-curestatus":
                             turnDetails.Add($"{action[2].Substring(5)} has recovered from {action[3]}");
