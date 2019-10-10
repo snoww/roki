@@ -1,0 +1,282 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using Roki.Core.Services;
+
+namespace Roki.Modules.Games.Services
+{
+    public class ShowdownService : IRService
+    {
+/*        public static readonly Dictionary<string, string> actions = new Dictionary<string, string>()
+        {
+            { "debug", "ignored" },
+            { "move", "{0} used {1} on {2}." },
+            { "switch", "this is a move" },
+            { "detailschange", "this is a move" },
+            { "replace", "this is a move" },
+            { "swap", "this is a move" },
+            { "cant", "this is a move" },
+            { "faint", "this is a move" },
+            { "-fail", "this is a move" },
+            { "-notarget", "this is a move" },
+            { "-miss", "this is a move" },
+            { "-damage", "this is a move" },
+            { "-heal", "this is a move" },
+            { "-sethp", "this is a move" },
+            { "-status", "this is a move" },
+            { "-cureteam", "this is a move" },
+            { "-boost", "this is a move" },
+            { "-unboost", "this is a move" },
+            { "-setboost", "this is a move" },
+            { "-swapboost", "this is a move" },
+            { "-invertboost", "this is a move" },
+            { "-clearboost", "this is a move" },
+            { "-clearpositiveboost", "this is a move" },
+            { "-copyboost", "this is a move" },
+            { "-weather", "this is a move" },
+            { "-fieldstart", "this is a move" },
+            { "-fieldend", "this is a move" },
+            { "-sidestart", "this is a move" },
+            { "-sideend", "this is a move" },
+            { "-start", "this is a move" },
+            { "-end", "this is a move" },
+            { "-crit", "this is a move" },
+            { "-supereffective", "this is a move" },
+            { "-resisted", "this is a move" },
+            { "-immune", "this is a move" },
+            { "-item", "this is a move" },
+            { "-enditem", "this is a move" },
+            { "-ability", "this is a move" },
+            { "-endability", "this is a move" },
+            { "-transform", "this is a move" },
+            { "-mega", "this is a move" },
+            { "-primal", "this is a move" },
+            { "-burst", "this is a move" },
+            { "-zpower", "this is a move" },
+            { "-zbroken", "this is a move" },
+            { "-activate", "this is a move" },
+            { "-hint", "this is a move" },
+            { "-center", "this is a move" },
+            { "-message", "this is a move" },
+            { "-combine", "this is a move" },
+            { "-waiting", "this is a move" },
+            { "-prepare", "this is a move" },
+            { "-mustrecharge", "this is a move" },
+            { "-nothing", "this is a move" },
+            { "-hitcount", "this is a move" },
+            { "-singlemove", "this is a move" },
+            { "-singleturn", "this is a move" },
+        };*/
+
+        public ShowdownService()
+        {
+        }
+
+        public async Task<string> StartAiGameAsync()
+        {
+            using (var proc = new Process())
+            {
+                proc.StartInfo.FileName = "./scripts/battle.sh";
+                proc.StartInfo.UseShellExecute = false;
+                proc.StartInfo.RedirectStandardOutput = true;
+                proc.Start();
+                var reader = proc.StandardOutput;
+                var output = await reader.ReadToEndAsync().ConfigureAwait(false);
+                proc.WaitForExit();
+
+                return output;
+            }
+        }
+
+        public async Task<string> ParseGame(string game)
+        {
+            var index = game.IndexOf("|\n", StringComparison.InvariantCultureIgnoreCase);
+            
+            var gameIntro = game.Substring(0, index);
+            var gameChunks = game.Substring(index + 1).Split("|\n");
+
+            return "";
+        }
+
+        public List<List<string>> ParseIntro(string intro)
+        {
+            var lines = intro.Split('\n');
+            var p1Poke = new List<string>();
+            var p2Poke = new List<string>();
+            foreach (var line in lines)
+            {
+                if (line.StartsWith("|poke|p1"))
+                {
+                    var poke = line.Split('|');
+                    p1Poke.Add(poke[2]);
+                }
+                else if (line.StartsWith("|poke|p2"))
+                {
+                    var poke = line.Split('|');
+                    p2Poke.Add(poke[2]);
+                }
+            }
+
+            var toReturn = new List<List<string>> {p1Poke, p2Poke};
+
+            return toReturn;
+        }
+
+        public List<List<string>> ParseTurns(string game)
+        {
+            var turns = game.Split("|turn");
+            var turnDetails = new List<string>();
+            foreach (var turn in turns)
+            {
+                var lines = turn.Split('\n');
+                foreach (var line in lines)
+                {
+                    var action = line.Split('|');
+                    if (action.Length <= 1) continue;
+                    switch (action[1])
+                    {
+                        case "debug":
+                            break;
+                        case "move":
+                            turnDetails.Add(action[2].Substring(5) != action[4].Substring(5)
+                                ? $"Player {action[2][1]}'s {action[2].Substring(5)} used {action[3]} on Opponent's {action[4].Substring(5)}.'"
+                                : $"Player {action[2][1]}'s {action[2].Substring(5)} used {action[3]} on its own {action[4].Substring(5)}.'");
+                            break;
+                        case "switch":
+                            turnDetails.Add($"Player {action[2][1]} switched in {action[3].Replace(", L", ", LVL")}, HP: {action[4]}");
+                            break;
+                        case "drag":
+                            turnDetails.Add($"Player {action[2][1]}'s {action[3].Replace(", L", ", LVL")} was dragged out! HP: {action[4]}");
+                            break;
+                        case "detailschange":
+                            break;
+                        case "replace":
+                            turnDetails.Add($"Player {action[2][1]}'s {action[2]}'s illusion faded. HP: {action[4]}");
+                            break;
+                        case "swap":
+                            turnDetails.Add($"please @snow about this line!!!\n`{line}`");
+                            break;
+                        case "cant":
+                            turnDetails.Add($"Player {action[2][1]}'s {action[2].Substring(5)} couldn't move. Reason: {action[3]}");
+                            break;
+                        case "faint":
+                            turnDetails.Add($"Player {action[2][1]}'s {action[2].Substring(5)} has fainted.");
+                            break;
+                        case "-fail":
+                            turnDetails.Add($"But it failed.");
+                            break;
+                        case "-notarget":
+                            turnDetails.Add($"please @snow about this line!!!\n`{line}`");
+                            break;
+                        case "-miss":
+                            turnDetails.Add($"But it missed.");
+                            break;
+                        case "-damage":
+                            turnDetails.Add($"Player {action[2][1]}'s {action[2].Substring(5)} is at {action[3]} HP.");
+                            break;
+                        case "-heal":
+                            break;
+                        case "-sethp":
+                            break;
+                        case "-status":
+                            break;
+                        case "-curestatus":
+                            break;
+                        case "-cureteam":
+                            break;
+                        case "-boost":
+                            break;
+                        case "-unboost":
+                            break;
+                        case "-setboost":
+                            break;
+                        case "-swapboost":
+                            break;
+                        case "-invertboost":
+                            break;
+                        case "-clearboost":
+                            break;
+                        case "-clearallboost":
+                            break;
+                        case "-clearpositiveboost":
+                            break;
+                        case "-clearnegativeboost":
+                            break;
+                        case "-negativeboost":
+                            break;
+                        case "-copyboost":
+                            break;
+                        case "-weather":
+                            break;
+                        case "-fieldstart":
+                            break;
+                        case "-fieldend":
+                            break;
+                        case "-sidestart":
+                            break;
+                        case "-sidened":
+                            break;
+                        case "-start":
+                            break;
+                        case "-end":
+                            break;
+                        case "-crit":
+                            break;
+                        case "-supereffective":
+                            break;
+                        case "-resisted":
+                            break;
+                        case "-immune":
+                            break;
+                        case "-item":
+                            break;
+                        case "-enditem":
+                            break;
+                        case "-ability":
+                            break;
+                        case "-endability":
+                            break;
+                        case "-transform":
+                            break;
+                        case "-mega":
+                            break;
+                        case "-primal":
+                            turnDetails.Add($"Player {action[2][2]}'s {action[2].Substring(5)} has reverted to its primal forme");
+                            break;
+                        case "-burst":
+                            break;
+                        case "-zpower":
+                            break;
+                        case "-zbroken":
+                            break;
+                        case "-activate":
+                            break;
+                        case "-hint":
+                            break;
+                        case "-center":
+                            break;
+                        case "-message":
+                            break;
+                        case "-combine":
+                            break;
+                        case "-waiting":
+                            break;
+                        case "-prepare":
+                            break;
+                        case "-mustrecharge":
+                            break;
+                        case "-nothing":
+                            break;
+                        case "-hitcount":
+                            break;
+                        case "-singlemove":
+                            break;
+                        case "-singleturn":
+                            break;
+                    }
+                }
+            }
+        }
+    }
+}
