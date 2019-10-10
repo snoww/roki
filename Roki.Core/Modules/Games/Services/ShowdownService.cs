@@ -155,39 +155,63 @@ namespace Roki.Modules.Games.Services
                             turnDetails.Add($"Player {action[2][1]}'s {action[2]}'s illusion faded. HP: {action[4]}");
                             break;
                         case "swap":
-                            turnDetails.Add($"please @snow about this line!!!\n`{line}`");
+                            turnDetails.Add($"please @snow about this!!!\n`{line}`");
                             break;
                         case "cant":
                             turnDetails.Add($"Player {action[2][1]}'s {action[2].Substring(5)} couldn't move. Reason: {action[3]}");
                             break;
                         case "faint":
-                            turnDetails.Add($"Player {action[2][1]}'s {action[2].Substring(5)} has fainted.");
+                            turnDetails.Add($"Player {action[2][1]}'s {action[2].Substring(5)} has fainted");
                             break;
                         case "-fail":
-                            turnDetails.Add($"But it failed.");
+                            turnDetails.Add($"But it failed");
                             break;
                         case "-notarget":
-                            turnDetails.Add($"please @snow about this line!!!\n`{line}`");
+                            turnDetails.Add($"please @snow about this!!!\n`{line}`");
                             break;
                         case "-miss":
-                            turnDetails.Add($"But it missed.");
+                            turnDetails.Add($"But it missed");
                             break;
                         case "-damage":
-                            turnDetails.Add($"Player {action[2][1]}'s {action[2].Substring(5)} is at {action[3]} HP.");
+                            turnDetails.Add(action.Length >= 4 && action[4].StartsWith("[from]")
+                                ? action[4].Contains("item:")
+                                    ? $"{action[2].Substring(5)} took damage from its {action[4].Substring(12)} and is now at {action[3]} HP"
+                                    : $"{action[2].Substring(5)} took damage from {action[5].Substring(5)}'s {action[4].Substring(7)} and is now at {action[3]} HP"
+                                : $"{action[2].Substring(5)} took damage and is now at {action[3]} HP");
                             break;
                         case "-heal":
+                            turnDetails.Add(action.Length >= 4 && action[4].StartsWith("[from]")
+                                ? action[4].Contains("item:")
+                                    ? $"{action[2].Substring(5)} restored health from its {action[4].Substring(13)} and is now at {action[3]} HP"
+                                    : $"{action[2].Substring(5)} restored health from {action[5].Substring(5)}'s {action[4].Substring(7)} and is now at {action[3]} HP"
+                                : $"{action[2].Substring(5)} restored health and is now at {action[3]} HP");
                             break;
                         case "-sethp":
+                            turnDetails.Add(action.Length >= 4 && action[4].StartsWith("[from]")
+                                ? action[4].Contains("move:")
+                                    ? $"{action[2].Substring(5)}'s HP has been set by {action[4].Substring(13)} and is now at {action[3]} HP"
+                                    : $"{action[2].Substring(5)}'s HP has been set by {action[4].Substring(7)} and is now at {action[3]} HP" // should never see this
+                                : $"{action[2].Substring(5)}'s HP has been set to {action[3]} HP"); // should never see this
                             break;
                         case "-status":
+                            turnDetails.Add(action.Length >= 4 && action[4].StartsWith("[from]")
+                                ? action[4].Contains("item:")
+                                    ? $"{action[2].Substring(5)}'s HP has been set from its {action[4].Substring(12)} and is now at {action[3]} HP"
+                                    : $"{action[2].Substring(5)}'s HP has been set from {action[4].Substring(7)} and is now at {action[3]} HP"
+                                : $"{action[2].Substring(5)} restored health and is now at {action[3]} HP");
+                            turnDetails.Add($"{action[2].Substring(5)} has been inflicted with {action[3]}");
                             break;
                         case "-curestatus":
+                            turnDetails.Add($"{action[2].Substring(5)} has recovered from {action[3]}");
                             break;
                         case "-cureteam":
+                            turnDetails.Add($"Player {action[2][1]}'s team has recovered from all status effects");
                             break;
                         case "-boost":
+                            turnDetails.Add($"{action[2].Substring(5)}'s {action[3]} has been boosted by {action[4]} stages");
                             break;
                         case "-unboost":
+                            turnDetails.Add($"{action[2].Substring(5)}'s {action[3]} has been lowered by {action[4]} stages");
                             break;
                         case "-setboost":
                             break;
