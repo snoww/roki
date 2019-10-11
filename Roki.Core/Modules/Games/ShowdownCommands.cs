@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -21,7 +20,6 @@ namespace Roki.Modules.Games
         {
             private readonly DiscordSocketClient _client;
             private readonly ICurrencyService _currency;
-            private readonly ConcurrentDictionary<ulong, string> _games = new ConcurrentDictionary<ulong, string>();
 
             public ShowdownCommands(DiscordSocketClient client, ICurrencyService currency)
             {
@@ -47,13 +45,13 @@ namespace Roki.Modules.Games
             [RequireContext(ContextType.Guild)]
             public async Task BetPokemonGame()
             {
-                if (_games.TryGetValue(ctx.Channel.Id, out _))
+                if (_service.Games.TryGetValue(ctx.Channel.Id, out _))
                 {
                     await ctx.Channel.SendErrorAsync("Game already in progress in current channel.");
                     return;
                 }
                 
-                _games.TryAdd(ctx.Channel.Id, $"{ctx.User.Username}'s game");
+                _service.Games.TryAdd(ctx.Channel.Id, $"{ctx.User.Username}'s game");
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
                 await ctx.Channel.SendMessageAsync("Starting new Pokemon game.").ConfigureAwait(false);
 
@@ -150,7 +148,7 @@ namespace Roki.Modules.Games
                     }
                 }
 
-                _games.TryRemove(ctx.Channel.Id, out _);
+                _service.Games.TryRemove(ctx.Channel.Id, out _);
             }
         }
     }
