@@ -50,8 +50,12 @@ namespace Roki.Modules.Games
                 {
                     await ctx.Channel.SendErrorAsync("Game already in progress in current channel.");
                     return;
-                }_games.TryAdd(ctx.Channel.Id, $"{ctx.User.Username}'s game");
+                }
                 
+                _games.TryAdd(ctx.Channel.Id, $"{ctx.User.Username}'s game");
+                await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync("Starting new Pokemon game.").ConfigureAwait(false);
+
                 var gameText = await _service.StartAiGameAsync().ConfigureAwait(false);
                 var index = gameText.IndexOf("|\n", StringComparison.Ordinal);
                 var gameIntro = gameText.Substring(0, index);
@@ -137,6 +141,8 @@ namespace Roki.Modules.Games
                             .WithDescription($"Result is: {result}\n{ctx.User.Mention} Better luck next time!")).ConfigureAwait(false);
                     }
                 }
+
+                _games.Remove(ctx.Channel.Id, out var _);
             }
         }
     }
