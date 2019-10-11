@@ -26,7 +26,9 @@ namespace Roki.Modules.Games.Services
                 output = await reader.ReadToEndAsync().ConfigureAwait(false);
                 proc.WaitForExit();
             }
-
+            
+            System.IO.File.WriteAllText($@"./data/pokemon-logs/{Guid.NewGuid().ToString().Substring(0, 7)}", output);
+            
             return output;
         }
 
