@@ -48,12 +48,12 @@ namespace Roki.Modules.Games.Services
                 if (line.StartsWith("|poke|p1", StringComparison.Ordinal))
                 {
                     var poke = line.Split('|');
-                    p1Poke.Add(poke[2]);
+                    p1Poke.Add(poke[3]);
                 }
                 else if (line.StartsWith("|poke|p2", StringComparison.Ordinal))
                 {
                     var poke = line.Split('|');
-                    p2Poke.Add(poke[2]);
+                    p2Poke.Add(poke[3]);
                 }
             }
 
