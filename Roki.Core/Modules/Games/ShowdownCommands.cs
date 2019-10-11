@@ -57,7 +57,7 @@ namespace Roki.Modules.Games
                 await ctx.Channel.SendMessageAsync("Starting new Pokemon game.").ConfigureAwait(false);
 
                 var gameText = await _service.StartAiGameAsync().ConfigureAwait(false);
-                var index = gameText.IndexOf("|\n", StringComparison.Ordinal);
+                var index = gameText.IndexOf("|teampreview", StringComparison.Ordinal);
                 var gameIntro = gameText.Substring(0, index);
                 var gameTurns = gameText.Substring(index + 1);
 
