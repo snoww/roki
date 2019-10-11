@@ -47,7 +47,7 @@ namespace Roki.Modules.Games
             [RequireContext(ContextType.Guild)]
             public async Task BetPokemonGame()
             {
-                if (_games.ContainsKey(ctx.Channel.Id))
+                if (_games.TryGetValue(ctx.Channel.Id, out _))
                 {
                     await ctx.Channel.SendErrorAsync("Game already in progress in current channel.");
                     return;
@@ -66,7 +66,6 @@ namespace Roki.Modules.Games
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle($"Random Battle")
-                        .WithDescription("The teams are:")
                         .AddField("Player 1", string.Join('\n', intro[0]))
                         .AddField("Player 2", string.Join('\n', intro[1])))
                     .ConfigureAwait(false);
@@ -111,7 +110,7 @@ namespace Roki.Modules.Games
                         if (added)
                         {
                             await ctx.Channel
-                                .EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"{message.Author.Mention} you've joined the bet.'"))
+                                .EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"{message.Author.Mention} has joined the bet."))
                                 .ConfigureAwait(false);
                             return Task.CompletedTask;
                         }
@@ -151,7 +150,7 @@ namespace Roki.Modules.Games
                     }
                 }
 
-                _games.Remove(ctx.Channel.Id, out var _);
+                _games.TryRemove(ctx.Channel.Id, out _);
             }
         }
     }
