@@ -64,15 +64,12 @@ namespace Roki.Modules.Games
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle($"Random Battle")
-                        .AddField("Player 1", string.Join('\n', intro[0]))
-                        .AddField("Player 2", string.Join('\n', intro[1])))
-                    .ConfigureAwait(false);
-                
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                        .WithDescription("A new Pokemon game is about to start!\nType `join bet_amount player` to join the bet.\ni.e. `join 15 p2`"))
+                        .WithDescription("A Pokemon battle is about to start!\nType `join bet_amount player` to join the bet.\ni.e. `join 15 p2`")
+                        .AddField("Player 1", string.Join('\n', intro[0]), true)
+                        .AddField("Player 2", string.Join('\n', intro[1]), true))
                     .ConfigureAwait(false);
 
-                var joinedPlayers = new Dictionary<ulong, PlayerBet>();
+                var joinedPlayers = new Dictionary<IUser, PlayerBet>();
                 var timeout = DateTime.UtcNow + TimeSpan.FromSeconds(30);
                 _client.MessageReceived += message =>
                 {
@@ -91,7 +88,7 @@ namespace Roki.Modules.Games
                         }
 
                         var removed = await _currency
-                            .ChangeAsync(ctx.User, "BetShowdown Entry", -amount, ctx.User.Id.ToString(), "Server", ctx.Guild.Id, ctx.Channel.Id,
+                            .ChangeAsync(message.Author, "BetShowdown Entry", -amount, ctx.User.Id.ToString(), "Server", ctx.Guild.Id, ctx.Channel.Id,
                                 ctx.Message.Id)
                             .ConfigureAwait(false);
                         if (!removed)
@@ -100,20 +97,22 @@ namespace Roki.Modules.Games
                             return Task.CompletedTask;
                         }
 
-                        var added = joinedPlayers.TryAdd(message.Author.Id, new PlayerBet
+                        var added = joinedPlayers.TryAdd(message.Author, new PlayerBet
                         {
                             Amount = amount,
                             BetPlayer = betPlayer
                         });
                         if (added)
                         {
-                            await ctx.Channel
+                            var joinedMsg = await ctx.Channel
                                 .EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"{message.Author.Mention} has joined the bet."))
                                 .ConfigureAwait(false);
+                            joinedMsg.DeleteAfter(5);
                             return Task.CompletedTask;
                         }
-                        await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor().WithDescription("You are already in the bet."))
+                        var alreadyJoinedMsg = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor().WithDescription("You are already in the bet."))
                             .ConfigureAwait(false);
+                        alreadyJoinedMsg.DeleteAfter(5);
                         return Task.CompletedTask;
                     });
                     return Task.CompletedTask;
@@ -129,26 +128,25 @@ namespace Roki.Modules.Games
 //                var turns = _service.ParseTurns(gameTurns);
 //                var win = turns.Last().Last();
                 var win = _service.GetWinner(gameTurns);
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"The winner is: Player {win}")).ConfigureAwait(false);
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"Player {win} has won the battle!")).ConfigureAwait(false);
                 var result = win == "1" ? BetPlayer.P1 : BetPlayer.P2;
 
-                foreach (var (_, value) in joinedPlayers)
+                var winStr = "";
+
+                foreach (var (key, value) in joinedPlayers)
                 {
-                    if (result == value.BetPlayer)
-                    {
-                        var won = value.Amount * 2;
-                        await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                            .WithDescription($"{ctx.User.Mention} Congratulations! You've won {won} stones")).ConfigureAwait(false);
-                        await _currency.ChangeAsync(ctx.User, "BetShowdown Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
-                            ctx.Channel.Id, ctx.Message.Id);
-                    }
-                    else
-                    {
-                        await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                            .WithDescription($"{ctx.User.Mention} Better luck next time!")).ConfigureAwait(false);
-                    }
+                    if (result != value.BetPlayer) continue;
+                    var won = value.Amount * 2;
+                    winStr += $"{key.Username} won {value} stones\n";
+                    await _currency.ChangeAsync(key, "BetShowdown Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
+                        ctx.Channel.Id, ctx.Message.Id);
                 }
 
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    .WithDescription($"Congratulations! {winStr}\n")).ConfigureAwait(false);
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
+                    .WithDescription($"Everyone else better luck next time!")).ConfigureAwait(false);
+                
                 _service.Games.TryRemove(ctx.Channel.Id, out _);
             }
         }
