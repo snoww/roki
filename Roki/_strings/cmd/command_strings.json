@@ -409,5 +409,12 @@
       "{0}bfm 10 h h t h t",
       "{0}bfm 10 tails h heads tails t"
     ]
+  },
+  "betpokemongame": {
+    "Command": "betpokemon bp",
+    "Description": "Bet on an AI vs AI game of pokemon. If guessed winner correctly, win stones.",
+    "Usage": [
+      "{0}bp"
+    ]
   }
 }

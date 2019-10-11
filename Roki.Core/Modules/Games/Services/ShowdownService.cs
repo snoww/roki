@@ -13,7 +13,7 @@ namespace Roki.Modules.Games.Services
         {
         }
 
-        public async Task<(IEnumerable<List<string>>, IEnumerable<List<string>>)> StartAiGameAsync()
+        public async Task<string> StartAiGameAsync()
         {
             string output;
             using (var proc = new Process())
@@ -27,23 +27,16 @@ namespace Roki.Modules.Games.Services
                 proc.WaitForExit();
             }
 
-            return ParseGame(output);
+            return output;
         }
 
-        public (IEnumerable<List<string>>, IEnumerable<List<string>>) ParseGame(string game)
-        {
-            var index = game.IndexOf("|\n", StringComparison.InvariantCultureIgnoreCase);
-            
-            var gameIntro = game.Substring(0, index);
-            var gameTurns = game.Substring(index + 1);
-
-            var parsedIntro = ParseIntro(gameIntro);
-            var parsedGame = ParseTurns(gameTurns);
-
-            return (parsedIntro, parsedGame);
-        }
-
-        private static IEnumerable<List<string>> ParseIntro(string intro)
+        public List<List<string>> ParseIntro(string intro) =>
+            InternalParseIntro(intro);
+        
+        public IEnumerable<List<string>> ParseTurns(string turns) =>
+            InternalParseTurns(turns);
+        
+        private static List<List<string>> InternalParseIntro(string intro)
         {
             var lines = intro.Split('\n');
             var p1Poke = new List<string>();
@@ -318,10 +311,13 @@ namespace Roki.Modules.Games.Services
                 }
             }
 
+            var win = lines.Last().Split('|')[2];
+            turnDetails.Add(win.Substring(win.Length - 1));
+
             return turnDetails;
         }
 
-        private static IEnumerable<List<string>> ParseTurns(string game)
+        private static IEnumerable<List<string>> InternalParseTurns(string game)
         {
             var turns = game.Split("|turn");
             return turns.Select(ParseTurn).ToList();
