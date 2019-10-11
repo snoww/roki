@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -107,7 +108,13 @@ namespace Roki.Modules.Games
                             Amount = amount,
                             BetPlayer = betPlayer
                         });
-                        if (added) return Task.CompletedTask;
+                        if (added)
+                        {
+                            await ctx.Channel
+                                .EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"{message.Author.Mention} you've joined the bet.'"))
+                                .ConfigureAwait(false);
+                            return Task.CompletedTask;
+                        }
                         await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor().WithDescription("You are already in the bet."))
                             .ConfigureAwait(false);
                         return Task.CompletedTask;
@@ -115,7 +122,8 @@ namespace Roki.Modules.Games
                     return Task.CompletedTask;
                 };
 
-                if (DateTime.UtcNow >= timeout && joinedPlayers.Count == 0)
+                Thread.Sleep(TimeSpan.FromSeconds(15));
+                if (joinedPlayers.Count == 0)
                 {
                     await ctx.Channel.SendErrorAsync("Not enough players to start the bet.\nBet is cancelled");
                     return;
@@ -125,11 +133,11 @@ namespace Roki.Modules.Games
                 var win = turns.Last().Last();
                 var result = win == "1" ? BetPlayer.Player1 : BetPlayer.Player2;
 
-                foreach (var player in joinedPlayers)
+                foreach (var (_, value) in joinedPlayers)
                 {
-                    if (result == player.Value.BetPlayer)
+                    if (result == value.BetPlayer)
                     {
-                        var won = player.Value.Amount * 2;
+                        var won = value.Amount * 2;
                         await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithDescription($"Result is: {result}\n{ctx.User.Mention} Congratulations! You've won {won} stones")).ConfigureAwait(false);
                         await _currency.ChangeAsync(ctx.User, "BetShowdown Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
