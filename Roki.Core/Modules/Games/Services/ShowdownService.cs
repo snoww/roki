@@ -38,8 +38,8 @@ namespace Roki.Modules.Games.Services
         public string GetWinner(string game)
         {
             var turns = game.Split("|turn");
-            
-            return turns.Last().Split('\n').FirstOrDefault(l => l.StartsWith("|win", StringComparison.Ordinal))?.Substring(4);
+
+            return turns.Last().Split('\n').First(l => l.StartsWith("|win", StringComparison.Ordinal)).Split('|').Last().Substring(4);
         }
 
         public List<List<string>> ParseIntro(string intro) =>
