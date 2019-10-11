@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -9,6 +10,8 @@ namespace Roki.Modules.Games.Services
 {
     public class ShowdownService : IRService
     {
+        public readonly ConcurrentDictionary<ulong, string> Games = new ConcurrentDictionary<ulong, string>();
+
         public ShowdownService()
         {
         }
