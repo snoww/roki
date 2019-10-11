@@ -43,6 +43,7 @@ namespace Roki.Modules.Games
             }
             
             [RokiCommand, Description, Aliases, Usage]
+            [RequireContext(ContextType.Guild)]
             public async Task BetPokemonGame()
             {
                 if (_games.ContainsKey(ctx.Channel.Id))
