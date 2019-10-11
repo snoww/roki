@@ -126,8 +126,9 @@ namespace Roki.Modules.Games
                     return;
                 }
                 
-                var turns = _service.ParseTurns(gameTurns);
-                var win = turns.Last().Last();
+//                var turns = _service.ParseTurns(gameTurns);
+//                var win = turns.Last().Last();
+                var win = _service.GetWinner(gameTurns);
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"The winner is: Player {win}")).ConfigureAwait(false);
                 var result = win == "1" ? BetPlayer.P1 : BetPlayer.P2;
 

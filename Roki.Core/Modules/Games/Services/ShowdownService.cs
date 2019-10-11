@@ -35,6 +35,13 @@ namespace Roki.Modules.Games.Services
             return output;
         }
 
+        public string GetWinner(string game)
+        {
+            var turns = game.Split("|turn");
+            var win = turns.Last().Split('\n').Last().Split('|').Last();
+            return win.Substring(4);
+        }
+
         public List<List<string>> ParseIntro(string intro) =>
             InternalParseIntro(intro);
         
