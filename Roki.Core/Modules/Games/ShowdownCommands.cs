@@ -138,14 +138,14 @@ namespace Roki.Modules.Games
                     {
                         var won = value.Amount * 2;
                         await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                            .WithDescription($"Result is: {result}\n{ctx.User.Mention} Congratulations! You've won {won} stones")).ConfigureAwait(false);
+                            .WithDescription($"{ctx.User.Mention} Congratulations! You've won {won} stones")).ConfigureAwait(false);
                         await _currency.ChangeAsync(ctx.User, "BetShowdown Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
                             ctx.Channel.Id, ctx.Message.Id);
                     }
                     else
                     {
                         await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                            .WithDescription($"Result is: {result}\n{ctx.User.Mention} Better luck next time!")).ConfigureAwait(false);
+                            .WithDescription($"{ctx.User.Mention} Better luck next time!")).ConfigureAwait(false);
                     }
                 }
 
