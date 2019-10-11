@@ -31,9 +31,9 @@ namespace Roki.Modules.Games
             
             private enum BetPlayer
             {
-                Player1 = 1,
+                PLAYER1 = 1,
                 P1 = 1,
-                Player2 = 2,
+                PLAYER2 = 2,
                 P2 = 2,
             }
 
@@ -85,8 +85,8 @@ namespace Roki.Modules.Games
                     var _ = Task.Run(async () =>
                     {
                         var args = message.Content.Split();
-                        if (!string.Equals(args[0], "join", StringComparison.OrdinalIgnoreCase) || !long.TryParse(args[1], out var amount) || amount <= 0 ||
-                            !Enum.TryParse<BetPlayer>(args[2], out var betPlayer) || DateTime.UtcNow >= timeout) return Task.CompletedTask;
+                        if (!string.Equals(args[0], "join", StringComparison.OrdinalIgnoreCase) || !long.TryParse(args[1], out var amount) ||
+                            !Enum.TryParse<BetPlayer>(args[2].ToUpperInvariant(), out var betPlayer) || DateTime.UtcNow >= timeout) return Task.CompletedTask;
                         if (amount <= 0)
                         {
                             await ctx.Channel.SendErrorAsync("The minimum bet for this game is 1 stone").ConfigureAwait(false);
@@ -122,7 +122,7 @@ namespace Roki.Modules.Games
                     return Task.CompletedTask;
                 };
 
-                Thread.Sleep(TimeSpan.FromSeconds(15));
+                Thread.Sleep(TimeSpan.FromSeconds(30));
                 if (joinedPlayers.Count == 0)
                 {
                     await ctx.Channel.SendErrorAsync("Not enough players to start the bet.\nBet is cancelled");
