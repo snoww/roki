@@ -162,20 +162,29 @@ namespace Roki.Modules.Games
                 var result = win == "1" ? BetPlayer.P1 : BetPlayer.P2;
 
                 var winStr = "";
+                var losers = false;
 
                 foreach (var (key, value) in joinedPlayers)
                 {
-                    if (result != value.BetPlayer) continue;
+                    if (result != value.BetPlayer)
+                    {
+                        losers = true;
+                        continue;
+                    }
                     var won = value.Amount * 2;
                     winStr += $"{key.Username} won {won} stones\n";
                     await _currency.ChangeAsync(key, "BetShowdown Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
                 }
 
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                    .WithDescription($"Congratulations!\n{winStr}\n")).ConfigureAwait(false);
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                    .WithDescription($"Everyone else better luck next time!")).ConfigureAwait(false);
+                if (winStr.Length > 1)
+                {
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                        .WithDescription($"Congratulations!\n{winStr}\n")).ConfigureAwait(false);
+                }
+                if (losers)
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
+                        .WithDescription($"Everyone else better luck next time!")).ConfigureAwait(false);
                 
                 _service.Games.TryRemove(ctx.Channel.Id, out _);
             }
