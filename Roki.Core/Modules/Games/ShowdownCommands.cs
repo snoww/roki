@@ -161,7 +161,7 @@ namespace Roki.Modules.Games
                     return Task.CompletedTask;
                 };
 
-                Thread.Sleep(TimeSpan.FromSeconds(30));
+                Thread.Sleep(TimeSpan.FromSeconds(35));
                 if (joinedPlayers.Count == 0)
                 {
                     await ctx.Channel.SendErrorAsync("Not enough players to start the bet.\nBet is cancelled");
