@@ -152,6 +152,7 @@ namespace Roki.Modules.Games
                 if (joinedPlayers.Count == 0)
                 {
                     await ctx.Channel.SendErrorAsync("Not enough players to start the bet.\nBet is cancelled");
+                    _service.Games.TryRemove(ctx.Channel.Id, out _);
                     return;
                 }
                 
