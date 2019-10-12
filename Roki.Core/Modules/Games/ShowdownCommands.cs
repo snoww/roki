@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -10,6 +12,9 @@ using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Games.Services;
 using Roki.Services;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using Image = SixLabors.ImageSharp.Image;
 
 namespace Roki.Modules.Games
 {
@@ -20,6 +25,7 @@ namespace Roki.Modules.Games
         {
             private readonly DiscordSocketClient _client;
             private readonly ICurrencyService _currency;
+            private readonly string _spriteUrl = "http://play.pokemonshowdown.com/sprites/xydex/";
 
             public ShowdownCommands(DiscordSocketClient client, ICurrencyService currency)
             {
@@ -61,13 +67,36 @@ namespace Roki.Modules.Games
                 var gameTurns = gameText.Substring(index + 1);
 
                 var intro = _service.ParseIntro(gameIntro);
+                
+                var t1 = new List<Image<Rgba32>>();
+                var t2 = new List<Image<Rgba32>>();
 
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                for (int i = 0; i < intro[0].Count; i++)
+                {
+                    t1.Add(GetPokemonImage(intro[0][i]));
+                    t2.Add(GetPokemonImage(intro[1][i]));
+                }
+                
+                using (var bitmap1 = t1.MergePokemonTeam())
+                using (var bitmap2 = t2.MergePokemonTeam())
+                using (var bitmap = bitmap1.MergeTwoVertical(bitmap2, out var format))
+                using (var ms = bitmap.ToStream(format))
+                {
+                    for (int i = 0; i < t1.Count; i++)
+                    {
+                        t1[i].Dispose();
+                        t2[i].Dispose();
+                    }
+                    
+                    var embed = new EmbedBuilder().WithOkColor()
                         .WithTitle($"Random Battle")
-                        .WithDescription("A Pokemon battle is about to start!\nType `join bet_amount player` to join the bet.\ni.e. `join 15 p2`")
+                        .WithDescription("A Pokemon battle is about to start!\nType **`join bet_amount player`** to join the bet.\ni.e. `join 15 p2`")
+                        .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
                         .AddField("Player 1", string.Join('\n', intro[0]), true)
-                        .AddField("Player 2", string.Join('\n', intro[1]), true))
-                    .ConfigureAwait(false);
+                        .AddField("Player 2", string.Join('\n', intro[1]), true);
+
+                    await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: embed.Build()).ConfigureAwait(false);
+                }
 
                 var joinedPlayers = new Dictionary<IUser, PlayerBet>();
                 var timeout = DateTime.UtcNow + TimeSpan.FromSeconds(30);
@@ -108,6 +137,7 @@ namespace Roki.Modules.Games
                                 .EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"{message.Author.Mention} has joined the bet."))
                                 .ConfigureAwait(false);
                             joinedMsg.DeleteAfter(5);
+                            await message.DeleteAsync().ConfigureAwait(false);
                             return Task.CompletedTask;
                         }
                         var alreadyJoinedMsg = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor().WithDescription("You are already in the bet."))
@@ -137,17 +167,27 @@ namespace Roki.Modules.Games
                 {
                     if (result != value.BetPlayer) continue;
                     var won = value.Amount * 2;
-                    winStr += $"{key.Username} won {value} stones\n";
+                    winStr += $"{key.Username} won {won} stones\n";
                     await _currency.ChangeAsync(key, "BetShowdown Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
                 }
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                    .WithDescription($"Congratulations! {winStr}\n")).ConfigureAwait(false);
+                    .WithDescription($"Congratulations!\n{winStr}\n")).ConfigureAwait(false);
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
                     .WithDescription($"Everyone else better luck next time!")).ConfigureAwait(false);
                 
                 _service.Games.TryRemove(ctx.Channel.Id, out _);
+            }
+
+            private Image<Rgba32> GetPokemonImage(string pokemon)
+            {
+                var sprite = _service.GetPokemonSprite(pokemon);
+                var wc = new WebClient();
+                using (var stream = new MemoryStream(wc.DownloadData(_spriteUrl + sprite)))
+                {
+                    return Image.Load(stream.ToArray());
+                }
             }
         }
     }

@@ -2,15 +2,19 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Roki.Core.Services;
+using Roki.Modules.Searches.Common;
 
 namespace Roki.Modules.Games.Services
 {
     public class ShowdownService : IRService
     {
         public readonly ConcurrentDictionary<ulong, string> Games = new ConcurrentDictionary<ulong, string>();
+        private static readonly Dictionary<string, PokemonData> Data = JsonConvert.DeserializeObject<Dictionary<string, PokemonData>>(File.ReadAllText("./_strings/pokemon/pokemon.json"));
 
         public ShowdownService()
         {
@@ -333,6 +337,14 @@ namespace Roki.Modules.Games.Services
         {
             var turns = game.Split("|turn");
             return turns.Select(ParseTurn).ToList();
+        }
+        
+        public string GetPokemonSprite(string query)
+        {
+            query = query.Split(',').First().ToLower();
+            var poke = query.EndsWith("-*", StringComparison.Ordinal) ? Data[query.Replace("-*", "", StringComparison.Ordinal)] : Data[query];
+
+            return poke.Sprite.Replace("gif", "png", StringComparison.Ordinal);
         }
     }
 }
