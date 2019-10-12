@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using NLog;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Games.Services;
@@ -26,6 +27,7 @@ namespace Roki.Modules.Games
             private readonly DiscordSocketClient _client;
             private readonly ICurrencyService _currency;
             private readonly string _spriteUrl = "http://play.pokemonshowdown.com/sprites/xydex/";
+            private readonly Logger _log = LogManager.GetCurrentClassLogger();
 
             public ShowdownCommands(DiscordSocketClient client, ICurrencyService currency)
             {
@@ -71,32 +73,43 @@ namespace Roki.Modules.Games
                 var t1 = new List<Image<Rgba32>>();
                 var t2 = new List<Image<Rgba32>>();
 
-                for (int i = 0; i < intro[0].Count; i++)
+                try
                 {
-                    t1.Add(GetPokemonImage(intro[0][i]));
-                    t2.Add(GetPokemonImage(intro[1][i]));
+                    for (int i = 0; i < intro[0].Count; i++)
+                    {
+                        t1.Add(GetPokemonImage(intro[0][i]));
+                        t2.Add(GetPokemonImage(intro[1][i]));
+                    }
+                
+                    using (var bitmap1 = t1.MergePokemonTeam())
+                    using (var bitmap2 = t2.MergePokemonTeam())
+                    using (var bitmap = bitmap1.MergeTwoVertical(bitmap2, out var format))
+                    using (var ms = bitmap.ToStream(format))
+                    {
+                        for (int i = 0; i < t1.Count; i++)
+                        {
+                            t1[i].Dispose();
+                            t2[i].Dispose();
+                        }
+                    
+                        var embed = new EmbedBuilder().WithOkColor()
+                            .WithTitle($"Random Battle")
+                            .WithDescription("A Pokemon battle is about to start!\nType **`join bet_amount player`** to join the bet.\ni.e. `join 15 p2`")
+                            .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
+                            .AddField("Player 1", string.Join('\n', intro[0]), true)
+                            .AddField("Player 2", string.Join('\n', intro[1]), true);
+
+                        await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: embed.Build()).ConfigureAwait(false);
+                    }
+                }
+                catch (Exception e)
+                {
+                    _log.Warn(e);
+                    await ctx.Channel.SendErrorAsync("Unable to start game, please try again.");
+                    _service.Games.TryRemove(ctx.Channel.Id, out _);
+                    return;
                 }
                 
-                using (var bitmap1 = t1.MergePokemonTeam())
-                using (var bitmap2 = t2.MergePokemonTeam())
-                using (var bitmap = bitmap1.MergeTwoVertical(bitmap2, out var format))
-                using (var ms = bitmap.ToStream(format))
-                {
-                    for (int i = 0; i < t1.Count; i++)
-                    {
-                        t1[i].Dispose();
-                        t2[i].Dispose();
-                    }
-                    
-                    var embed = new EmbedBuilder().WithOkColor()
-                        .WithTitle($"Random Battle")
-                        .WithDescription("A Pokemon battle is about to start!\nType **`join bet_amount player`** to join the bet.\ni.e. `join 15 p2`")
-                        .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
-                        .AddField("Player 1", string.Join('\n', intro[0]), true)
-                        .AddField("Player 2", string.Join('\n', intro[1]), true);
-
-                    await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: embed.Build()).ConfigureAwait(false);
-                }
 
                 var joinedPlayers = new Dictionary<IUser, PlayerBet>();
                 var timeout = DateTime.UtcNow + TimeSpan.FromSeconds(30);
