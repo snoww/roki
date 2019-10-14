@@ -144,7 +144,8 @@ namespace Roki.Modules.Games
                 catch (Exception e)
                 {
                     _log.Warn(e);
-                    await ctx.Channel.SendErrorAsync("Unable to start game, please try again.");
+                    _log.Info(gameIntro);
+                    await ctx.Channel.SendErrorAsync("Unable to start game, please try again.\nplease @snow about this issue.");
                     _service.Games.TryRemove(ctx.Channel.Id, out _);
                     return;
                 }
@@ -154,8 +155,8 @@ namespace Roki.Modules.Games
                 var timeout = DateTime.UtcNow + TimeSpan.FromSeconds(30);
                 _client.ReactionAdded += (cachedMessage, channel, reaction) =>
                 {
-                    if (ctx.Channel.Id != channel.Id || cachedMessage.Id != startMsg.Id || !_reactionPlayer.Contains(reaction.Emote) || !_reactionBet.Contains(reaction.Emote) || DateTime.UtcNow >= timeout)
-                        return Task.CompletedTask;
+                    if (ctx.Channel.Id != channel.Id || cachedMessage.Value.Id != startMsg.Id || (!_reactionPlayer.Contains(reaction.Emote) && !_reactionBet.Contains(reaction.Emote)) ||
+                        DateTime.UtcNow > timeout || reaction.User.Value.IsBot) return Task.CompletedTask;
                     var user = reaction.User.Value;
                     var _ = Task.Run(async () =>
                     {
@@ -167,21 +168,16 @@ namespace Roki.Modules.Games
                                 joinedReactions.Add(user, new PlayerBet{Bet = BetPlayer.P2, Amount = 0});
                             else
                             {
-                                if (_currency.GetCurrency(user.Id) >= _betMap[reaction.Emote])
-                                    joinedReactions.Add(user, new PlayerBet{Bet = null, Amount = _betMap[reaction.Emote]});
-                                else
-                                {
-                                    var notEnoughMsg = await ctx.Channel.SendErrorAsync($"{reaction.User.Value.Id} You do not have enough currency to make that bet.").ConfigureAwait(false);
-                                    await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, RequestOptions.Default).ConfigureAwait(false);
-                                    notEnoughMsg.DeleteAfter(5);
-                                }
+                                var notEnoughMsg = await ctx.Channel.SendErrorAsync($"<@{reaction.UserId}> Please select a player to bet on first.").ConfigureAwait(false);
+                                await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, RequestOptions.Default).ConfigureAwait(false);
+                                notEnoughMsg.DeleteAfter(3);
                             }
 
                             return Task.CompletedTask;
                         }
                         if (joinedReactions[user].Amount <= 0)
                         {
-                            if (_currency.GetCurrency(user.Id) >= _betMap[reaction.Emote])
+                            if (_currency.GetCurrency(user.Id) >= joinedReactions[user].Amount + _betMap[reaction.Emote])
                                 joinedReactions[user].Amount += _betMap[reaction.Emote];
                             else
                             {
@@ -313,8 +309,8 @@ namespace Roki.Modules.Games
                         await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
                             .WithDescription($"Player {win} has won the battle!\nBetter luck next time!\n{losers}\n")).ConfigureAwait(false);
                 }
-                    
-                
+
+                await startMsg.RemoveAllReactionsAsync().ConfigureAwait(false);
                 _service.Games.TryRemove(ctx.Channel.Id, out _);
             }
 
