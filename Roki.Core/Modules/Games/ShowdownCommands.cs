@@ -92,14 +92,14 @@ namespace Roki.Modules.Games
                             t2[i].Dispose();
                         }
                     
-                        var embed = new EmbedBuilder().WithOkColor()
+                        var start = new EmbedBuilder().WithOkColor()
                             .WithTitle($"Random Battle")
                             .WithDescription("A Pokemon battle is about to start!\nType **`join bet_amount player`** to join the bet.\ni.e. `join 15 p2`")
                             .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
                             .AddField("Player 1", string.Join('\n', intro[0]), true)
                             .AddField("Player 2", string.Join('\n', intro[1]), true);
 
-                        await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: embed.Build()).ConfigureAwait(false);
+                        await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: start.Build()).ConfigureAwait(false);
                     }
                 }
                 catch (Exception e)
@@ -172,33 +172,40 @@ namespace Roki.Modules.Games
 //                var turns = _service.ParseTurns(gameTurns);
 //                var win = turns.Last().Last();
                 var win = _service.GetWinner(gameTurns);
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"Player {win} has won the battle!")).ConfigureAwait(false);
                 var result = win == "1" ? BetPlayer.P1 : BetPlayer.P2;
 
-                var winStr = "";
-                var losers = false;
+                var winners = "";
+                var losers = "";
 
                 foreach (var (key, value) in joinedPlayers)
                 {
                     if (result != value.BetPlayer)
                     {
-                        losers = true;
+                        losers += $"{key.Username}\n";
                         continue;
                     }
                     var won = value.Amount * 2;
-                    winStr += $"{key.Username} won {won} stones\n";
+                    winners += $"{key.Username} won {won} stones\n";
                     await _currency.ChangeAsync(key, "BetShowdown Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
                 }
-
-                if (winStr.Length > 1)
+                
+                var embed = new EmbedBuilder().WithOkColor();
+                if (winners.Length > 1)
                 {
-                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                        .WithDescription($"Congratulations!\n{winStr}\n")).ConfigureAwait(false);
+                    embed.WithDescription($"Player {win} has won the battle!\nCongratulations!\n{winners}\n");
+                    await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 }
-                if (losers)
-                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                        .WithDescription($"Everyone else better luck next time!")).ConfigureAwait(false);
+                if (losers.Length > 1)
+                {
+                    if (winners.Length > 1)
+                        await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
+                            .WithDescription($"Better luck next time!\n{losers}\n")).ConfigureAwait(false);
+                    else 
+                        await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
+                            .WithDescription($"Player {win} has won the battle!\nBetter luck next time!\n{losers}\n")).ConfigureAwait(false);
+                }
+                    
                 
                 _service.Games.TryRemove(ctx.Channel.Id, out _);
             }
