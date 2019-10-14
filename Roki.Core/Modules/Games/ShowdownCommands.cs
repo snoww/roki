@@ -138,6 +138,7 @@ namespace Roki.Modules.Games
 
                         startMsg = await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: start.Build()).ConfigureAwait(false);
                         await startMsg.AddReactionsAsync(_reactionPlayer).ConfigureAwait(false);
+                        await startMsg.AddReactionsAsync(_reactionBet).ConfigureAwait(false);
                     }
                 }
                 catch (Exception e)
