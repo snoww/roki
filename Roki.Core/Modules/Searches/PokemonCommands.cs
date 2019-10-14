@@ -25,6 +25,8 @@ namespace Roki.Modules.Searches
                 if (string.IsNullOrWhiteSpace(query))
                     return;
 
+                query = query.ToLowerInvariant();
+
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
 // save poke api data to json files?
                 try

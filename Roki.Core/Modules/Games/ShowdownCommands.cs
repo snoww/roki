@@ -193,7 +193,7 @@ namespace Roki.Modules.Games
                     
                     return Task.CompletedTask;
                 };
-                
+
                 Thread.Sleep(TimeSpan.FromSeconds(35));
                 if (joinedReactions.Count == 0)
                 {
