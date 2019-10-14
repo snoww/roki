@@ -97,7 +97,6 @@ namespace Roki.Modules.Games
                 
                 _service.Games.TryAdd(ctx.Channel.Id, $"{ctx.User.Username}'s game");
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
-                await ctx.Channel.SendMessageAsync("Starting new Pokemon game.").ConfigureAwait(false);
 
                 var gameText = await _service.StartAiGameAsync().ConfigureAwait(false);
                 var index = gameText.IndexOf("|teampreview", StringComparison.Ordinal);
@@ -189,7 +188,6 @@ namespace Roki.Modules.Games
                         }
 
                         joinedReactions[user].Bet = Equals(Player1, reaction.Emote) ? BetPlayer.P1 : BetPlayer.P2;
-
                         return Task.CompletedTask;
                     });
                     
@@ -305,8 +303,6 @@ namespace Roki.Modules.Games
                             .WithDescription($"Player {win} has won the battle!\nBetter luck next time!\n{losers}\n")).ConfigureAwait(false);
                 }
 
-                await startMsg.RemoveReactionsAsync(ctx.Client.CurrentUser, _reactionPlayer).ConfigureAwait(false);
-                await startMsg.RemoveReactionsAsync(ctx.Client.CurrentUser, _reactionBet).ConfigureAwait(false);
                 _service.Games.TryRemove(ctx.Channel.Id, out _);
             }
 
