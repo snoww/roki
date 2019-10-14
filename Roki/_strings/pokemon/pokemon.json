@@ -4834,7 +4834,17 @@
     "sprite": "necrozma-duskmane.gif",
     "name": "Necrozma Duskmane"
   },
+  "necrozma-duskmane": {
+    "api": 10155,
+    "sprite": "necrozma-duskmane.gif",
+    "name": "Necrozma Duskmane"
+  },
   "necrozma-dawn": {
+    "api": 10156,
+    "sprite": "necrozma-dawnwings.gif",
+    "name": "Necrozma Dawnwings"
+  },
+  "necrozma-dawn-wings": {
     "api": 10156,
     "sprite": "necrozma-dawnwings.gif",
     "name": "Necrozma Dawnwings"
