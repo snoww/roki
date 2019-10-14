@@ -62,5 +62,27 @@ namespace Roki.Modules.Utility
             
             await ctx.Channel.EmbedAsync(embed);
         }
+
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task Say([Leftover] string message = null)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                return;
+
+            await ctx.Channel.SendMessageAsync(message).ConfigureAwait(false);
+        }
+
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task SayRaw([Leftover] string message = null)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                return;
+            
+            await ctx.Channel.SendMessageAsync(ctx.Message.Content).ConfigureAwait(false);
+        }
     }
 }
