@@ -409,10 +409,10 @@
     "sprite": "magneton.gif",
     "name": "Magneton"
   },
-  "farfetch’d": {
+  "farfetch'd": {
     "api": 83,
-    "sprite": "farfetch’d.gif",
-    "name": "Farfetch’d"
+    "sprite": "farfetch'd.gif",
+    "name": "Farfetch'd"
   },
   "doduo": {
     "api": 84,
@@ -4646,7 +4646,7 @@
   },
   "oricorio-pa'u": {
     "api": 10124,
-    "sprite": "beedrill-mega.gif",
+    "sprite": "oricorio-pau.gif",
     "name": "Oricorio P'au"
   },
   "oricorio-sensu": {
