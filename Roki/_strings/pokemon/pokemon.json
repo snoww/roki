@@ -3854,7 +3854,7 @@
     "sprite": "pyukumuku.gif",
     "name": "Pyukumuku"
   },
-  "type null": {
+  "type-null": {
     "api": 772,
     "sprite": "typenull.gif",
     "name": "Type: null"
