@@ -604,9 +604,9 @@
     "sprite": "starmie.gif",
     "name": "Starmie"
   },
-  "mr. mime": {
+  "mr-mime": {
     "api": 122,
-    "sprite": "mr. mime.gif",
+    "sprite": "mrmime.gif",
     "name": "Mr. mime"
   },
   "scyther": {
@@ -3348,6 +3348,36 @@
     "api": 670,
     "sprite": "floette.gif",
     "name": "Floette"
+  },
+  "floette-blue": {
+    "api": 670,
+    "sprite": "floette-blue.gif",
+    "name": "Floette-Blue"
+  },
+  "floette-eternal": {
+    "api": 670,
+    "sprite": "floette-eternal.gif",
+    "name": "Floette-Eternal"
+  },
+  "floette-orange": {
+    "api": 670,
+    "sprite": "floette-orange.gif",
+    "name": "Floette-Orange"
+  },
+  "floette-red": {
+    "api": 670,
+    "sprite": "floette-red.gif",
+    "name": "Floette-Red"
+  },
+  "floett-white": {
+    "api": 670,
+    "sprite": "floette-white.gif",
+    "name": "Floette-White"
+  },
+  "floette-yellow": {
+    "api": 670,
+    "sprite": "floette-yellow.gif",
+    "name": "Floette-Yellow"
   },
   "florges": {
     "api": 671,
