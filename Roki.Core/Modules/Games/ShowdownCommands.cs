@@ -131,7 +131,7 @@ namespace Roki.Modules.Games
                     
                         var start = new EmbedBuilder().WithOkColor()
                             .WithTitle($"Random Battle")
-                            .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions P1 10 20 100 means betting on 130 on P1.")
+                            .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 20 100` means betting on 130 on P1.")
                             .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
                             .AddField("Player 1", string.Join('\n', intro[0]), true)
                             .AddField("Player 2", string.Join('\n', intro[1]), true);
@@ -181,7 +181,7 @@ namespace Roki.Modules.Games
                                 joinedReactions[user].Amount += _betMap[reaction.Emote];
                             else
                             {
-                                var notEnoughMsg = await ctx.Channel.SendErrorAsync($"{reaction.User.Value.Id} You do not have enough currency to make that bet.").ConfigureAwait(false);
+                                var notEnoughMsg = await ctx.Channel.SendErrorAsync($"<@{reaction.User.Value.Id}> You do not have enough currency to make that bet.").ConfigureAwait(false);
                                 await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, RequestOptions.Default).ConfigureAwait(false);
                                 notEnoughMsg.DeleteAfter(5);
                             }
@@ -305,7 +305,8 @@ namespace Roki.Modules.Games
                             .WithDescription($"Player {win} has won the battle!\nBetter luck next time!\n{losers}\n")).ConfigureAwait(false);
                 }
 
-                await startMsg.RemoveAllReactionsAsync().ConfigureAwait(false);
+                await startMsg.RemoveReactionsAsync(ctx.Client.CurrentUser, _reactionPlayer).ConfigureAwait(false);
+                await startMsg.RemoveReactionsAsync(ctx.Client.CurrentUser, _reactionBet).ConfigureAwait(false);
                 _service.Games.TryRemove(ctx.Channel.Id, out _);
             }
 
