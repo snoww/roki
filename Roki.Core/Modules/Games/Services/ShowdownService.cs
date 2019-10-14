@@ -341,7 +341,8 @@ namespace Roki.Modules.Games.Services
         
         public string GetPokemonSprite(string query)
         {
-            query = query.Split(',').First().ToLower().Replace(" ", "-", StringComparison.Ordinal).Replace("%", "", StringComparison.Ordinal);
+            query = query.Split(',').First().ToLower().Replace(" ", "-", StringComparison.Ordinal).Replace("%", "", StringComparison.Ordinal)
+                .Replace(".", "", StringComparison.Ordinal).Replace(":", "", StringComparison.Ordinal);
             var poke = query.EndsWith("-*", StringComparison.Ordinal) ? Data[query.Replace("-*", "", StringComparison.Ordinal)] : Data[query];
 
             return poke.Sprite.Replace("gif", "png", StringComparison.Ordinal);
