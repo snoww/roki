@@ -175,7 +175,7 @@ namespace Roki.Modules.Games
 
                             return Task.CompletedTask;
                         }
-                        if (joinedReactions[user].Amount <= 0)
+                        if (joinedReactions[user].Amount >= 0)
                         {
                             if (_currency.GetCurrency(user.Id) >= joinedReactions[user].Amount + _betMap[reaction.Emote])
                                 joinedReactions[user].Amount += _betMap[reaction.Emote];
@@ -188,13 +188,8 @@ namespace Roki.Modules.Games
                             return Task.CompletedTask;
                         }
 
-                        if (Equals(Player1, reaction.Emote))
-                        {
-                            joinedReactions[user].Bet = BetPlayer.P1;
-                            return Task.CompletedTask;
-                        }
-                        
-                        joinedReactions[user].Bet = BetPlayer.P2;
+                        joinedReactions[user].Bet = Equals(Player1, reaction.Emote) ? BetPlayer.P1 : BetPlayer.P2;
+
                         return Task.CompletedTask;
                     });
                     
