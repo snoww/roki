@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore.Internal;
 using NLog;
 using Roki.Common.Attributes;
 using Roki.Extensions;
@@ -84,21 +85,48 @@ namespace Roki.Modules.Games
                 public long Amount { get; set; }
                 public BetPlayer? Bet { get; set; }
             }
-            
+
             [RokiCommand, Description, Aliases, Usage]
             [RequireContext(ContextType.Guild)]
-            public async Task BetPokemonGame()
+            public async Task BetPokemonGame([Leftover] string arguments = "-g 7")
             {
                 if (_service.Games.TryGetValue(ctx.Channel.Id, out _))
                 {
                     await ctx.Channel.SendErrorAsync("Game already in progress in current channel.");
                     return;
                 }
+
+                var verbose = false;
+                var generation = "7";
+
+                var args = arguments.Split();
+                if (args.Contains("-g", StringComparer.Ordinal) || args.Contains("--generation", StringComparer.Ordinal))
+                {
+                    try
+                    {
+                        var gen = args[args.IndexOf("-g") + 1];
+                        if (gen == "6")
+                            generation = "6";
+                        else if (gen == "5")
+                            generation = "5";
+                        else if (gen == "4") 
+                            generation = "4";
+                    }
+                    catch
+                    {
+                        await ctx.Channel.SendErrorAsync("Argument Error.").ConfigureAwait(false);
+                        return;
+                    }
+                } 
+                if (args.Contains("-v", StringComparer.Ordinal) || args.Contains("--verbose", StringComparer.Ordinal))
+                {
+                    verbose = true;
+                }
                 
                 _service.Games.TryAdd(ctx.Channel.Id, $"{ctx.User.Username}'s game");
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
 
-                var gameText = await _service.StartAiGameAsync().ConfigureAwait(false);
+                var gameText = await _service.StartAiGameAsync(generation).ConfigureAwait(false);
                 var index = gameText.IndexOf("|teampreview", StringComparison.Ordinal);
                 var gameIntro = gameText.Substring(0, index);
                 var gameTurns = gameText.Substring(index + 1);
@@ -266,9 +294,12 @@ namespace Roki.Modules.Games
                     _service.Games.TryRemove(ctx.Channel.Id, out _);
                     return;
                 }*/
-                
-//                var turns = _service.ParseTurns(gameTurns);
-//                var win = turns.Last().Last();
+
+                if (verbose)
+                {
+//                    var turns = _service.ParseTurns(gameTurns);
+//                    do nothing right now
+                }
                 var win = _service.GetWinner(gameTurns);
                 var result = win == "1" ? BetPlayer.P1 : BetPlayer.P2;
 

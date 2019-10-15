@@ -20,12 +20,12 @@ namespace Roki.Modules.Games.Services
         {
         }
 
-        public async Task<string> StartAiGameAsync()
+        public async Task<string> StartAiGameAsync(string args)
         {
             string output;
             using (var proc = new Process())
             {
-                proc.StartInfo.FileName = "./scripts/ai-battle.sh";
+                proc.StartInfo.FileName = $"./scripts/ai-battle.sh -g {args}";
                 proc.StartInfo.UseShellExecute = false;
                 proc.StartInfo.RedirectStandardOutput = true;
                 proc.Start();
