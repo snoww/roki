@@ -26,7 +26,7 @@ namespace Roki.Modules.Games.Services
             using (var proc = new Process())
             {
                 proc.StartInfo.FileName = "./scripts/ai-battle.sh";
-                proc.StartInfo.Arguments = $" -g {args}";
+                proc.StartInfo.Arguments = $"-g {args}";
                 proc.StartInfo.UseShellExecute = false;
                 proc.StartInfo.RedirectStandardOutput = true;
                 proc.Start();
