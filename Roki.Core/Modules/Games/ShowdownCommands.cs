@@ -27,7 +27,10 @@ namespace Roki.Modules.Games
         {
             private readonly DiscordSocketClient _client;
             private readonly ICurrencyService _currency;
-            private const string SpriteUrl = "http://play.pokemonshowdown.com/sprites/xydex/";
+            private const string Gen7SpriteUrl = "http://play.pokemonshowdown.com/sprites/xydex/";
+            private const string Gen6SpriteUrl = "http://play.pokemonshowdown.com/sprites/xy/";
+            private const string Gen5SpriteUrl = "http://play.pokemonshowdown.com/sprites/bw/";
+            private const string Gen4SpriteUrl = "http://play.pokemonshowdown.com/sprites/dpp/";
             private static readonly Emote Player1 = Emote.Parse("<:p1:633334846386601984>");
             private static readonly Emote Player2 = Emote.Parse("<:p2:633334846441127936>");
             private static readonly Emote One = Emote.Parse("<:1_:633332839454343199>");
@@ -141,8 +144,8 @@ namespace Roki.Modules.Games
                 {
                     for (int i = 0; i < intro[0].Count; i++)
                     {
-                        t1.Add(GetPokemonImage(intro[0][i]));
-                        t2.Add(GetPokemonImage(intro[1][i]));
+                        t1.Add(GetPokemonImage(intro[0][i], generation));
+                        t2.Add(GetPokemonImage(intro[1][i], generation));
                     }
                 
                     using (var bitmap1 = t1.MergePokemonTeam())
@@ -338,11 +341,20 @@ namespace Roki.Modules.Games
                 _service.Games.TryRemove(ctx.Channel.Id, out _);
             }
 
-            private Image<Rgba32> GetPokemonImage(string pokemon)
+            private Image<Rgba32> GetPokemonImage(string pokemon, string generation)
             {
                 var sprite = _service.GetPokemonSprite(pokemon);
                 var wc = new WebClient();
-                using (var stream = new MemoryStream(wc.DownloadData(SpriteUrl + sprite)))
+                string genUrl;
+                if (generation == "7")
+                    genUrl = Gen7SpriteUrl;
+                else if (generation == "6")
+                    genUrl = Gen6SpriteUrl;
+                else if (generation == "5")
+                    genUrl = Gen5SpriteUrl;
+                else
+                    genUrl = Gen4SpriteUrl;
+                using (var stream = new MemoryStream(wc.DownloadData(genUrl + sprite + ".png")))
                 {
                     return Image.Load(stream.ToArray());
                 }
