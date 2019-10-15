@@ -1,4522 +1,4522 @@
 {
   "bulbasaur": {
     "api": 1,
-    "sprite": "bulbasaur.gif",
+    "sprite": "bulbasaur",
     "name": "Bulbasaur"
   },
   "ivysaur": {
     "api": 2,
-    "sprite": "ivysaur.gif",
+    "sprite": "ivysaur",
     "name": "Ivysaur"
   },
   "venusaur": {
     "api": 3,
-    "sprite": "venusaur.gif",
+    "sprite": "venusaur",
     "name": "Venusaur"
   },
   "charmander": {
     "api": 4,
-    "sprite": "charmander.gif",
+    "sprite": "charmander",
     "name": "Charmander"
   },
   "charmeleon": {
     "api": 5,
-    "sprite": "charmeleon.gif",
+    "sprite": "charmeleon",
     "name": "Charmeleon"
   },
   "charizard": {
     "api": 6,
-    "sprite": "charizard.gif",
+    "sprite": "charizard",
     "name": "Charizard"
   },
   "squirtle": {
     "api": 7,
-    "sprite": "squirtle.gif",
+    "sprite": "squirtle",
     "name": "Squirtle"
   },
   "wartortle": {
     "api": 8,
-    "sprite": "wartortle.gif",
+    "sprite": "wartortle",
     "name": "Wartortle"
   },
   "blastoise": {
     "api": 9,
-    "sprite": "blastoise.gif",
+    "sprite": "blastoise",
     "name": "Blastoise"
   },
   "caterpie": {
     "api": 10,
-    "sprite": "caterpie.gif",
+    "sprite": "caterpie",
     "name": "Caterpie"
   },
   "metapod": {
     "api": 11,
-    "sprite": "metapod.gif",
+    "sprite": "metapod",
     "name": "Metapod"
   },
   "butterfree": {
     "api": 12,
-    "sprite": "butterfree.gif",
+    "sprite": "butterfree",
     "name": "Butterfree"
   },
   "weedle": {
     "api": 13,
-    "sprite": "weedle.gif",
+    "sprite": "weedle",
     "name": "Weedle"
   },
   "kakuna": {
     "api": 14,
-    "sprite": "kakuna.gif",
+    "sprite": "kakuna",
     "name": "Kakuna"
   },
   "beedrill": {
     "api": 15,
-    "sprite": "beedrill.gif",
+    "sprite": "beedrill",
     "name": "Beedrill"
   },
   "pidgey": {
     "api": 16,
-    "sprite": "pidgey.gif",
+    "sprite": "pidgey",
     "name": "Pidgey"
   },
   "pidgeotto": {
     "api": 17,
-    "sprite": "pidgeotto.gif",
+    "sprite": "pidgeotto",
     "name": "Pidgeotto"
   },
   "pidgeot": {
     "api": 18,
-    "sprite": "pidgeot.gif",
+    "sprite": "pidgeot",
     "name": "Pidgeot"
   },
   "rattata": {
     "api": 19,
-    "sprite": "rattata.gif",
+    "sprite": "rattata",
     "name": "Rattata"
   },
   "raticate": {
     "api": 20,
-    "sprite": "raticate.gif",
+    "sprite": "raticate",
     "name": "Raticate"
   },
   "spearow": {
     "api": 21,
-    "sprite": "spearow.gif",
+    "sprite": "spearow",
     "name": "Spearow"
   },
   "fearow": {
     "api": 22,
-    "sprite": "fearow.gif",
+    "sprite": "fearow",
     "name": "Fearow"
   },
   "ekans": {
     "api": 23,
-    "sprite": "ekans.gif",
+    "sprite": "ekans",
     "name": "Ekans"
   },
   "arbok": {
     "api": 24,
-    "sprite": "arbok.gif",
+    "sprite": "arbok",
     "name": "Arbok"
   },
   "pikachu": {
     "api": 25,
-    "sprite": "pikachu.gif",
+    "sprite": "pikachu",
     "name": "Pikachu"
   },
   "raichu": {
     "api": 26,
-    "sprite": "raichu.gif",
+    "sprite": "raichu",
     "name": "Raichu"
   },
   "sandshrew": {
     "api": 27,
-    "sprite": "sandshrew.gif",
+    "sprite": "sandshrew",
     "name": "Sandshrew"
   },
   "sandslash": {
     "api": 28,
-    "sprite": "sandslash.gif",
+    "sprite": "sandslash",
     "name": "Sandslash"
   },
   "nidoran-f": {
     "api": 29,
-    "sprite": "nidoran-f.gif",
+    "sprite": "nidoran-f",
     "name": "Nidoran"
   },
   "nidorina": {
     "api": 30,
-    "sprite": "nidorina.gif",
+    "sprite": "nidorina",
     "name": "Nidorina"
   },
   "nidoqueen": {
     "api": 31,
-    "sprite": "nidoqueen.gif",
+    "sprite": "nidoqueen",
     "name": "Nidoqueen"
   },
   "nidoran": {
     "api": 32,
-    "sprite": "nidoranf.gif",
+    "sprite": "nidoranf",
     "name": "Nidoran"
   },
   "nidorino": {
     "api": 33,
-    "sprite": "nidorino.gif",
+    "sprite": "nidorino",
     "name": "Nidorino"
   },
   "nidoking": {
     "api": 34,
-    "sprite": "nidoking.gif",
+    "sprite": "nidoking",
     "name": "Nidoking"
   },
   "clefairy": {
     "api": 35,
-    "sprite": "clefairy.gif",
+    "sprite": "clefairy",
     "name": "Clefairy"
   },
   "clefable": {
     "api": 36,
-    "sprite": "clefable.gif",
+    "sprite": "clefable",
     "name": "Clefable"
   },
   "vulpix": {
     "api": 37,
-    "sprite": "vulpix.gif",
+    "sprite": "vulpix",
     "name": "Vulpix"
   },
   "ninetales": {
     "api": 38,
-    "sprite": "ninetales.gif",
+    "sprite": "ninetales",
     "name": "Ninetales"
   },
   "jigglypuff": {
     "api": 39,
-    "sprite": "jigglypuff.gif",
+    "sprite": "jigglypuff",
     "name": "Jigglypuff"
   },
   "wigglytuff": {
     "api": 40,
-    "sprite": "wigglytuff.gif",
+    "sprite": "wigglytuff",
     "name": "Wigglytuff"
   },
   "zubat": {
     "api": 41,
-    "sprite": "zubat.gif",
+    "sprite": "zubat",
     "name": "Zubat"
   },
   "golbat": {
     "api": 42,
-    "sprite": "golbat.gif",
+    "sprite": "golbat",
     "name": "Golbat"
   },
   "oddish": {
     "api": 43,
-    "sprite": "oddish.gif",
+    "sprite": "oddish",
     "name": "Oddish"
   },
   "gloom": {
     "api": 44,
-    "sprite": "gloom.gif",
+    "sprite": "gloom",
     "name": "Gloom"
   },
   "vileplume": {
     "api": 45,
-    "sprite": "vileplume.gif",
+    "sprite": "vileplume",
     "name": "Vileplume"
   },
   "paras": {
     "api": 46,
-    "sprite": "paras.gif",
+    "sprite": "paras",
     "name": "Paras"
   },
   "parasect": {
     "api": 47,
-    "sprite": "parasect.gif",
+    "sprite": "parasect",
     "name": "Parasect"
   },
   "venonat": {
     "api": 48,
-    "sprite": "venonat.gif",
+    "sprite": "venonat",
     "name": "Venonat"
   },
   "venomoth": {
     "api": 49,
-    "sprite": "venomoth.gif",
+    "sprite": "venomoth",
     "name": "Venomoth"
   },
   "diglett": {
     "api": 50,
-    "sprite": "diglett.gif",
+    "sprite": "diglett",
     "name": "Diglett"
   },
   "dugtrio": {
     "api": 51,
-    "sprite": "dugtrio.gif",
+    "sprite": "dugtrio",
     "name": "Dugtrio"
   },
   "meowth": {
     "api": 52,
-    "sprite": "meowth.gif",
+    "sprite": "meowth",
     "name": "Meowth"
   },
   "persian": {
     "api": 53,
-    "sprite": "persian.gif",
+    "sprite": "persian",
     "name": "Persian"
   },
   "psyduck": {
     "api": 54,
-    "sprite": "psyduck.gif",
+    "sprite": "psyduck",
     "name": "Psyduck"
   },
   "golduck": {
     "api": 55,
-    "sprite": "golduck.gif",
+    "sprite": "golduck",
     "name": "Golduck"
   },
   "mankey": {
     "api": 56,
-    "sprite": "mankey.gif",
+    "sprite": "mankey",
     "name": "Mankey"
   },
   "primeape": {
     "api": 57,
-    "sprite": "primeape.gif",
+    "sprite": "primeape",
     "name": "Primeape"
   },
   "growlithe": {
     "api": 58,
-    "sprite": "growlithe.gif",
+    "sprite": "growlithe",
     "name": "Growlithe"
   },
   "arcanine": {
     "api": 59,
-    "sprite": "arcanine.gif",
+    "sprite": "arcanine",
     "name": "Arcanine"
   },
   "poliwag": {
     "api": 60,
-    "sprite": "poliwag.gif",
+    "sprite": "poliwag",
     "name": "Poliwag"
   },
   "poliwhirl": {
     "api": 61,
-    "sprite": "poliwhirl.gif",
+    "sprite": "poliwhirl",
     "name": "Poliwhirl"
   },
   "poliwrath": {
     "api": 62,
-    "sprite": "poliwrath.gif",
+    "sprite": "poliwrath",
     "name": "Poliwrath"
   },
   "abra": {
     "api": 63,
-    "sprite": "abra.gif",
+    "sprite": "abra",
     "name": "Abra"
   },
   "kadabra": {
     "api": 64,
-    "sprite": "kadabra.gif",
+    "sprite": "kadabra",
     "name": "Kadabra"
   },
   "alakazam": {
     "api": 65,
-    "sprite": "alakazam.gif",
+    "sprite": "alakazam",
     "name": "Alakazam"
   },
   "machop": {
     "api": 66,
-    "sprite": "machop.gif",
+    "sprite": "machop",
     "name": "Machop"
   },
   "machoke": {
     "api": 67,
-    "sprite": "machoke.gif",
+    "sprite": "machoke",
     "name": "Machoke"
   },
   "machamp": {
     "api": 68,
-    "sprite": "machamp.gif",
+    "sprite": "machamp",
     "name": "Machamp"
   },
   "bellsprout": {
     "api": 69,
-    "sprite": "bellsprout.gif",
+    "sprite": "bellsprout",
     "name": "Bellsprout"
   },
   "weepinbell": {
     "api": 70,
-    "sprite": "weepinbell.gif",
+    "sprite": "weepinbell",
     "name": "Weepinbell"
   },
   "victreebel": {
     "api": 71,
-    "sprite": "victreebel.gif",
+    "sprite": "victreebel",
     "name": "Victreebel"
   },
   "tentacool": {
     "api": 72,
-    "sprite": "tentacool.gif",
+    "sprite": "tentacool",
     "name": "Tentacool"
   },
   "tentacruel": {
     "api": 73,
-    "sprite": "tentacruel.gif",
+    "sprite": "tentacruel",
     "name": "Tentacruel"
   },
   "geodude": {
     "api": 74,
-    "sprite": "geodude.gif",
+    "sprite": "geodude",
     "name": "Geodude"
   },
   "graveler": {
     "api": 75,
-    "sprite": "graveler.gif",
+    "sprite": "graveler",
     "name": "Graveler"
   },
   "golem": {
     "api": 76,
-    "sprite": "golem.gif",
+    "sprite": "golem",
     "name": "Golem"
   },
   "ponyta": {
     "api": 77,
-    "sprite": "ponyta.gif",
+    "sprite": "ponyta",
     "name": "Ponyta"
   },
   "rapidash": {
     "api": 78,
-    "sprite": "rapidash.gif",
+    "sprite": "rapidash",
     "name": "Rapidash"
   },
   "slowpoke": {
     "api": 79,
-    "sprite": "slowpoke.gif",
+    "sprite": "slowpoke",
     "name": "Slowpoke"
   },
   "slowbro": {
     "api": 80,
-    "sprite": "slowbro.gif",
+    "sprite": "slowbro",
     "name": "Slowbro"
   },
   "magnemite": {
     "api": 81,
-    "sprite": "magnemite.gif",
+    "sprite": "magnemite",
     "name": "Magnemite"
   },
   "magneton": {
     "api": 82,
-    "sprite": "magneton.gif",
+    "sprite": "magneton",
     "name": "Magneton"
   },
   "farfetch'd": {
     "api": 83,
-    "sprite": "farfetch'd.gif",
+    "sprite": "farfetch'd",
     "name": "Farfetch'd"
   },
   "doduo": {
     "api": 84,
-    "sprite": "doduo.gif",
+    "sprite": "doduo",
     "name": "Doduo"
   },
   "dodrio": {
     "api": 85,
-    "sprite": "dodrio.gif",
+    "sprite": "dodrio",
     "name": "Dodrio"
   },
   "seel": {
     "api": 86,
-    "sprite": "seel.gif",
+    "sprite": "seel",
     "name": "Seel"
   },
   "dewgong": {
     "api": 87,
-    "sprite": "dewgong.gif",
+    "sprite": "dewgong",
     "name": "Dewgong"
   },
   "grimer": {
     "api": 88,
-    "sprite": "grimer.gif",
+    "sprite": "grimer",
     "name": "Grimer"
   },
   "muk": {
     "api": 89,
-    "sprite": "muk.gif",
+    "sprite": "muk",
     "name": "Muk"
   },
   "shellder": {
     "api": 90,
-    "sprite": "shellder.gif",
+    "sprite": "shellder",
     "name": "Shellder"
   },
   "cloyster": {
     "api": 91,
-    "sprite": "cloyster.gif",
+    "sprite": "cloyster",
     "name": "Cloyster"
   },
   "gastly": {
     "api": 92,
-    "sprite": "gastly.gif",
+    "sprite": "gastly",
     "name": "Gastly"
   },
   "haunter": {
     "api": 93,
-    "sprite": "haunter.gif",
+    "sprite": "haunter",
     "name": "Haunter"
   },
   "gengar": {
     "api": 94,
-    "sprite": "gengar.gif",
+    "sprite": "gengar",
     "name": "Gengar"
   },
   "onix": {
     "api": 95,
-    "sprite": "onix.gif",
+    "sprite": "onix",
     "name": "Onix"
   },
   "drowzee": {
     "api": 96,
-    "sprite": "drowzee.gif",
+    "sprite": "drowzee",
     "name": "Drowzee"
   },
   "hypno": {
     "api": 97,
-    "sprite": "hypno.gif",
+    "sprite": "hypno",
     "name": "Hypno"
   },
   "krabby": {
     "api": 98,
-    "sprite": "krabby.gif",
+    "sprite": "krabby",
     "name": "Krabby"
   },
   "kingler": {
     "api": 99,
-    "sprite": "kingler.gif",
+    "sprite": "kingler",
     "name": "Kingler"
   },
   "voltorb": {
     "api": 100,
-    "sprite": "voltorb.gif",
+    "sprite": "voltorb",
     "name": "Voltorb"
   },
   "electrode": {
     "api": 101,
-    "sprite": "electrode.gif",
+    "sprite": "electrode",
     "name": "Electrode"
   },
   "exeggcute": {
     "api": 102,
-    "sprite": "exeggcute.gif",
+    "sprite": "exeggcute",
     "name": "Exeggcute"
   },
   "exeggutor": {
     "api": 103,
-    "sprite": "exeggutor.gif",
+    "sprite": "exeggutor",
     "name": "Exeggutor"
   },
   "cubone": {
     "api": 104,
-    "sprite": "cubone.gif",
+    "sprite": "cubone",
     "name": "Cubone"
   },
   "marowak": {
     "api": 105,
-    "sprite": "marowak.gif",
+    "sprite": "marowak",
     "name": "Marowak"
   },
   "hitmonlee": {
     "api": 106,
-    "sprite": "hitmonlee.gif",
+    "sprite": "hitmonlee",
     "name": "Hitmonlee"
   },
   "hitmonchan": {
     "api": 107,
-    "sprite": "hitmonchan.gif",
+    "sprite": "hitmonchan",
     "name": "Hitmonchan"
   },
   "lickitung": {
     "api": 108,
-    "sprite": "lickitung.gif",
+    "sprite": "lickitung",
     "name": "Lickitung"
   },
   "koffing": {
     "api": 109,
-    "sprite": "koffing.gif",
+    "sprite": "koffing",
     "name": "Koffing"
   },
   "weezing": {
     "api": 110,
-    "sprite": "weezing.gif",
+    "sprite": "weezing",
     "name": "Weezing"
   },
   "rhyhorn": {
     "api": 111,
-    "sprite": "rhyhorn.gif",
+    "sprite": "rhyhorn",
     "name": "Rhyhorn"
   },
   "rhydon": {
     "api": 112,
-    "sprite": "rhydon.gif",
+    "sprite": "rhydon",
     "name": "Rhydon"
   },
   "chansey": {
     "api": 113,
-    "sprite": "chansey.gif",
+    "sprite": "chansey",
     "name": "Chansey"
   },
   "tangela": {
     "api": 114,
-    "sprite": "tangela.gif",
+    "sprite": "tangela",
     "name": "Tangela"
   },
   "kangaskhan": {
     "api": 115,
-    "sprite": "kangaskhan.gif",
+    "sprite": "kangaskhan",
     "name": "Kangaskhan"
   },
   "horsea": {
     "api": 116,
-    "sprite": "horsea.gif",
+    "sprite": "horsea",
     "name": "Horsea"
   },
   "seadra": {
     "api": 117,
-    "sprite": "seadra.gif",
+    "sprite": "seadra",
     "name": "Seadra"
   },
   "goldeen": {
     "api": 118,
-    "sprite": "goldeen.gif",
+    "sprite": "goldeen",
     "name": "Goldeen"
   },
   "seaking": {
     "api": 119,
-    "sprite": "seaking.gif",
+    "sprite": "seaking",
     "name": "Seaking"
   },
   "staryu": {
     "api": 120,
-    "sprite": "staryu.gif",
+    "sprite": "staryu",
     "name": "Staryu"
   },
   "starmie": {
     "api": 121,
-    "sprite": "starmie.gif",
+    "sprite": "starmie",
     "name": "Starmie"
   },
   "mr-mime": {
     "api": 122,
-    "sprite": "mrmime.gif",
+    "sprite": "mrmime",
     "name": "Mr. mime"
   },
   "scyther": {
     "api": 123,
-    "sprite": "scyther.gif",
+    "sprite": "scyther",
     "name": "Scyther"
   },
   "jynx": {
     "api": 124,
-    "sprite": "jynx.gif",
+    "sprite": "jynx",
     "name": "Jynx"
   },
   "electabuzz": {
     "api": 125,
-    "sprite": "electabuzz.gif",
+    "sprite": "electabuzz",
     "name": "Electabuzz"
   },
   "magmar": {
     "api": 126,
-    "sprite": "magmar.gif",
+    "sprite": "magmar",
     "name": "Magmar"
   },
   "pinsir": {
     "api": 127,
-    "sprite": "pinsir.gif",
+    "sprite": "pinsir",
     "name": "Pinsir"
   },
   "tauros": {
     "api": 128,
-    "sprite": "tauros.gif",
+    "sprite": "tauros",
     "name": "Tauros"
   },
   "magikarp": {
     "api": 129,
-    "sprite": "magikarp.gif",
+    "sprite": "magikarp",
     "name": "Magikarp"
   },
   "gyarados": {
     "api": 130,
-    "sprite": "gyarados.gif",
+    "sprite": "gyarados",
     "name": "Gyarados"
   },
   "lapras": {
     "api": 131,
-    "sprite": "lapras.gif",
+    "sprite": "lapras",
     "name": "Lapras"
   },
   "ditto": {
     "api": 132,
-    "sprite": "ditto.gif",
+    "sprite": "ditto",
     "name": "Ditto"
   },
   "eevee": {
     "api": 133,
-    "sprite": "eevee.gif",
+    "sprite": "eevee",
     "name": "Eevee"
   },
   "vaporeon": {
     "api": 134,
-    "sprite": "vaporeon.gif",
+    "sprite": "vaporeon",
     "name": "Vaporeon"
   },
   "jolteon": {
     "api": 135,
-    "sprite": "jolteon.gif",
+    "sprite": "jolteon",
     "name": "Jolteon"
   },
   "flareon": {
     "api": 136,
-    "sprite": "flareon.gif",
+    "sprite": "flareon",
     "name": "Flareon"
   },
   "porygon": {
     "api": 137,
-    "sprite": "porygon.gif",
+    "sprite": "porygon",
     "name": "Porygon"
   },
   "omanyte": {
     "api": 138,
-    "sprite": "omanyte.gif",
+    "sprite": "omanyte",
     "name": "Omanyte"
   },
   "omastar": {
     "api": 139,
-    "sprite": "omastar.gif",
+    "sprite": "omastar",
     "name": "Omastar"
   },
   "kabuto": {
     "api": 140,
-    "sprite": "kabuto.gif",
+    "sprite": "kabuto",
     "name": "Kabuto"
   },
   "kabutops": {
     "api": 141,
-    "sprite": "kabutops.gif",
+    "sprite": "kabutops",
     "name": "Kabutops"
   },
   "aerodactyl": {
     "api": 142,
-    "sprite": "aerodactyl.gif",
+    "sprite": "aerodactyl",
     "name": "Aerodactyl"
   },
   "snorlax": {
     "api": 143,
-    "sprite": "snorlax.gif",
+    "sprite": "snorlax",
     "name": "Snorlax"
   },
   "articuno": {
     "api": 144,
-    "sprite": "articuno.gif",
+    "sprite": "articuno",
     "name": "Articuno"
   },
   "zapdos": {
     "api": 145,
-    "sprite": "zapdos.gif",
+    "sprite": "zapdos",
     "name": "Zapdos"
   },
   "moltres": {
     "api": 146,
-    "sprite": "moltres.gif",
+    "sprite": "moltres",
     "name": "Moltres"
   },
   "dratini": {
     "api": 147,
-    "sprite": "dratini.gif",
+    "sprite": "dratini",
     "name": "Dratini"
   },
   "dragonair": {
     "api": 148,
-    "sprite": "dragonair.gif",
+    "sprite": "dragonair",
     "name": "Dragonair"
   },
   "dragonite": {
     "api": 149,
-    "sprite": "dragonite.gif",
+    "sprite": "dragonite",
     "name": "Dragonite"
   },
   "mewtwo": {
     "api": 150,
-    "sprite": "mewtwo.gif",
+    "sprite": "mewtwo",
     "name": "Mewtwo"
   },
   "mew": {
     "api": 151,
-    "sprite": "mew.gif",
+    "sprite": "mew",
     "name": "Mew"
   },
   "chikorita": {
     "api": 152,
-    "sprite": "chikorita.gif",
+    "sprite": "chikorita",
     "name": "Chikorita"
   },
   "bayleef": {
     "api": 153,
-    "sprite": "bayleef.gif",
+    "sprite": "bayleef",
     "name": "Bayleef"
   },
   "meganium": {
     "api": 154,
-    "sprite": "meganium.gif",
+    "sprite": "meganium",
     "name": "Meganium"
   },
   "cyndaquil": {
     "api": 155,
-    "sprite": "cyndaquil.gif",
+    "sprite": "cyndaquil",
     "name": "Cyndaquil"
   },
   "quilava": {
     "api": 156,
-    "sprite": "quilava.gif",
+    "sprite": "quilava",
     "name": "Quilava"
   },
   "typhlosion": {
     "api": 157,
-    "sprite": "typhlosion.gif",
+    "sprite": "typhlosion",
     "name": "Typhlosion"
   },
   "totodile": {
     "api": 158,
-    "sprite": "totodile.gif",
+    "sprite": "totodile",
     "name": "Totodile"
   },
   "croconaw": {
     "api": 159,
-    "sprite": "croconaw.gif",
+    "sprite": "croconaw",
     "name": "Croconaw"
   },
   "feraligatr": {
     "api": 160,
-    "sprite": "feraligatr.gif",
+    "sprite": "feraligatr",
     "name": "Feraligatr"
   },
   "sentret": {
     "api": 161,
-    "sprite": "sentret.gif",
+    "sprite": "sentret",
     "name": "Sentret"
   },
   "furret": {
     "api": 162,
-    "sprite": "furret.gif",
+    "sprite": "furret",
     "name": "Furret"
   },
   "hoothoot": {
     "api": 163,
-    "sprite": "hoothoot.gif",
+    "sprite": "hoothoot",
     "name": "Hoothoot"
   },
   "noctowl": {
     "api": 164,
-    "sprite": "noctowl.gif",
+    "sprite": "noctowl",
     "name": "Noctowl"
   },
   "ledyba": {
     "api": 165,
-    "sprite": "ledyba.gif",
+    "sprite": "ledyba",
     "name": "Ledyba"
   },
   "ledian": {
     "api": 166,
-    "sprite": "ledian.gif",
+    "sprite": "ledian",
     "name": "Ledian"
   },
   "spinarak": {
     "api": 167,
-    "sprite": "spinarak.gif",
+    "sprite": "spinarak",
     "name": "Spinarak"
   },
   "ariados": {
     "api": 168,
-    "sprite": "ariados.gif",
+    "sprite": "ariados",
     "name": "Ariados"
   },
   "crobat": {
     "api": 169,
-    "sprite": "crobat.gif",
+    "sprite": "crobat",
     "name": "Crobat"
   },
   "chinchou": {
     "api": 170,
-    "sprite": "chinchou.gif",
+    "sprite": "chinchou",
     "name": "Chinchou"
   },
   "lanturn": {
     "api": 171,
-    "sprite": "lanturn.gif",
+    "sprite": "lanturn",
     "name": "Lanturn"
   },
   "pichu": {
     "api": 172,
-    "sprite": "pichu.gif",
+    "sprite": "pichu",
     "name": "Pichu"
   },
   "cleffa": {
     "api": 173,
-    "sprite": "cleffa.gif",
+    "sprite": "cleffa",
     "name": "Cleffa"
   },
   "igglybuff": {
     "api": 174,
-    "sprite": "igglybuff.gif",
+    "sprite": "igglybuff",
     "name": "Igglybuff"
   },
   "togepi": {
     "api": 175,
-    "sprite": "togepi.gif",
+    "sprite": "togepi",
     "name": "Togepi"
   },
   "togetic": {
     "api": 176,
-    "sprite": "togetic.gif",
+    "sprite": "togetic",
     "name": "Togetic"
   },
   "natu": {
     "api": 177,
-    "sprite": "natu.gif",
+    "sprite": "natu",
     "name": "Natu"
   },
   "xatu": {
     "api": 178,
-    "sprite": "xatu.gif",
+    "sprite": "xatu",
     "name": "Xatu"
   },
   "mareep": {
     "api": 179,
-    "sprite": "mareep.gif",
+    "sprite": "mareep",
     "name": "Mareep"
   },
   "flaaffy": {
     "api": 180,
-    "sprite": "flaaffy.gif",
+    "sprite": "flaaffy",
     "name": "Flaaffy"
   },
   "ampharos": {
     "api": 181,
-    "sprite": "ampharos.gif",
+    "sprite": "ampharos",
     "name": "Ampharos"
   },
   "bellossom": {
     "api": 182,
-    "sprite": "bellossom.gif",
+    "sprite": "bellossom",
     "name": "Bellossom"
   },
   "marill": {
     "api": 183,
-    "sprite": "marill.gif",
+    "sprite": "marill",
     "name": "Marill"
   },
   "azumarill": {
     "api": 184,
-    "sprite": "azumarill.gif",
+    "sprite": "azumarill",
     "name": "Azumarill"
   },
   "sudowoodo": {
     "api": 185,
-    "sprite": "sudowoodo.gif",
+    "sprite": "sudowoodo",
     "name": "Sudowoodo"
   },
   "politoed": {
     "api": 186,
-    "sprite": "politoed.gif",
+    "sprite": "politoed",
     "name": "Politoed"
   },
   "hoppip": {
     "api": 187,
-    "sprite": "hoppip.gif",
+    "sprite": "hoppip",
     "name": "Hoppip"
   },
   "skiploom": {
     "api": 188,
-    "sprite": "skiploom.gif",
+    "sprite": "skiploom",
     "name": "Skiploom"
   },
   "jumpluff": {
     "api": 189,
-    "sprite": "jumpluff.gif",
+    "sprite": "jumpluff",
     "name": "Jumpluff"
   },
   "aipom": {
     "api": 190,
-    "sprite": "aipom.gif",
+    "sprite": "aipom",
     "name": "Aipom"
   },
   "sunkern": {
     "api": 191,
-    "sprite": "sunkern.gif",
+    "sprite": "sunkern",
     "name": "Sunkern"
   },
   "sunflora": {
     "api": 192,
-    "sprite": "sunflora.gif",
+    "sprite": "sunflora",
     "name": "Sunflora"
   },
   "yanma": {
     "api": 193,
-    "sprite": "yanma.gif",
+    "sprite": "yanma",
     "name": "Yanma"
   },
   "wooper": {
     "api": 194,
-    "sprite": "wooper.gif",
+    "sprite": "wooper",
     "name": "Wooper"
   },
   "quagsire": {
     "api": 195,
-    "sprite": "quagsire.gif",
+    "sprite": "quagsire",
     "name": "Quagsire"
   },
   "espeon": {
     "api": 196,
-    "sprite": "espeon.gif",
+    "sprite": "espeon",
     "name": "Espeon"
   },
   "umbreon": {
     "api": 197,
-    "sprite": "umbreon.gif",
+    "sprite": "umbreon",
     "name": "Umbreon"
   },
   "murkrow": {
     "api": 198,
-    "sprite": "murkrow.gif",
+    "sprite": "murkrow",
     "name": "Murkrow"
   },
   "slowking": {
     "api": 199,
-    "sprite": "slowking.gif",
+    "sprite": "slowking",
     "name": "Slowking"
   },
   "misdreavus": {
     "api": 200,
-    "sprite": "misdreavus.gif",
+    "sprite": "misdreavus",
     "name": "Misdreavus"
   },
   "unown": {
     "api": 201,
-    "sprite": "unown.gif",
+    "sprite": "unown",
     "name": "Unown"
   },
   "wobbuffet": {
     "api": 202,
-    "sprite": "wobbuffet.gif",
+    "sprite": "wobbuffet",
     "name": "Wobbuffet"
   },
   "girafarig": {
     "api": 203,
-    "sprite": "girafarig.gif",
+    "sprite": "girafarig",
     "name": "Girafarig"
   },
   "pineco": {
     "api": 204,
-    "sprite": "pineco.gif",
+    "sprite": "pineco",
     "name": "Pineco"
   },
   "forretress": {
     "api": 205,
-    "sprite": "forretress.gif",
+    "sprite": "forretress",
     "name": "Forretress"
   },
   "dunsparce": {
     "api": 206,
-    "sprite": "dunsparce.gif",
+    "sprite": "dunsparce",
     "name": "Dunsparce"
   },
   "gligar": {
     "api": 207,
-    "sprite": "gligar.gif",
+    "sprite": "gligar",
     "name": "Gligar"
   },
   "steelix": {
     "api": 208,
-    "sprite": "steelix.gif",
+    "sprite": "steelix",
     "name": "Steelix"
   },
   "snubbull": {
     "api": 209,
-    "sprite": "snubbull.gif",
+    "sprite": "snubbull",
     "name": "Snubbull"
   },
   "granbull": {
     "api": 210,
-    "sprite": "granbull.gif",
+    "sprite": "granbull",
     "name": "Granbull"
   },
   "qwilfish": {
     "api": 211,
-    "sprite": "qwilfish.gif",
+    "sprite": "qwilfish",
     "name": "Qwilfish"
   },
   "scizor": {
     "api": 212,
-    "sprite": "scizor.gif",
+    "sprite": "scizor",
     "name": "Scizor"
   },
   "shuckle": {
     "api": 213,
-    "sprite": "shuckle.gif",
+    "sprite": "shuckle",
     "name": "Shuckle"
   },
   "heracross": {
     "api": 214,
-    "sprite": "heracross.gif",
+    "sprite": "heracross",
     "name": "Heracross"
   },
   "sneasel": {
     "api": 215,
-    "sprite": "sneasel.gif",
+    "sprite": "sneasel",
     "name": "Sneasel"
   },
   "teddiursa": {
     "api": 216,
-    "sprite": "teddiursa.gif",
+    "sprite": "teddiursa",
     "name": "Teddiursa"
   },
   "ursaring": {
     "api": 217,
-    "sprite": "ursaring.gif",
+    "sprite": "ursaring",
     "name": "Ursaring"
   },
   "slugma": {
     "api": 218,
-    "sprite": "slugma.gif",
+    "sprite": "slugma",
     "name": "Slugma"
   },
   "magcargo": {
     "api": 219,
-    "sprite": "magcargo.gif",
+    "sprite": "magcargo",
     "name": "Magcargo"
   },
   "swinub": {
     "api": 220,
-    "sprite": "swinub.gif",
+    "sprite": "swinub",
     "name": "Swinub"
   },
   "piloswine": {
     "api": 221,
-    "sprite": "piloswine.gif",
+    "sprite": "piloswine",
     "name": "Piloswine"
   },
   "corsola": {
     "api": 222,
-    "sprite": "corsola.gif",
+    "sprite": "corsola",
     "name": "Corsola"
   },
   "remoraid": {
     "api": 223,
-    "sprite": "remoraid.gif",
+    "sprite": "remoraid",
     "name": "Remoraid"
   },
   "octillery": {
     "api": 224,
-    "sprite": "octillery.gif",
+    "sprite": "octillery",
     "name": "Octillery"
   },
   "delibird": {
     "api": 225,
-    "sprite": "delibird.gif",
+    "sprite": "delibird",
     "name": "Delibird"
   },
   "mantine": {
     "api": 226,
-    "sprite": "mantine.gif",
+    "sprite": "mantine",
     "name": "Mantine"
   },
   "skarmory": {
     "api": 227,
-    "sprite": "skarmory.gif",
+    "sprite": "skarmory",
     "name": "Skarmory"
   },
   "houndour": {
     "api": 228,
-    "sprite": "houndour.gif",
+    "sprite": "houndour",
     "name": "Houndour"
   },
   "houndoom": {
     "api": 229,
-    "sprite": "houndoom.gif",
+    "sprite": "houndoom",
     "name": "Houndoom"
   },
   "kingdra": {
     "api": 230,
-    "sprite": "kingdra.gif",
+    "sprite": "kingdra",
     "name": "Kingdra"
   },
   "phanpy": {
     "api": 231,
-    "sprite": "phanpy.gif",
+    "sprite": "phanpy",
     "name": "Phanpy"
   },
   "donphan": {
     "api": 232,
-    "sprite": "donphan.gif",
+    "sprite": "donphan",
     "name": "Donphan"
   },
   "porygon2": {
     "api": 233,
-    "sprite": "porygon2.gif",
+    "sprite": "porygon2",
     "name": "Porygon2"
   },
   "stantler": {
     "api": 234,
-    "sprite": "stantler.gif",
+    "sprite": "stantler",
     "name": "Stantler"
   },
   "smeargle": {
     "api": 235,
-    "sprite": "smeargle.gif",
+    "sprite": "smeargle",
     "name": "Smeargle"
   },
   "tyrogue": {
     "api": 236,
-    "sprite": "tyrogue.gif",
+    "sprite": "tyrogue",
     "name": "Tyrogue"
   },
   "hitmontop": {
     "api": 237,
-    "sprite": "hitmontop.gif",
+    "sprite": "hitmontop",
     "name": "Hitmontop"
   },
   "smoochum": {
     "api": 238,
-    "sprite": "smoochum.gif",
+    "sprite": "smoochum",
     "name": "Smoochum"
   },
   "elekid": {
     "api": 239,
-    "sprite": "elekid.gif",
+    "sprite": "elekid",
     "name": "Elekid"
   },
   "magby": {
     "api": 240,
-    "sprite": "magby.gif",
+    "sprite": "magby",
     "name": "Magby"
   },
   "miltank": {
     "api": 241,
-    "sprite": "miltank.gif",
+    "sprite": "miltank",
     "name": "Miltank"
   },
   "blissey": {
     "api": 242,
-    "sprite": "blissey.gif",
+    "sprite": "blissey",
     "name": "Blissey"
   },
   "raikou": {
     "api": 243,
-    "sprite": "raikou.gif",
+    "sprite": "raikou",
     "name": "Raikou"
   },
   "entei": {
     "api": 244,
-    "sprite": "entei.gif",
+    "sprite": "entei",
     "name": "Entei"
   },
   "suicune": {
     "api": 245,
-    "sprite": "suicune.gif",
+    "sprite": "suicune",
     "name": "Suicune"
   },
   "larvitar": {
     "api": 246,
-    "sprite": "larvitar.gif",
+    "sprite": "larvitar",
     "name": "Larvitar"
   },
   "pupitar": {
     "api": 247,
-    "sprite": "pupitar.gif",
+    "sprite": "pupitar",
     "name": "Pupitar"
   },
   "tyranitar": {
     "api": 248,
-    "sprite": "tyranitar.gif",
+    "sprite": "tyranitar",
     "name": "Tyranitar"
   },
   "lugia": {
     "api": 249,
-    "sprite": "lugia.gif",
+    "sprite": "lugia",
     "name": "Lugia"
   },
   "ho-oh": {
     "api": 250,
-    "sprite": "hooh.gif",
+    "sprite": "hooh",
     "name": "Ho-Oh"
   },
   "celebi": {
     "api": 251,
-    "sprite": "celebi.gif",
+    "sprite": "celebi",
     "name": "Celebi"
   },
   "treecko": {
     "api": 252,
-    "sprite": "treecko.gif",
+    "sprite": "treecko",
     "name": "Treecko"
   },
   "grovyle": {
     "api": 253,
-    "sprite": "grovyle.gif",
+    "sprite": "grovyle",
     "name": "Grovyle"
   },
   "sceptile": {
     "api": 254,
-    "sprite": "sceptile.gif",
+    "sprite": "sceptile",
     "name": "Sceptile"
   },
   "torchic": {
     "api": 255,
-    "sprite": "torchic.gif",
+    "sprite": "torchic",
     "name": "Torchic"
   },
   "combusken": {
     "api": 256,
-    "sprite": "combusken.gif",
+    "sprite": "combusken",
     "name": "Combusken"
   },
   "blaziken": {
     "api": 257,
-    "sprite": "blaziken.gif",
+    "sprite": "blaziken",
     "name": "Blaziken"
   },
   "mudkip": {
     "api": 258,
-    "sprite": "mudkip.gif",
+    "sprite": "mudkip",
     "name": "Mudkip"
   },
   "marshtomp": {
     "api": 259,
-    "sprite": "marshtomp.gif",
+    "sprite": "marshtomp",
     "name": "Marshtomp"
   },
   "swampert": {
     "api": 260,
-    "sprite": "swampert.gif",
+    "sprite": "swampert",
     "name": "Swampert"
   },
   "poochyena": {
     "api": 261,
-    "sprite": "poochyena.gif",
+    "sprite": "poochyena",
     "name": "Poochyena"
   },
   "mightyena": {
     "api": 262,
-    "sprite": "mightyena.gif",
+    "sprite": "mightyena",
     "name": "Mightyena"
   },
   "zigzagoon": {
     "api": 263,
-    "sprite": "zigzagoon.gif",
+    "sprite": "zigzagoon",
     "name": "Zigzagoon"
   },
   "linoone": {
     "api": 264,
-    "sprite": "linoone.gif",
+    "sprite": "linoone",
     "name": "Linoone"
   },
   "wurmple": {
     "api": 265,
-    "sprite": "wurmple.gif",
+    "sprite": "wurmple",
     "name": "Wurmple"
   },
   "silcoon": {
     "api": 266,
-    "sprite": "silcoon.gif",
+    "sprite": "silcoon",
     "name": "Silcoon"
   },
   "beautifly": {
     "api": 267,
-    "sprite": "beautifly.gif",
+    "sprite": "beautifly",
     "name": "Beautifly"
   },
   "cascoon": {
     "api": 268,
-    "sprite": "cascoon.gif",
+    "sprite": "cascoon",
     "name": "Cascoon"
   },
   "dustox": {
     "api": 269,
-    "sprite": "dustox.gif",
+    "sprite": "dustox",
     "name": "Dustox"
   },
   "lotad": {
     "api": 270,
-    "sprite": "lotad.gif",
+    "sprite": "lotad",
     "name": "Lotad"
   },
   "lombre": {
     "api": 271,
-    "sprite": "lombre.gif",
+    "sprite": "lombre",
     "name": "Lombre"
   },
   "ludicolo": {
     "api": 272,
-    "sprite": "ludicolo.gif",
+    "sprite": "ludicolo",
     "name": "Ludicolo"
   },
   "seedot": {
     "api": 273,
-    "sprite": "seedot.gif",
+    "sprite": "seedot",
     "name": "Seedot"
   },
   "nuzleaf": {
     "api": 274,
-    "sprite": "nuzleaf.gif",
+    "sprite": "nuzleaf",
     "name": "Nuzleaf"
   },
   "shiftry": {
     "api": 275,
-    "sprite": "shiftry.gif",
+    "sprite": "shiftry",
     "name": "Shiftry"
   },
   "taillow": {
     "api": 276,
-    "sprite": "taillow.gif",
+    "sprite": "taillow",
     "name": "Taillow"
   },
   "swellow": {
     "api": 277,
-    "sprite": "swellow.gif",
+    "sprite": "swellow",
     "name": "Swellow"
   },
   "wingull": {
     "api": 278,
-    "sprite": "wingull.gif",
+    "sprite": "wingull",
     "name": "Wingull"
   },
   "pelipper": {
     "api": 279,
-    "sprite": "pelipper.gif",
+    "sprite": "pelipper",
     "name": "Pelipper"
   },
   "ralts": {
     "api": 280,
-    "sprite": "ralts.gif",
+    "sprite": "ralts",
     "name": "Ralts"
   },
   "kirlia": {
     "api": 281,
-    "sprite": "kirlia.gif",
+    "sprite": "kirlia",
     "name": "Kirlia"
   },
   "gardevoir": {
     "api": 282,
-    "sprite": "gardevoir.gif",
+    "sprite": "gardevoir",
     "name": "Gardevoir"
   },
   "surskit": {
     "api": 283,
-    "sprite": "surskit.gif",
+    "sprite": "surskit",
     "name": "Surskit"
   },
   "masquerain": {
     "api": 284,
-    "sprite": "masquerain.gif",
+    "sprite": "masquerain",
     "name": "Masquerain"
   },
   "shroomish": {
     "api": 285,
-    "sprite": "shroomish.gif",
+    "sprite": "shroomish",
     "name": "Shroomish"
   },
   "breloom": {
     "api": 286,
-    "sprite": "breloom.gif",
+    "sprite": "breloom",
     "name": "Breloom"
   },
   "slakoth": {
     "api": 287,
-    "sprite": "slakoth.gif",
+    "sprite": "slakoth",
     "name": "Slakoth"
   },
   "vigoroth": {
     "api": 288,
-    "sprite": "vigoroth.gif",
+    "sprite": "vigoroth",
     "name": "Vigoroth"
   },
   "slaking": {
     "api": 289,
-    "sprite": "slaking.gif",
+    "sprite": "slaking",
     "name": "Slaking"
   },
   "nincada": {
     "api": 290,
-    "sprite": "nincada.gif",
+    "sprite": "nincada",
     "name": "Nincada"
   },
   "ninjask": {
     "api": 291,
-    "sprite": "ninjask.gif",
+    "sprite": "ninjask",
     "name": "Ninjask"
   },
   "shedinja": {
     "api": 292,
-    "sprite": "shedinja.gif",
+    "sprite": "shedinja",
     "name": "Shedinja"
   },
   "whismur": {
     "api": 293,
-    "sprite": "whismur.gif",
+    "sprite": "whismur",
     "name": "Whismur"
   },
   "loudred": {
     "api": 294,
-    "sprite": "loudred.gif",
+    "sprite": "loudred",
     "name": "Loudred"
   },
   "exploud": {
     "api": 295,
-    "sprite": "exploud.gif",
+    "sprite": "exploud",
     "name": "Exploud"
   },
   "makuhita": {
     "api": 296,
-    "sprite": "makuhita.gif",
+    "sprite": "makuhita",
     "name": "Makuhita"
   },
   "hariyama": {
     "api": 297,
-    "sprite": "hariyama.gif",
+    "sprite": "hariyama",
     "name": "Hariyama"
   },
   "azurill": {
     "api": 298,
-    "sprite": "azurill.gif",
+    "sprite": "azurill",
     "name": "Azurill"
   },
   "nosepass": {
     "api": 299,
-    "sprite": "nosepass.gif",
+    "sprite": "nosepass",
     "name": "Nosepass"
   },
   "skitty": {
     "api": 300,
-    "sprite": "skitty.gif",
+    "sprite": "skitty",
     "name": "Skitty"
   },
   "delcatty": {
     "api": 301,
-    "sprite": "delcatty.gif",
+    "sprite": "delcatty",
     "name": "Delcatty"
   },
   "sableye": {
     "api": 302,
-    "sprite": "sableye.gif",
+    "sprite": "sableye",
     "name": "Sableye"
   },
   "mawile": {
     "api": 303,
-    "sprite": "mawile.gif",
+    "sprite": "mawile",
     "name": "Mawile"
   },
   "aron": {
     "api": 304,
-    "sprite": "aron.gif",
+    "sprite": "aron",
     "name": "Aron"
   },
   "lairon": {
     "api": 305,
-    "sprite": "lairon.gif",
+    "sprite": "lairon",
     "name": "Lairon"
   },
   "aggron": {
     "api": 306,
-    "sprite": "aggron.gif",
+    "sprite": "aggron",
     "name": "Aggron"
   },
   "meditite": {
     "api": 307,
-    "sprite": "meditite.gif",
+    "sprite": "meditite",
     "name": "Meditite"
   },
   "medicham": {
     "api": 308,
-    "sprite": "medicham.gif",
+    "sprite": "medicham",
     "name": "Medicham"
   },
   "electrike": {
     "api": 309,
-    "sprite": "electrike.gif",
+    "sprite": "electrike",
     "name": "Electrike"
   },
   "manectric": {
     "api": 310,
-    "sprite": "manectric.gif",
+    "sprite": "manectric",
     "name": "Manectric"
   },
   "plusle": {
     "api": 311,
-    "sprite": "plusle.gif",
+    "sprite": "plusle",
     "name": "Plusle"
   },
   "minun": {
     "api": 312,
-    "sprite": "minun.gif",
+    "sprite": "minun",
     "name": "Minun"
   },
   "volbeat": {
     "api": 313,
-    "sprite": "volbeat.gif",
+    "sprite": "volbeat",
     "name": "Volbeat"
   },
   "illumise": {
     "api": 314,
-    "sprite": "illumise.gif",
+    "sprite": "illumise",
     "name": "Illumise"
   },
   "roselia": {
     "api": 315,
-    "sprite": "roselia.gif",
+    "sprite": "roselia",
     "name": "Roselia"
   },
   "gulpin": {
     "api": 316,
-    "sprite": "gulpin.gif",
+    "sprite": "gulpin",
     "name": "Gulpin"
   },
   "swalot": {
     "api": 317,
-    "sprite": "swalot.gif",
+    "sprite": "swalot",
     "name": "Swalot"
   },
   "carvanha": {
     "api": 318,
-    "sprite": "carvanha.gif",
+    "sprite": "carvanha",
     "name": "Carvanha"
   },
   "sharpedo": {
     "api": 319,
-    "sprite": "sharpedo.gif",
+    "sprite": "sharpedo",
     "name": "Sharpedo"
   },
   "wailmer": {
     "api": 320,
-    "sprite": "wailmer.gif",
+    "sprite": "wailmer",
     "name": "Wailmer"
   },
   "wailord": {
     "api": 321,
-    "sprite": "wailord.gif",
+    "sprite": "wailord",
     "name": "Wailord"
   },
   "numel": {
     "api": 322,
-    "sprite": "numel.gif",
+    "sprite": "numel",
     "name": "Numel"
   },
   "camerupt": {
     "api": 323,
-    "sprite": "camerupt.gif",
+    "sprite": "camerupt",
     "name": "Camerupt"
   },
   "torkoal": {
     "api": 324,
-    "sprite": "torkoal.gif",
+    "sprite": "torkoal",
     "name": "Torkoal"
   },
   "spoink": {
     "api": 325,
-    "sprite": "spoink.gif",
+    "sprite": "spoink",
     "name": "Spoink"
   },
   "grumpig": {
     "api": 326,
-    "sprite": "grumpig.gif",
+    "sprite": "grumpig",
     "name": "Grumpig"
   },
   "spinda": {
     "api": 327,
-    "sprite": "spinda.gif",
+    "sprite": "spinda",
     "name": "Spinda"
   },
   "trapinch": {
     "api": 328,
-    "sprite": "trapinch.gif",
+    "sprite": "trapinch",
     "name": "Trapinch"
   },
   "vibrava": {
     "api": 329,
-    "sprite": "vibrava.gif",
+    "sprite": "vibrava",
     "name": "Vibrava"
   },
   "flygon": {
     "api": 330,
-    "sprite": "flygon.gif",
+    "sprite": "flygon",
     "name": "Flygon"
   },
   "cacnea": {
     "api": 331,
-    "sprite": "cacnea.gif",
+    "sprite": "cacnea",
     "name": "Cacnea"
   },
   "cacturne": {
     "api": 332,
-    "sprite": "cacturne.gif",
+    "sprite": "cacturne",
     "name": "Cacturne"
   },
   "swablu": {
     "api": 333,
-    "sprite": "swablu.gif",
+    "sprite": "swablu",
     "name": "Swablu"
   },
   "altaria": {
     "api": 334,
-    "sprite": "altaria.gif",
+    "sprite": "altaria",
     "name": "Altaria"
   },
   "zangoose": {
     "api": 335,
-    "sprite": "zangoose.gif",
+    "sprite": "zangoose",
     "name": "Zangoose"
   },
   "seviper": {
     "api": 336,
-    "sprite": "seviper.gif",
+    "sprite": "seviper",
     "name": "Seviper"
   },
   "lunatone": {
     "api": 337,
-    "sprite": "lunatone.gif",
+    "sprite": "lunatone",
     "name": "Lunatone"
   },
   "solrock": {
     "api": 338,
-    "sprite": "solrock.gif",
+    "sprite": "solrock",
     "name": "Solrock"
   },
   "barboach": {
     "api": 339,
-    "sprite": "barboach.gif",
+    "sprite": "barboach",
     "name": "Barboach"
   },
   "whiscash": {
     "api": 340,
-    "sprite": "whiscash.gif",
+    "sprite": "whiscash",
     "name": "Whiscash"
   },
   "corphish": {
     "api": 341,
-    "sprite": "corphish.gif",
+    "sprite": "corphish",
     "name": "Corphish"
   },
   "crawdaunt": {
     "api": 342,
-    "sprite": "crawdaunt.gif",
+    "sprite": "crawdaunt",
     "name": "Crawdaunt"
   },
   "baltoy": {
     "api": 343,
-    "sprite": "baltoy.gif",
+    "sprite": "baltoy",
     "name": "Baltoy"
   },
   "claydol": {
     "api": 344,
-    "sprite": "claydol.gif",
+    "sprite": "claydol",
     "name": "Claydol"
   },
   "lileep": {
     "api": 345,
-    "sprite": "lileep.gif",
+    "sprite": "lileep",
     "name": "Lileep"
   },
   "cradily": {
     "api": 346,
-    "sprite": "cradily.gif",
+    "sprite": "cradily",
     "name": "Cradily"
   },
   "anorith": {
     "api": 347,
-    "sprite": "anorith.gif",
+    "sprite": "anorith",
     "name": "Anorith"
   },
   "armaldo": {
     "api": 348,
-    "sprite": "armaldo.gif",
+    "sprite": "armaldo",
     "name": "Armaldo"
   },
   "feebas": {
     "api": 349,
-    "sprite": "feebas.gif",
+    "sprite": "feebas",
     "name": "Feebas"
   },
   "milotic": {
     "api": 350,
-    "sprite": "milotic.gif",
+    "sprite": "milotic",
     "name": "Milotic"
   },
   "castform": {
     "api": 351,
-    "sprite": "castform.gif",
+    "sprite": "castform",
     "name": "Castform"
   },
   "kecleon": {
     "api": 352,
-    "sprite": "kecleon.gif",
+    "sprite": "kecleon",
     "name": "Kecleon"
   },
   "shuppet": {
     "api": 353,
-    "sprite": "shuppet.gif",
+    "sprite": "shuppet",
     "name": "Shuppet"
   },
   "banette": {
     "api": 354,
-    "sprite": "banette.gif",
+    "sprite": "banette",
     "name": "Banette"
   },
   "duskull": {
     "api": 355,
-    "sprite": "duskull.gif",
+    "sprite": "duskull",
     "name": "Duskull"
   },
   "dusclops": {
     "api": 356,
-    "sprite": "dusclops.gif",
+    "sprite": "dusclops",
     "name": "Dusclops"
   },
   "tropius": {
     "api": 357,
-    "sprite": "tropius.gif",
+    "sprite": "tropius",
     "name": "Tropius"
   },
   "chimecho": {
     "api": 358,
-    "sprite": "chimecho.gif",
+    "sprite": "chimecho",
     "name": "Chimecho"
   },
   "absol": {
     "api": 359,
-    "sprite": "absol.gif",
+    "sprite": "absol",
     "name": "Absol"
   },
   "wynaut": {
     "api": 360,
-    "sprite": "wynaut.gif",
+    "sprite": "wynaut",
     "name": "Wynaut"
   },
   "snorunt": {
     "api": 361,
-    "sprite": "snorunt.gif",
+    "sprite": "snorunt",
     "name": "Snorunt"
   },
   "glalie": {
     "api": 362,
-    "sprite": "glalie.gif",
+    "sprite": "glalie",
     "name": "Glalie"
   },
   "spheal": {
     "api": 363,
-    "sprite": "spheal.gif",
+    "sprite": "spheal",
     "name": "Spheal"
   },
   "sealeo": {
     "api": 364,
-    "sprite": "sealeo.gif",
+    "sprite": "sealeo",
     "name": "Sealeo"
   },
   "walrein": {
     "api": 365,
-    "sprite": "walrein.gif",
+    "sprite": "walrein",
     "name": "Walrein"
   },
   "clamperl": {
     "api": 366,
-    "sprite": "clamperl.gif",
+    "sprite": "clamperl",
     "name": "Clamperl"
   },
   "huntail": {
     "api": 367,
-    "sprite": "huntail.gif",
+    "sprite": "huntail",
     "name": "Huntail"
   },
   "gorebyss": {
     "api": 368,
-    "sprite": "gorebyss.gif",
+    "sprite": "gorebyss",
     "name": "Gorebyss"
   },
   "relicanth": {
     "api": 369,
-    "sprite": "relicanth.gif",
+    "sprite": "relicanth",
     "name": "Relicanth"
   },
   "luvdisc": {
     "api": 370,
-    "sprite": "luvdisc.gif",
+    "sprite": "luvdisc",
     "name": "Luvdisc"
   },
   "bagon": {
     "api": 371,
-    "sprite": "bagon.gif",
+    "sprite": "bagon",
     "name": "Bagon"
   },
   "shelgon": {
     "api": 372,
-    "sprite": "shelgon.gif",
+    "sprite": "shelgon",
     "name": "Shelgon"
   },
   "salamence": {
     "api": 373,
-    "sprite": "salamence.gif",
+    "sprite": "salamence",
     "name": "Salamence"
   },
   "beldum": {
     "api": 374,
-    "sprite": "beldum.gif",
+    "sprite": "beldum",
     "name": "Beldum"
   },
   "metang": {
     "api": 375,
-    "sprite": "metang.gif",
+    "sprite": "metang",
     "name": "Metang"
   },
   "metagross": {
     "api": 376,
-    "sprite": "metagross.gif",
+    "sprite": "metagross",
     "name": "Metagross"
   },
   "regirock": {
     "api": 377,
-    "sprite": "regirock.gif",
+    "sprite": "regirock",
     "name": "Regirock"
   },
   "regice": {
     "api": 378,
-    "sprite": "regice.gif",
+    "sprite": "regice",
     "name": "Regice"
   },
   "registeel": {
     "api": 379,
-    "sprite": "registeel.gif",
+    "sprite": "registeel",
     "name": "Registeel"
   },
   "latias": {
     "api": 380,
-    "sprite": "latias.gif",
+    "sprite": "latias",
     "name": "Latias"
   },
   "latios": {
     "api": 381,
-    "sprite": "latios.gif",
+    "sprite": "latios",
     "name": "Latios"
   },
   "kyogre": {
     "api": 382,
-    "sprite": "kyogre.gif",
+    "sprite": "kyogre",
     "name": "Kyogre"
   },
   "groudon": {
     "api": 383,
-    "sprite": "groudon.gif",
+    "sprite": "groudon",
     "name": "Groudon"
   },
   "rayquaza": {
     "api": 384,
-    "sprite": "rayquaza.gif",
+    "sprite": "rayquaza",
     "name": "Rayquaza"
   },
   "jirachi": {
     "api": 385,
-    "sprite": "jirachi.gif",
+    "sprite": "jirachi",
     "name": "Jirachi"
   },
   "deoxys": {
     "api": 386,
-    "sprite": "deoxys.gif",
+    "sprite": "deoxys",
     "name": "Deoxys"
   },
   "turtwig": {
     "api": 387,
-    "sprite": "turtwig.gif",
+    "sprite": "turtwig",
     "name": "Turtwig"
   },
   "grotle": {
     "api": 388,
-    "sprite": "grotle.gif",
+    "sprite": "grotle",
     "name": "Grotle"
   },
   "torterra": {
     "api": 389,
-    "sprite": "torterra.gif",
+    "sprite": "torterra",
     "name": "Torterra"
   },
   "chimchar": {
     "api": 390,
-    "sprite": "chimchar.gif",
+    "sprite": "chimchar",
     "name": "Chimchar"
   },
   "monferno": {
     "api": 391,
-    "sprite": "monferno.gif",
+    "sprite": "monferno",
     "name": "Monferno"
   },
   "infernape": {
     "api": 392,
-    "sprite": "infernape.gif",
+    "sprite": "infernape",
     "name": "Infernape"
   },
   "piplup": {
     "api": 393,
-    "sprite": "piplup.gif",
+    "sprite": "piplup",
     "name": "Piplup"
   },
   "prinplup": {
     "api": 394,
-    "sprite": "prinplup.gif",
+    "sprite": "prinplup",
     "name": "Prinplup"
   },
   "empoleon": {
     "api": 395,
-    "sprite": "empoleon.gif",
+    "sprite": "empoleon",
     "name": "Empoleon"
   },
   "starly": {
     "api": 396,
-    "sprite": "starly.gif",
+    "sprite": "starly",
     "name": "Starly"
   },
   "staravia": {
     "api": 397,
-    "sprite": "staravia.gif",
+    "sprite": "staravia",
     "name": "Staravia"
   },
   "staraptor": {
     "api": 398,
-    "sprite": "staraptor.gif",
+    "sprite": "staraptor",
     "name": "Staraptor"
   },
   "bidoof": {
     "api": 399,
-    "sprite": "bidoof.gif",
+    "sprite": "bidoof",
     "name": "Bidoof"
   },
   "bibarel": {
     "api": 400,
-    "sprite": "bibarel.gif",
+    "sprite": "bibarel",
     "name": "Bibarel"
   },
   "kricketot": {
     "api": 401,
-    "sprite": "kricketot.gif",
+    "sprite": "kricketot",
     "name": "Kricketot"
   },
   "kricketune": {
     "api": 402,
-    "sprite": "kricketune.gif",
+    "sprite": "kricketune",
     "name": "Kricketune"
   },
   "shinx": {
     "api": 403,
-    "sprite": "shinx.gif",
+    "sprite": "shinx",
     "name": "Shinx"
   },
   "luxio": {
     "api": 404,
-    "sprite": "luxio.gif",
+    "sprite": "luxio",
     "name": "Luxio"
   },
   "luxray": {
     "api": 405,
-    "sprite": "luxray.gif",
+    "sprite": "luxray",
     "name": "Luxray"
   },
   "budew": {
     "api": 406,
-    "sprite": "budew.gif",
+    "sprite": "budew",
     "name": "Budew"
   },
   "roserade": {
     "api": 407,
-    "sprite": "roserade.gif",
+    "sprite": "roserade",
     "name": "Roserade"
   },
   "cranidos": {
     "api": 408,
-    "sprite": "cranidos.gif",
+    "sprite": "cranidos",
     "name": "Cranidos"
   },
   "rampardos": {
     "api": 409,
-    "sprite": "rampardos.gif",
+    "sprite": "rampardos",
     "name": "Rampardos"
   },
   "shieldon": {
     "api": 410,
-    "sprite": "shieldon.gif",
+    "sprite": "shieldon",
     "name": "Shieldon"
   },
   "bastiodon": {
     "api": 411,
-    "sprite": "bastiodon.gif",
+    "sprite": "bastiodon",
     "name": "Bastiodon"
   },
   "burmy": {
     "api": 412,
-    "sprite": "burmy.gif",
+    "sprite": "burmy",
     "name": "Burmy"
   },
   "wormadam": {
     "api": 413,
-    "sprite": "wormadam.gif",
+    "sprite": "wormadam",
     "name": "Wormadam"
   },
   "mothim": {
     "api": 414,
-    "sprite": "mothim.gif",
+    "sprite": "mothim",
     "name": "Mothim"
   },
   "combee": {
     "api": 415,
-    "sprite": "combee.gif",
+    "sprite": "combee",
     "name": "Combee"
   },
   "vespiquen": {
     "api": 416,
-    "sprite": "vespiquen.gif",
+    "sprite": "vespiquen",
     "name": "Vespiquen"
   },
   "pachirisu": {
     "api": 417,
-    "sprite": "pachirisu.gif",
+    "sprite": "pachirisu",
     "name": "Pachirisu"
   },
   "buizel": {
     "api": 418,
-    "sprite": "buizel.gif",
+    "sprite": "buizel",
     "name": "Buizel"
   },
   "floatzel": {
     "api": 419,
-    "sprite": "floatzel.gif",
+    "sprite": "floatzel",
     "name": "Floatzel"
   },
   "cherubi": {
     "api": 420,
-    "sprite": "cherubi.gif",
+    "sprite": "cherubi",
     "name": "Cherubi"
   },
   "cherrim": {
     "api": 421,
-    "sprite": "cherrim.gif",
+    "sprite": "cherrim",
     "name": "Cherrim"
   },
   "shellos": {
     "api": 422,
-    "sprite": "shellos.gif",
+    "sprite": "shellos",
     "name": "Shellos"
   },
   "gastrodon": {
     "api": 423,
-    "sprite": "gastrodon.gif",
+    "sprite": "gastrodon",
     "name": "Gastrodon"
   },
   "ambipom": {
     "api": 424,
-    "sprite": "ambipom.gif",
+    "sprite": "ambipom",
     "name": "Ambipom"
   },
   "drifloon": {
     "api": 425,
-    "sprite": "drifloon.gif",
+    "sprite": "drifloon",
     "name": "Drifloon"
   },
   "drifblim": {
     "api": 426,
-    "sprite": "drifblim.gif",
+    "sprite": "drifblim",
     "name": "Drifblim"
   },
   "buneary": {
     "api": 427,
-    "sprite": "buneary.gif",
+    "sprite": "buneary",
     "name": "Buneary"
   },
   "lopunny": {
     "api": 428,
-    "sprite": "lopunny.gif",
+    "sprite": "lopunny",
     "name": "Lopunny"
   },
   "mismagius": {
     "api": 429,
-    "sprite": "mismagius.gif",
+    "sprite": "mismagius",
     "name": "Mismagius"
   },
   "honchkrow": {
     "api": 430,
-    "sprite": "honchkrow.gif",
+    "sprite": "honchkrow",
     "name": "Honchkrow"
   },
   "glameow": {
     "api": 431,
-    "sprite": "glameow.gif",
+    "sprite": "glameow",
     "name": "Glameow"
   },
   "purugly": {
     "api": 432,
-    "sprite": "purugly.gif",
+    "sprite": "purugly",
     "name": "Purugly"
   },
   "chingling": {
     "api": 433,
-    "sprite": "chingling.gif",
+    "sprite": "chingling",
     "name": "Chingling"
   },
   "stunky": {
     "api": 434,
-    "sprite": "stunky.gif",
+    "sprite": "stunky",
     "name": "Stunky"
   },
   "skuntank": {
     "api": 435,
-    "sprite": "skuntank.gif",
+    "sprite": "skuntank",
     "name": "Skuntank"
   },
   "bronzor": {
     "api": 436,
-    "sprite": "bronzor.gif",
+    "sprite": "bronzor",
     "name": "Bronzor"
   },
   "bronzong": {
     "api": 437,
-    "sprite": "bronzong.gif",
+    "sprite": "bronzong",
     "name": "Bronzong"
   },
   "bonsly": {
     "api": 438,
-    "sprite": "bonsly.gif",
+    "sprite": "bonsly",
     "name": "Bonsly"
   },
   "mime jr.": {
     "api": 439,
-    "sprite": "mime jr..gif",
+    "sprite": "mime jr.",
     "name": "Mime jr."
   },
   "happiny": {
     "api": 440,
-    "sprite": "happiny.gif",
+    "sprite": "happiny",
     "name": "Happiny"
   },
   "chatot": {
     "api": 441,
-    "sprite": "chatot.gif",
+    "sprite": "chatot",
     "name": "Chatot"
   },
   "spiritomb": {
     "api": 442,
-    "sprite": "spiritomb.gif",
+    "sprite": "spiritomb",
     "name": "Spiritomb"
   },
   "gible": {
     "api": 443,
-    "sprite": "gible.gif",
+    "sprite": "gible",
     "name": "Gible"
   },
   "gabite": {
     "api": 444,
-    "sprite": "gabite.gif",
+    "sprite": "gabite",
     "name": "Gabite"
   },
   "garchomp": {
     "api": 445,
-    "sprite": "garchomp.gif",
+    "sprite": "garchomp",
     "name": "Garchomp"
   },
   "munchlax": {
     "api": 446,
-    "sprite": "munchlax.gif",
+    "sprite": "munchlax",
     "name": "Munchlax"
   },
   "riolu": {
     "api": 447,
-    "sprite": "riolu.gif",
+    "sprite": "riolu",
     "name": "Riolu"
   },
   "lucario": {
     "api": 448,
-    "sprite": "lucario.gif",
+    "sprite": "lucario",
     "name": "Lucario"
   },
   "hippopotas": {
     "api": 449,
-    "sprite": "hippopotas.gif",
+    "sprite": "hippopotas",
     "name": "Hippopotas"
   },
   "hippowdon": {
     "api": 450,
-    "sprite": "hippowdon.gif",
+    "sprite": "hippowdon",
     "name": "Hippowdon"
   },
   "skorupi": {
     "api": 451,
-    "sprite": "skorupi.gif",
+    "sprite": "skorupi",
     "name": "Skorupi"
   },
   "drapion": {
     "api": 452,
-    "sprite": "drapion.gif",
+    "sprite": "drapion",
     "name": "Drapion"
   },
   "croagunk": {
     "api": 453,
-    "sprite": "croagunk.gif",
+    "sprite": "croagunk",
     "name": "Croagunk"
   },
   "toxicroak": {
     "api": 454,
-    "sprite": "toxicroak.gif",
+    "sprite": "toxicroak",
     "name": "Toxicroak"
   },
   "carnivine": {
     "api": 455,
-    "sprite": "carnivine.gif",
+    "sprite": "carnivine",
     "name": "Carnivine"
   },
   "finneon": {
     "api": 456,
-    "sprite": "finneon.gif",
+    "sprite": "finneon",
     "name": "Finneon"
   },
   "lumineon": {
     "api": 457,
-    "sprite": "lumineon.gif",
+    "sprite": "lumineon",
     "name": "Lumineon"
   },
   "mantyke": {
     "api": 458,
-    "sprite": "mantyke.gif",
+    "sprite": "mantyke",
     "name": "Mantyke"
   },
   "snover": {
     "api": 459,
-    "sprite": "snover.gif",
+    "sprite": "snover",
     "name": "Snover"
   },
   "abomasnow": {
     "api": 460,
-    "sprite": "abomasnow.gif",
+    "sprite": "abomasnow",
     "name": "Abomasnow"
   },
   "weavile": {
     "api": 461,
-    "sprite": "weavile.gif",
+    "sprite": "weavile",
     "name": "Weavile"
   },
   "magnezone": {
     "api": 462,
-    "sprite": "magnezone.gif",
+    "sprite": "magnezone",
     "name": "Magnezone"
   },
   "lickilicky": {
     "api": 463,
-    "sprite": "lickilicky.gif",
+    "sprite": "lickilicky",
     "name": "Lickilicky"
   },
   "rhyperior": {
     "api": 464,
-    "sprite": "rhyperior.gif",
+    "sprite": "rhyperior",
     "name": "Rhyperior"
   },
   "tangrowth": {
     "api": 465,
-    "sprite": "tangrowth.gif",
+    "sprite": "tangrowth",
     "name": "Tangrowth"
   },
   "electivire": {
     "api": 466,
-    "sprite": "electivire.gif",
+    "sprite": "electivire",
     "name": "Electivire"
   },
   "magmortar": {
     "api": 467,
-    "sprite": "magmortar.gif",
+    "sprite": "magmortar",
     "name": "Magmortar"
   },
   "togekiss": {
     "api": 468,
-    "sprite": "togekiss.gif",
+    "sprite": "togekiss",
     "name": "Togekiss"
   },
   "yanmega": {
     "api": 469,
-    "sprite": "yanmega.gif",
+    "sprite": "yanmega",
     "name": "Yanmega"
   },
   "leafeon": {
     "api": 470,
-    "sprite": "leafeon.gif",
+    "sprite": "leafeon",
     "name": "Leafeon"
   },
   "glaceon": {
     "api": 471,
-    "sprite": "glaceon.gif",
+    "sprite": "glaceon",
     "name": "Glaceon"
   },
   "gliscor": {
     "api": 472,
-    "sprite": "gliscor.gif",
+    "sprite": "gliscor",
     "name": "Gliscor"
   },
   "mamoswine": {
     "api": 473,
-    "sprite": "mamoswine.gif",
+    "sprite": "mamoswine",
     "name": "Mamoswine"
   },
   "porygon-z": {
     "api": 474,
-    "sprite": "porygonz.gif",
+    "sprite": "porygonz",
     "name": "Porygon-Z"
   },
   "gallade": {
     "api": 475,
-    "sprite": "gallade.gif",
+    "sprite": "gallade",
     "name": "Gallade"
   },
   "probopass": {
     "api": 476,
-    "sprite": "probopass.gif",
+    "sprite": "probopass",
     "name": "Probopass"
   },
   "dusknoir": {
     "api": 477,
-    "sprite": "dusknoir.gif",
+    "sprite": "dusknoir",
     "name": "Dusknoir"
   },
   "froslass": {
     "api": 478,
-    "sprite": "froslass.gif",
+    "sprite": "froslass",
     "name": "Froslass"
   },
   "rotom": {
     "api": 479,
-    "sprite": "rotom.gif",
+    "sprite": "rotom",
     "name": "Rotom"
   },
   "uxie": {
     "api": 480,
-    "sprite": "uxie.gif",
+    "sprite": "uxie",
     "name": "Uxie"
   },
   "mesprit": {
     "api": 481,
-    "sprite": "mesprit.gif",
+    "sprite": "mesprit",
     "name": "Mesprit"
   },
   "azelf": {
     "api": 482,
-    "sprite": "azelf.gif",
+    "sprite": "azelf",
     "name": "Azelf"
   },
   "dialga": {
     "api": 483,
-    "sprite": "dialga.gif",
+    "sprite": "dialga",
     "name": "Dialga"
   },
   "palkia": {
     "api": 484,
-    "sprite": "palkia.gif",
+    "sprite": "palkia",
     "name": "Palkia"
   },
   "heatran": {
     "api": 485,
-    "sprite": "heatran.gif",
+    "sprite": "heatran",
     "name": "Heatran"
   },
   "regigigas": {
     "api": 486,
-    "sprite": "regigigas.gif",
+    "sprite": "regigigas",
     "name": "Regigigas"
   },
   "giratina": {
     "api": 487,
-    "sprite": "giratina.gif",
+    "sprite": "giratina",
     "name": "Giratina"
   },
   "cresselia": {
     "api": 488,
-    "sprite": "cresselia.gif",
+    "sprite": "cresselia",
     "name": "Cresselia"
   },
   "phione": {
     "api": 489,
-    "sprite": "phione.gif",
+    "sprite": "phione",
     "name": "Phione"
   },
   "manaphy": {
     "api": 490,
-    "sprite": "manaphy.gif",
+    "sprite": "manaphy",
     "name": "Manaphy"
   },
   "darkrai": {
     "api": 491,
-    "sprite": "darkrai.gif",
+    "sprite": "darkrai",
     "name": "Darkrai"
   },
   "shaymin": {
     "api": 492,
-    "sprite": "shaymin.gif",
+    "sprite": "shaymin",
     "name": "Shaymin"
   },
   "arceus": {
     "api": 493,
-    "sprite": "arceus.gif",
+    "sprite": "arceus",
     "name": "Arceus"
   },
   "victini": {
     "api": 494,
-    "sprite": "victini.gif",
+    "sprite": "victini",
     "name": "Victini"
   },
   "snivy": {
     "api": 495,
-    "sprite": "snivy.gif",
+    "sprite": "snivy",
     "name": "Snivy"
   },
   "servine": {
     "api": 496,
-    "sprite": "servine.gif",
+    "sprite": "servine",
     "name": "Servine"
   },
   "serperior": {
     "api": 497,
-    "sprite": "serperior.gif",
+    "sprite": "serperior",
     "name": "Serperior"
   },
   "tepig": {
     "api": 498,
-    "sprite": "tepig.gif",
+    "sprite": "tepig",
     "name": "Tepig"
   },
   "pignite": {
     "api": 499,
-    "sprite": "pignite.gif",
+    "sprite": "pignite",
     "name": "Pignite"
   },
   "emboar": {
     "api": 500,
-    "sprite": "emboar.gif",
+    "sprite": "emboar",
     "name": "Emboar"
   },
   "oshawott": {
     "api": 501,
-    "sprite": "oshawott.gif",
+    "sprite": "oshawott",
     "name": "Oshawott"
   },
   "dewott": {
     "api": 502,
-    "sprite": "dewott.gif",
+    "sprite": "dewott",
     "name": "Dewott"
   },
   "samurott": {
     "api": 503,
-    "sprite": "samurott.gif",
+    "sprite": "samurott",
     "name": "Samurott"
   },
   "patrat": {
     "api": 504,
-    "sprite": "patrat.gif",
+    "sprite": "patrat",
     "name": "Patrat"
   },
   "watchog": {
     "api": 505,
-    "sprite": "watchog.gif",
+    "sprite": "watchog",
     "name": "Watchog"
   },
   "lillipup": {
     "api": 506,
-    "sprite": "lillipup.gif",
+    "sprite": "lillipup",
     "name": "Lillipup"
   },
   "herdier": {
     "api": 507,
-    "sprite": "herdier.gif",
+    "sprite": "herdier",
     "name": "Herdier"
   },
   "stoutland": {
     "api": 508,
-    "sprite": "stoutland.gif",
+    "sprite": "stoutland",
     "name": "Stoutland"
   },
   "purrloin": {
     "api": 509,
-    "sprite": "purrloin.gif",
+    "sprite": "purrloin",
     "name": "Purrloin"
   },
   "liepard": {
     "api": 510,
-    "sprite": "liepard.gif",
+    "sprite": "liepard",
     "name": "Liepard"
   },
   "pansage": {
     "api": 511,
-    "sprite": "pansage.gif",
+    "sprite": "pansage",
     "name": "Pansage"
   },
   "simisage": {
     "api": 512,
-    "sprite": "simisage.gif",
+    "sprite": "simisage",
     "name": "Simisage"
   },
   "pansear": {
     "api": 513,
-    "sprite": "pansear.gif",
+    "sprite": "pansear",
     "name": "Pansear"
   },
   "simisear": {
     "api": 514,
-    "sprite": "simisear.gif",
+    "sprite": "simisear",
     "name": "Simisear"
   },
   "panpour": {
     "api": 515,
-    "sprite": "panpour.gif",
+    "sprite": "panpour",
     "name": "Panpour"
   },
   "simipour": {
     "api": 516,
-    "sprite": "simipour.gif",
+    "sprite": "simipour",
     "name": "Simipour"
   },
   "munna": {
     "api": 517,
-    "sprite": "munna.gif",
+    "sprite": "munna",
     "name": "Munna"
   },
   "musharna": {
     "api": 518,
-    "sprite": "musharna.gif",
+    "sprite": "musharna",
     "name": "Musharna"
   },
   "pidove": {
     "api": 519,
-    "sprite": "pidove.gif",
+    "sprite": "pidove",
     "name": "Pidove"
   },
   "tranquill": {
     "api": 520,
-    "sprite": "tranquill.gif",
+    "sprite": "tranquill",
     "name": "Tranquill"
   },
   "unfezant": {
     "api": 521,
-    "sprite": "unfezant.gif",
+    "sprite": "unfezant",
     "name": "Unfezant"
   },
   "blitzle": {
     "api": 522,
-    "sprite": "blitzle.gif",
+    "sprite": "blitzle",
     "name": "Blitzle"
   },
   "zebstrika": {
     "api": 523,
-    "sprite": "zebstrika.gif",
+    "sprite": "zebstrika",
     "name": "Zebstrika"
   },
   "roggenrola": {
     "api": 524,
-    "sprite": "roggenrola.gif",
+    "sprite": "roggenrola",
     "name": "Roggenrola"
   },
   "boldore": {
     "api": 525,
-    "sprite": "boldore.gif",
+    "sprite": "boldore",
     "name": "Boldore"
   },
   "gigalith": {
     "api": 526,
-    "sprite": "gigalith.gif",
+    "sprite": "gigalith",
     "name": "Gigalith"
   },
   "woobat": {
     "api": 527,
-    "sprite": "woobat.gif",
+    "sprite": "woobat",
     "name": "Woobat"
   },
   "swoobat": {
     "api": 528,
-    "sprite": "swoobat.gif",
+    "sprite": "swoobat",
     "name": "Swoobat"
   },
   "drilbur": {
     "api": 529,
-    "sprite": "drilbur.gif",
+    "sprite": "drilbur",
     "name": "Drilbur"
   },
   "excadrill": {
     "api": 530,
-    "sprite": "excadrill.gif",
+    "sprite": "excadrill",
     "name": "Excadrill"
   },
   "audino": {
     "api": 531,
-    "sprite": "audino.gif",
+    "sprite": "audino",
     "name": "Audino"
   },
   "timburr": {
     "api": 532,
-    "sprite": "timburr.gif",
+    "sprite": "timburr",
     "name": "Timburr"
   },
   "gurdurr": {
     "api": 533,
-    "sprite": "gurdurr.gif",
+    "sprite": "gurdurr",
     "name": "Gurdurr"
   },
   "conkeldurr": {
     "api": 534,
-    "sprite": "conkeldurr.gif",
+    "sprite": "conkeldurr",
     "name": "Conkeldurr"
   },
   "tympole": {
     "api": 535,
-    "sprite": "tympole.gif",
+    "sprite": "tympole",
     "name": "Tympole"
   },
   "palpitoad": {
     "api": 536,
-    "sprite": "palpitoad.gif",
+    "sprite": "palpitoad",
     "name": "Palpitoad"
   },
   "seismitoad": {
     "api": 537,
-    "sprite": "seismitoad.gif",
+    "sprite": "seismitoad",
     "name": "Seismitoad"
   },
   "throh": {
     "api": 538,
-    "sprite": "throh.gif",
+    "sprite": "throh",
     "name": "Throh"
   },
   "sawk": {
     "api": 539,
-    "sprite": "sawk.gif",
+    "sprite": "sawk",
     "name": "Sawk"
   },
   "sewaddle": {
     "api": 540,
-    "sprite": "sewaddle.gif",
+    "sprite": "sewaddle",
     "name": "Sewaddle"
   },
   "swadloon": {
     "api": 541,
-    "sprite": "swadloon.gif",
+    "sprite": "swadloon",
     "name": "Swadloon"
   },
   "leavanny": {
     "api": 542,
-    "sprite": "leavanny.gif",
+    "sprite": "leavanny",
     "name": "Leavanny"
   },
   "venipede": {
     "api": 543,
-    "sprite": "venipede.gif",
+    "sprite": "venipede",
     "name": "Venipede"
   },
   "whirlipede": {
     "api": 544,
-    "sprite": "whirlipede.gif",
+    "sprite": "whirlipede",
     "name": "Whirlipede"
   },
   "scolipede": {
     "api": 545,
-    "sprite": "scolipede.gif",
+    "sprite": "scolipede",
     "name": "Scolipede"
   },
   "cottonee": {
     "api": 546,
-    "sprite": "cottonee.gif",
+    "sprite": "cottonee",
     "name": "Cottonee"
   },
   "whimsicott": {
     "api": 547,
-    "sprite": "whimsicott.gif",
+    "sprite": "whimsicott",
     "name": "Whimsicott"
   },
   "petilil": {
     "api": 548,
-    "sprite": "petilil.gif",
+    "sprite": "petilil",
     "name": "Petilil"
   },
   "lilligant": {
     "api": 549,
-    "sprite": "lilligant.gif",
+    "sprite": "lilligant",
     "name": "Lilligant"
   },
   "basculin": {
     "api": 550,
-    "sprite": "basculin.gif",
+    "sprite": "basculin",
     "name": "Basculin"
   },
   "sandile": {
     "api": 551,
-    "sprite": "sandile.gif",
+    "sprite": "sandile",
     "name": "Sandile"
   },
   "krokorok": {
     "api": 552,
-    "sprite": "krokorok.gif",
+    "sprite": "krokorok",
     "name": "Krokorok"
   },
   "krookodile": {
     "api": 553,
-    "sprite": "krookodile.gif",
+    "sprite": "krookodile",
     "name": "Krookodile"
   },
   "darumaka": {
     "api": 554,
-    "sprite": "darumaka.gif",
+    "sprite": "darumaka",
     "name": "Darumaka"
   },
   "darmanitan": {
     "api": 555,
-    "sprite": "darmanitan.gif",
+    "sprite": "darmanitan",
     "name": "Darmanitan"
   },
   "maractus": {
     "api": 556,
-    "sprite": "maractus.gif",
+    "sprite": "maractus",
     "name": "Maractus"
   },
   "dwebble": {
     "api": 557,
-    "sprite": "dwebble.gif",
+    "sprite": "dwebble",
     "name": "Dwebble"
   },
   "crustle": {
     "api": 558,
-    "sprite": "crustle.gif",
+    "sprite": "crustle",
     "name": "Crustle"
   },
   "scraggy": {
     "api": 559,
-    "sprite": "scraggy.gif",
+    "sprite": "scraggy",
     "name": "Scraggy"
   },
   "scrafty": {
     "api": 560,
-    "sprite": "scrafty.gif",
+    "sprite": "scrafty",
     "name": "Scrafty"
   },
   "sigilyph": {
     "api": 561,
-    "sprite": "sigilyph.gif",
+    "sprite": "sigilyph",
     "name": "Sigilyph"
   },
   "yamask": {
     "api": 562,
-    "sprite": "yamask.gif",
+    "sprite": "yamask",
     "name": "Yamask"
   },
   "cofagrigus": {
     "api": 563,
-    "sprite": "cofagrigus.gif",
+    "sprite": "cofagrigus",
     "name": "Cofagrigus"
   },
   "tirtouga": {
     "api": 564,
-    "sprite": "tirtouga.gif",
+    "sprite": "tirtouga",
     "name": "Tirtouga"
   },
   "carracosta": {
     "api": 565,
-    "sprite": "carracosta.gif",
+    "sprite": "carracosta",
     "name": "Carracosta"
   },
   "archen": {
     "api": 566,
-    "sprite": "archen.gif",
+    "sprite": "archen",
     "name": "Archen"
   },
   "archeops": {
     "api": 567,
-    "sprite": "archeops.gif",
+    "sprite": "archeops",
     "name": "Archeops"
   },
   "trubbish": {
     "api": 568,
-    "sprite": "trubbish.gif",
+    "sprite": "trubbish",
     "name": "Trubbish"
   },
   "garbodor": {
     "api": 569,
-    "sprite": "garbodor.gif",
+    "sprite": "garbodor",
     "name": "Garbodor"
   },
   "zorua": {
     "api": 570,
-    "sprite": "zorua.gif",
+    "sprite": "zorua",
     "name": "Zorua"
   },
   "zoroark": {
     "api": 571,
-    "sprite": "zoroark.gif",
+    "sprite": "zoroark",
     "name": "Zoroark"
   },
   "minccino": {
     "api": 572,
-    "sprite": "minccino.gif",
+    "sprite": "minccino",
     "name": "Minccino"
   },
   "cinccino": {
     "api": 573,
-    "sprite": "cinccino.gif",
+    "sprite": "cinccino",
     "name": "Cinccino"
   },
   "gothita": {
     "api": 574,
-    "sprite": "gothita.gif",
+    "sprite": "gothita",
     "name": "Gothita"
   },
   "gothorita": {
     "api": 575,
-    "sprite": "gothorita.gif",
+    "sprite": "gothorita",
     "name": "Gothorita"
   },
   "gothitelle": {
     "api": 576,
-    "sprite": "gothitelle.gif",
+    "sprite": "gothitelle",
     "name": "Gothitelle"
   },
   "solosis": {
     "api": 577,
-    "sprite": "solosis.gif",
+    "sprite": "solosis",
     "name": "Solosis"
   },
   "duosion": {
     "api": 578,
-    "sprite": "duosion.gif",
+    "sprite": "duosion",
     "name": "Duosion"
   },
   "reuniclus": {
     "api": 579,
-    "sprite": "reuniclus.gif",
+    "sprite": "reuniclus",
     "name": "Reuniclus"
   },
   "ducklett": {
     "api": 580,
-    "sprite": "ducklett.gif",
+    "sprite": "ducklett",
     "name": "Ducklett"
   },
   "swanna": {
     "api": 581,
-    "sprite": "swanna.gif",
+    "sprite": "swanna",
     "name": "Swanna"
   },
   "vanillite": {
     "api": 582,
-    "sprite": "vanillite.gif",
+    "sprite": "vanillite",
     "name": "Vanillite"
   },
   "vanillish": {
     "api": 583,
-    "sprite": "vanillish.gif",
+    "sprite": "vanillish",
     "name": "Vanillish"
   },
   "vanilluxe": {
     "api": 584,
-    "sprite": "vanilluxe.gif",
+    "sprite": "vanilluxe",
     "name": "Vanilluxe"
   },
   "deerling": {
     "api": 585,
-    "sprite": "deerling.gif",
+    "sprite": "deerling",
     "name": "Deerling"
   },
   "sawsbuck": {
     "api": 586,
-    "sprite": "sawsbuck.gif",
+    "sprite": "sawsbuck",
     "name": "Sawsbuck"
   },
   "emolga": {
     "api": 587,
-    "sprite": "emolga.gif",
+    "sprite": "emolga",
     "name": "Emolga"
   },
   "karrablast": {
     "api": 588,
-    "sprite": "karrablast.gif",
+    "sprite": "karrablast",
     "name": "Karrablast"
   },
   "escavalier": {
     "api": 589,
-    "sprite": "escavalier.gif",
+    "sprite": "escavalier",
     "name": "Escavalier"
   },
   "foongus": {
     "api": 590,
-    "sprite": "foongus.gif",
+    "sprite": "foongus",
     "name": "Foongus"
   },
   "amoonguss": {
     "api": 591,
-    "sprite": "amoonguss.gif",
+    "sprite": "amoonguss",
     "name": "Amoonguss"
   },
   "frillish": {
     "api": 592,
-    "sprite": "frillish.gif",
+    "sprite": "frillish",
     "name": "Frillish"
   },
   "jellicent": {
     "api": 593,
-    "sprite": "jellicent.gif",
+    "sprite": "jellicent",
     "name": "Jellicent"
   },
   "alomomola": {
     "api": 594,
-    "sprite": "alomomola.gif",
+    "sprite": "alomomola",
     "name": "Alomomola"
   },
   "joltik": {
     "api": 595,
-    "sprite": "joltik.gif",
+    "sprite": "joltik",
     "name": "Joltik"
   },
   "galvantula": {
     "api": 596,
-    "sprite": "galvantula.gif",
+    "sprite": "galvantula",
     "name": "Galvantula"
   },
   "ferroseed": {
     "api": 597,
-    "sprite": "ferroseed.gif",
+    "sprite": "ferroseed",
     "name": "Ferroseed"
   },
   "ferrothorn": {
     "api": 598,
-    "sprite": "ferrothorn.gif",
+    "sprite": "ferrothorn",
     "name": "Ferrothorn"
   },
   "klink": {
     "api": 599,
-    "sprite": "klink.gif",
+    "sprite": "klink",
     "name": "Klink"
   },
   "klang": {
     "api": 600,
-    "sprite": "klang.gif",
+    "sprite": "klang",
     "name": "Klang"
   },
   "klinklang": {
     "api": 601,
-    "sprite": "klinklang.gif",
+    "sprite": "klinklang",
     "name": "Klinklang"
   },
   "tynamo": {
     "api": 602,
-    "sprite": "tynamo.gif",
+    "sprite": "tynamo",
     "name": "Tynamo"
   },
   "eelektrik": {
     "api": 603,
-    "sprite": "eelektrik.gif",
+    "sprite": "eelektrik",
     "name": "Eelektrik"
   },
   "eelektross": {
     "api": 604,
-    "sprite": "eelektross.gif",
+    "sprite": "eelektross",
     "name": "Eelektross"
   },
   "elgyem": {
     "api": 605,
-    "sprite": "elgyem.gif",
+    "sprite": "elgyem",
     "name": "Elgyem"
   },
   "beheeyem": {
     "api": 606,
-    "sprite": "beheeyem.gif",
+    "sprite": "beheeyem",
     "name": "Beheeyem"
   },
   "litwick": {
     "api": 607,
-    "sprite": "litwick.gif",
+    "sprite": "litwick",
     "name": "Litwick"
   },
   "lampent": {
     "api": 608,
-    "sprite": "lampent.gif",
+    "sprite": "lampent",
     "name": "Lampent"
   },
   "chandelure": {
     "api": 609,
-    "sprite": "chandelure.gif",
+    "sprite": "chandelure",
     "name": "Chandelure"
   },
   "axew": {
     "api": 610,
-    "sprite": "axew.gif",
+    "sprite": "axew",
     "name": "Axew"
   },
   "fraxure": {
     "api": 611,
-    "sprite": "fraxure.gif",
+    "sprite": "fraxure",
     "name": "Fraxure"
   },
   "haxorus": {
     "api": 612,
-    "sprite": "haxorus.gif",
+    "sprite": "haxorus",
     "name": "Haxorus"
   },
   "cubchoo": {
     "api": 613,
-    "sprite": "cubchoo.gif",
+    "sprite": "cubchoo",
     "name": "Cubchoo"
   },
   "beartic": {
     "api": 614,
-    "sprite": "beartic.gif",
+    "sprite": "beartic",
     "name": "Beartic"
   },
   "cryogonal": {
     "api": 615,
-    "sprite": "cryogonal.gif",
+    "sprite": "cryogonal",
     "name": "Cryogonal"
   },
   "shelmet": {
     "api": 616,
-    "sprite": "shelmet.gif",
+    "sprite": "shelmet",
     "name": "Shelmet"
   },
   "accelgor": {
     "api": 617,
-    "sprite": "accelgor.gif",
+    "sprite": "accelgor",
     "name": "Accelgor"
   },
   "stunfisk": {
     "api": 618,
-    "sprite": "stunfisk.gif",
+    "sprite": "stunfisk",
     "name": "Stunfisk"
   },
   "mienfoo": {
     "api": 619,
-    "sprite": "mienfoo.gif",
+    "sprite": "mienfoo",
     "name": "Mienfoo"
   },
   "mienshao": {
     "api": 620,
-    "sprite": "mienshao.gif",
+    "sprite": "mienshao",
     "name": "Mienshao"
   },
   "druddigon": {
     "api": 621,
-    "sprite": "druddigon.gif",
+    "sprite": "druddigon",
     "name": "Druddigon"
   },
   "golett": {
     "api": 622,
-    "sprite": "golett.gif",
+    "sprite": "golett",
     "name": "Golett"
   },
   "golurk": {
     "api": 623,
-    "sprite": "golurk.gif",
+    "sprite": "golurk",
     "name": "Golurk"
   },
   "pawniard": {
     "api": 624,
-    "sprite": "pawniard.gif",
+    "sprite": "pawniard",
     "name": "Pawniard"
   },
   "bisharp": {
     "api": 625,
-    "sprite": "bisharp.gif",
+    "sprite": "bisharp",
     "name": "Bisharp"
   },
   "bouffalant": {
     "api": 626,
-    "sprite": "bouffalant.gif",
+    "sprite": "bouffalant",
     "name": "Bouffalant"
   },
   "rufflet": {
     "api": 627,
-    "sprite": "rufflet.gif",
+    "sprite": "rufflet",
     "name": "Rufflet"
   },
   "braviary": {
     "api": 628,
-    "sprite": "braviary.gif",
+    "sprite": "braviary",
     "name": "Braviary"
   },
   "vullaby": {
     "api": 629,
-    "sprite": "vullaby.gif",
+    "sprite": "vullaby",
     "name": "Vullaby"
   },
   "mandibuzz": {
     "api": 630,
-    "sprite": "mandibuzz.gif",
+    "sprite": "mandibuzz",
     "name": "Mandibuzz"
   },
   "heatmor": {
     "api": 631,
-    "sprite": "heatmor.gif",
+    "sprite": "heatmor",
     "name": "Heatmor"
   },
   "durant": {
     "api": 632,
-    "sprite": "durant.gif",
+    "sprite": "durant",
     "name": "Durant"
   },
   "deino": {
     "api": 633,
-    "sprite": "deino.gif",
+    "sprite": "deino",
     "name": "Deino"
   },
   "zweilous": {
     "api": 634,
-    "sprite": "zweilous.gif",
+    "sprite": "zweilous",
     "name": "Zweilous"
   },
   "hydreigon": {
     "api": 635,
-    "sprite": "hydreigon.gif",
+    "sprite": "hydreigon",
     "name": "Hydreigon"
   },
   "larvesta": {
     "api": 636,
-    "sprite": "larvesta.gif",
+    "sprite": "larvesta",
     "name": "Larvesta"
   },
   "volcarona": {
     "api": 637,
-    "sprite": "volcarona.gif",
+    "sprite": "volcarona",
     "name": "Volcarona"
   },
   "cobalion": {
     "api": 638,
-    "sprite": "cobalion.gif",
+    "sprite": "cobalion",
     "name": "Cobalion"
   },
   "terrakion": {
     "api": 639,
-    "sprite": "terrakion.gif",
+    "sprite": "terrakion",
     "name": "Terrakion"
   },
   "virizion": {
     "api": 640,
-    "sprite": "virizion.gif",
+    "sprite": "virizion",
     "name": "Virizion"
   },
   "tornadus": {
     "api": 641,
-    "sprite": "tornadus.gif",
+    "sprite": "tornadus",
     "name": "Tornadus"
   },
   "thundurus": {
     "api": 642,
-    "sprite": "thundurus.gif",
+    "sprite": "thundurus",
     "name": "Thundurus"
   },
   "reshiram": {
     "api": 643,
-    "sprite": "reshiram.gif",
+    "sprite": "reshiram",
     "name": "Reshiram"
   },
   "zekrom": {
     "api": 644,
-    "sprite": "zekrom.gif",
+    "sprite": "zekrom",
     "name": "Zekrom"
   },
   "landorus": {
     "api": 645,
-    "sprite": "landorus.gif",
+    "sprite": "landorus",
     "name": "Landorus"
   },
   "kyurem": {
     "api": 646,
-    "sprite": "kyurem.gif",
+    "sprite": "kyurem",
     "name": "Kyurem"
   },
   "keldeo": {
     "api": 647,
-    "sprite": "keldeo.gif",
+    "sprite": "keldeo",
     "name": "Keldeo"
   },
   "meloetta": {
     "api": 648,
-    "sprite": "meloetta.gif",
+    "sprite": "meloetta",
     "name": "Meloetta"
   },
   "genesect": {
     "api": 649,
-    "sprite": "genesect.gif",
+    "sprite": "genesect",
     "name": "Genesect"
   },
   "chespin": {
     "api": 650,
-    "sprite": "chespin.gif",
+    "sprite": "chespin",
     "name": "Chespin"
   },
   "quilladin": {
     "api": 651,
-    "sprite": "quilladin.gif",
+    "sprite": "quilladin",
     "name": "Quilladin"
   },
   "chesnaught": {
     "api": 652,
-    "sprite": "chesnaught.gif",
+    "sprite": "chesnaught",
     "name": "Chesnaught"
   },
   "fennekin": {
     "api": 653,
-    "sprite": "fennekin.gif",
+    "sprite": "fennekin",
     "name": "Fennekin"
   },
   "braixen": {
     "api": 654,
-    "sprite": "braixen.gif",
+    "sprite": "braixen",
     "name": "Braixen"
   },
   "delphox": {
     "api": 655,
-    "sprite": "delphox.gif",
+    "sprite": "delphox",
     "name": "Delphox"
   },
   "froakie": {
     "api": 656,
-    "sprite": "froakie.gif",
+    "sprite": "froakie",
     "name": "Froakie"
   },
   "frogadier": {
     "api": 657,
-    "sprite": "frogadier.gif",
+    "sprite": "frogadier",
     "name": "Frogadier"
   },
   "greninja": {
     "api": 658,
-    "sprite": "greninja.gif",
+    "sprite": "greninja",
     "name": "Greninja"
   },
   "bunnelby": {
     "api": 659,
-    "sprite": "bunnelby.gif",
+    "sprite": "bunnelby",
     "name": "Bunnelby"
   },
   "diggersby": {
     "api": 660,
-    "sprite": "diggersby.gif",
+    "sprite": "diggersby",
     "name": "Diggersby"
   },
   "fletchling": {
     "api": 661,
-    "sprite": "fletchling.gif",
+    "sprite": "fletchling",
     "name": "Fletchling"
   },
   "fletchinder": {
     "api": 662,
-    "sprite": "fletchinder.gif",
+    "sprite": "fletchinder",
     "name": "Fletchinder"
   },
   "talonflame": {
     "api": 663,
-    "sprite": "talonflame.gif",
+    "sprite": "talonflame",
     "name": "Talonflame"
   },
   "scatterbug": {
     "api": 664,
-    "sprite": "scatterbug.gif",
+    "sprite": "scatterbug",
     "name": "Scatterbug"
   },
   "spewpa": {
     "api": 665,
-    "sprite": "spewpa.gif",
+    "sprite": "spewpa",
     "name": "Spewpa"
   },
   "vivillon": {
     "api": 666,
-    "sprite": "vivillon.gif",
+    "sprite": "vivillon",
     "name": "Vivillon"
   },
   "litleo": {
     "api": 667,
-    "sprite": "litleo.gif",
+    "sprite": "litleo",
     "name": "Litleo"
   },
   "pyroar": {
     "api": 668,
-    "sprite": "pyroar.gif",
+    "sprite": "pyroar",
     "name": "Pyroar"
   },
   "flabebe": {
     "api": 669,
-    "sprite": "flabebé.gif",
+    "sprite": "flabebé",
     "name": "Flabébé"
   },
   "floette": {
     "api": 670,
-    "sprite": "floette.gif",
+    "sprite": "floette",
     "name": "Floette"
   },
   "floette-blue": {
     "api": 670,
-    "sprite": "floette-blue.gif",
+    "sprite": "floette-blue",
     "name": "Floette-Blue"
   },
   "floette-eternal": {
     "api": 670,
-    "sprite": "floette-eternal.gif",
+    "sprite": "floette-eternal",
     "name": "Floette-Eternal"
   },
   "floette-orange": {
     "api": 670,
-    "sprite": "floette-orange.gif",
+    "sprite": "floette-orange",
     "name": "Floette-Orange"
   },
   "floette-red": {
     "api": 670,
-    "sprite": "floette-red.gif",
+    "sprite": "floette-red",
     "name": "Floette-Red"
   },
   "floett-white": {
     "api": 670,
-    "sprite": "floette-white.gif",
+    "sprite": "floette-white",
     "name": "Floette-White"
   },
   "floette-yellow": {
     "api": 670,
-    "sprite": "floette-yellow.gif",
+    "sprite": "floette-yellow",
     "name": "Floette-Yellow"
   },
   "florges": {
     "api": 671,
-    "sprite": "florges.gif",
+    "sprite": "florges",
     "name": "Florges"
   },
   "skiddo": {
     "api": 672,
-    "sprite": "skiddo.gif",
+    "sprite": "skiddo",
     "name": "Skiddo"
   },
   "gogoat": {
     "api": 673,
-    "sprite": "gogoat.gif",
+    "sprite": "gogoat",
     "name": "Gogoat"
   },
   "pancham": {
     "api": 674,
-    "sprite": "pancham.gif",
+    "sprite": "pancham",
     "name": "Pancham"
   },
   "pangoro": {
     "api": 675,
-    "sprite": "pangoro.gif",
+    "sprite": "pangoro",
     "name": "Pangoro"
   },
   "furfrou": {
     "api": 676,
-    "sprite": "furfrou.gif",
+    "sprite": "furfrou",
     "name": "Furfrou"
   },
   "espurr": {
     "api": 677,
-    "sprite": "espurr.gif",
+    "sprite": "espurr",
     "name": "Espurr"
   },
   "meowstic": {
     "api": 678,
-    "sprite": "meowstic.gif",
+    "sprite": "meowstic",
     "name": "Meowstic"
   },
   "honedge": {
     "api": 679,
-    "sprite": "honedge.gif",
+    "sprite": "honedge",
     "name": "Honedge"
   },
   "doublade": {
     "api": 680,
-    "sprite": "doublade.gif",
+    "sprite": "doublade",
     "name": "Doublade"
   },
   "aegislash": {
     "api": 681,
-    "sprite": "aegislash.gif",
+    "sprite": "aegislash",
     "name": "Aegislash"
   },
   "spritzee": {
     "api": 682,
-    "sprite": "spritzee.gif",
+    "sprite": "spritzee",
     "name": "Spritzee"
   },
   "aromatisse": {
     "api": 683,
-    "sprite": "aromatisse.gif",
+    "sprite": "aromatisse",
     "name": "Aromatisse"
   },
   "swirlix": {
     "api": 684,
-    "sprite": "swirlix.gif",
+    "sprite": "swirlix",
     "name": "Swirlix"
   },
   "slurpuff": {
     "api": 685,
-    "sprite": "slurpuff.gif",
+    "sprite": "slurpuff",
     "name": "Slurpuff"
   },
   "inkay": {
     "api": 686,
-    "sprite": "inkay.gif",
+    "sprite": "inkay",
     "name": "Inkay"
   },
   "malamar": {
     "api": 687,
-    "sprite": "malamar.gif",
+    "sprite": "malamar",
     "name": "Malamar"
   },
   "binacle": {
     "api": 688,
-    "sprite": "binacle.gif",
+    "sprite": "binacle",
     "name": "Binacle"
   },
   "barbaracle": {
     "api": 689,
-    "sprite": "barbaracle.gif",
+    "sprite": "barbaracle",
     "name": "Barbaracle"
   },
   "skrelp": {
     "api": 690,
-    "sprite": "skrelp.gif",
+    "sprite": "skrelp",
     "name": "Skrelp"
   },
   "dragalge": {
     "api": 691,
-    "sprite": "dragalge.gif",
+    "sprite": "dragalge",
     "name": "Dragalge"
   },
   "clauncher": {
     "api": 692,
-    "sprite": "clauncher.gif",
+    "sprite": "clauncher",
     "name": "Clauncher"
   },
   "clawitzer": {
     "api": 693,
-    "sprite": "clawitzer.gif",
+    "sprite": "clawitzer",
     "name": "Clawitzer"
   },
   "helioptile": {
     "api": 694,
-    "sprite": "helioptile.gif",
+    "sprite": "helioptile",
     "name": "Helioptile"
   },
   "heliolisk": {
     "api": 695,
-    "sprite": "heliolisk.gif",
+    "sprite": "heliolisk",
     "name": "Heliolisk"
   },
   "tyrunt": {
     "api": 696,
-    "sprite": "tyrunt.gif",
+    "sprite": "tyrunt",
     "name": "Tyrunt"
   },
   "tyrantrum": {
     "api": 697,
-    "sprite": "tyrantrum.gif",
+    "sprite": "tyrantrum",
     "name": "Tyrantrum"
   },
   "amaura": {
     "api": 698,
-    "sprite": "amaura.gif",
+    "sprite": "amaura",
     "name": "Amaura"
   },
   "aurorus": {
     "api": 699,
-    "sprite": "aurorus.gif",
+    "sprite": "aurorus",
     "name": "Aurorus"
   },
   "sylveon": {
     "api": 700,
-    "sprite": "sylveon.gif",
+    "sprite": "sylveon",
     "name": "Sylveon"
   },
   "hawlucha": {
     "api": 701,
-    "sprite": "hawlucha.gif",
+    "sprite": "hawlucha",
     "name": "Hawlucha"
   },
   "dedenne": {
     "api": 702,
-    "sprite": "dedenne.gif",
+    "sprite": "dedenne",
     "name": "Dedenne"
   },
   "carbink": {
     "api": 703,
-    "sprite": "carbink.gif",
+    "sprite": "carbink",
     "name": "Carbink"
   },
   "goomy": {
     "api": 704,
-    "sprite": "goomy.gif",
+    "sprite": "goomy",
     "name": "Goomy"
   },
   "sliggoo": {
     "api": 705,
-    "sprite": "sliggoo.gif",
+    "sprite": "sliggoo",
     "name": "Sliggoo"
   },
   "goodra": {
     "api": 706,
-    "sprite": "goodra.gif",
+    "sprite": "goodra",
     "name": "Goodra"
   },
   "klefki": {
     "api": 707,
-    "sprite": "klefki.gif",
+    "sprite": "klefki",
     "name": "Klefki"
   },
   "phantump": {
     "api": 708,
-    "sprite": "phantump.gif",
+    "sprite": "phantump",
     "name": "Phantump"
   },
   "trevenant": {
     "api": 709,
-    "sprite": "trevenant.gif",
+    "sprite": "trevenant",
     "name": "Trevenant"
   },
   "pumpkaboo": {
     "api": 710,
-    "sprite": "pumpkaboo.gif",
+    "sprite": "pumpkaboo",
     "name": "Pumpkaboo"
   },
   "gourgeist": {
     "api": 711,
-    "sprite": "gourgeist.gif",
+    "sprite": "gourgeist",
     "name": "Gourgeist"
   },
   "bergmite": {
     "api": 712,
-    "sprite": "bergmite.gif",
+    "sprite": "bergmite",
     "name": "Bergmite"
   },
   "avalugg": {
     "api": 713,
-    "sprite": "avalugg.gif",
+    "sprite": "avalugg",
     "name": "Avalugg"
   },
   "noibat": {
     "api": 714,
-    "sprite": "noibat.gif",
+    "sprite": "noibat",
     "name": "Noibat"
   },
   "noivern": {
     "api": 715,
-    "sprite": "noivern.gif",
+    "sprite": "noivern",
     "name": "Noivern"
   },
   "xerneas": {
     "api": 716,
-    "sprite": "xerneas.gif",
+    "sprite": "xerneas",
     "name": "Xerneas"
   },
   "yveltal": {
     "api": 717,
-    "sprite": "yveltal.gif",
+    "sprite": "yveltal",
     "name": "Yveltal"
   },
   "zygarde": {
     "api": 718,
-    "sprite": "zygarde.gif",
+    "sprite": "zygarde",
     "name": "Zygarde"
   },
   "diancie": {
     "api": 719,
-    "sprite": "diancie.gif",
+    "sprite": "diancie",
     "name": "Diancie"
   },
   "hoopa": {
     "api": 720,
-    "sprite": "hoopa.gif",
+    "sprite": "hoopa",
     "name": "Hoopa"
   },
   "volcanion": {
     "api": 721,
-    "sprite": "volcanion.gif",
+    "sprite": "volcanion",
     "name": "Volcanion"
   },
   "rowlet": {
     "api": 722,
-    "sprite": "rowlet.gif",
+    "sprite": "rowlet",
     "name": "Rowlet"
   },
   "dartrix": {
     "api": 723,
-    "sprite": "dartrix.gif",
+    "sprite": "dartrix",
     "name": "Dartrix"
   },
   "decidueye": {
     "api": 724,
-    "sprite": "decidueye.gif",
+    "sprite": "decidueye",
     "name": "Decidueye"
   },
   "litten": {
     "api": 725,
-    "sprite": "litten.gif",
+    "sprite": "litten",
     "name": "Litten"
   },
   "torracat": {
     "api": 726,
-    "sprite": "torracat.gif",
+    "sprite": "torracat",
     "name": "Torracat"
   },
   "incineroar": {
     "api": 727,
-    "sprite": "incineroar.gif",
+    "sprite": "incineroar",
     "name": "Incineroar"
   },
   "popplio": {
     "api": 728,
-    "sprite": "popplio.gif",
+    "sprite": "popplio",
     "name": "Popplio"
   },
   "brionne": {
     "api": 729,
-    "sprite": "brionne.gif",
+    "sprite": "brionne",
     "name": "Brionne"
   },
   "primarina": {
     "api": 730,
-    "sprite": "primarina.gif",
+    "sprite": "primarina",
     "name": "Primarina"
   },
   "pikipek": {
     "api": 731,
-    "sprite": "pikipek.gif",
+    "sprite": "pikipek",
     "name": "Pikipek"
   },
   "trumbeak": {
     "api": 732,
-    "sprite": "trumbeak.gif",
+    "sprite": "trumbeak",
     "name": "Trumbeak"
   },
   "toucannon": {
     "api": 733,
-    "sprite": "toucannon.gif",
+    "sprite": "toucannon",
     "name": "Toucannon"
   },
   "yungoos": {
     "api": 734,
-    "sprite": "yungoos.gif",
+    "sprite": "yungoos",
     "name": "Yungoos"
   },
   "gumshoos": {
     "api": 735,
-    "sprite": "gumshoos.gif",
+    "sprite": "gumshoos",
     "name": "Gumshoos"
   },
   "grubbin": {
     "api": 736,
-    "sprite": "grubbin.gif",
+    "sprite": "grubbin",
     "name": "Grubbin"
   },
   "charjabug": {
     "api": 737,
-    "sprite": "charjabug.gif",
+    "sprite": "charjabug",
     "name": "Charjabug"
   },
   "vikavolt": {
     "api": 738,
-    "sprite": "vikavolt.gif",
+    "sprite": "vikavolt",
     "name": "Vikavolt"
   },
   "crabrawler": {
     "api": 739,
-    "sprite": "crabrawler.gif",
+    "sprite": "crabrawler",
     "name": "Crabrawler"
   },
   "crabominable": {
     "api": 740,
-    "sprite": "crabominable.gif",
+    "sprite": "crabominable",
     "name": "Crabominable"
   },
   "oricorio": {
     "api": 741,
-    "sprite": "oricorio.gif",
+    "sprite": "oricorio",
     "name": "Oricorio"
   },
   "cutiefly": {
     "api": 742,
-    "sprite": "cutiefly.gif",
+    "sprite": "cutiefly",
     "name": "Cutiefly"
   },
   "ribombee": {
     "api": 743,
-    "sprite": "ribombee.gif",
+    "sprite": "ribombee",
     "name": "Ribombee"
   },
   "rockruff": {
     "api": 744,
-    "sprite": "rockruff.gif",
+    "sprite": "rockruff",
     "name": "Rockruff"
   },
   "lycanroc": {
     "api": 745,
-    "sprite": "lycanroc.gif",
+    "sprite": "lycanroc",
     "name": "Lycanroc"
   },
   "wishiwashi": {
     "api": 746,
-    "sprite": "wishiwashi.gif",
+    "sprite": "wishiwashi",
     "name": "Wishiwashi"
   },
   "mareanie": {
     "api": 747,
-    "sprite": "mareanie.gif",
+    "sprite": "mareanie",
     "name": "Mareanie"
   },
   "toxapex": {
     "api": 748,
-    "sprite": "toxapex.gif",
+    "sprite": "toxapex",
     "name": "Toxapex"
   },
   "mudbray": {
     "api": 749,
-    "sprite": "mudbray.gif",
+    "sprite": "mudbray",
     "name": "Mudbray"
   },
   "mudsdale": {
     "api": 750,
-    "sprite": "mudsdale.gif",
+    "sprite": "mudsdale",
     "name": "Mudsdale"
   },
   "dewpider": {
     "api": 751,
-    "sprite": "dewpider.gif",
+    "sprite": "dewpider",
     "name": "Dewpider"
   },
   "araquanid": {
     "api": 752,
-    "sprite": "araquanid.gif",
+    "sprite": "araquanid",
     "name": "Araquanid"
   },
   "fomantis": {
     "api": 753,
-    "sprite": "fomantis.gif",
+    "sprite": "fomantis",
     "name": "Fomantis"
   },
   "lurantis": {
     "api": 754,
-    "sprite": "lurantis.gif",
+    "sprite": "lurantis",
     "name": "Lurantis"
   },
   "morelull": {
     "api": 755,
-    "sprite": "morelull.gif",
+    "sprite": "morelull",
     "name": "Morelull"
   },
   "shiinotic": {
     "api": 756,
-    "sprite": "shiinotic.gif",
+    "sprite": "shiinotic",
     "name": "Shiinotic"
   },
   "salandit": {
     "api": 757,
-    "sprite": "salandit.gif",
+    "sprite": "salandit",
     "name": "Salandit"
   },
   "salazzle": {
     "api": 758,
-    "sprite": "salazzle.gif",
+    "sprite": "salazzle",
     "name": "Salazzle"
   },
   "stufful": {
     "api": 759,
-    "sprite": "stufful.gif",
+    "sprite": "stufful",
     "name": "Stufful"
   },
   "bewear": {
     "api": 760,
-    "sprite": "bewear.gif",
+    "sprite": "bewear",
     "name": "Bewear"
   },
   "bounsweet": {
     "api": 761,
-    "sprite": "bounsweet.gif",
+    "sprite": "bounsweet",
     "name": "Bounsweet"
   },
   "steenee": {
     "api": 762,
-    "sprite": "steenee.gif",
+    "sprite": "steenee",
     "name": "Steenee"
   },
   "tsareena": {
     "api": 763,
-    "sprite": "tsareena.gif",
+    "sprite": "tsareena",
     "name": "Tsareena"
   },
   "comfey": {
     "api": 764,
-    "sprite": "comfey.gif",
+    "sprite": "comfey",
     "name": "Comfey"
   },
   "oranguru": {
     "api": 765,
-    "sprite": "oranguru.gif",
+    "sprite": "oranguru",
     "name": "Oranguru"
   },
   "passimian": {
     "api": 766,
-    "sprite": "passimian.gif",
+    "sprite": "passimian",
     "name": "Passimian"
   },
   "wimpod": {
     "api": 767,
-    "sprite": "wimpod.gif",
+    "sprite": "wimpod",
     "name": "Wimpod"
   },
   "golisopod": {
     "api": 768,
-    "sprite": "golisopod.gif",
+    "sprite": "golisopod",
     "name": "Golisopod"
   },
   "sandygast": {
     "api": 769,
-    "sprite": "sandygast.gif",
+    "sprite": "sandygast",
     "name": "Sandygast"
   },
   "palossand": {
     "api": 770,
-    "sprite": "palossand.gif",
+    "sprite": "palossand",
     "name": "Palossand"
   },
   "pyukumuku": {
     "api": 771,
-    "sprite": "pyukumuku.gif",
+    "sprite": "pyukumuku",
     "name": "Pyukumuku"
   },
   "type-null": {
     "api": 772,
-    "sprite": "typenull.gif",
+    "sprite": "typenull",
     "name": "Type: null"
   },
   "silvally": {
     "api": 773,
-    "sprite": "silvally.gif",
+    "sprite": "silvally",
     "name": "Silvally"
   },
   "minior": {
     "api": 774,
-    "sprite": "minior.gif",
+    "sprite": "minior",
     "name": "Minior"
   },
   "komala": {
     "api": 775,
-    "sprite": "komala.gif",
+    "sprite": "komala",
     "name": "Komala"
   },
   "turtonator": {
     "api": 776,
-    "sprite": "turtonator.gif",
+    "sprite": "turtonator",
     "name": "Turtonator"
   },
   "togedemaru": {
     "api": 777,
-    "sprite": "togedemaru.gif",
+    "sprite": "togedemaru",
     "name": "Togedemaru"
   },
   "mimikyu": {
     "api": 778,
-    "sprite": "mimikyu.gif",
+    "sprite": "mimikyu",
     "name": "Mimikyu"
   },
   "bruxish": {
     "api": 779,
-    "sprite": "bruxish.gif",
+    "sprite": "bruxish",
     "name": "Bruxish"
   },
   "drampa": {
     "api": 780,
-    "sprite": "drampa.gif",
+    "sprite": "drampa",
     "name": "Drampa"
   },
   "dhelmise": {
     "api": 781,
-    "sprite": "dhelmise.gif",
+    "sprite": "dhelmise",
     "name": "Dhelmise"
   },
   "jangmo-o": {
     "api": 782,
-    "sprite": "jangmoo.gif",
+    "sprite": "jangmoo",
     "name": "Jangmo-o"
   },
   "hakamo-o": {
     "api": 783,
-    "sprite": "hakamoo.gif",
+    "sprite": "hakamoo",
     "name": "Hakamo-o"
   },
   "kommo-o": {
     "api": 784,
-    "sprite": "kommoo.gif",
+    "sprite": "kommoo",
     "name": "Kommo-o"
   },
   "tapu-koko": {
     "api": 785,
-    "sprite": "tapukoko.gif",
+    "sprite": "tapukoko",
     "name": "Tapu Koko"
   },
   "tapu-lele": {
     "api": 786,
-    "sprite": "tapulele.gif",
+    "sprite": "tapulele",
     "name": "Tapu Lele"
   },
   "tapu-bulu": {
     "api": 787,
-    "sprite": "tapubulu.gif",
+    "sprite": "tapubulu",
     "name": "Tapu Bulu"
   },
   "tapu-fini": {
     "api": 788,
-    "sprite": "tapufini.gif",
+    "sprite": "tapufini",
     "name": "Tapu Fini"
   },
   "cosmog": {
     "api": 789,
-    "sprite": "cosmog.gif",
+    "sprite": "cosmog",
     "name": "Cosmog"
   },
   "cosmoem": {
     "api": 790,
-    "sprite": "cosmoem.gif",
+    "sprite": "cosmoem",
     "name": "Cosmoem"
   },
   "solgaleo": {
     "api": 791,
-    "sprite": "solgaleo.gif",
+    "sprite": "solgaleo",
     "name": "Solgaleo"
   },
   "lunala": {
     "api": 792,
-    "sprite": "lunala.gif",
+    "sprite": "lunala",
     "name": "Lunala"
   },
   "nihilego": {
     "api": 793,
-    "sprite": "nihilego.gif",
+    "sprite": "nihilego",
     "name": "Nihilego"
   },
   "buzzwole": {
     "api": 794,
-    "sprite": "buzzwole.gif",
+    "sprite": "buzzwole",
     "name": "Buzzwole"
   },
   "pheromosa": {
     "api": 795,
-    "sprite": "pheromosa.gif",
+    "sprite": "pheromosa",
     "name": "Pheromosa"
   },
   "xurkitree": {
     "api": 796,
-    "sprite": "xurkitree.gif",
+    "sprite": "xurkitree",
     "name": "Xurkitree"
   },
   "celesteela": {
     "api": 797,
-    "sprite": "celesteela.gif",
+    "sprite": "celesteela",
     "name": "Celesteela"
   },
   "kartana": {
     "api": 798,
-    "sprite": "kartana.gif",
+    "sprite": "kartana",
     "name": "Kartana"
   },
   "guzzlord": {
     "api": 799,
-    "sprite": "guzzlord.gif",
+    "sprite": "guzzlord",
     "name": "Guzzlord"
   },
   "necrozma": {
     "api": 800,
-    "sprite": "necrozma.gif",
+    "sprite": "necrozma",
     "name": "Necrozma"
   },
   "magearna": {
     "api": 801,
-    "sprite": "magearna.gif",
+    "sprite": "magearna",
     "name": "Magearna"
   },
   "marshadow": {
     "api": 802,
-    "sprite": "marshadow.gif",
+    "sprite": "marshadow",
     "name": "Marshadow"
   },
   "poipole": {
     "api": 803,
-    "sprite": "poipole.gif",
+    "sprite": "poipole",
     "name": "Poipole"
   },
   "naganadel": {
     "api": 804,
-    "sprite": "naganadel.gif",
+    "sprite": "naganadel",
     "name": "Naganadel"
   },
   "stakataka": {
     "api": 805,
-    "sprite": "stakataka.gif",
+    "sprite": "stakataka",
     "name": "Stakataka"
   },
   "blacephalon": {
     "api": 806,
-    "sprite": "blacephalon.gif",
+    "sprite": "blacephalon",
     "name": "Blacephalon"
   },
   "zeraora": {
     "api": 807,
-    "sprite": "zeraora.gif",
+    "sprite": "zeraora",
     "name": "Zeraora"
   },
   "deoxys-attack": {
     "api": 10001,
-    "sprite": "deoxys-attack.gif",
+    "sprite": "deoxys-attack",
     "name": "Deoxys Attack"
   },
   "deoxys-defense": {
     "api": 10002,
-    "sprite": "deoxys-defense.gif",
+    "sprite": "deoxys-defense",
     "name": "Deoxys Defense"
   },
   "deoxys-speed": {
     "api": 10003,
-    "sprite": "deoxys-speed.gif",
+    "sprite": "deoxys-speed",
     "name": "Deoxys Speed"
   },
   "wormadam-sandy": {
     "api": 10004,
-    "sprite": "wormadam-sandy.gif",
+    "sprite": "wormadam-sandy",
     "name": "Wormadam Sandy"
   },
   "wormadam-trash": {
     "api": 10005,
-    "sprite": "wormadam-trash.gif",
+    "sprite": "wormadam-trash",
     "name": "Wormadam Trash"
   },
   "shaymin-sky": {
     "api": 10006,
-    "sprite": "shaymin-sky.gif",
+    "sprite": "shaymin-sky",
     "name": "Shaymin Sky"
   },
   "giratina-origin": {
     "api": 10007,
-    "sprite": "giratina-origin.gif",
+    "sprite": "giratina-origin",
     "name": "Giratina"
   },
   "rotom-heat": {
     "api": 10008,
-    "sprite": "rotom-heat.gif",
+    "sprite": "rotom-heat",
     "name": "Rotom Heat"
   },
   "rotom-wash": {
     "api": 10009,
-    "sprite": "rotom-wash.gif",
+    "sprite": "rotom-wash",
     "name": "Rotom Wash"
   },
   "rotom-frost": {
     "api": 10010,
-    "sprite": "rotom-frost.gif",
+    "sprite": "rotom-frost",
     "name": "Rotom Frost"
   },
   "rotom-fan": {
     "api": 10011,
-    "sprite": "rotom-fan.gif",
+    "sprite": "rotom-fan",
     "name": "Rotom Fan"
   },
   "rotom-mow": {
     "api": 10012,
-    "sprite": "rotom-mow.gif",
+    "sprite": "rotom-mow",
     "name": "Rotom Mow"
   },
   "castform-sunny": {
     "api": 10013,
-    "sprite": "castform-sunny.gif",
+    "sprite": "castform-sunny",
     "name": "Castform Sunny"
   },
   "castform-rainy": {
     "api": 10014,
-    "sprite": "castform-rainy.gif",
+    "sprite": "castform-rainy",
     "name": "Castform Rainy"
   },
   "castform-snowy": {
     "api": 10015,
-    "sprite": "castform-snowy.gif",
+    "sprite": "castform-snowy",
     "name": "Castform Snowy"
   },
   "basculin-blue-striped": {
     "api": 10016,
-    "sprite": "basculin-bluestriped.gif",
+    "sprite": "basculin-bluestriped",
     "name": "Basculin Blue Striped"
   },
   "darmanitan-zen": {
     "api": 10017,
-    "sprite": "darmanitan-zen.gif",
+    "sprite": "darmanitan-zen",
     "name": "Darmanitan Zen"
   },
   "meloetta-pirouette": {
     "api": 10018,
-    "sprite": "meloetta-pirouette.gif",
+    "sprite": "meloetta-pirouette",
     "name": "Meloetta Pirouette"
   },
   "tornadus-therian": {
     "api": 10019,
-    "sprite": "tornadus-therian.gif",
+    "sprite": "tornadus-therian",
     "name": "Tornadus Therian"
   },
   "thundurus-therian": {
     "api": 10020,
-    "sprite": "thundurus-therian.gif",
+    "sprite": "thundurus-therian",
     "name": "Thundurus Therian"
   },
   "landorus-therian": {
     "api": 10021,
-    "sprite": "landorus-therian.gif",
+    "sprite": "landorus-therian",
     "name": "Landorus Therian"
   },
   "kyurem-black": {
     "api": 10022,
-    "sprite": "kyurem-black.gif",
+    "sprite": "kyurem-black",
     "name": "Kyurem Black"
   },
   "kyurem-white": {
     "api": 10023,
-    "sprite": "kyurem-white.gif",
+    "sprite": "kyurem-white",
     "name": "Kyurem White"
   },
   "keldeo-resolute": {
     "api": 10024,
-    "sprite": "keldeo-resolute.gif",
+    "sprite": "keldeo-resolute",
     "name": "Keldeo Resolute"
   },
   "meowstic-f": {
     "api": 10025,
-    "sprite": "meowstic-f.gif",
+    "sprite": "meowstic-f",
     "name": "Meowstic"
   },
   "aegislash-blade": {
     "api": 10026,
-    "sprite": "aegislash-blade.gif",
+    "sprite": "aegislash-blade",
     "name": "Aegislash"
   },
   "pumpkaboo-small": {
     "api": 10027,
-    "sprite": "pumpkaboo-small.gif",
+    "sprite": "pumpkaboo-small",
     "name": "Pumpkaboo Small"
   },
   "pumpkaboo-large": {
     "api": 10028,
-    "sprite": "pumpkaboo-large.gif",
+    "sprite": "pumpkaboo-large",
     "name": "Pumpkaboo Large"
   },
   "pumpkaboo-super": {
     "api": 10029,
-    "sprite": "pumpkaboo-super.gif",
+    "sprite": "pumpkaboo-super",
     "name": "Pumpkaboo"
   },
   "gourgeist-small": {
     "api": 10030,
-    "sprite": "gourgeist-small.gif",
+    "sprite": "gourgeist-small",
     "name": "Gourgeist"
   },
   "gourgeist-large": {
     "api": 10031,
-    "sprite": "gourgeist-large.gif",
+    "sprite": "gourgeist-large",
     "name": "Gourgeist"
   },
   "gourgeist-super": {
     "api": 10032,
-    "sprite": "gourgeist-super.gif",
+    "sprite": "gourgeist-super",
     "name": "Gourgeist"
   },
   "venusaur-mega": {
     "api": 10033,
-    "sprite": "venusaur-mega.gif",
+    "sprite": "venusaur-mega",
     "name": "Mega Venusaur"
   },
   "charizard-mega-x": {
     "api": 10034,
-    "sprite": "charizard-megax.gif",
+    "sprite": "charizard-megax",
     "name": "Mega Charizard X"
   },
   "charizard-mega-y": {
     "api": 10035,
-    "sprite": "charizard-megay.gif",
+    "sprite": "charizard-megay",
     "name": "Mega Charizard Y"
   },
   "blastoise-mega": {
     "api": 10036,
-    "sprite": "blastoise-mega.gif",
+    "sprite": "blastoise-mega",
     "name": "Mega Blastoise"
   },
   "alakazam-mega": {
     "api": 10037,
-    "sprite": "alakazam-mega.gif",
+    "sprite": "alakazam-mega",
     "name": "Mega Alakazam"
   },
   "gengar-mega": {
     "api": 10038,
-    "sprite": "gengar-mega.gif",
+    "sprite": "gengar-mega",
     "name": "Mega Gengar"
   },
   "kangaskhan-mega": {
     "api": 10039,
-    "sprite": "kangaskhan-mega.gif",
+    "sprite": "kangaskhan-mega",
     "name": "Mega Kangaskhan"
   },
   "pinsir-mega": {
     "api": 10040,
-    "sprite": "pinsir-mega.gif",
+    "sprite": "pinsir-mega",
     "name": "Mega Pinsir"
   },
   "gyarados-mega": {
     "api": 10041,
-    "sprite": "gyarados-mega.gif",
+    "sprite": "gyarados-mega",
     "name": "Mega Gyarados"
   },
   "aerodactyl-mega": {
     "api": 10042,
-    "sprite": "aerodactyl-mega.gif",
+    "sprite": "aerodactyl-mega",
     "name": "Mega Aerodactyl"
   },
   "mewtwo-mega-x": {
     "api": 10043,
-    "sprite": "mewtwo-megax.gif",
+    "sprite": "mewtwo-megax",
     "name": "Mega Mewtwo X"
   },
   "mewtwo-mega-y": {
     "api": 10044,
-    "sprite": "mewtwo-megay.gif",
+    "sprite": "mewtwo-megay",
     "name": "Mega Mewtwo Y"
   },
   "ampharos-mega": {
     "api": 10045,
-    "sprite": "ampharos-mega.gif",
+    "sprite": "ampharos-mega",
     "name": "Mega Ampharos"
   },
   "scizor-mega": {
     "api": 10046,
-    "sprite": "scizor-mega.gif",
+    "sprite": "scizor-mega",
     "name": "Mega Scizor"
   },
   "heracross-mega": {
     "api": 10047,
-    "sprite": "heracross-mega.gif",
+    "sprite": "heracross-mega",
     "name": "Mega Heracross"
   },
   "houndoom-mega": {
     "api": 10048,
-    "sprite": "houndoom-mega.gif",
+    "sprite": "houndoom-mega",
     "name": "Mega Houndoom"
   },
   "tyranitar-mega": {
     "api": 10049,
-    "sprite": "tyranitar-mega.gif",
+    "sprite": "tyranitar-mega",
     "name": "Mega Tyranitar"
   },
   "blaziken-mega": {
     "api": 10050,
-    "sprite": "blaziken-mega.gif",
+    "sprite": "blaziken-mega",
     "name": "Mega Blaziken"
   },
   "gardevoir-mega": {
     "api": 10051,
-    "sprite": "gardevoir-mega.gif",
+    "sprite": "gardevoir-mega",
     "name": "Mega Gardevoir"
   },
   "mawile-mega": {
     "api": 10052,
-    "sprite": "mawile-mega.gif",
+    "sprite": "mawile-mega",
     "name": "Mega Mawile"
   },
   "aggron-mega": {
     "api": 10053,
-    "sprite": "aggron-mega.gif",
+    "sprite": "aggron-mega",
     "name": "Mega Aggron"
   },
   "medicham-mega": {
     "api": 10054,
-    "sprite": "medicham-mega.gif",
+    "sprite": "medicham-mega",
     "name": "Mega Medicham"
   },
   "manectric-mega": {
     "api": 10055,
-    "sprite": "manectric-mega.gif",
+    "sprite": "manectric-mega",
     "name": "Mega Manectric"
   },
   "banette-mega": {
     "api": 10056,
-    "sprite": "banette-mega.gif",
+    "sprite": "banette-mega",
     "name": "Mega Banette"
   },
   "absol-mega": {
     "api": 10057,
-    "sprite": "absol-mega.gif",
+    "sprite": "absol-mega",
     "name": "Mega Absol"
   },
   "garchomp-mega": {
     "api": 10058,
-    "sprite": "garchomp-mega.gif",
+    "sprite": "garchomp-mega",
     "name": "Mega Garchomp"
   },
   "lucario-mega": {
     "api": 10059,
-    "sprite": "lucario-mega.gif",
+    "sprite": "lucario-mega",
     "name": "Mega Lucario"
   },
   "abomasnow-mega": {
     "api": 10060,
-    "sprite": "abomasnow-mega.gif",
+    "sprite": "abomasnow-mega",
     "name": "Mega Abomasnow"
   },
   "latias-mega": {
     "api": 10062,
-    "sprite": "latias-mega.gif",
+    "sprite": "latias-mega",
     "name": "Mega Latias"
   },
   "latios-mega": {
     "api": 10063,
-    "sprite": "latios-mega.gif",
+    "sprite": "latios-mega",
     "name": "Mega Latios"
   },
   "swampert-mega": {
     "api": 10064,
-    "sprite": "swampert-mega.gif",
+    "sprite": "swampert-mega",
     "name": "Mega Swampert"
   },
   "sceptile-mega": {
     "api": 10065,
-    "sprite": "sceptile-mega.gif",
+    "sprite": "sceptile-mega",
     "name": "Mega Sceptile"
   },
   "sableye-mega": {
     "api": 10066,
-    "sprite": "sableye-mega.gif",
+    "sprite": "sableye-mega",
     "name": "Mega Sableye"
   },
   "altaria-mega": {
     "api": 10067,
-    "sprite": "altaria-mega.gif",
+    "sprite": "altaria-mega",
     "name": "Mega Altaria"
   },
   "gallade-mega": {
     "api": 10068,
-    "sprite": "gallade-mega.gif",
+    "sprite": "gallade-mega",
     "name": "Mega Gallade"
   },
   "audino-mega": {
     "api": 10069,
-    "sprite": "audino-mega.gif",
+    "sprite": "audino-mega",
     "name": "Mega Audino"
   },
   "sharpedo-mega": {
     "api": 10070,
-    "sprite": "sharpedo-mega.gif",
+    "sprite": "sharpedo-mega",
     "name": "Mega Sharpedo"
   },
   "slowbro-mega": {
     "api": 10071,
-    "sprite": "slowbro-mega.gif",
+    "sprite": "slowbro-mega",
     "name": "Mega Slowbro"
   },
   "steelix-mega": {
     "api": 10072,
-    "sprite": "steelix-mega.gif",
+    "sprite": "steelix-mega",
     "name": "Mega Steelix"
   },
   "pidgeot-mega": {
     "api": 10073,
-    "sprite": "pidgeot-mega.gif",
+    "sprite": "pidgeot-mega",
     "name": "Mega Pidgeot"
   },
   "glalie-mega": {
     "api": 10074,
-    "sprite": "glalie-mega.gif",
+    "sprite": "glalie-mega",
     "name": "Mega Glalie"
   },
   "diancie-mega": {
     "api": 10075,
-    "sprite": "diancie-mega.gif",
+    "sprite": "diancie-mega",
     "name": "Mega Diancie"
   },
   "metagross-mega": {
     "api": 10076,
-    "sprite": "metagross-mega.gif",
+    "sprite": "metagross-mega",
     "name": "Mega Metagross"
   },
   "kyogre-primal": {
     "api": 10077,
-    "sprite": "kyogre-primal.gif",
+    "sprite": "kyogre-primal",
     "name": "Primal Kyogre"
   },
   "groudon-primal": {
     "api": 10078,
-    "sprite": "groudon-primal.gif",
+    "sprite": "groudon-primal",
     "name": "Primal Groudon"
   },
   "rayquaza-mega": {
     "api": 10079,
-    "sprite": "rayquaza-mega.gif",
+    "sprite": "rayquaza-mega",
     "name": "Mega Rayquaza"
   },
   "pikachu-rockstar": {
     "api": 10080,
-    "sprite": "pikachu-rockstar.gif",
+    "sprite": "pikachu-rockstar",
     "name": "Pikachu Rockstar"
   },
   "pikachu-belle": {
     "api": 100781,
-    "sprite": "pikachu-belle.gif",
+    "sprite": "pikachu-belle",
     "name": "Pikachu Belle"
   },
   "pikachu-popstar": {
     "api": 10082,
-    "sprite": "pikachu-popstar.gif",
+    "sprite": "pikachu-popstar",
     "name": "Pikachu Popstar"
   },
   "pikachu-phd": {
     "api": 10083,
-    "sprite": "pikachu-phd.gif",
+    "sprite": "pikachu-phd",
     "name": "Pikachu PhD"
   },
   "pikachu-libre": {
     "api": 10084,
-    "sprite": "pikachu-libre.gif",
+    "sprite": "pikachu-libre",
     "name": "Pikachu Libre"
   },
   "pikachu-cosplay": {
     "api": 10085,
-    "sprite": "pikachu-cosplay.gif",
+    "sprite": "pikachu-cosplay",
     "name": "Pikachu Cosplay"
   },
   "hoopa-unbound": {
     "api": 10086,
-    "sprite": "hoopa-unbound.gif",
+    "sprite": "hoopa-unbound",
     "name": "Hoopa Unbound"
   },
   "camerupt-mega": {
     "api": 10087,
-    "sprite": "camerupt-mega.gif",
+    "sprite": "camerupt-mega",
     "name": "Mega Camerupt"
   },
   "lopunny-mega": {
     "api": 10088,
-    "sprite": "lopunny-mega.gif",
+    "sprite": "lopunny-mega",
     "name": "Mega Lopunny"
   },
   "salamence-mega": {
     "api": 10089,
-    "sprite": "salamence-mega.gif",
+    "sprite": "salamence-mega",
     "name": "MegaSalamence"
   },
   "beedrill-mega": {
     "api": 10090,
-    "sprite": "beedrill-mega.gif",
+    "sprite": "beedrill-mega",
     "name": "Mega Beedrill"
   },
   "rattata-alola": {
     "api": 10091,
-    "sprite": "rattata-alola.gif",
+    "sprite": "rattata-alola",
     "name": "Rattata Alola"
   },
   "raticate-alola": {
     "api": 10092,
-    "sprite": "raticate-alola.gif",
+    "sprite": "raticate-alola",
     "name": "Raticate Alola"
   },
   "raticate-totem": {
@@ -4526,332 +4526,332 @@
   },
   "pikachu-original": {
     "api": 10094,
-    "sprite": "pikachu-original.gif",
+    "sprite": "pikachu-original",
     "name": "Pikachu Original"
   },
   "pikachu-hoenn": {
     "api": 10095,
-    "sprite": "pikachu-hoenn.gif",
+    "sprite": "pikachu-hoenn",
     "name": "Pikachu Hoenn"
   },
   "pikachu-sinnoh": {
     "api": 10096,
-    "sprite": "pikachu-sinnoh.gif",
+    "sprite": "pikachu-sinnoh",
     "name": "Pikachu Sinnoh"
   },
   "pikachu-unova": {
     "api": 10097,
-    "sprite": "pikachu-unova.gif",
+    "sprite": "pikachu-unova",
     "name": "Pikachu Unova"
   },
   "pikachu-kalos": {
     "api": 10098,
-    "sprite": "pikachu-kalos.gif",
+    "sprite": "pikachu-kalos",
     "name": "Pikachu Kalos"
   },
   "pikachu-alola": {
     "api": 10099,
-    "sprite": "pikachu-alola.gif",
+    "sprite": "pikachu-alola",
     "name": "Pikachu Alola"
   },
   "raichu-alola": {
     "api": 10100,
-    "sprite": "raichu-alola.gif",
+    "sprite": "raichu-alola",
     "name": "Raichu Alola"
   },
   "sandshrew-alola": {
     "api": 10101,
-    "sprite": "sandshrew-alola.gif",
+    "sprite": "sandshrew-alola",
     "name": "Sandshrew Alola"
   },
   "sandslash-alola": {
     "api": 10102,
-    "sprite": "sandslash-alola.gif",
+    "sprite": "sandslash-alola",
     "name": "Sandslash Alola"
   },
   "vulpix-alola": {
     "api": 10103,
-    "sprite": "vulpix-alola.gif",
+    "sprite": "vulpix-alola",
     "name": "Vulpix Alola"
   },
   "ninetales-alola": {
     "api": 10104,
-    "sprite": "ninetales-alola.gif",
+    "sprite": "ninetales-alola",
     "name": "Ninetales Alola"
   },
   "diglett-alola": {
     "api": 10105,
-    "sprite": "diglett-alola.gif",
+    "sprite": "diglett-alola",
     "name": "Diglett Alola"
   },
   "dugtrio-alola": {
     "api": 10106,
-    "sprite": "dugtrio-alola.gif",
+    "sprite": "dugtrio-alola",
     "name": "Dugtrio Alola"
   },
   "meowth-alola": {
     "api": 10107,
-    "sprite": "meowth-alola.gif",
+    "sprite": "meowth-alola",
     "name": "Meowth Alola"
   },
   "persian-alola": {
     "api": 10108,
-    "sprite": "persian-alola.gif",
+    "sprite": "persian-alola",
     "name": "Persian Alola"
   },
   "geodude-alola": {
     "api": 10109,
-    "sprite": "beedrill-mega.gif",
+    "sprite": "beedrill-mega",
     "name": "Geodude Alola"
   },
   "graveler-alola": {
     "api": 10110,
-    "sprite": "graveler-alola.gif",
+    "sprite": "graveler-alola",
     "name": "Graveler Alola"
   },
   "golem-alola": {
     "api": 10111,
-    "sprite": "golem-alola.gif",
+    "sprite": "golem-alola",
     "name": "Golem Alola"
   },
   "grimer-alola": {
     "api": 10112,
-    "sprite": "grimer-alola.gif",
+    "sprite": "grimer-alola",
     "name": "Grimer Alola"
   },
   "muk-alola": {
     "api": 10113,
-    "sprite": "muk-alola.gif",
+    "sprite": "muk-alola",
     "name": "Muk Alola"
   },
   "exeggutor-alola": {
     "api": 10114,
-    "sprite": "exeggutor-alola.gif",
+    "sprite": "exeggutor-alola",
     "name": "Exeggutor Alola"
   },
   "marowak-alola": {
     "api": 10115,
-    "sprite": "marowak-alola.gif",
+    "sprite": "marowak-alola",
     "name": "Marowak Alola"
   },
   "greninja-battlebond": {
     "api": 10116,
-    "sprite": "greninja.gif",
+    "sprite": "greninja",
     "name": "Greninja Battlebond"
   },
   "greninja-ash": {
     "api": 10117,
-    "sprite": "greninja-ash.gif",
+    "sprite": "greninja-ash",
     "name": "Greninja Ash"
   },
   "zygarde-10": {
     "api": 10118,
-    "sprite": "zygarde-10.gif",
+    "sprite": "zygarde-10",
     "name": "Zygarde 10"
   },
   "zygarde-50": {
     "api": 10119,
-    "sprite": "zygarde.gif",
+    "sprite": "zygarde",
     "name": "Zygarde 50"
   },
   "zygarde-complete": {
     "api": 10120,
-    "sprite": "zygarde-complete.gif",
+    "sprite": "zygarde-complete",
     "name": "Zygarde Complete"
   },
   "gumshoos-totem": {
     "api": 10121,
-    "sprite": "gumshoos-totem.gif",
+    "sprite": "gumshoos-totem",
     "name": "Gumshoos Totem"
   },
   "vikavolt-totem": {
     "api": 10122,
-    "sprite": "vikavolt-totem.gif",
+    "sprite": "vikavolt-totem",
     "name": "Vikavolt Totem"
   },
   "oricorio-pompom": {
     "api": 10123,
-    "sprite": "oricorio-pompom.gif",
+    "sprite": "oricorio-pompom",
     "name": "Oricorio Pom-Pom"
   },
   "oricorio-pa'u": {
     "api": 10124,
-    "sprite": "oricorio-pau.gif",
+    "sprite": "oricorio-pau",
     "name": "Oricorio P'au"
   },
   "oricorio-sensu": {
     "api": 10125,
-    "sprite": "oricorio-sensu.gif",
+    "sprite": "oricorio-sensu",
     "name": "Oricorio Sensu"
   },
   "lycanroc-midnight": {
     "api": 10126,
-    "sprite": "lycanroc-midnight.gif",
+    "sprite": "lycanroc-midnight",
     "name": "Lycanroc Midnight"
   },
   "wishiwashi-school": {
     "api": 10127,
-    "sprite": "wishiwashi-school.gif",
+    "sprite": "wishiwashi-school",
     "name": "Wishiwashi School"
   },
   "lurantis-totem": {
     "api": 10128,
-    "sprite": "lurantis-totem.gif",
+    "sprite": "lurantis-totem",
     "name": "Lurantis Totem"
   },
   "salazzle-totem": {
     "api": 10129,
-    "sprite": "salazzle-totem.gif",
+    "sprite": "salazzle-totem",
     "name": "Salazzle Totem"
   },
   "minior-orange-meteor": {
     "api": 10130,
-    "sprite": "minior-meteor.gif",
+    "sprite": "minior-meteor",
     "name": "Minior Orange Meteor"
   },
   "minior-yellow-meteor": {
     "api": 10131,
-    "sprite": "minior-meteor.gif",
+    "sprite": "minior-meteor",
     "name": "Minior Yellow Meteor"
   },
   "minior-green-meteor": {
     "api": 10132,
-    "sprite": "minior-meteor.gif",
+    "sprite": "minior-meteor",
     "name": "Minior Green Meteor"
   },
   "minior-blue-meteor": {
     "api": 10133,
-    "sprite": "minior-meteor.gif",
+    "sprite": "minior-meteor",
     "name": "Minior Blue Meteor"
   },
   "minior-indigo-meteor": {
     "api": 10134,
-    "sprite": "minior-meteor.gif",
+    "sprite": "minior-meteor",
     "name": "Minior Indigo Meteor"
   },
   "minior-violet-meteor": {
     "api": 10135,
-    "sprite": "minior-meteor.gif",
+    "sprite": "minior-meteor",
     "name": "Minior Violet Meteor"
   },
   "minior-red": {
     "api": 10136,
-    "sprite": "minior-red.gif",
+    "sprite": "minior-red",
     "name": "Minior Red"
   },
   "minior-orange": {
     "api": 10137,
-    "sprite": "minior-orange.gif",
+    "sprite": "minior-orange",
     "name": "Minior Orange"
   },
   "minior-yellow": {
     "api": 10138,
-    "sprite": "minior-yellow.gif",
+    "sprite": "minior-yellow",
     "name": "Minior Yellow"
   },
   "minior-green": {
     "api": 10139,
-    "sprite": "minior-green.gif",
+    "sprite": "minior-green",
     "name": "Minior Green"
   },
   "minior-blue": {
     "api": 10140,
-    "sprite": "minior-blue.gif",
+    "sprite": "minior-blue",
     "name": "Minior Blue"
   },
   "minior-indigo": {
     "api": 10141,
-    "sprite": "minior Indigo.gif",
+    "sprite": "minior Indigo",
     "name": "Minior Indigo"
   },
   "minior-violet": {
     "api": 10142,
-    "sprite": "minior-violet.gif",
+    "sprite": "minior-violet",
     "name": "Minior Violet"
   },
   "mimikyu-busted": {
     "api": 10143,
-    "sprite": "mimikyu-busted.gif",
+    "sprite": "mimikyu-busted",
     "name": "Mimikyu"
   },
   "mimikyu-totem": {
     "api": 10144,
-    "sprite": "mimikyu-totem.gif",
+    "sprite": "mimikyu-totem",
     "name": "Mimikyu Totem"
   },
   "mimikyu-totem-busted": {
     "api": 10145,
-    "sprite": "mimikyu-totem-busted.gif",
+    "sprite": "mimikyu-totem-busted",
     "name": "Mimikyu Totem"
   },
   "kommo-o-totem": {
     "api": 10146,
-    "sprite": "kommo-o-totem.gif",
+    "sprite": "kommo-o-totem",
     "name": "Kommo-o Totem"
   },
   "magearna-original": {
     "api": 10147,
-    "sprite": "magearna-original.gif",
+    "sprite": "magearna-original",
     "name": "Magearna Original"
   },
   "pikachu-partner": {
     "api": 10148,
-    "sprite": "pikachu-partner.gif",
+    "sprite": "pikachu-partner",
     "name": "Pikachu Partner"
   },
   "marowak-totem": {
     "api": 10149,
-    "sprite": "marowak-totem.gif",
+    "sprite": "marowak-totem",
     "name": "Marowak Totem"
   },
   "ribombee-totem": {
     "api": 10150,
-    "sprite": "ribombee-totem.gif",
+    "sprite": "ribombee-totem",
     "name": "Ribombee Totem"
   },
   "rockruff-own-tempo": {
     "api": 10151,
-    "sprite": "rockruff.gif",
+    "sprite": "rockruff",
     "name": "Rockruff"
   },
   "lycanroc-dusk": {
     "api": 10152,
-    "sprite": "lycanroc-dusk.gif",
+    "sprite": "lycanroc-dusk",
     "name": "Lycanroc Dusk"
   },
   "araquanid-totem": {
     "api": 10153,
-    "sprite": "araquanid-totem.gif",
+    "sprite": "araquanid-totem",
     "name": "Araquanid Totem"
   },
   "togedemaru-totem": {
     "api": 10154,
-    "sprite": "togedemaru-totem.gif",
+    "sprite": "togedemaru-totem",
     "name": "Togedemaru Totem"
   },
   "necrozma-dusk": {
     "api": 10155,
-    "sprite": "necrozma-duskmane.gif",
+    "sprite": "necrozma-duskmane",
     "name": "Necrozma Duskmane"
   },
   "necrozma-duskmane": {
     "api": 10155,
-    "sprite": "necrozma-duskmane.gif",
+    "sprite": "necrozma-duskmane",
     "name": "Necrozma Duskmane"
   },
   "necrozma-dawn": {
     "api": 10156,
-    "sprite": "necrozma-dawnwings.gif",
+    "sprite": "necrozma-dawnwings",
     "name": "Necrozma Dawnwings"
   },
   "necrozma-dawn-wings": {
     "api": 10156,
-    "sprite": "necrozma-dawnwings.gif",
+    "sprite": "necrozma-dawnwings",
     "name": "Necrozma Dawnwings"
   },
   "necrozma-ultra": {
     "api": 10157,
-    "sprite": "necrozma-ultra.gif",
+    "sprite": "necrozma-ultra",
     "name": "Necrozma Ultra"
   }
 }

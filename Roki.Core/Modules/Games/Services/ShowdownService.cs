@@ -345,7 +345,7 @@ namespace Roki.Modules.Games.Services
                 .Replace(".", "", StringComparison.Ordinal).Replace(":", "", StringComparison.Ordinal);
             var poke = query.EndsWith("-*", StringComparison.Ordinal) ? Data[query.Replace("-*", "", StringComparison.Ordinal)] : Data[query];
 
-            return poke.Sprite.Replace("gif", "png", StringComparison.Ordinal);
+            return poke.Sprite;
         }
     }
 }

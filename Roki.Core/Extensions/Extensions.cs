@@ -174,9 +174,9 @@ namespace Roki.Extensions
 
         public static Image<Rgba32> MergePokemonTeam(this IEnumerable<Image<Rgba32>> images)
         {
-            var width = images.Sum(image => image.Width);
+            var width = images.Sum(image => image.Width) - images.First().Height * 2;
 
-            var output = new Image<Rgba32>(width-240, 120);
+            var output = new Image<Rgba32>(width, images.Sum(image => image.Height));
             var curWidth = 0;
             var diff = 0;
 
