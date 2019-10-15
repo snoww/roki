@@ -176,7 +176,7 @@ namespace Roki.Extensions
         {
             var width = images.Sum(image => image.Width) - images.First().Height * 2;
 
-            var output = new Image<Rgba32>(width, images.Sum(image => image.Height));
+            var output = new Image<Rgba32>(width, images.First().Height);
             var curWidth = 0;
             var diff = 0;
 
