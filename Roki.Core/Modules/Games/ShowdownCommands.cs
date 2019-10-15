@@ -114,6 +114,8 @@ namespace Roki.Modules.Games
                             generation = "5";
                         else if (gen == "4") 
                             generation = "4";
+                        else
+                            generation = "7";
                     }
                     catch
                     {
