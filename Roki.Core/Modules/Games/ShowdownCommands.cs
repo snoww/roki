@@ -102,9 +102,10 @@ namespace Roki.Modules.Games
                 string generation;
                 bool verbose;
                 
-                if (gen == 6)
-                    generation = "6";
-                else if (gen == 5)
+//                if (gen == 6)
+//                    generation = "6";
+//                else 
+                if (gen == 5)
                     generation = "5";
                 else if (gen == 4)
                     generation = "4";

@@ -35,7 +35,7 @@ namespace Roki.Modules.Games.Services
                 proc.WaitForExit();
             }
             
-            System.IO.File.WriteAllText($@"./data/pokemon-logs/{Guid.NewGuid().ToString().Substring(0, 7)}", output);
+//            System.IO.File.WriteAllText($@"./data/pokemon-logs/{Guid.NewGuid().ToString().Substring(0, 7)}", output);
             
             return output;
         }
