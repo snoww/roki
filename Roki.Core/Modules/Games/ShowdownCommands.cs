@@ -91,7 +91,7 @@ namespace Roki.Modules.Games
 
             [RokiCommand, Description, Aliases, Usage]
             [RequireContext(ContextType.Guild)]
-            public async Task BetPokemonGame([Leftover] string arguments = "-g 7")
+            public async Task BetPokemonGame(int gen = 7, string v = null)
             {
                 if (_service.Games.TryGetValue(ctx.Channel.Id, out _))
                 {
@@ -99,34 +99,22 @@ namespace Roki.Modules.Games
                     return;
                 }
 
-                var verbose = false;
-                var generation = "7";
-
-                var args = arguments.Split();
-                if (args.Contains("-g", StringComparer.Ordinal) || args.Contains("--generation", StringComparer.Ordinal))
-                {
-                    try
-                    {
-                        var gen = args[args.IndexOf("-g") + 1];
-                        if (gen == "6")
-                            generation = "6";
-                        else if (gen == "5")
-                            generation = "5";
-                        else if (gen == "4") 
-                            generation = "4";
-                        else
-                            generation = "7";
-                    }
-                    catch
-                    {
-                        await ctx.Channel.SendErrorAsync("Argument Error.").ConfigureAwait(false);
-                        return;
-                    }
-                } 
-                if (args.Contains("-v", StringComparer.Ordinal) || args.Contains("--verbose", StringComparer.Ordinal))
-                {
+                string generation;
+                bool verbose;
+                
+                if (gen == 6)
+                    generation = "6";
+                else if (gen == 5)
+                    generation = "5";
+                else if (gen == 4)
+                    generation = "4";
+                else
+                    generation = "7";
+                
+                if (v == "-v" || v == "--verbose")
                     verbose = true;
-                }
+                else
+                    verbose = false;
                 
                 _service.Games.TryAdd(ctx.Channel.Id, $"{ctx.User.Username}'s game");
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
