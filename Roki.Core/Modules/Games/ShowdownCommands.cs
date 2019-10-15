@@ -151,7 +151,7 @@ namespace Roki.Modules.Games
                         }
                     
                         var start = new EmbedBuilder().WithOkColor()
-                            .WithTitle($"Random Battle")
+                            .WithTitle($"[Gen {generation}] Random Battle")
                             .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 20 100` means betting on 130 on P1.")
                             .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
                             .AddField("Player 1", string.Join('\n', intro[0]), true)
