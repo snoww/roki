@@ -107,8 +107,8 @@ namespace Roki.Modules.Games
 //                else 
                 if (gen == 5)
                     generation = "5";
-                else if (gen == 4)
-                    generation = "4";
+//                else if (gen == 4)
+//                    generation = "4";
                 else
                     generation = "7";
                 
