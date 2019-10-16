@@ -26,8 +26,8 @@ namespace Roki.Modules.Games
             private static readonly IEmote LetterB = new Emoji("🇧");
             private static readonly IEmote LetterC = new Emoji("🇨");
             private static readonly IEmote LetterD = new Emoji("🇩");
-            private static readonly IEmote True = new Emoji("🇹️");
-            private static readonly IEmote False = new Emoji("🇫");
+            private static readonly IEmote True = new Emoji("✔️");
+            private static readonly IEmote False = new Emoji("❌");
 
             private static readonly IEmote[] MultipleChoice =
             {
@@ -171,7 +171,7 @@ namespace Roki.Modules.Games
                         await msg.AddReactionsAsync(TrueFalse).ConfigureAwait(false);
                     }
 
-                    using (msg.OnReaction(_client, AnswerAdded, AnswerRemoved))
+                    using (msg.OnReaction(_client, AnswerAdded))
                     {
                         await Task.Delay(20000).ConfigureAwait(false);
                     }
@@ -209,34 +209,28 @@ namespace Roki.Modules.Games
                     async Task AnswerAdded(SocketReaction r)
                     {
                         if (r.Channel != ctx.Channel || r.User.Value.IsBot || r.Message.Value != msg)
-                            await Task.CompletedTask;
+                            return;
                         if (MultipleChoice.Contains(r.Emote))
                         {
                             if (playerChoice.ContainsKey(r.User.Value))
-                            {
-                                var rm = await ctx.Channel.SendErrorAsync($"{r.User.Value.Mention} You must remove your current choice first.").ConfigureAwait(false);
-                                await msg.RemoveReactionAsync(r.Emote, r.User.Value).ConfigureAwait(false);
-                                rm.DeleteAfter(3);
-                            }
+                                playerChoice[r.User.Value] = shuffledAnswers[MultipleChoice.IndexOf(r.Emote)];
                             else
                                 playerChoice.Add(r.User.Value, shuffledAnswers[MultipleChoice.IndexOf(r.Emote)]);
-                            await Task.CompletedTask;
+                            await msg.RemoveReactionAsync(r.Emote, r.User.Value).ConfigureAwait(false);
+                            return;
                         }
                         if (TrueFalse.Contains(r.Emote))
                         {
                             if (playerChoice.ContainsKey(r.User.Value))
-                            {
-                                var rm = await ctx.Channel.SendErrorAsync($"{r.User.Value.Mention} You must remove your current choice first.").ConfigureAwait(false);
-                                await msg.RemoveReactionAsync(r.Emote, r.User.Value).ConfigureAwait(false);
-                                rm.DeleteAfter(3);
-                            }
+                                playerChoice[r.User.Value] = r.Emote.Equals(True) ? "True" : "False";
                             else
                                 playerChoice.Add(r.User.Value, r.Emote.Equals(True) ? "True" : "False");
-                            await Task.CompletedTask;
+                            
+                            await msg.RemoveReactionAsync(r.Emote, r.User.Value).ConfigureAwait(false);
                         }
                     }
 
-                    async Task AnswerRemoved(SocketReaction r)
+                    /*async Task AnswerRemoved(SocketReaction r)
                     {
                         if (r.Channel != ctx.Channel || r.User.Value.IsBot || r.Message.Value != msg)
                             await Task.CompletedTask;
@@ -252,7 +246,7 @@ namespace Roki.Modules.Games
                                 playerChoice.Remove(r.User.Value, out _);
                             await Task.CompletedTask;
                         }
-                    }
+                    }*/
                 }
 
                 var winStr = "";
