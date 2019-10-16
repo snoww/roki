@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Roki.Modules.Games.Common
@@ -5,7 +6,7 @@ namespace Roki.Modules.Games.Common
     public class TriviaModel
     {
         public int ResponseCode { get; set; }
-        public Results[] Results { get; set; }
+        public List<Results> Results { get; set; }
     }
 
     public class Results
