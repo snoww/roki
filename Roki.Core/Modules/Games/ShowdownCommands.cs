@@ -107,8 +107,8 @@ namespace Roki.Modules.Games
 //                else 
                 if (gen == 5)
                     generation = "5";
-//                else if (gen == 4)
-//                    generation = "4";
+                else if (gen == 4)
+                    generation = "4";
                 else
                     generation = "7";
                 
@@ -121,7 +121,7 @@ namespace Roki.Modules.Games
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
 
                 var gameText = await _service.StartAiGameAsync(generation).ConfigureAwait(false);
-                var index = gameText.IndexOf("|teampreview", StringComparison.Ordinal);
+                var index = gameText.IndexOf("|start", StringComparison.Ordinal);
                 var gameIntro = gameText.Substring(0, index);
                 var gameTurns = gameText.Substring(index + 1);
 
