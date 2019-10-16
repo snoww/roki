@@ -26,10 +26,10 @@ namespace Roki.Modules.Games
             private static readonly IEmote LetterB = new Emoji("🇧");
             private static readonly IEmote LetterC = new Emoji("🇨");
             private static readonly IEmote LetterD = new Emoji("🇩");
-            private static readonly IEmote True = new Emoji("✔️️");
-            private static readonly IEmote False = new Emoji("❌");
+            private static readonly IEmote True = new Emoji("🇹️");
+            private static readonly IEmote False = new Emoji("🇫");
 
-            private readonly IEmote[] _multipleChoice =
+            private static readonly IEmote[] MultipleChoice =
             {
                 LetterA,
                 LetterB,
@@ -37,6 +37,12 @@ namespace Roki.Modules.Games
                 LetterD
             };
 
+            private static readonly IEmote[] TrueFalse =
+            {
+                True,
+                False
+            };
+            
             private static readonly Dictionary<string, int> Categories = new Dictionary<string, int>
             {
                 {"All", 0},
@@ -156,14 +162,13 @@ namespace Roki.Modules.Games
                     {
                         embed.WithDescription($"**Multiple Choice**\n{question}\n{string.Join('\n', shuffledAnswers)}");
                         msg = await ctx.Channel.EmbedAsync(embed);
-                        await msg.AddReactionsAsync(_multipleChoice).ConfigureAwait(false);
+                        await msg.AddReactionsAsync(MultipleChoice).ConfigureAwait(false);
                     }
                     else
                     {
                         embed.WithDescription($"**True or False**\n{question}");
                         msg = await ctx.Channel.EmbedAsync(embed);
-                        await msg.AddReactionAsync(True);
-                        await msg.AddReactionAsync(False);
+                        await msg.AddReactionsAsync(TrueFalse).ConfigureAwait(false);
                     }
 
                     using (msg.OnReaction(_client, AnswerAdded, AnswerRemoved))
@@ -205,7 +210,7 @@ namespace Roki.Modules.Games
                     {
                         if (r.Channel != ctx.Channel || r.User.Value.IsBot || r.Message.Value != msg)
                             await Task.CompletedTask;
-                        if (_multipleChoice.Contains(r.Emote))
+                        if (MultipleChoice.Contains(r.Emote))
                         {
                             if (playerChoice.ContainsKey(r.User.Value))
                             {
@@ -214,10 +219,10 @@ namespace Roki.Modules.Games
                                 rm.DeleteAfter(3);
                             }
                             else
-                                playerChoice.Add(r.User.Value, shuffledAnswers[_multipleChoice.IndexOf(r.Emote)]);
+                                playerChoice.Add(r.User.Value, shuffledAnswers[MultipleChoice.IndexOf(r.Emote)]);
                             await Task.CompletedTask;
                         }
-                        if (Equals(r.Emote, True) || Equals(r.Emote, False))
+                        if (TrueFalse.Contains(r.Emote))
                         {
                             if (playerChoice.ContainsKey(r.User.Value))
                             {
@@ -226,7 +231,7 @@ namespace Roki.Modules.Games
                                 rm.DeleteAfter(3);
                             }
                             else
-                                playerChoice.Add(r.User.Value, r.Emote.Name);
+                                playerChoice.Add(r.User.Value, r.Emote.Equals(True) ? "True" : "False");
                             await Task.CompletedTask;
                         }
                     }
@@ -235,13 +240,13 @@ namespace Roki.Modules.Games
                     {
                         if (r.Channel != ctx.Channel || r.User.Value.IsBot || r.Message.Value != msg)
                             await Task.CompletedTask;
-                        if (_multipleChoice.Contains(r.Emote))
+                        if (MultipleChoice.Contains(r.Emote))
                         {
                             if (playerChoice.ContainsKey(r.User.Value))
                                 playerChoice.Remove(r.User.Value, out _);
                             await Task.CompletedTask;
                         }
-                        if (Equals(r.Emote, True) || Equals(r.Emote, False))
+                        if (TrueFalse.Contains(r.Emote))
                         {
                             if (playerChoice.ContainsKey(r.User.Value))
                                 playerChoice.Remove(r.User.Value, out _);
