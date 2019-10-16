@@ -263,7 +263,7 @@ namespace Roki.Modules.Games
                 var winners = false;
                 foreach (var (user, score) in playerScore)
                 {
-                    scoreStr += $"{user.Username} {score.Correct}/{score.Incorrect}\n";
+                    scoreStr += $"{user.Username} {score.Correct}/{score.Incorrect + score.Correct}\n";
                     if (score.Amount <= 0 || score.Correct / (float) (score.Correct + score.Incorrect) < 0.6) continue;
                     winStr += $"{user.Username} won {score.Amount} stones\n";
                     winners = true;
