@@ -26,9 +26,9 @@ namespace Roki.Modules.Games
             private static readonly IEmote LetterB = new Emoji("🇧");
             private static readonly IEmote LetterC = new Emoji("🇨");
             private static readonly IEmote LetterD = new Emoji("🇩");
-            private static readonly IEmote True = new Emoji("✔️");
-            private static readonly IEmote False = new Emoji("❌");
-
+            private static readonly IEmote Check = new Emoji("✔");
+            private static readonly IEmote Cross = new Emoji("❌");
+            
             private static readonly IEmote[] MultipleChoice =
             {
                 LetterA,
@@ -39,8 +39,8 @@ namespace Roki.Modules.Games
 
             private static readonly IEmote[] TrueFalse =
             {
-                True,
-                False
+                Check,
+                Cross
             };
             
             private static readonly Dictionary<string, int> Categories = new Dictionary<string, int>
@@ -101,7 +101,9 @@ namespace Roki.Modules.Games
                     await ctx.Channel.SendErrorAsync("Game already in progress in current channel.");
                     return;
                 }
-                if (!Categories.ContainsKey(category.ToTitleCase()))
+
+                category = category.Trim().ToTitleCase();
+                if (!Categories.ContainsKey(category))
                 {
                     await ctx.Channel.SendErrorAsync("Unknown Category, use `.tc` to checkout the trivia categories.").ConfigureAwait(false);
                     return;
@@ -204,11 +206,11 @@ namespace Roki.Modules.Games
                             });
                     }
                     
-                    await Task.Delay(2000).ConfigureAwait(false);
+                    await Task.Delay(5000).ConfigureAwait(false);
 
                     async Task AnswerAdded(SocketReaction r)
                     {
-                        if (r.Channel != ctx.Channel || r.User.Value.IsBot || r.Message.Value != msg)
+                        if (r.Channel != ctx.Channel || r.User.Value.IsBot || r.Message.Value.Id != msg.Id)
                             return;
                         if (MultipleChoice.Contains(r.Emote))
                         {
@@ -216,18 +218,18 @@ namespace Roki.Modules.Games
                                 playerChoice[r.User.Value] = shuffledAnswers[MultipleChoice.IndexOf(r.Emote)];
                             else
                                 playerChoice.Add(r.User.Value, shuffledAnswers[MultipleChoice.IndexOf(r.Emote)]);
-                            await msg.RemoveReactionAsync(r.Emote, r.User.Value).ConfigureAwait(false);
-                            return;
                         }
-                        if (TrueFalse.Contains(r.Emote))
+                        else if (TrueFalse.Contains(r.Emote))
                         {
                             if (playerChoice.ContainsKey(r.User.Value))
-                                playerChoice[r.User.Value] = r.Emote.Equals(True) ? "True" : "False";
+                                playerChoice[r.User.Value] = r.Emote.Equals(Check) ? "True" : "False";
                             else
-                                playerChoice.Add(r.User.Value, r.Emote.Equals(True) ? "True" : "False");
-                            
-                            await msg.RemoveReactionAsync(r.Emote, r.User.Value).ConfigureAwait(false);
+                                playerChoice.Add(r.User.Value, r.Emote.Equals(Check) ? "True" : "False");
                         }
+
+                        await Task.CompletedTask;
+                        await Task.Delay(500);
+                        await msg.RemoveReactionAsync(r.Emote, r.User.Value).ConfigureAwait(false);
                     }
 
                     /*async Task AnswerRemoved(SocketReaction r)
