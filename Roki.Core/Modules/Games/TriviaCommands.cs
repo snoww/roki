@@ -204,7 +204,7 @@ namespace Roki.Modules.Games
                             });
                     }
                     
-                    await Task.Delay(1000).ConfigureAwait(false);
+                    await Task.Delay(2000).ConfigureAwait(false);
 
                     async Task AnswerAdded(SocketReaction r)
                     {
