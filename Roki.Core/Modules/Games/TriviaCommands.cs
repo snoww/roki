@@ -195,8 +195,12 @@ namespace Roki.Modules.Games
                             incorrStr += user.Username + '\n';
                             continue;
                         }
+
                         if (playerScore.ContainsKey(user))
+                        {
                             playerScore[user].Amount += difficultyBonus;
+                            playerScore[user].Correct += 1;
+                        }
                         else
                             playerScore.Add(user, new PlayerScore
                             {
@@ -276,7 +280,7 @@ namespace Roki.Modules.Games
                         .WithDescription($"Congratulations!\n{winStr}\n{scoreStr}")).ConfigureAwait(false);
                 else
                     await ctx.Channel.SendErrorAsync($"Better luck next time!\n{scoreStr}").ConfigureAwait(false);
-
+                
                 _service.TriviaGames.TryRemove(ctx.Channel.Id, out _);
             }
 
