@@ -113,7 +113,7 @@ namespace Roki.Modules.Games
                 try
                 {
                     await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
-                    questions = await _service.GetTriviaQuestionsAsync().ConfigureAwait(false);
+                    questions = await _service.GetTriviaQuestionsAsync(Categories[category]).ConfigureAwait(false);
                     foreach (var question in questions.Results)
                     {
                         if (question.Difficulty == "easy")
@@ -134,7 +134,7 @@ namespace Roki.Modules.Games
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle($"Trivia Game - {category}")
-                        .WithDescription($"Starting new trivia game.\nYou can earn up to: **{prizePool}**!\nReact with the correct emote to answer questions."))
+                        .WithDescription($"Starting new trivia game.\nYou can earn up to **{prizePool}** Stones!\nReact with the correct emote to answer questions."))
                     .ConfigureAwait(false);
 
                 await Task.Delay(5000).ConfigureAwait(false);
@@ -160,13 +160,13 @@ namespace Roki.Modules.Games
                         .WithTitle($"Question {count++}: {q.Category.ToTitleCase()} - {q.Difficulty.ToTitleCase()}");
                     if (q.Type == "multiple")
                     {
-                        embed.WithDescription($"Multiple Choice\n**{question}**\n{string.Join('\n', shuffledAnswers)}");
+                        embed.WithDescription($"**Multiple Choice**\n{question}\n{string.Join('\n', shuffledAnswers)}");
                         msg = await ctx.Channel.EmbedAsync(embed);
                         await msg.AddReactionsAsync(MultipleChoice).ConfigureAwait(false);
                     }
                     else
                     {
-                        embed.WithDescription($"True or False\n{question}");
+                        embed.WithDescription($"**True or False**\n{question}");
                         msg = await ctx.Channel.EmbedAsync(embed);
                         await msg.AddReactionsAsync(TrueFalse).ConfigureAwait(false);
                     }

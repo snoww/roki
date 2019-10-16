@@ -22,11 +22,16 @@ namespace Roki.Modules.Games.Services
             _http = http;
         }
 
-        public async Task<TriviaModel> GetTriviaQuestionsAsync()
+        public async Task<TriviaModel> GetTriviaQuestionsAsync(int category)
         {
             using (var http = _http.CreateClient())
             {
-                var result = await http.GetStringAsync($"{OpenTdbUrl}?amount=10").ConfigureAwait(false);
+                string result;
+                if (category == 0)
+                    result = await http.GetStringAsync($"{OpenTdbUrl}?amount=10").ConfigureAwait(false);
+                else 
+                    result = await http.GetStringAsync($"{OpenTdbUrl}?amount=10&category={category}").ConfigureAwait(false);
+                
                 var questions = JsonConvert.DeserializeObject<TriviaModel>(result);
                 return questions;
             }
