@@ -167,7 +167,7 @@ namespace Roki.Modules.Games
                     else
                     {
                         embed.WithDescription($"**True or False**\n{question}");
-                        msg = await ctx.Channel.EmbedAsync(embed);
+                        msg = await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                         await msg.AddReactionsAsync(TrueFalse).ConfigureAwait(false);
                     }
 
