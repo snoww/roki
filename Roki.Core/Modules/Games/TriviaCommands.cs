@@ -37,12 +37,6 @@ namespace Roki.Modules.Games
                 LetterD
             };
 
-            private readonly IEmote[] _trueFalse =
-            {
-                True,
-                False
-            };
-            
             private static readonly Dictionary<string, int> Categories = new Dictionary<string, int>
             {
                 {"All", 0},
@@ -168,7 +162,8 @@ namespace Roki.Modules.Games
                     {
                         embed.WithDescription($"**True or False**\n{question}");
                         msg = await ctx.Channel.EmbedAsync(embed);
-                        await msg.AddReactionsAsync(_trueFalse).ConfigureAwait(false);
+                        await msg.AddReactionAsync(True);
+                        await msg.AddReactionAsync(False);
                     }
 
                     using (msg.OnReaction(_client, AnswerAdded, AnswerRemoved))
@@ -222,7 +217,7 @@ namespace Roki.Modules.Games
                                 playerChoice.Add(r.User.Value, shuffledAnswers[_multipleChoice.IndexOf(r.Emote)]);
                             await Task.CompletedTask;
                         }
-                        if (_trueFalse.Contains(r.Emote))
+                        if (Equals(r.Emote, True) || Equals(r.Emote, False))
                         {
                             if (playerChoice.ContainsKey(r.User.Value))
                             {
@@ -246,7 +241,7 @@ namespace Roki.Modules.Games
                                 playerChoice.Remove(r.User.Value, out _);
                             await Task.CompletedTask;
                         }
-                        if (_trueFalse.Contains(r.Emote))
+                        if (Equals(r.Emote, True) || Equals(r.Emote, False))
                         {
                             if (playerChoice.ContainsKey(r.User.Value))
                                 playerChoice.Remove(r.User.Value, out _);
