@@ -158,7 +158,7 @@ namespace Roki.Modules.Games
                         .WithTitle($"Question {count++}: {q.Category.ToTitleCase()} - {q.Difficulty.ToTitleCase()}");
                     if (q.Type == "multiple")
                     {
-                        embed.WithDescription($"Multiple Choice\n{question}\n{string.Join('\n', shuffledAnswers)}");
+                        embed.WithDescription($"Multiple Choice\n**{question}**\n{string.Join('\n', shuffledAnswers)}");
                         msg = await ctx.Channel.EmbedAsync(embed);
                         await msg.AddReactionsAsync(MultipleChoice).ConfigureAwait(false);
                     }
@@ -176,7 +176,7 @@ namespace Roki.Modules.Games
 
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithTitle("Answer")
-                            .WithDescription($"The correct answer is:\n{answer}"))
+                            .WithDescription($"{answer}"))
                         .ConfigureAwait(false);
 
                     foreach (var (user, score) in playerChoice)
