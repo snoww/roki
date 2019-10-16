@@ -28,7 +28,7 @@ namespace Roki.Modules.Games.Services
             {
                 string result;
                 if (category == 0)
-                    result = await http.GetStringAsync($"{OpenTdbUrl}?amount=10&type=boolean").ConfigureAwait(false);
+                    result = await http.GetStringAsync($"{OpenTdbUrl}?amount=10").ConfigureAwait(false);
                 else 
                     result = await http.GetStringAsync($"{OpenTdbUrl}?amount=10&category={category}").ConfigureAwait(false);
                 
@@ -42,11 +42,14 @@ namespace Roki.Modules.Games.Services
             var questions = new List<string> {HttpUtility.HtmlDecode(correct)};
             questions.AddRange(incorrect.Select(HttpUtility.HtmlDecode));
             questions.Shuffle();
+            if (incorrect.Length == 1)
+                return questions;
             var letter = 'A';
             for (int i = 0; i < questions.Count; i++)
             {
                 questions[i] = $"{letter++}. {questions[i]}";
             }
+            
             return questions;
         }
     }
