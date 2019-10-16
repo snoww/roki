@@ -138,10 +138,10 @@ namespace Roki.Modules.Games
                     .ConfigureAwait(false);
 
                 var count = 1;
-                var playerScore = new Dictionary<ulong, PlayerScore>();
+                var playerScore = new Dictionary<IUser, PlayerScore>();
                 foreach (var q in questions.Results)
                 {
-                    var playerChoice = new Dictionary<ulong, string>();
+                    var playerChoice = new Dictionary<IUser, string>();
                     var shuffledAnswers = _service.RandomizeAnswersOrder(q.Correct, q.Incorrect);
                     var question = HttpUtility.HtmlDecode(q.Question);
                     var answer = shuffledAnswers.First(s => s.Contains(HttpUtility.HtmlDecode(q.Correct) ?? ""));
@@ -179,23 +179,23 @@ namespace Roki.Modules.Games
                             .WithDescription($"The correct answer is:\n{answer}"))
                         .ConfigureAwait(false);
 
-                    foreach (var player in playerChoice)
+                    foreach (var (user, score) in playerChoice)
                     {
-                        if (player.Value != answer)
+                        if (score != answer)
                         {
-                            if (playerScore.ContainsKey(player.Key))
-                                playerScore[player.Key].Incorrect += 1;
+                            if (playerScore.ContainsKey(user))
+                                playerScore[user].Incorrect += 1;
                             else
-                                playerScore.Add(player.Key, new PlayerScore
+                                playerScore.Add(user, new PlayerScore
                                 {
                                     Incorrect = 1
                                 });
                             continue;
                         }
-                        if (playerScore.ContainsKey(player.Key))
-                            playerScore[player.Key].Amount += difficultyBonus;
+                        if (playerScore.ContainsKey(user))
+                            playerScore[user].Amount += difficultyBonus;
                         else
-                            playerScore.Add(player.Key, new PlayerScore
+                            playerScore.Add(user, new PlayerScore
                             {
                                 Amount = difficultyBonus,
                                 Correct = 1
@@ -210,26 +210,26 @@ namespace Roki.Modules.Games
                             await Task.CompletedTask;
                         if (MultipleChoice.Contains(r.Emote))
                         {
-                            if (playerChoice.ContainsKey(r.UserId))
+                            if (playerChoice.ContainsKey(r.User.Value))
                             {
                                 var rm = await ctx.Channel.SendErrorAsync($"{r.User.Value.Mention} You must remove your current choice first.").ConfigureAwait(false);
                                 await msg.RemoveReactionAsync(r.Emote, r.User.Value).ConfigureAwait(false);
                                 rm.DeleteAfter(3);
                             }
                             else
-                                playerChoice.Add(r.UserId, shuffledAnswers[MultipleChoice.IndexOf(r.Emote)]);
+                                playerChoice.Add(r.User.Value, shuffledAnswers[MultipleChoice.IndexOf(r.Emote)]);
                             await Task.CompletedTask;
                         }
                         if (TrueFalse.Contains(r.Emote))
                         {
-                            if (playerChoice.ContainsKey(r.UserId))
+                            if (playerChoice.ContainsKey(r.User.Value))
                             {
                                 var rm = await ctx.Channel.SendErrorAsync($"{r.User.Value.Mention} You must remove your current choice first.").ConfigureAwait(false);
                                 await msg.RemoveReactionAsync(r.Emote, r.User.Value).ConfigureAwait(false);
                                 rm.DeleteAfter(3);
                             }
                             else
-                                playerChoice.Add(r.UserId, r.Emote.Name);
+                                playerChoice.Add(r.User.Value, r.Emote.Name);
                             await Task.CompletedTask;
                         }
                     }
@@ -240,21 +240,36 @@ namespace Roki.Modules.Games
                             await Task.CompletedTask;
                         if (MultipleChoice.Contains(r.Emote))
                         {
-                            if (playerChoice.ContainsKey(r.UserId))
-                                playerChoice.Remove(r.UserId, out _);
+                            if (playerChoice.ContainsKey(r.User.Value))
+                                playerChoice.Remove(r.User.Value, out _);
                             await Task.CompletedTask;
                         }
                         if (TrueFalse.Contains(r.Emote))
                         {
-                            if (playerChoice.ContainsKey(r.UserId))
-                                playerChoice.Remove(r.UserId, out _);
+                            if (playerChoice.ContainsKey(r.User.Value))
+                                playerChoice.Remove(r.User.Value, out _);
                             await Task.CompletedTask;
                         }
                     }
                 }
 
-                
-                
+                var winStr = "";
+                var winners = false;
+                foreach (var (user, score) in playerScore)
+                {
+                    if (score.Amount <= 0 || score.Correct / (float) (score.Correct + score.Incorrect) < 0.6) continue;
+                    winStr += $"{user.Username} won {score.Amount} stones\n";
+                    winners = true;
+                    await _currency.ChangeAsync(user, "Trivia Reward", score.Amount, "Server", user.Id.ToString(), ctx.Guild.Id, ctx.Channel.Id,
+                        ctx.Message.Id).ConfigureAwait(false);
+                }
+
+                if (winners)
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                        .WithDescription($"Congratulations!\n{winStr}")).ConfigureAwait(false);
+                else
+                    await ctx.Channel.SendErrorAsync("Better luck next time!").ConfigureAwait(false);
+
                 _service.TriviaGames.TryRemove(ctx.Channel.Id, out _);
             }
 
