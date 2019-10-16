@@ -137,6 +137,8 @@ namespace Roki.Modules.Games
                         .WithDescription($"Starting new trivia game.\nYou can earn up to: **{prizePool}**!\nReact with the correct emote to answer questions."))
                     .ConfigureAwait(false);
 
+                await Task.Delay(5000).ConfigureAwait(false);
+                
                 var count = 1;
                 var playerScore = new Dictionary<IUser, PlayerScore>();
                 foreach (var q in questions.Results)
