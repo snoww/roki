@@ -263,9 +263,9 @@ namespace Roki.Modules.Games
                 var winners = false;
                 foreach (var (user, score) in playerScore)
                 {
+                    scoreStr += $"{user.Username} {score.Correct}/{score.Incorrect}\n";
                     if (score.Amount <= 0 || score.Correct / (float) (score.Correct + score.Incorrect) < 0.6) continue;
                     winStr += $"{user.Username} won {score.Amount} stones\n";
-                    scoreStr += $"{user.Username} {score.Correct}/{score.Incorrect}\n";
                     winners = true;
                     await _currency.ChangeAsync(user, "Trivia Reward", score.Amount, "Server", user.Id.ToString(), ctx.Guild.Id, ctx.Channel.Id,
                         ctx.Message.Id).ConfigureAwait(false);
