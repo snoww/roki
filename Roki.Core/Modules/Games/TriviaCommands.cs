@@ -178,11 +178,9 @@ namespace Roki.Modules.Games
                         await Task.Delay(20000).ConfigureAwait(false);
                     }
 
-                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                            .WithTitle("Answer")
-                            .WithDescription($"{answer}"))
-                        .ConfigureAwait(false);
-
+                    var corrStr = "";
+                    var incorrStr = "";
+                    
                     foreach (var (user, score) in playerChoice)
                     {
                         if (score != answer)
@@ -194,6 +192,7 @@ namespace Roki.Modules.Games
                                 {
                                     Incorrect = 1
                                 });
+                            incorrStr += user.Username + '\n';
                             continue;
                         }
                         if (playerScore.ContainsKey(user))
@@ -204,7 +203,15 @@ namespace Roki.Modules.Games
                                 Amount = difficultyBonus,
                                 Correct = 1
                             });
+                        corrStr += user.Username + '\n';
                     }
+                    
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                            .WithTitle("Answer")
+                            .WithDescription($"{answer}")
+                            .AddField("Correct", !string.IsNullOrWhiteSpace(corrStr) ? corrStr : "None", true)
+                            .AddField("Incorrect", !string.IsNullOrWhiteSpace(incorrStr) ? incorrStr : "None", true))
+                        .ConfigureAwait(false);
                     
                     await Task.Delay(5000).ConfigureAwait(false);
 
@@ -252,11 +259,13 @@ namespace Roki.Modules.Games
                 }
 
                 var winStr = "";
+                var scoreStr = "";
                 var winners = false;
                 foreach (var (user, score) in playerScore)
                 {
                     if (score.Amount <= 0 || score.Correct / (float) (score.Correct + score.Incorrect) < 0.6) continue;
                     winStr += $"{user.Username} won {score.Amount} stones\n";
+                    scoreStr += $"{user.Username} {score.Correct}/{score.Incorrect}\n";
                     winners = true;
                     await _currency.ChangeAsync(user, "Trivia Reward", score.Amount, "Server", user.Id.ToString(), ctx.Guild.Id, ctx.Channel.Id,
                         ctx.Message.Id).ConfigureAwait(false);
@@ -264,9 +273,9 @@ namespace Roki.Modules.Games
 
                 if (winners)
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                        .WithDescription($"Congratulations!\n{winStr}")).ConfigureAwait(false);
+                        .WithDescription($"Congratulations!\n{winStr}\n{scoreStr}")).ConfigureAwait(false);
                 else
-                    await ctx.Channel.SendErrorAsync("Better luck next time!").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync($"Better luck next time!\n{scoreStr}").ConfigureAwait(false);
 
                 _service.TriviaGames.TryRemove(ctx.Channel.Id, out _);
             }
