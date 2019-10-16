@@ -94,7 +94,7 @@ namespace Roki.Modules.Games
             }
 
             [RokiCommand, Description, Usage, Aliases]
-            public async Task Trivia(string category = "All")
+            public async Task Trivia([Leftover] string category = "All")
             {
                 if (_service.TriviaGames.ContainsKey(ctx.Channel.Id))
                 {
