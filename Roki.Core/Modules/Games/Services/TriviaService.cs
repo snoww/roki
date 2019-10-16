@@ -28,7 +28,7 @@ namespace Roki.Modules.Games.Services
             {
                 string result;
                 if (category == 0)
-                    result = await http.GetStringAsync($"{OpenTdbUrl}?amount=10").ConfigureAwait(false);
+                    result = await http.GetStringAsync($"{OpenTdbUrl}?amount=10&type=multiple").ConfigureAwait(false);
                 else 
                     result = await http.GetStringAsync($"{OpenTdbUrl}?amount=10&category={category}").ConfigureAwait(false);
                 
