@@ -321,7 +321,7 @@ namespace Roki.Modules.Games
 
             [RokiCommand, Description, Aliases, Usage]
             [RequireContext(ContextType.Guild)]
-            public async Task BetPokemonLog(string uid)
+            public async Task BetPokemonLog(string uid = null)
             {
                 uid = uid.SanitizeStringFull();
                 if (uid.Length != 8)
