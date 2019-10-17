@@ -91,7 +91,7 @@ namespace Roki.Modules.Games
 
             [RokiCommand, Description, Aliases, Usage]
             [RequireContext(ContextType.Guild)]
-            public async Task BetPokemonGame(int gen = 7, string v = null)
+            public async Task BetPokemonGame(int gen = 7)
             {
                 if (_service.Games.TryGetValue(ctx.Channel.Id, out _))
                 {
@@ -100,8 +100,6 @@ namespace Roki.Modules.Games
                 }
 
                 string generation;
-                bool verbose;
-                
 //                if (gen == 6)
 //                    generation = "6";
 //                else 
@@ -112,15 +110,10 @@ namespace Roki.Modules.Games
                 else
                     generation = "7";
                 
-                if (v == "-v" || v == "--verbose")
-                    verbose = true;
-                else
-                    verbose = false;
-                
                 _service.Games.TryAdd(ctx.Channel.Id, $"{ctx.User.Username}'s game");
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
 
-                var gameText = await _service.StartAiGameAsync(generation).ConfigureAwait(false);
+                var (gameText, uid) = await _service.StartAiGameAsync(generation).ConfigureAwait(false);
                 var index = gameText.IndexOf("|start", StringComparison.Ordinal);
                 var gameIntro = gameText.Substring(0, index);
                 var gameTurns = gameText.Substring(index + 1);
@@ -151,7 +144,7 @@ namespace Roki.Modules.Games
                         }
                     
                         var start = new EmbedBuilder().WithOkColor()
-                            .WithTitle($"[Gen {generation}] Random Battle")
+                            .WithTitle($"[Gen {generation}] Random Battle - ID: `{uid}`")
                             .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 20 100` means betting on 130 on P1.")
                             .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
                             .AddField("Player 1", string.Join('\n', intro[0]), true)
@@ -176,7 +169,7 @@ namespace Roki.Modules.Games
                 var timeout = DateTime.UtcNow + TimeSpan.FromSeconds(30);
                 _client.ReactionAdded += (cachedMessage, channel, reaction) =>
                 {
-                    if (ctx.Channel.Id != channel.Id || cachedMessage.Value.Id != startMsg.Id || (!_reactionPlayer.Contains(reaction.Emote) && !_reactionBet.Contains(reaction.Emote)) ||
+                    if (ctx.Channel.Id != channel.Id || cachedMessage.Value.Id != startMsg.Id || !_reactionPlayer.Contains(reaction.Emote) && !_reactionBet.Contains(reaction.Emote) ||
                         DateTime.UtcNow > timeout || reaction.User.Value.IsBot) return Task.CompletedTask;
                     var user = reaction.User.Value;
                     var _ = Task.Run(async () =>
@@ -288,12 +281,7 @@ namespace Roki.Modules.Games
                     _service.Games.TryRemove(ctx.Channel.Id, out _);
                     return;
                 }*/
-
-                if (verbose)
-                {
-//                    var turns = _service.ParseTurns(gameTurns);
-//                    do nothing right now
-                }
+                
                 var win = _service.GetWinner(gameTurns);
                 var result = win == "1" ? BetPlayer.P1 : BetPlayer.P2;
 
@@ -331,6 +319,28 @@ namespace Roki.Modules.Games
                 await startMsg.RemoveReactionsAsync(ctx.Client.CurrentUser, _reactionPlayer).ConfigureAwait(false);
                 await startMsg.RemoveReactionsAsync(ctx.Client.CurrentUser, _reactionBet).ConfigureAwait(false);
                 _service.Games.TryRemove(ctx.Channel.Id, out _);
+            }
+
+            [RokiCommand, Description, Aliases, Usage]
+            [RequireContext(ContextType.Guild)]
+            public async Task BetPokemonLog(string uid)
+            {
+                uid = uid.SanitizeStringFull();
+                if (uid.Length != 7)
+                {
+                    await ctx.Channel.SendErrorAsync("Invalid Game ID").ConfigureAwait(false);
+                    return;
+                }
+                var game = await _service.LoadSavedGameAsync(uid).ConfigureAwait(false);
+                if (game == null)
+                {
+                    await ctx.Channel.SendErrorAsync("Game not found").ConfigureAwait(false);
+                    return;
+                }
+                
+                var index = game.IndexOf("|start", StringComparison.Ordinal);
+                var gameIntro = game.Substring(0, index);
+                var gameTurns = game.Substring(index + 1);
             }
 
             private Image<Rgba32> GetPokemonImage(string pokemon, string generation)
