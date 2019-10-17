@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.EntityFrameworkCore.Internal;
-using NLog;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Games.Services;
