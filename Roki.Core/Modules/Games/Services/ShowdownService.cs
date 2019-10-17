@@ -15,12 +15,12 @@ namespace Roki.Modules.Games.Services
     {
         public readonly ConcurrentDictionary<ulong, string> Games = new ConcurrentDictionary<ulong, string>();
         private static readonly Dictionary<string, PokemonData> Data = JsonConvert.DeserializeObject<Dictionary<string, PokemonData>>(File.ReadAllText("./_strings/pokemon/pokemon.json"));
-
+        
         public ShowdownService()
         {
         }
 
-        public async Task<string> StartAiGameAsync(string args)
+        public async Task<(string, string)> StartAiGameAsync(string args)
         {
             string output;
             using (var proc = new Process())
@@ -34,17 +34,30 @@ namespace Roki.Modules.Games.Services
                 output = await reader.ReadToEndAsync().ConfigureAwait(false);
                 proc.WaitForExit();
             }
+
+            var uid = Guid.NewGuid().ToString().Substring(0, 7);
+            File.WriteAllText($@"./data/pokemon-logs/{uid}", output);
             
-//            System.IO.File.WriteAllText($@"./data/pokemon-logs/{Guid.NewGuid().ToString().Substring(0, 7)}", output);
-            
-            return output;
+            return (output, uid);
+        }
+
+        public async Task<string> LoadSavedGameAsync(string uid)
+        {
+            try
+            {
+                var game = await File.ReadAllTextAsync($@"./data/pokemon-logs/{uid}").ConfigureAwait(false);
+                return game;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public string GetWinner(string game)
         {
-            var turns = game.Split("|turn");
-
-            return turns.Last().Split('\n').First(l => l.StartsWith("|win", StringComparison.Ordinal)).Split('|').Last().Substring(4);
+            var winIndex = game.IndexOf("Bot", StringComparison.Ordinal);
+            return game.Substring(winIndex, 5)[4].ToString();
         }
 
         public List<List<string>> ParseIntro(string intro) =>
