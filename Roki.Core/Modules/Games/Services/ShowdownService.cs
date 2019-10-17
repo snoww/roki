@@ -110,6 +110,7 @@ namespace Roki.Modules.Games.Services
                             turnDetails.Add($"Player {action[2][1]}'s {action[2].Substring(5)} used {action[3]}");
                             break;
                         }
+
                         turnDetails.Add(action[2].Substring(5) != action[4].Substring(5)
                             ? $"Player {action[2][1]}'s {action[2].Substring(5)} used {action[3]} on Opponent's {action[4].Substring(5)}"
                             : $"Player {action[2][1]}'s {action[2].Substring(5)} used {action[3]} on its own {action[4].Substring(5)}");
@@ -144,36 +145,53 @@ namespace Roki.Modules.Games.Services
                         turnDetails.Add($"But it missed");
                         break;
                     case "-damage":
-                        turnDetails.Add(action.Length > 4 && action[4].StartsWith("[from]", StringComparison.Ordinal)
-                            ? action[4].Contains("item:")
-                                ? $"{action[2].Substring(5)} took damage from its {action[4].Substring(12)} and is now at {TrimStatus(action[3])} HP"
-                                : $"{action[2].Substring(5)} took damage from {action[5].Substring(5)}'s {action[4].Substring(7)} and is now at {TrimStatus(action[3])} HP"
-                            : $"{action[2].Substring(5)} took damage and is now at {TrimStatus(action[3])} HP");
+                        if (action.Length > 4 && action[4].StartsWith("[from]", StringComparison.Ordinal))
+                        {
+                            if (action[4].Contains("item:"))
+                                turnDetails.Add($"{action[2].Substring(5)} took damage from its {action[4].Substring(12)} and is now at {action[3]} HP");
+                            else if (action[4].Contains("move:"))
+                                turnDetails.Add($"{action[2].Substring(5)} took damage from {action[5].Substring(5)}'s {action[4].Substring(7)} and is now at {action[3]} HP");
+                            else
+                                turnDetails.Add($"{action[2].Substring(5)} took damage from {action[4].Substring(7)} and is now at {action[3]} HP");
+                        }
+                        else
+                            turnDetails.Add($"{action[2].Substring(5)} took damage and is now at {action[3]} HP");
+
                         break;
                     case "-heal":
-                        if (action.Length >= 4 && action[4].StartsWith("[from]", StringComparison.Ordinal))
+                        if (action.Length > 4 && action[4].StartsWith("[from]", StringComparison.Ordinal))
                         {
                             if (action[4].Contains("item:"))
                                 turnDetails.Add($"{action[2].Substring(5)} restored health from its {action[4].Substring(13)} and is now at {action[3]} HP");
                             else if (action[4].Contains("move:"))
                                 turnDetails.Add($"{action[2].Substring(5)} restored health from {action[5].Substring(5)}'s {action[4].Substring(7)} and is now at {action[3]} HP");
                             else
-                                turnDetails.Add($"{action[2].Substring(5)} restored health from its {action[4].Substring(16)} and is now at {action[3]} HP");
+                                turnDetails.Add($"{action[2].Substring(5)} restored health from {action[4].Substring(7)} and is now at {action[3]} HP");
                         }
                         else
                             turnDetails.Add($"{action[2].Substring(5)} restored health and is now at {action[3]} HP");
+
                         break;
                     case "-sethp":
-                        turnDetails.Add(action.Length >= 4 && action[4].StartsWith("[from]", StringComparison.Ordinal)
+                        turnDetails.Add(action.Length > 4 && action[4].StartsWith("[from]", StringComparison.Ordinal)
                             ? $"{action[2].Substring(5)}'s HP has been set by {action[4].Substring(13)} and is now at {action[3]} HP"
                             : $"{action[2].Substring(5)}'s HP has been set to {action[3]} HP"); // should never see this
                         break;
                     case "-status":
-                        turnDetails.Add(action.Length >= 4 && action[4].StartsWith("[from]", StringComparison.Ordinal)
-                            ? action[4].Contains("move:")
-                                ? $"{action[2].Substring(5)} has been inflicted with {action[3]} from {action[4].Substring(13)}"
-                                : $"{action[2].Substring(5)} has been inflicted with {action[3]} by its {action[4].Substring(13)}"
-                            : $"{action[2].Substring(5)} has status: {action[3]}");
+                        if (action.Length > 4 && action[4].StartsWith("[from]", StringComparison.Ordinal))
+                        {
+                            if (action[4].Contains("move:"))
+                                turnDetails.Add($"{action[2].Substring(5)} has been inflicted with {action[3]} from {action[4].Substring(13)}");
+                            else if (action[4].Contains("item:"))
+                                turnDetails.Add($"{action[2].Substring(5)} has been inflicted with {action[3]} by its {action[4].Substring(13)}");
+                            else if (action[4].Contains("ability:"))
+                                turnDetails.Add($"{action[2].Substring(5)} has been inflicted with {action[3]} by {action[5].Substring(10)}'s {action[4].Substring(16)}");
+                            else
+                                turnDetails.Add($"{action[2].Substring(5)} has been inflicted with {action[3]}");
+                        }
+                        else
+                            turnDetails.Add($"{action[2].Substring(5)} has status: {action[3]}");
+
                         break;
                     case "-curestatus":
                         turnDetails.Add($"{action[2].Substring(5)} has recovered from {action[3]}");
@@ -227,6 +245,7 @@ namespace Roki.Modules.Games.Services
                             turnDetails.Add($"{action[2]} is still active");
                         else
                             turnDetails.Add($"The weather has cleared.");
+
                         break;
                     case "-fieldstart":
                         turnDetails.Add(action[3].StartsWith("[of", StringComparison.Ordinal)
@@ -273,14 +292,14 @@ namespace Roki.Modules.Games.Services
                         turnDetails.Add($"{action[2].Substring(5)} is holding {action[3]}");
                         break;
                     case "-enditem":
-                        turnDetails.Add(action.Length >= 5
+                        turnDetails.Add(action.Length > 5
                             ? action[5].StartsWith("[from", StringComparison.Ordinal)
                                 ? $"{action[2].Substring(5)}'s {action[3]} has been destroyed by {action[4].Substring(13)}"
                                 : $"{action[2].Substring(5)}'s {action[3]} has been consumed"
                             : $"{action[2].Substring(5)}'s {action[3]} has been used");
                         break;
                     case "-ability":
-                        turnDetails.Add($"{action[2].Substring(5)}'s ability {action[3]}");
+                        turnDetails.Add($"{action[2].Substring(5)}'s ability {action[3]} activated");
                         break;
                     case "-endability":
                         turnDetails.Add($"{action[2].Substring(5)} no longer has {action[3]} ability");
@@ -316,7 +335,8 @@ namespace Roki.Modules.Games.Services
                         turnDetails.Add($"please @snow about this!!!\n`{line}`");
                         break;
                     case "-combine":
-                        turnDetails.Add($"This line should never appear. If it did, something went horribly wrong, please @snow about this!!!\n`{line}`"); break;
+                        turnDetails.Add($"This line should never appear. If it did, something went horribly wrong, please @snow about this!!!\n`{line}`");
+                        break;
                     case "-waiting":
                         turnDetails.Add($"please @snow about this!!!\n`{line}`");
                         break;
@@ -340,11 +360,9 @@ namespace Roki.Modules.Games.Services
                     case "-singleturn":
                         // ignored
                         break;
-                    default:
-                        break;
                 }
             }
-
+            
             if (!turn.Contains("|win", StringComparison.Ordinal)) return string.Join("\n", turnDetails);
             var win = GetWinner(turn);
             turnDetails.Add($"Winner: Bot {win}");
