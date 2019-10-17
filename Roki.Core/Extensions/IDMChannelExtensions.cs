@@ -52,6 +52,8 @@ namespace Roki.Extensions
                         lastPageChange = DateTime.UtcNow;
                         var toSend = await pageFunc(--currentPage).ConfigureAwait(false);
                         await msg.ModifyAsync(x => x.Embed = toSend.Build()).ConfigureAwait(false);
+                        await Task.Delay(1000);
+                        await msg.RemoveReactionAsync(r.Emote, r.User.Value).ConfigureAwait(false);
                     }
                     else if (r.Emote.Name == ArrowRight.Name)
                     {
@@ -60,10 +62,10 @@ namespace Roki.Extensions
                             lastPageChange = DateTime.UtcNow;
                             var toSend = await pageFunc(++currentPage).ConfigureAwait(false);
                             await msg.ModifyAsync(x => x.Embed = toSend.Build()).ConfigureAwait(false);
+                            await Task.Delay(1000);
+                            await msg.RemoveReactionAsync(r.Emote, r.User.Value).ConfigureAwait(false);
                         }
                     }
-                    await Task.Delay(500);
-                    await msg.RemoveReactionAsync(r.Emote, r.User.Value).ConfigureAwait(false);
                 }
                 catch (Exception)
                 {
