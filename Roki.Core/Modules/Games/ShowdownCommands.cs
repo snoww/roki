@@ -108,10 +108,10 @@ namespace Roki.Modules.Games
                 else
                     generation = "7";
                 
-                _service.Games.TryAdd(ctx.Channel.Id, $"{ctx.User.Username}'s game");
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
 
                 var (gameText, uid) = await _service.StartAiGameAsync(generation).ConfigureAwait(false);
+                _service.Games.TryAdd(ctx.Channel.Id, uid);
                 var index = gameText.IndexOf("|start", StringComparison.Ordinal);
                 var gameIntro = gameText.Substring(0, index);
                 var gameTurns = gameText.Substring(index + 1);
@@ -335,6 +335,11 @@ namespace Roki.Modules.Games
                     await ctx.Channel.SendErrorAsync("Game not found").ConfigureAwait(false);
                     return;
                 }
+                if (_service.Games.TryGetValue(ctx.Channel.Id, out var gameUid) && gameUid == uid)
+                {
+                    await ctx.Channel.SendErrorAsync("Game currently in progress. Please wait until game is finished.").ConfigureAwait(false);
+                    return;
+                }
                 
                 var index = game.IndexOf("|start", StringComparison.Ordinal);
                 var generation = uid.Substring(0, 1);
@@ -390,7 +395,7 @@ namespace Roki.Modules.Games
                     var turn = turns[turnNum];
                     return new EmbedBuilder().WithOkColor()
                         .WithAuthor($"[Gen {generation}] Random Battle Replay - ID: {uid}")
-                        .WithTitle($"Turn: {turnNum}")
+                        .WithTitle($"Turn: {turnNum + 1}")
                         .WithDescription(turn)
                         .WithFooter($"Turn {turnNum + 1}/{turns.Count}");
                 }
