@@ -35,7 +35,7 @@ namespace Roki.Modules.Games.Services
                 proc.WaitForExit();
             }
 
-            var uid = Guid.NewGuid().ToString().Substring(0, 7);
+            var uid = args + Guid.NewGuid().ToString().Substring(0, 7);
             File.WriteAllText($@"./data/pokemon-logs/{uid}", output);
             
             return (output, uid);
@@ -54,7 +54,7 @@ namespace Roki.Modules.Games.Services
             }
         }
 
-        public string GetWinner(string game)
+        public static string GetWinner(string game)
         {
             var winIndex = game.IndexOf("Bot", StringComparison.Ordinal);
             return game.Substring(winIndex, 5)[4].ToString();
@@ -63,7 +63,7 @@ namespace Roki.Modules.Games.Services
         public List<List<string>> ParseIntro(string intro) =>
             InternalParseIntro(intro);
         
-        public IEnumerable<List<string>> ParseTurns(string turns) =>
+        public List<string> ParseTurns(string turns) =>
             InternalParseTurns(turns);
         
         private static List<List<string>> InternalParseIntro(string intro)
@@ -90,7 +90,7 @@ namespace Roki.Modules.Games.Services
             return toReturn;
         }
 
-        private static List<string> ParseTurn(string turn)
+        private static string ParseTurn(string turn)
         {
             var turnDetails = new List<string>();
             var lines = turn.Split('\n');
@@ -341,13 +341,15 @@ namespace Roki.Modules.Games.Services
                 }
             }
 
-            var win = lines.Last().Split('|')[2];
-            turnDetails.Add(win.Substring(win.Length - 1));
-
-            return turnDetails;
+            if (turn.Contains("|win", StringComparison.Ordinal))
+            {
+                var win = GetWinner(turn);
+                turnDetails.Add($"Winner: Bot {win}");
+            }
+            return string.Join("\n", turnDetails);
         }
 
-        private static IEnumerable<List<string>> InternalParseTurns(string game)
+        private static List<string> InternalParseTurns(string game)
         {
             var turns = game.Split("|turn");
             return turns.Select(ParseTurn).ToList();

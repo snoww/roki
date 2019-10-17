@@ -282,7 +282,7 @@ namespace Roki.Modules.Games
                     return;
                 }*/
                 
-                var win = _service.GetWinner(gameTurns);
+                var win = ShowdownService.GetWinner(gameTurns);
                 var result = win == "1" ? BetPlayer.P1 : BetPlayer.P2;
 
                 var winners = "";
@@ -326,7 +326,7 @@ namespace Roki.Modules.Games
             public async Task BetPokemonLog(string uid)
             {
                 uid = uid.SanitizeStringFull();
-                if (uid.Length != 7)
+                if (uid.Length != 9)
                 {
                     await ctx.Channel.SendErrorAsync("Invalid Game ID").ConfigureAwait(false);
                     return;
@@ -339,10 +339,65 @@ namespace Roki.Modules.Games
                 }
                 
                 var index = game.IndexOf("|start", StringComparison.Ordinal);
+                var generation = uid.Substring(0, 1);
                 var gameIntro = game.Substring(0, index);
                 var gameTurns = game.Substring(index + 1);
-            }
+                var intro = _service.ParseIntro(gameIntro);
+                var t1 = new List<Image<Rgba32>>();
+                var t2 = new List<Image<Rgba32>>();
 
+                ctx.Message.DeleteAfter(5);
+                IDMChannel dm;
+                try
+                {
+                    dm = await ctx.User.GetOrCreateDMChannelAsync().ConfigureAwait(false);
+                }
+                catch 
+                {
+                    await ctx.Channel.SendErrorAsync("Unable to send DM message. Please try again.").ConfigureAwait(false);
+                    return;
+                }
+
+                for (int i = 0; i < intro[0].Count; i++)
+                {
+                    t1.Add(GetPokemonImage(intro[0][i], generation));
+                    t2.Add(GetPokemonImage(intro[1][i], generation));
+                }
+                
+                using (var bitmap1 = t1.MergePokemonTeam())
+                using (var bitmap2 = t2.MergePokemonTeam())
+                using (var bitmap = bitmap1.MergeTwoVertical(bitmap2, out var format))
+                using (var ms = bitmap.ToStream(format))
+                {
+                    for (int i = 0; i < t1.Count; i++)
+                    {
+                        t1[i].Dispose();
+                        t2[i].Dispose();
+                    }
+
+                    var startEmbed = new EmbedBuilder().WithOkColor()
+                        .WithTitle($"[Gen {generation}] Random Battle Replay - ID: `{uid}`")
+                        .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
+                        .AddField("Player 1", string.Join('\n', intro[0]), true)
+                        .AddField("Player 2", string.Join('\n', intro[1]), true);
+                    await dm.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: startEmbed.Build()).ConfigureAwait(false);
+                }
+
+                var turns = _service.ParseTurns(gameTurns);
+
+                await dm.SendPaginatedDmAsync(_client, 0, TurnFunc, turns.Count, 1);
+
+                EmbedBuilder TurnFunc(int turnNum)
+                {
+                    var turn = turns[turnNum];
+                    return new EmbedBuilder().WithOkColor()
+                        .WithAuthor($"[Gen {generation}] Random Battle Replay - ID: {uid}")
+                        .WithTitle($"Turn: {turnNum}")
+                        .WithDescription(turn)
+                        .WithFooter($"Turn {turnNum}/{turns.Count}");
+                }
+            }
+            
             private Image<Rgba32> GetPokemonImage(string pokemon, string generation)
             {
                 var sprite = _service.GetPokemonSprite(pokemon);
