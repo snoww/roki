@@ -409,5 +409,21 @@
       "{0}bfm 10 h h t h t",
       "{0}bfm 10 tails h heads tails t"
     ]
+  },
+  "trivia": {
+    "Command": "trivia t",
+    "Description": "Starts a new 10 question trivia game with optional category (use `.tc` to check categories). Default is all categories. Awards currency based on difficulty. Needs at least 60% to get rewards.",
+    "Usage": [
+      "{0}trivia optional_category",
+      "{0}t",
+      "{0}t geography"
+    ]
+  },
+  "triviacategories": {
+    "Command": "tc",
+    "Description": "Lists all the trivia categories.",
+    "Usage": [
+      "{0}tc"
+    ]
   }
 }
