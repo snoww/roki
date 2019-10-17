@@ -382,8 +382,8 @@ namespace Roki.Modules.Games
                 }
 
                 var turns = _service.ParseTurns(gameTurns);
-
-                await dm.SendPaginatedDmAsync(_client, 0, TurnFunc, turns.Count, 1);
+                await dm.TriggerTypingAsync().ConfigureAwait(false);
+                await dm.SendPaginatedDmAsync(_client, 0, TurnFunc, turns.Count, 1).ConfigureAwait(false);
 
                 EmbedBuilder TurnFunc(int turnNum)
                 {
