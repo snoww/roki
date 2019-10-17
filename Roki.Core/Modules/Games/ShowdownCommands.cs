@@ -326,7 +326,7 @@ namespace Roki.Modules.Games
             public async Task BetPokemonLog(string uid)
             {
                 uid = uid.SanitizeStringFull();
-                if (uid.Length != 9)
+                if (uid.Length != 8)
                 {
                     await ctx.Channel.SendErrorAsync("Invalid Game ID").ConfigureAwait(false);
                     return;
