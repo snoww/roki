@@ -136,11 +136,12 @@ namespace Roki.Modules.Games
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle($"Trivia Game - {category}")
-                        .WithDescription($"Starting new trivia game.\nYou can earn up to **{prizePool}** Stones!\nReact with the correct emote to answer questions."))
+                        .WithDescription($"Starting new trivia game.\nYou can earn up to **{prizePool}** Stones!\nReact with the correct emote to answer questions.\nType `stop` to cancel game early"))
                     .ConfigureAwait(false);
 
                 await Task.Delay(5000).ConfigureAwait(false);
-                
+
+                var exit = false;
                 var count = 1;
                 var playerScore = new Dictionary<IUser, PlayerScore>();
                 foreach (var q in questions.Results)
@@ -176,6 +177,12 @@ namespace Roki.Modules.Games
                     using (msg.OnReaction(_client, AnswerAdded))
                     {
                         await Task.Delay(20000).ConfigureAwait(false);
+                    }
+
+                    if (exit)
+                    {
+                        await ctx.Channel.SendErrorAsync("Stopping current trivia game...").ConfigureAwait(false);
+                        return;
                     }
 
                     var corrStr = "";
@@ -260,6 +267,14 @@ namespace Roki.Modules.Games
                             await Task.CompletedTask;
                         }
                     }*/
+
+                    _client.MessageReceived += message =>
+                    {
+                        if (message.Channel.Id != ctx.Channel.Id || message.Author.IsBot || message.Content.ToUpper() != "STOP")
+                            return Task.CompletedTask;
+                        exit = true;
+                        return Task.CompletedTask;
+                    };
                 }
 
                 var winStr = "";
