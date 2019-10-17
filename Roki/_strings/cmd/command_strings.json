@@ -416,5 +416,13 @@
     "Usage": [
       "{0}bp"
     ]
+  },
+  "betpokemonlog": {
+    "Command": "betpokemonlog bplog",
+    "Description": "Get the turn log of the specified bp game. Sends the log to a DM.",
+    "Usage": [
+      "{0}bplog id",
+      "{0}bplog 7fc8837f"
+    ]
   }
 }
