@@ -62,6 +62,8 @@ namespace Roki.Extensions
                             await msg.ModifyAsync(x => x.Embed = toSend.Build()).ConfigureAwait(false);
                         }
                     }
+                    await Task.Delay(500);
+                    await msg.RemoveReactionAsync(r.Emote, r.User.Value).ConfigureAwait(false);
                 }
                 catch (Exception)
                 {
@@ -69,7 +71,7 @@ namespace Roki.Extensions
                 }
             }
 
-            using (msg.OnReaction(client, ChangePage, ChangePage))
+            using (msg.OnReaction(client, ChangePage))
             {
                 await Task.Delay(TimeSpan.FromMinutes(5)).ConfigureAwait(false);
                 await Task.WhenAll(msg.Reactions.Where(x => x.Value.IsMe)

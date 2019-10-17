@@ -392,7 +392,7 @@ namespace Roki.Modules.Games
                         .WithAuthor($"[Gen {generation}] Random Battle Replay - ID: {uid}")
                         .WithTitle($"Turn: {turnNum}")
                         .WithDescription(turn)
-                        .WithFooter($"Turn {turnNum}/{turns.Count}");
+                        .WithFooter($"Turn {turnNum + 1}/{turns.Count}");
                 }
             }
             
