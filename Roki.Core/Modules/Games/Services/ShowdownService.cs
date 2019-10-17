@@ -105,9 +105,14 @@ namespace Roki.Modules.Games.Services
                     case "move":
                         if (action[4] == "")
                             break;
+                        if (action[2].Substring(5) == action[4].Substring(5))
+                        {
+                            turnDetails.Add($"Player {action[2][1]}'s {action[2].Substring(5)} used {action[3]}");
+                            break;
+                        }
                         turnDetails.Add(action[2].Substring(5) != action[4].Substring(5)
-                            ? $"Player {action[2][1]}'s {action[2].Substring(5)} used {action[3]} on Opponent's {action[4].Substring(5)}.'"
-                            : $"Player {action[2][1]}'s {action[2].Substring(5)} used {action[3]} on its own {action[4].Substring(5)}.'");
+                            ? $"Player {action[2][1]}'s {action[2].Substring(5)} used {action[3]} on Opponent's {action[4].Substring(5)}"
+                            : $"Player {action[2][1]}'s {action[2].Substring(5)} used {action[3]} on its own {action[4].Substring(5)}");
                         break;
                     case "switch":
                         turnDetails.Add($"Player {action[2][1]} switched in {action[3].Replace(", L", ", LVL")}, HP: {action[4]}");
@@ -139,11 +144,11 @@ namespace Roki.Modules.Games.Services
                         turnDetails.Add($"But it missed");
                         break;
                     case "-damage":
-                        turnDetails.Add(action.Length >= 4 && action[4].StartsWith("[from]", StringComparison.Ordinal)
+                        turnDetails.Add(action.Length > 4 && action[4].StartsWith("[from]", StringComparison.Ordinal)
                             ? action[4].Contains("item:")
-                                ? $"{action[2].Substring(5)} took damage from its {action[4].Substring(12)} and is now at {action[3]} HP"
-                                : $"{action[2].Substring(5)} took damage from {action[5].Substring(5)}'s {action[4].Substring(7)} and is now at {action[3]} HP"
-                            : $"{action[2].Substring(5)} took damage and is now at {action[3]} HP");
+                                ? $"{action[2].Substring(5)} took damage from its {action[4].Substring(12)} and is now at {TrimStatus(action[3])} HP"
+                                : $"{action[2].Substring(5)} took damage from {action[5].Substring(5)}'s {action[4].Substring(7)} and is now at {TrimStatus(action[3])} HP"
+                            : $"{action[2].Substring(5)} took damage and is now at {TrimStatus(action[3])} HP");
                         break;
                     case "-heal":
                         if (action.Length >= 4 && action[4].StartsWith("[from]", StringComparison.Ordinal))
@@ -336,16 +341,13 @@ namespace Roki.Modules.Games.Services
                         // ignored
                         break;
                     default:
-                        //ignored
                         break;
                 }
             }
 
-            if (turn.Contains("|win", StringComparison.Ordinal))
-            {
-                var win = GetWinner(turn);
-                turnDetails.Add($"Winner: Bot {win}");
-            }
+            if (!turn.Contains("|win", StringComparison.Ordinal)) return string.Join("\n", turnDetails);
+            var win = GetWinner(turn);
+            turnDetails.Add($"Winner: Bot {win}");
             return string.Join("\n", turnDetails);
         }
 
@@ -362,6 +364,13 @@ namespace Roki.Modules.Games.Services
             var poke = query.EndsWith("-*", StringComparison.Ordinal) ? Data[query.Replace("-*", "", StringComparison.Ordinal)] : Data[query];
 
             return poke.Sprite;
+        }
+
+        private static string TrimStatus(string move)
+        {
+            var charsToRemove = new[] { "f", "n", "t", " " };
+
+            return charsToRemove.Aggregate(move, (current, c) => current.Replace(c, string.Empty));
         }
     }
 }
