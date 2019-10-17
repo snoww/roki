@@ -25,6 +25,8 @@ namespace Roki.Extensions
     public static class Extensions
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
+        private static readonly Random rng = new Random();  
+
 
         public static EmbedBuilder WithOkColor(this EmbedBuilder embed)
         {
@@ -215,6 +217,17 @@ namespace Roki.Extensions
             }
             canvas.Frames.RemoveFrame(0);
             return canvas;
+        }
+        public static void Shuffle<T>(this IList<T> list)  
+        {  
+            var n = list.Count;  
+            while (n > 1) {  
+                n--;  
+                var k = rng.Next(n + 1);
+                var value = list[k];  
+                list[k] = list[n];  
+                list[n] = value;  
+            }  
         }
     }
 }
