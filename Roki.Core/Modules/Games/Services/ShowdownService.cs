@@ -236,7 +236,7 @@ namespace Roki.Modules.Games.Services
                     case "-weather":
                         if (action.Length == 3)
                             turnDetails.Add($"The weather is now {action[2]}");
-                        if (action[3].StartsWith("[from]", StringComparison.Ordinal))
+                        else if (action[3].StartsWith("[from]", StringComparison.Ordinal))
                         {
                             if (action[3].Contains("ability"))
                                 turnDetails.Add($"The weather is now: {action[2]} because of {action[4].Substring(10)}'s {action[3].Substring(7)}");
