@@ -58,6 +58,7 @@ namespace Roki.Modules.Games
             };
             private readonly Dictionary<IEmote, long> _betMap = new Dictionary<IEmote, long>
             {
+                {AllIn, 0},
                 {One, 1},
                 {Five, 5},
                 {Ten, 10},
@@ -191,13 +192,9 @@ namespace Roki.Modules.Games
                         if (joinedReactions[user].Amount >= 0)
                         {
                             if (reaction.Emote.Equals(AllIn))
-                            {
                                 joinedReactions[user].Amount = _currency.GetCurrency(user.Id);
-                            }
-                            else if (_currency.GetCurrency(user.Id) >= joinedReactions[user].Amount + _betMap[reaction.Emote])
-                            {
+                            else if (_currency.GetCurrency(user.Id) >= joinedReactions[user].Amount + _betMap[reaction.Emote]) 
                                 joinedReactions[user].Amount += _betMap[reaction.Emote];
-                            }
                             else
                             {
                                 var notEnoughMsg = await ctx.Channel.SendErrorAsync($"<@{reaction.User.Value.Id}> You do not have enough currency to make that bet.").ConfigureAwait(false);
