@@ -192,10 +192,9 @@ namespace Roki.Modules.Games
                             else
                             {
                                 var notEnoughMsg = await ctx.Channel.SendErrorAsync($"<@{reaction.UserId}> Please select a player to bet on first.").ConfigureAwait(false);
-                                await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, RequestOptions.Default).ConfigureAwait(false);
                                 notEnoughMsg.DeleteAfter(3);
                             }
-
+                            await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, RequestOptions.Default).ConfigureAwait(false);
                             return Task.CompletedTask;
                         }
                         if (joinedReactions[user].Amount >= 0)
@@ -212,8 +211,9 @@ namespace Roki.Modules.Games
                             }
                             return Task.CompletedTask;
                         }
-
                         joinedReactions[user].Bet = Equals(Player1, reaction.Emote) ? BetPlayer.P1 : BetPlayer.P2;
+                        await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, RequestOptions.Default).ConfigureAwait(false);
+
                         return Task.CompletedTask;
                     });
                     
