@@ -327,7 +327,6 @@ namespace Roki.Modules.Games
                         await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
                             .WithDescription($"Player {win} has won the battle!\nBetter luck next time!\n{losers}\n")).ConfigureAwait(false);
                 }
-                await startMsg.RemoveReactionsAsync(ctx.Client.CurrentUser, _reactionPlayer).ConfigureAwait(false);
                 await startMsg.RemoveReactionsAsync(ctx.Client.CurrentUser, _reactionBet).ConfigureAwait(false);
                 _service.Games.TryRemove(ctx.Channel.Id, out _);
             }
