@@ -51,7 +51,7 @@ namespace Roki.Modules.Currency
                 page -= 1;
             using (var uow = _db.GetDbContext())
             {
-                var list = uow.DUsers.GetCurrencyLeaderboard(page);
+                var list = uow.DUsers.GetCurrencyLeaderboard(ctx.Client.CurrentUser.Id, page);
                 var embed = new EmbedBuilder().WithOkColor()
                     .WithTitle("Currency Leaderboard");
                 var i = 9 * page + 1;

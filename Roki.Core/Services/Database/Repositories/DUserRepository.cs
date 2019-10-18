@@ -20,7 +20,7 @@ namespace Roki.Core.Services.Database.Repositories
         DUser[] GetUsersXpLeaderboard(int page);
         long GetUserCurrency(ulong userId);
         Task<bool> UpdateCurrencyAsync(IUser user, long amount);
-        IEnumerable<DUser> GetCurrencyLeaderboard(int page);
+        IEnumerable<DUser> GetCurrencyLeaderboard(ulong botId, int page);
         Task UpdateXp(DUser dUser, SocketMessage message);
         Task ChangeNotificationLocation(ulong userId, byte notify);
     }
@@ -100,9 +100,9 @@ WHERE UserId={dUser.UserId}
             return true;
         }
 
-        public IEnumerable<DUser> GetCurrencyLeaderboard(int page)
+        public IEnumerable<DUser> GetCurrencyLeaderboard(ulong botId, int page)
         {
-            return Set.Where(c => c.Currency > 0)
+            return Set.Where(c => c.Currency > 0 && botId != c.UserId)
                 .OrderByDescending(c => c.Currency)
                 .Skip(page * 9)
                 .Take(9)
