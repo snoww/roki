@@ -31,6 +31,7 @@ namespace Roki.Modules.Games
             private const string Gen4SpriteUrl = "http://play.pokemonshowdown.com/sprites/dpp/";
             private static readonly Emote Player1 = Emote.Parse("<:p1:633334846386601984>");
             private static readonly Emote Player2 = Emote.Parse("<:p2:633334846441127936>");
+            private static readonly Emote AllIn = Emote.Parse("<:allin:634555484703162369>");
             private static readonly Emote One = Emote.Parse("<:1_:633332839454343199>");
             private static readonly Emote Five = Emote.Parse("<:5_:633332839588298756>");
             private static readonly Emote Ten = Emote.Parse("<:10:633332839391428609>");
@@ -189,8 +190,14 @@ namespace Roki.Modules.Games
                         }
                         if (joinedReactions[user].Amount >= 0)
                         {
-                            if (_currency.GetCurrency(user.Id) >= joinedReactions[user].Amount + _betMap[reaction.Emote])
+                            if (reaction.Emote.Equals(AllIn))
+                            {
+                                joinedReactions[user].Amount = _currency.GetCurrency(user.Id);
+                            }
+                            else if (_currency.GetCurrency(user.Id) >= joinedReactions[user].Amount + _betMap[reaction.Emote])
+                            {
                                 joinedReactions[user].Amount += _betMap[reaction.Emote];
+                            }
                             else
                             {
                                 var notEnoughMsg = await ctx.Channel.SendErrorAsync($"<@{reaction.User.Value.Id}> You do not have enough currency to make that bet.").ConfigureAwait(false);
