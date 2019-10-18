@@ -410,6 +410,21 @@
       "{0}bfm 10 tails h heads tails t"
     ]
   },
+  "betpokemongame": {
+    "Command": "betpokemon bp",
+    "Description": "Bet on an AI vs AI game of pokemon. Default is Generation 7 (Available Generations: 7, 5, 4). If guessed winner correctly, win stones.",
+    "Usage": [
+      "{0}bp"
+    ]
+  },
+  "betpokemonlog": {
+    "Command": "betpokemonlog bplog",
+    "Description": "Get the turn log of the specified bp game. Sends the log to a DM.",
+    "Usage": [
+      "{0}bplog id",
+      "{0}bplog 7fc8837f"
+    ]
+  },
   "trivia": {
     "Command": "trivia t",
     "Description": "Starts a new 10 question trivia game with optional category (use `.tc` to check categories). Default is all categories. Awards currency based on difficulty. Needs at least 60% to get rewards.",

@@ -14,6 +14,8 @@ namespace Roki.Services
         Task<bool> TransferAsync(IUser userFrom, IUser userTo, string reason, long amount, ulong guildId, ulong channelId, ulong messageId);
         Task ChangeListAsync(IEnumerable<IUser> users, IEnumerable<string> reasons, IEnumerable<long> amounts, IEnumerable<string> from, 
             IEnumerable<string> to, IEnumerable<ulong> guildIds, IEnumerable<ulong> channelIds, IEnumerable<ulong> messageIds);
+
+        long GetCurrency(ulong userId);
     }
     
     public class CurrencyService : ICurrencyService
@@ -107,7 +109,14 @@ namespace Roki.Services
 
                 await uow.SaveChangesAsync().ConfigureAwait(false);
             }
+        }
 
+        public long GetCurrency(ulong userId)
+        {
+            using (var uow = _db.GetDbContext())
+            {
+                return uow.DUsers.GetUserCurrency(userId);
+            }
         }
     }
 }

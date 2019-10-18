@@ -173,6 +173,32 @@ namespace Roki.Extensions
             imageStream.Position = 0;
             return imageStream;
         }
+
+        public static Image<Rgba32> MergePokemonTeam(this IEnumerable<Image<Rgba32>> images)
+        {
+            var width = (int) images.Sum(image => image.Width * 0.6);
+            var output = new Image<Rgba32>(width, images.First().Height);
+            var curWidth = 0;
+
+            foreach (var image in images)
+            {
+                output.Mutate(o => o.DrawImage(image, new Point((int) (curWidth * 0.5), 0), 1f));
+                curWidth += image.Width;
+            }
+
+            return output;
+        }
+
+        public static Image<Rgba32> MergeTwoVertical(this Image<Rgba32> image1, Image<Rgba32> image2, out IImageFormat format)
+        {
+            format = PngFormat.Instance;
+            var output = new Image<Rgba32>(image1.Width, image1.Height + image2.Height);
+            output.Mutate(o => o
+                .DrawImage(image1, new Point(0, 0), 1f)
+                .DrawImage(image2, new Point(0, image1.Height), 1f));
+
+            return output;
+        }
         
         public static Image<Rgba32> Merge(this IEnumerable<Image<Rgba32>> images)
         {
@@ -184,11 +210,11 @@ namespace Roki.Extensions
             void DrawFrame(Image<Rgba32>[] imgArray, Image<Rgba32> imgFrame, int frameNumber)
             {
                 var xOffset = 0;
-                for (int i = 0; i < imgArray.Length; i++)
+                foreach (var t in imgArray)
                 {
-                    var frame = imgArray[i].Frames.CloneFrame(frameNumber % imgArray[i].Frames.Count);
+                    var frame = t.Frames.CloneFrame(frameNumber % t.Frames.Count);
                     imgFrame.Mutate(x => x.DrawImage(frame, new Point(xOffset, 0), GraphicsOptions.Default));
-                    xOffset += imgArray[i].Bounds().Width;
+                    xOffset += t.Bounds().Width;
                 }
             }
 
