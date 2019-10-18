@@ -25,6 +25,8 @@ namespace Roki.Modules.Searches
                 if (string.IsNullOrWhiteSpace(query))
                     return;
 
+                query = query.ToLowerInvariant();
+
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
 // save poke api data to json files?
                 try
@@ -49,7 +51,7 @@ namespace Roki.Modules.Searches
                         .WithColor(_service.GetColorOfPokemon(species.Color.Name))
                         .WithTitle($"#{pokemon.Id} {data.Name}")
                         .WithDescription($"{species.Genera[2].Genus}")
-                        .WithThumbnailUrl("https://play.pokemonshowdown.com/sprites/xyani/" + data.Sprite)
+                        .WithThumbnailUrl("https://play.pokemonshowdown.com/sprites/xyani/" + data.Sprite + ".gif")
                         .AddField("Types", string.Join(", ", pokemon.Types.OrderBy(t => t.Slot).Select(t => t.Type.Name.ToTitleCase()).ToList()), true)
                         .AddField("Abilities", string.Join(", ", 
                             pokemon.Abilities.OrderBy(a => a.Slot).Select(a =>
