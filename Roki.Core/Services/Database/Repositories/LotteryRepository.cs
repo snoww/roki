@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Roki.Core.Services.Database.Models;
+using Roki.Modules.Gambling;
 
 namespace Roki.Core.Services.Database.Repositories
 {
@@ -12,6 +13,7 @@ namespace Roki.Core.Services.Database.Repositories
         List<Lottery> GetLotteryEntries(ulong userId, string lotteryId);
         void AddLotteryEntry(ulong userId, List<int> numbers, string lotteryId);
         void NewLottery(ulong botId, List<int> numbers);
+        Lottery GetLottery(ulong botId);
         string GetLotteryId();
     }
 
@@ -41,6 +43,11 @@ VALUES({userId}, {numbers[0]}, {numbers[1]}, {numbers[2]}, {numbers[3]}, {number
 INSERT INTO lottery(userId, num1, num2, num3, num4, num5, lotteryId)
 VALUES({botId}, {numbers[0]}, {numbers[1]}, {numbers[2]}, {numbers[3]}, {numbers[4]}, {lotteryId})")
                 .ConfigureAwait(false);
+        }
+
+        public Lottery GetLottery(ulong botId)
+        {
+            return Set.OrderByDescending(l => l.Id).First(u => u.UserId == botId);
         }
 
         public string GetLotteryId() =>

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Timers;
 using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
@@ -21,7 +22,7 @@ namespace Roki.Modules.Gambling
             private readonly DbService _db;
             private readonly Random _rng = new Random();
             private const string Stone = "<:stone:269130892100763649>";
-
+            
             public LotteryCommands(ICurrencyService currency, DbService db)
             {
                 _currency = currency;
@@ -88,6 +89,23 @@ namespace Roki.Modules.Gambling
                         .ConfigureAwait(false);
                 }
             }
+
+//            public void StartTimer()
+//            {
+//                var lotteryTimer = new Timer();
+//                lotteryTimer.Elapsed += LotteryEventHandler;
+//                lotteryTimer.Interval = TimeSpan.FromDays(1).TotalMilliseconds;
+//                lotteryTimer.Enabled = true;
+//            }
+//
+//            private void LotteryEventHandler(object source, ElapsedEventArgs e)
+//            {
+//                using (var uow = _db.GetDbContext())
+//                {
+//                    var lottery = uow.Lottery.GetLottery(ctx.Client.CurrentUser.Id);
+//                    var winningNum = 
+//                }
+//            }
 
             private List<int> GenerateLotteryNumber()
             {
