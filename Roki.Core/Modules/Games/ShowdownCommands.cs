@@ -178,7 +178,7 @@ namespace Roki.Modules.Games
                 var timeout = DateTime.UtcNow + TimeSpan.FromSeconds(30);
                 _client.ReactionAdded += (cachedMessage, channel, reaction) =>
                 {
-                    if (ctx.Channel.Id != channel.Id || cachedMessage.Value.Id != startMsg.Id || !_reactionPlayer.Contains(reaction.Emote) ||
+                    if (ctx.Channel.Id != channel.Id || cachedMessage.Value.Id != startMsg.Id || !_reactionPlayer.Contains(reaction.Emote) && !_reactionBet.Contains(reaction.Emote) ||
                         DateTime.UtcNow > timeout || reaction.User.Value.IsBot) return Task.CompletedTask;
                     var user = reaction.User.Value;
                     var _ = Task.Run(async () =>
