@@ -83,7 +83,7 @@ namespace Roki.Extensions
                             await msg.ModifyAsync(x => x.Embed = toSend.Build()).ConfigureAwait(false);
                         }
                     }
-                    else if (r.Emote.Equals(ArrowForward))
+                    else if (r.Emote.Equals(ArrowBack))
                     {
                         if (currentPage == 0)
                             return;
