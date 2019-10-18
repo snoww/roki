@@ -11,6 +11,8 @@ namespace Roki.Extensions
     {
         private static readonly IEmote ArrowLeft = new Emoji("⬅");
         private static readonly IEmote ArrowRight = new Emoji("➡");
+        private static readonly IEmote ArrowForward = new Emoji("⏩");
+        private static readonly IEmote ArrowBack = new Emoji("⏪");
         
         public static Task SendPaginatedDmAsync(this IDMChannel dm, DiscordSocketClient client,
             int currentPage, Func<int, EmbedBuilder> pageFunc, int totalElements,
@@ -32,8 +34,10 @@ namespace Roki.Extensions
             if (lastPage == 0)
                 return;
 
+            await msg.AddReactionAsync(ArrowBack).ConfigureAwait(false);
             await msg.AddReactionAsync(ArrowLeft).ConfigureAwait(false);
             await msg.AddReactionAsync(ArrowRight).ConfigureAwait(false);
+            await msg.AddReactionAsync(ArrowForward).ConfigureAwait(false);
 
             await Task.Delay(2000).ConfigureAwait(false);
 
@@ -61,6 +65,43 @@ namespace Roki.Extensions
                             var toSend = await pageFunc(++currentPage).ConfigureAwait(false);
                             await msg.ModifyAsync(x => x.Embed = toSend.Build()).ConfigureAwait(false);
                         }
+                    }
+                    else if (r.Emote.Equals(ArrowForward))
+                    {
+                        if (lastPage > currentPage + 4)
+                        {
+                            lastPageChange = DateTime.UtcNow;
+                            currentPage += 5;
+                            var toSend = await pageFunc(currentPage).ConfigureAwait(false);
+                            await msg.ModifyAsync(x => x.Embed = toSend.Build()).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            lastPageChange = DateTime.UtcNow;
+                            currentPage = lastPage;
+                            var toSend = await pageFunc(currentPage).ConfigureAwait(false);
+                            await msg.ModifyAsync(x => x.Embed = toSend.Build()).ConfigureAwait(false);
+                        }
+                    }
+                    else if (r.Emote.Equals(ArrowForward))
+                    {
+                        if (currentPage == 0)
+                            return;
+                        if (currentPage - 4 < 0)
+                        {
+                            lastPageChange = DateTime.UtcNow;
+                            currentPage = 0;
+                            var _ = await pageFunc(currentPage).ConfigureAwait(false);
+                            await msg.ModifyAsync(x => x.Embed = _.Build()).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            lastPageChange = DateTime.UtcNow;
+                            currentPage -= 5;
+                            var toSend = await pageFunc(currentPage).ConfigureAwait(false);
+                            await msg.ModifyAsync(x => x.Embed = toSend.Build()).ConfigureAwait(false);
+                        }
+                       
                     }
                 }
                 catch (Exception)
