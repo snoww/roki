@@ -13,6 +13,7 @@ namespace Roki.Core.Services.Database
         IDUserRepository DUsers { get; }
         IDMessageRepository DMessages { get; }
         ICurrencyTransactionRepository Transaction { get; }
+        ILotteryRepository Lottery { get; }
 
         int SaveChanges();
         Task<int> SaveChangesAsync();
@@ -24,6 +25,7 @@ namespace Roki.Core.Services.Database
         private IDUserRepository _dUsers;
         private IDMessageRepository _dMessages;
         private ICurrencyTransactionRepository _transaction;
+        private ILotteryRepository _lottery;
 
         public UnitOfWork(RokiContext context)
         {
@@ -35,6 +37,7 @@ namespace Roki.Core.Services.Database
         public IDUserRepository DUsers => _dUsers ?? (_dUsers = new DUserRepository(Context));
         public IDMessageRepository DMessages => _dMessages ?? (_dMessages = new DMessageRepository(Context));
         public ICurrencyTransactionRepository Transaction => _transaction ?? (_transaction = new CurrencyTransactionRepository(Context));
+        public ILotteryRepository Lottery => _lottery ?? (_lottery = new LotteryRepository(Context));
 
         public int SaveChanges()
         {
