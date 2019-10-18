@@ -47,6 +47,7 @@ namespace Roki.Modules.Games
             };
             private readonly IEmote[] _reactionBet = 
             {
+                AllIn,
                 One,
                 Five,
                 Ten,
@@ -58,7 +59,6 @@ namespace Roki.Modules.Games
             };
             private readonly Dictionary<IEmote, long> _betMap = new Dictionary<IEmote, long>
             {
-                {AllIn, 0},
                 {One, 1},
                 {Five, 5},
                 {Ten, 10},
