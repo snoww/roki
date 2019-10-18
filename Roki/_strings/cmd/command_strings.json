@@ -412,7 +412,7 @@
   },
   "betpokemongame": {
     "Command": "betpokemon bp",
-    "Description": "Bet on an AI vs AI game of pokemon. If guessed winner correctly, win stones.",
+    "Description": "Bet on an AI vs AI game of pokemon. Default is Generation 7 (Available Generations: 7, 5, 4). If guessed winner correctly, win stones.",
     "Usage": [
       "{0}bp"
     ]
