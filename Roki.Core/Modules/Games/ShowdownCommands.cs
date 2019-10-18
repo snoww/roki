@@ -178,7 +178,7 @@ namespace Roki.Modules.Games
                 var timeout = DateTime.UtcNow + TimeSpan.FromSeconds(30);
                 _client.ReactionAdded += (cachedMessage, channel, reaction) =>
                 {
-                    if (ctx.Channel.Id != channel.Id || cachedMessage.Value.Id != startMsg.Id || !_reactionPlayer.Contains(reaction.Emote) && !_reactionBet.Contains(reaction.Emote) ||
+                    if (ctx.Channel.Id != channel.Id || cachedMessage.Value.Id != startMsg.Id || !_reactionPlayer.Contains(reaction.Emote) ||
                         DateTime.UtcNow > timeout || reaction.User.Value.IsBot) return Task.CompletedTask;
                     var user = reaction.User.Value;
                     var _ = Task.Run(async () =>
@@ -197,7 +197,7 @@ namespace Roki.Modules.Games
                             await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, RequestOptions.Default).ConfigureAwait(false);
                             return Task.CompletedTask;
                         }
-                        if (joinedReactions[user].Amount >= 0)
+                        if (_reactionBet.Contains(reaction.Emote))
                         {
                             if (reaction.Emote.Equals(AllIn))
                                 joinedReactions[user].Amount = _currency.GetCurrency(user.Id);
@@ -211,9 +211,12 @@ namespace Roki.Modules.Games
                             }
                             return Task.CompletedTask;
                         }
-                        joinedReactions[user].Bet = Equals(Player1, reaction.Emote) ? BetPlayer.P1 : BetPlayer.P2;
+                        if (reaction.Emote.Equals(Player1))
+                            joinedReactions[user].Bet = BetPlayer.P1;
+                        else if (reaction.Emote.Equals(Player2))
+                            joinedReactions[user].Bet = BetPlayer.P2;
+                        
                         await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, RequestOptions.Default).ConfigureAwait(false);
-
                         return Task.CompletedTask;
                     });
                     
