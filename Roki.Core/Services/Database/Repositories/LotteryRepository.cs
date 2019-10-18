@@ -9,7 +9,7 @@ namespace Roki.Core.Services.Database.Repositories
 {
     public interface ILotteryRepository : IRepository<Lottery>
     {
-        List<List<int>> GetLotteryEntries(ulong userId, string lotteryId);
+        List<Lottery> GetLotteryEntries(ulong userId, string lotteryId);
         void AddLotteryEntry(ulong userId, List<int> numbers, string lotteryId);
         void NewLottery(ulong botId, List<int> numbers);
         string GetLotteryId();
@@ -21,14 +21,17 @@ namespace Roki.Core.Services.Database.Repositories
         {
         }
 
-        public List<List<int>> GetLotteryEntries(ulong userId, string lotteryId)
+        public List<Lottery> GetLotteryEntries(ulong userId, string lotteryId)
         {
-            throw new System.NotImplementedException();
+            return Set.Where(l => l.UserId == userId && l.LotteryId == lotteryId).ToList();
         }
 
-        public void AddLotteryEntry(ulong userId, List<int> numbers, string lotteryId)
+        public async void AddLotteryEntry(ulong userId, List<int> numbers, string lotteryId)
         {
-            throw new System.NotImplementedException();
+            await Context.Database.ExecuteSqlCommandAsync($@"
+INSERT INTO lottery(userId, num1, num2, num3, num4, num5, lotteryId)
+VALUES({userId}, {numbers[0]}, {numbers[1]}, {numbers[2]}, {numbers[3]}, {numbers[4]}, {lotteryId})")
+                .ConfigureAwait(false);
         }
 
         public async void NewLottery(ulong botId, List<int> numbers)
