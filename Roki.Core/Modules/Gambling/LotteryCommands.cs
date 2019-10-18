@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -13,6 +15,7 @@ namespace Roki.Modules.Gambling
         public class LotteryCommands : RokiSubmodule
         {
             private readonly ICurrencyService _currency;
+            private readonly Random _rng = new Random();
             private const string Stone = "<:stone:269130892100763649>";
 
             public LotteryCommands(ICurrencyService currency)
@@ -46,9 +49,28 @@ namespace Roki.Modules.Gambling
                     return;
                 }
 
+                var numbers = GenerateLotteryNumber();
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                        .WithDescription($"{ctx.User.Mention} you've joined the lottery."))
+                        .WithDescription($"{ctx.User.Mention} you've joined the lottery.\n Here's your lottery number: `{string.Join(", ", numbers)}`"))
                     .ConfigureAwait(false);
+            }
+
+            private List<int> GenerateLotteryNumber()
+            {
+                var numList = new List<int>();
+                for (int i = 0; i < 6; i++)
+                {
+                    var num = _rng.Next(1, 56);
+                    if (numList.Contains(num))
+                    {
+                        i--;
+                        continue;
+                    }
+                    numList.Add(num);
+                }
+                numList.Sort();
+                
+                return numList;
             }
         }
     }
