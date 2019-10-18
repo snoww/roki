@@ -141,8 +141,8 @@
   },
   "nidoran-f": {
     "api": 29,
-    "sprite": "nidoran-f",
-    "name": "Nidoran"
+    "sprite": "nidoranf",
+    "name": "Nidoran ♀"
   },
   "nidorina": {
     "api": 30,
@@ -156,8 +156,13 @@
   },
   "nidoran": {
     "api": 32,
-    "sprite": "nidoranf",
-    "name": "Nidoran"
+    "sprite": "nidoranm",
+    "name": "Nidoran ♂"
+  },
+  "nidoran-m": {
+    "api": 32,
+    "sprite": "nidoranm",
+    "name": "Nidoran ♂"
   },
   "nidorino": {
     "api": 33,
