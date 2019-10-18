@@ -57,7 +57,7 @@ namespace Roki.Modules.Games.Services
         public static string GetWinner(string game)
         {
             var winIndex = game.IndexOf("Bot", StringComparison.Ordinal);
-            return game.Substring(winIndex, 5)[4].ToString();
+            return game.Substring(winIndex);
         }
 
         public List<List<string>> ParseIntro(string intro) =>
