@@ -84,5 +84,14 @@ namespace Roki.Modules.Utility
             
             await ctx.Channel.SendMessageAsync(ctx.Message.Content).ConfigureAwait(false);
         }
+
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task UserDetails(IUser user)
+        {
+            await ctx.Channel.SendMessageAsync(
+                $"UserId: {user.Id}\nUsername: {user.Username}\nDiscriminator: {user.Discriminator}\nAvatarId: {user.AvatarId}\n").ConfigureAwait(false);
+        }
     }
 }
