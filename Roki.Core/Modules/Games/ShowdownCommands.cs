@@ -27,8 +27,11 @@ namespace Roki.Modules.Games
             private readonly ICurrencyService _currency;
             private const string Gen7SpriteUrl = "http://play.pokemonshowdown.com/sprites/xydex/";
             private const string Gen6SpriteUrl = "http://play.pokemonshowdown.com/sprites/xy/";
-            private const string Gen5SpriteUrl = "http://play.pokemonshowdown.com/sprites/bw/";
-            private const string Gen4SpriteUrl = "http://play.pokemonshowdown.com/sprites/dpp/";
+            private const string Gen5SpriteUrl = "http://play.pokemonshowdown.com/sprites/gen5/";
+            private const string Gen4SpriteUrl = "http://play.pokemonshowdown.com/sprites/gen4/";
+            private const string Gen3SpriteUrl = "http://play.pokemonshowdown.com/sprites/gen3/";
+            private const string Gen2SpriteUrl = "http://play.pokemonshowdown.com/sprites/gen2/";
+            private const string Gen1SpriteUrl = "http://play.pokemonshowdown.com/sprites/gen1/";
             private static readonly Emote Player1 = Emote.Parse("<:p1:633334846386601984>");
             private static readonly Emote Player2 = Emote.Parse("<:p2:633334846441127936>");
             private static readonly Emote AllIn = Emote.Parse("<:allin:634555484703162369>");
@@ -107,6 +110,12 @@ namespace Roki.Modules.Games
                     generation = "5";
                 else if (gen == 4)
                     generation = "4";
+                else if (gen == 3)
+                    generation = "3";
+                else if (gen == 2)
+                    generation = "2";
+                else if (gen == 1)
+                    generation = "1";
                 else
                     generation = "7";
                 
@@ -411,13 +420,19 @@ namespace Roki.Modules.Games
                 var wc = new WebClient();
                 string genUrl;
                 if (generation == "7")
-                    genUrl = Gen7SpriteUrl;
+                    genUrl = Gen5SpriteUrl;
                 else if (generation == "6")
-                    genUrl = Gen6SpriteUrl;
+                    genUrl = Gen5SpriteUrl;
                 else if (generation == "5")
                     genUrl = Gen5SpriteUrl;
-                else
+                else if (generation == "4")
                     genUrl = Gen4SpriteUrl;
+                else if (generation == "3")
+                    genUrl = Gen3SpriteUrl;
+                else if (generation == "2")
+                    genUrl = Gen2SpriteUrl;
+                else
+                    genUrl = Gen1SpriteUrl;
                 using (var stream = new MemoryStream(wc.DownloadData(genUrl + sprite + ".png")))
                 {
                     return Image.Load(stream.ToArray());
