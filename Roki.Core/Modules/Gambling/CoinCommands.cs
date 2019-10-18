@@ -44,7 +44,7 @@ namespace Roki.Modules.Gambling
                     return;
 
                 var removed = await _currency
-                    .ChangeAsync(ctx.User, "BetFlip Entry", -amount, ctx.User.Id.ToString(), "Server", ctx.Guild.Id, ctx.Channel.Id, 
+                    .ChangeAsync(ctx.User, "BetFlip Entry", -amount, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}", ctx.Guild.Id, ctx.Channel.Id, 
                         ctx.Message.Id)
                     .ConfigureAwait(false);
 
@@ -69,7 +69,7 @@ namespace Roki.Modules.Gambling
                     var won = (long) Math.Ceiling(amount * 1.95);
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithDescription($"Result is: {result}\n{ctx.User.Mention} Congratulations! You've won {won} stones")).ConfigureAwait(false);
-                    await _currency.ChangeAsync(ctx.User, "BetFlip Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
+                    await _currency.ChangeAsync(ctx.User, "BetFlip Payout", won, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
                     return;
                 }
@@ -98,7 +98,7 @@ namespace Roki.Modules.Gambling
                 }
 
                 var removed = await _currency
-                    .ChangeAsync(ctx.User, "BetFlipMulti Entry", -amount, ctx.User.Id.ToString(), "Server", ctx.Guild.Id, ctx.Channel.Id, 
+                    .ChangeAsync(ctx.User, "BetFlipMulti Entry", -amount, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}", ctx.Guild.Id, ctx.Channel.Id, 
                         ctx.Message.Id)
                     .ConfigureAwait(false);
 
@@ -122,7 +122,7 @@ namespace Roki.Modules.Gambling
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithDescription($"Results are: {string.Join(", ", results)}\n{ctx.User.Mention} Congratulations! You got {correct}/{guesses.Length} correct. You've won {won} stones"))
                         .ConfigureAwait(false);
-                    await _currency.ChangeAsync(ctx.User, "BetFlipMulti Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
+                    await _currency.ChangeAsync(ctx.User, "BetFlipMulti Payout", won, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
                     return;
                 }

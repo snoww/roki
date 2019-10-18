@@ -232,7 +232,7 @@ namespace Roki.Modules.Games
                 foreach (var (key, value) in joinedReactions)
                 {
                     await _currency
-                        .ChangeAsync(key, "BetShowdown Entry", -value.Amount, ctx.User.Id.ToString(), "Server", ctx.Guild.Id, ctx.Channel.Id,
+                        .ChangeAsync(key, "BetShowdown Entry", -value.Amount, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}", ctx.Guild.Id, ctx.Channel.Id,
                             ctx.Message.Id)
                         .ConfigureAwait(false);
                 }
@@ -254,7 +254,7 @@ namespace Roki.Modules.Games
                         }
 
                         var removed = await _currency
-                            .ChangeAsync(message.Author, "BetShowdown Entry", -amount, ctx.User.Id.ToString(), "Server", ctx.Guild.Id, ctx.Channel.Id,
+                            .ChangeAsync(message.Author, "BetShowdown Entry", -amount, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}", ctx.Guild.Id, ctx.Channel.Id,
                                 ctx.Message.Id)
                             .ConfigureAwait(false);
                         if (!removed)
@@ -308,7 +308,7 @@ namespace Roki.Modules.Games
                     }
                     var won = value.Amount * 2;
                     winners += $"{key.Username} won {won} stones\n";
-                    await _currency.ChangeAsync(key, "BetShowdown Payout", won, "Server", ctx.User.Id.ToString(), ctx.Guild.Id,
+                    await _currency.ChangeAsync(key, "BetShowdown Payout", won, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
                 }
                 
