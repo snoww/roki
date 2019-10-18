@@ -284,7 +284,7 @@ namespace Roki.Modules.Games
                     return;
                 }*/
                 
-                var win = ShowdownService.GetWinner(gameTurns);
+                var win = ShowdownService.GetWinner(gameTurns.Substring(gameTurns.IndexOf("|win", StringComparison.Ordinal)));
                 var result = win.Contains("1", StringComparison.Ordinal) ? BetPlayer.P1 : BetPlayer.P2;
 
                 var winners = "";
