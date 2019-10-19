@@ -20,6 +20,7 @@ namespace Roki.Core.Services.Database.Repositories
         DUser[] GetUsersXpLeaderboard(int page);
         long GetUserCurrency(ulong userId);
         Task<bool> UpdateCurrencyAsync(IUser user, long amount);
+        Task LotteryAwardAsync(ulong userId, long amount);
         Task UpdateBotCurrencyAsync(ulong botId, long amount);
         IEnumerable<DUser> GetCurrencyLeaderboard(ulong botId, int page);
         Task UpdateXp(DUser dUser, SocketMessage message);
@@ -99,6 +100,15 @@ SET Currency=Currency+{amount}
 WHERE UserId={dUser.UserId}
 ").ConfigureAwait(false);
             return true;
+        }
+
+        public async Task LotteryAwardAsync(ulong userId, long amount)
+        {
+            await Context.Database.ExecuteSqlCommandAsync($@"
+UPDATE IGNORE users
+SET Currency=Currency+{amount}
+WHERE UserId={userId}
+").ConfigureAwait(false);
         }
 
         public async Task UpdateBotCurrencyAsync(ulong botId, long amount)

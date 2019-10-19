@@ -9,6 +9,7 @@ using Roki.Common.Attributes;
 using Roki.Core.Services;
 using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
+using Roki.Modules.Gambling.Services;
 using Roki.Services;
 
 namespace Roki.Modules.Gambling
@@ -16,11 +17,10 @@ namespace Roki.Modules.Gambling
     public partial class Gambling
     {
         [Group]
-        public class LotteryCommands : RokiSubmodule
+        public class LotteryCommands : RokiSubmodule<LotteryService>
         {
             private readonly ICurrencyService _currency;
             private readonly DbService _db;
-            private readonly Random _rng = new Random();
             private const string Stone = "<:stone:269130892100763649>";
             
             public LotteryCommands(ICurrencyService currency, DbService db)
@@ -32,22 +32,27 @@ namespace Roki.Modules.Gambling
             [RokiCommand, Description, Usage, Aliases]
             public async Task Jackpot()
             {
-                var rokiCurr = _currency.GetCurrency(ctx.Client.CurrentUser.Id);
-                if (rokiCurr < 1000)
+                var jackpot = (long) (_currency.GetCurrency(ctx.Client.CurrentUser.Id) * 0.9);
+                if (jackpot < 1000)
                     await ctx.Channel.SendErrorAsync("The lottery is currently down. Please check back another time.").ConfigureAwait(false);
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle("Stone Lottery")
-                        .WithDescription($"Current Jackpot: {Format.Bold(rokiCurr.ToString())} {Stone}"))
+                        .WithDescription($"Current Jackpot: {Format.Bold(jackpot.ToString())} {Stone}"))
                     .ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
-            public async Task JoinLottery()
+            public async Task JoinLottery(int[] nums = null)
             {
+                if (nums != null && nums.Length != 6 && !_service.ValidNumbers(nums))
+                {
+                    await ctx.Channel.SendErrorAsync("Invalid numbers: Please enter 6 numbers from 1 to 30, no repeats.");
+                    return;
+                }
                 var user = ctx.User;
-                var removed = await _currency.ChangeAsync(ctx.User, "Lottery Entry", -10, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}",
+                var removed = await _currency.ChangeAsync(ctx.User, "Lottery Entry", -1, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}",
                     ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id).ConfigureAwait(false);
                 if (!removed)
                 {
@@ -56,7 +61,7 @@ namespace Roki.Modules.Gambling
                     return;
                 }
 
-                var numbers = GenerateLotteryNumber();
+                var numbers = nums == null ? _service.GenerateLotteryNumber() : nums.ToList();
                 using (var uow = _db.GetDbContext())
                 {
                     var lotteryId = uow.Lottery.GetLotteryId();
@@ -68,6 +73,7 @@ namespace Roki.Modules.Gambling
                         : $"{user.Mention} you've joined the lottery.\n Here's your lottery number: `{string.Join('-', numbers)}`\nYou have {entries} entries in the lottery.");
 
                     await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                    await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
 
@@ -78,7 +84,7 @@ namespace Roki.Modules.Gambling
                 using (var uow = _db.GetDbContext())
                 {
                     var lotteryId = uow.Lottery.GetLotteryId();
-                    var entries = EntriesToList(uow.Lottery.GetLotteryEntries(ctx.User.Id, lotteryId));
+                    var entries = _service.EntriesToListString(uow.Lottery.GetLotteryEntries(ctx.User.Id, lotteryId));
                     if (entries.Count == 0)
                     {
                         await ctx.Channel.SendErrorAsync("You have no tickets for the current lottery.").ConfigureAwait(false);
@@ -87,48 +93,11 @@ namespace Roki.Modules.Gambling
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithDescription($"{ctx.User.Mention} Here are you lottery ticket numbers:\n`{string.Join("\n", entries)}`"))
                         .ConfigureAwait(false);
+                    await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
 
-//            public void StartTimer()
-//            {
-//                var lotteryTimer = new Timer();
-//                lotteryTimer.Elapsed += LotteryEventHandler;
-//                lotteryTimer.Interval = TimeSpan.FromDays(1).TotalMilliseconds;
-//                lotteryTimer.Enabled = true;
-//            }
-//
-//            private void LotteryEventHandler(object source, ElapsedEventArgs e)
-//            {
-//                using (var uow = _db.GetDbContext())
-//                {
-//                    var lottery = uow.Lottery.GetLottery(ctx.Client.CurrentUser.Id);
-//                    var winningNum = 
-//                }
-//            }
 
-            private List<int> GenerateLotteryNumber()
-            {
-                var numList = new List<int>();
-                for (int i = 0; i < 6; i++)
-                {
-                    var num = _rng.Next(1, 56);
-                    if (numList.Contains(num))
-                    {
-                        i--;
-                        continue;
-                    }
-                    numList.Add(num);
-                }
-                numList.Sort();
-                
-                return numList;
-            }
-
-            private List<string> EntriesToList(IReadOnlyCollection<Lottery> entries)
-            {
-                return entries.Count == 0 ? null : entries.Select(entry => $"{entry.Num1}-{entry.Num2}-{entry.Num3}-{entry.Num4}-{entry.Num5}").ToList();
-            }
         }
     }
 }
