@@ -101,6 +101,7 @@ namespace Roki.Modules.Games
                     await ctx.Channel.SendErrorAsync("Game already in progress in current channel.");
                     return;
                 }
+                _service.Games.TryAdd(ctx.Channel.Id, "");
 
                 string generation;
 //                if (gen == 6)
@@ -122,7 +123,6 @@ namespace Roki.Modules.Games
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
 
                 var (gameText, uid) = await _service.StartAiGameAsync(generation).ConfigureAwait(false);
-                _service.Games.TryAdd(ctx.Channel.Id, uid);
                 var index = gameText.IndexOf("|start", StringComparison.Ordinal);
                 var gameIntro = gameText.Substring(0, index);
                 var gameTurns = gameText.Substring(index + 1);
