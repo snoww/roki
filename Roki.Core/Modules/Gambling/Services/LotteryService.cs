@@ -34,7 +34,8 @@ namespace Roki.Modules.Gambling.Services
 
         private void LotteryTimer()
         {
-            _timer = new Timer(LotteryEvent, null, TimeSpan.Zero, TimeSpan.FromMinutes(90));
+            // dueTime is when it first occurs, period is how long after each occurence
+            _timer = new Timer(LotteryEvent, null, TimeSpan.FromMinutes(90), TimeSpan.FromMinutes(90));
         }
 
         private async void LotteryEvent(object state)
