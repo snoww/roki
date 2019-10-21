@@ -87,12 +87,18 @@ namespace Roki.Modules.Gambling
             
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
-            public async Task JoinLottery(int[] nums = null)
+            public async Task JoinLottery([Leftover] string nums = null)
             {
-                if (nums != null && nums.Length != 6 && !LotteryService.ValidNumbers(nums))
+                var numbers = new List<int>();
+                if (nums != null)
                 {
-                    await ctx.Channel.SendErrorAsync("Invalid numbers: Please enter 6 numbers from 1 to 30, no repeats.");
-                    return;
+                    var numList = nums.Split();
+                    numbers = numList.Select(int.Parse).ToList();
+                    if (numbers.Count != 5 && !LotteryService.ValidNumbers(numbers))
+                    {
+                        await ctx.Channel.SendErrorAsync("Invalid numbers: Please enter 6 numbers from 1 to 25, no repeats.");
+                        return;
+                    }
                 }
                 var user = ctx.User;
                 var removed = await _currency.ChangeAsync(ctx.User, "Lottery Entry", -1, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}",
@@ -104,15 +110,11 @@ namespace Roki.Modules.Gambling
                     return;
                 }
 
-                List<int> numbers;
-                if (nums == null)
+                if (numbers.Count == 0)
                     numbers = _service.GenerateLotteryNumber();
                 else
-                {
-                    numbers = nums.ToList();
                     numbers.Sort();
-                }
-                
+
                 using (var uow = _db.GetDbContext())
                 {
                     var lotteryId = uow.Lottery.GetLotteryId();
