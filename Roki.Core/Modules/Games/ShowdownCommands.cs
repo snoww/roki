@@ -101,6 +101,7 @@ namespace Roki.Modules.Games
                     await ctx.Channel.SendErrorAsync("Game already in progress in current channel.");
                     return;
                 }
+                _service.Games.TryAdd(ctx.Channel.Id, "");
 
                 string generation;
 //                if (gen == 6)
@@ -122,7 +123,6 @@ namespace Roki.Modules.Games
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
 
                 var (gameText, uid) = await _service.StartAiGameAsync(generation).ConfigureAwait(false);
-                _service.Games.TryAdd(ctx.Channel.Id, uid);
                 var index = gameText.IndexOf("|start", StringComparison.Ordinal);
                 var gameIntro = gameText.Substring(0, index);
                 var gameTurns = gameText.Substring(index + 1);
@@ -197,7 +197,7 @@ namespace Roki.Modules.Games
                             await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, RequestOptions.Default).ConfigureAwait(false);
                             return Task.CompletedTask;
                         }
-                        if (joinedReactions[user].Amount >= 0)
+                        if (_reactionBet.Contains(reaction.Emote))
                         {
                             if (reaction.Emote.Equals(AllIn))
                                 joinedReactions[user].Amount = _currency.GetCurrency(user.Id);
@@ -211,9 +211,12 @@ namespace Roki.Modules.Games
                             }
                             return Task.CompletedTask;
                         }
-                        joinedReactions[user].Bet = Equals(Player1, reaction.Emote) ? BetPlayer.P1 : BetPlayer.P2;
+                        if (reaction.Emote.Equals(Player1))
+                            joinedReactions[user].Bet = BetPlayer.P1;
+                        else if (reaction.Emote.Equals(Player2))
+                            joinedReactions[user].Bet = BetPlayer.P2;
+                        
                         await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, RequestOptions.Default).ConfigureAwait(false);
-
                         return Task.CompletedTask;
                     });
                     
