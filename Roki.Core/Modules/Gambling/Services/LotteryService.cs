@@ -34,7 +34,7 @@ namespace Roki.Modules.Gambling.Services
 
         private void LotteryTimer()
         {
-            _timer = new Timer(LotteryEvent, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
+            _timer = new Timer(LotteryEvent, null, TimeSpan.Zero, TimeSpan.FromMinutes(30));
         }
 
         private async void LotteryEvent(object state)
@@ -52,7 +52,7 @@ namespace Roki.Modules.Gambling.Services
                     lottery.Num4,
                     lottery.Num5
                 });
-                var winningNum = $"The winning number is: {lottery.Num1}-{lottery.Num2}-{lottery.Num3}-{lottery.Num4}-{lottery.Num5}\n";
+                var winningNum = $"The winning numbers are: {lottery.Num1}-{lottery.Num2}-{lottery.Num3}-{lottery.Num4}-{lottery.Num5}\n";
                 if (winners.Count == 0)
                 {
                     await channel.SendErrorAsync(winningNum + "No winners this draw").ConfigureAwait(false);
