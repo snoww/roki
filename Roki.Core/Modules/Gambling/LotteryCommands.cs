@@ -132,9 +132,9 @@ namespace Roki.Modules.Gambling
 
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
-            public async Task Tickets(int page = 1)
+            public async Task Tickets(int page = 0)
             {
-                if (page <= 0)
+                if (page < 0)
                     return;
                 using (var uow = _db.GetDbContext())
                 {
@@ -144,7 +144,13 @@ namespace Roki.Modules.Gambling
                     {
                         await ctx.Channel.SendErrorAsync("You have no tickets for the current lottery.").ConfigureAwait(false);
                     }
-
+                    if (page == 0)
+                    {
+                        await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                                .WithDescription($"{ctx.User.Username} has {uow.Lottery.GetTotalEntries(ctx.User.Id, lotteryId)} tickets"))
+                            .ConfigureAwait(false);
+                        return;
+                    }
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithTitle($"{ctx.User.Username}'s Lottery Tickets - Total {uow.Lottery.GetTotalEntries(ctx.User.Id, lotteryId)}")
                             .WithDescription($"`{string.Join("\n", entries)}`")
