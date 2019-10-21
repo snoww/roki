@@ -64,9 +64,9 @@ VALUES({botId}, {numbers[0]}, {numbers[1]}, {numbers[2]}, {numbers[3]}, {numbers
         }
 
         public string GetLotteryId() =>
-            Set.OrderByDescending(l => l.Id).First(u => u.Id == 549644503351296040).LotteryId;
+            Set.OrderByDescending(l => l.Id).First(u => u.UserId == 549644503351296040).LotteryId;
 
         public DateTime GetLotteryDate(ulong botId) =>
-            Set.OrderByDescending(l => l.Id).First(u => u.Id == 549644503351296040).Date;
+            Set.OrderByDescending(l => l.Id).First(u => u.UserId == 549644503351296040).Date;
     }
 }
