@@ -20,7 +20,6 @@ namespace Roki.Modules.Gambling.Services
         private readonly ICurrencyService _currency;
         private readonly Random _rng = new Random();
         private Timer _timer;
-        private readonly IMessageChannel _channel;
         private const string Stone = "<:stone:269130892100763649>";
 
 
@@ -29,7 +28,6 @@ namespace Roki.Modules.Gambling.Services
             _client = client;
             _db = db;
             _currency = currency;
-            _channel = _client.GetChannel(123123) as IMessageChannel;
             LotteryTimer();
         }
 
@@ -40,6 +38,8 @@ namespace Roki.Modules.Gambling.Services
 
         private async void LotteryEvent(object state)
         {
+            var channel = _client.GetChannel(123123) as IMessageChannel;
+
             using (var uow = _db.GetDbContext())
             {
                 var lottery = uow.Lottery.GetLottery(_client.CurrentUser.Id);
@@ -54,15 +54,13 @@ namespace Roki.Modules.Gambling.Services
 
                 if (winners.Count == 0)
                 {
-//                    await _channel.SendErrorAsync("No winners this draw").ConfigureAwait(false);
-                    await _channel.SendMessageAsync("No winners this draw.").ConfigureAwait(false);
+                    await channel.SendErrorAsync("No winners this draw").ConfigureAwait(false);
                     uow.Lottery.NewLottery(_client.CurrentUser.Id, GenerateLotteryNumber());
                     await uow.SaveChangesAsync().ConfigureAwait(false);
                     return;
                 }
                 var winStr = await GiveWinnings(winners).ConfigureAwait(false);
-//                await _channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription(winStr)).ConfigureAwait(false);
-                await _channel.SendMessageAsync(winStr).ConfigureAwait(false);
+                await channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription(winStr)).ConfigureAwait(false);
                 await uow.SaveChangesAsync().ConfigureAwait(false);
             }
         }
