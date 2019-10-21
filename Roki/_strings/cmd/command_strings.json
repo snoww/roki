@@ -450,7 +450,7 @@
   },
   "joinlottery": {
     "Command": "joinlottery jl",
-    "Description": "Purchases a lottery ticket for 1 currency. Can choose own numbers or one will be automatically generated. (Choose from 1-25, no duplicates)",
+    "Description": "Purchases a lottery ticket for 1 currency. Can choose own numbers or one will be automatically generated. (Choose from 1-30, no duplicates)",
     "Usage": [
       "{0}jl",
       "{0}jl 2 5 6 12 25"
