@@ -10,7 +10,8 @@ namespace Roki.Core.Services.Database.Repositories
 {
     public interface ILotteryRepository : IRepository<Lottery>
     {
-        List<Lottery> GetLotteryEntries(ulong userId, string lotteryId);
+        List<Lottery> GetLotteryEntries(ulong userId, string lotteryId, int page);
+        int GetTotalEntries(ulong userId, string lotteryId);
         List<Lottery> GetAllLotteryEntries(string lotteryId);
         void AddLotteryEntry(ulong userId, List<int> numbers, string lotteryId);
         void NewLottery(ulong botId, List<int> numbers);
@@ -25,9 +26,14 @@ namespace Roki.Core.Services.Database.Repositories
         {
         }
 
-        public List<Lottery> GetLotteryEntries(ulong userId, string lotteryId)
+        public List<Lottery> GetLotteryEntries(ulong userId, string lotteryId, int page)
         {
-            return Set.Where(l => l.UserId == userId && l.LotteryId == lotteryId).ToList();
+            return Set.Where(l => l.UserId == userId && l.LotteryId == lotteryId).Skip(page * 9).Take(9).ToList();
+        }
+
+        public int GetTotalEntries(ulong userId, string lotteryId)
+        {
+            return Set.Count(l => l.UserId == userId && l.LotteryId == lotteryId);
         }
 
         public List<Lottery> GetAllLotteryEntries(string lotteryId)
