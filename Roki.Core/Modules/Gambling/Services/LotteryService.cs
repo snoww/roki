@@ -34,7 +34,7 @@ namespace Roki.Modules.Gambling.Services
 
         private void LotteryTimer()
         {
-            _timer = new Timer(LotteryEvent, null, TimeSpan.Zero, TimeSpan.FromMinutes(30));
+            _timer = new Timer(LotteryEvent, null, TimeSpan.Zero, TimeSpan.FromMinutes(90));
         }
 
         private async void LotteryEvent(object state)
