@@ -34,8 +34,8 @@ namespace Roki.Modules.Gambling.Services
         private void LotteryTimer()
         {
             var today = DateTime.UtcNow;
-            var drawToday = new DateTime(today.Year, today.Month, today.Day, 14, 0, 0);
-            var drawTmr = new DateTime(today.Year, today.Month, today.Day + 1, 14, 0, 0);
+            var drawToday = new DateTime(today.Year, today.Month, today.Day, 23, 0, 0);
+            var drawTmr = new DateTime(today.Year, today.Month, today.Day + 1, 23, 0, 0);
             // dueTime is when it first occurs, period is how long after each occurence
 
             _timer = drawToday - today > TimeSpan.Zero 
