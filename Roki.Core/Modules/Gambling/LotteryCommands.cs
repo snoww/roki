@@ -44,9 +44,48 @@ namespace Roki.Modules.Gambling
 
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
+            public async Task JoinLotteryMulti(int tickets = 2)
+            {
+                if (tickets < 2)
+                {
+                    await ctx.Channel.SendErrorAsync("Needs to buy at least 2 tickets.");
+                    return;
+                }
+                var user = ctx.User;
+                var removed = await _currency.ChangeAsync(ctx.User, $"Lottery Entry x{tickets}", -tickets, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}",
+                    ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id).ConfigureAwait(false);
+                if (!removed)
+                {
+                    await ctx.Channel.SendErrorAsync($"{ctx.User.Mention} you do not have enough currency to join the lottery.")
+                        .ConfigureAwait(false);
+                    return;
+                }
+                
+                using (var uow = _db.GetDbContext())
+                {
+                    var lotteryId = uow.Lottery.GetLotteryId();
+                    var numbers = new List<string>();
+                    for (int i = 0; i < tickets; i++)
+                    {
+                        var number = _service.GenerateLotteryNumber();
+                        uow.Lottery.AddLotteryEntry(user.Id, number, lotteryId);
+                        numbers.Add(string.Join("-", number));
+                    }
+                    var entries = uow.Lottery.GetLotteryEntries(user.Id, lotteryId);
+                    var embed = new EmbedBuilder().WithOkColor()
+                        .WithTitle($"Purchase Successful - You have {entries.Count} entries")
+                        .WithDescription($"{user.Mention} you've joined the lottery.\n Here's your lottery number: `{string.Join('\n', numbers)}`");
+
+                    await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                    await uow.SaveChangesAsync().ConfigureAwait(false);
+                }
+            }
+            
+            [RokiCommand, Description, Usage, Aliases]
+            [RequireContext(ContextType.Guild)]
             public async Task JoinLottery(int[] nums = null)
             {
-                if (nums != null && nums.Length != 6 && !_service.ValidNumbers(nums))
+                if (nums != null && nums.Length != 6 && !LotteryService.ValidNumbers(nums))
                 {
                     await ctx.Channel.SendErrorAsync("Invalid numbers: Please enter 6 numbers from 1 to 30, no repeats.");
                     return;
@@ -67,11 +106,11 @@ namespace Roki.Modules.Gambling
                     var lotteryId = uow.Lottery.GetLotteryId();
                     uow.Lottery.AddLotteryEntry(user.Id, numbers, lotteryId);
                     var entries = uow.Lottery.GetLotteryEntries(user.Id, lotteryId).Count;
-                    var embed = new EmbedBuilder().WithOkColor();
-                    embed.WithDescription(entries == 1
-                        ? $"{user.Mention} you've joined the lottery.\n Here's your lottery number: `{string.Join('-', numbers)}`\nYou have {entries} entry in the lottery."
-                        : $"{user.Mention} you've joined the lottery.\n Here's your lottery number: `{string.Join('-', numbers)}`\nYou have {entries} entries in the lottery.");
-
+                    var embed = new EmbedBuilder().WithOkColor()
+                        .WithDescription($"{user.Mention} you've joined the lottery.\n Here's your lottery number: `{string.Join('-', numbers)}`\n");
+                    embed.WithAuthor(entries == 1
+                        ? $"Purchase Successful - You have {entries} entry in the lottery."
+                        : $"Purchase Successful - You have {entries} entries in the lottery.");
                     await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                     await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
@@ -96,8 +135,6 @@ namespace Roki.Modules.Gambling
                     await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
-
-
         }
     }
 }
