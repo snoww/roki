@@ -21,6 +21,7 @@ namespace Roki.Modules.Gambling.Services
         private readonly Random _rng = new Random();
         private Timer _timer;
         private const string Stone = "<:stone:269130892100763649>";
+        private const ulong ChannelId = 222401767697154048;
 
 
         public LotteryService(DiscordSocketClient client, DbService db, ICurrencyService currency)
@@ -38,7 +39,7 @@ namespace Roki.Modules.Gambling.Services
 
         private async void LotteryEvent(object state)
         {
-            var channel = _client.GetChannel(123123) as IMessageChannel;
+            var channel = _client.GetChannel(ChannelId) as IMessageChannel;
 
             using (var uow = _db.GetDbContext())
             {
