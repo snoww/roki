@@ -27,6 +27,7 @@ namespace Roki.Modules.Gambling
             {
                 _currency = currency;
                 _db = db;
+                
             }
             
             [RokiCommand, Description, Usage, Aliases]
