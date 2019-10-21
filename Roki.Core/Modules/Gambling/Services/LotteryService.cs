@@ -160,6 +160,8 @@ namespace Roki.Modules.Gambling.Services
             var winners = new List<Tuple<ulong, int>>();
             foreach (var entry in entries)
             {
+                if (entry.UserId == 549644503351296040)
+                    continue;
                 var count = 0;
                 if (winning.Contains(entry.Num1))
                     count += 1;
