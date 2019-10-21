@@ -52,16 +52,17 @@ namespace Roki.Modules.Gambling.Services
                     lottery.Num4,
                     lottery.Num5
                 });
-
+                var winningNum = $"The winning number is: {lottery.Num1}-{lottery.Num2}-{lottery.Num3}-{lottery.Num4}-{lottery.Num5}\n";
                 if (winners.Count == 0)
                 {
-                    await channel.SendErrorAsync("No winners this draw").ConfigureAwait(false);
+                    await channel.SendErrorAsync(winningNum + "No winners this draw").ConfigureAwait(false);
                     await uow.Lottery.NewLottery(_client.CurrentUser.Id, GenerateLotteryNumber()).ConfigureAwait(false);
                     await uow.SaveChangesAsync().ConfigureAwait(false);
                     return;
                 }
                 var winStr = await GiveWinnings(winners).ConfigureAwait(false);
-                await channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription(winStr)).ConfigureAwait(false);
+                await channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription(winningNum + winStr)).ConfigureAwait(false);
+                await uow.Lottery.NewLottery(_client.CurrentUser.Id, GenerateLotteryNumber()).ConfigureAwait(false);
                 await uow.SaveChangesAsync().ConfigureAwait(false);
             }
         }
@@ -137,7 +138,7 @@ namespace Roki.Modules.Gambling.Services
             var numList = new List<int>();
             for (int i = 0; i < 6; i++)
             {
-                var num = _rng.Next(1, 26);
+                var num = _rng.Next(1, 31);
                 if (numList.Contains(num))
                 {
                     i--;
@@ -185,7 +186,7 @@ namespace Roki.Modules.Gambling.Services
             var list = numbers.ToList();
             var hs = new HashSet<int>();
             var valid = list.Any(t => !hs.Add(t));
-            return valid && hs.Max() <= 25 && hs.Min() >= 1;
+            return valid && hs.Max() <= 30 && hs.Min() >= 1;
         }
     }
 }

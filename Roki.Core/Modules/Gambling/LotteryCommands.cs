@@ -96,7 +96,7 @@ namespace Roki.Modules.Gambling
                     numbers = numList.Select(int.Parse).ToList();
                     if (numbers.Count != 5 && !LotteryService.ValidNumbers(numbers))
                     {
-                        await ctx.Channel.SendErrorAsync("Invalid numbers: Please enter 6 numbers from 1 to 25, no repeats.");
+                        await ctx.Channel.SendErrorAsync("Invalid numbers: Please enter 6 numbers from 1 to 30, no repeats.");
                         return;
                     }
                 }
