@@ -13,8 +13,8 @@ namespace Roki.Core.Services.Database.Repositories
         List<Lottery> GetLotteryEntries(ulong userId, string lotteryId, int page);
         int GetTotalEntries(ulong userId, string lotteryId);
         List<Lottery> GetAllLotteryEntries(string lotteryId);
-        void AddLotteryEntry(ulong userId, List<int> numbers, string lotteryId);
-        void NewLottery(ulong botId, List<int> numbers);
+        Task<bool> AddLotteryEntry(ulong userId, List<int> numbers, string lotteryId);
+        Task<bool> NewLottery(ulong botId, List<int> numbers);
         Lottery GetLottery(ulong botId);
         string GetLotteryId();
         DateTime GetLotteryDate(ulong botId);
@@ -41,21 +41,23 @@ namespace Roki.Core.Services.Database.Repositories
             return Set.Where(l => l.LotteryId == lotteryId).ToList();
         }
 
-        public async void AddLotteryEntry(ulong userId, List<int> numbers, string lotteryId)
+        public async Task<bool> AddLotteryEntry(ulong userId, List<int> numbers, string lotteryId)
         {
             await Context.Database.ExecuteSqlCommandAsync($@"
 INSERT INTO lottery(userId, num1, num2, num3, num4, num5, lotteryId, date)
 VALUES({userId}, {numbers[0]}, {numbers[1]}, {numbers[2]}, {numbers[3]}, {numbers[4]}, {lotteryId}, {DateTime.UtcNow})")
                 .ConfigureAwait(false);
+            return true;
         }
 
-        public async void NewLottery(ulong botId, List<int> numbers)
+        public async Task<bool> NewLottery(ulong botId, List<int> numbers)
         {
             var lotteryId = Guid.NewGuid().ToString();
             await Context.Database.ExecuteSqlCommandAsync($@"
 INSERT INTO lottery(userId, num1, num2, num3, num4, num5, lotteryId, date)
 VALUES({botId}, {numbers[0]}, {numbers[1]}, {numbers[2]}, {numbers[3]}, {numbers[4]}, {lotteryId}, {DateTime.UtcNow})")
                 .ConfigureAwait(false);
+            return true;
         }
 
         public Lottery GetLottery(ulong botId)
