@@ -1,7 +1,9 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Roki.Core.Services.Database.Models
 {
+    [Table("lottery")]
     public class Lottery : DbEntity
     {
         public ulong UserId { get; set; }
