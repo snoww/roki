@@ -54,13 +54,15 @@ namespace Roki.Modules.Gambling.Services
 
                 if (winners.Count == 0)
                 {
-                    await _channel.SendErrorAsync("No winners this draw").ConfigureAwait(false);
+//                    await _channel.SendErrorAsync("No winners this draw").ConfigureAwait(false);
+                    await _channel.SendMessageAsync("No winners this draw.").ConfigureAwait(false);
                     uow.Lottery.NewLottery(_client.CurrentUser.Id, GenerateLotteryNumber());
                     await uow.SaveChangesAsync().ConfigureAwait(false);
                     return;
                 }
                 var winStr = await GiveWinnings(winners).ConfigureAwait(false);
-                await _channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription(winStr)).ConfigureAwait(false);
+//                await _channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription(winStr)).ConfigureAwait(false);
+                await _channel.SendMessageAsync(winStr).ConfigureAwait(false);
                 await uow.SaveChangesAsync().ConfigureAwait(false);
             }
         }
