@@ -68,7 +68,7 @@ namespace Roki.Modules.Gambling
                     for (int i = 0; i < tickets; i++)
                     {
                         var number = _service.GenerateLotteryNumber();
-                        uow.Lottery.AddLotteryEntry(user.Id, number, lotteryId);
+                        await uow.Lottery.AddLotteryEntry(user.Id, number, lotteryId).ConfigureAwait(false);
                         if (i < 10)
                         {
                             numbers.Add(string.Join("-", number));
@@ -118,7 +118,7 @@ namespace Roki.Modules.Gambling
                 using (var uow = _db.GetDbContext())
                 {
                     var lotteryId = uow.Lottery.GetLotteryId();
-                    uow.Lottery.AddLotteryEntry(user.Id, numbers, lotteryId);
+                    await uow.Lottery.AddLotteryEntry(user.Id, numbers, lotteryId).ConfigureAwait(false);
                     var entries = uow.Lottery.GetTotalEntries(user.Id, lotteryId);
                     var embed = new EmbedBuilder().WithOkColor()
                         .WithDescription($"{user.Mention} Here's your lottery number: `{string.Join('-', numbers)}`\n");
