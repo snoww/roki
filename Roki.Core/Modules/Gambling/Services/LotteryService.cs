@@ -22,6 +22,7 @@ namespace Roki.Modules.Gambling.Services
         private Timer _timer;
         private const string Stone = "<:stone:269130892100763649>";
         private const ulong ChannelId = 222401767697154048;
+        private readonly DateTime _tmr = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day + 1, 14, 0, 0);
 
 
         public LotteryService(DiscordSocketClient client, DbService db, ICurrencyService currency)
@@ -35,7 +36,7 @@ namespace Roki.Modules.Gambling.Services
         private void LotteryTimer()
         {
             // dueTime is when it first occurs, period is how long after each occurence
-            _timer = new Timer(LotteryEvent, null, TimeSpan.FromMinutes(90), TimeSpan.FromMinutes(90));
+            _timer = new Timer(LotteryEvent, null, _tmr - DateTime.UtcNow, TimeSpan.FromDays(1));
         }
 
         private async void LotteryEvent(object state)
