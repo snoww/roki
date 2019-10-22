@@ -44,8 +44,8 @@ namespace Roki.Core.Services.Database.Repositories
         public async Task<bool> AddLotteryEntry(ulong userId, List<int> numbers, string lotteryId)
         {
             await Context.Database.ExecuteSqlCommandAsync($@"
-INSERT INTO lottery(userId, num1, num2, num3, num4, num5, lotteryId, date)
-VALUES({userId}, {numbers[0]}, {numbers[1]}, {numbers[2]}, {numbers[3]}, {numbers[4]}, {lotteryId}, {DateTime.UtcNow})")
+INSERT INTO lottery(userId, num1, num2, num3, num4, num5, num6, lotteryId, date)
+VALUES({userId}, {numbers[0]}, {numbers[1]}, {numbers[2]}, {numbers[3]}, {numbers[4]}, {numbers[5]}, {lotteryId}, {DateTime.UtcNow})")
                 .ConfigureAwait(false);
             return true;
         }
@@ -54,8 +54,8 @@ VALUES({userId}, {numbers[0]}, {numbers[1]}, {numbers[2]}, {numbers[3]}, {number
         {
             var lotteryId = Guid.NewGuid().ToString();
             await Context.Database.ExecuteSqlCommandAsync($@"
-INSERT INTO lottery(userId, num1, num2, num3, num4, num5, lotteryId, date)
-VALUES({botId}, {numbers[0]}, {numbers[1]}, {numbers[2]}, {numbers[3]}, {numbers[4]}, {lotteryId}, {DateTime.UtcNow})")
+INSERT INTO lottery(userId, num1, num2, num3, num4, num5, num6, lotteryId, date)
+VALUES({botId}, {numbers[0]}, {numbers[1]}, {numbers[2]}, {numbers[3]}, {numbers[4]}, {numbers[5]}, {lotteryId}, {DateTime.UtcNow})")
                 .ConfigureAwait(false);
             return true;
         }
