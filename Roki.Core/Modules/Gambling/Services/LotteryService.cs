@@ -142,7 +142,7 @@ namespace Roki.Modules.Gambling.Services
         public List<int> GenerateLotteryNumber()
         {
             var numList = new List<int>();
-            for (int i = 0; i < 7; i++)
+            for (int i = 0; i < 6; i++)
             {
                 var num = _rng.Next(1, 41);
                 if (numList.Contains(num))
