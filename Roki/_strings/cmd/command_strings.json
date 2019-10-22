@@ -470,5 +470,12 @@
       "{0}tickets",
       "{0}tickets 2"
     ]
+  },
+  "nextdraw": {
+    "Command": "nextdraw",
+    "Description": "Shows when the next lottery draw will be.",
+    "Usage": [
+      "{0}nextdraw"
+    ]
   }
 }

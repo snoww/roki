@@ -160,6 +160,28 @@ namespace Roki.Modules.Gambling
                     await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
+
+            [RokiCommand, Description, Usage, Aliases]
+            [RequireContext(ContextType.Guild)]
+            public async Task NextDraw()
+            {
+                var today = DateTime.UtcNow;
+                var drawToday = new DateTime(today.Year, today.Month, today.Day, 23, 0, 0);
+                var drawTmr = new DateTime(today.Year, today.Month, today.Day + 1, 23, 0, 0);
+
+                if (drawToday - today > TimeSpan.Zero)
+                {
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                            .WithTitle("Next Lottery Draw")
+                            .WithDescription($"Today at {drawToday.ToLocalTime():HH:mm:ss}"))
+                        .ConfigureAwait(false);
+                    return;
+                }
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                        .WithTitle("Next Lottery Draw")
+                        .WithDescription($"Tomorrow at {drawTmr.ToLocalTime():HH:mm:ss}"))
+                    .ConfigureAwait(false);
+            }
         }
     }
 }
