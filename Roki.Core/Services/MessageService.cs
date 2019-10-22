@@ -92,12 +92,19 @@ namespace Roki.Services
 
         private async Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
         {
-            if (cache.Value.Author.IsBot)
-                return;
+            
             using (var uow = _db.GetDbContext())
             {
+                if (!cache.HasValue)
+                {
+                    uow.DMessages.MessageDeleted(cache.Id);
+                    await uow.SaveChangesAsync().ConfigureAwait(false);
+                    return;
+                }
+                if (cache.Value.Author.IsBot)
+                    return;
                 uow.DMessages.MessageDeleted(cache.Value.Id);
-                
+
                 await uow.SaveChangesAsync().ConfigureAwait(false);
             }
             
@@ -108,10 +115,16 @@ namespace Roki.Services
         {
             foreach (var cache in caches)
             {
-                if (cache.Value.Author.IsBot)
-                    continue;
                 using (var uow = _db.GetDbContext())
                 {
+                    if (!cache.HasValue)
+                    {
+                        uow.DMessages.MessageDeleted(cache.Id);
+                        await uow.SaveChangesAsync().ConfigureAwait(false);
+                        continue;
+                    }
+                    if (cache.Value.Author.IsBot)
+                        return;
                     uow.DMessages.MessageDeleted(cache.Value.Id);
                 
                     await uow.SaveChangesAsync().ConfigureAwait(false);
