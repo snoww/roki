@@ -21,6 +21,9 @@ namespace Roki.Services
     public class CurrencyService : ICurrencyService
     {
         private readonly DbService _db;
+        
+        // TODO Replace with botId
+        private const string BotId = "549644503351296040";
 
         public CurrencyService(DbService db)
         {
@@ -45,6 +48,14 @@ namespace Roki.Services
             using (var uow = _db.GetDbContext())
             {
                 var success = await uow.DUsers.UpdateCurrencyAsync(user, amount).ConfigureAwait(false);
+                if (from == BotId) // Replace with botId
+                {
+                    await uow.DUsers.UpdateBotCurrencyAsync(ulong.Parse(from), -amount);
+                }
+                else if (to == BotId) // Replace with botId
+                {
+                    await uow.DUsers.UpdateBotCurrencyAsync(ulong.Parse(to), -amount);
+                }
                 if (success)
                 {
                     var _ = CreateTransaction(reason, amount, from, to, guildId, channelId, messageId);

@@ -81,6 +81,16 @@ namespace Roki.Core.Services.Database
             });
 
             #endregion
+
+            #region Lottery
+
+            modelBuilder.Entity<Lottery>(entity =>
+            {
+                entity.HasIndex(l => l.LotteryId);
+                entity.HasIndex(l => l.Date);
+            });
+
+            #endregion
         }
     }
 }
