@@ -97,7 +97,7 @@ namespace Roki.Modules.Gambling
                     numbers = numList.Select(int.Parse).ToList();
                     if (numbers.Count != 5 || !LotteryService.ValidNumbers(numbers))
                     {
-                        await ctx.Channel.SendErrorAsync("Invalid numbers: Please enter 6 numbers from 1 to 30, no repeats.");
+                        await ctx.Channel.SendErrorAsync("Invalid numbers: Please enter 6 numbers from 1 to 40, no repeats.");
                         return;
                     }
                 }
@@ -140,17 +140,17 @@ namespace Roki.Modules.Gambling
                 using (var uow = _db.GetDbContext())
                 {
                     var lotteryId = uow.Lottery.GetLotteryId();
-                    var entries = _service.EntriesToListString(uow.Lottery.GetLotteryEntries(ctx.User.Id, lotteryId, page - 1));
-                    if (entries.Count == 0)
-                    {
-                        await ctx.Channel.SendErrorAsync("You have no tickets for the current lottery.").ConfigureAwait(false);
-                    }
                     if (page == 0)
                     {
                         await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                                 .WithDescription($"{ctx.User.Username} has {uow.Lottery.GetTotalEntries(ctx.User.Id, lotteryId)} tickets"))
                             .ConfigureAwait(false);
                         return;
+                    }
+                    var entries = _service.EntriesToListString(uow.Lottery.GetLotteryEntries(ctx.User.Id, lotteryId, page - 1));
+                    if (entries.Count == 0)
+                    {
+                        await ctx.Channel.SendErrorAsync("You have no tickets for the current lottery.").ConfigureAwait(false);
                     }
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithTitle($"{ctx.User.Username}'s Lottery Tickets - Total {uow.Lottery.GetTotalEntries(ctx.User.Id, lotteryId)}")
