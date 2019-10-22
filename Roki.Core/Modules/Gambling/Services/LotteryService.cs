@@ -182,7 +182,7 @@ namespace Roki.Modules.Gambling.Services
                     count += 1;
                 if (winning.Contains(entry.Num6))
                     count += 1;
-                if (count > 2)
+                if (count > 3)
                     winners.Add(new Tuple<ulong, int>(entry.UserId, count));
             }
 
