@@ -78,7 +78,7 @@ namespace Roki.Modules.Gambling
                     var entries = uow.Lottery.GetTotalEntries(user.Id, lotteryId);
                     var embed = new EmbedBuilder().WithOkColor()
                         .WithTitle($"Purchase Successful - You have {entries} total entries")
-                        .WithDescription($"{user.Mention} Here are your lottery numbers: `{string.Join('\n', numbers)}`")
+                        .WithDescription($"{user.Mention} Here are your lottery numbers:\n`{string.Join('\n', numbers)}`")
                         .WithFooter("Note: Only shows first 10 tickets.");
 
                     await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
@@ -122,7 +122,7 @@ namespace Roki.Modules.Gambling
                     await uow.Lottery.AddLotteryEntry(user.Id, numbers, lotteryId).ConfigureAwait(false);
                     var entries = uow.Lottery.GetTotalEntries(user.Id, lotteryId);
                     var embed = new EmbedBuilder().WithOkColor()
-                        .WithDescription($"{user.Mention} Here's your lottery number: `{string.Join('-', numbers)}`\n");
+                        .WithDescription($"{user.Mention} Here's your lottery number:\n`{string.Join('-', numbers)}`\n");
                     embed.WithAuthor(entries == 1
                         ? $"Purchase Successful - You have {entries} entry in the lottery."
                         : $"Purchase Successful - You have {entries} total entries in the lottery.");
