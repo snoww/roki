@@ -12,7 +12,7 @@ namespace Roki.Core.Services.Impl
 {
     public class StatsService : IStatsService
     {
-        public const string BotVersion = "0.2.1";
+        public const string BotVersion = "0.5.0";
         private readonly DiscordSocketClient _client;
         private readonly IRokiConfig _config;
         private readonly Logger _log;
