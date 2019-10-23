@@ -18,25 +18,19 @@ namespace Roki.Modules.Currency
         [Group]
         public class StoreCommands : RokiSubmodule<StoreService>
         {
-            private readonly ICurrencyService _currency;
-            private readonly DbService _db;
+//            private readonly ICurrencyService _currency;
             private const string Stone = "<:stone:269130892100763649>";
 
-            private StoreCommands(ICurrencyService currency, DbService db)
-            {
-                _currency = currency;
-                _db = db;
-            }
+//            private StoreCommands(ICurrencyService currency, DbService db)
+//            {
+//                _currency = currency;
+//            }
             
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
             public async Task Store()
             {
-                List<Store> cat;
-                using (var uow = _db.GetDbContext())
-                {
-                    cat = uow.Store.GetStoreCatalog();
-                }
+                var cat = _service.GetStoreCatalog();
 
                 const int itemsPerPage = 10;
                 EmbedBuilder Catalog(int page)
@@ -49,7 +43,7 @@ namespace Roki.Modules.Currency
                         .Select(c =>
                         {
                             var desc = $"{Format.Bold(c.ItemName)} - {(c.Quantity > 0 ? $"{c.Quantity} Remaining" : "Sold Out")} - {c.Cost} {Stone}";
-                            return $"`{number++}.` {desc}\n\t{c.Description.TrimTo(100)}";
+                            return $"`{number++}.` {desc}\n\t{c.Description.TrimTo(120)}";
                         }));
                     return new EmbedBuilder().WithOkColor()
                         .WithTitle("Stone Shop")
@@ -59,6 +53,27 @@ namespace Roki.Modules.Currency
 
                 await ctx.SendPaginatedConfirmAsync(0, Catalog, cat.Count, 9).ConfigureAwait(false);
             }
+        }
+
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
+        public async Task Sell()
+        {
+            
+        }
+        
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
+        public async Task Buy()
+        {
+            
+        }
+        
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
+        public async Task Modify()
+        {
+            
         }
     }
 }

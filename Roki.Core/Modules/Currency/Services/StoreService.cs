@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using Discord.WebSocket;
 using Roki.Core.Services;
+using Roki.Core.Services.Database.Models;
 using Roki.Services;
 
 namespace Roki.Modules.Currency.Services
@@ -15,6 +17,14 @@ namespace Roki.Modules.Currency.Services
             _client = client;
             _currency = currency;
             _db = db;
+        }
+
+        public List<Store> GetStoreCatalog()
+        {
+            using (var uow = _db.GetDbContext())
+            {
+                return uow.Store.GetStoreCatalog();
+            }
         }
     }
 }
