@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
 using Roki.Core.Services.Database.Models;
@@ -18,13 +19,13 @@ namespace Roki.Modules.Currency
         [Group]
         public class StoreCommands : RokiSubmodule<StoreService>
         {
-//            private readonly ICurrencyService _currency;
+            private readonly DiscordSocketClient _client;
             private const string Stone = "<:stone:269130892100763649>";
 
-//            private StoreCommands(ICurrencyService currency, DbService db)
-//            {
-//                _currency = currency;
-//            }
+            private StoreCommands(DiscordSocketClient client)
+            {
+                _client = client;
+            }
             
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
@@ -42,7 +43,7 @@ namespace Roki.Modules.Currency
                         .Take(itemsPerPage)
                         .Select(c =>
                         {
-                            var desc = $"{Format.Bold(c.ItemName)} - {(c.Quantity > 0 ? $"{c.Quantity} Remaining" : "Sold Out")} - {c.Cost} {Stone}";
+                            var desc = $"{Format.Bold(c.ItemName)} | Sold By: {_client.GetUser(c.UserId).Username} | {(c.Quantity > 0 ? $"{c.Quantity} Remaining" : "Sold Out")} | {c.Cost} {Stone}";
                             return $"`{number++}.` {desc}\n\t{c.Description.TrimTo(120)}";
                         }));
                     return new EmbedBuilder().WithOkColor()
