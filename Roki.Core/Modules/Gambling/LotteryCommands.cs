@@ -173,13 +173,13 @@ namespace Roki.Modules.Gambling
                 {
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithTitle("Next Lottery Draw")
-                            .WithDescription($"Today at {drawToday.ToLocalTime():HH:mm:ss}"))
+                            .WithDescription($"Today at {drawToday:HH:mm}"))
                         .ConfigureAwait(false);
                     return;
                 }
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle("Next Lottery Draw")
-                        .WithDescription($"Tomorrow at {drawTmr.ToLocalTime():HH:mm:ss}"))
+                        .WithDescription($"Tomorrow at {drawTmr.ToLocalTime():HH:mm}"))
                     .ConfigureAwait(false);
             }
         }
