@@ -39,10 +39,7 @@ namespace Roki.Modules.Games
             private static readonly Emote One = Emote.Parse("<:1_:633332839454343199>");
             private static readonly Emote Five = Emote.Parse("<:5_:633332839588298756>");
             private static readonly Emote Ten = Emote.Parse("<:10:633332839391428609>");
-            private static readonly Emote Twenty = Emote.Parse("<:20:633332839584366602>");
-            private static readonly Emote Fifty = Emote.Parse("<:50:633332839709933591>");
             private static readonly Emote Hundred = Emote.Parse("<:100:633332839605338162>");
-            private static readonly Emote TwoHundredFifty = Emote.Parse("<:250:633332839601143848>");
             private static readonly Emote FiveHundred = Emote.Parse("<:500:633332839806664704>");
             private static readonly Emote TimesTwo = Emote.Parse("x2placeholder");
             private static readonly Emote TimesFive = Emote.Parse("x5placeholder");
@@ -161,7 +158,6 @@ namespace Roki.Modules.Games
                     return;
                 }
 
-//                var joinedPlayers = new Dictionary<IUser, PlayerBet>();
                 var joinedReactions = new Dictionary<IUser, PlayerBet>();
                 var timeout = DateTime.UtcNow + TimeSpan.FromSeconds(30);
                 _client.ReactionAdded += (cachedMessage, channel, reaction) =>
