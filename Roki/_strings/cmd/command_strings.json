@@ -477,5 +477,12 @@
     "Usage": [
       "{0}nextdraw"
     ]
+  },
+  "store": {
+    "Command": "store",
+    "Description": "Shows the Stone store. 9 items per page.",
+    "Usage": [
+      "{0}store"
+    ]
   }
 }
