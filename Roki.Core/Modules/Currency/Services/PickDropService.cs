@@ -60,20 +60,18 @@ namespace Roki.Modules.Currency.Services
                         : $"<:stone:269130892100763649> {drop} random stones appeared! Type `{prefix}pick` to pick them up.";
                     // TODO add images to send with drop
                     var curMessage = await channel.SendMessageAsync(toSend).ConfigureAwait(false);
-                    using (var uow = _db.GetDbContext())
+                    using var uow = _db.GetDbContext();
+                    uow.Transaction.Add(new CurrencyTransaction
                     {
-                        uow.Transaction.Add(new CurrencyTransaction
-                        {
-                            Amount = drop,
-                            Reason = "GCA",
-                            From = "Server",
-                            To = "-",
-                            GuildId = channel.GuildId,
-                            ChannelId = channel.Id,
-                            MessageId = curMessage.Id
-                        });
-                        await uow.SaveChangesAsync().ConfigureAwait(false);
-                    }
+                        Amount = drop,
+                        Reason = "GCA",
+                        From = "Server",
+                        To = "-",
+                        GuildId = channel.GuildId,
+                        ChannelId = channel.Id,
+                        MessageId = curMessage.Id
+                    });
+                    await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
         }
@@ -118,32 +116,30 @@ namespace Roki.Modules.Currency.Services
 
         public async Task<bool> DropAsync(ICommandContext ctx, IUser user, long amount)
         {
-            using (var uow = _db.GetDbContext())
+            using var uow = _db.GetDbContext();
+            var dUser = uow.DUsers.GetOrCreate(user);
+            if (dUser.Currency < amount)
+                return false;
+
+            var updated = await uow.DUsers.UpdateCurrencyAsync(user, -amount).ConfigureAwait(false);
+
+            if (!updated) return false;
+                
+            var msg = await ctx.Channel.SendMessageAsync($"{user.Username} dropped {amount} <:stone:269130892100763649>\nType `.pick` to pick it up.");
+
+            uow.Transaction.Add(new CurrencyTransaction
             {
-                var dUser = uow.DUsers.GetOrCreate(user);
-                if (dUser.Currency < amount)
-                    return false;
-
-                var updated = await uow.DUsers.UpdateCurrencyAsync(user, -amount).ConfigureAwait(false);
-
-                if (!updated) return false;
+                Amount = amount,
+                Reason = "UserDrop",
+                From = dUser.UserId.ToString(),
+                To = "-",
+                GuildId = ctx.Guild.Id,
+                ChannelId = msg.Channel.Id,
+                MessageId = msg.Id
+            });
                 
-                var msg = await ctx.Channel.SendMessageAsync($"{user.Username} dropped {amount} <:stone:269130892100763649>\nType `.pick` to pick it up.");
-
-                uow.Transaction.Add(new CurrencyTransaction
-                {
-                    Amount = amount,
-                    Reason = "UserDrop",
-                    From = dUser.UserId.ToString(),
-                    To = "-",
-                    GuildId = ctx.Guild.Id,
-                    ChannelId = msg.Channel.Id,
-                    MessageId = msg.Id
-                });
-                
-                await uow.SaveChangesAsync().ConfigureAwait(false);
-                return true;
-            }
+            await uow.SaveChangesAsync().ConfigureAwait(false);
+            return true;
         }
     }
 }
