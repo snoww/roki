@@ -94,7 +94,7 @@ namespace Roki.Core.Services.Database
 
             #region Store
 
-            modelBuilder.Entity<Store>(entity =>
+            modelBuilder.Entity<Listing>(entity =>
             {
                 entity.HasIndex(s => s.ItemName);
             });
