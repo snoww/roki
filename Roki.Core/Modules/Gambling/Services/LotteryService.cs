@@ -46,31 +46,29 @@ namespace Roki.Modules.Gambling.Services
         {
             var channel = _client.GetChannel(ChannelId) as IMessageChannel;
 
-            using (var uow = _db.GetDbContext())
+            using var uow = _db.GetDbContext();
+            var lottery = uow.Lottery.GetLottery(_client.CurrentUser.Id);
+            var winners = CheckWinner(uow.Lottery.GetAllLotteryEntries(lottery.LotteryId), new List<int>
             {
-                var lottery = uow.Lottery.GetLottery(_client.CurrentUser.Id);
-                var winners = CheckWinner(uow.Lottery.GetAllLotteryEntries(lottery.LotteryId), new List<int>
-                {
-                    lottery.Num1,
-                    lottery.Num2,
-                    lottery.Num3,
-                    lottery.Num4,
-                    lottery.Num5,
-                    lottery.Num6
-                });
-                var winningNum = $"The winning numbers are: {lottery.Num1}-{lottery.Num2}-{lottery.Num3}-{lottery.Num4}-{lottery.Num5}-{lottery.Num6}\n";
-                if (winners.Count == 0)
-                {
-                    await channel.SendErrorAsync(winningNum + "No winners this draw").ConfigureAwait(false);
-                    await uow.Lottery.NewLottery(_client.CurrentUser.Id, GenerateLotteryNumber()).ConfigureAwait(false);
-                    await uow.SaveChangesAsync().ConfigureAwait(false);
-                    return;
-                }
-                var winStr = await GiveWinnings(winners).ConfigureAwait(false);
-                await channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription(winningNum + winStr)).ConfigureAwait(false);
+                lottery.Num1,
+                lottery.Num2,
+                lottery.Num3,
+                lottery.Num4,
+                lottery.Num5,
+                lottery.Num6
+            });
+            var winningNum = $"The winning numbers are: {lottery.Num1}-{lottery.Num2}-{lottery.Num3}-{lottery.Num4}-{lottery.Num5}-{lottery.Num6}\n";
+            if (winners.Count == 0)
+            {
+                await channel.SendErrorAsync(winningNum + "No winners this draw").ConfigureAwait(false);
                 await uow.Lottery.NewLottery(_client.CurrentUser.Id, GenerateLotteryNumber()).ConfigureAwait(false);
                 await uow.SaveChangesAsync().ConfigureAwait(false);
+                return;
             }
+            var winStr = await GiveWinnings(winners).ConfigureAwait(false);
+            await channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription(winningNum + winStr)).ConfigureAwait(false);
+            await uow.Lottery.NewLottery(_client.CurrentUser.Id, GenerateLotteryNumber()).ConfigureAwait(false);
+            await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
         private async Task<string> GiveWinnings(IEnumerable<Tuple<ulong, int>> winners)
@@ -96,46 +94,43 @@ namespace Roki.Modules.Gambling.Services
             }
 
             var toReturn = "";
-            using (var uow = _db.GetDbContext())
+            using var uow = _db.GetDbContext();
+            if (six.Count > 0)
             {
-                if (six.Count > 0)
+                var amount = (long) (_currency.GetCurrency(_client.CurrentUser.Id) * 0.9) / six.Count;
+                toReturn += "JACKPOT WINNERS\n";
+                foreach (var winner in six)
                 {
-                    var amount = (long) (_currency.GetCurrency(_client.CurrentUser.Id) * 0.9) / six.Count;
-                    toReturn += "JACKPOT WINNERS\n";
-                    foreach (var winner in six)
-                    {
-                        await uow.DUsers.LotteryAwardAsync(winner, amount).ConfigureAwait(false);
-                        await uow.DUsers.UpdateBotCurrencyAsync(_client.CurrentUser.Id, -amount);
-                        toReturn += $"<@{winner}> WON {amount} {Stone}\n";
-                    }
-                    
+                    await uow.DUsers.LotteryAwardAsync(winner, amount).ConfigureAwait(false);
+                    await uow.DUsers.UpdateBotCurrencyAsync(_client.CurrentUser.Id, -amount);
+                    toReturn += $"<@{winner}> WON {amount} {Stone}\n";
                 }
-                if (five.Count > 0)
+                
+            }
+            if (five.Count > 0)
+            {
+                toReturn += "5/6 Winners\n";
+                var amount = (long) (_currency.GetCurrency(_client.CurrentUser.Id) * 0.045) / five.Count;
+                foreach (var winner in five)
                 {
-                    toReturn += "5/6 Winners\n";
-                    var amount = (long) (_currency.GetCurrency(_client.CurrentUser.Id) * 0.045) / five.Count;
-                    foreach (var winner in five)
-                    {
-                        await uow.DUsers.LotteryAwardAsync(winner, amount).ConfigureAwait(false);
-                        await uow.DUsers.UpdateBotCurrencyAsync(_client.CurrentUser.Id, -amount);
-                        toReturn += $"<@{winner}> won {amount} {Stone}\n";
-                    }
+                    await uow.DUsers.LotteryAwardAsync(winner, amount).ConfigureAwait(false);
+                    await uow.DUsers.UpdateBotCurrencyAsync(_client.CurrentUser.Id, -amount);
+                    toReturn += $"<@{winner}> won {amount} {Stone}\n";
                 }
-                if (four.Count > 0)
+            }
+            if (four.Count > 0)
+            {
+                toReturn += "4/6 Winners\n";
+                var amount = (long) (_currency.GetCurrency(_client.CurrentUser.Id) * 0.055) / four.Count;
+                foreach (var winner in four)
                 {
-                    toReturn += "4/6 Winners\n";
-                    var amount = (long) (_currency.GetCurrency(_client.CurrentUser.Id) * 0.055) / four.Count;
-                    foreach (var winner in four)
-                    {
-                        await uow.DUsers.LotteryAwardAsync(winner, amount).ConfigureAwait(false);
-                        await uow.DUsers.UpdateBotCurrencyAsync(_client.CurrentUser.Id, -amount);
-                        toReturn += $"<@{winner}> won {amount} {Stone}\n";
-                    }
+                    await uow.DUsers.LotteryAwardAsync(winner, amount).ConfigureAwait(false);
+                    await uow.DUsers.UpdateBotCurrencyAsync(_client.CurrentUser.Id, -amount);
+                    toReturn += $"<@{winner}> won {amount} {Stone}\n";
                 }
-
-                await uow.SaveChangesAsync().ConfigureAwait(false);
             }
 
+            await uow.SaveChangesAsync().ConfigureAwait(false);
             return toReturn;
         }
 

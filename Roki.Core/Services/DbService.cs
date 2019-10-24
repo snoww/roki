@@ -20,11 +20,9 @@ namespace Roki.Core.Services
 
         public void Setup()
         {
-            using (var context = new RokiContext(_options))
-            {
-                context.Database.EnsureCreated();
-                context.SaveChanges();
-            }
+            using var context = new RokiContext(_options);
+            context.Database.EnsureCreated();
+            context.SaveChanges();
         }
 
         private RokiContext GetDbContextInternal()

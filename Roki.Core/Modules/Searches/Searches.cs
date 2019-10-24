@@ -156,27 +156,25 @@ namespace Roki.Modules.Searches
                 return;
 
             await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
-            using (var http = _httpFactory.CreateClient())
+            using var http = _httpFactory.CreateClient();
+            var response = await http.GetStringAsync($"http://api.urbandictionary.com/v0/define?term={Uri.EscapeUriString(query)}")
+                .ConfigureAwait(false);
+            try
             {
-                var response = await http.GetStringAsync($"http://api.urbandictionary.com/v0/define?term={Uri.EscapeUriString(query)}")
-                    .ConfigureAwait(false);
-                try
-                {
-                    var items = JsonConvert.DeserializeObject<UrbanResponse>(response).List;
-                    if (items.Any())
-                        await ctx.SendPaginatedConfirmAsync(0, p =>
-                        {
-                            var item = items[p];
-                            return new EmbedBuilder().WithOkColor()
-                                .WithUrl(item.Permalink)
-                                .WithAuthor(item.Word, "https://i.imgur.com/p1NqHdf.jpg")
-                                .WithDescription(item.Definition);
-                        }, items.Length, 1).ConfigureAwait(false);
-                }
-                catch (Exception e)
-                {
-                    _log.Warn(e.Message);
-                }
+                var items = JsonConvert.DeserializeObject<UrbanResponse>(response).List;
+                if (items.Any())
+                    await ctx.SendPaginatedConfirmAsync(0, p =>
+                    {
+                        var item = items[p];
+                        return new EmbedBuilder().WithOkColor()
+                            .WithUrl(item.Permalink)
+                            .WithAuthor(item.Word, "https://i.imgur.com/p1NqHdf.jpg")
+                            .WithDescription(item.Definition);
+                    }, items.Length, 1).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                _log.Warn(e.Message);
             }
         }
 

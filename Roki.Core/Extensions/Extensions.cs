@@ -233,13 +233,11 @@ namespace Roki.Extensions
             format = GifFormat.Instance;
             for (int j = 0; j < frames; j++)
             {
-                using (var imgFrame = new Image<Rgba32>(width, height))
-                {
-                    DrawFrame(imgs, imgFrame, j);
+                using var imgFrame = new Image<Rgba32>(width, height);
+                DrawFrame(imgs, imgFrame, j);
 
-                    var frameToAdd = imgFrame.Frames.RootFrame;
-                    canvas.Frames.AddFrame(frameToAdd);
-                }
+                var frameToAdd = imgFrame.Frames.RootFrame;
+                canvas.Frames.AddFrame(frameToAdd);
             }
             canvas.Frames.RemoveFrame(0);
             return canvas;

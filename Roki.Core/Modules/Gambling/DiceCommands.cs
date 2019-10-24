@@ -117,32 +117,30 @@ namespace Roki.Modules.Gambling
                         break;
                 }
 
-                using (var bitmap = die.Merge(out var format))
-                using (var ms = bitmap.ToStream(format))
+                using var bitmap = die.Merge(out var format);
+                await using var ms = bitmap.ToStream(format);
+                foreach (var dice in die)
                 {
-                    foreach (var dice in die)
-                    {
-                        dice.Dispose();
-                    }
-
-                    var embed = new EmbedBuilder()
-                        .WithImageUrl($"attachment://dice.{format.FileExtensions.First()}");
-
-                    if (won > 0)
-                    {
-                        embed.WithOkColor()
-                            .WithDescription($"{ctx.User.Mention} You rolled a total of {total}\nCongratulations! You've won {won} stones");
-                        await _currency.ChangeAsync(ctx.User, "BetDie Payout", won, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id,
-                            ctx.Channel.Id, ctx.Message.Id);
-                    }
-                    else
-                    {
-                        embed.WithErrorColor()
-                            .WithDescription($"{ctx.User.Mention} You rolled a total of {total}\nBetter luck next time!");
-                    }
-
-                    await ctx.Channel.SendFileAsync(ms, $"dice.{format.FileExtensions.First()}", embed: embed.Build()).ConfigureAwait(false);
+                    dice.Dispose();
                 }
+
+                var embed = new EmbedBuilder()
+                    .WithImageUrl($"attachment://dice.{format.FileExtensions.First()}");
+
+                if (won > 0)
+                {
+                    embed.WithOkColor()
+                        .WithDescription($"{ctx.User.Mention} You rolled a total of {total}\nCongratulations! You've won {won} stones");
+                    await _currency.ChangeAsync(ctx.User, "BetDie Payout", won, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id,
+                        ctx.Channel.Id, ctx.Message.Id);
+                }
+                else
+                {
+                    embed.WithErrorColor()
+                        .WithDescription($"{ctx.User.Mention} You rolled a total of {total}\nBetter luck next time!");
+                }
+
+                await ctx.Channel.SendFileAsync(ms, $"dice.{format.FileExtensions.First()}", embed: embed.Build()).ConfigureAwait(false);
             }
 
             private Image<Rgba32> GetDice(int num)
@@ -151,11 +149,9 @@ namespace Roki.Modules.Gambling
                     throw new ArgumentOutOfRangeException(nameof(num));
 
                 var image = Image.Load(path + $"{num}.png");
-                using (var ms = new MemoryStream())
-                {
-                    image.Save(ms, PngFormat.Instance);
-                    return Image.Load(ms.ToArray());
-                }
+                using var ms = new MemoryStream();
+                image.Save(ms, PngFormat.Instance);
+                return Image.Load(ms.ToArray());
             }
         }
     }

@@ -38,10 +38,8 @@ namespace Roki.Modules.Searches.Services
         {
             try
             {
-                using (var client = new WebClient())
-                {
-                    await client.DownloadFileTaskAsync(new Uri($"https://wttr.in/{query}_0Fmnpqt.png"), "./temp/weather.png");
-                }
+                using var client = new WebClient();
+                await client.DownloadFileTaskAsync(new Uri($"https://wttr.in/{query}_0Fmnpqt.png"), "./temp/weather.png");
             }
             catch (Exception e)
             {
@@ -58,33 +56,31 @@ namespace Roki.Modules.Searches.Services
         {
             try
             {
-                using (var http = _httpFactory.CreateClient())
+                using var http = _httpFactory.CreateClient();
+                var result = await http.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={arg}&key={_config.GoogleApi}")
+                    .ConfigureAwait(false);
+                var obj = JsonConvert.DeserializeObject<GeolocationResult>(result);
+                if (obj?.Results == null || obj.Results.Length == 0)
                 {
-                    var result = await http.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={arg}&key={_config.GoogleApi}")
-                        .ConfigureAwait(false);
-                    var obj = JsonConvert.DeserializeObject<GeolocationResult>(result);
-                    if (obj?.Results == null || obj.Results.Length == 0)
-                    {
-                        _log.Warn("Geocode lookup failed for {0}", arg);
-                        return null;
-                    }
-
-                    var currentSeconds = DateTime.UtcNow.UnixTimestamp();
-                    var timeResult = await http
-                        .GetStringAsync(
-                            $"https://maps.googleapis.com/maps/api/timezone/json?location={obj.Results[0].Geometry.Location.Lat},{obj.Results[0].Geometry.Location.Lng}&timestamp={currentSeconds}&key={_config.GoogleApi}")
-                        .ConfigureAwait(false);
-                    var timeObj = JsonConvert.DeserializeObject<TimeZoneResult>(timeResult);
-                    var time = DateTime.UtcNow.AddSeconds(timeObj.DstOffset + timeObj.RawOffset);
-
-                    var toReturn = new TimeData
-                    {
-                        Address = obj.Results[0].FormattedAddress,
-                        Time = time,
-                        TimeZoneName = timeObj.TimeZoneName
-                    };
-                    return toReturn;
+                    _log.Warn("Geocode lookup failed for {0}", arg);
+                    return null;
                 }
+
+                var currentSeconds = DateTime.UtcNow.UnixTimestamp();
+                var timeResult = await http
+                    .GetStringAsync(
+                        $"https://maps.googleapis.com/maps/api/timezone/json?location={obj.Results[0].Geometry.Location.Lat},{obj.Results[0].Geometry.Location.Lng}&timestamp={currentSeconds}&key={_config.GoogleApi}")
+                    .ConfigureAwait(false);
+                var timeObj = JsonConvert.DeserializeObject<TimeZoneResult>(timeResult);
+                var time = DateTime.UtcNow.AddSeconds(timeObj.DstOffset + timeObj.RawOffset);
+
+                var toReturn = new TimeData
+                {
+                    Address = obj.Results[0].FormattedAddress,
+                    Time = time,
+                    TimeZoneName = timeObj.TimeZoneName
+                };
+                return toReturn;
             }
             catch (Exception e)
             {
@@ -101,57 +97,45 @@ namespace Roki.Modules.Searches.Services
 
         private async Task<OmdbMovie> GetMovieDataFactory(string name)
         {
-            using (var http = _httpFactory.CreateClient())
-            {
-                var result = await http.GetStringAsync($"http://www.omdbapi.com/?t={name.Trim().Replace(' ', '+')}&apikey={_config.OmdbApi}&y=&plot=full&r=json").ConfigureAwait(false);
-                var movie = JsonConvert.DeserializeObject<OmdbMovie>(result);
-                return movie?.Title == null ? null : movie;
-            }
+            using var http = _httpFactory.CreateClient();
+            var result = await http.GetStringAsync($"http://www.omdbapi.com/?t={name.Trim().Replace(' ', '+')}&apikey={_config.OmdbApi}&y=&plot=full&r=json").ConfigureAwait(false);
+            var movie = JsonConvert.DeserializeObject<OmdbMovie>(result);
+            return movie?.Title == null ? null : movie;
         }
 
         public async Task<string> GetRandomCatAsync()
         {
-            using (var http = _httpFactory.CreateClient())
-            {
-                var result = await http.GetStringAsync("https://aws.random.cat/meow").ConfigureAwait(false);
-                var cat = JsonConvert.DeserializeAnonymousType(result, new {File = ""}).File;
+            using var http = _httpFactory.CreateClient();
+            var result = await http.GetStringAsync("https://aws.random.cat/meow").ConfigureAwait(false);
+            var cat = JsonConvert.DeserializeAnonymousType(result, new {File = ""}).File;
 
-                using (var client = new WebClient())
-                {
-                    var uri = new Uri(cat);
-                    var fileName = "./temp/" + Path.GetFileName(uri.LocalPath);
-                    await client.DownloadFileTaskAsync(uri, fileName).ConfigureAwait(false);
-                    return fileName;
-                }
-            }
+            using var client = new WebClient();
+            var uri = new Uri(cat);
+            var fileName = "./temp/" + Path.GetFileName(uri.LocalPath);
+            await client.DownloadFileTaskAsync(uri, fileName).ConfigureAwait(false);
+            return fileName;
         }
         
         public async Task<string> GetRandomDogAsync()
         {
-            using (var http = _httpFactory.CreateClient())
-            {
-                var result = await http.GetStringAsync("https://random.dog/woof.json").ConfigureAwait(false);
-                var dog = JsonConvert.DeserializeAnonymousType(result, new {Url = ""}).Url;
+            using var http = _httpFactory.CreateClient();
+            var result = await http.GetStringAsync("https://random.dog/woof.json").ConfigureAwait(false);
+            var dog = JsonConvert.DeserializeAnonymousType(result, new {Url = ""}).Url;
 
-                using (var client = new WebClient())
-                {
-                    var uri = new Uri(dog);
-                    var fileName = "./temp/" + Path.GetFileName(uri.LocalPath);
-                    await client.DownloadFileTaskAsync(uri, fileName).ConfigureAwait(false);
-                    return fileName;
-                }
-            }
+            using var client = new WebClient();
+            var uri = new Uri(dog);
+            var fileName = "./temp/" + Path.GetFileName(uri.LocalPath);
+            await client.DownloadFileTaskAsync(uri, fileName).ConfigureAwait(false);
+            return fileName;
         }
 
         public async Task<string> GetCatFactAsync()
         {
-            using (var http = _httpFactory.CreateClient())
-            {
-                var result = await http.GetStringAsync("https://catfact.ninja/fact").ConfigureAwait(false);
-                var fact = JsonConvert.DeserializeAnonymousType(result, new {Fact = ""}).Fact;
+            using var http = _httpFactory.CreateClient();
+            var result = await http.GetStringAsync("https://catfact.ninja/fact").ConfigureAwait(false);
+            var fact = JsonConvert.DeserializeAnonymousType(result, new {Fact = ""}).Fact;
 
-                return fact;
-            }
+            return fact;
         }
     }
 }
