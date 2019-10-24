@@ -72,6 +72,12 @@ namespace Roki.Modules.Currency
                     return;
                 }
 
+                if (listing.Quantity <= 0)
+                {
+                    await ctx.Channel.SendErrorAsync("Sorry. This item is out of stock, please come back later.").ConfigureAwait(false);
+                    return;
+                }
+
                 var buyer = ctx.User;
                 var seller = _client.GetUser(listing.SellerId);
                 var removed = await _currency.TransferAsync(buyer, seller, $"Store Purchase - ID {listing.Id}", listing.Cost, 
@@ -81,8 +87,23 @@ namespace Roki.Modules.Currency
                     await ctx.Channel.SendErrorAsync("You do not have enough to purchase this item.").ConfigureAwait(false);
                     return;
                 }
-                
-                
+
+                Enum.TryParse<ListingCategory>(listing.Category, out var category); 
+                Enum.TryParse<ListingType>(listing.Type, out var type); 
+                switch (category)
+                {
+                    case ListingCategory.Role:
+                        var guildUser = buyer as IGuildUser;
+                        if (type == ListingType.OneTime)
+                        {
+                        }
+                        break;
+                    case ListingCategory.Digital:
+                    case ListingCategory.Virtual:
+                        break;
+                    case ListingCategory.Irl:
+                        break;
+                }
             }
             
             [RokiCommand, Description, Usage, Aliases]
@@ -105,6 +126,20 @@ namespace Roki.Modules.Currency
             public async Task Modify()
             {
             
+            }
+
+            private enum ListingCategory
+            {
+                Role,
+                Digital,
+                Virtual,
+                Irl,
+            }
+            
+            private enum ListingType
+            {
+                Subscription,
+                OneTime
             }
         }
     }
