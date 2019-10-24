@@ -6,20 +6,32 @@ using Roki.Core.Services.Database.Models;
 
 namespace Roki.Core.Services.Database.Repositories
 {
-    public interface IStoreRepository : IRepository<Store>
+    public interface IListingRepository : IRepository<Listing>
     {
-        List<Store> GetStoreCatalog();
+        List<Listing> GetStoreCatalog();
+        Listing GetListingByName(string name);
+        Listing GetListingById(int id);
     }
 
-    public class StoreRepository : Repository<Store>, IStoreRepository
+    public class ListingRepository : Repository<Listing>, IListingRepository
     {
-        public StoreRepository(DbContext context) : base(context)
+        public ListingRepository(DbContext context) : base(context)
         {
         }
 
-        public List<Store> GetStoreCatalog()
+        public List<Listing> GetStoreCatalog()
         {
-            return Set.OrderByDescending(c => c.Cost).AsEnumerable().ToList();
+            return Set.OrderByDescending(l => l.Cost).AsEnumerable().ToList();
+        }
+
+        public Listing GetListingByName(string name)
+        {
+            return Set.FirstOrDefault(l => l.ItemName == name);
+        }
+
+        public Listing GetListingById(int id)
+        {
+            return Set.FirstOrDefault(l => l.Id == id);
         }
     }
 }

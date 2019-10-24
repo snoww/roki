@@ -2,9 +2,9 @@ using System;
 
 namespace Roki.Core.Services.Database.Models
 {
-    public class Store : DbEntity
+    public class Listing : DbEntity
     {
-        public ulong UserId { get; set; }
+        public ulong SellerId { get; set; }
         public string ItemName { get; set; }
         public string Description { get; set; } = "-";
         public string Type { get; set; }

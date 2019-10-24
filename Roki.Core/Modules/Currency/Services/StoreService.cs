@@ -19,11 +19,27 @@ namespace Roki.Modules.Currency.Services
             _db = db;
         }
 
-        public List<Store> GetStoreCatalog()
+        public List<Listing> GetStoreCatalog()
         {
             using (var uow = _db.GetDbContext())
             {
-                return uow.Store.GetStoreCatalog();
+                return uow.Listing.GetStoreCatalog();
+            }
+        }
+
+        public Listing GetListingByName(string name)
+        {
+            using (var uow = _db.GetDbContext())
+            {
+                return uow.Listing.GetListingByName(name);
+            }
+        }
+        
+        public Listing GetListingById(int id)
+        {
+            using (var uow = _db.GetDbContext())
+            {
+                return uow.Listing.GetListingById(id);
             }
         }
     }
