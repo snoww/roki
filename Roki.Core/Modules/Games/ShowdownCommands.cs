@@ -41,9 +41,9 @@ namespace Roki.Modules.Games
             private static readonly Emote Ten = Emote.Parse("<:10:633332839391428609>");
             private static readonly Emote Hundred = Emote.Parse("<:100:633332839605338162>");
             private static readonly Emote FiveHundred = Emote.Parse("<:500:633332839806664704>");
-            private static readonly Emote TimesTwo = Emote.Parse("x2placeholder");
-            private static readonly Emote TimesFive = Emote.Parse("x5placeholder");
-            private static readonly Emote TimesTen = Emote.Parse("x10placeholder");
+            private static readonly Emote TimesTwo = Emote.Parse("<:2x:637062546817417244>");
+            private static readonly Emote TimesFive = Emote.Parse("<:5x:637062547169869824>");
+            private static readonly Emote TimesTen = Emote.Parse("<:10x:637062547169738752>");
             
             private readonly Dictionary<IEmote, long> _reactionMap = new Dictionary<IEmote, long>
             {
