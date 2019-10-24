@@ -61,29 +61,27 @@ namespace Roki.Modules.Gambling
                         .ConfigureAwait(false);
                     return;
                 }
-                
-                using (var uow = _db.GetDbContext())
-                {
-                    var lotteryId = uow.Lottery.GetLotteryId();
-                    var numbers = new List<string>();
-                    for (int i = 0; i < tickets; i++)
-                    {
-                        var number = _service.GenerateLotteryNumber();
-                        await uow.Lottery.AddLotteryEntry(user.Id, number, lotteryId).ConfigureAwait(false);
-                        if (i < 10)
-                        {
-                            numbers.Add(string.Join("-", number));
-                        }
-                    }
-                    var entries = uow.Lottery.GetTotalEntries(user.Id, lotteryId);
-                    var embed = new EmbedBuilder().WithOkColor()
-                        .WithTitle($"Purchase Successful - You have {entries} total entries")
-                        .WithDescription($"{user.Mention} Here are your lottery numbers:\n`{string.Join('\n', numbers)}`")
-                        .WithFooter("Note: Only shows first 10 tickets.");
 
-                    await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
-                    await uow.SaveChangesAsync().ConfigureAwait(false);
+                using var uow = _db.GetDbContext();
+                var lotteryId = uow.Lottery.GetLotteryId();
+                var numbers = new List<string>();
+                for (int i = 0; i < tickets; i++)
+                {
+                    var number = _service.GenerateLotteryNumber();
+                    await uow.Lottery.AddLotteryEntry(user.Id, number, lotteryId).ConfigureAwait(false);
+                    if (i < 10)
+                    {
+                        numbers.Add(string.Join("-", number));
+                    }
                 }
+                var entries = uow.Lottery.GetTotalEntries(user.Id, lotteryId);
+                var embed = new EmbedBuilder().WithOkColor()
+                    .WithTitle($"Purchase Successful - You have {entries} total entries")
+                    .WithDescription($"{user.Mention} Here are your lottery numbers:\n`{string.Join('\n', numbers)}`")
+                    .WithFooter("Note: Only shows first 10 tickets.");
+
+                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                await uow.SaveChangesAsync().ConfigureAwait(false);
             }
             
             [RokiCommand, Description, Usage, Aliases]
@@ -116,19 +114,18 @@ namespace Roki.Modules.Gambling
                 else
                     numbers.Sort();
 
-                using (var uow = _db.GetDbContext())
-                {
-                    var lotteryId = uow.Lottery.GetLotteryId();
-                    await uow.Lottery.AddLotteryEntry(user.Id, numbers, lotteryId).ConfigureAwait(false);
-                    var entries = uow.Lottery.GetTotalEntries(user.Id, lotteryId);
-                    var embed = new EmbedBuilder().WithOkColor()
-                        .WithDescription($"{user.Mention} Here's your lottery number:\n`{string.Join('-', numbers)}`\n");
-                    embed.WithAuthor(entries == 1
-                        ? $"Purchase Successful - You have {entries} entry in the lottery."
-                        : $"Purchase Successful - You have {entries} total entries in the lottery.");
-                    await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
-                    await uow.SaveChangesAsync().ConfigureAwait(false);
-                }
+                using var uow = _db.GetDbContext();
+                var lotteryId = uow.Lottery.GetLotteryId();
+                await uow.Lottery.AddLotteryEntry(user.Id, numbers, lotteryId).ConfigureAwait(false);
+                var entries = uow.Lottery.GetTotalEntries(user.Id, lotteryId);
+                var embed = new EmbedBuilder().WithOkColor()
+                    .WithDescription($"{user.Mention} Here's your lottery number:\n`{string.Join('-', numbers)}`\n");
+                embed.WithAuthor(entries == 1
+                    ? $"Purchase Successful - You have {entries} entry in the lottery."
+                    : $"Purchase Successful - You have {entries} total entries in the lottery.");
+                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                await uow.SaveChangesAsync().ConfigureAwait(false);
+
             }
 
             [RokiCommand, Description, Usage, Aliases]
@@ -137,28 +134,26 @@ namespace Roki.Modules.Gambling
             {
                 if (page < 0)
                     return;
-                using (var uow = _db.GetDbContext())
+                using var uow = _db.GetDbContext();
+                var lotteryId = uow.Lottery.GetLotteryId();
+                if (page == 0)
                 {
-                    var lotteryId = uow.Lottery.GetLotteryId();
-                    if (page == 0)
-                    {
-                        await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                                .WithDescription($"{ctx.User.Username} has {uow.Lottery.GetTotalEntries(ctx.User.Id, lotteryId)} tickets"))
-                            .ConfigureAwait(false);
-                        return;
-                    }
-                    var entries = _service.EntriesToListString(uow.Lottery.GetLotteryEntries(ctx.User.Id, lotteryId, page - 1));
-                    if (entries.Count == 0)
-                    {
-                        await ctx.Channel.SendErrorAsync("You have no tickets for the current lottery.").ConfigureAwait(false);
-                    }
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                            .WithTitle($"{ctx.User.Username}'s Lottery Tickets - Total {uow.Lottery.GetTotalEntries(ctx.User.Id, lotteryId)}")
-                            .WithDescription($"`{string.Join("\n", entries)}`")
-                            .WithFooter($"Page {page}"))
+                            .WithDescription($"{ctx.User.Username} has {uow.Lottery.GetTotalEntries(ctx.User.Id, lotteryId)} tickets"))
                         .ConfigureAwait(false);
-                    await uow.SaveChangesAsync().ConfigureAwait(false);
+                    return;
                 }
+                var entries = _service.EntriesToListString(uow.Lottery.GetLotteryEntries(ctx.User.Id, lotteryId, page - 1));
+                if (entries.Count == 0)
+                {
+                    await ctx.Channel.SendErrorAsync("You have no tickets for the current lottery.").ConfigureAwait(false);
+                }
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                        .WithTitle($"{ctx.User.Username}'s Lottery Tickets - Total {uow.Lottery.GetTotalEntries(ctx.User.Id, lotteryId)}")
+                        .WithDescription($"`{string.Join("\n", entries)}`")
+                        .WithFooter($"Page {page}"))
+                    .ConfigureAwait(false);
+                await uow.SaveChangesAsync().ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]

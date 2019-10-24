@@ -115,20 +115,18 @@ namespace Roki.Services
         {
             foreach (var cache in caches)
             {
-                using (var uow = _db.GetDbContext())
+                using var uow = _db.GetDbContext();
+                if (!cache.HasValue)
                 {
-                    if (!cache.HasValue)
-                    {
-                        uow.DMessages.MessageDeleted(cache.Id);
-                        await uow.SaveChangesAsync().ConfigureAwait(false);
-                        continue;
-                    }
-                    if (cache.Value.Author.IsBot)
-                        return;
-                    uow.DMessages.MessageDeleted(cache.Value.Id);
-                
+                    uow.DMessages.MessageDeleted(cache.Id);
                     await uow.SaveChangesAsync().ConfigureAwait(false);
+                    continue;
                 }
+                if (cache.Value.Author.IsBot)
+                    return;
+                uow.DMessages.MessageDeleted(cache.Value.Id);
+                
+                await uow.SaveChangesAsync().ConfigureAwait(false);
             }
             
             await Task.CompletedTask;
