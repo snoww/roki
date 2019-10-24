@@ -88,6 +88,7 @@ namespace Roki.Modules.Currency
                     return;
                 }
 
+                await _service.UpdateListingAsync(listing.Id).ConfigureAwait(false);
                 Enum.TryParse<ListingCategory>(listing.Category, out var category); 
                 Enum.TryParse<ListingType>(listing.Type, out var type); 
                 switch (category)
@@ -97,7 +98,10 @@ namespace Roki.Modules.Currency
                         {
                             var role = ctx.Guild.Roles.First(r => r.Name == listing.ItemDetails);
                             await ((IGuildUser) buyer).AddRoleAsync(role);
+                            break;
                         }
+
+                        await ctx.Channel.SendMessageAsync("as");
                         break;
                     case ListingCategory.Digital:
                     case ListingCategory.Virtual:
