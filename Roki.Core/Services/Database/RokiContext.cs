@@ -100,6 +100,12 @@ namespace Roki.Core.Services.Database
             });
 
             #endregion
+
+            #region Subscriptions
+
+            modelBuilder.Entity<Subscriptions>(entity => { entity.HasIndex(s => s.Description); });
+
+            #endregion
         }
     }
 }

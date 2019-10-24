@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Discord.WebSocket;
 using Roki.Core.Services;
 using Roki.Core.Services.Database.Models;
@@ -40,6 +41,15 @@ namespace Roki.Modules.Currency.Services
             using (var uow = _db.GetDbContext())
             {
                 return uow.Listing.GetListingById(id);
+            }
+        }
+
+        public async Task UpdateListingAsync(int id)
+        {
+            using (var uow = _db.GetDbContext())
+            {
+                await uow.Listing.UpdateQuantityAsync(id).ConfigureAwait(false);
+                await uow.SaveChangesAsync().ConfigureAwait(false);
             }
         }
     }
