@@ -93,9 +93,10 @@ namespace Roki.Modules.Currency
                 switch (category)
                 {
                     case ListingCategory.Role:
-                        var guildUser = buyer as IGuildUser;
                         if (type == ListingType.OneTime)
                         {
+                            var role = ctx.Guild.Roles.First(r => r.Name == listing.ItemDetails);
+                            await ((IGuildUser) buyer).AddRoleAsync(role);
                         }
                         break;
                     case ListingCategory.Digital:
@@ -104,6 +105,10 @@ namespace Roki.Modules.Currency
                     case ListingCategory.Irl:
                         break;
                 }
+
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                        .WithDescription($"{buyer.Mention} Purchase Successful!"))
+                    .ConfigureAwait(false);
             }
             
             [RokiCommand, Description, Usage, Aliases]
