@@ -41,7 +41,8 @@ namespace Roki.Modules.Currency
                         .Take(itemsPerPage)
                         .Select(c =>
                         {
-                            var desc = $"{Format.Bold(c.ItemName)} | Type: {c.Type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remaining" : "**Sold Out**")} | {c.Cost} {Stone}";
+                            var type = c.Type == "Subscription" ? $"{c.Type} {c.SubscriptionDays} Days" : c.Type;
+                            var desc = $"{Format.Bold(c.ItemName)} | Type: {type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remaining" : "**Sold Out**")} | {c.Cost} {Stone}";
                             return $"`ID: {c.Id}` {desc}\n\t{c.Description.TrimTo(120)}";
                         }));
                     return new EmbedBuilder().WithOkColor()
