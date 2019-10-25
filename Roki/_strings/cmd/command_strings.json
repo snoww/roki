@@ -480,9 +480,10 @@
   },
   "store": {
     "Command": "store",
-    "Description": "Shows the Stone store. 9 items per page.",
+    "Description": "Shows the Stone store. 9 items per page. Or specify specific name or id to see that item.",
     "Usage": [
-      "{0}store"
+      "{0}store",
+      "{0}store 8"
     ]
   },
   "buy": {

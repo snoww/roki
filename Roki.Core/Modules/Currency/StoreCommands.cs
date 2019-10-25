@@ -5,6 +5,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Roki.Common.Attributes;
+using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
 using Roki.Modules.Currency.Services;
 using Roki.Services;
@@ -28,30 +29,49 @@ namespace Roki.Modules.Currency
             
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
-            public async Task Store()
+            public async Task Store([Leftover] string itemName = null)
             {
                 var cat = _service.GetStoreCatalog();
 
-                const int itemsPerPage = 10;
-                EmbedBuilder Catalog(int page)
+                if (itemName == null)
                 {
-                    var startAt = itemsPerPage * page;
-                    var catalogStr = string.Join("\n", cat
-                        .Skip(startAt)
-                        .Take(itemsPerPage)
-                        .Select(c =>
-                        {
-                            var type = c.Type == "Subscription" ? $"{c.SubscriptionDays} Day {c.Type}" : c.Type;
-                            var desc = $"{Format.Bold(c.ItemName)} | {type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remaining" : "**Sold Out**")} | {c.Cost} {Stone}";
-                            return $"`ID: {c.Id}` {desc}\n\t{c.Description.TrimTo(120)}";
-                        }));
-                    return new EmbedBuilder().WithOkColor()
-                        .WithTitle("Stone Shop")
-                        .WithDescription(catalogStr)
-                        .WithFooter($"Page {page + 1}/{Math.Ceiling((double) cat.Count / itemsPerPage)}");
+                    const int itemsPerPage = 10;
+                    EmbedBuilder Catalog(int page)
+                    {
+                        var startAt = itemsPerPage * page;
+                        var catalogStr = string.Join("\n", cat
+                            .Skip(startAt)
+                            .Take(itemsPerPage)
+                            .Select(c =>
+                            {
+                                var type = c.Type == "Subscription" ? $"{c.SubscriptionDays} Day {c.Type}" : c.Type;
+                                var desc = $"{Format.Bold(c.ItemName)} | {type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remaining" : "**Sold Out**")} | {c.Cost} {Stone}";
+                                return $"`ID: {c.Id}` {desc}\n\t{c.Description.TrimTo(120)}";
+                            }));
+                        return new EmbedBuilder().WithOkColor()
+                            .WithTitle("Stone Shop")
+                            .WithDescription(catalogStr)
+                            .WithFooter($"Page {page + 1}/{Math.Ceiling((double) cat.Count / itemsPerPage)}");
+                    }
+                                                
+                    await ctx.SendPaginatedConfirmAsync(0, Catalog, cat.Count, 9).ConfigureAwait(false);
                 }
 
-                await ctx.SendPaginatedConfirmAsync(0, Catalog, cat.Count, 9).ConfigureAwait(false);
+                var item = int.TryParse(itemName, out var id) ? cat.FirstOrDefault(i => i.Id == id) : cat.FirstOrDefault(i => i.ItemName == itemName);
+                if (item == null)
+                {
+                    await ctx.Channel.SendErrorAsync("Cannot find the specified item.").ConfigureAwait(false);
+                    return;
+                }
+
+                var embed = new EmbedBuilder().WithOkColor()
+                    .WithTitle($"ID {item.Id} | {item.ItemName} | {item.Cost} {Stone}")
+                    .WithDescription(item.Description)
+                    .AddField("Category", $"{item.Category}", true)
+                    .AddField("Quantity", $"{(item.Quantity > 0 ? $"**{item.Quantity}** Remaining" : "**Sold Out**")}")
+                    .AddField("Type", item.Type == "Subscription" ? $"{item.SubscriptionDays} Day {item.Type}" : $"{item.Type}", true);
+
+                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
             
             [RokiCommand, Description, Usage, Aliases]
