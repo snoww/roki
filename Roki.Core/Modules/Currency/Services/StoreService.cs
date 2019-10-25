@@ -105,23 +105,31 @@ namespace Roki.Modules.Currency.Services
             }
         }
 
-        public async Task AddNewSubscriptionAsync(ulong userId, string description, DateTime startDate, DateTime endDate)
+        public async Task AddNewSubscriptionAsync(ulong userId, int itemId, string description, DateTime startDate, DateTime endDate)
         {
             using (var uow = _db.GetDbContext())
             {
-                await uow.Subscriptions.NewSubscriptionAsync(userId, description, startDate, endDate).ConfigureAwait(false);
+                await uow.Subscriptions.NewSubscriptionAsync(userId, itemId, description, startDate, endDate).ConfigureAwait(false);
                 await uow.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
-        public async Task<bool> GetOrUpdateSubAsync(ulong userId, string itemDetails, int days)
+        public async Task<bool> GetOrUpdateSubAsync(ulong userId, int itemId, int days)
         {
             using (var uow = _db.GetDbContext())
             {
-                var subId = await uow.Subscriptions.CheckSubscription(userId, itemDetails).ConfigureAwait(false);
+                var subId = await uow.Subscriptions.CheckSubscription(userId, itemId).ConfigureAwait(false);
                 if (subId == 0) return false;
                 await uow.Subscriptions.UpdateSubscriptionsAsync(subId, days).ConfigureAwait(false);
                 return true;
+            }
+        }
+
+        public List<Subscriptions> GetUserSubscriptions(ulong userId)
+        {
+            using (var uow = _db.GetDbContext())
+            {
+                return uow.Subscriptions.GetUserSubscriptions(userId);
             }
         }
     }

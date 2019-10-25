@@ -493,5 +493,13 @@
       "{0}buy 123",
       "{0}buy pizza"
     ]
+  },
+  "subscriptions": {
+    "Command": "subscriptions subs",
+    "Description": "Shows your active subscriptions.",
+    "Usage": [
+      "{0}subscriptions",
+      "{0}subs"
+    ]
   }
 }

@@ -9,11 +9,12 @@ namespace Roki.Core.Services.Database.Repositories
 {
     public interface ISubscriptionRepository : IRepository<Subscriptions>
     {
-        Task NewSubscriptionAsync(ulong userId, string description, DateTime startDate, DateTime endDate);
+        Task NewSubscriptionAsync(ulong userId, int itemId, string description, DateTime startDate, DateTime endDate);
         Task RemoveSubscriptionAsync(int id);
-        List<Subscriptions> GetExpiredSubscriptions();
-        Task<int> CheckSubscription(ulong userId, string itemDetails);
+        IEnumerable<Subscriptions> GetExpiredSubscriptions();
+        Task<int> CheckSubscription(ulong userId, int itemId);
         Task UpdateSubscriptionsAsync(int id, int days);
+        List<Subscriptions> GetUserSubscriptions(ulong userId);
     }
     
     public class SubscriptionRepository : Repository<Subscriptions>, ISubscriptionRepository
@@ -23,11 +24,11 @@ namespace Roki.Core.Services.Database.Repositories
         }
 
 
-        public async Task NewSubscriptionAsync(ulong userId, string description, DateTime startDate, DateTime endDate)
+        public async Task NewSubscriptionAsync(ulong userId, int itemId, string description, DateTime startDate, DateTime endDate)
         {
             await Context.Database.ExecuteSqlCommandAsync($@"
-INSERT INTO `subscriptions`(userid, description, startdate, enddate)
-VALUES({userId}, {description}, {startDate}, {endDate})")
+INSERT INTO `subscriptions`(userid, itemId, description, startdate, enddate)
+VALUES({userId}, {itemId}, {description}, {startDate}, {endDate})")
                 .ConfigureAwait(false);
         }
 
@@ -39,14 +40,14 @@ WHERE id={id}")
                 .ConfigureAwait(false);
         }
 
-        public List<Subscriptions> GetExpiredSubscriptions()
+        public IEnumerable<Subscriptions> GetExpiredSubscriptions()
         {
             return Set.Where(s => s.EndDate <= DateTime.UtcNow).AsEnumerable().ToList();
         }
 
-        public async Task<int> CheckSubscription(ulong userId, string itemDetails)
+        public async Task<int> CheckSubscription(ulong userId, int itemId)
         {
-            var sub = await Set.FirstOrDefaultAsync(s => s.UserId == userId && s.Description == itemDetails).ConfigureAwait(false);
+            var sub = await Set.FirstOrDefaultAsync(s => s.UserId == userId && s.ItemId == itemId).ConfigureAwait(false);
             return sub?.Id ?? 0;
         }
 
@@ -59,6 +60,11 @@ UPDATE IGNORE `subscriptions`
 SET enddate = {newEndDate}
 WHERE id = {id} ")
                 .ConfigureAwait(false);
+        }
+
+        public List<Subscriptions> GetUserSubscriptions(ulong userId)
+        {
+            return Set.Where(s => s.UserId == userId).AsEnumerable().ToList();
         }
     }
 }
