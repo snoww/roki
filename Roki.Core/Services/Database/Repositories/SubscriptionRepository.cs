@@ -12,6 +12,8 @@ namespace Roki.Core.Services.Database.Repositories
         Task NewSubscriptionAsync(ulong userId, string description, DateTime startDate, DateTime endDate);
         Task RemoveSubscriptionAsync(int id);
         List<Subscriptions> GetExpiredSubscriptions();
+        Task<int> CheckSubscription(string itemDetails);
+        Task UpdateSubscriptionsAsync(int id, int days);
     }
     
     public class SubscriptionRepository : Repository<Subscriptions>, ISubscriptionRepository
@@ -40,6 +42,23 @@ WHERE id={id}")
         public List<Subscriptions> GetExpiredSubscriptions()
         {
             return Set.Where(s => s.EndDate <= DateTime.UtcNow).AsEnumerable().ToList();
+        }
+
+        public async Task<int> CheckSubscription(string itemDetails)
+        {
+            var sub = await Set.FirstOrDefaultAsync(s => s.Description == itemDetails).ConfigureAwait(false);
+            return sub?.Id ?? 0;
+        }
+
+        public async Task UpdateSubscriptionsAsync(int id, int days)
+        {
+            var sub = await Set.FirstOrDefaultAsync(s => s.Id == id).ConfigureAwait(false);
+            var newEndDate = sub.EndDate + TimeSpan.FromDays(days);
+            await Context.Database.ExecuteSqlCommandAsync($@"
+UPDATE IGNORE `subscriptions`
+SET enddate = {newEndDate}
+WHERE id = {id} ")
+                .ConfigureAwait(false);
         }
     }
 }
