@@ -191,7 +191,7 @@ namespace Roki.Modules.Currency
                 var desc = "";
                 foreach (var sub in subs)
                 {
-                    var listing = _service.GetListingById(sub.Id);
+                    var listing = _service.GetListingById(sub.ItemId);
                     desc += $"{listing.ItemName} - Purchased On: {sub.StartDate} - Expires On: {sub.EndDate}\n";
                 }
 
