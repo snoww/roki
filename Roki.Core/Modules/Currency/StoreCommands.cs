@@ -55,6 +55,7 @@ namespace Roki.Modules.Currency
                     }
                                                 
                     await ctx.SendPaginatedConfirmAsync(0, Catalog, cat.Count, 9).ConfigureAwait(false);
+                    return;
                 }
 
                 var item = int.TryParse(itemName, out var id) ? cat.FirstOrDefault(i => i.Id == id) : cat.FirstOrDefault(i => i.ItemName == itemName);
