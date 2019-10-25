@@ -485,8 +485,8 @@
       "{0}store"
     ]
   },
-  "storebuy": {
-    "Command": "storebuy sb",
+  "buy": {
+    "Command": "buy",
     "Description": "Buy an item from the store using its name or id.",
     "Usage": [
       "{0}storebuy 123",
