@@ -1,5 +1,9 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Discord;
 using Discord.WebSocket;
 using Roki.Core.Services;
 using Roki.Core.Services.Database.Models;
@@ -12,12 +16,38 @@ namespace Roki.Modules.Currency.Services
         private readonly DiscordSocketClient _client;
         private readonly ICurrencyService _currency;
         private readonly DbService _db;
+        private Timer _timer;
 
         public StoreService(DiscordSocketClient client, ICurrencyService currency, DbService db)
         {
             _client = client;
             _currency = currency;
             _db = db;
+        }
+
+        private void CheckSubscriptions()
+        {
+            var today = DateTime.UtcNow;
+            var drawToday = new DateTime(today.Year, today.Month, today.Day, 0, 0, 0);
+            var drawTmr = new DateTime(today.Year, today.Month, today.Day + 1, 0, 0, 0);
+            _timer = drawToday - today > TimeSpan.Zero 
+                ? new Timer(RemoveSubEvent, null, drawToday - today, TimeSpan.FromDays(1)) 
+                : new Timer(RemoveSubEvent, null, drawTmr - today, TimeSpan.FromDays(1));
+        }
+
+        private async void RemoveSubEvent(object state)
+        {
+            using (var uow = _db.GetDbContext())
+            {
+                var expired = uow.Subscriptions.GetExpiredSubscriptions();
+                foreach (var sub in expired)
+                {
+                    await uow.Subscriptions.RemoveSubscriptionAsync(sub.Id).ConfigureAwait(false);
+                    if (!(_client.GetUser(sub.UserId) is IGuildUser user)) continue;
+                    var role = user.Guild.Roles.First(r => r.Name == sub.Description);
+                    await user.RemoveRoleAsync(role).ConfigureAwait(false);
+                }
+            }
         }
 
         public List<Listing> GetStoreCatalog()
@@ -49,6 +79,15 @@ namespace Roki.Modules.Currency.Services
             using (var uow = _db.GetDbContext())
             {
                 await uow.Listing.UpdateQuantityAsync(id).ConfigureAwait(false);
+                await uow.SaveChangesAsync().ConfigureAwait(false);
+            }
+        }
+
+        public async Task AddNewSubscriptionAsync(ulong userId, string description, DateTime startDate, DateTime endDate)
+        {
+            using (var uow = _db.GetDbContext())
+            {
+                await uow.Subscriptions.NewSubscriptionAsync(userId, description, startDate, endDate).ConfigureAwait(false);
                 await uow.SaveChangesAsync().ConfigureAwait(false);
             }
         }
