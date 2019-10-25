@@ -50,7 +50,7 @@ namespace Roki.Modules.Currency.Services
         }
 
         public async Task NewStoreItem(ulong sellerId, string itemName, string itemDetails, string itemDescription, string category,
-            string type, TimeSpan? subTime, long cost, int quantity)
+            string type, int? subDays, long cost, int quantity)
         {
             using (var uow = _db.GetDbContext())
             {
@@ -63,7 +63,7 @@ namespace Roki.Modules.Currency.Services
                     Category = category,
                     Cost = cost,
                     Type = type,
-                    SubscriptionTime = subTime,
+                    SubscriptionDays = subDays,
                     Quantity = quantity,
                     ListDate = DateTime.UtcNow
                 });

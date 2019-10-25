@@ -12,7 +12,7 @@ namespace Roki.Core.Services.Database.Models
         public string Description { get; set; } = "-";
         public string Category { get; set; }
         public string Type { get; set; } = "OneTime";
-        public TimeSpan? SubscriptionTime { get; set; }
+        public int? SubscriptionDays { get; set; }
         public long Cost { get; set; }
         public int Quantity { get; set; } = 1;
         public DateTime ListDate { get; set; } = DateTime.UtcNow;
