@@ -41,8 +41,8 @@ namespace Roki.Modules.Currency
                         .Take(itemsPerPage)
                         .Select(c =>
                         {
-                            var desc = $"{Format.Bold(c.ItemName)} | Type: {c.Type} | {(c.Quantity > 0 ? $"{c.Quantity} Remaining" : "Sold Out")} | {c.Cost} {Stone}";
-                            return $"`ID: {c.Id}.` {desc}\n\t{c.Description.TrimTo(120)}";
+                            var desc = $"{Format.Bold(c.ItemName)} | Type: {c.Type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remaining" : "**Sold Out**")} | {c.Cost} {Stone}";
+                            return $"`ID: {c.Id}` {desc}\n\t{c.Description.TrimTo(120)}";
                         }));
                     return new EmbedBuilder().WithOkColor()
                         .WithTitle("Stone Shop")
@@ -102,7 +102,7 @@ namespace Roki.Modules.Currency
                             break;
                         }
 
-                        if (await _service.GetOrUpdateSubAsync(listing.ItemDetails, listing.SubscriptionDays ?? 7)) break;
+                        if (await _service.GetOrUpdateSubAsync(buyer.Id, listing.ItemDetails, listing.SubscriptionDays ?? 7)) break;
                         await ((IGuildUser) buyer).AddRoleAsync(role);
                         await _service.AddNewSubscriptionAsync(buyer.Id, listing.ItemDetails, DateTime.UtcNow, 
                                 DateTime.UtcNow + new TimeSpan(listing.SubscriptionDays ?? 7, 0, 0, 0)
