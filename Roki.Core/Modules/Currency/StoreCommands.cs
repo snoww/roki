@@ -41,7 +41,7 @@ namespace Roki.Modules.Currency
                         .Take(itemsPerPage)
                         .Select(c =>
                         {
-                            var desc = $"{Format.Bold(c.ItemName)} | Sold By: {_client.GetUser(c.SellerId).Username} | {(c.Quantity > 0 ? $"{c.Quantity} Remaining" : "Sold Out")} | {c.Cost} {Stone}";
+                            var desc = $"{Format.Bold(c.ItemName)} | Type: {c.Type} | {(c.Quantity > 0 ? $"{c.Quantity} Remaining" : "Sold Out")} | {c.Cost} {Stone}";
                             return $"`ID: {c.Id}.` {desc}\n\t{c.Description.TrimTo(120)}";
                         }));
                     return new EmbedBuilder().WithOkColor()
@@ -55,9 +55,10 @@ namespace Roki.Modules.Currency
             
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
+            [RequireUserPermission(GuildPermission.Administrator)]
             public async Task Sell()
             {
-            
+                
             }
         
             [RokiCommand, Description, Usage, Aliases]
@@ -79,7 +80,7 @@ namespace Roki.Modules.Currency
                 }
 
                 var buyer = ctx.User;
-                var seller = _client.GetUser(listing.SellerId);
+                var seller = _client.GetUser(listing.SellerId) as IUser;
                 var removed = await _currency.TransferAsync(buyer, seller, $"Store Purchase - ID {listing.Id}", listing.Cost, 
                     ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id).ConfigureAwait(false);
                 if (!removed)
@@ -102,7 +103,7 @@ namespace Roki.Modules.Currency
                         }
                         await ((IGuildUser) buyer).AddRoleAsync(role);
                         await _service.AddNewSubscriptionAsync(buyer.Id, listing.ItemDetails, DateTime.UtcNow,
-                            DateTime.UtcNow + listing.SubscriptionTime).ConfigureAwait(false);
+                            DateTime.UtcNow + (listing.SubscriptionTime ?? TimeSpan.FromDays(7))).ConfigureAwait(false);
                         break;
                     case Category.Power:
                         Enum.TryParse<Power>(listing.ItemDetails, out var power);

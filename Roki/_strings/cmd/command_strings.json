@@ -484,5 +484,13 @@
     "Usage": [
       "{0}store"
     ]
+  },
+  "storebuy": {
+    "Command": "storebuy sb",
+    "Description": "Buy an item from the store using its name or id.",
+    "Usage": [
+      "{0}storebuy 123",
+      "{0}sb pizza"
+    ]
   }
 }

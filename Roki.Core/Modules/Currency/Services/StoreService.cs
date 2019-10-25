@@ -14,15 +14,14 @@ namespace Roki.Modules.Currency.Services
     public class StoreService : IRService
     {
         private readonly DiscordSocketClient _client;
-        private readonly ICurrencyService _currency;
         private readonly DbService _db;
         private Timer _timer;
 
-        public StoreService(DiscordSocketClient client, ICurrencyService currency, DbService db)
+        public StoreService(DiscordSocketClient client, DbService db)
         {
             _client = client;
-            _currency = currency;
             _db = db;
+            CheckSubscriptions();
         }
 
         private void CheckSubscriptions()
@@ -47,6 +46,29 @@ namespace Roki.Modules.Currency.Services
                     var role = user.Guild.Roles.First(r => r.Name == sub.Description);
                     await user.RemoveRoleAsync(role).ConfigureAwait(false);
                 }
+            }
+        }
+
+        public async Task NewStoreItem(ulong sellerId, string itemName, string itemDetails, string itemDescription, string category,
+            string type, TimeSpan? subTime, long cost, int quantity)
+        {
+            using (var uow = _db.GetDbContext())
+            {
+                uow.Listing.Add(new Listing
+                {
+                    SellerId = sellerId,
+                    ItemName = itemName,
+                    ItemDetails = itemDetails,
+                    Description = itemDescription,
+                    Category = category,
+                    Cost = cost,
+                    Type = type,
+                    SubscriptionTime = subTime,
+                    Quantity = quantity,
+                    ListDate = DateTime.UtcNow
+                });
+                
+                await uow.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
