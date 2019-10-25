@@ -124,9 +124,9 @@ namespace Roki.Modules.Currency
                             break;
                         }
 
-                        if (await _service.GetOrUpdateSubAsync(buyer.Id, listing.ItemDetails, listing.SubscriptionDays ?? 7)) break;
+                        if (await _service.GetOrUpdateSubAsync(buyer.Id, listing.Id, listing.SubscriptionDays ?? 7)) break;
                         await ((IGuildUser) buyer).AddRoleAsync(role);
-                        await _service.AddNewSubscriptionAsync(buyer.Id, listing.ItemDetails, DateTime.UtcNow, 
+                        await _service.AddNewSubscriptionAsync(buyer.Id, listing.Id, listing.ItemDetails, DateTime.UtcNow, 
                                 DateTime.UtcNow + new TimeSpan(listing.SubscriptionDays ?? 7, 0, 0, 0)
                             ).ConfigureAwait(false);
                         break;
@@ -175,6 +175,27 @@ namespace Roki.Modules.Currency
             public async Task Modify()
             {
             
+            }
+
+            [RokiCommand, Description, Usage, Aliases]
+            [RequireContext(ContextType.Guild)]
+            public async Task Subscriptions()
+            {
+                var subs = _service.GetUserSubscriptions(ctx.User.Id);
+                var embed = new EmbedBuilder().WithOkColor().WithTitle($"{ctx.User.Username}'s Active Subscriptions");
+                if (subs.Count == 0)
+                {
+                    await ctx.Channel.EmbedAsync(embed.WithDescription("No active subscriptions.")).ConfigureAwait(false);
+                    return;
+                }
+                var desc = "";
+                foreach (var sub in subs)
+                {
+                    var listing = _service.GetListingById(sub.Id);
+                    desc += $"{listing.ItemName} - Purchased On: {sub.StartDate} - Expires On: {sub.EndDate}\n";
+                }
+
+                await ctx.Channel.EmbedAsync(embed.WithDescription(desc)).ConfigureAwait(false);
             }
 
             private enum Category
