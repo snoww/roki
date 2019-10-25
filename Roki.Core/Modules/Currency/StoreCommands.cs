@@ -89,24 +89,38 @@ namespace Roki.Modules.Currency
                 }
 
                 await _service.UpdateListingAsync(listing.Id).ConfigureAwait(false);
-                Enum.TryParse<ListingCategory>(listing.Category, out var category); 
-                Enum.TryParse<ListingType>(listing.Type, out var type); 
+                Enum.TryParse<Category>(listing.Category, out var category); 
+                Enum.TryParse<Type>(listing.Type, out var type); 
                 switch (category)
                 {
-                    case ListingCategory.Role:
-                        if (type == ListingType.OneTime)
+                    case Category.Role:
+                        var role = ctx.Guild.Roles.First(r => r.Name == listing.ItemDetails);
+                        if (type == Type.OneTime)
                         {
-                            var role = ctx.Guild.Roles.First(r => r.Name == listing.ItemDetails);
                             await ((IGuildUser) buyer).AddRoleAsync(role);
                             break;
                         }
-
-                        await ctx.Channel.SendMessageAsync("as");
+                        await ((IGuildUser) buyer).AddRoleAsync(role);
+                        await _service.AddNewSubscriptionAsync(buyer.Id, listing.ItemDetails, DateTime.UtcNow,
+                            DateTime.UtcNow + listing.SubscriptionTime).ConfigureAwait(false);
                         break;
-                    case ListingCategory.Digital:
-                    case ListingCategory.Virtual:
+                    case Category.Power:
+                        Enum.TryParse<Power>(listing.ItemDetails, out var power);
+                        switch (power)
+                        {
+                            case Power.Mute:
+                                break;
+                            case Power.Timeout:
+                                break;
+                            case Power.DeleteMessage:
+                                break;
+                            case Power.SlowMode:
+                                break;
+                        }
                         break;
-                    case ListingCategory.Irl:
+                    case Category.Digital:
+                    case Category.Virtual:
+                    case Category.Irl:
                         break;
                 }
 
@@ -137,18 +151,27 @@ namespace Roki.Modules.Currency
             
             }
 
-            private enum ListingCategory
+            private enum Category
             {
                 Role,
+                Power,
                 Digital,
                 Virtual,
                 Irl,
             }
             
-            private enum ListingType
+            private enum Type
             {
                 Subscription,
                 OneTime
+            }
+            
+            private enum Power
+            {
+                Timeout,
+                Mute,
+                DeleteMessage,
+                SlowMode,
             }
         }
     }
