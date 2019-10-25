@@ -101,9 +101,12 @@ namespace Roki.Modules.Currency
                             await ((IGuildUser) buyer).AddRoleAsync(role);
                             break;
                         }
+
+                        if (await _service.GetOrUpdateSubAsync(listing.ItemDetails, listing.SubscriptionDays ?? 7)) break;
                         await ((IGuildUser) buyer).AddRoleAsync(role);
-                        await _service.AddNewSubscriptionAsync(buyer.Id, listing.ItemDetails, DateTime.UtcNow,
-                            DateTime.UtcNow + new TimeSpan(listing.SubscriptionDays ?? 7, 0, 0, 0)).ConfigureAwait(false);
+                        await _service.AddNewSubscriptionAsync(buyer.Id, listing.ItemDetails, DateTime.UtcNow, 
+                                DateTime.UtcNow + new TimeSpan(listing.SubscriptionDays ?? 7, 0, 0, 0)
+                            ).ConfigureAwait(false);
                         break;
                     case Category.Power:
                         Enum.TryParse<Power>(listing.ItemDetails, out var power);

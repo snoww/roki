@@ -113,5 +113,16 @@ namespace Roki.Modules.Currency.Services
                 await uow.SaveChangesAsync().ConfigureAwait(false);
             }
         }
+
+        public async Task<bool> GetOrUpdateSubAsync(string itemDetails, int days)
+        {
+            using (var uow = _db.GetDbContext())
+            {
+                var subId = await uow.Subscriptions.CheckSubscription(itemDetails).ConfigureAwait(false);
+                if (subId == 0) return false;
+                await uow.Subscriptions.UpdateSubscriptionsAsync(subId, days).ConfigureAwait(false);
+                return true;
+            }
+        }
     }
 }
