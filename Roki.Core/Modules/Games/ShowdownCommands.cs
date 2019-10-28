@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using PokeApiNet.Models;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Games.Services;
@@ -38,38 +39,25 @@ namespace Roki.Modules.Games
             private static readonly Emote One = Emote.Parse("<:1_:633332839454343199>");
             private static readonly Emote Five = Emote.Parse("<:5_:633332839588298756>");
             private static readonly Emote Ten = Emote.Parse("<:10:633332839391428609>");
-            private static readonly Emote Twenty = Emote.Parse("<:20:633332839584366602>");
-            private static readonly Emote Fifty = Emote.Parse("<:50:633332839709933591>");
             private static readonly Emote Hundred = Emote.Parse("<:100:633332839605338162>");
-            private static readonly Emote TwoHundredFifty = Emote.Parse("<:250:633332839601143848>");
             private static readonly Emote FiveHundred = Emote.Parse("<:500:633332839806664704>");
-            private readonly IEmote[] _reactionPlayer = 
+            private static readonly Emote TimesTwo = Emote.Parse("<:2x:637062546817417244>");
+            private static readonly Emote TimesFive = Emote.Parse("<:5x:637062547169869824>");
+            private static readonly Emote TimesTen = Emote.Parse("<:10x:637062547169738752>");
+            
+            private readonly Dictionary<IEmote, long> _reactionMap = new Dictionary<IEmote, long>
             {
-                Player1,
-                Player2,
-            };
-            private readonly IEmote[] _reactionBet = 
-            {
-                AllIn,
-                One,
-                Five,
-                Ten,
-                Twenty,
-                Fifty,
-                Hundred,
-                TwoHundredFifty,
-                FiveHundred
-            };
-            private readonly Dictionary<IEmote, long> _betMap = new Dictionary<IEmote, long>
-            {
+                {Player1, 0},
+                {Player2, 0},
+                {AllIn, 0},
                 {One, 1},
                 {Five, 5},
                 {Ten, 10},
-                {Twenty, 20},
-                {Fifty, 50},
                 {Hundred, 100},
-                {TwoHundredFifty, 250},
                 {FiveHundred, 500},
+                {TimesTwo, 0},
+                {TimesFive, 0},
+                {TimesTen, 0},
             };
             
             public ShowdownCommands(DiscordSocketClient client, ICurrencyService currency)
@@ -80,9 +68,7 @@ namespace Roki.Modules.Games
             
             private enum BetPlayer
             {
-                PLAYER1 = 1,
                 P1 = 1,
-                PLAYER2 = 2,
                 P2 = 2,
             }
 
@@ -140,27 +126,28 @@ namespace Roki.Modules.Games
                         t1.Add(GetPokemonImage(intro[0][i], generation));
                         t2.Add(GetPokemonImage(intro[1][i], generation));
                     }
-
-                    using var bitmap1 = t1.MergePokemonTeam();
-                    using var bitmap2 = t2.MergePokemonTeam();
-                    using var bitmap = bitmap1.MergeTwoVertical(bitmap2, out var format);
-                    await using var ms = bitmap.ToStream(format);
-                    for (int i = 0; i < t1.Count; i++)
+                
+                    using (var bitmap1 = t1.MergePokemonTeam())
+                    using (var bitmap2 = t2.MergePokemonTeam())
+                    using (var bitmap = bitmap1.MergeTwoVertical(bitmap2, out var format))
+                    using (var ms = bitmap.ToStream(format))
                     {
-                        t1[i].Dispose();
-                        t2[i].Dispose();
-                    }
+                        for (int i = 0; i < t1.Count; i++)
+                        {
+                            t1[i].Dispose();
+                            t2[i].Dispose();
+                        }
                     
-                    var start = new EmbedBuilder().WithOkColor()
-                        .WithTitle($"[Gen {generation}] Random Battle - ID: `{uid}`")
-                        .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 20 100` means betting on 130 on P1.")
-                        .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
-                        .AddField("Player 1", string.Join('\n', intro[0]), true)
-                        .AddField("Player 2", string.Join('\n', intro[1]), true);
+                        var start = new EmbedBuilder().WithOkColor()
+                            .WithTitle($"[Gen {generation}] Random Battle - ID: `{uid}`")
+                            .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 20 100` means betting on 130 on P1.")
+                            .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
+                            .AddField("Player 1", string.Join('\n', intro[0]), true)
+                            .AddField("Player 2", string.Join('\n', intro[1]), true);
 
-                    startMsg = await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: start.Build()).ConfigureAwait(false);
-                    await startMsg.AddReactionsAsync(_reactionPlayer).ConfigureAwait(false);
-                    await startMsg.AddReactionsAsync(_reactionBet).ConfigureAwait(false);
+                        startMsg = await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: start.Build()).ConfigureAwait(false);
+                        await startMsg.AddReactionsAsync(_reactionMap.Keys.ToArray()).ConfigureAwait(false);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -171,16 +158,16 @@ namespace Roki.Modules.Games
                     return;
                 }
 
-//                var joinedPlayers = new Dictionary<IUser, PlayerBet>();
                 var joinedReactions = new Dictionary<IUser, PlayerBet>();
                 var timeout = DateTime.UtcNow + TimeSpan.FromSeconds(30);
                 _client.ReactionAdded += (cachedMessage, channel, reaction) =>
                 {
-                    if (ctx.Channel.Id != channel.Id || cachedMessage.Value.Id != startMsg.Id || !_reactionPlayer.Contains(reaction.Emote) && !_reactionBet.Contains(reaction.Emote) ||
+                    if (ctx.Channel.Id != channel.Id || cachedMessage.Value.Id != startMsg.Id || !_reactionMap.ContainsKey(reaction.Emote) ||
                         DateTime.UtcNow > timeout || reaction.User.Value.IsBot) return Task.CompletedTask;
                     var user = reaction.User.Value;
                     var _ = Task.Run(async () =>
                     {
+                        // If user doesn't exist in the dictionary yet
                         if (!joinedReactions.ContainsKey(user))
                         {
                             if (Equals(reaction.Emote, Player1))
@@ -195,12 +182,26 @@ namespace Roki.Modules.Games
                             await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, RequestOptions.Default).ConfigureAwait(false);
                             return Task.CompletedTask;
                         }
-                        if (_reactionBet.Contains(reaction.Emote))
+                        // If user exists in dictionary and reacted with player1 
+                        if (reaction.Emote.Equals(Player1))
+                            joinedReactions[user].Bet = BetPlayer.P1;
+                        // If user exists in dictionary and reacted with player2 
+                        else if (reaction.Emote.Equals(Player2))
+                            joinedReactions[user].Bet = BetPlayer.P2;
+                        // If user exists in dictionary and reacted with any other emote in the reactionMap
+                        else if (_reactionMap.ContainsKey(reaction.Emote))
                         {
+                            var currency = _currency.GetCurrency(user.Id);
                             if (reaction.Emote.Equals(AllIn))
-                                joinedReactions[user].Amount = _currency.GetCurrency(user.Id);
-                            else if (_currency.GetCurrency(user.Id) >= joinedReactions[user].Amount + _betMap[reaction.Emote]) 
-                                joinedReactions[user].Amount += _betMap[reaction.Emote];
+                                joinedReactions[user].Amount = currency;
+                            else if (reaction.Emote.Equals(TimesTwo) && currency >= joinedReactions[user].Amount * 2)
+                                joinedReactions[user].Amount *= 2;
+                            else if (reaction.Emote.Equals(TimesFive) && currency >= joinedReactions[user].Amount * 5)
+                                joinedReactions[user].Amount *= 5;
+                            else if (reaction.Emote.Equals(TimesTen) && currency >= joinedReactions[user].Amount * 10)
+                                joinedReactions[user].Amount *= 10;
+                            else if (currency >= joinedReactions[user].Amount + _reactionMap[reaction.Emote]) 
+                                joinedReactions[user].Amount += _reactionMap[reaction.Emote];
                             else
                             {
                                 var notEnoughMsg = await ctx.Channel.SendErrorAsync($"<@{reaction.User.Value.Id}> You do not have enough currency to make that bet.").ConfigureAwait(false);
@@ -209,11 +210,6 @@ namespace Roki.Modules.Games
                             }
                             return Task.CompletedTask;
                         }
-                        if (reaction.Emote.Equals(Player1))
-                            joinedReactions[user].Bet = BetPlayer.P1;
-                        else if (reaction.Emote.Equals(Player2))
-                            joinedReactions[user].Bet = BetPlayer.P2;
-                        
                         await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, RequestOptions.Default).ConfigureAwait(false);
                         return Task.CompletedTask;
                     });
@@ -237,62 +233,6 @@ namespace Roki.Modules.Games
                             ctx.Message.Id)
                         .ConfigureAwait(false);
                 }
-                
-                /*_client.MessageReceived += message =>
-                {
-                    if (ctx.Channel.Id != message.Channel.Id)
-                        return Task.CompletedTask;
-
-                    var _ = Task.Run(async () =>
-                    {
-                        var args = message.Content.Split();
-                        if (!string.Equals(args[0], "join", StringComparison.OrdinalIgnoreCase) || !long.TryParse(args[1], out var amount) ||
-                            !Enum.TryParse<BetPlayer>(args[2].ToUpperInvariant(), out var betPlayer) || DateTime.UtcNow >= timeout) return Task.CompletedTask;
-                        if (amount <= 0)
-                        {
-                            await ctx.Channel.SendErrorAsync("The minimum bet for this game is 1 stone").ConfigureAwait(false);
-                            return Task.CompletedTask;
-                        }
-
-                        var removed = await _currency
-                            .ChangeAsync(message.Author, "BetShowdown Entry", -amount, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}", ctx.Guild.Id, ctx.Channel.Id,
-                                ctx.Message.Id)
-                            .ConfigureAwait(false);
-                        if (!removed)
-                        {
-                            await ctx.Channel.SendErrorAsync("Not enough stones.").ConfigureAwait(false);
-                            return Task.CompletedTask;
-                        }
-
-                        var added = joinedPlayers.TryAdd(message.Author, new PlayerBet
-                        {
-                            Amount = amount,
-                            Bet = betPlayer
-                        });
-                        if (added)
-                        {
-                            var joinedMsg = await ctx.Channel
-                                .EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"{message.Author.Mention} has joined the bet."))
-                                .ConfigureAwait(false);
-                            joinedMsg.DeleteAfter(5);
-                            await message.DeleteAsync().ConfigureAwait(false);
-                            return Task.CompletedTask;
-                        }
-                        var alreadyJoinedMsg = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor().WithDescription("You are already in the bet."))
-                            .ConfigureAwait(false);
-                        alreadyJoinedMsg.DeleteAfter(5);
-                        return Task.CompletedTask;
-                    });
-                    return Task.CompletedTask;
-                };
-
-                Thread.Sleep(TimeSpan.FromSeconds(35));
-                if (joinedPlayers.Count == 0)
-                {
-                    await ctx.Channel.SendErrorAsync("Not enough players to start the bet.\nBet is cancelled");
-                    _service.Games.TryRemove(ctx.Channel.Id, out _);
-                    return;
-                }*/
                 
                 var win = ShowdownService.GetWinner(gameTurns.Substring(gameTurns.IndexOf("|win", StringComparison.Ordinal)));
                 var result = win.Contains("1", StringComparison.Ordinal) ? BetPlayer.P1 : BetPlayer.P2;
@@ -328,7 +268,7 @@ namespace Roki.Modules.Games
                         await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
                             .WithDescription($"Player {win} has won the battle!\nBetter luck next time!\n{losers}\n")).ConfigureAwait(false);
                 }
-                await startMsg.RemoveReactionsAsync(ctx.Client.CurrentUser, _reactionBet).ConfigureAwait(false);
+                await startMsg.RemoveReactionsAsync(ctx.Client.CurrentUser, _reactionMap.Keys.ToArray()).ConfigureAwait(false);
                 _service.Games.TryRemove(ctx.Channel.Id, out _);
             }
 
@@ -379,23 +319,25 @@ namespace Roki.Modules.Games
                     t1.Add(GetPokemonImage(intro[0][i], generation));
                     t2.Add(GetPokemonImage(intro[1][i], generation));
                 }
-
-                using var bitmap1 = t1.MergePokemonTeam();
-                using var bitmap2 = t2.MergePokemonTeam();
-                using var bitmap = bitmap1.MergeTwoVertical(bitmap2, out var format);
-                await using var ms = bitmap.ToStream(format);
-                for (int i = 0; i < t1.Count; i++)
+                
+                using (var bitmap1 = t1.MergePokemonTeam())
+                using (var bitmap2 = t2.MergePokemonTeam())
+                using (var bitmap = bitmap1.MergeTwoVertical(bitmap2, out var format))
+                using (var ms = bitmap.ToStream(format))
                 {
-                    t1[i].Dispose();
-                    t2[i].Dispose();
-                }
+                    for (int i = 0; i < t1.Count; i++)
+                    {
+                        t1[i].Dispose();
+                        t2[i].Dispose();
+                    }
 
-                var startEmbed = new EmbedBuilder().WithOkColor()
-                    .WithTitle($"[Gen {generation}] Random Battle Replay - ID: `{uid}`")
-                    .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
-                    .AddField("Player 1", string.Join('\n', intro[0]), true)
-                    .AddField("Player 2", string.Join('\n', intro[1]), true);
-                await dm.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: startEmbed.Build()).ConfigureAwait(false);
+                    var startEmbed = new EmbedBuilder().WithOkColor()
+                        .WithTitle($"[Gen {generation}] Random Battle Replay - ID: `{uid}`")
+                        .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
+                        .AddField("Player 1", string.Join('\n', intro[0]), true)
+                        .AddField("Player 2", string.Join('\n', intro[1]), true);
+                    await dm.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: startEmbed.Build()).ConfigureAwait(false);
+                }
 
                 var turns = _service.ParseTurns(gameTurns);
                 await dm.TriggerTypingAsync().ConfigureAwait(false);
@@ -431,8 +373,10 @@ namespace Roki.Modules.Games
                     genUrl = Gen2SpriteUrl;
                 else
                     genUrl = Gen1SpriteUrl;
-                using var stream = new MemoryStream(wc.DownloadData(genUrl + sprite + ".png"));
-                return Image.Load(stream.ToArray());
+                using (var stream = new MemoryStream(wc.DownloadData(genUrl + sprite + ".png")))
+                {
+                    return Image.Load(stream.ToArray());
+                }
             }
         }
     }
