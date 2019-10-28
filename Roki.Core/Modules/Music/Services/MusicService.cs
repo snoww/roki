@@ -9,37 +9,39 @@ using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Music.Extensions;
 using Victoria;
-using Victoria.Entities;
+using Victoria.Enums;
+using Victoria.EventArgs;
 
 namespace Roki.Modules.Music.Services
 {
     public class MusicService : IRService
     {
-        private readonly LavaRestClient _lavaRestClient;
-        private readonly LavaSocketClient _lavaSocketClient;
+        private readonly LavaNode _lavaNode;
         private readonly DiscordSocketClient _client;
         private readonly Logger _log;
 
-        public MusicService(LavaRestClient lavaRestClient, LavaSocketClient lavaSocketClient, DiscordSocketClient client)
+        public MusicService(LavaNode lavaNode, DiscordSocketClient client)
         {
             _client = client;
-            _lavaRestClient = lavaRestClient;
-            _lavaSocketClient = lavaSocketClient;
+            _lavaNode = lavaNode;
             _log = LogManager.GetCurrentClassLogger();
-            OnReady();
-            _lavaSocketClient.OnTrackFinished += TrackFinished;
+            _client.Ready += OnReadyAsync;
+            _lavaNode.OnTrackEnded += TrackFinished;
         }
 
+        private async Task OnReadyAsync() => 
+            await _lavaNode.ConnectAsync().ConfigureAwait(false);
+
         public async Task ConnectAsync(SocketVoiceChannel voiceChannel, ITextChannel textChannel)
-            => await _lavaSocketClient.ConnectAsync(voiceChannel, textChannel).ConfigureAwait(false);
+            => await _lavaNode.JoinAsync(voiceChannel, textChannel).ConfigureAwait(false);
         
         public async Task LeaveAsync(SocketVoiceChannel voiceChannel)
-            => await _lavaSocketClient.DisconnectAsync(voiceChannel).ConfigureAwait(false);
+            => await _lavaNode.LeaveAsync(voiceChannel).ConfigureAwait(false);
 
         public async Task QueueAsync(ICommandContext ctx, string query)
         {
-            var player = _lavaSocketClient.GetPlayer(ctx.Guild.Id);
-            var result = await _lavaRestClient.SearchYouTubeAsync(query).ConfigureAwait(false);
+            var player = _lavaNode.GetPlayer(ctx.Guild);
+            var result = await _lavaNode.SearchYouTubeAsync(query).ConfigureAwait(false);
 
             if (result.LoadType == LoadType.NoMatches || result.LoadType == LoadType.LoadFailed)
             {
@@ -50,12 +52,12 @@ namespace Roki.Modules.Music.Services
             var track = result.Tracks.FirstOrDefault();
 
             var embed = new EmbedBuilder().WithOkColor();
-            if (player.IsPlaying)
+            if (player.PlayerState == PlayerState.Playing)
             {
                 player.Queue.Enqueue(track);
                 embed.WithAuthor($"Queued: #{player.Queue.Count}", "http://i.imgur.com/nhKS3PT.png")
                     .WithDescription($"{track.PrettyTrack()}")
-                    .WithFooter(track.PrettyFooter(player.CurrentVolume));
+                    .WithFooter(track.PrettyFooter(player.Volume));
                 var msg = await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 msg.DeleteAfter(10);
             }
@@ -64,7 +66,7 @@ namespace Roki.Modules.Music.Services
                 await player.PlayAsync(track).ConfigureAwait(false);
                 embed.WithAuthor($"Playing song", "http://i.imgur.com/nhKS3PT.png")
                     .WithDescription($"{track.PrettyTrack()}")
-                    .WithFooter(track.PrettyFooter(player.CurrentVolume));
+                    .WithFooter(track.PrettyFooter(player.Volume));
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
             
@@ -75,7 +77,7 @@ namespace Roki.Modules.Music.Services
         {
             if (!await IsPlayerActive(ctx))
                 return;
-            var player = _lavaSocketClient.GetPlayer(ctx.Guild.Id);
+            var player = _lavaNode.GetPlayer(ctx.Guild);
             
             await player.PauseAsync().ConfigureAwait(false);
             var embed = new EmbedBuilder().WithOkColor()
@@ -88,11 +90,11 @@ namespace Roki.Modules.Music.Services
         {
             if (!await IsPlayerActive(ctx))
                 return;
-            var player = _lavaSocketClient.GetPlayer(ctx.Guild.Id);
+            var player = _lavaNode.GetPlayer(ctx.Guild);
             
             try
             {
-                var currTrack = player.CurrentTrack;
+                var currTrack = player.Track;
                 await player.SkipAsync().ConfigureAwait(false);
                 var embed = new EmbedBuilder().WithOkColor()
                     .WithAuthor("Skipped song")
@@ -110,7 +112,7 @@ namespace Roki.Modules.Music.Services
         {
             if (!await IsPlayerActive(ctx))
                 return;
-            var player = _lavaSocketClient.GetPlayer(ctx.Guild.Id);
+            var player = _lavaNode.GetPlayer(ctx.Guild);
             
             var queue = player.Queue.Items.Cast<LavaTrack>().ToArray();
             if (--page < -1)
@@ -132,10 +134,10 @@ namespace Roki.Modules.Music.Services
                     .Take(itemsPerPage)
                     .Select(t => $"`{number++}.` {t.PrettyFullTrack()}"));
 
-                desc = $"`🔊` {player.CurrentTrack.PrettyFullTrack()}\n\n" + desc;
+                desc = $"`🔊` {player.Track.PrettyFullTrack()}\n\n" + desc;
 
                 var pStatus = "";
-                if (player.IsPaused)
+                if (player.PlayerState == PlayerState.Paused)
                     pStatus += Format.Bold($"Player is paused. Use {Format.Code(".play")}` command to start playing.");
 
                 if (!string.IsNullOrWhiteSpace(pStatus))
@@ -144,7 +146,7 @@ namespace Roki.Modules.Music.Services
                 var embed = new EmbedBuilder().WithOkColor()
                     .WithAuthor($"Player queue - Page {curPage + 1}/{Math.Ceiling((double) queue.Length / itemsPerPage)}", "http://i.imgur.com/nhKS3PT.png")
                     .WithDescription(desc)
-                    .WithFooter($"🔉 {player.CurrentVolume}% | {queue.Length} tracks | {totalStr}");
+                    .WithFooter($"🔉 {player.Volume}% | {queue.Length} tracks | {totalStr}");
                 return embed;
             }
 
@@ -155,7 +157,7 @@ namespace Roki.Modules.Music.Services
         {
             if (!await IsPlayerActive(ctx))
                 return;
-            var player = _lavaSocketClient.GetPlayer(ctx.Guild.Id);
+            var player = _lavaNode.GetPlayer(ctx.Guild);
             index -= 1;
             if (index < 0 || index > player.Queue.Count)
             {
@@ -173,15 +175,15 @@ namespace Roki.Modules.Music.Services
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
-        public async Task SetVolumeAsync(ICommandContext ctx, int volume)
+        public async Task SetVolumeAsync(ICommandContext ctx, ushort volume)
         {
             if (!await IsPlayerActive(ctx))
                 return;
-            var player = _lavaSocketClient.GetPlayer(ctx.Guild.Id);
+            var player = _lavaNode.GetPlayer(ctx.Guild);
 
-            await player.SetVolumeAsync(volume).ConfigureAwait(false);
+            await player.UpdateVolumeAsync(volume).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithOkColor()
-                .WithDescription($"Volume set to {player.CurrentVolume}.");
+                .WithDescription($"Volume set to {player.Volume}.");
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
@@ -189,54 +191,48 @@ namespace Roki.Modules.Music.Services
         {
             if (!await IsPlayerActive(ctx))
                 return;
-            var player = _lavaSocketClient.GetPlayer(ctx.Guild.Id);
+            var player = _lavaNode.GetPlayer(ctx.Guild);
 
-            var currTime = player.CurrentTrack.Position;
+            var currTime = player.Track.Position;
             var addedTime = currTime.Add(new TimeSpan(0, 0, seconds));
 
-            if (addedTime > player.CurrentTrack.Length)
+            if (addedTime > player.Track.Duration)
             {
                 await ctx.Channel.SendErrorAsync("Cannot seek that far.").ConfigureAwait(false);
                 return;
             }
-            
+
             await player.SeekAsync(addedTime).ConfigureAwait(false);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                 .WithDescription($"Skipped {seconds} seconds.")).ConfigureAwait(false);
         }
 
-        private Task OnReady()
+        private async Task TrackFinished(TrackEndedEventArgs args)
         {
-            _lavaSocketClient.StartAsync(_client).ConfigureAwait(false);
-            return Task.CompletedTask;
-        }
-
-        private static async Task TrackFinished(LavaPlayer player, LavaTrack track, TrackEndReason reason)
-        {
-            if (!reason.ShouldPlayNext())
+            if (!args.Reason.ShouldPlayNext())
                 return;
 
-            await player.TextChannel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithOkColor()
                 .WithAuthor($"Finished song", "http://i.imgur.com/nhKS3PT.png")
-                .WithDescription(track.PrettyTrack())
-                .WithFooter(track.PrettyFooter(player.CurrentVolume))).ConfigureAwait(false);
+                .WithDescription(args.Player.Track.PrettyTrack())
+                .WithFooter(args.Player.Track.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
 
-            if (!player.Queue.TryDequeue(out var item) || !(item is LavaTrack nextTrack))
+            if (!args.Player.Queue.TryDequeue(out _))
             {
-                await player.TextChannel.SendErrorAsync("Finished player queue").ConfigureAwait(false);
+                await args.Player.TextChannel.SendErrorAsync("Finished player queue").ConfigureAwait(false);
                 return;
             }
 
-            await player.TextChannel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithOkColor()
                 .WithAuthor($"Playing song", "http://i.imgur.com/nhKS3PT.png")
-                .WithDescription($"{track.PrettyTrack()}")
-                .WithFooter(track.PrettyFooter(player.CurrentVolume))).ConfigureAwait(false);
-            await player.PlayAsync(nextTrack).ConfigureAwait(false);
+                .WithDescription($"{args.Player.Track.PrettyTrack()}")
+                .WithFooter(args.Player.Track.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
+            await args.Player.PlayAsync(args.Player.Track).ConfigureAwait(false);
         }
 
         private async Task<bool> IsPlayerActive(ICommandContext ctx)
         {
-            var player = _lavaSocketClient.GetPlayer(ctx.Guild.Id);
+            var player = _lavaNode.GetPlayer(ctx.Guild);
             if (player != null) return true;
             await ctx.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
             return false;
