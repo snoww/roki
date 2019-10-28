@@ -21,25 +21,25 @@ namespace Roki.Modules.Gambling
         {
             private readonly ICurrencyService _currency;
             private readonly DbService _db;
-            private const string Stone = "<:stone:269130892100763649>";
+            private readonly Roki _roki;
             
-            public LotteryCommands(ICurrencyService currency, DbService db)
+            public LotteryCommands(ICurrencyService currency, DbService db, Roki roki)
             {
                 _currency = currency;
                 _db = db;
-                
+                _roki = roki;
             }
             
             [RokiCommand, Description, Usage, Aliases]
             public async Task Jackpot()
             {
-                var jackpot = (long) (_currency.GetCurrency(ctx.Client.CurrentUser.Id) * 0.9);
-                if (jackpot < 1000)
+                var jackpot = (long) (_currency.GetCurrency(ctx.Client.CurrentUser.Id) * _roki.Properties.LotteryJackpot);
+                if (jackpot < _roki.Properties.LotteryMin)
                     await ctx.Channel.SendErrorAsync("The lottery is currently down. Please check back another time.").ConfigureAwait(false);
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle("Stone Lottery")
-                        .WithDescription($"Current Jackpot: {Format.Bold(jackpot.ToString())} {Stone}"))
+                        .WithDescription($"Current Jackpot: {Format.Bold(jackpot.ToString())} {_roki.Properties.CurrencyIcon}"))
                     .ConfigureAwait(false);
             }
 
@@ -53,11 +53,11 @@ namespace Roki.Modules.Gambling
                     return;
                 }
                 var user = ctx.User;
-                var removed = await _currency.ChangeAsync(ctx.User, $"Lottery Entry x{tickets}", -tickets * 10, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}",
+                var removed = await _currency.ChangeAsync(ctx.User, $"Lottery Entry x{tickets}", -tickets * _roki.Properties.LotteryTicketCost, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}",
                     ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id).ConfigureAwait(false);
                 if (!removed)
                 {
-                    await ctx.Channel.SendErrorAsync($"{ctx.User.Mention} you do not have enough currency to join the lottery.")
+                    await ctx.Channel.SendErrorAsync($"{ctx.User.Mention} you do not have enough {_roki.Properties.CurrencyIcon} to join the lottery.")
                         .ConfigureAwait(false);
                     return;
                 }
@@ -100,11 +100,11 @@ namespace Roki.Modules.Gambling
                     }
                 }
                 var user = ctx.User;
-                var removed = await _currency.ChangeAsync(ctx.User, "Lottery Entry", -10, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}",
+                var removed = await _currency.ChangeAsync(ctx.User, "Lottery Entry", -_roki.Properties.LotteryTicketCost, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}",
                     ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id).ConfigureAwait(false);
                 if (!removed)
                 {
-                    await ctx.Channel.SendErrorAsync($"{ctx.User.Mention} you do not have enough currency to join the lottery.")
+                    await ctx.Channel.SendErrorAsync($"{ctx.User.Mention} you do not have enough {_roki.Properties.CurrencyIcon} to join the lottery.")
                         .ConfigureAwait(false);
                     return;
                 }
