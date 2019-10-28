@@ -33,11 +33,11 @@ namespace Roki.Core.Services.Database
         }
 
         public RokiContext Context { get; }
-        public IQuoteRepository Quotes => _quotes ?? (_quotes = new QuoteRepository(Context));
-        public IDUserRepository DUsers => _dUsers ?? (_dUsers = new DUserRepository(Context));
-        public IDMessageRepository DMessages => _dMessages ?? (_dMessages = new DMessageRepository(Context));
-        public ICurrencyTransactionRepository Transaction => _transaction ?? (_transaction = new CurrencyTransactionRepository(Context));
-        public ILotteryRepository Lottery => _lottery ?? (_lottery = new LotteryRepository(Context));
+        public IQuoteRepository Quotes => _quotes ??= new QuoteRepository(Context);
+        public IDUserRepository DUsers => _dUsers ??= new DUserRepository(Context);
+        public IDMessageRepository DMessages => _dMessages ??= new DMessageRepository(Context);
+        public ICurrencyTransactionRepository Transaction => _transaction ??= new CurrencyTransactionRepository(Context);
+        public ILotteryRepository Lottery => _lottery ??= new LotteryRepository(Context);
 
         public int SaveChanges()
         {
