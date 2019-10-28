@@ -32,7 +32,7 @@ namespace Roki.Modules.Currency
                 {
                     IUserMessage msg;
                     if (picked == 1)
-                        msg = await ctx.Channel.SendMessageAsync($"{ctx.User.Username} picked up 1 {_roki.Properties}.").ConfigureAwait(false);
+                        msg = await ctx.Channel.SendMessageAsync($"{ctx.User.Username} picked up 1 {_roki.Properties.CurrencyName}.").ConfigureAwait(false);
                     else
                         msg = await ctx.Channel.SendMessageAsync($"{ctx.User.Username} picked up {picked} {_roki.Properties.CurrencyNamePlural}.").ConfigureAwait(false);
 
