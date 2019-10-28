@@ -31,11 +31,12 @@ namespace Roki.Modules.Currency.Services
         
         private async Task CurrencyGeneration(IUserMessage message)
         {
-            if (!(message is SocketUserMessage msg))
+            if (!(message is SocketUserMessage))
                 return;
             if (!(message.Channel is ITextChannel channel))
                 return;
-            // TODO add ignored channels, change constants to database values
+            if (_roki.Properties.CurrencyGenIgnoredChannels.Contains(channel.Id))
+                return;
 
             var lastGeneration = LastGenerations.GetOrAdd(channel.Id, DateTime.MinValue);
             var rng = new Random();
