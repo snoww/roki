@@ -70,7 +70,7 @@ WHERE id = {id} ")
 
         public bool XpBoostIsActive(ulong userId)
         {
-            return GetUserSubscriptions(userId).Any(s => s.Description.Contains("xp", StringComparison.InvariantCulture));
+            return GetUserSubscriptions(userId).Any(s => s.Description.Contains("xp", StringComparison.OrdinalIgnoreCase));
         }
     }
 }
