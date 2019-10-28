@@ -15,15 +15,17 @@ namespace Roki.Modules.Currency.Services
     {
         private readonly CommandHandler _cmdHandler;
         private readonly DbService _db;
+        private readonly Roki _roki;
 
-        public ConcurrentDictionary<ulong, DateTime> LastGenerations { get; } = new ConcurrentDictionary<ulong, DateTime>();
+        private ConcurrentDictionary<ulong, DateTime> LastGenerations { get; } = new ConcurrentDictionary<ulong, DateTime>();
         private readonly SemaphoreSlim _pickLock = new SemaphoreSlim(1, 1);
 
 
-        public PickDropService(CommandHandler cmdHandler, DbService db)
+        public PickDropService(CommandHandler cmdHandler, DbService db, Roki roki)
         {
             _cmdHandler = cmdHandler;
             _db = db;
+            _roki = roki;
             _cmdHandler.OnMessageNoTrigger += CurrencyGeneration;
         }
         
@@ -41,23 +43,23 @@ namespace Roki.Modules.Currency.Services
             if (DateTime.UtcNow - TimeSpan.FromMinutes(5) < lastGeneration)
                 return;
 
-            var num = rng.Next(0, 100) + 5;
+            var num = rng.Next(0, 100) + _roki.Properties.CurrencyGenerationChance * 100;
             if (num > 100 && LastGenerations.TryUpdate(channel.Id, DateTime.UtcNow, lastGeneration))
             {
-                var drop = 1;
-                var dropMax = 5;
+                var drop = _roki.Properties.CurrencyDropAmount;
+                var dropMax = _roki.Properties.CurrencyDropAmountMax;
                 
                 if (dropMax != null && dropMax > drop)
-                    drop = new Random().Next(drop, dropMax + 1);
+                    drop = new Random().Next(drop, dropMax.Value + 1);
                 if (new Random().Next(0, 101) == 100)
-                    drop = 100;
+                    drop = _roki.Properties.CurrencyDropAmountRare ?? 100;
                 
                 if (drop > 0)
                 {
-                    var prefix = _cmdHandler.DefaultPrefix;
+                    var prefix = _roki.Properties.Prefix;
                     var toSend = drop == 1
-                        ? $"<:stone:269130892100763649> A random stone appeared! Type `{prefix}pick` to pick it up."
-                        : $"<:stone:269130892100763649> {drop} random stones appeared! Type `{prefix}pick` to pick them up.";
+                        ? $"{_roki.Properties.CurrencyIcon} A random {_roki.Properties.CurrencyName} appeared! Type `{prefix}pick` to pick it up."
+                        : $"{_roki.Properties.CurrencyIcon} {drop} random {_roki.Properties.CurrencyNamePlural} appeared! Type `{prefix}pick` to pick them up.";
                     // TODO add images to send with drop
                     var curMessage = await channel.SendMessageAsync(toSend).ConfigureAwait(false);
                     using var uow = _db.GetDbContext();
@@ -76,7 +78,7 @@ namespace Roki.Modules.Currency.Services
             }
         }
 
-        public async Task<long> PickAsync(ulong guildId, ITextChannel channel, IUser user)
+        public async Task<long> PickAsync(ITextChannel channel, IUser user)
         {
             await _pickLock.WaitAsync();
             try
@@ -125,7 +127,7 @@ namespace Roki.Modules.Currency.Services
 
             if (!updated) return false;
                 
-            var msg = await ctx.Channel.SendMessageAsync($"{user.Username} dropped {amount} <:stone:269130892100763649>\nType `.pick` to pick it up.");
+            var msg = await ctx.Channel.SendMessageAsync($"{user.Username} dropped {amount} {_roki.Properties.CurrencyIcon}\nType `.pick` to pick it up.");
 
             uow.Transaction.Add(new CurrencyTransaction
             {
