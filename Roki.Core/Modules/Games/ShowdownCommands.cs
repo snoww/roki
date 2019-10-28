@@ -25,6 +25,7 @@ namespace Roki.Modules.Games
         {
             private readonly DiscordSocketClient _client;
             private readonly ICurrencyService _currency;
+            private readonly Roki _roki;
             private const string Gen7SpriteUrl = "http://play.pokemonshowdown.com/sprites/xydex/";
             private const string Gen6SpriteUrl = "http://play.pokemonshowdown.com/sprites/xy/";
             private const string Gen5SpriteUrl = "http://play.pokemonshowdown.com/sprites/gen5/";
@@ -59,10 +60,11 @@ namespace Roki.Modules.Games
                 {TimesTen, 0},
             };
             
-            public ShowdownCommands(DiscordSocketClient client, ICurrencyService currency)
+            public ShowdownCommands(DiscordSocketClient client, ICurrencyService currency, Roki roki)
             {
                 _client = client;
                 _currency = currency;
+                _roki = roki;
             }
             
             private enum BetPlayer
@@ -138,7 +140,7 @@ namespace Roki.Modules.Games
                     
                     var start = new EmbedBuilder().WithOkColor()
                         .WithTitle($"[Gen {generation}] Random Battle - ID: `{uid}`")
-                        .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 20 100` means betting on 130 on P1.")
+                        .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 100` means betting on 110 on P1.")
                         .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
                         .AddField("Player 1", string.Join('\n', intro[0]), true)
                         .AddField("Player 2", string.Join('\n', intro[1]), true);
@@ -201,13 +203,14 @@ namespace Roki.Modules.Games
                                 joinedReactions[user].Amount += _reactionMap[reaction.Emote];
                             else
                             {
-                                var notEnoughMsg = await ctx.Channel.SendErrorAsync($"<@{reaction.User.Value.Id}> You do not have enough currency to make that bet.").ConfigureAwait(false);
-                                await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, RequestOptions.Default).ConfigureAwait(false);
+                                var notEnoughMsg = await ctx.Channel.SendErrorAsync($"<@{reaction.User.Value.Id}> You do not have enough {_roki.Properties.CurrencyIcon} to make that bet.")
+                                    .ConfigureAwait(false);
+                                await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
                                 notEnoughMsg.DeleteAfter(5);
                             }
                             return Task.CompletedTask;
                         }
-                        await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, RequestOptions.Default).ConfigureAwait(false);
+                        await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
                         return Task.CompletedTask;
                     });
                     
@@ -245,7 +248,7 @@ namespace Roki.Modules.Games
                         continue;
                     }
                     var won = value.Amount * 2;
-                    winners += $"{key.Username} won {won} stones\n";
+                    winners += $"{key.Username} won {won} {_roki.Properties.CurrencyIcon}\n";
                     await _currency.ChangeAsync(key, "BetShowdown Payout", won, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
                 }
