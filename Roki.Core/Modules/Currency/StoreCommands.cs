@@ -144,6 +144,10 @@ namespace Roki.Modules.Currency
                         }
                         break;
                     case Category.Boost:
+                        if (await _service.GetOrUpdateSubAsync(buyer.Id, listing.Id, listing.SubscriptionDays ?? 7)) break;
+                        await _service.AddNewSubscriptionAsync(buyer.Id, listing.Id, listing.ItemDetails, DateTime.UtcNow, 
+                            DateTime.UtcNow + new TimeSpan(listing.SubscriptionDays ?? 7, 0, 0, 0)
+                        ).ConfigureAwait(false);
                         break;
                     case Category.Digital:
                     case Category.Virtual:

@@ -23,7 +23,7 @@ namespace Roki.Core.Services.Database.Repositories
         Task LotteryAwardAsync(ulong userId, long amount);
         Task UpdateBotCurrencyAsync(ulong botId, long amount);
         IEnumerable<DUser> GetCurrencyLeaderboard(ulong botId, int page);
-        Task UpdateXp(DUser dUser, SocketMessage message);
+        Task UpdateXp(DUser dUser, SocketMessage message, bool boost = false);
         Task ChangeNotificationLocation(ulong userId, byte notify);
     }
 
@@ -129,13 +129,16 @@ WHERE UserId={botId}
                 .ToList();
         }
 
-        public async Task UpdateXp(DUser dUser, SocketMessage message)
+        public async Task UpdateXp(DUser dUser, SocketMessage message, bool boost = false)
         {
             var user = Set.FirstOrDefault(u => u.Equals(dUser));
             if (user == null) return;
             var level = new XpLevel(user.TotalXp);
-            // TODO lower xp per message afterwards
-            var xp = user.TotalXp + 5;
+            int xp;
+            if (boost)
+                xp = user.TotalXp + 10;
+            else 
+                xp = user.TotalXp + 5;
             var newLevel = new XpLevel(xp);
             if (newLevel.Level > level.Level)
             {
@@ -148,6 +151,7 @@ WHERE UserId={user.UserId};
 ").ConfigureAwait(false);
                 
                 await SendNotification(user, message, new XpLevel(xp).Level).ConfigureAwait(false);
+                return;
             }
             
             await Context.Database.ExecuteSqlCommandAsync($@"
