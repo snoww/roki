@@ -88,8 +88,8 @@ namespace Roki
                 .AddSingleton(_db)
                 .AddSingleton(Client)
                 .AddSingleton(CommandService)
-                .AddSingleton<LavaSocketClient>()
-                .AddSingleton<LavaRestClient>()
+                .AddSingleton<LavaConfig>()
+                .AddSingleton<LavaNode>()
                 .AddSingleton(_db.GetDbContext())
                 .AddSingleton(this);
 

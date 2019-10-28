@@ -11,13 +11,14 @@ namespace Roki.Modules.Music
     public partial class Music : RokiTopLevelModule<MusicService>
     {
         [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
         public async Task Queue([Leftover] string query)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
             var user = ctx.User as SocketGuildUser;
             
-            await _service.ConnectAsync(user.VoiceChannel, ctx.Channel as ITextChannel).ConfigureAwait(false);
+            await _service.ConnectAsync(user?.VoiceChannel, ctx.Channel as ITextChannel).ConfigureAwait(false);
             await _service.QueueAsync(ctx, query).ConfigureAwait(false);
         }
 
@@ -86,7 +87,7 @@ namespace Roki.Modules.Music
                 return;
             }
             
-            await _service.SetVolumeAsync(ctx, volume).ConfigureAwait(false);
+            await _service.SetVolumeAsync(ctx, (ushort) volume).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
