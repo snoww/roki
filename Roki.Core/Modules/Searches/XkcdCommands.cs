@@ -1,9 +1,9 @@
 using System;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Newtonsoft.Json;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Searches.Common;
@@ -34,7 +34,7 @@ namespace Roki.Modules.Searches
                             ? await http.GetStringAsync($"{XkcdUrl}/info.0.json").ConfigureAwait(false)
                             : await http.GetStringAsync($"{XkcdUrl}/{num}/info.0.json").ConfigureAwait(false);
 
-                        var xkcd = JsonConvert.DeserializeObject<XkcdModel>(result);
+                        var xkcd = JsonSerializer.Deserialize<XkcdModel>(result);
                         var embed = new EmbedBuilder().WithOkColor()
                             .WithAuthor(xkcd.Title, "https://xkcd.com/s/919f27.ico", $"{XkcdUrl}/{xkcd.Num}")
                             .WithImageUrl(xkcd.Img)

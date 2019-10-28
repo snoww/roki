@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using Discord;
-using Newtonsoft.Json;
 using PokeApiNet.Models;
 using Roki.Core.Services;
 using Roki.Extensions;
@@ -13,7 +13,7 @@ namespace Roki.Modules.Searches.Services
 {
     public class PokemonService : IRService
     {
-        private static readonly Dictionary<string, PokemonData> Data = JsonConvert.DeserializeObject<Dictionary<string, PokemonData>>(File.ReadAllText("./_strings/pokemon/pokemon.json"));
+        private static readonly Dictionary<string, PokemonData> Data = JsonSerializer.Deserialize<Dictionary<string, PokemonData>>(File.ReadAllText("./_strings/pokemon/pokemon.json"));
         
         public Color GetColorOfPokemon(string color)
         {

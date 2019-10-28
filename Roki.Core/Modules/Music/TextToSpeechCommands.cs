@@ -4,9 +4,10 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Discord.Commands;
-using Newtonsoft.Json;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 
@@ -44,7 +45,7 @@ namespace Roki.Modules.Music
                     var content = new StringContent(queryString, Encoding.UTF8, "application/json");
                     var result = await http.PostAsync(_api, content).ConfigureAwait(false);
 
-                    var tts = JsonConvert.DeserializeObject<TtsModel>(await result.Content.ReadAsStringAsync().ConfigureAwait(false));
+                    var tts = JsonSerializer.Deserialize<TtsModel>(await result.Content.ReadAsStringAsync().ConfigureAwait(false));
                     if (tts.Success)
                     {
                         var guid = Guid.NewGuid().ToString().Substring(0, 7);
@@ -84,7 +85,7 @@ namespace Roki.Modules.Music
     public class TtsModel
     {
         public bool Success { get; set; }
-        [JsonProperty("speak_url")]
+        [JsonPropertyName("speak_url")]
         public string SpeakUrl { get; set; }
     }
 }

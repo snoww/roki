@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Roki.Core.Services;
 using Roki.Extensions;
 
@@ -31,7 +30,7 @@ namespace Roki.Modules.Searches.Services
                     var newQuery = _queryJson.Replace("searchString", query);
                     var content = new StringContent(newQuery, Encoding.UTF8, "application/json");
                     var result = await http.PostAsync("https://graphql.anilist.co", content).ConfigureAwait(false);
-                    var model = JsonConvert.DeserializeObject<AnimeModel>(await result.Content.ReadAsStringAsync().ConfigureAwait(false));
+                    var model = JsonSerializer.Deserialize<AnimeModel>(await result.Content.ReadAsStringAsync().ConfigureAwait(false));
                     var media = model.Data.Page.Media;
                     return media;
                 }

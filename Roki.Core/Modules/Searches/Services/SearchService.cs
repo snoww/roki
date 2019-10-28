@@ -2,9 +2,9 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Discord.WebSocket;
-using Newtonsoft.Json;
 using NLog;
 using Roki.Core.Services;
 using Roki.Extensions;
@@ -59,7 +59,7 @@ namespace Roki.Modules.Searches.Services
                 using var http = _httpFactory.CreateClient();
                 var result = await http.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={arg}&key={_config.GoogleApi}")
                     .ConfigureAwait(false);
-                var obj = JsonConvert.DeserializeObject<GeolocationResult>(result);
+                var obj = JsonSerializer.Deserialize<GeolocationResult>(result);
                 if (obj?.Results == null || obj.Results.Length == 0)
                 {
                     _log.Warn("Geocode lookup failed for {0}", arg);
@@ -71,7 +71,7 @@ namespace Roki.Modules.Searches.Services
                     .GetStringAsync(
                         $"https://maps.googleapis.com/maps/api/timezone/json?location={obj.Results[0].Geometry.Location.Lat},{obj.Results[0].Geometry.Location.Lng}&timestamp={currentSeconds}&key={_config.GoogleApi}")
                     .ConfigureAwait(false);
-                var timeObj = JsonConvert.DeserializeObject<TimeZoneResult>(timeResult);
+                var timeObj = JsonSerializer.Deserialize<TimeZoneResult>(timeResult);
                 var time = DateTime.UtcNow.AddSeconds(timeObj.DstOffset + timeObj.RawOffset);
 
                 var toReturn = new TimeData
@@ -99,7 +99,7 @@ namespace Roki.Modules.Searches.Services
         {
             using var http = _httpFactory.CreateClient();
             var result = await http.GetStringAsync($"http://www.omdbapi.com/?t={name.Trim().Replace(' ', '+')}&apikey={_config.OmdbApi}&y=&plot=full&r=json").ConfigureAwait(false);
-            var movie = JsonConvert.DeserializeObject<OmdbMovie>(result);
+            var movie = JsonSerializer.Deserialize<OmdbMovie>(result);
             return movie?.Title == null ? null : movie;
         }
 
@@ -107,7 +107,7 @@ namespace Roki.Modules.Searches.Services
         {
             using var http = _httpFactory.CreateClient();
             var result = await http.GetStringAsync("https://aws.random.cat/meow").ConfigureAwait(false);
-            var cat = JsonConvert.DeserializeAnonymousType(result, new {File = ""}).File;
+            var cat = JsonDocument.Parse(result).RootElement.GetProperty("file").GetString();
 
             using var client = new WebClient();
             var uri = new Uri(cat);
@@ -120,7 +120,7 @@ namespace Roki.Modules.Searches.Services
         {
             using var http = _httpFactory.CreateClient();
             var result = await http.GetStringAsync("https://random.dog/woof.json").ConfigureAwait(false);
-            var dog = JsonConvert.DeserializeAnonymousType(result, new {Url = ""}).Url;
+            var dog = JsonDocument.Parse(result).RootElement.GetProperty("url").GetString();
 
             using var client = new WebClient();
             var uri = new Uri(dog);
@@ -133,7 +133,7 @@ namespace Roki.Modules.Searches.Services
         {
             using var http = _httpFactory.CreateClient();
             var result = await http.GetStringAsync("https://catfact.ninja/fact").ConfigureAwait(false);
-            var fact = JsonConvert.DeserializeAnonymousType(result, new {Fact = ""}).Fact;
+            var fact = JsonDocument.Parse(result).RootElement.GetProperty("fact").GetString();
 
             return fact;
         }

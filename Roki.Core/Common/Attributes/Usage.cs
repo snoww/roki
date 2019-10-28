@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Discord.Commands;
-using Newtonsoft.Json;
 using Roki.Core.Services;
 
 namespace Roki.Common.Attributes
@@ -16,7 +16,7 @@ namespace Roki.Common.Attributes
         public static string GetUsage(string memberName)
         {
             var usage = Localization.LoadCommand(memberName.ToLowerInvariant()).Usage;
-            return JsonConvert.SerializeObject(usage);
+            return JsonSerializer.Serialize(usage);
         }
     }
 }

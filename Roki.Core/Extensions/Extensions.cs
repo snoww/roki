@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using NLog;
 using Roki.Common;
 using Roki.Core.Services;
@@ -151,7 +151,7 @@ namespace Roki.Extensions
 
         public static string RealRemarks(this CommandInfo cmd, string prefix)
         {
-            return string.Join(" or ", JsonConvert.DeserializeObject<string[]>(cmd.Remarks).Select(x => Format.Code(string.Format(x, prefix))));
+            return string.Join(" or ", JsonSerializer.Deserialize<string[]>(cmd.Remarks).Select(x => Format.Code(string.Format(x, prefix))));
         }
 
         public static double UnixTimestamp(this DateTime dt)

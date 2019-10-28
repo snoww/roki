@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Roki.Core.Services;
 using Roki.Modules.Searches.Common;
 
@@ -14,7 +14,7 @@ namespace Roki.Modules.Games.Services
     public class ShowdownService : IRService
     {
         public readonly ConcurrentDictionary<ulong, string> Games = new ConcurrentDictionary<ulong, string>();
-        private static readonly Dictionary<string, PokemonData> Data = JsonConvert.DeserializeObject<Dictionary<string, PokemonData>>(File.ReadAllText("./_strings/pokemon/pokemon.json"));
+        private static readonly Dictionary<string, PokemonData> Data = JsonSerializer.Deserialize<Dictionary<string, PokemonData>>(File.ReadAllText("./_strings/pokemon/pokemon.json"));
         
         public ShowdownService()
         {
