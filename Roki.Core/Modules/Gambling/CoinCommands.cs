@@ -19,11 +19,13 @@ namespace Roki.Modules.Gambling
             private readonly DbService _db;
             private readonly ICurrencyService _currency;
             private static readonly Random Rng = new Random();
+            private readonly Roki _roki;
 
-            public CoinCommands(DbService db, ICurrencyService currency)
+            public CoinCommands(DbService db, ICurrencyService currency, Roki roki)
             {
                 _db = db;
                 _currency = currency;
+                _roki = roki;
             }
             
             public enum BetFlipGuess
@@ -40,8 +42,12 @@ namespace Roki.Modules.Gambling
             public async Task BetFlip(long amount, BetFlipGuess guess)
             {
                 // TODO min/max bet amounts
-                if (amount <= 0)
+                if (amount < _roki.Properties.BetFlipMin)
+                {
+                    await ctx.Channel.SendErrorAsync($"The minimum bet is {_roki.Properties.BetFlipMin} {_roki.Properties.CurrencyIcon}")
+                        .ConfigureAwait(false);
                     return;
+                }
 
                 var removed = await _currency
                     .ChangeAsync(ctx.User, "BetFlip Entry", -amount, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}", ctx.Guild.Id, ctx.Channel.Id, 
@@ -50,11 +56,12 @@ namespace Roki.Modules.Gambling
 
                 if (!removed)
                 {
-                    await ctx.Channel.SendErrorAsync("Not enough stones.").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync($"Not enough {_roki.Properties.CurrencyIcon}").ConfigureAwait(false);
                     return;
                 }
 
                 BetFlipGuess result;
+                // TODO get images
                 if (Rng.Next(0, 2) == 1)
                 {
                     result = BetFlipGuess.Heads;
@@ -66,9 +73,11 @@ namespace Roki.Modules.Gambling
                 
                 if (guess == result)
                 {
-                    var won = (long) Math.Ceiling(amount * 1.95);
+                    var won = (long) Math.Ceiling(amount * _roki.Properties.BetFlipMultiplier);
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                        .WithDescription($"Result is: {result}\n{ctx.User.Mention} Congratulations! You've won {won} stones")).ConfigureAwait(false);
+                            .WithDescription(
+                                $"Result is: {result}\n{ctx.User.Mention} Congratulations! You've won {won} {_roki.Properties.CurrencyNamePlural}"))
+                        .ConfigureAwait(false);
                     await _currency.ChangeAsync(ctx.User, "BetFlip Payout", won, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
                     return;
@@ -84,16 +93,17 @@ namespace Roki.Modules.Gambling
                 if (amount <= 0)
                     return;
 
-                if (guesses.Length < 5)
+                if (guesses.Length < _roki.Properties.BetFlipMMinGuesses)
                 {
                     await ctx.Channel.SendErrorAsync("Needs at least 5 guesses.").ConfigureAwait(false);
                     return;
                 }
 
                 var minAmount = guesses.Length * 2;
-                if (guesses.Length >= 5 && amount < minAmount)
+                if (guesses.Length >= _roki.Properties.BetFlipMMinGuesses && amount < minAmount)
                 {
-                    await ctx.Channel.SendErrorAsync($"{guesses.Length} guesses requires you to bet at least {minAmount} stones.").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync($"{guesses.Length} guesses requires you to bet at least {minAmount} {_roki.Properties.CurrencyNamePlural}.")
+                        .ConfigureAwait(false);
                     return;
                 }
 
@@ -104,7 +114,7 @@ namespace Roki.Modules.Gambling
 
                 if (!removed)
                 {
-                    await ctx.Channel.SendErrorAsync("Not enough stones.").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync($"Not enough {_roki.Properties.CurrencyIcon}").ConfigureAwait(false);
                     return;
                 }
 
@@ -116,11 +126,12 @@ namespace Roki.Modules.Gambling
 
                 var correct = guesses.Where((t, i) => t == results[i]).Count();
 
-                if ((float) correct / guesses.Length >= 0.75)
+                if ((float) correct / guesses.Length >= _roki.Properties.BetFlipMMinCorrect)
                 {
-                    var won = (long) Math.Ceiling(amount * Math.Pow(correct, 1.1));
+                    var won = (long) Math.Ceiling(amount * Math.Pow(correct, _roki.Properties.BetFlipMMultiplier));
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                        .WithDescription($"Results are: {string.Join(", ", results)}\n{ctx.User.Mention} Congratulations! You got {correct}/{guesses.Length} correct. You've won {won} stones"))
+                            .WithDescription(
+                                $"Results are: {string.Join(", ", results)}\n{ctx.User.Mention} Congratulations! You got {correct}/{guesses.Length} correct. You've won {won} {_roki.Properties.CurrencyNamePlural}"))
                         .ConfigureAwait(false);
                     await _currency.ChangeAsync(ctx.User, "BetFlipMulti Payout", won, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);

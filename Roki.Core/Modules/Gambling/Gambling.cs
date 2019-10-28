@@ -12,17 +12,19 @@ namespace Roki.Modules.Gambling
     {
         private readonly DbService _db;
         private readonly ICurrencyService _currency;
+        private readonly Roki _roki;
 
-        public Gambling(DbService db, ICurrencyService currency)
+        public Gambling(DbService db, ICurrencyService currency, Roki roki)
         {
             _db = db;
             _currency = currency;
+            _roki = roki;
         }
 
         [RokiCommand, Description, Usage, Aliases]
         public async Task BetRoll(long amount)
         {
-            if (amount <= 0)
+            if (amount < _roki.Properties.BetRollMin)
                 return;
             
             var removed = await _currency
@@ -31,7 +33,7 @@ namespace Roki.Modules.Gambling
                 .ConfigureAwait(false);
             if (!removed)
             {
-                await ctx.Channel.SendErrorAsync("Not enough stones.").ConfigureAwait(false);
+                await ctx.Channel.SendErrorAsync($"Not enough {_roki.Properties.CurrencyIcon}").ConfigureAwait(false);
                 return;
             }
             var roll = new Random().Next(1, 101);
@@ -44,22 +46,16 @@ namespace Roki.Modules.Gambling
             
             long win;
             if (roll < 91)
-            {
-                win = (long) Math.Ceiling(amount * 2.5);
-            }
+                win = (long) Math.Ceiling(amount * _roki.Properties.BetRoll71);
             else if (roll < 100)
-            {
-                win = amount * 4;
-            }
+                win = amount * _roki.Properties.BetRoll92;
             else
-            {
-                win = amount * 10;
-            }
-            
+                win = amount * _roki.Properties.BetRoll100;
+
             await _currency.ChangeAsync(ctx.User, "BetRoll Payout", win, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id, ctx.Channel.Id,
                 ctx.Message.Id);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{rollStr}\nCongratulations, you won {win} stones."));
+                .WithDescription($"{rollStr}\nCongratulations, you won {win} {_roki.Properties.CurrencyIcon}"));
         }
     }
 }
