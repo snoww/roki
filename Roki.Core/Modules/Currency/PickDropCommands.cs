@@ -14,24 +14,27 @@ namespace Roki.Modules.Currency
         [Group]
         public class PickDropCommands : RokiSubmodule<PickDropService>
         {
+            private readonly Roki _roki;
+
+            public PickDropCommands(Roki roki)
+            {
+                _roki = roki;
+            }
+
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
             public async Task Pick()
             {
                 await ctx.Message.DeleteAsync().ConfigureAwait(false);
-                var picked = await _service.PickAsync(ctx.Guild.Id, (ITextChannel) ctx.Channel, ctx.User).ConfigureAwait(false);
+                var picked = await _service.PickAsync((ITextChannel) ctx.Channel, ctx.User).ConfigureAwait(false);
 
                 if (picked > 0)
                 {
                     IUserMessage msg;
                     if (picked == 1)
-                    {
-                        msg = await ctx.Channel.SendMessageAsync($"{ctx.User.Username} picked up 1 stone.").ConfigureAwait(false);
-                    }
+                        msg = await ctx.Channel.SendMessageAsync($"{ctx.User.Username} picked up 1 {_roki.Properties}.").ConfigureAwait(false);
                     else
-                    {
-                        msg = await ctx.Channel.SendMessageAsync($"{ctx.User.Username} picked up {picked} stones.").ConfigureAwait(false);
-                    }
+                        msg = await ctx.Channel.SendMessageAsync($"{ctx.User.Username} picked up {picked} {_roki.Properties.CurrencyNamePlural}.").ConfigureAwait(false);
 
                     msg.DeleteAfter(10);
                 }
@@ -48,7 +51,7 @@ namespace Roki.Modules.Currency
                 var success = await _service.DropAsync(ctx, ctx.User, amount).ConfigureAwait(false);
 
                 if (!success)
-                    await ctx.Channel.SendMessageAsync("You do not have enough <:stone:269130892100763649> to drop.").ConfigureAwait(false);
+                    await ctx.Channel.SendMessageAsync($"You do not have enough {_roki.Properties.CurrencyIcon} to drop.").ConfigureAwait(false);
 
             }
         }

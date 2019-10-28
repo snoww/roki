@@ -17,28 +17,28 @@ namespace Roki.Modules.Currency
     {
         private readonly DbService _db;
         private readonly ICurrencyService _currency;
+        private readonly Roki _roki;
 
-        public Currency(DbService db, ICurrencyService currency)
+        public Currency(DbService db, ICurrencyService currency, Roki roki)
         {
             _db = db;
             _currency = currency;
+            _roki = roki;
         }
 
         private long GetCurrency(ulong userId)
         {
-            using (var uow = _db.GetDbContext())
-            {
-                return uow.DUsers.GetUserCurrency(userId);
-            }
+            using var uow = _db.GetDbContext();
+            return uow.DUsers.GetUserCurrency(userId);
         }
 
         [RokiCommand, Description, Usage, Aliases]
         [RequireContext(ContextType.Guild)]
         public async Task Cash([Leftover] IUser user = null)
         {
-            user = user ?? ctx.User;
+            user ??= ctx.User;
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{user.Mention} has {GetCurrency(user.Id)} stones")).ConfigureAwait(false);
+                .WithDescription($"{user.Mention} has {GetCurrency(user.Id)} {_roki.Properties.CurrencyIcon}")).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -57,7 +57,7 @@ namespace Roki.Modules.Currency
                 var i = 9 * page + 1;
                 foreach (var user in list)
                 {
-                    embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"{user.Currency} <:stone:269130892100763649>");
+                    embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"{user.Currency} {_roki.Properties.CurrencyIcon}");
                 }
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
@@ -79,12 +79,12 @@ namespace Roki.Modules.Currency
 
             if (!success)
             {
-                await ctx.Channel.SendErrorAsync("You do not have enough stones to give.").ConfigureAwait(false);
+                await ctx.Channel.SendErrorAsync($"You do not have enough {_roki.Properties.CurrencyNamePlural} to give.").ConfigureAwait(false);
                 return;
             }
 
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{ctx.User.Username} gifted {amount} stones to {user.Username}")).ConfigureAwait(false);
+                .WithDescription($"{ctx.User.Username} gifted {amount} {_roki.Properties.CurrencyNamePlural} to {user.Username}")).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -123,7 +123,7 @@ namespace Roki.Modules.Currency
                     amount = amount.Insert(0, "-");
                 }
                 var date = Format.Code($"{tran.TransactionDate.ToLocalTime():HH:mm yyyy-MM-dd}");
-                desc += $"{type} {tran.Reason?.Trim()} {date}\n\t\t{Format.Bold(amount)} <:stone:269130892100763649>\n";
+                desc += $"{type} {tran.Reason?.Trim()} {date}\n\t\t{Format.Bold(amount)} {_roki.Properties.CurrencyIcon}\n";
             }
 
             embed.WithDescription(desc)

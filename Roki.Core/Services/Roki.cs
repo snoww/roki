@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -33,6 +35,8 @@ namespace Roki
             _db = new DbService(Config);
             _db.Setup();
 
+            Properties = JsonSerializer.Deserialize<Properties>(File.ReadAllText("./data/roki_options.json"));
+
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 MessageCacheSize = 500,
@@ -54,6 +58,7 @@ namespace Roki
         public RokiConfig Config { get; }
         public DiscordSocketClient Client { get; }
         public CommandService CommandService { get; }
+        public Properties Properties { get; }
         public static Color OkColor { get; set; }
         public static Color ErrorColor { get; set; }
 
