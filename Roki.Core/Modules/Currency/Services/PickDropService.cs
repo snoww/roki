@@ -40,7 +40,7 @@ namespace Roki.Modules.Currency.Services
             var lastGeneration = LastGenerations.GetOrAdd(channel.Id, DateTime.MinValue);
             var rng = new Random();
             
-            if (DateTime.UtcNow - TimeSpan.FromMinutes(5) < lastGeneration)
+            if (DateTime.UtcNow - TimeSpan.FromMinutes(_roki.Properties.CurrencyGenerationCooldown) < lastGeneration)
                 return;
 
             var num = rng.Next(0, 100) + _roki.Properties.CurrencyGenerationChance * 100;
