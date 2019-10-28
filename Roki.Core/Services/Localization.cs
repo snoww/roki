@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
+using System.Text.Json;
 using Roki.Common;
 
 namespace Roki.Core.Services
@@ -8,7 +8,7 @@ namespace Roki.Core.Services
     public class Localization
     {
         private static readonly Dictionary<string, CommandData> CommandData =
-            JsonConvert.DeserializeObject<Dictionary<string, CommandData>>(File.ReadAllText("./_strings/cmd/command_strings.json"));
+            JsonSerializer.Deserialize<Dictionary<string, CommandData>>(File.ReadAllText("./_strings/cmd/command_strings.json"));
 
         public static CommandData LoadCommand(string key)
         {

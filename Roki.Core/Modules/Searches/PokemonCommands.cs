@@ -2,7 +2,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Newtonsoft.Json;
 using PokeApiNet;
 using PokeApiNet.Models;
 using Roki.Common.Attributes;

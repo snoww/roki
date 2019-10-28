@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Roki.Modules.Searches.Common
 {
@@ -7,7 +7,7 @@ namespace Roki.Modules.Searches.Common
         public string Month { get; set; }
         public int Num { get; set; }
         public string Year { get; set; }
-        [JsonProperty("safe_title")]
+        [JsonPropertyName("safe_title")]
         public string Title { get; set; }
         public string Img { get; set; }
     }

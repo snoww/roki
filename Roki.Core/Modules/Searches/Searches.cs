@@ -3,10 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Discord;
-using Newtonsoft.Json;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
 using Roki.Extensions;
@@ -161,7 +160,7 @@ namespace Roki.Modules.Searches
                 .ConfigureAwait(false);
             try
             {
-                var items = JsonConvert.DeserializeObject<UrbanResponse>(response).List;
+                var items = JsonSerializer.Deserialize<UrbanResponse>(response).List;
                 if (items.Any())
                     await ctx.SendPaginatedConfirmAsync(0, p =>
                     {

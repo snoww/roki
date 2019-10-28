@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Roki.Modules.Games.Common
 {
@@ -15,9 +15,9 @@ namespace Roki.Modules.Games.Common
         public string Type { get; set; }
         public string Difficulty { get; set; }
         public string Question { get; set; }
-        [JsonProperty("correct_answer")]
+        [JsonPropertyName("correct_answer")]
         public string Correct { get; set; }
-        [JsonProperty("incorrect_answers")]
+        [JsonPropertyName("incorrect_answers")]
         public string[] Incorrect { get; set; }
     }
 }

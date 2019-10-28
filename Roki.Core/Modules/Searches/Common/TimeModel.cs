@@ -1,4 +1,5 @@
-using Newtonsoft.Json;
+
+using System.Text.Json.Serialization;
 
 namespace Roki.Modules.Searches.Common
 {
@@ -16,7 +17,7 @@ namespace Roki.Modules.Searches.Common
 
         public class GeolocationModel
         {
-            [JsonProperty("formatted_address")] 
+            [JsonPropertyName("formatted_address")] 
             public string FormattedAddress { get; set; }
 
             public GeometryModel Geometry { get; set; }
