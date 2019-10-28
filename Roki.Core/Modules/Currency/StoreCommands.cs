@@ -117,15 +117,14 @@ namespace Roki.Modules.Currency
                 switch (category)
                 {
                     case Category.Role:
-                        var role = ctx.Guild.Roles.First(r => r.Name == listing.ItemDetails);
                         if (type == Type.OneTime)
                         {
-                            await ((IGuildUser) buyer).AddRoleAsync(role);
+                            await ((IGuildUser) buyer).AddRoleAsync(await _service.GetRoleAsync(ctx, listing.ItemDetails).ConfigureAwait(false));
                             break;
                         }
 
                         if (await _service.GetOrUpdateSubAsync(buyer.Id, listing.Id, listing.SubscriptionDays ?? 7)) break;
-                        await ((IGuildUser) buyer).AddRoleAsync(role);
+                        await ((IGuildUser) buyer).AddRoleAsync(await _service.GetRoleAsync(ctx, listing.ItemDetails).ConfigureAwait(false));
                         await _service.AddNewSubscriptionAsync(buyer.Id, listing.Id, listing.ItemDetails, DateTime.UtcNow, 
                                 DateTime.UtcNow + new TimeSpan(listing.SubscriptionDays ?? 7, 0, 0, 0)
                             ).ConfigureAwait(false);
@@ -143,6 +142,8 @@ namespace Roki.Modules.Currency
                             case Power.SlowMode:
                                 break;
                         }
+                        break;
+                    case Category.Boost:
                         break;
                     case Category.Digital:
                     case Category.Virtual:
@@ -201,6 +202,7 @@ namespace Roki.Modules.Currency
             private enum Category
             {
                 Role,
+                Boost,
                 Power,
                 Digital,
                 Virtual,
