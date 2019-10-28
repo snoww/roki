@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using PokeApiNet.Models;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Games.Services;
@@ -126,28 +125,26 @@ namespace Roki.Modules.Games
                         t1.Add(GetPokemonImage(intro[0][i], generation));
                         t2.Add(GetPokemonImage(intro[1][i], generation));
                     }
-                
-                    using (var bitmap1 = t1.MergePokemonTeam())
-                    using (var bitmap2 = t2.MergePokemonTeam())
-                    using (var bitmap = bitmap1.MergeTwoVertical(bitmap2, out var format))
-                    using (var ms = bitmap.ToStream(format))
-                    {
-                        for (int i = 0; i < t1.Count; i++)
-                        {
-                            t1[i].Dispose();
-                            t2[i].Dispose();
-                        }
-                    
-                        var start = new EmbedBuilder().WithOkColor()
-                            .WithTitle($"[Gen {generation}] Random Battle - ID: `{uid}`")
-                            .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 20 100` means betting on 130 on P1.")
-                            .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
-                            .AddField("Player 1", string.Join('\n', intro[0]), true)
-                            .AddField("Player 2", string.Join('\n', intro[1]), true);
 
-                        startMsg = await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: start.Build()).ConfigureAwait(false);
-                        await startMsg.AddReactionsAsync(_reactionMap.Keys.ToArray()).ConfigureAwait(false);
+                    using var bitmap1 = t1.MergePokemonTeam();
+                    using var bitmap2 = t2.MergePokemonTeam();
+                    using var bitmap = bitmap1.MergeTwoVertical(bitmap2, out var format);
+                    await using var ms = bitmap.ToStream(format);
+                    for (int i = 0; i < t1.Count; i++)
+                    {
+                        t1[i].Dispose();
+                        t2[i].Dispose();
                     }
+                    
+                    var start = new EmbedBuilder().WithOkColor()
+                        .WithTitle($"[Gen {generation}] Random Battle - ID: `{uid}`")
+                        .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 20 100` means betting on 130 on P1.")
+                        .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
+                        .AddField("Player 1", string.Join('\n', intro[0]), true)
+                        .AddField("Player 2", string.Join('\n', intro[1]), true);
+
+                    startMsg = await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: start.Build()).ConfigureAwait(false);
+                    await startMsg.AddReactionsAsync(_reactionMap.Keys.ToArray()).ConfigureAwait(false);
                 }
                 catch (Exception e)
                 {
@@ -319,25 +316,23 @@ namespace Roki.Modules.Games
                     t1.Add(GetPokemonImage(intro[0][i], generation));
                     t2.Add(GetPokemonImage(intro[1][i], generation));
                 }
-                
-                using (var bitmap1 = t1.MergePokemonTeam())
-                using (var bitmap2 = t2.MergePokemonTeam())
-                using (var bitmap = bitmap1.MergeTwoVertical(bitmap2, out var format))
-                using (var ms = bitmap.ToStream(format))
-                {
-                    for (int i = 0; i < t1.Count; i++)
-                    {
-                        t1[i].Dispose();
-                        t2[i].Dispose();
-                    }
 
-                    var startEmbed = new EmbedBuilder().WithOkColor()
-                        .WithTitle($"[Gen {generation}] Random Battle Replay - ID: `{uid}`")
-                        .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
-                        .AddField("Player 1", string.Join('\n', intro[0]), true)
-                        .AddField("Player 2", string.Join('\n', intro[1]), true);
-                    await dm.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: startEmbed.Build()).ConfigureAwait(false);
+                using var bitmap1 = t1.MergePokemonTeam();
+                using var bitmap2 = t2.MergePokemonTeam();
+                using var bitmap = bitmap1.MergeTwoVertical(bitmap2, out var format);
+                await using var ms = bitmap.ToStream(format);
+                for (int i = 0; i < t1.Count; i++)
+                {
+                    t1[i].Dispose();
+                    t2[i].Dispose();
                 }
+
+                var startEmbed = new EmbedBuilder().WithOkColor()
+                    .WithTitle($"[Gen {generation}] Random Battle Replay - ID: `{uid}`")
+                    .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
+                    .AddField("Player 1", string.Join('\n', intro[0]), true)
+                    .AddField("Player 2", string.Join('\n', intro[1]), true);
+                await dm.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: startEmbed.Build()).ConfigureAwait(false);
 
                 var turns = _service.ParseTurns(gameTurns);
                 await dm.TriggerTypingAsync().ConfigureAwait(false);
@@ -373,10 +368,8 @@ namespace Roki.Modules.Games
                     genUrl = Gen2SpriteUrl;
                 else
                     genUrl = Gen1SpriteUrl;
-                using (var stream = new MemoryStream(wc.DownloadData(genUrl + sprite + ".png")))
-                {
-                    return Image.Load(stream.ToArray());
-                }
+                using var stream = new MemoryStream(wc.DownloadData(genUrl + sprite + ".png"));
+                return Image.Load(stream.ToArray());
             }
         }
     }
