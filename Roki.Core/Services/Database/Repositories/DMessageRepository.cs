@@ -21,7 +21,7 @@ namespace Roki.Core.Services.Database.Repositories
 
         public void MessageDeleted(ulong messageId)
         {
-            Context.Database.ExecuteSqlRawAsync($@"
+            Context.Database.ExecuteSqlCommandAsync($@"
 UPDATE IGNORE messages
 SET IsDeleted=1
 WHERE MessageId={messageId}
