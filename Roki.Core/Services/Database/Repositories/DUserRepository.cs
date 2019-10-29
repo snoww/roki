@@ -193,7 +193,7 @@ WHERE UserId={userId}")
         {
             var inv = await GetOrCreateUserInventory(userId).ConfigureAwait(false);
             var invObj = (JObject) JToken.FromObject(inv);
-            invObj["key"] = invObj["key"].Value<int>() + value;
+            invObj[key] = invObj[key].Value<int>() + value;
             await Context.Database.ExecuteSqlCommandAsync($@"
 UPDATE IGNORE users
 SET Inventory={invObj.ToString()}

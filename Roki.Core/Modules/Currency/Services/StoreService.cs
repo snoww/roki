@@ -123,6 +123,7 @@ namespace Roki.Modules.Currency.Services
                 var subId = await uow.Subscriptions.CheckSubscription(userId, itemId).ConfigureAwait(false);
                 if (subId == 0) return false;
                 await uow.Subscriptions.UpdateSubscriptionsAsync(subId, days).ConfigureAwait(false);
+                await uow.SaveChangesAsync().ConfigureAwait(false);
                 return true;
             }
         }
@@ -168,6 +169,7 @@ namespace Roki.Modules.Currency.Services
             using (var uow = _db.GetDbContext())
             {
                 await uow.DUsers.UpdateUserInventory(userId, key, value).ConfigureAwait(false);
+                await uow.SaveChangesAsync().ConfigureAwait(false);
             }
         }
     }
