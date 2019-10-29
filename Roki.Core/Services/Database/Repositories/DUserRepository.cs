@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -30,7 +31,7 @@ namespace Roki.Core.Services.Database.Repositories
 
     public class DUserRepository : Repository<DUser>, IDUserRepository
     {
-        private readonly Properties _properties = JsonSerializer.Deserialize<Properties>("./data/properties.json");
+        private readonly Properties _properties = JsonSerializer.Deserialize<Properties>(File.ReadAllText("./data/properties.json"));
         public DUserRepository(DbContext context) : base(context)
         {
         }
