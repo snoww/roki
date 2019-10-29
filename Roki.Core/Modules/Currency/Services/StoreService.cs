@@ -154,5 +154,13 @@ namespace Roki.Modules.Currency.Services
 
             return rRoles.First() ?? first;
         }
+
+        public async Task<Inventory> GetOrUpdateInventoryAsync(ulong userId)
+        {
+            using (var uow = _db.GetDbContext())
+            {
+                return await uow.DUsers.GetOrCreateUserInventory(userId).ConfigureAwait(false);
+            }
+        }
     }
 }

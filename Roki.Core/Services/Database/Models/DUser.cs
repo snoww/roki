@@ -15,8 +15,7 @@ namespace Roki.Core.Services.Database.Models
         public DateTime LastXpGain { get; set; } = DateTime.MinValue;
         public byte NotificationLocation { get; set; } = 1;
         public long Currency { get; set; } = 0;
-        
-        public JsonObject<Inventory> Inventory { get; set; }
+        public string Inventory { get; set; } = null;
         
         public override bool Equals(object obj) => 
             obj is DUser dUser && dUser.UserId == UserId;
