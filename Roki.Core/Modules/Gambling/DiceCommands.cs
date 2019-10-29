@@ -35,7 +35,7 @@ namespace Roki.Modules.Gambling
             {
                 if (amount < _roki.Properties.BetDieMin)
                 {
-                    await ctx.Channel.SendErrorAsync($"The minimum bet for this game is {_roki.Properties.BetDieMin} {_roki.Properties.CurrencyName}")
+                    await ctx.Channel.SendErrorAsync($"The minimum bet for this game is {_roki.Properties.BetDieMin} {_roki.Properties.CurrencyIcon}")
                         .ConfigureAwait(false);
                     return;
                 }
