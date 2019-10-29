@@ -15,11 +15,13 @@ namespace Roki.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly DbService _db;
+        private readonly Roki _roki;
 
-        public MessageService(DiscordSocketClient client, DbService db, CommandHandler cmdHandler)
+        public MessageService(DiscordSocketClient client, DbService db, Roki roki)
         {
             _client = client;
             _db = db;
+            _roki = roki;
         }
 
         public async Task StartService()
@@ -40,7 +42,7 @@ namespace Roki.Services
                 {
                     var user = uow.DUsers.GetOrCreate(message.Author);
                         
-                    if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(5))
+                    if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpCooldown))
                         await uow.DUsers.UpdateXp(user, message).ConfigureAwait(false);
 
                     uow.DMessages.Add(new DMessage
