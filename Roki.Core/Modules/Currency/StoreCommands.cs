@@ -51,7 +51,7 @@ namespace Roki.Modules.Currency
                         return new EmbedBuilder().WithOkColor()
                             .WithTitle("Stone Shop")
                             .WithDescription(catalogStr)
-                            .WithFooter($"Page {page + 1}/{Math.Ceiling((double) cat.Count / itemsPerPage)}");
+                            .WithFooter($"Page {page + 1}/{Math.Ceiling((double) cat.Count / itemsPerPage)} Use .buy to purchase items");
                     }
                                                 
                     await ctx.SendPaginatedConfirmAsync(0, Catalog, cat.Count, 9).ConfigureAwait(false);
