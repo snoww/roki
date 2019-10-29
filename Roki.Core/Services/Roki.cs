@@ -35,7 +35,7 @@ namespace Roki
             _db = new DbService(Config);
             _db.Setup();
 
-            Properties = JsonSerializer.Deserialize<Properties>(File.ReadAllText("./data/roki_options.json"));
+            Properties = JsonSerializer.Deserialize<Properties>(File.ReadAllText("./data/properties.json"));
 
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {

@@ -58,9 +58,9 @@ namespace Roki.Core.Services
         #region BetRoll
 
         public int BetRollMin { get; set; } = 1;
-        public double BetRoll71 { get; set; } = 2.5;
-        public int BetRoll92 { get; set; } = 4;
-        public int BetRoll100 { get; set; } = 10;
+        public double BetRoll71Multiplier { get; set; } = 2.5;
+        public int BetRoll92Multiplier { get; set; } = 4;
+        public int BetRoll100Multiplier { get; set; } = 10;
 
         #endregion
 
