@@ -50,8 +50,8 @@ namespace Roki.Modules.Moderation.Services
             Muted.AddOrUpdate(user.Id, time, (key, oldTime) => updatedTime += TimeSpan.FromMinutes(5));
             await user.AddRoleAsync(muted).ConfigureAwait(false);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                    .WithTitle("🔇 Mute")
-                    .WithDescription($"{ctx.User.Mention} used a Mute Power on {user.Mention}\n{user.Username} is muted for 5 minutes.\nUn-muted in {updatedTime - DateTime.UtcNow:c}"))
+                    .WithTitle($"🔇 {ctx.User.Username} used a Mute Power on {user.Username}")
+                    .WithDescription($"{user.Mention} is muted for 5 minutes.\nUnmuted in {updatedTime - DateTime.UtcNow:m\\:ss}"))
                 .ConfigureAwait(false);
 
             await Task.Delay(TimeSpan.FromMinutes(5));
@@ -60,7 +60,7 @@ namespace Roki.Modules.Moderation.Services
             if (DateTime.UtcNow >= latest)
             {
                 await user.RemoveRoleAsync(muted).ConfigureAwait(false);
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithTitle("🔈 Un-mute").WithDescription($"{user.Mention} has been un-muted"))
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithTitle("🔈 Unmute").WithDescription($"{user.Mention} has been unmuted"))
                     .ConfigureAwait(false);
             }
         }
