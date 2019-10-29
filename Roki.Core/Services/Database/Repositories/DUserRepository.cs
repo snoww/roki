@@ -189,9 +189,16 @@ WHERE UserId={userId}")
             return JsonConvert.DeserializeObject<Inventory>(inv);
         }
 
-        public Task UpdateUserInventory(ulong userId, string key, int value)
+        public async Task UpdateUserInventory(ulong userId, string key, int value)
         {
-            throw new NotImplementedException();
+            var inv = await GetOrCreateUserInventory(userId).ConfigureAwait(false);
+            var invObj = (JObject) JToken.FromObject(inv);
+            invObj["key"] = invObj["key"].Value<int>() + value;
+            await Context.Database.ExecuteSqlCommandAsync($@"
+UPDATE IGNORE users
+SET Inventory={invObj.ToString()}
+WHERE UserId={userId}")
+                .ConfigureAwait(false);
         }
 
         private static async Task SendNotification(DUser user, SocketMessage msg, int level)

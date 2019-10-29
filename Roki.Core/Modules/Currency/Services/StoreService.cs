@@ -155,11 +155,19 @@ namespace Roki.Modules.Currency.Services
             return rRoles.First() ?? first;
         }
 
-        public async Task<Inventory> GetOrUpdateInventoryAsync(ulong userId)
+        public async Task<Inventory> GetOrCreateInventoryAsync(ulong userId)
         {
             using (var uow = _db.GetDbContext())
             {
                 return await uow.DUsers.GetOrCreateUserInventory(userId).ConfigureAwait(false);
+            }
+        }
+
+        public async Task UpdateInventoryAsync(ulong userId, string key, int value)
+        {
+            using (var uow = _db.GetDbContext())
+            {
+                await uow.DUsers.UpdateUserInventory(userId, key, value).ConfigureAwait(false);
             }
         }
     }
