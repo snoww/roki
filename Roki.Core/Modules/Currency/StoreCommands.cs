@@ -131,17 +131,18 @@ namespace Roki.Modules.Currency
                         break;
                     case Category.Power:
                         Enum.TryParse<Power>(listing.ItemDetails, out var power);
-                        switch (power)
-                        {
-                            case Power.Mute:
-                                break;
-                            case Power.Timeout:
-                                break;
-                            case Power.DeleteMessage:
-                                break;
-                            case Power.SlowMode:
-                                break;
-                        }
+                        await _service.UpdateInventoryAsync(buyer.Id, listing.ItemDetails, 1).ConfigureAwait(false);
+//                        switch (power)
+//                        {
+//                            case Power.Mute:
+//                                break;
+//                            case Power.Timeout:
+//                                break;
+//                            case Power.DeleteMessage:
+//                                break;
+//                            case Power.SlowMode:
+//                                break;
+//                        }
                         break;
                     case Category.Boost:
                         if (await _service.GetOrUpdateSubAsync(buyer.Id, listing.Id, listing.SubscriptionDays ?? 7)) break;
@@ -207,8 +208,11 @@ namespace Roki.Modules.Currency
             [RequireContext(ContextType.Guild)]
             public async Task Inventory()
             {
-                var inv = await _service.GetOrUpdateInventoryAsync(ctx.User.Id).ConfigureAwait(false);
-                await ctx.Channel.SendMessageAsync($"Mute: {inv.Mute}, SlowMode: {inv.SlowMode}").ConfigureAwait(false);
+                var inv = await _service.GetOrCreateInventoryAsync(ctx.User.Id).ConfigureAwait(false);
+                var embed = new EmbedBuilder().WithOkColor().WithTitle($"{ctx.User.Username}'s Inventory")
+                    .WithDescription($"Powers:\nMute: {inv.Mute}\nTimeout: {inv.Timeout}\nDelete Message: {inv.DeleteMessage}\nSlow Mode: {inv.SlowMode}");
+
+                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
 
             private enum Category
