@@ -13,7 +13,7 @@ namespace Roki.Modules.Searches.Services
 {
     public class PokemonService : IRService
     {
-        private static readonly Dictionary<string, PokemonData> Data = JsonSerializer.Deserialize<Dictionary<string, PokemonData>>(File.ReadAllText("./_strings/pokemon/pokemon.json"));
+        private static readonly Dictionary<string, PokemonData> Data = JsonSerializer.Deserialize<Dictionary<string, PokemonData>>(File.ReadAllText("./data/pokemon.json"));
         
         public Color GetColorOfPokemon(string color)
         {

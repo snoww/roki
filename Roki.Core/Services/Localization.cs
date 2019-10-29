@@ -8,7 +8,7 @@ namespace Roki.Core.Services
     public class Localization
     {
         private static readonly Dictionary<string, CommandData> CommandData =
-            JsonSerializer.Deserialize<Dictionary<string, CommandData>>(File.ReadAllText("./_strings/cmd/command_strings.json"));
+            JsonSerializer.Deserialize<Dictionary<string, CommandData>>(File.ReadAllText("./_strings/command_strings.json"));
 
         public static CommandData LoadCommand(string key)
         {
