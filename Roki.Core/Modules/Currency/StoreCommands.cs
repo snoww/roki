@@ -203,6 +203,14 @@ namespace Roki.Modules.Currency
                 await ctx.Channel.EmbedAsync(embed.WithDescription(desc)).ConfigureAwait(false);
             }
 
+            [RokiCommand, Description, Usage, Aliases]
+            [RequireContext(ContextType.Guild)]
+            public async Task Inventory()
+            {
+                var inv = await _service.GetOrUpdateInventoryAsync(ctx.User.Id).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync($"Mute: {inv.Mute}, SlowMode: {inv.SlowMode}").ConfigureAwait(false);
+            }
+
             private enum Category
             {
                 Role,

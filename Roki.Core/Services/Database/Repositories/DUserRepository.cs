@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Roki.Core.Services.Database.Models;
 using Roki.Core.Services.Impl;
 using Roki.Modules.Xp;
@@ -25,6 +27,8 @@ namespace Roki.Core.Services.Database.Repositories
         IEnumerable<DUser> GetCurrencyLeaderboard(ulong botId, int page);
         Task UpdateXp(DUser dUser, SocketMessage message, bool boost = false);
         Task ChangeNotificationLocation(ulong userId, byte notify);
+        Task<Inventory> GetOrCreateUserInventory(ulong userId);
+        Task UpdateUserInventory(ulong userId, string key, int value);
     }
 
     public class DUserRepository : Repository<DUser>, IDUserRepository
@@ -169,6 +173,25 @@ UPDATE IGNORE users
 SET NotificationLocation={notify}
 WHERE UserId={userId}
 ").ConfigureAwait(false);
+        }
+
+        public async Task<Inventory> GetOrCreateUserInventory(ulong userId)
+        {
+            var user = Set.First(u => u.UserId == userId);
+            if (user.Inventory != null) return JsonConvert.DeserializeObject<Inventory>(user.Inventory);
+            var inv = ((JObject) JToken.FromObject(new Inventory())).ToString();
+            await Context.Database.ExecuteSqlCommandAsync($@"
+UPDATE IGNORE users
+SET Inventory={inv}
+WHERE UserId={userId}")
+                .ConfigureAwait(false);
+            
+            return JsonConvert.DeserializeObject<Inventory>(inv);
+        }
+
+        public Task UpdateUserInventory(ulong userId, string key, int value)
+        {
+            throw new NotImplementedException();
         }
 
         private static async Task SendNotification(DUser user, SocketMessage msg, int level)
