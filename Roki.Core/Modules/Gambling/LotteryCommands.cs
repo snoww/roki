@@ -35,7 +35,10 @@ namespace Roki.Modules.Gambling
             {
                 var jackpot = (long) (_currency.GetCurrency(ctx.Client.CurrentUser.Id) * 0.9);
                 if (jackpot < 1000)
+                {
                     await ctx.Channel.SendErrorAsync("The lottery is currently down. Please check back another time.").ConfigureAwait(false);
+                    return;
+                }
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle("Stone Lottery")
