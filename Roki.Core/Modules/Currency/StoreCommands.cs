@@ -210,7 +210,7 @@ namespace Roki.Modules.Currency
             {
                 var inv = await _service.GetOrCreateInventoryAsync(ctx.User.Id).ConfigureAwait(false);
                 var embed = new EmbedBuilder().WithOkColor().WithTitle($"{ctx.User.Username}'s Inventory")
-                    .WithDescription($"Powers:\nMute: {inv.Mute}\nTimeout: {inv.Timeout}\nDelete Message: {inv.DeleteMessage}\nSlow Mode: {inv.SlowMode}");
+                    .WithDescription($"Powers:\nMutes: {inv.Mute}\nTimeouts: {inv.Timeout}\nDelete Messages: {inv.DeleteMessage}\nSlow Modes: {inv.SlowMode}");
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
