@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -29,6 +30,7 @@ namespace Roki.Core.Services.Database.Repositories
 
     public class DUserRepository : Repository<DUser>, IDUserRepository
     {
+        private readonly Properties _properties = JsonSerializer.Deserialize<Properties>("./data/properties.json");
         public DUserRepository(DbContext context) : base(context)
         {
         }
@@ -135,7 +137,7 @@ WHERE UserId={botId}
             if (user == null) return;
             var level = new XpLevel(user.TotalXp);
             // TODO lower xp per message afterwards
-            var xp = user.TotalXp + 5;
+            var xp = user.TotalXp + _properties.XpPerMessage;
             var newLevel = new XpLevel(xp);
             if (newLevel.Level > level.Level)
             {
