@@ -24,7 +24,7 @@ namespace Roki.Core.Services.Database.Repositories
             if (!trans.Any())
                 return (0, new ulong[0]);
             var toReturn = (trans.Sum(t => t.Amount), trans.Select(t => t.MessageId).ToArray());
-            await Context.Database.ExecuteSqlCommandAsync($@"
+            await Context.Database.ExecuteSqlRawAsync($@"
 UPDATE IGNORE transactions
 SET `Reason`={"Picked"},
     `To`={userId}
