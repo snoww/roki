@@ -75,13 +75,13 @@ namespace Roki.Modules.Currency
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
             
-            [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
-            [RequireUserPermission(GuildPermission.Administrator)]
-            public async Task Sell()
-            {
-                
-            }
+//            [RokiCommand, Description, Usage, Aliases]
+//            [RequireContext(ContextType.Guild)]
+//            [RequireUserPermission(GuildPermission.Administrator)]
+//            public async Task Sell()
+//            {
+//                
+//            }
         
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
@@ -175,12 +175,12 @@ namespace Roki.Modules.Currency
                 await Buy(listing.ItemName).ConfigureAwait(false);
             }
         
-            [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
-            public async Task Modify()
-            {
-            
-            }
+//            [RokiCommand, Description, Usage, Aliases]
+//            [RequireContext(ContextType.Guild)]
+//            public async Task Modify()
+//            {
+//            
+//            }
 
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
