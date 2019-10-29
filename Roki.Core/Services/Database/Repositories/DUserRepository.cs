@@ -50,7 +50,7 @@ namespace Roki.Core.Services.Database.Repositories
 //                    AvatarId = avatarId
 //                });
 //            }
-            Context.Database.ExecuteSqlCommand($@"
+            Context.Database.ExecuteSqlRawAsync($@"
 UPDATE IGNORE users
 SET Username={username},
     Discriminator={discriminator},
@@ -97,7 +97,7 @@ VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.MinValue}, 
             var dUser = GetOrCreate(user);
             if (dUser.Currency + amount < 0)
                 return false;
-            await Context.Database.ExecuteSqlCommandAsync($@"
+            await Context.Database.ExecuteSqlRawAsync($@"
 UPDATE IGNORE users
 SET Currency=Currency+{amount}
 WHERE UserId={dUser.UserId}
@@ -107,7 +107,7 @@ WHERE UserId={dUser.UserId}
 
         public async Task LotteryAwardAsync(ulong userId, long amount)
         {
-            await Context.Database.ExecuteSqlCommandAsync($@"
+            await Context.Database.ExecuteSqlRawAsync($@"
 UPDATE IGNORE users
 SET Currency=Currency+{amount}
 WHERE UserId={userId}
@@ -116,7 +116,7 @@ WHERE UserId={userId}
 
         public async Task UpdateBotCurrencyAsync(ulong botId, long amount)
         {
-            await Context.Database.ExecuteSqlCommandAsync($@"
+            await Context.Database.ExecuteSqlRawAsync($@"
 UPDATE IGNORE users
 SET Currency=Currency+{amount}
 WHERE UserId={botId}
@@ -142,7 +142,7 @@ WHERE UserId={botId}
             var newLevel = new XpLevel(xp);
             if (newLevel.Level > level.Level)
             {
-                await Context.Database.ExecuteSqlCommandAsync($@"
+                await Context.Database.ExecuteSqlRawAsync($@"
 UPDATE IGNORE users
 SET TotalXp={xp},
     LastLevelUp={DateTime.UtcNow},
@@ -153,7 +153,7 @@ WHERE UserId={user.UserId};
                 await SendNotification(user, message, new XpLevel(xp).Level).ConfigureAwait(false);
             }
             
-            await Context.Database.ExecuteSqlCommandAsync($@"
+            await Context.Database.ExecuteSqlRawAsync($@"
 UPDATE IGNORE users
 SET TotalXp={xp},
     LastXpGain={DateTime.UtcNow}
@@ -163,7 +163,7 @@ WHERE UserId={user.UserId};
 
         public async Task ChangeNotificationLocation(ulong userId, byte notify)
         {
-            await Context.Database.ExecuteSqlCommandAsync($@"
+            await Context.Database.ExecuteSqlRawAsync($@"
 UPDATE IGNORE users
 SET NotificationLocation={notify}
 WHERE UserId={userId}
