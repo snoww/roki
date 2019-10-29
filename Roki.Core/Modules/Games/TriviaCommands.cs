@@ -6,7 +6,6 @@ using System.Web;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.EntityFrameworkCore.Internal;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Games.Common;
@@ -230,14 +229,15 @@ namespace Roki.Modules.Games
 
                     async Task AnswerAdded(SocketReaction r)
                     {
+                        var mc = MultipleChoice.ToList();
                         if (r.Channel != ctx.Channel || r.User.Value.IsBot || r.Message.Value.Id != msg.Id)
                             return;
-                        if (MultipleChoice.Contains(r.Emote))
+                        if (mc.Contains(r.Emote))
                         {
                             if (playerChoice.ContainsKey(r.User.Value))
-                                playerChoice[r.User.Value] = shuffledAnswers[MultipleChoice.IndexOf(r.Emote)];
+                                playerChoice[r.User.Value] = shuffledAnswers[mc.IndexOf(r.Emote)];
                             else
-                                playerChoice.Add(r.User.Value, shuffledAnswers[MultipleChoice.IndexOf(r.Emote)]);
+                                playerChoice.Add(r.User.Value, shuffledAnswers[mc.IndexOf(r.Emote)]);
                         }
                         else if (TrueFalse.Contains(r.Emote))
                         {
@@ -285,7 +285,7 @@ namespace Roki.Modules.Games
                 foreach (var (user, score) in playerScore)
                 {
                     scoreStr += $"{user.Username} {score.Correct}/{score.Incorrect + score.Correct}\n";
-                    if (score.Amount <= 0 || score.Correct / (float) (score.Correct + score.Incorrect) < 0.6) continue;
+                    if (score.Amount <= 0 || score.Correct / (float) (score.Correct + score.Incorrect) < _roki.Properties.TriviaMinCorrect) continue;
                     winStr += $"{user.Username} won {score.Amount} {_roki.Properties.CurrencyIcon}\n";
                     winners = true;
                     await _currency.ChangeAsync(user, "Trivia Reward", score.Amount, $"{ctx.Client.CurrentUser.Id}", user.Id.ToString(), ctx.Guild.Id, ctx.Channel.Id,

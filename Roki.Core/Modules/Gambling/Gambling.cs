@@ -46,11 +46,11 @@ namespace Roki.Modules.Gambling
             
             long win;
             if (roll < 91)
-                win = (long) Math.Ceiling(amount * _roki.Properties.BetRoll71);
+                win = (long) Math.Ceiling(amount * _roki.Properties.BetRoll71Multiplier);
             else if (roll < 100)
-                win = amount * _roki.Properties.BetRoll92;
+                win = amount * _roki.Properties.BetRoll92Multiplier;
             else
-                win = amount * _roki.Properties.BetRoll100;
+                win = amount * _roki.Properties.BetRoll100Multiplier;
 
             await _currency.ChangeAsync(ctx.User, "BetRoll Payout", win, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id, ctx.Channel.Id,
                 ctx.Message.Id);
