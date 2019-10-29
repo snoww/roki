@@ -60,41 +60,37 @@ namespace Roki.Modules.Gambling
                 }
 
                 long won;
-                if (total >= 19 && total <= 23)
+                if (total >= 18 && total <= 24)
                     won = 0;
                 else switch (total)
                 {
-                    case 18:
-                    case 24:
-                        won = (long) Math.Ceiling(amount * 1.6);
-                        break;
                     case 17:
                     case 25:
-                        won = (long) Math.Ceiling(amount * 1.95);
+                        won = (long) Math.Ceiling(amount * 1.5);
                         break;
                     case 16:
                     case 26:
-                        won = amount * 2;
+                        won = (long) Math.Ceiling(amount * 1.75);
                         break;
                     case 15:
                     case 27:
-                        won = amount * 3;
+                        won = (long) Math.Ceiling(amount * 1.95);
                         break;
                     case 14:
                     case 28:
-                        won = amount * 4;
+                        won = amount * 2;
                         break;
                     case 13:
                     case 29:
-                        won = amount * 5;
+                        won = amount * 3;
                         break;
                     case 12:
                     case 30:
-                        won = amount * 6;
+                        won = amount * 5;
                         break;
                     case 11:
                     case 31:
-                        won = amount * 8;
+                        won = amount * 7;
                         break;
                     case 10:
                     case 32:
