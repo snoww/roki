@@ -254,5 +254,15 @@ namespace Roki.Extensions
                 list[n] = value;  
             }  
         }
+
+        public static void UpdateJsonProperty<T, T2>(this T obj, string key, T2 value)
+        {
+            foreach (var property in obj.GetType().GetProperties())
+            {
+                if (!property.Name.Equals(key, StringComparison.OrdinalIgnoreCase)) continue;
+                property.SetValue(obj, value);
+                break;
+            }
+        }
     }
 }

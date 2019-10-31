@@ -9,6 +9,7 @@ using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using Roki.Core.Services.Database.Models;
+using Roki.Extensions;
 using Roki.Modules.Xp.Common;
 
 namespace Roki.Core.Services.Database.Repositories
@@ -193,12 +194,11 @@ WHERE UserId={userId}")
         public async Task UpdateUserInventory(ulong userId, string key, int value)
         {
             var inv = await GetOrCreateUserInventory(userId).ConfigureAwait(false);
-            // Dont know how to refactor to use system.text.json
-            var invObj = (JObject) JToken.FromObject(inv);
-            invObj[key] = invObj[key].Value<int>() + value;
+            inv.UpdateJsonProperty(key, value);
+            var json = JsonSerializer.Serialize(inv);
             await Context.Database.ExecuteSqlCommandAsync($@"
 UPDATE IGNORE users
-SET Inventory={invObj.ToString()}
+SET Inventory={json}
 WHERE UserId={userId}")
                 .ConfigureAwait(false);
         }
