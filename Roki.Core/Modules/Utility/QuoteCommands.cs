@@ -63,10 +63,10 @@ namespace Roki.Modules.Utility
                 }
                 var author = await ctx.Guild.GetUserAsync(quote.AuthorId).ConfigureAwait(false);
                 var embed = new EmbedBuilder().WithOkColor().WithFooter($"Use count: {quote.UseCount}");
-                if (_service.IsImage(quote.Text))
-                    embed.WithImageUrl(quote.Text);
-                else
+                if (!_service.IsImage(quote.Text))
                     embed.WithDescription(quote.Text);
+                else
+                    embed.WithImageUrl(quote.Text);
                 if (string.IsNullOrWhiteSpace(quote.Context))
                     embed.WithAuthor($"#{quote.Id} {author.Username}", author.GetAvatarUrl());
                 else
