@@ -25,8 +25,10 @@ namespace Roki.Core.Services.Database.Repositories
         Task LotteryAwardAsync(ulong userId, long amount);
         Task UpdateBotCurrencyAsync(ulong botId, long amount);
         IEnumerable<DUser> GetCurrencyLeaderboard(ulong botId, int page);
-        Task UpdateXp(DUser dUser, SocketMessage message);
+        Task UpdateXp(DUser dUser, SocketMessage message, bool boost = false);
         Task ChangeNotificationLocation(ulong userId, byte notify);
+        Task<Inventory> GetOrCreateUserInventory(ulong userId);
+        Task UpdateUserInventory(ulong userId, string key, int value);
     }
 
     public class DUserRepository : Repository<DUser>, IDUserRepository
@@ -132,13 +134,16 @@ WHERE UserId={botId}
                 .ToList();
         }
 
-        public async Task UpdateXp(DUser dUser, SocketMessage message)
+        public async Task UpdateXp(DUser dUser, SocketMessage message, bool boost = false)
         {
             var user = Set.FirstOrDefault(u => u.Equals(dUser));
             if (user == null) return;
             var level = new XpLevel(user.TotalXp);
-            // TODO lower xp per message afterwards
-            var xp = user.TotalXp + _properties.XpPerMessage;
+            int xp;
+            if (boost)
+                xp = user.TotalXp + 10;
+            else 
+                xp = user.TotalXp + 5;
             var newLevel = new XpLevel(xp);
             if (newLevel.Level > level.Level)
             {
@@ -151,6 +156,7 @@ WHERE UserId={user.UserId};
 ").ConfigureAwait(false);
                 
                 await SendNotification(user, message, new XpLevel(xp).Level).ConfigureAwait(false);
+                return;
             }
             
             await Context.Database.ExecuteSqlCommandAsync($@"
@@ -168,6 +174,32 @@ UPDATE IGNORE users
 SET NotificationLocation={notify}
 WHERE UserId={userId}
 ").ConfigureAwait(false);
+        }
+
+        public async Task<Inventory> GetOrCreateUserInventory(ulong userId)
+        {
+            var user = Set.First(u => u.UserId == userId);
+            if (user.Inventory != null) return JsonConvert.DeserializeObject<Inventory>(user.Inventory);
+            var inv = ((JObject) JToken.FromObject(new Inventory())).ToString();
+            await Context.Database.ExecuteSqlCommandAsync($@"
+UPDATE IGNORE users
+SET Inventory={inv}
+WHERE UserId={userId}")
+                .ConfigureAwait(false);
+            
+            return JsonConvert.DeserializeObject<Inventory>(inv);
+        }
+
+        public async Task UpdateUserInventory(ulong userId, string key, int value)
+        {
+            var inv = await GetOrCreateUserInventory(userId).ConfigureAwait(false);
+            var invObj = (JObject) JToken.FromObject(inv);
+            invObj[key] = invObj[key].Value<int>() + value;
+            await Context.Database.ExecuteSqlCommandAsync($@"
+UPDATE IGNORE users
+SET Inventory={invObj.ToString()}
+WHERE UserId={userId}")
+                .ConfigureAwait(false);
         }
 
         private static async Task SendNotification(DUser user, SocketMessage msg, int level)
