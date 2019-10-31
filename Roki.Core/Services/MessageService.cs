@@ -39,9 +39,9 @@ namespace Roki.Services
                 if (!message.Author.IsBot)
                 {
                     var user = uow.DUsers.GetOrCreate(message.Author);
-                        
+                    var boost = uow.Subscriptions.XpBoostIsActive(message.Author.Id);
                     if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(5))
-                        await uow.DUsers.UpdateXp(user, message).ConfigureAwait(false);
+                        await uow.DUsers.UpdateXp(user, message, boost).ConfigureAwait(false);
 
                     uow.DMessages.Add(new DMessage
                     {

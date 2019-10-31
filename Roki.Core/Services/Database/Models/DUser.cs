@@ -15,6 +15,7 @@ namespace Roki.Core.Services.Database.Models
         public DateTime LastXpGain { get; set; } = DateTime.MinValue;
         public byte NotificationLocation { get; set; } = 1;
         public long Currency { get; set; } = 0;
+        public string Inventory { get; set; } = null;
         
         public override bool Equals(object obj) => 
             obj is DUser dUser && dUser.UserId == UserId;
@@ -24,5 +25,14 @@ namespace Roki.Core.Services.Database.Models
         
         public override string ToString() => 
             Username + "#" + Discriminator;
+    }
+
+    public class Inventory
+    {
+        public int Mute { get; set; } = 0;
+        public int Block { get; set; } = 0;
+        public int Timeout { get; set; } = 0;
+        public int DeleteMessage { get; set; } = 0;
+        public int SlowMode { get; set; } = 0;
     }
 }

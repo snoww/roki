@@ -34,7 +34,7 @@ namespace Roki.Modules.Gambling.Services
         {
             var today = DateTime.UtcNow;
             var drawToday = new DateTime(today.Year, today.Month, today.Day, 23, 0, 0);
-            var drawTmr = new DateTime(today.Year, today.Month, today.Day + 1, 23, 0, 0);
+            var drawTmr = drawToday + TimeSpan.FromDays(1);
             // dueTime is when it first occurs, period is how long after each occurence
 
             _timer = drawToday - today > TimeSpan.Zero 
@@ -48,6 +48,9 @@ namespace Roki.Modules.Gambling.Services
 
             using (var uow = _db.GetDbContext())
             {
+                var jackpot = (long) (_currency.GetCurrency(549644503351296040) * 0.9);
+                if (jackpot < 1000)
+                    return;
                 var lottery = uow.Lottery.GetLottery(_client.CurrentUser.Id);
                 var winners = CheckWinner(uow.Lottery.GetAllLotteryEntries(lottery.LotteryId), new List<int>
                 {
