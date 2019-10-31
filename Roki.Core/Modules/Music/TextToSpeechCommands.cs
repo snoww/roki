@@ -20,6 +20,7 @@ namespace Roki.Modules.Music
         {
             private readonly string _api = "https://streamlabs.com/polly/speak";
             private string _queryJson = @"{""voice"": ""Brian"", ""text"": ""textString""}";
+            private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
             
             [RokiCommand, Description, Usage, Aliases]
             public async Task Tts([Leftover] string query = null)
@@ -45,7 +46,7 @@ namespace Roki.Modules.Music
                     var content = new StringContent(queryString, Encoding.UTF8, "application/json");
                     var result = await http.PostAsync(_api, content).ConfigureAwait(false);
 
-                    var tts = JsonSerializer.Deserialize<TtsModel>(await result.Content.ReadAsStringAsync().ConfigureAwait(false));
+                    var tts = JsonSerializer.Deserialize<TtsModel>(await result.Content.ReadAsStringAsync().ConfigureAwait(false), Options);
                     if (tts.Success)
                     {
                         var guid = Guid.NewGuid().ToString().Substring(0, 7);

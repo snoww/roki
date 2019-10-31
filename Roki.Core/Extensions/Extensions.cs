@@ -26,6 +26,7 @@ namespace Roki.Extensions
     {
         private static readonly Logger _log = LogManager.GetCurrentClassLogger();
         private static readonly Random rng = new Random();  
+        private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
 
 
         public static EmbedBuilder WithOkColor(this EmbedBuilder embed)
@@ -151,7 +152,7 @@ namespace Roki.Extensions
 
         public static string RealRemarks(this CommandInfo cmd, string prefix)
         {
-            return string.Join(" or ", JsonSerializer.Deserialize<string[]>(cmd.Remarks).Select(x => Format.Code(string.Format(x, prefix))));
+            return string.Join(" or ", JsonSerializer.Deserialize<string[]>(cmd.Remarks, Options).Select(x => Format.Code(string.Format(x, prefix))));
         }
 
         public static double UnixTimestamp(this DateTime dt)
