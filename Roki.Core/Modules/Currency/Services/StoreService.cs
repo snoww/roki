@@ -30,7 +30,7 @@ namespace Roki.Modules.Currency.Services
         {
             var today = DateTime.UtcNow;
             var drawToday = new DateTime(today.Year, today.Month, today.Day, 0, 0, 0);
-            var drawTmr = new DateTime(today.Year, today.Month, today.Day + 1, 0, 0, 0);
+            var drawTmr = drawToday + TimeSpan.FromDays(1);
             _timer = drawToday - today > TimeSpan.Zero 
                 ? new Timer(RemoveSubEvent, null, drawToday - today, TimeSpan.FromDays(1)) 
                 : new Timer(RemoveSubEvent, null, drawTmr - today, TimeSpan.FromDays(1));
