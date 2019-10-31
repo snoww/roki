@@ -62,7 +62,7 @@ namespace Roki.Modules.Utility
                     await uow.Quotes.IncrementUseCount(quote.Id);
                 }
                 var author = await ctx.Guild.GetUserAsync(quote.AuthorId).ConfigureAwait(false);
-                var embed = new EmbedBuilder().WithOkColor();
+                var embed = new EmbedBuilder().WithOkColor().WithFooter($"Use count: {quote.UseCount}");
                 if (_service.IsImage(quote.Text))
                     embed.WithImageUrl(quote.Text);
                 else
