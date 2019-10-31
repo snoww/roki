@@ -522,5 +522,12 @@
     "Usage": [
       "{0}timeout @snow"
     ]
+  },
+  "inventory": {
+    "Command": "inventory inv",
+    "Description": "Shows the items in your inventory",
+    "Usage": [
+      "{0}inventory"
+    ]
   }
 }
