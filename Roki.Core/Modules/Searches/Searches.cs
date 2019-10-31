@@ -19,6 +19,7 @@ namespace Roki.Modules.Searches
         private readonly IRokiConfig _config;
         private readonly IGoogleApiService _google;
         private readonly IHttpClientFactory _httpFactory;
+        private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
 
         public Searches(IRokiConfig config, IGoogleApiService google, IHttpClientFactory httpFactory)
         {
@@ -160,7 +161,7 @@ namespace Roki.Modules.Searches
                 .ConfigureAwait(false);
             try
             {
-                var items = JsonSerializer.Deserialize<UrbanResponse>(response).List;
+                var items = JsonSerializer.Deserialize<UrbanResponse>(response, Options).List;
                 if (items.Any())
                     await ctx.SendPaginatedConfirmAsync(0, p =>
                     {

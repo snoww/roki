@@ -23,6 +23,7 @@ namespace Roki
     {
         private readonly DbService _db;
         private readonly Logger _log;
+        private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
 
         public Roki()
         {
@@ -35,7 +36,7 @@ namespace Roki
             _db = new DbService(Config);
             _db.Setup();
 
-            Properties = JsonSerializer.Deserialize<Properties>(File.ReadAllText("./data/properties.json"));
+            Properties = JsonSerializer.Deserialize<Properties>(File.ReadAllText("./data/properties.json"), Options);
 
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {

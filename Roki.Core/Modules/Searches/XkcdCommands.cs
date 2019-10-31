@@ -17,6 +17,7 @@ namespace Roki.Modules.Searches
         {
             private const string XkcdUrl = "https://xkcd.com";
             private readonly IHttpClientFactory _httpFactory;
+            private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
 
             public XkcdCommands(IHttpClientFactory httpFactory)
             {
@@ -34,7 +35,7 @@ namespace Roki.Modules.Searches
                             ? await http.GetStringAsync($"{XkcdUrl}/info.0.json").ConfigureAwait(false)
                             : await http.GetStringAsync($"{XkcdUrl}/{num}/info.0.json").ConfigureAwait(false);
 
-                        var xkcd = JsonSerializer.Deserialize<XkcdModel>(result);
+                        var xkcd = JsonSerializer.Deserialize<XkcdModel>(result, Options);
                         var embed = new EmbedBuilder().WithOkColor()
                             .WithAuthor(xkcd.Title, "https://xkcd.com/s/919f27.ico", $"{XkcdUrl}/{xkcd.Num}")
                             .WithImageUrl(xkcd.Img)

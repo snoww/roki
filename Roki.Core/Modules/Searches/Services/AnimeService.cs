@@ -14,6 +14,7 @@ namespace Roki.Modules.Searches.Services
         private string _queryJson =
             @"{""query"":""query ($search: String) { Page(page:1 perPage:5) { media(search: $search) { title { romaji english native } description averageScore status episodes genres type seasonInt coverImage { large color } } } }"", ""variables"": { ""search"": ""searchString"" } }";
         private readonly IHttpClientFactory _httpFactory;
+        private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
 
         public AnimeService(IHttpClientFactory httpFactory)
         {
@@ -30,7 +31,7 @@ namespace Roki.Modules.Searches.Services
                     var newQuery = _queryJson.Replace("searchString", query);
                     var content = new StringContent(newQuery, Encoding.UTF8, "application/json");
                     var result = await http.PostAsync("https://graphql.anilist.co", content).ConfigureAwait(false);
-                    var model = JsonSerializer.Deserialize<AnimeModel>(await result.Content.ReadAsStringAsync().ConfigureAwait(false));
+                    var model = JsonSerializer.Deserialize<AnimeModel>(await result.Content.ReadAsStringAsync().ConfigureAwait(false), Options);
                     var media = model.Data.Page.Media;
                     return media;
                 }
