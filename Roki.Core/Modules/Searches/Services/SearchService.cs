@@ -108,10 +108,9 @@ namespace Roki.Modules.Searches.Services
         {
             using var http = _httpFactory.CreateClient();
             var result = await http.GetStringAsync("https://aws.random.cat/meow").ConfigureAwait(false);
-            var cat = JsonDocument.Parse(result).RootElement.GetProperty("file").GetString();
-
+            using var cat = JsonDocument.Parse(result);
             using var client = new WebClient();
-            var uri = new Uri(cat);
+            var uri = new Uri(cat.RootElement.GetProperty("file").GetString());
             var fileName = "./temp/" + Path.GetFileName(uri.LocalPath);
             await client.DownloadFileTaskAsync(uri, fileName).ConfigureAwait(false);
             return fileName;
@@ -121,10 +120,9 @@ namespace Roki.Modules.Searches.Services
         {
             using var http = _httpFactory.CreateClient();
             var result = await http.GetStringAsync("https://random.dog/woof.json").ConfigureAwait(false);
-            var dog = JsonDocument.Parse(result).RootElement.GetProperty("url").GetString();
-
+            using var dog = JsonDocument.Parse(result);
             using var client = new WebClient();
-            var uri = new Uri(dog);
+            var uri = new Uri(dog.RootElement.GetProperty("url").GetString());
             var fileName = "./temp/" + Path.GetFileName(uri.LocalPath);
             await client.DownloadFileTaskAsync(uri, fileName).ConfigureAwait(false);
             return fileName;
@@ -134,9 +132,9 @@ namespace Roki.Modules.Searches.Services
         {
             using var http = _httpFactory.CreateClient();
             var result = await http.GetStringAsync("https://catfact.ninja/fact").ConfigureAwait(false);
-            var fact = JsonDocument.Parse(result).RootElement.GetProperty("fact").GetString();
+            using var fact = JsonDocument.Parse(result);
 
-            return fact;
+            return fact.RootElement.GetProperty("fact").GetString();
         }
     }
 }
