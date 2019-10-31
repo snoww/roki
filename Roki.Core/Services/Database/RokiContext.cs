@@ -91,6 +91,21 @@ namespace Roki.Core.Services.Database
             });
 
             #endregion
+
+            #region Store
+
+            modelBuilder.Entity<Listing>(entity =>
+            {
+                entity.HasIndex(s => s.ItemName);
+            });
+
+            #endregion
+
+            #region Subscriptions
+
+            modelBuilder.Entity<Subscriptions>(entity => { entity.HasIndex(s => s.Description); });
+
+            #endregion
         }
     }
 }

@@ -54,8 +54,4 @@
       <DeployManifest Remove="obj\Debug\netcoreapp2.2\Roki.Core.application" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Modules\Utility\Services" />
-    </ItemGroup>
-
 </Project>

@@ -7,10 +7,11 @@ using Roki.Common.Attributes;
 using Roki.Core.Services;
 using Roki.Core.Services.Impl;
 using Roki.Extensions;
+using Roki.Modules.Utility.Services;
 
 namespace Roki.Modules.Utility
 {
-    public partial class Utility : RokiTopLevelModule
+    public partial class Utility : RokiTopLevelModule<RainbowRoleService>
     {
         private readonly DiscordSocketClient _client;
         private readonly IRokiConfig _config;
