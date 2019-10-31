@@ -59,7 +59,8 @@ namespace Roki.Modules.Utility
                     quote = await uow.Quotes.GetRandomQuoteByKeywordAsync(ctx.Guild.Id, keyword);
                     if (quote == null)
                         return;
-                    await uow.Quotes.IncrementUseCount(quote.Id);
+                    await uow.Quotes.IncrementUseCount(quote.Id).ConfigureAwait(false);
+                    await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
                 var author = await ctx.Guild.GetUserAsync(quote.AuthorId).ConfigureAwait(false);
                 var embed = new EmbedBuilder().WithOkColor().WithFooter($"Use count: {quote.UseCount}");
