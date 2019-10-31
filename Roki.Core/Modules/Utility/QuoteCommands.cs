@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -7,13 +8,14 @@ using Roki.Common.Attributes;
 using Roki.Core.Services;
 using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
+using Roki.Modules.Utility.Services;
 
 namespace Roki.Modules.Utility
 {
     public partial class Utility
     {
         [Group]
-        public class QuoteCommands : RokiSubmodule
+        public class QuoteCommands : RokiSubmodule<QuoteService>
         {
             private readonly DbService _db;
 
@@ -55,12 +57,22 @@ namespace Roki.Modules.Utility
                 using (var uow = _db.GetDbContext())
                 {
                     quote = await uow.Quotes.GetRandomQuoteByKeywordAsync(ctx.Guild.Id, keyword);
+                    if (quote == null)
+                        return;
+                    await uow.Quotes.IncrementUseCount(quote.Id);
                 }
+                var author = await ctx.Guild.GetUserAsync(quote.AuthorId).ConfigureAwait(false);
+                var embed = new EmbedBuilder().WithOkColor();
+                if (_service.IsImage(quote.Text))
+                    embed.WithImageUrl(quote.Text);
+                else
+                    embed.WithDescription(quote.Text);
+                if (string.IsNullOrWhiteSpace(quote.Context))
+                    embed.WithAuthor($"#{quote.Id} {author.Username}", author.GetAvatarUrl());
+                else
+                    embed.WithAuthor($"#{quote.Id} {author.Username}", author.GetAvatarUrl(), quote.Context);
 
-                if (quote == null)
-                    return;
-                // TODO make quotes look better
-                await ctx.Channel.SendMessageAsync($"`#{quote.Id}` 📣 " + quote.Text).ConfigureAwait(false);
+                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
@@ -79,6 +91,7 @@ namespace Roki.Modules.Utility
                         AuthorName = ctx.Message.Author.Username,
                         GuildId = ctx.Guild.Id,
                         Keyword = keyword,
+                        Context = $"https://discordapp.com/channels/{ctx.Guild.Id}/{ctx.Channel.Id}/{ctx.Message.Id}",
                         Text = text
                     });
                     await uow.SaveChangesAsync().ConfigureAwait(false);

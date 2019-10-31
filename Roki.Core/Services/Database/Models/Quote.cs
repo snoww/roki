@@ -19,10 +19,11 @@ namespace Roki.Core.Services.Database.Models
 
         [Required]
         public string Text { get; set; }
+        public string Context { get; set; }
         
         public DateTime? DateAdded { get; set; } = DateTime.UtcNow;
 
-//        public ulong UseCount { get; set; }
+        public ulong UseCount { get; set; }
     }
 
     public enum OrderType
