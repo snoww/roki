@@ -13,6 +13,7 @@ namespace Roki.Core.Services.Database.Repositories
         Task<Quote> GetRandomQuoteByKeywordAsync(ulong guildId, string keyword);
         Task<Quote> SearchQuoteKeywordTextAsync(ulong guildId, string keyword, string text);
         IEnumerable<Quote> GetGroup(ulong guildId, int page, OrderType order);
+        Task IncrementUseCount(int id);
         void RemoveAllByKeyword(ulong guildId, string keyword);
     }
     
@@ -42,6 +43,15 @@ namespace Roki.Core.Services.Database.Repositories
             q = order == OrderType.Keyword ? q.OrderBy(x => x.Keyword) : q.OrderBy(x => x.Id);
 
             return q.Skip(15 * page).Take(15).ToArray();
+        }
+
+        public async Task IncrementUseCount(int id)
+        {
+            await Context.Database.ExecuteSqlCommandAsync($@"
+UPDATE quotes
+SET usecount=usecount+1
+WHERE id={id}")
+                .ConfigureAwait(false);
         }
 
         public void RemoveAllByKeyword(ulong guildId, string keyword)
