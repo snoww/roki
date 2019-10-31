@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using Roki.Core.Services.Database.Models;
-using Roki.Core.Services.Impl;
-using Roki.Modules.Xp;
 using Roki.Modules.Xp.Common;
 
 namespace Roki.Core.Services.Database.Repositories
@@ -179,20 +178,22 @@ WHERE UserId={userId}
         public async Task<Inventory> GetOrCreateUserInventory(ulong userId)
         {
             var user = Set.First(u => u.UserId == userId);
-            if (user.Inventory != null) return JsonConvert.DeserializeObject<Inventory>(user.Inventory);
-            var inv = ((JObject) JToken.FromObject(new Inventory())).ToString();
+            if (user.Inventory != null) return JsonSerializer.Deserialize<Inventory>(user.Inventory);
+            var inv = new Inventory();
+            var json = JsonSerializer.Serialize(inv);
             await Context.Database.ExecuteSqlCommandAsync($@"
 UPDATE IGNORE users
-SET Inventory={inv}
+SET Inventory={json}
 WHERE UserId={userId}")
                 .ConfigureAwait(false);
-            
-            return JsonConvert.DeserializeObject<Inventory>(inv);
+
+            return inv;
         }
 
         public async Task UpdateUserInventory(ulong userId, string key, int value)
         {
             var inv = await GetOrCreateUserInventory(userId).ConfigureAwait(false);
+            // Dont know how to refactor to use system.text.json
             var invObj = (JObject) JToken.FromObject(inv);
             invObj[key] = invObj[key].Value<int>() + value;
             await Context.Database.ExecuteSqlCommandAsync($@"
