@@ -35,7 +35,10 @@ namespace Roki.Modules.Gambling
             {
                 var jackpot = (long) (_currency.GetCurrency(ctx.Client.CurrentUser.Id) * _roki.Properties.LotteryJackpot);
                 if (jackpot < _roki.Properties.LotteryMin)
+                {
                     await ctx.Channel.SendErrorAsync("The lottery is currently down. Please check back another time.").ConfigureAwait(false);
+                    return;
+                }
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle("Stone Lottery")

@@ -477,5 +477,57 @@
     "Usage": [
       "{0}nextdraw"
     ]
+  },
+  "store": {
+    "Command": "store",
+    "Description": "Shows the Stone store. 9 items per page. Or specify specific name or id to see that item.",
+    "Usage": [
+      "{0}store",
+      "{0}store 8"
+    ]
+  },
+  "buy": {
+    "Command": "buy",
+    "Description": "Buy an item from the store using its name or id.",
+    "Usage": [
+      "{0}buy 123",
+      "{0}buy pizza"
+    ]
+  },
+  "subscriptions": {
+    "Command": "subscriptions subs",
+    "Description": "Shows your active subscriptions.",
+    "Usage": [
+      "{0}subscriptions",
+      "{0}subs"
+    ]
+  },
+  "mute": {
+    "Command": "mute",
+    "Description": "Mutes the specified user (Prevents them from speaking in voice). Must be a moderator or have an available power (Consumes the power).",
+    "Usage": [
+      "{0}mute @snow"
+    ]
+  },
+  "block": {
+    "Command": "block",
+    "Description": "Blocks the specified user (Prevents them from typing in chat). Must be a moderator or have an available power (Consumes the power).",
+    "Usage": [
+      "{0}block @snow"
+    ]
+  },
+  "timeout": {
+    "Command": "timeout",
+    "Description": "Times out the specified user (Prevents them from typing and speaking). Must be a moderator or have an available power (Consumes the power). Does not stack with `.mute` and `.block`.",
+    "Usage": [
+      "{0}timeout @snow"
+    ]
+  },
+  "inventory": {
+    "Command": "inventory inv",
+    "Description": "Shows the items in your inventory",
+    "Usage": [
+      "{0}inventory"
+    ]
   }
 }
