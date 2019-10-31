@@ -518,7 +518,7 @@
   },
   "timeout": {
     "Command": "timeout",
-    "Description": "Times out the specified user (Prevents them from typing and speaking). Must be a moderator or have an available power (Consumes the power).",
+    "Description": "Times out the specified user (Prevents them from typing and speaking). Must be a moderator or have an available power (Consumes the power). Does not stack with `.mute` and `.block`.",
     "Usage": [
       "{0}timeout @snow"
     ]
