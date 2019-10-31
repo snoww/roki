@@ -162,7 +162,7 @@ namespace Roki.Modules.Gambling
             {
                 var today = DateTime.UtcNow;
                 var drawToday = new DateTime(today.Year, today.Month, today.Day, 23, 0, 0);
-                var drawTmr = new DateTime(today.Year, today.Month, today.Day + 1, 23, 0, 0);
+                var drawTmr = drawToday.AddDays(1);
 
                 if (drawToday - today > TimeSpan.Zero)
                 {
