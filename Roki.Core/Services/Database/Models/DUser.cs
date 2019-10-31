@@ -30,6 +30,7 @@ namespace Roki.Core.Services.Database.Models
     public class Inventory
     {
         public int Mute { get; set; } = 0;
+        public int Block { get; set; } = 0;
         public int Timeout { get; set; } = 0;
         public int DeleteMessage { get; set; } = 0;
         public int SlowMode { get; set; } = 0;

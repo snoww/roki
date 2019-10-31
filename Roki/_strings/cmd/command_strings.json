@@ -501,5 +501,26 @@
       "{0}subscriptions",
       "{0}subs"
     ]
+  },
+  "mute": {
+    "Command": "mute",
+    "Description": "Mutes the specified user (Prevents them from speaking in voice). Must be a moderator or have an available power (Consumes the power).",
+    "Usage": [
+      "{0}mute @snow"
+    ]
+  },
+  "block": {
+    "Command": "block",
+    "Description": "Blocks the specified user (Prevents them from typing in chat). Must be a moderator or have an available power (Consumes the power).",
+    "Usage": [
+      "{0}block @snow"
+    ]
+  },
+  "timeout": {
+    "Command": "timeout",
+    "Description": "Times out the specified user (Prevents them from typing and speaking). Must be a moderator or have an available power (Consumes the power).",
+    "Usage": [
+      "{0}timeout @snow"
+    ]
   }
 }
