@@ -141,9 +141,9 @@ WHERE UserId={botId}
             var level = new XpLevel(user.TotalXp);
             int xp;
             if (boost)
-                xp = user.TotalXp + 10;
+                xp = user.TotalXp + _properties.XpPerMessage * 2;
             else 
-                xp = user.TotalXp + 5;
+                xp = user.TotalXp + _properties.XpPerMessage;
             var newLevel = new XpLevel(xp);
             if (newLevel.Level > level.Level)
             {
