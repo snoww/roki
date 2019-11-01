@@ -46,7 +46,7 @@ namespace Roki.Modules.Utility
             }
 
             [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
-            public async Task ShowQuote([Leftover] string keyword)
+            public async Task ShowQuote(string keyword, bool context = false)
             {
                 if (string.IsNullOrWhiteSpace(keyword))
                     return;
@@ -63,7 +63,12 @@ namespace Roki.Modules.Utility
                     await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
                 var author = await ctx.Guild.GetUserAsync(quote.AuthorId).ConfigureAwait(false);
-                await ctx.Channel.SendMessageAsync($"`#{quote.Id}` by {author}. Use count: {quote.UseCount}\n📣{quote.Text}\nContext: {quote.Context}").ConfigureAwait(false);
+                if (context)
+                {
+                    await ctx.Channel.SendMessageAsync($"`#{quote.Id}` by {author}. Use count: {quote.UseCount}\n📣 {quote.Text}\nContext: {quote.Context}").ConfigureAwait(false);
+                    return;
+                }
+                await ctx.Channel.SendMessageAsync($"`#{quote.Id}` by {author}. Use count: {quote.UseCount}\n📣 {quote.Text}").ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
