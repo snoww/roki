@@ -37,7 +37,7 @@ namespace Roki.Core.Services.Database.Repositories
 
         public async Task UpdateQuantityAsync(int id)
         {
-            await Context.Database.ExecuteSqlCommandAsync($@"
+            await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE IGNORE store
 SET `quantity` = `quantity` - 1
 WHERE `id` = {id}
