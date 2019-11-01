@@ -15,7 +15,8 @@ namespace Roki.Core.Services.Database.Repositories
         Task<int> CheckSubscription(ulong userId, int itemId);
         Task UpdateSubscriptionsAsync(int id, int days);
         List<Subscriptions> GetUserSubscriptions(ulong userId);
-        bool XpBoostIsActive(ulong userId);
+        bool DoubleXpIsActive(ulong userId);
+        bool FastXpIsActive(ulong userId);
     }
     
     public class SubscriptionRepository : Repository<Subscriptions>, ISubscriptionRepository
@@ -68,9 +69,14 @@ WHERE id = {id} ")
             return Set.Where(s => s.UserId == userId).AsEnumerable().ToList();
         }
 
-        public bool XpBoostIsActive(ulong userId)
+        public bool DoubleXpIsActive(ulong userId)
         {
-            return GetUserSubscriptions(userId).Any(s => s.Description.Contains("xp", StringComparison.OrdinalIgnoreCase));
+            return GetUserSubscriptions(userId).Any(s => s.Description.Contains("double", StringComparison.OrdinalIgnoreCase));
+        }
+
+        public bool FastXpIsActive(ulong userId)
+        {
+            return GetUserSubscriptions(userId).Any(s => s.Description.Contains("fast", StringComparison.OrdinalIgnoreCase));
         }
     }
 }
