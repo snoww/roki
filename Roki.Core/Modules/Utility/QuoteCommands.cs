@@ -63,17 +63,7 @@ namespace Roki.Modules.Utility
                     await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
                 var author = await ctx.Guild.GetUserAsync(quote.AuthorId).ConfigureAwait(false);
-                var embed = new EmbedBuilder().WithOkColor().WithFooter($"Use count: {quote.UseCount}");
-                if (!_service.IsImage(quote.Text))
-                    embed.WithDescription(quote.Text);
-                else
-                    embed.WithImageUrl(quote.Text);
-                if (string.IsNullOrWhiteSpace(quote.Context))
-                    embed.WithAuthor($"#{quote.Id} {author.Username}", author.GetAvatarUrl());
-                else
-                    embed.WithAuthor($"#{quote.Id} {author.Username}", author.GetAvatarUrl(), quote.Context);
-
-                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync($"`#{quote.Id} by {author}. Use count: {quote.UseCount}` 📣 \n" + quote.Text).ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
