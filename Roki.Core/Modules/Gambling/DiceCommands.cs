@@ -77,23 +77,23 @@ namespace Roki.Modules.Gambling
                         break;
                     case 15:
                     case 27:
-                        won = (long) Math.Ceiling(amount * 1.75);
+                        won = amount * 2;
                         break;
                     case 14:
                     case 28:
-                        won = (long) Math.Ceiling(amount * 1.95);
+                        won = (long) Math.Ceiling(amount * 2.5);
                         break;
                     case 13:
                     case 29:
-                        won = amount * 2;
+                        won = amount * 3;
                         break;
                     case 12:
                     case 30:
-                        won = amount * 3;
+                        won = amount * 5;
                         break;
                     case 11:
                     case 31:
-                        won = amount * 5;
+                        won = amount * 7;
                         break;
                     case 10:
                     case 32:
