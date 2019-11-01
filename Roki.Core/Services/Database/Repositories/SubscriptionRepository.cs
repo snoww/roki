@@ -66,7 +66,7 @@ WHERE id = {id} ")
 
         public List<Subscriptions> GetUserSubscriptions(ulong userId)
         {
-            return Set.Where(s => s.UserId == userId).AsEnumerable().ToList();
+            return Set.Where(s => s.UserId == userId).ToList();
         }
 
         public bool DoubleXpIsActive(ulong userId)
