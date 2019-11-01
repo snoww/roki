@@ -56,7 +56,7 @@ namespace Roki.Modules.Utility
                 Quote quote;
                 using (var uow = _db.GetDbContext())
                 {
-                    quote = await uow.Quotes.GetRandomQuoteByKeywordAsync(ctx.Guild.Id, keyword);
+                    quote = uow.Quotes.GetRandomQuoteByKeywordAsync(ctx.Guild.Id, keyword);
                     if (quote == null)
                         return;
                     await uow.Quotes.IncrementUseCount(quote.Id).ConfigureAwait(false);
@@ -126,7 +126,7 @@ namespace Roki.Modules.Utility
                     await ctx.Channel.SendErrorAsync(response).ConfigureAwait(false);
             }
 
-            [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
+            /*[RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
             public async Task QuoteSearch(string keyword, [Leftover] string text)
             {
                 if (string.IsNullOrWhiteSpace(keyword) || string.IsNullOrWhiteSpace(text))
@@ -144,7 +144,7 @@ namespace Roki.Modules.Utility
                     return;
 
                 await ctx.Channel.SendMessageAsync($"`#{quote.Id}` 💬 " + keyword.ToLowerInvariant() + ": " + quote.Text).ConfigureAwait(false);
-            }
+            }*/
 
             [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
             public async Task QuoteId(int id)
