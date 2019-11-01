@@ -38,102 +38,84 @@ namespace Roki.Modules.Currency.Services
 
         private async void RemoveSubEvent(object state)
         {
-            using (var uow = _db.GetDbContext())
+            using var uow = _db.GetDbContext();
+            var expired = uow.Subscriptions.GetExpiredSubscriptions();
+            foreach (var sub in expired)
             {
-                var expired = uow.Subscriptions.GetExpiredSubscriptions();
-                foreach (var sub in expired)
-                {
-                    await uow.Subscriptions.RemoveSubscriptionAsync(sub.Id).ConfigureAwait(false);
-                    if (!(_client.GetUser(sub.UserId) is IGuildUser user)) continue;
-                    var role = user.Guild.Roles.First(r => r.Name == sub.Description);
-                    await user.RemoveRoleAsync(role).ConfigureAwait(false);
-                }
+                await uow.Subscriptions.RemoveSubscriptionAsync(sub.Id).ConfigureAwait(false);
+                if (!(_client.GetUser(sub.UserId) is IGuildUser user)) continue;
+                var role = user.Guild.Roles.First(r => r.Name.Contains(sub.Description, StringComparison.OrdinalIgnoreCase));
+                await user.RemoveRoleAsync(role).ConfigureAwait(false);
             }
         }
 
         public async Task NewStoreItem(ulong sellerId, string itemName, string itemDetails, string itemDescription, string category,
             string type, int? subDays, long cost, int quantity)
         {
-            using (var uow = _db.GetDbContext())
+            using var uow = _db.GetDbContext();
+            uow.Listing.Add(new Listing
             {
-                uow.Listing.Add(new Listing
-                {
-                    SellerId = sellerId,
-                    ItemName = itemName,
-                    ItemDetails = itemDetails,
-                    Description = itemDescription,
-                    Category = category,
-                    Cost = cost,
-                    Type = type,
-                    SubscriptionDays = subDays,
-                    Quantity = quantity,
-                    ListDate = DateTime.UtcNow
-                });
+                SellerId = sellerId,
+                ItemName = itemName,
+                ItemDetails = itemDetails,
+                Description = itemDescription,
+                Category = category,
+                Cost = cost,
+                Type = type,
+                SubscriptionDays = subDays,
+                Quantity = quantity,
+                ListDate = DateTime.UtcNow
+            });
                 
-                await uow.SaveChangesAsync().ConfigureAwait(false);
-            }
+            await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public List<Listing> GetStoreCatalog()
         {
-            using (var uow = _db.GetDbContext())
-            {
-                return uow.Listing.GetStoreCatalog();
-            }
+            using var uow = _db.GetDbContext();
+            return uow.Listing.GetStoreCatalog();
         }
 
         public Listing GetListingByName(string name)
         {
-            using (var uow = _db.GetDbContext())
-            {
-                return uow.Listing.GetListingByName(name);
-            }
+            using var uow = _db.GetDbContext();
+            return uow.Listing.GetListingByName(name);
         }
         
         public Listing GetListingById(int id)
         {
-            using (var uow = _db.GetDbContext())
-            {
-                return uow.Listing.GetListingById(id);
-            }
+            using var uow = _db.GetDbContext();
+            return uow.Listing.GetListingById(id);
         }
 
         public async Task UpdateListingAsync(int id)
         {
-            using (var uow = _db.GetDbContext())
-            {
-                await uow.Listing.UpdateQuantityAsync(id).ConfigureAwait(false);
-                await uow.SaveChangesAsync().ConfigureAwait(false);
-            }
+            using var uow = _db.GetDbContext();
+            await uow.Listing.UpdateQuantityAsync(id).ConfigureAwait(false);
+            await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task AddNewSubscriptionAsync(ulong userId, int itemId, string description, DateTime startDate, DateTime endDate)
         {
-            using (var uow = _db.GetDbContext())
-            {
-                await uow.Subscriptions.NewSubscriptionAsync(userId, itemId, description, startDate, endDate).ConfigureAwait(false);
-                await uow.SaveChangesAsync().ConfigureAwait(false);
-            }
+            using var uow = _db.GetDbContext();
+            await uow.Subscriptions.NewSubscriptionAsync(userId, itemId, description, startDate, endDate).ConfigureAwait(false);
+            await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task<bool> GetOrUpdateSubAsync(ulong userId, int itemId, int days)
         {
-            using (var uow = _db.GetDbContext())
-            {
-                var subId = await uow.Subscriptions.CheckSubscription(userId, itemId).ConfigureAwait(false);
-                if (subId == 0) return false;
-                await uow.Subscriptions.UpdateSubscriptionsAsync(subId, days).ConfigureAwait(false);
-                await uow.SaveChangesAsync().ConfigureAwait(false);
-                return true;
-            }
+            using var uow = _db.GetDbContext();
+            var subId = await uow.Subscriptions.CheckSubscription(userId, itemId).ConfigureAwait(false);
+            if (subId == 0) return false;
+            await uow.Subscriptions.UpdateSubscriptionsAsync(subId, days).ConfigureAwait(false);
+            await uow.SaveChangesAsync().ConfigureAwait(false);
+            return true;
         }
 
         public List<Subscriptions> GetUserSubscriptions(ulong userId)
         {
-            using (var uow = _db.GetDbContext())
-            {
-                return uow.Subscriptions.GetUserSubscriptions(userId);
-            }
+            using var uow = _db.GetDbContext();
+            return uow.Subscriptions.GetUserSubscriptions(userId);
         }
 
         public async Task<IRole> GetRoleAsync(ICommandContext ctx, string roleName)
@@ -158,19 +140,15 @@ namespace Roki.Modules.Currency.Services
 
         public async Task<Inventory> GetOrCreateInventoryAsync(ulong userId)
         {
-            using (var uow = _db.GetDbContext())
-            {
-                return await uow.DUsers.GetOrCreateUserInventory(userId).ConfigureAwait(false);
-            }
+            using var uow = _db.GetDbContext();
+            return await uow.DUsers.GetOrCreateUserInventory(userId).ConfigureAwait(false);
         }
 
         public async Task UpdateInventoryAsync(ulong userId, string key, int value)
         {
-            using (var uow = _db.GetDbContext())
-            {
-                await uow.DUsers.UpdateUserInventory(userId, key, value).ConfigureAwait(false);
-                await uow.SaveChangesAsync().ConfigureAwait(false);
-            }
+            using var uow = _db.GetDbContext();
+            await uow.DUsers.UpdateUserInventory(userId, key, value).ConfigureAwait(false);
+            await uow.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }
