@@ -10,7 +10,7 @@ namespace Roki.Core.Services.Database.Repositories
 {
     public interface IQuoteRepository : IRepository<Quote>
     {
-        Task<Quote> GetRandomQuoteByKeywordAsync(ulong guildId, string keyword);
+        Quote GetRandomQuoteByKeywordAsync(ulong guildId, string keyword);
         Task<Quote> SearchQuoteKeywordTextAsync(ulong guildId, string keyword, string text);
         IEnumerable<Quote> GetGroup(ulong guildId, int page, OrderType order);
         Task IncrementUseCount(int id);
@@ -23,10 +23,11 @@ namespace Roki.Core.Services.Database.Repositories
         {
         }
 
-        public Task<Quote> GetRandomQuoteByKeywordAsync(ulong guildId, string keyword)
+        public Quote GetRandomQuoteByKeywordAsync(ulong guildId, string keyword)
         {
             var rand = new Random();
-            return Set.Where(q => q.GuildId == guildId && q.Keyword == keyword).OrderBy(q => rand.Next()).FirstOrDefaultAsync();
+            var quotes = Set.Where(q => q.GuildId == guildId && q.Keyword == keyword).ToList();
+            return quotes.OrderBy(q => rand.Next()).FirstOrDefault();
         }
 
         public Task<Quote> SearchQuoteKeywordTextAsync(ulong guildId, string keyword, string text)
