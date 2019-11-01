@@ -8,6 +8,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Roki.Core.Services;
 using Roki.Core.Services.Database.Models;
+using Roki.Extensions;
 
 namespace Roki.Modules.Currency.Services
 {
@@ -128,7 +129,7 @@ namespace Roki.Modules.Currency.Services
 
             if (!updated) return false;
                 
-            var msg = await ctx.Channel.SendMessageAsync($"{user.Username} dropped {amount} {_roki.Properties.CurrencyIcon}\nType `.pick` to pick it up.");
+            var msg = await ctx.Channel.SendMessageAsync($"{user.Username} dropped {amount.FormatNumber()} {_roki.Properties.CurrencyIcon}\nType `.pick` to pick it up.");
 
             uow.Transaction.Add(new CurrencyTransaction
             {

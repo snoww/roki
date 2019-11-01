@@ -84,7 +84,7 @@ namespace Roki.Modules.Currency
             }
 
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{ctx.User.Username} gifted {amount.FormatNumber()} {_roki.Properties.CurrencyNamePlural} to {user.Username}")).ConfigureAwait(false);
+                .WithDescription($"{ctx.User.Username} gifted {amount.FormatNumber()} {_roki.Properties.CurrencyNamePlural} to {user.Mention}")).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
