@@ -76,6 +76,7 @@ namespace Roki.Modules.Games
             private class PlayerBet
             {
                 public long Amount { get; set; }
+                public int Multiple { get; set; } = 1;
                 public BetPlayer? Bet { get; set; }
             }
 
@@ -193,13 +194,13 @@ namespace Roki.Modules.Games
                             var currency = _currency.GetCurrency(user.Id);
                             if (reaction.Emote.Equals(AllIn))
                                 joinedReactions[user].Amount = currency;
-                            else if (reaction.Emote.Equals(TimesTwo) && currency >= joinedReactions[user].Amount * 2)
-                                joinedReactions[user].Amount *= 2;
-                            else if (reaction.Emote.Equals(TimesFive) && currency >= joinedReactions[user].Amount * 5)
-                                joinedReactions[user].Amount *= 5;
-                            else if (reaction.Emote.Equals(TimesTen) && currency >= joinedReactions[user].Amount * 10)
-                                joinedReactions[user].Amount *= 10;
-                            else if (currency >= joinedReactions[user].Amount + _reactionMap[reaction.Emote]) 
+                            else if (reaction.Emote.Equals(TimesTwo) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 2)
+                                joinedReactions[user].Multiple *= 2;
+                            else if (reaction.Emote.Equals(TimesFive) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 5)
+                                joinedReactions[user].Multiple *= 5;
+                            else if (reaction.Emote.Equals(TimesTen) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 10)
+                                joinedReactions[user].Multiple *= 10;
+                            else if (currency >= joinedReactions[user].Amount + _reactionMap[reaction.Emote] * joinedReactions[user].Multiple) 
                                 joinedReactions[user].Amount += _reactionMap[reaction.Emote];
                             else
                             {
@@ -229,7 +230,7 @@ namespace Roki.Modules.Games
                 foreach (var (key, value) in joinedReactions)
                 {
                     await _currency
-                        .ChangeAsync(key, "BetShowdown Entry", -value.Amount, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}", ctx.Guild.Id, ctx.Channel.Id,
+                        .ChangeAsync(key, "BetShowdown Entry", -value.Amount * value.Multiple, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}", ctx.Guild.Id, ctx.Channel.Id,
                             ctx.Message.Id)
                         .ConfigureAwait(false);
                 }
