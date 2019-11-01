@@ -23,7 +23,7 @@ namespace Roki.Core.Services.Database.Models
         
         public DateTime? DateAdded { get; set; } = DateTime.UtcNow;
 
-        public ulong UseCount { get; set; }
+        public int UseCount { get; set; }
     }
 
     public enum OrderType
