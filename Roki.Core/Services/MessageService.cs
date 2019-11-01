@@ -41,9 +41,18 @@ namespace Roki.Services
                 if (!message.Author.IsBot)
                 {
                     var user = uow.DUsers.GetOrCreate(message.Author);
-                    var boost = uow.Subscriptions.XpBoostIsActive(message.Author.Id);
-                    if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpCooldown))
-                        await uow.DUsers.UpdateXp(user, message, boost).ConfigureAwait(false);
+                    var doubleXp = uow.Subscriptions.DoubleXpIsActive(message.Author.Id);
+                    var fastXp = uow.Subscriptions.FastXpIsActive(message.Author.Id);
+                    if (fastXp)
+                    {
+                        if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpFastCooldown))
+                            await uow.DUsers.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpCooldown))
+                            await uow.DUsers.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
+                    }
 
                     uow.DMessages.Add(new DMessage
                     {

@@ -34,6 +34,7 @@ namespace Roki.Core.Services
 
         public int XpPerMessage { get; set; } = 5;
         public int XpCooldown { get; set; } = 5;
+        public double XpFastCooldown { get; set; } = 2.5; 
 
         #endregion
 
