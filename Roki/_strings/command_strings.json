@@ -397,7 +397,7 @@
   },
   "betdie": {
     "Command": "betdie bd",
-    "Description": "Bet an amount to roll 6 die. Rolling 18/24 yields x1.95 stones, 17/25 x2, 16/26 x2.3, 15/27 x2.8, 14/28 x3, 13/29 x4, 12/30 x5, 11/31 x8, 10/32 x10, 9/33 x15, 8/34 x20, 7/35 x50, 6/36 x100",
+    "Description": "Bet an amount to roll 6 die. Rolling 17/25 yields x1.25 stones, 16/26 x1.5, 15/27 x1.75, 14/28 x1.95, 13/29 x2, 12/30 x3, 11/31 x5, 10/32 x10, 9/33 x17, 8/34 x25, 7/35 x50, 6/36 x100",
     "Usage": [
       "{0}bd 10"
     ]
