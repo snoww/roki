@@ -84,5 +84,20 @@ namespace Roki.Extensions
         {
             return ulong.Parse(str);
         }
+
+        public static string FormatNumber(this long number)
+        {
+            return number.ToString("N0");
+        }
+        
+        public static string FormatNumber(this int number)
+        {
+            return number.ToString("N0");
+        }
+        
+        public static string FormatNumber(this double number)
+        {
+            return number.ToString("N");
+        }
     }
 }

@@ -38,7 +38,7 @@ namespace Roki.Modules.Currency
         {
             user ??= ctx.User;
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{user.Mention} has {GetCurrency(user.Id)} {_roki.Properties.CurrencyIcon}")).ConfigureAwait(false);
+                .WithDescription($"{user.Mention} has {GetCurrency(user.Id).FormatNumber()} {_roki.Properties.CurrencyIcon}")).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -57,7 +57,7 @@ namespace Roki.Modules.Currency
                 var i = 9 * page + 1;
                 foreach (var user in list)
                 {
-                    embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"{user.Currency} {_roki.Properties.CurrencyIcon}");
+                    embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"{user.Currency.FormatNumber()} {_roki.Properties.CurrencyIcon}");
                 }
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
@@ -84,7 +84,7 @@ namespace Roki.Modules.Currency
             }
 
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{ctx.User.Username} gifted {amount} {_roki.Properties.CurrencyNamePlural} to {user.Username}")).ConfigureAwait(false);
+                .WithDescription($"{ctx.User.Username} gifted {amount.FormatNumber()} {_roki.Properties.CurrencyNamePlural} to {user.Username}")).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -116,7 +116,7 @@ namespace Roki.Modules.Currency
             foreach (var tran in trans)
             {
                 var type = tran.Amount > 0 ? "🔵" : "🔴";
-                var amount = tran.Amount.ToString();
+                var amount = tran.Amount.FormatNumber();
                 if (tran.Reason.StartsWith("Gift from") && tran.From == userId.ToString())
                 {
                     type = "🔴";

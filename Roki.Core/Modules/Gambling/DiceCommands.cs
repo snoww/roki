@@ -35,7 +35,7 @@ namespace Roki.Modules.Gambling
             {
                 if (amount < _roki.Properties.BetDieMin)
                 {
-                    await ctx.Channel.SendErrorAsync($"The minimum bet for this game is {_roki.Properties.BetDieMin} {_roki.Properties.CurrencyIcon}")
+                    await ctx.Channel.SendErrorAsync($"The minimum bet for this game is {_roki.Properties.BetDieMin.FormatNumber()} {_roki.Properties.CurrencyIcon}")
                         .ConfigureAwait(false);
                     return;
                 }
@@ -129,7 +129,7 @@ namespace Roki.Modules.Gambling
                 if (won > 0)
                 {
                     embed.WithOkColor()
-                        .WithDescription($"{ctx.User.Mention} You rolled a total of {total}\nCongratulations! You've won {won} {_roki.Properties.CurrencyIcon}");
+                        .WithDescription($"{ctx.User.Mention} You rolled a total of {total}\nCongratulations! You've won {won.FormatNumber()} {_roki.Properties.CurrencyIcon}");
                     await _currency.ChangeAsync(ctx.User, "BetDie Payout", won, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
                 }
