@@ -36,7 +36,7 @@ VALUES({userId}, {itemId}, {type}, {description}, {startDate}, {endDate})")
 
         public async Task RemoveSubscriptionAsync(int id)
         {
-            await Context.Database.ExecuteSqlCommandAsync($@"
+            await Context.Database.ExecuteSqlInterpolatedAsync($@"
 DELETE FROM `subscriptions`
 WHERE id={id}")
                 .ConfigureAwait(false);
@@ -57,7 +57,7 @@ WHERE id={id}")
         {
             var sub = await Set.FirstOrDefaultAsync(s => s.Id == id).ConfigureAwait(false);
             var newEndDate = sub.EndDate + TimeSpan.FromDays(days);
-            await Context.Database.ExecuteSqlCommandAsync($@"
+            await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE IGNORE `subscriptions`
 SET enddate = {newEndDate}
 WHERE id = {id} ")

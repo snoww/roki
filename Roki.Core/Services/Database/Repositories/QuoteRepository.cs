@@ -47,7 +47,7 @@ namespace Roki.Core.Services.Database.Repositories
 
         public async Task IncrementUseCount(int id)
         {
-            await Context.Database.ExecuteSqlCommandAsync($@"
+            await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE quotes
 SET UseCount=UseCount+1
 WHERE id={id}")
