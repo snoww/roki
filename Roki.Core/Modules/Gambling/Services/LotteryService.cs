@@ -107,7 +107,7 @@ namespace Roki.Modules.Gambling.Services
                 {
                     await uow.DUsers.LotteryAwardAsync(winner, amount).ConfigureAwait(false);
                     await uow.DUsers.UpdateBotCurrencyAsync(_client.CurrentUser.Id, -amount);
-                    toReturn += $"<@{winner}> WON {amount} {_roki.Properties.CurrencyIcon}\n";
+                    toReturn += $"<@{winner}> WON {amount.FormatNumber()} {_roki.Properties.CurrencyIcon}\n";
                 }
                 
             }
@@ -119,7 +119,7 @@ namespace Roki.Modules.Gambling.Services
                 {
                     await uow.DUsers.LotteryAwardAsync(winner, amount).ConfigureAwait(false);
                     await uow.DUsers.UpdateBotCurrencyAsync(_client.CurrentUser.Id, -amount);
-                    toReturn += $"<@{winner}> won {amount} {_roki.Properties.CurrencyIcon}\n";
+                    toReturn += $"<@{winner}> won {amount.FormatNumber()} {_roki.Properties.CurrencyIcon}\n";
                 }
             }
             if (four.Count > 0)
@@ -130,7 +130,7 @@ namespace Roki.Modules.Gambling.Services
                 {
                     await uow.DUsers.LotteryAwardAsync(winner, amount).ConfigureAwait(false);
                     await uow.DUsers.UpdateBotCurrencyAsync(_client.CurrentUser.Id, -amount);
-                    toReturn += $"<@{winner}> won {amount} {_roki.Properties.CurrencyIcon}\n";
+                    toReturn += $"<@{winner}> won {amount.FormatNumber()} {_roki.Properties.CurrencyIcon}\n";
                 }
             }
 

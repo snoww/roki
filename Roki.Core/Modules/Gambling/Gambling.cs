@@ -55,7 +55,7 @@ namespace Roki.Modules.Gambling
             await _currency.ChangeAsync(ctx.User, "BetRoll Payout", win, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id, ctx.Channel.Id,
                 ctx.Message.Id);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{rollStr}\nCongratulations, you won {win} {_roki.Properties.CurrencyIcon}"));
+                .WithDescription($"{rollStr}\nCongratulations, you won {win.FormatNumber()} {_roki.Properties.CurrencyIcon}"));
         }
     }
 }

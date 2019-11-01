@@ -42,7 +42,7 @@ namespace Roki.Modules.Gambling
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle("Stone Lottery")
-                        .WithDescription($"Current Jackpot: {Format.Bold(jackpot.ToString())} {_roki.Properties.CurrencyIcon}"))
+                        .WithDescription($"Current Jackpot: {Format.Bold(jackpot.FormatNumber())} {_roki.Properties.CurrencyIcon}"))
                     .ConfigureAwait(false);
             }
 
@@ -79,7 +79,7 @@ namespace Roki.Modules.Gambling
                 }
                 var entries = uow.Lottery.GetTotalEntries(user.Id, lotteryId);
                 var embed = new EmbedBuilder().WithOkColor()
-                    .WithTitle($"Purchase Successful - You have {entries} total entries")
+                    .WithTitle($"Purchase Successful - You have {entries.FormatNumber()} total entries")
                     .WithDescription($"{user.Mention} Here are your lottery numbers:\n`{string.Join('\n', numbers)}`")
                     .WithFooter("Note: Only shows first 10 tickets.");
 
@@ -142,7 +142,7 @@ namespace Roki.Modules.Gambling
                 if (page == 0)
                 {
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                            .WithDescription($"{ctx.User.Username} has {uow.Lottery.GetTotalEntries(ctx.User.Id, lotteryId)} tickets"))
+                            .WithDescription($"{ctx.User.Username} has {uow.Lottery.GetTotalEntries(ctx.User.Id, lotteryId).FormatNumber()} tickets"))
                         .ConfigureAwait(false);
                     return;
                 }

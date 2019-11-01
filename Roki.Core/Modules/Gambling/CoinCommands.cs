@@ -76,7 +76,7 @@ namespace Roki.Modules.Gambling
                     var won = (long) Math.Ceiling(amount * _roki.Properties.BetFlipMultiplier);
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithDescription(
-                                $"Result is: {result}\n{ctx.User.Mention} Congratulations! You've won {won} {_roki.Properties.CurrencyNamePlural}"))
+                                $"Result is: {result}\n{ctx.User.Mention} Congratulations! You've won {won.FormatNumber()} {_roki.Properties.CurrencyNamePlural}"))
                         .ConfigureAwait(false);
                     await _currency.ChangeAsync(ctx.User, "BetFlip Payout", won, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
@@ -102,7 +102,7 @@ namespace Roki.Modules.Gambling
                 var minAmount = guesses.Length * 2;
                 if (guesses.Length >= _roki.Properties.BetFlipMMinGuesses && amount < minAmount)
                 {
-                    await ctx.Channel.SendErrorAsync($"{guesses.Length} guesses requires you to bet at least {minAmount} {_roki.Properties.CurrencyNamePlural}.")
+                    await ctx.Channel.SendErrorAsync($"{guesses.Length} guesses requires you to bet at least {minAmount.FormatNumber()} {_roki.Properties.CurrencyNamePlural}.")
                         .ConfigureAwait(false);
                     return;
                 }
@@ -131,7 +131,7 @@ namespace Roki.Modules.Gambling
                     var won = (long) Math.Ceiling(amount * Math.Pow(correct, _roki.Properties.BetFlipMMultiplier));
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithDescription(
-                                $"Results are: {string.Join(", ", results)}\n{ctx.User.Mention} Congratulations! You got {correct}/{guesses.Length} correct. You've won {won} {_roki.Properties.CurrencyNamePlural}"))
+                                $"Results are: {string.Join(", ", results)}\n{ctx.User.Mention} Congratulations! You got {correct}/{guesses.Length} correct. You've won {won.FormatNumber()} {_roki.Properties.CurrencyNamePlural}"))
                         .ConfigureAwait(false);
                     await _currency.ChangeAsync(ctx.User, "BetFlipMulti Payout", won, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
