@@ -65,10 +65,10 @@ namespace Roki.Modules.Utility
                 var author = await ctx.Guild.GetUserAsync(quote.AuthorId).ConfigureAwait(false);
                 if (context)
                 {
-                    await ctx.Channel.SendMessageAsync($"`#{quote.Id}` by `{author}`. Use count: {quote.UseCount}\n📣 {quote.Text}\nContext: {quote.Context}").ConfigureAwait(false);
+                    await ctx.Channel.SendMessageAsync($"`#{quote.Id}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}\nContext: {quote.Context}").ConfigureAwait(false);
                     return;
                 }
-                await ctx.Channel.SendMessageAsync($"`#{quote.Id}` by `{author}`. Use count: {quote.UseCount}\n📣 {quote.Text}").ConfigureAwait(false);
+                await ctx.Channel.SendMessageAsync($"`#{quote.Id}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}").ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
