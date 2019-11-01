@@ -43,10 +43,13 @@ namespace Roki.Modules.Currency.Services
             foreach (var sub in expired)
             {
                 await uow.Subscriptions.RemoveSubscriptionAsync(sub.Id).ConfigureAwait(false);
+                if (sub.Type.Equals("BOOST", StringComparison.OrdinalIgnoreCase)) continue;
                 if (!(_client.GetUser(sub.UserId) is IGuildUser user)) continue;
                 var role = user.Guild.Roles.First(r => r.Name.Contains(sub.Description, StringComparison.OrdinalIgnoreCase));
                 await user.RemoveRoleAsync(role).ConfigureAwait(false);
             }
+
+            await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task NewStoreItem(ulong sellerId, string itemName, string itemDetails, string itemDescription, string category,
@@ -95,10 +98,10 @@ namespace Roki.Modules.Currency.Services
             await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task AddNewSubscriptionAsync(ulong userId, int itemId, string description, DateTime startDate, DateTime endDate)
+        public async Task AddNewSubscriptionAsync(ulong userId, int itemId, string type, string description, DateTime startDate, DateTime endDate)
         {
             using var uow = _db.GetDbContext();
-            await uow.Subscriptions.NewSubscriptionAsync(userId, itemId, description, startDate, endDate).ConfigureAwait(false);
+            await uow.Subscriptions.NewSubscriptionAsync(userId, itemId, type, description, startDate, endDate).ConfigureAwait(false);
             await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 

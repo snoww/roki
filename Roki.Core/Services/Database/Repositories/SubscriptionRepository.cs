@@ -9,7 +9,7 @@ namespace Roki.Core.Services.Database.Repositories
 {
     public interface ISubscriptionRepository : IRepository<Subscriptions>
     {
-        Task NewSubscriptionAsync(ulong userId, int itemId, string description, DateTime startDate, DateTime endDate);
+        Task NewSubscriptionAsync(ulong userId, int itemId, string type, string description, DateTime startDate, DateTime endDate);
         Task RemoveSubscriptionAsync(int id);
         IEnumerable<Subscriptions> GetExpiredSubscriptions();
         Task<int> CheckSubscription(ulong userId, int itemId);
@@ -26,11 +26,11 @@ namespace Roki.Core.Services.Database.Repositories
         }
 
 
-        public async Task NewSubscriptionAsync(ulong userId, int itemId, string description, DateTime startDate, DateTime endDate)
+        public async Task NewSubscriptionAsync(ulong userId, int itemId, string type, string description, DateTime startDate, DateTime endDate)
         {
             await Context.Database.ExecuteSqlCommandAsync($@"
-INSERT INTO `subscriptions`(userid, itemId, description, startdate, enddate)
-VALUES({userId}, {itemId}, {description}, {startDate}, {endDate})")
+INSERT INTO `subscriptions`(userid, itemId, type, description, startdate, enddate)
+VALUES({userId}, {itemId}, {type}, {description}, {startDate}, {endDate})")
                 .ConfigureAwait(false);
         }
 
