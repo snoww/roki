@@ -28,7 +28,7 @@ namespace Roki.Modules.Currency.Services
 
         private void CheckSubscriptions()
         {
-            _timer = new Timer(RemoveSubEvent, null, TimeSpan.Zero, TimeSpan.FromHours(3));
+            _timer = new Timer(RemoveSubEvent, null, TimeSpan.Zero, TimeSpan.FromHours(1));
         }
 
         private async void RemoveSubEvent(object state)
@@ -39,8 +39,10 @@ namespace Roki.Modules.Currency.Services
             {
                 await uow.Subscriptions.RemoveSubscriptionAsync(sub.Id).ConfigureAwait(false);
                 if (sub.Type.Equals("BOOST", StringComparison.OrdinalIgnoreCase)) continue;
-                if (!(_client.GetUser(sub.UserId) is IGuildUser user)) continue;
-                var role = user.Guild.Roles.First(r => r.Name.Contains(sub.Description, StringComparison.OrdinalIgnoreCase));
+                var guild = _client.GetGuild(sub.GuildId);
+                if (!(guild.GetUser(sub.UserId) is IGuildUser user)) continue;
+                var role = user.GetRoles().FirstOrDefault(r => r.Name.Contains(sub.Description, StringComparison.OrdinalIgnoreCase));
+                if (role == null) continue;
                 await user.RemoveRoleAsync(role).ConfigureAwait(false);
             }
 
@@ -93,10 +95,10 @@ namespace Roki.Modules.Currency.Services
             await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task AddNewSubscriptionAsync(ulong userId, int itemId, string type, string description, DateTime startDate, DateTime endDate)
+        public async Task AddNewSubscriptionAsync(ulong userId, ulong guildId, int itemId, string type, string description, DateTime startDate, DateTime endDate)
         {
             using var uow = _db.GetDbContext();
-            await uow.Subscriptions.NewSubscriptionAsync(userId, itemId, type, description, startDate, endDate).ConfigureAwait(false);
+            await uow.Subscriptions.NewSubscriptionAsync(userId, guildId, itemId, type, description, startDate, endDate).ConfigureAwait(false);
             await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
