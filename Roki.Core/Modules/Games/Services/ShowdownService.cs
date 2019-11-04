@@ -38,7 +38,7 @@ namespace Roki.Modules.Games.Services
             var team1 = new List<string>();
             var team2 = new List<string>();
             var winner = 0;
-            await Task.Run(async () =>
+            var p1 = Task.Run(() =>
             {
                 using var proc = new Process {StartInfo =
                 {
@@ -48,7 +48,7 @@ namespace Roki.Modules.Games.Services
                 }};
                 proc.Start();
                 var reader = proc.StandardOutput;
-                var gameStr = await reader.ReadToEndAsync().ConfigureAwait(false);
+                var gameStr = reader.ReadToEnd();
                 var game = gameStr.Split();
                 var id = game[0].Substring(game[0].IndexOf("battle", StringComparison.OrdinalIgnoreCase), 34);
                 team1 = ParseTeamAsync(game[3]);
@@ -57,7 +57,7 @@ namespace Roki.Modules.Games.Services
                 winner = game[^4].Contains("0", StringComparison.Ordinal) ? 1 : 0;
                 File.AppendAllText(@"./data/pokemon-logs/battle-logs", $"{uid}={id}");
             });
-            await Task.Run(async () =>
+            var p2 = Task.Run(() =>
             {
                 using var proc = new Process {StartInfo =
                 {
@@ -67,11 +67,12 @@ namespace Roki.Modules.Games.Services
                 }};
                 proc.Start();
                 var reader = proc.StandardOutput;
-                var gameStr = await reader.ReadToEndAsync().ConfigureAwait(false);
+                var gameStr = reader.ReadToEnd();
                 var game = gameStr.Split();
                 proc.WaitForExit();
                 team2 = ParseTeamAsync(game[3]);
             });
+            Task.WaitAll(p1, p2);
             return (uid, team1, team2, winner);
         }
 
