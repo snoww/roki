@@ -268,9 +268,9 @@ namespace Roki.Modules.Games
                 _service.Games.TryRemove(ctx.Channel.Id, out _);
             }
 
-            /*[RokiCommand, Description, Aliases, Usage]
+            [RokiCommand, Description, Aliases, Usage]
             [RequireContext(ContextType.Guild)]
-            public async Task BetPokemonLog([Leftover] string uid = null)
+            public async Task BetPokemonReplay([Leftover] string uid = null)
             {
                 uid = uid.SanitizeStringFull();
                 if (uid.Length != 8)
@@ -278,75 +278,17 @@ namespace Roki.Modules.Games
                     await ctx.Channel.SendErrorAsync("Invalid Game ID").ConfigureAwait(false);
                     return;
                 }
-                var game = await _service.LoadSavedGameAsync(uid).ConfigureAwait(false);
-                if (game == null)
-                {
-                    await ctx.Channel.SendErrorAsync("Game not found").ConfigureAwait(false);
-                    return;
-                }
-                if (_service.Games.TryGetValue(ctx.Channel.Id, out var gameUid) && gameUid == uid)
-                {
-                    await ctx.Channel.SendErrorAsync("Game currently in progress. Please wait until game is finished.").ConfigureAwait(false);
-                    return;
-                }
-                
-                var index = game.IndexOf("|start", StringComparison.Ordinal);
-                var generation = uid.Substring(0, 1);
-                var gameIntro = game.Substring(0, index);
-                var gameTurns = game.Substring(index + 1);
-                var intro = _service.ParseIntro(gameIntro);
-                var t1 = new List<Image<Rgba32>>();
-                var t2 = new List<Image<Rgba32>>();
 
-                ctx.Message.DeleteAfter(5);
-                IDMChannel dm;
-                try
+                var url = await _service.GetBetPokemonReplay(uid);
+                if (url == null)
                 {
-                    dm = await ctx.User.GetOrCreateDMChannelAsync().ConfigureAwait(false);
-                }
-                catch 
-                {
-                    await ctx.Channel.SendErrorAsync("Unable to send DM message. Please try again.").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync("Cannot find replay with that ID.").ConfigureAwait(false);
                     return;
                 }
 
-                for (int i = 0; i < intro[0].Count; i++)
-                {
-                    t1.Add(GetPokemonImage(intro[0][i], generation));
-                    t2.Add(GetPokemonImage(intro[1][i], generation));
-                }
-
-                using var bitmap1 = t1.MergePokemonTeam();
-                using var bitmap2 = t2.MergePokemonTeam();
-                using var bitmap = bitmap1.MergeTwoVertical(bitmap2, out var format);
-                await using var ms = bitmap.ToStream(format);
-                for (int i = 0; i < t1.Count; i++)
-                {
-                    t1[i].Dispose();
-                    t2[i].Dispose();
-                }
-
-                var startEmbed = new EmbedBuilder().WithOkColor()
-                    .WithTitle($"[Gen {generation}] Random Battle Replay - ID: `{uid}`")
-                    .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
-                    .AddField("Player 1", string.Join('\n', intro[0]), true)
-                    .AddField("Player 2", string.Join('\n', intro[1]), true);
-                await dm.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: startEmbed.Build()).ConfigureAwait(false);
-
-                var turns = _service.ParseTurns(gameTurns);
-                await dm.TriggerTypingAsync().ConfigureAwait(false);
-                await dm.SendPaginatedDmAsync(_client, 0, TurnFunc, turns.Count, 1).ConfigureAwait(false);
-
-                EmbedBuilder TurnFunc(int turnNum)
-                {
-                    var turn = turns[turnNum];
-                    return new EmbedBuilder().WithOkColor()
-                        .WithAuthor($"[Gen {generation}] Random Battle Replay - ID: {uid}")
-                        .WithTitle($"Turn: {turnNum + 1}")
-                        .WithDescription(turn)
-                        .WithFooter($"Turn {turnNum + 1}/{turns.Count}");
-                }
-            }*/
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"{ctx.User.Mention} Here is the replay url:\n{url}"))
+                    .ConfigureAwait(false);
+            }
             
             private Image<Rgba32> GetPokemonImage(string pokemon, string generation)
             {
