@@ -48,7 +48,7 @@ namespace Roki.Modules.Games.Services
             var team = ParseTeamAsync(game[3]);
             proc.WaitForExit();
             var uid = generation + Guid.NewGuid().ToString().Substring(0, 7);
-            File.AppendAllText(@"./pokemon-logs/battle-logs", $"{uid}={id}");
+            File.AppendAllText(@"./data/pokemon-logs/battle-logs", $"{uid}={id}");
             return (uid, team, game[^4].Contains("0", StringComparison.Ordinal) ? 1 : 0);
         }
 
@@ -437,6 +437,12 @@ namespace Roki.Modules.Games.Services
             var poke = query.EndsWith("-*", StringComparison.Ordinal) ? Data[query.Replace("-*", "", StringComparison.Ordinal)] : Data[query];
 
             return poke.Sprite;
+        }
+
+        public async Task<string> GetBetPokemonReplay(string uid)
+        {
+            var logs = await File.ReadAllLinesAsync(@"./data/pokemon-logs/battle-logs").ConfigureAwait(false);
+            return (from log in logs where log.StartsWith(uid, StringComparison.OrdinalIgnoreCase) select "https://replay.pokemonshowdown.com/" + log.Substring(9)).FirstOrDefault();
         }
     }
 }
