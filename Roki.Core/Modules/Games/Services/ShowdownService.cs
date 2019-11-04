@@ -32,10 +32,11 @@ namespace Roki.Modules.Games.Services
             await File.WriteAllTextAsync("/home/snow/Documents/showdown2/.env", env2).ConfigureAwait(false);
         }
 
-        public async Task<(string, List<string>, int)> RunP1AiAsync(string generation)
+        public async Task<(string, List<string>, List<string>, int)> RunAiGameAsync(string generation)
         {
             var uid = "";
-            var team = new List<string>();
+            var team1 = new List<string>();
+            var team2 = new List<string>();
             var winner = 0;
             await Task.Run(async () =>
             {
@@ -50,29 +51,28 @@ namespace Roki.Modules.Games.Services
                 var gameStr = await reader.ReadToEndAsync().ConfigureAwait(false);
                 var game = gameStr.Split();
                 var id = game[0].Substring(game[0].IndexOf("battle", StringComparison.OrdinalIgnoreCase), 34);
-                team = ParseTeamAsync(game[3]);
+                team1 = ParseTeamAsync(game[3]);
                 proc.WaitForExit();
                 uid = generation + Guid.NewGuid().ToString().Substring(0, 7);
                 winner = game[^4].Contains("0", StringComparison.Ordinal) ? 1 : 0;
                 File.AppendAllText(@"./data/pokemon-logs/battle-logs", $"{uid}={id}");
             });
-            return (uid, team, winner);
-        }
-
-        public async Task<List<string>> RunP2AiAsync()
-        {
-            using var proc = new Process {StartInfo =
+            await Task.Run(async () =>
             {
-                FileName = "~/Documents/showdown2/run.py", 
-                UseShellExecute = false,
-                RedirectStandardOutput = true
-            }};
-            proc.Start();
-            var reader = proc.StandardOutput;
-            var gameStr = await reader.ReadToEndAsync().ConfigureAwait(false);
-            var game = gameStr.Split();
-            proc.WaitForExit();
-            return ParseTeamAsync(game[3]);
+                using var proc = new Process {StartInfo =
+                {
+                    FileName = "~/Documents/showdown2/run.py", 
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true
+                }};
+                proc.Start();
+                var reader = proc.StandardOutput;
+                var gameStr = await reader.ReadToEndAsync().ConfigureAwait(false);
+                var game = gameStr.Split();
+                proc.WaitForExit();
+                team2 = ParseTeamAsync(game[3]);
+            });
+            return (uid, team1, team2, winner);
         }
 
         private List<string> ParseTeamAsync(string rawTeam)
