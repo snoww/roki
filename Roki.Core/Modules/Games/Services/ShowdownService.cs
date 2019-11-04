@@ -38,6 +38,22 @@ namespace Roki.Modules.Games.Services
             var team1 = new List<string>();
             var team2 = new List<string>();
             var winner = 0;
+            var p2 = Task.Run(() =>
+            {
+                using var proc = new Process {StartInfo =
+                {
+                    FileName = "~/Documents/showdown2/run.py", 
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true
+                }};
+                proc.Start();
+                var reader = proc.StandardOutput;
+                var gameStr = reader.ReadToEnd();
+                var game = gameStr.Split();
+                proc.WaitForExit();
+                team2 = ParseTeamAsync(game[3]);
+            });
+            await Task.Delay(10);
             var p1 = Task.Run(() =>
             {
                 using var proc = new Process {StartInfo =
@@ -56,21 +72,6 @@ namespace Roki.Modules.Games.Services
                 uid = generation + Guid.NewGuid().ToString().Substring(0, 7);
                 winner = game[^4].Contains("0", StringComparison.Ordinal) ? 1 : 0;
                 File.AppendAllText(@"./data/pokemon-logs/battle-logs", $"{uid}={id}");
-            });
-            var p2 = Task.Run(() =>
-            {
-                using var proc = new Process {StartInfo =
-                {
-                    FileName = "~/Documents/showdown2/run.py", 
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true
-                }};
-                proc.Start();
-                var reader = proc.StandardOutput;
-                var gameStr = reader.ReadToEnd();
-                var game = gameStr.Split();
-                proc.WaitForExit();
-                team2 = ParseTeamAsync(game[3]);
             });
             Task.WaitAll(p1, p2);
             return (uid, team1, team2, winner);
