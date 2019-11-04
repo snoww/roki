@@ -109,9 +109,7 @@ namespace Roki.Modules.Games
                 
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
                 await _service.ConfigureAiGameAsync(generation).ConfigureAwait(false);
-                var (uid, team1, winner) = await _service.RunP1AiAsync(generation).ConfigureAwait(false);
-                var team2 = await _service.RunP2AiAsync().ConfigureAwait(false);
-                
+                var (uid, team1, team2, winner) = await _service.RunAiGameAsync(generation).ConfigureAwait(false);
                 var t1 = new List<Image<Rgba32>>();
                 var t2 = new List<Image<Rgba32>>();
 
