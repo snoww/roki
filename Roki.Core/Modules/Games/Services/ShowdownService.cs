@@ -34,22 +34,29 @@ namespace Roki.Modules.Games.Services
 
         public async Task<(string, List<string>, int)> RunP1AiAsync(string generation)
         {
-            using var proc = new Process {StartInfo =
+            var uid = "";
+            var team = new List<string>();
+            var winner = 0;
+            await Task.Run(async () =>
             {
-                FileName = "~/Documents/showdown/run.py", 
-                UseShellExecute = false,
-                RedirectStandardOutput = true
-            }};
-            proc.Start();
-            var reader = proc.StandardOutput;
-            var gameStr = await reader.ReadToEndAsync().ConfigureAwait(false);
-            var game = gameStr.Split();
-            var id = game[0].Substring(game[0].IndexOf("battle", StringComparison.OrdinalIgnoreCase), 34);
-            var team = ParseTeamAsync(game[3]);
-            proc.WaitForExit();
-            var uid = generation + Guid.NewGuid().ToString().Substring(0, 7);
-            File.AppendAllText(@"./data/pokemon-logs/battle-logs", $"{uid}={id}");
-            return (uid, team, game[^4].Contains("0", StringComparison.Ordinal) ? 1 : 0);
+                using var proc = new Process {StartInfo =
+                {
+                    FileName = "~/Documents/showdown/run.py", 
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true
+                }};
+                proc.Start();
+                var reader = proc.StandardOutput;
+                var gameStr = await reader.ReadToEndAsync().ConfigureAwait(false);
+                var game = gameStr.Split();
+                var id = game[0].Substring(game[0].IndexOf("battle", StringComparison.OrdinalIgnoreCase), 34);
+                team = ParseTeamAsync(game[3]);
+                proc.WaitForExit();
+                uid = generation + Guid.NewGuid().ToString().Substring(0, 7);
+                winner = game[^4].Contains("0", StringComparison.Ordinal) ? 1 : 0;
+                File.AppendAllText(@"./data/pokemon-logs/battle-logs", $"{uid}={id}");
+            });
+            return (uid, team, winner);
         }
 
         public async Task<List<string>> RunP2AiAsync()
