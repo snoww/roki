@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Roki.Core.Services;
 using Roki.Modules.Searches.Common;
@@ -21,7 +22,60 @@ namespace Roki.Modules.Games.Services
         {
         }
 
-        public async Task<(string, string)> StartAiGameAsync(string args)
+        public async Task ConfigureAiGameAsync(string generation)
+        {
+            var env = await File.ReadAllTextAsync("~/Documents/showdown/.env").ConfigureAwait(false);
+            var env2 = await File.ReadAllTextAsync("~/Documents/showdown2/.env").ConfigureAwait(false);
+            env = Regex.Replace(env, @"gen\d", $"gen{generation}");
+            env2 = Regex.Replace(env2, @"gen\d", $"gen{generation}");
+            await File.WriteAllTextAsync("~/Documents/showdown/.env", env).ConfigureAwait(false);
+            await File.WriteAllTextAsync("~/Documents/showdown2/.env", env2).ConfigureAwait(false);
+        }
+
+        public async Task<(string, List<string>, int)> RunP1AiAsync(string generation)
+        {
+            using var proc = new Process {StartInfo =
+            {
+                FileName = "~/Documents/showdown/run.py", 
+                UseShellExecute = false,
+                RedirectStandardOutput = true
+            }};
+            proc.Start();
+            var reader = proc.StandardOutput;
+            var gameStr = await reader.ReadToEndAsync().ConfigureAwait(false);
+            var game = gameStr.Split();
+            var id = game[0].Substring(game[0].IndexOf("battle", StringComparison.OrdinalIgnoreCase), 34);
+            var team = ParseTeamAsync(game[3]);
+            proc.WaitForExit();
+            var uid = generation + Guid.NewGuid().ToString().Substring(0, 7);
+            File.AppendAllText(@"./pokemon-logs/battle-logs", $"{uid}={id}");
+            return (uid, team, game[^4].Contains("0", StringComparison.Ordinal) ? 1 : 0);
+        }
+
+        public async Task<List<string>> RunP2AiAsync()
+        {
+            using var proc = new Process {StartInfo =
+            {
+                FileName = "~/Documents/showdown2/run.py", 
+                UseShellExecute = false,
+                RedirectStandardOutput = true
+            }};
+            proc.Start();
+            var reader = proc.StandardOutput;
+            var gameStr = await reader.ReadToEndAsync().ConfigureAwait(false);
+            var game = gameStr.Split();
+            proc.WaitForExit();
+            return ParseTeamAsync(game[3]);
+        }
+
+        private List<string> ParseTeamAsync(string rawTeam)
+        {
+            var json = rawTeam.Substring(rawTeam.IndexOf("{", StringComparison.OrdinalIgnoreCase));
+            using var team = JsonDocument.Parse(json);
+            return team.RootElement.GetProperty("side").GetProperty("pokemon").EnumerateArray().Select(pokemon => pokemon.GetProperty("details").GetString()).ToList();
+        }
+        
+        /*public async Task<(string, string)> StartAiGameAsync(string args)
         {
             string output;
             using (var proc = new Process())
@@ -40,9 +94,9 @@ namespace Roki.Modules.Games.Services
             File.WriteAllText($@"./data/pokemon-logs/{uid}", output);
             
             return (output, uid);
-        }
+        }*/
 
-        public async Task<string> LoadSavedGameAsync(string uid)
+        /*public async Task<string> LoadSavedGameAsync(string uid)
         {
             try
             {
@@ -374,7 +428,7 @@ namespace Roki.Modules.Games.Services
         {
             var turns = game.Split("|turn");
             return turns.Select(ParseTurn).ToList();
-        }
+        }*/
         
         public string GetPokemonSprite(string query)
         {
@@ -383,13 +437,6 @@ namespace Roki.Modules.Games.Services
             var poke = query.EndsWith("-*", StringComparison.Ordinal) ? Data[query.Replace("-*", "", StringComparison.Ordinal)] : Data[query];
 
             return poke.Sprite;
-        }
-
-        private static string TrimStatus(string move)
-        {
-            var charsToRemove = new[] { "f", "n", "t", " " };
-
-            return charsToRemove.Aggregate(move, (current, c) => current.Replace(c, string.Empty));
         }
     }
 }
