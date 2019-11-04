@@ -32,49 +32,68 @@ namespace Roki.Modules.Games.Services
             await File.WriteAllTextAsync("/home/snow/Documents/showdown2/.env", env2).ConfigureAwait(false);
         }
 
-        public async Task<(string, List<string>, List<string>, int)> RunAiGameAsync(string generation)
+        public async Task<string> RunAiGameAsync(string generation)
         {
-            var uid = "";
-            var team1 = new List<string>();
-            var team2 = new List<string>();
-            var winner = 0;
-            var p2 = Task.Run(() =>
-            {
-                using var proc = new Process {StartInfo =
-                {
-                    FileName = "~/Documents/showdown2/run.py", 
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true
-                }};
-                proc.Start();
-                var reader = proc.StandardOutput;
-                var gameStr = reader.ReadToEnd();
-                var game = gameStr.Split();
-                proc.WaitForExit();
-                team2 = ParseTeamAsync(game[3]);
-            });
-            await Task.Delay(10);
-            var p1 = Task.Run(() =>
-            {
-                using var proc = new Process {StartInfo =
-                {
-                    FileName = "/home/snow/Documents/showdown/run.py", 
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true
-                }};
-                proc.Start();
-                var reader = proc.StandardOutput;
-                var gameStr = reader.ReadToEnd();
-                var game = gameStr.Split();
-                var id = game[0].Substring(game[0].IndexOf("battle", StringComparison.OrdinalIgnoreCase), 34);
-                team1 = ParseTeamAsync(game[3]);
-                proc.WaitForExit();
-                uid = generation + Guid.NewGuid().ToString().Substring(0, 7);
-                winner = game[^4].Contains("0", StringComparison.Ordinal) ? 1 : 0;
-                File.AppendAllText(@"./data/pokemon-logs/battle-logs", $"{uid}={id}");
-            });
-            Task.WaitAll(p1, p2);
-            return (uid, team1, team2, winner);
+            using var proc = new Process {StartInfo = {FileName = "./scripts/ai.sh", UseShellExecute = false, RedirectStandardOutput = true}};
+            proc.Start();
+            var reader = proc.StandardOutput;
+            var output = await reader.ReadToEndAsync().ConfigureAwait(false);
+            proc.WaitForExit();
+            var uid = generation + Guid.NewGuid().ToString().Substring(0, 7);
+            var gameId = output.Substring(output.IndexOf("battle-gen", StringComparison.OrdinalIgnoreCase), 34);
+            File.AppendAllText(@"./data/pokemon-logs/battle-logs", $"{uid}={gameId}");
+//            var uid = "";
+//            var team1 = new List<string>();
+//            var team2 = new List<string>();
+//            var winner = 0;
+//            var p2 = Task.Run(() =>
+//            {
+//                using var proc = new Process {StartInfo =
+//                {
+//                    FileName = "~/Documents/showdown2/run.py", 
+//                    UseShellExecute = false,
+//                    RedirectStandardOutput = true
+//                }};
+//                proc.Start();
+//                var reader = proc.StandardOutput;
+//                var gameStr = reader.ReadToEnd();
+//                var game = gameStr.Split();
+//                proc.WaitForExit();
+//                team2 = ParseTeamAsync(game[3]);
+//            });
+//            await Task.Delay(10);
+//            var p1 = Task.Run(() =>
+//            {
+//                using var proc = new Process {StartInfo =
+//                {
+//                    FileName = "/home/snow/Documents/showdown/run.py", 
+//                    UseShellExecute = false,
+//                    RedirectStandardOutput = true
+//                }};
+//                proc.Start();
+//                var reader = proc.StandardOutput;
+//                var gameStr = reader.ReadToEnd();
+//                var game = gameStr.Split();
+//                var id = game[0].Substring(game[0].IndexOf("battle", StringComparison.OrdinalIgnoreCase), 34);
+//                team1 = ParseTeamAsync(game[3]);
+//                proc.WaitForExit();
+//                uid = generation + Guid.NewGuid().ToString().Substring(0, 7);
+//                winner = game[^4].Contains("0", StringComparison.Ordinal) ? 1 : 0;
+//                File.AppendAllText(@"./data/pokemon-logs/battle-logs", $"{uid}={id}");
+//                var winner = game[^4].Contains("0", StringComparison.Ordinal) ? 1 : 0;
+//            });
+//            Task.WaitAll(p1, p2);
+            return uid;
+        }
+
+        public async Task<(List<string>, List<string>, int)> GetGameAsync(string uid)
+        {
+            var p1 = await File.ReadAllLinesAsync($@"/home/snow/Documents/showdown/logs/1-{GetBetPokemonGame(uid)}.log").ConfigureAwait(false);
+            var p2 = await File.ReadAllLinesAsync($@"/home/snow/Documents/showdown2/logs/rokibot\ \ rokibot1-{GetBetPokemonGame(uid)}.log").ConfigureAwait(false);
+            var team1 = ParseTeamAsync(p1[3]);
+            var team2 = ParseTeamAsync(p2[3]);
+            var winner = p1.Any(l => l.StartsWith("|win|rokibot1", StringComparison.OrdinalIgnoreCase)) ? 2 : 1;
+            return (team1, team2, winner);
         }
 
         private List<string> ParseTeamAsync(string rawTeam)
@@ -448,10 +467,10 @@ namespace Roki.Modules.Games.Services
             return poke.Sprite;
         }
 
-        public async Task<string> GetBetPokemonReplay(string uid)
+        public async Task<string> GetBetPokemonGame(string uid)
         {
             var logs = await File.ReadAllLinesAsync(@"./data/pokemon-logs/battle-logs").ConfigureAwait(false);
-            return (from log in logs where log.StartsWith(uid, StringComparison.OrdinalIgnoreCase) select "https://replay.pokemonshowdown.com/" + log.Substring(9)).FirstOrDefault();
+            return (from log in logs where log.StartsWith(uid, StringComparison.OrdinalIgnoreCase) select log.Substring(9)).FirstOrDefault();
         }
     }
 }

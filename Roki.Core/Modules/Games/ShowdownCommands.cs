@@ -109,7 +109,8 @@ namespace Roki.Modules.Games
                 
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
                 await _service.ConfigureAiGameAsync(generation).ConfigureAwait(false);
-                var (uid, team1, team2, winner) = await _service.RunAiGameAsync(generation).ConfigureAwait(false);
+                var uid = await _service.RunAiGameAsync(generation).ConfigureAwait(false);
+                var (team1, team2, winner) = await _service.GetGameAsync(uid).ConfigureAwait(false);
                 var t1 = new List<Image<Rgba32>>();
                 var t2 = new List<Image<Rgba32>>();
 
@@ -276,14 +277,14 @@ namespace Roki.Modules.Games
                     return;
                 }
 
-                var url = await _service.GetBetPokemonReplay(uid);
+                var url = await _service.GetBetPokemonGame(uid);
                 if (url == null)
                 {
                     await ctx.Channel.SendErrorAsync("Cannot find replay with that ID.").ConfigureAwait(false);
                     return;
                 }
 
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"{ctx.User.Mention} Here is the replay url:\n{url}"))
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"{ctx.User.Mention} Here is the replay url:\nhttps://replay.pokemonshowdown.com/{url}"))
                     .ConfigureAwait(false);
             }
             
