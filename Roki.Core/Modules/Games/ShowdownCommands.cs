@@ -109,13 +109,9 @@ namespace Roki.Modules.Games
                     generation = "7";
                 
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
-
-                var (gameText, uid) = await _service.StartAiGameAsync(generation).ConfigureAwait(false);
-                var index = gameText.IndexOf("|start", StringComparison.Ordinal);
-                var gameIntro = gameText.Substring(0, index);
-                var gameTurns = gameText.Substring(index + 1);
-
-                var intro = _service.ParseIntro(gameIntro);
+                await _service.ConfigureAiGameAsync(generation).ConfigureAwait(false);
+                var (uid, team1, winner) = await _service.RunP1AiAsync(generation).ConfigureAwait(false);
+                var team2 = await _service.RunP2AiAsync().ConfigureAwait(false);
                 
                 var t1 = new List<Image<Rgba32>>();
                 var t2 = new List<Image<Rgba32>>();
@@ -123,10 +119,10 @@ namespace Roki.Modules.Games
                 IUserMessage startMsg;
                 try
                 {
-                    for (int i = 0; i < intro[0].Count; i++)
+                    for (int i = 0; i < team1.Count; i++)
                     {
-                        t1.Add(GetPokemonImage(intro[0][i], generation));
-                        t2.Add(GetPokemonImage(intro[1][i], generation));
+                        t1.Add(GetPokemonImage(team1[i], generation));
+                        t2.Add(GetPokemonImage(team2[i], generation));
                     }
 
                     using var bitmap1 = t1.MergePokemonTeam();
@@ -143,8 +139,8 @@ namespace Roki.Modules.Games
                         .WithTitle($"[Gen {generation}] Random Battle - ID: `{uid}`")
                         .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 100` means betting on 110 on P1.")
                         .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
-                        .AddField("Player 1", string.Join('\n', intro[0]), true)
-                        .AddField("Player 2", string.Join('\n', intro[1]), true);
+                        .AddField("Player 1", string.Join('\n', team1), true)
+                        .AddField("Player 2", string.Join('\n', team2), true);
 
                     startMsg = await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: start.Build()).ConfigureAwait(false);
                     await startMsg.AddReactionsAsync(_reactionMap.Keys.ToArray()).ConfigureAwait(false);
@@ -152,7 +148,7 @@ namespace Roki.Modules.Games
                 catch (Exception e)
                 {
                     _log.Warn(e);
-                    _log.Info(gameIntro);
+                    _log.Info(uid);
                     await ctx.Channel.SendErrorAsync("Unable to start game, please try again.\nplease @snow about this issue.");
                     _service.Games.TryRemove(ctx.Channel.Id, out _);
                     return;
@@ -235,8 +231,7 @@ namespace Roki.Modules.Games
                         .ConfigureAwait(false);
                 }
                 
-                var win = ShowdownService.GetWinner(gameTurns.Substring(gameTurns.IndexOf("|win", StringComparison.Ordinal)));
-                var result = win.Contains("1", StringComparison.Ordinal) ? BetPlayer.P1 : BetPlayer.P2;
+                var result = winner == 1 ? BetPlayer.P1 : BetPlayer.P2;
 
                 var winners = "";
                 var losers = "";
@@ -257,7 +252,7 @@ namespace Roki.Modules.Games
                 var embed = new EmbedBuilder().WithOkColor();
                 if (winners.Length > 1)
                 {
-                    embed.WithDescription($"Player {win} has won the battle!\nCongratulations!\n{winners}\n");
+                    embed.WithDescription($"Player {winner} has won the battle!\nCongratulations!\n{winners}\n");
                     await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 }
                 if (losers.Length > 1)
@@ -267,13 +262,13 @@ namespace Roki.Modules.Games
                             .WithDescription($"Better luck next time!\n{losers}\n")).ConfigureAwait(false);
                     else 
                         await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                            .WithDescription($"Player {win} has won the battle!\nBetter luck next time!\n{losers}\n")).ConfigureAwait(false);
+                            .WithDescription($"Player {winner} has won the battle!\nBetter luck next time!\n{losers}\n")).ConfigureAwait(false);
                 }
                 await startMsg.RemoveReactionsAsync(ctx.Client.CurrentUser, _reactionMap.Keys.ToArray()).ConfigureAwait(false);
                 _service.Games.TryRemove(ctx.Channel.Id, out _);
             }
 
-            [RokiCommand, Description, Aliases, Usage]
+            /*[RokiCommand, Description, Aliases, Usage]
             [RequireContext(ContextType.Guild)]
             public async Task BetPokemonLog([Leftover] string uid = null)
             {
@@ -351,7 +346,7 @@ namespace Roki.Modules.Games
                         .WithDescription(turn)
                         .WithFooter($"Turn {turnNum + 1}/{turns.Count}");
                 }
-            }
+            }*/
             
             private Image<Rgba32> GetPokemonImage(string pokemon, string generation)
             {
