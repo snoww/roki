@@ -24,12 +24,12 @@ namespace Roki.Modules.Games.Services
 
         public async Task ConfigureAiGameAsync(string generation)
         {
-            var env = await File.ReadAllTextAsync("~/Documents/showdown/.env").ConfigureAwait(false);
-            var env2 = await File.ReadAllTextAsync("~/Documents/showdown2/.env").ConfigureAwait(false);
+            var env = await File.ReadAllTextAsync("/home/snow/Documents/showdown/.env").ConfigureAwait(false);
+            var env2 = await File.ReadAllTextAsync("/home/snow/Documents/showdown2/.env").ConfigureAwait(false);
             env = Regex.Replace(env, @"gen\d", $"gen{generation}");
             env2 = Regex.Replace(env2, @"gen\d", $"gen{generation}");
-            await File.WriteAllTextAsync("~/Documents/showdown/.env", env).ConfigureAwait(false);
-            await File.WriteAllTextAsync("~/Documents/showdown2/.env", env2).ConfigureAwait(false);
+            await File.WriteAllTextAsync("/home/snow/Documents/showdown/.env", env).ConfigureAwait(false);
+            await File.WriteAllTextAsync("/home/snow/Documents/showdown2/.env", env2).ConfigureAwait(false);
         }
 
         public async Task<(string, List<string>, int)> RunP1AiAsync(string generation)
@@ -41,7 +41,7 @@ namespace Roki.Modules.Games.Services
             {
                 using var proc = new Process {StartInfo =
                 {
-                    FileName = "~/Documents/showdown/run.py", 
+                    FileName = "/home/snow/Documents/showdown/run.py", 
                     UseShellExecute = false,
                     RedirectStandardOutput = true
                 }};
