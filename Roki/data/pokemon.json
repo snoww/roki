@@ -4929,6 +4929,11 @@
     "sprite": "necrozma-duskmane",
     "name": "Necrozma Duskmane"
   },
+  "necrozma-dusk-mane": {
+    "api": 10155,
+    "sprite": "necrozma-duskmane",
+    "name": "Necrozma Duskmane"
+  },
   "necrozma-dawn": {
     "api": 10156,
     "sprite": "necrozma-dawnwings",
