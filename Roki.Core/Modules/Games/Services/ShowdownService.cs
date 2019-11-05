@@ -33,13 +33,13 @@ namespace Roki.Modules.Games.Services
             await File.WriteAllTextAsync("/home/snow/Documents/showdown2/.env", env2).ConfigureAwait(false);
         }
 
-        public async Task<List<string>> RunAiGameAsync(string uid)
+        public async Task<List<List<string>>> RunAiGameAsync(string uid)
         {
             using var proc = new Process {StartInfo = {FileName = "./scripts/ai.sh", UseShellExecute = false, RedirectStandardOutput = true}};
             proc.Start();
             var reader = proc.StandardOutput;
             var gameId = "";
-            var teams = new List<string>();
+            var teams = new List<List<string>>();
             var gameIdReceived = false;
             while (teams.Count < 2)
             {
@@ -73,17 +73,13 @@ namespace Roki.Modules.Games.Services
             return winner;
         }
 
-        private (string, string) ParseTeam(string rawTeam)
+        private (string, List<string>) ParseTeam(string rawTeam)
         {
             var json = rawTeam.Substring(rawTeam.IndexOf("{", StringComparison.OrdinalIgnoreCase));
             using var team = JsonDocument.Parse(json);
-            var teamStr = new StringBuilder();
-            foreach (var pokemon in team.RootElement.GetProperty("side").GetProperty("pokemon").EnumerateArray())
-            {
-                teamStr.Append(pokemon.GetProperty("details").GetString() + "\n");
-            }
+            var teamList = team.RootElement.GetProperty("side").GetProperty("pokemon").EnumerateArray().Select(pokemon => pokemon.GetProperty("details").GetString() + "\n").ToList();
             var player = team.RootElement.GetProperty("side").GetProperty("id").GetString();
-            return (player, teamStr.ToString());
+            return (player, teamList);
         }
 
         public string GetPokemonSprite(string query)
