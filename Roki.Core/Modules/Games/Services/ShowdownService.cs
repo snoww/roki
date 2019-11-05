@@ -42,8 +42,6 @@ namespace Roki.Modules.Games.Services
             var uid = generation + Guid.NewGuid().ToString().Substring(0, 7);
             var gameId = output.Substring(output.IndexOf("battle-gen", StringComparison.OrdinalIgnoreCase), 34);
             File.AppendAllText(@"./data/pokemon-logs/battle-logs", $"{uid}={gameId}\n");
-            File.Delete($@"./logs/1-{gameId}.log");
-            File.Delete($@"./logs/rokibot-{gameId}.log");
 //            var uid = "";
 //            var team1 = new List<string>();
 //            var team2 = new List<string>();
@@ -96,6 +94,8 @@ namespace Roki.Modules.Games.Services
             var team1 = ParseTeamAsync(p1.First(l => l.StartsWith("|request|", StringComparison.OrdinalIgnoreCase)));
             var team2 = ParseTeamAsync(p2.First(l => l.StartsWith("|request|", StringComparison.OrdinalIgnoreCase)));
             var winner = p1.Any(l => l.StartsWith("|win|rokibot1", StringComparison.OrdinalIgnoreCase)) ? 2 : 1;
+            File.Delete($@"./logs/1-{gameId}.log");
+            File.Delete($@"./logs/rokibot-{gameId}.log");
             return (team1, team2, winner);
         }
 
