@@ -117,7 +117,7 @@ namespace Roki.Modules.Games
                     var t1 = new List<Image<Rgba32>>();
                     var t2 = new List<Image<Rgba32>>();
 
-                    for (int i = 0; i < teams.Count; i++)
+                    for (int i = 0; i < teams[0].Count; i++)
                     {
                         t1.Add(GetPokemonImage(teams[0][i], generation));
                         t2.Add(GetPokemonImage(teams[1][i], generation));
