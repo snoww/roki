@@ -116,7 +116,6 @@ namespace Roki.Modules.Games
                     var team1 = teams[0].Split("\n");
                     var team2 = teams[1].Split("\n");
                     
-                    var winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
                     var t1 = new List<Image<Rgba32>>();
                     var t2 = new List<Image<Rgba32>>();
 
@@ -223,6 +222,7 @@ namespace Roki.Modules.Games
                             .ConfigureAwait(false);
                     }
                     
+                    var winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
                     var result = winner == 1 ? BetPlayer.P1 : BetPlayer.P2;
 
                     var winners = "";
