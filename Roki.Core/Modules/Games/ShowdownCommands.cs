@@ -110,17 +110,9 @@ namespace Roki.Modules.Games
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
                 var uid = generation + Guid.NewGuid().ToString().Substring(0, 7);
                 await _service.ConfigureAiGameAsync(generation).ConfigureAwait(false);
-                _service.RunAiGameAsync(uid);
-                while (!_service.TeamsAndId.ContainsKey(uid + "p1") &&
-                       !_service.TeamsAndId.ContainsKey(uid + "p2"))
-                {
-                    await Task.Delay(10);
-                }
-
-                _service.TeamsAndId.TryRemove(uid + "p1", out var team1Raw);
-                _service.TeamsAndId.TryRemove(uid + "p2", out var team2Raw);
-                var team1 = team1Raw.Split("\n");
-                var team2 = team2Raw.Split("\n");
+                var teams = await _service.RunAiGameAsync(uid).ConfigureAwait(false);
+                var team1 = teams[0].Split("\n");
+                var team2 = teams[1].Split("\n");
                 
                 var winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
                 var t1 = new List<Image<Rgba32>>();

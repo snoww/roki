@@ -16,7 +16,6 @@ namespace Roki.Modules.Games.Services
     public class ShowdownService : IRService
     {
         public readonly ConcurrentDictionary<ulong, string> Games = new ConcurrentDictionary<ulong, string>();
-        public readonly ConcurrentDictionary<string, string> TeamsAndId = new ConcurrentDictionary<string, string>();
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
         private static readonly Dictionary<string, PokemonData> Data = JsonSerializer.Deserialize<Dictionary<string, PokemonData>>(File.ReadAllText("./data/pokemon.json"), Options);
         
@@ -34,20 +33,24 @@ namespace Roki.Modules.Games.Services
             await File.WriteAllTextAsync("/home/snow/Documents/showdown2/.env", env2).ConfigureAwait(false);
         }
 
-        public async void RunAiGameAsync(string uid)
+        public async Task<List<string>> RunAiGameAsync(string uid)
         {
             using var proc = new Process {StartInfo = {FileName = "./scripts/ai.sh", UseShellExecute = false, RedirectStandardOutput = true}};
             proc.Start();
             var reader = proc.StandardOutput;
             var gameId = "";
+            var teams = new List<string>();
             var gameIdReceived = false;
-            while (!TeamsAndId.ContainsKey(uid + "p1") && !TeamsAndId.ContainsKey(uid + "p2"))
+            while (teams.Count < 2)
             {
                 var output = await reader.ReadLineAsync().ConfigureAwait(false);
                 if (output.StartsWith("|request|{", StringComparison.OrdinalIgnoreCase))
                 {
-                    var (p, team) = ParseTeamAsync(output);
-                    TeamsAndId.TryAdd(uid + p, team);
+                    var (p, team) = ParseTeam(output);
+                    if (p == "p1") 
+                        teams.Insert(0, team);
+                    else 
+                        teams.Add(team);
                 }
                 else if (!gameIdReceived && output.Contains("battle-gen", StringComparison.OrdinalIgnoreCase))
                 {
@@ -56,7 +59,8 @@ namespace Roki.Modules.Games.Services
                 }
             }
             proc.WaitForExit();
-            File.AppendAllText(@"./data/pokemon-logs/battle-logs", $"{uid}={gameId}\n"); 
+            File.AppendAllText(@"./data/pokemon-logs/battle-logs", $"{uid}={gameId}\n");
+            return teams;
         }
 
         public async Task<int> GetWinnerAsync(string uid)
@@ -69,7 +73,7 @@ namespace Roki.Modules.Games.Services
             return winner;
         }
 
-        private (string, string) ParseTeamAsync(string rawTeam)
+        private (string, string) ParseTeam(string rawTeam)
         {
             var json = rawTeam.Substring(rawTeam.IndexOf("{", StringComparison.OrdinalIgnoreCase));
             using var team = JsonDocument.Parse(json);
