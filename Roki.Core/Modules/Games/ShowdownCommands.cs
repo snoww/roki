@@ -92,8 +92,8 @@ namespace Roki.Modules.Games
                 _service.Games.TryAdd(ctx.Channel.Id, "");
 
                 string generation;
-//                if (gen == 6)
-//                    generation = "6";
+                if (gen == 6)
+                    generation = "6";
 //                else if (gen == 5)
 //                    generation = "5";
 //                else if (gen == 4)
@@ -104,7 +104,7 @@ namespace Roki.Modules.Games
 //                    generation = "2";
 //                else if (gen == 1)
 //                    generation = "1";
-//                else
+                else
                     generation = "7";
                 
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
