@@ -137,8 +137,8 @@ namespace Roki.Modules.Games
                         .WithTitle($"[Gen {generation}] Random Battle - ID: `{uid}`")
                         .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 100` means betting on 110 on P1.")
                         .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
-                        .AddField("Player 1", string.Join('\n', team1), true)
-                        .AddField("Player 2", string.Join('\n', team2), true);
+                        .AddField("Player 1", string.Join('\n', teams[0]), true)
+                        .AddField("Player 2", string.Join('\n', teams[1]), true);
 
                     var startMsg = await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: start.Build()).ConfigureAwait(false);
                     await startMsg.AddReactionsAsync(_reactionMap.Keys.ToArray()).ConfigureAwait(false);
