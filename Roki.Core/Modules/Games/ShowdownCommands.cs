@@ -113,16 +113,14 @@ namespace Roki.Modules.Games
                 {
                     await _service.ConfigureAiGameAsync(generation).ConfigureAwait(false);
                     var teams = await _service.RunAiGameAsync(uid).ConfigureAwait(false);
-                    var team1 = teams[0].Split("\n");
-                    var team2 = teams[1].Split("\n");
-                    
+
                     var t1 = new List<Image<Rgba32>>();
                     var t2 = new List<Image<Rgba32>>();
 
-                    for (int i = 0; i < team1.Length; i++)
+                    for (int i = 0; i < teams.Count; i++)
                     {
-                        t1.Add(GetPokemonImage(team1[i], generation));
-                        t2.Add(GetPokemonImage(team2[i], generation));
+                        t1.Add(GetPokemonImage(teams[0][i], generation));
+                        t2.Add(GetPokemonImage(teams[1][i], generation));
                     }
 
                     using var bitmap1 = t1.MergePokemonTeam();
