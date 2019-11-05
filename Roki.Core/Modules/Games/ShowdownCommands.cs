@@ -207,6 +207,7 @@ namespace Roki.Modules.Games
                     };
 
                     Thread.Sleep(TimeSpan.FromSeconds(35));
+                    var winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
                     if (joinedReactions.Count == 0)
                     {
                         await ctx.Channel.SendErrorAsync("Not enough players to start the bet.\nBet is cancelled");
@@ -223,7 +224,6 @@ namespace Roki.Modules.Games
                             .ConfigureAwait(false);
                     }
                     
-                    var winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
                     var result = winner == 1 ? BetPlayer.P1 : BetPlayer.P2;
 
                     var winners = "";
