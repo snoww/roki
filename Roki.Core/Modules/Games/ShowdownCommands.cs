@@ -110,7 +110,7 @@ namespace Roki.Modules.Games
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
                 var uid = generation + Guid.NewGuid().ToString().Substring(0, 7);
                 await _service.ConfigureAiGameAsync(generation).ConfigureAwait(false);
-                _service.RunAiGameAsync(generation, uid);
+                _service.RunAiGameAsync(uid);
                 while (!_service.TeamsAndId.ContainsKey(uid + "p1") &&
                        !_service.TeamsAndId.ContainsKey(uid + "p2"))
                 {
