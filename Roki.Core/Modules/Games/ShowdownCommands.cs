@@ -178,7 +178,10 @@ namespace Roki.Modules.Games
                             {
                                 var currency = _currency.GetCurrency(user.Id);
                                 if (reaction.Emote.Equals(AllIn))
+                                {
                                     joinedReactions[user].Amount = currency;
+                                    joinedReactions[user].Multiple = 1;
+                                }
                                 else if (reaction.Emote.Equals(TimesTwo) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 2)
                                     joinedReactions[user].Multiple *= 2;
                                 else if (reaction.Emote.Equals(TimesFive) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 5)
