@@ -108,16 +108,28 @@ namespace Roki.Modules.Games
                     generation = "7";
                 
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+                var uid = generation + Guid.NewGuid().ToString().Substring(0, 7);
                 await _service.ConfigureAiGameAsync(generation).ConfigureAwait(false);
-                var uid = await _service.RunAiGameAsync(generation).ConfigureAwait(false);
-                var (team1, team2, winner) = await _service.GetGameAsync(uid).ConfigureAwait(false);
+                _service.RunAiGameAsync(generation, uid);
+                while (!_service.TeamsAndId.ContainsKey(uid + "p1") &&
+                       !_service.TeamsAndId.ContainsKey(uid + "p2"))
+                {
+                    await Task.Delay(10);
+                }
+
+                _service.TeamsAndId.TryRemove(uid + "p1", out var team1Raw);
+                _service.TeamsAndId.TryRemove(uid + "p2", out var team2Raw);
+                var team1 = team1Raw.Split("\n");
+                var team2 = team2Raw.Split("\n");
+                
+                var winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
                 var t1 = new List<Image<Rgba32>>();
                 var t2 = new List<Image<Rgba32>>();
 
                 IUserMessage startMsg;
                 try
                 {
-                    for (int i = 0; i < team1.Count; i++)
+                    for (int i = 0; i < team1.Length; i++)
                     {
                         t1.Add(GetPokemonImage(team1[i], generation));
                         t2.Add(GetPokemonImage(team2[i], generation));
