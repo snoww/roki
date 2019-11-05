@@ -109,18 +109,17 @@ namespace Roki.Modules.Games
                 
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
                 var uid = generation + Guid.NewGuid().ToString().Substring(0, 7);
-                await _service.ConfigureAiGameAsync(generation).ConfigureAwait(false);
-                var teams = await _service.RunAiGameAsync(uid).ConfigureAwait(false);
-                var team1 = teams[0].Split("\n");
-                var team2 = teams[1].Split("\n");
-                
-                var winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
-                var t1 = new List<Image<Rgba32>>();
-                var t2 = new List<Image<Rgba32>>();
-
-                IUserMessage startMsg;
                 try
                 {
+                    await _service.ConfigureAiGameAsync(generation).ConfigureAwait(false);
+                    var teams = await _service.RunAiGameAsync(uid).ConfigureAwait(false);
+                    var team1 = teams[0].Split("\n");
+                    var team2 = teams[1].Split("\n");
+                    
+                    var winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
+                    var t1 = new List<Image<Rgba32>>();
+                    var t2 = new List<Image<Rgba32>>();
+
                     for (int i = 0; i < team1.Length; i++)
                     {
                         t1.Add(GetPokemonImage(team1[i], generation));
@@ -144,7 +143,7 @@ namespace Roki.Modules.Games
                         .AddField("Player 1", string.Join('\n', team1), true)
                         .AddField("Player 2", string.Join('\n', team2), true);
 
-                    startMsg = await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: start.Build()).ConfigureAwait(false);
+                    var startMsg = await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: start.Build()).ConfigureAwait(false);
                     await startMsg.AddReactionsAsync(_reactionMap.Keys.ToArray()).ConfigureAwait(false);
 
                     var joinedReactions = new Dictionary<IUser, PlayerBet>();
