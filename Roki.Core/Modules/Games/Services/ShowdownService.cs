@@ -67,8 +67,8 @@ namespace Roki.Modules.Games.Services
         {
             var gameId = await GetBetPokemonGame(uid).ConfigureAwait(false);
             var p1 = await File.ReadAllLinesAsync($@"./logs/1-{gameId}.log").ConfigureAwait(false);
-            var winner = p1.Any(l => l.StartsWith("|win|rokibot1", StringComparison.OrdinalIgnoreCase)) ? 2 : 1;
-            File.Delete($@"./logs/1-{gameId}.log");
+            var winner = p1.Any(l => l.Contains("|win|rokibot1", StringComparison.OrdinalIgnoreCase)) ? 2 : 1;
+//            File.Delete($@"./logs/1-{gameId}.log");
             File.Delete($@"./logs/rokibot-{gameId}.log");
             return winner;
         }
