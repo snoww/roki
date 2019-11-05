@@ -79,7 +79,7 @@ namespace Roki.Modules.Games.Services
                 teamStr.Append(pokemon.GetProperty("details").GetString() + "\n");
             }
             var player = team.RootElement.GetProperty("side").GetProperty("id").GetString();
-            return (player, string.Join("\n", teamStr));
+            return (player, teamStr.ToString());
         }
 
         public string GetPokemonSprite(string query)
