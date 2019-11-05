@@ -77,7 +77,7 @@ namespace Roki.Modules.Games.Services
         {
             var json = rawTeam.Substring(rawTeam.IndexOf("{", StringComparison.OrdinalIgnoreCase));
             using var team = JsonDocument.Parse(json);
-            var teamList = team.RootElement.GetProperty("side").GetProperty("pokemon").EnumerateArray().Select(pokemon => pokemon.GetProperty("details").GetString() + "\n").ToList();
+            var teamList = team.RootElement.GetProperty("side").GetProperty("pokemon").EnumerateArray().Select(pokemon => pokemon.GetProperty("details").GetString()).ToList();
             var player = team.RootElement.GetProperty("side").GetProperty("id").GetString();
             return (player, teamList);
         }
