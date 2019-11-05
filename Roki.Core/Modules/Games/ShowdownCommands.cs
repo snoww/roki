@@ -207,12 +207,14 @@ namespace Roki.Modules.Games
                     };
 
                     Thread.Sleep(TimeSpan.FromSeconds(35));
-                    var winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
+                    
                     if (joinedReactions.Count == 0)
                     {
-                        await ctx.Channel.SendErrorAsync("Not enough players to start the bet.\nBet is cancelled");
+                        await ctx.Channel.SendErrorAsync("Not enough players to start the bet.\nBet is cancelled").ConfigureAwait(false);
                         await startMsg.RemoveAllReactionsAsync().ConfigureAwait(false);
                         _service.Games.TryRemove(ctx.Channel.Id, out _);
+                        await Task.Delay(10000).ConfigureAwait(false);
+                        await _service.GetWinnerAsync(uid).ConfigureAwait(false);
                         return;
                     }
 
@@ -223,7 +225,20 @@ namespace Roki.Modules.Games
                                 ctx.Message.Id)
                             .ConfigureAwait(false);
                     }
-                    
+
+                    int winner;
+                    try
+                    {
+                        winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        await ctx.Channel
+                            .EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("The game is taking longer than usual, please be patient."))
+                            .ConfigureAwait(false);
+                        await Task.Delay(5000).ConfigureAwait(false);
+                        winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
+                    }
                     var result = winner == 1 ? BetPlayer.P1 : BetPlayer.P2;
 
                     var winners = "";
