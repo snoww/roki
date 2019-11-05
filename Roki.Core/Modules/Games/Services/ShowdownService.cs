@@ -34,14 +34,14 @@ namespace Roki.Modules.Games.Services
             await File.WriteAllTextAsync("/home/snow/Documents/showdown2/.env", env2).ConfigureAwait(false);
         }
 
-        public async void RunAiGameAsync(string generation, string uid)
+        public async void RunAiGameAsync(string uid)
         {
             using var proc = new Process {StartInfo = {FileName = "./scripts/ai.sh", UseShellExecute = false, RedirectStandardOutput = true}};
             proc.Start();
             var reader = proc.StandardOutput;
             var gameId = "";
             var gameIdReceived = false;
-            while (TeamsAndId.Count < 3)
+            while (!TeamsAndId.ContainsKey(uid + "p1") && !TeamsAndId.ContainsKey(uid + "p2"))
             {
                 var output = await reader.ReadLineAsync().ConfigureAwait(false);
                 if (output.StartsWith("|request|{", StringComparison.OrdinalIgnoreCase))
