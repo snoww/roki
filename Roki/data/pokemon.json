@@ -2469,6 +2469,91 @@
     "sprite": "arceus",
     "name": "Arceus"
   },
+  "arceus-bug": {
+    "api": 493,
+    "sprite": "arceus-bug",
+    "name": "Arceus-Bug"
+  },
+  "arceus-dark": {
+    "api": 493,
+    "sprite": "arceus-dark",
+    "name": "Arceus-Dark"
+  },
+  "arceus-dragon": {
+    "api": 493,
+    "sprite": "arceus-dragon",
+    "name": "Arceus-Dragon"
+  },
+  "arceus-electric": {
+    "api": 493,
+    "sprite": "arceus-electric",
+    "name": "Arceus-Electric"
+  },
+  "arceus-fairy": {
+    "api": 493,
+    "sprite": "arceus-fairy",
+    "name": "Arceus-Fairy"
+  },
+  "arceus-fighting": {
+    "api": 493,
+    "sprite": "arceus-fighting",
+    "name": "Arceus-Fighting"
+  },
+  "arceus-fire": {
+    "api": 493,
+    "sprite": "arceus-fire",
+    "name": "Arceus-Fire"
+  },
+  "arceus-flying": {
+    "api": 493,
+    "sprite": "arceus-flying",
+    "name": "Arceus-Flying"
+  },
+  "arceus-ghost": {
+    "api": 493,
+    "sprite": "arceus-ghost",
+    "name": "Arceus-Ghost"
+  },
+  "arceus-grass": {
+    "api": 493,
+    "sprite": "arceus-grass",
+    "name": "Arceus-Grass"
+  },
+  "arceus-ground": {
+    "api": 493,
+    "sprite": "arceus-ground",
+    "name": "Arceus-Ground"
+  },
+  "arceus-ice": {
+    "api": 493,
+    "sprite": "arceus-ice",
+    "name": "arceus-Ice"
+  },
+  "arceus-poison": {
+    "api": 493,
+    "sprite": "arceus-poison",
+    "name": "Arceus-Poison"
+  },
+  "arceus-psychic": {
+    "api": 493,
+    "sprite": "arceus-psychic",
+    "name": "Arceus-Psychic"
+  },
+  "arceus-rock": {
+    "api": 493,
+    "sprite": "arceus-rock",
+    "name": "Arceus-Rock"
+  },
+  "arceus-steel": {
+    "api": 493,
+    "sprite": "arceus-steel",
+    "name": "Arceus-Steel"
+  },
+  "arceus-water": {
+    "api": 493,
+    "sprite": "arceus-water",
+    "name": "Arceus-Water"
+  },
   "victini": {
     "api": 494,
     "sprite": "victini",
@@ -4840,6 +4925,11 @@
     "name": "Necrozma Duskmane"
   },
   "necrozma-duskmane": {
+    "api": 10155,
+    "sprite": "necrozma-duskmane",
+    "name": "Necrozma Duskmane"
+  },
+  "necrozma-dusk-mane": {
     "api": 10155,
     "sprite": "necrozma-duskmane",
     "name": "Necrozma Duskmane"

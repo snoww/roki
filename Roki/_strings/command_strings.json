@@ -417,12 +417,11 @@
       "{0}bp"
     ]
   },
-  "betpokemonlog": {
-    "Command": "betpokemonlog bplog",
-    "Description": "Get the turn log of the specified bp game. Sends the log to a DM.",
+  "betpokemonreplay": {
+    "Command": "betpokemonreplay replay",
+    "Description": "Gets the replay of a bet pokemon game.",
     "Usage": [
-      "{0}bplog id",
-      "{0}bplog 7fc8837f"
+      "{0}replay xxxxxxx"
     ]
   },
   "trivia": {
