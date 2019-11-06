@@ -25,7 +25,7 @@ namespace Roki.Modules.Music.Services
             _client = client;
             _lavaNode = lavaNode;
             _log = LogManager.GetCurrentClassLogger();
-            _client.Ready += OnReadyAsync;
+            OnReadyAsync().Wait();
             _lavaNode.OnTrackEnded += TrackFinished;
         }
 
