@@ -92,41 +92,35 @@ namespace Roki.Modules.Games
                 _service.Games.TryAdd(ctx.Channel.Id, "");
 
                 string generation;
-//                if (gen == 6)
-//                    generation = "6";
-//                else 
-                if (gen == 5)
+                if (gen == 6)
+                    generation = "6";
+                else if (gen == 5)
                     generation = "5";
                 else if (gen == 4)
                     generation = "4";
-                else if (gen == 3)
-                    generation = "3";
-                else if (gen == 2)
-                    generation = "2";
-                else if (gen == 1)
-                    generation = "1";
+//                else if (gen == 3)
+//                    generation = "3";
+//                else if (gen == 2)
+//                    generation = "2"; 
+//                else if (gen == 1)
+//                    generation = "1";
                 else
                     generation = "7";
                 
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
-
-                var (gameText, uid) = await _service.StartAiGameAsync(generation).ConfigureAwait(false);
-                var index = gameText.IndexOf("|start", StringComparison.Ordinal);
-                var gameIntro = gameText.Substring(0, index);
-                var gameTurns = gameText.Substring(index + 1);
-
-                var intro = _service.ParseIntro(gameIntro);
-                
-                var t1 = new List<Image<Rgba32>>();
-                var t2 = new List<Image<Rgba32>>();
-
-                IUserMessage startMsg;
+                var uid = generation + Guid.NewGuid().ToString().Substring(0, 7);
                 try
                 {
-                    for (int i = 0; i < intro[0].Count; i++)
+                    await _service.ConfigureAiGameAsync(generation).ConfigureAwait(false);
+                    var teams = await _service.RunAiGameAsync(uid).ConfigureAwait(false);
+
+                    var t1 = new List<Image<Rgba32>>();
+                    var t2 = new List<Image<Rgba32>>();
+
+                    for (int i = 0; i < teams[0].Count; i++)
                     {
-                        t1.Add(GetPokemonImage(intro[0][i], generation));
-                        t2.Add(GetPokemonImage(intro[1][i], generation));
+                        t1.Add(GetPokemonImage(teams[0][i], generation));
+                        t2.Add(GetPokemonImage(teams[1][i], generation));
                     }
 
                     using var bitmap1 = t1.MergePokemonTeam();
@@ -143,139 +137,156 @@ namespace Roki.Modules.Games
                         .WithTitle($"[Gen {generation}] Random Battle - ID: `{uid}`")
                         .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 100` means betting on 110 on P1.")
                         .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
-                        .AddField("Player 1", string.Join('\n', intro[0]), true)
-                        .AddField("Player 2", string.Join('\n', intro[1]), true);
+                        .AddField("Player 1", string.Join('\n', teams[0]), true)
+                        .AddField("Player 2", string.Join('\n', teams[1]), true);
 
-                    startMsg = await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: start.Build()).ConfigureAwait(false);
+                    var startMsg = await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: start.Build()).ConfigureAwait(false);
                     await startMsg.AddReactionsAsync(_reactionMap.Keys.ToArray()).ConfigureAwait(false);
+
+                    var joinedReactions = new Dictionary<IUser, PlayerBet>();
+                    var timeout = DateTime.UtcNow + TimeSpan.FromSeconds(30);
+                    _client.ReactionAdded += (cachedMessage, channel, reaction) =>
+                    {
+                        if (ctx.Channel.Id != channel.Id || cachedMessage.Value.Id != startMsg.Id || !_reactionMap.ContainsKey(reaction.Emote) ||
+                            DateTime.UtcNow > timeout || reaction.User.Value.IsBot) return Task.CompletedTask;
+                        var user = reaction.User.Value;
+                        var _ = Task.Run(async () =>
+                        {
+                            // If user doesn't exist in the dictionary yet
+                            if (!joinedReactions.ContainsKey(user))
+                            {
+                                if (Equals(reaction.Emote, Player1))
+                                    joinedReactions.Add(user, new PlayerBet{Bet = BetPlayer.P1, Amount = 0});
+                                else if (Equals(reaction.Emote, Player2))
+                                    joinedReactions.Add(user, new PlayerBet{Bet = BetPlayer.P2, Amount = 0});
+                                else
+                                {
+                                    var notEnoughMsg = await ctx.Channel.SendErrorAsync($"<@{reaction.UserId}> Please select a player to bet on first.").ConfigureAwait(false);
+                                    notEnoughMsg.DeleteAfter(3);
+                                }
+                                await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, RequestOptions.Default).ConfigureAwait(false);
+                                return Task.CompletedTask;
+                            }
+                            // If user exists in dictionary and reacted with player1 
+                            if (reaction.Emote.Equals(Player1))
+                                joinedReactions[user].Bet = BetPlayer.P1;
+                            // If user exists in dictionary and reacted with player2 
+                            else if (reaction.Emote.Equals(Player2))
+                                joinedReactions[user].Bet = BetPlayer.P2;
+                            // If user exists in dictionary and reacted with any other emote in the reactionMap
+                            else if (_reactionMap.ContainsKey(reaction.Emote))
+                            {
+                                var currency = _currency.GetCurrency(user.Id);
+                                if (reaction.Emote.Equals(AllIn))
+                                {
+                                    joinedReactions[user].Amount = currency;
+                                    joinedReactions[user].Multiple = 1;
+                                }
+                                else if (reaction.Emote.Equals(TimesTwo) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 2)
+                                    joinedReactions[user].Multiple *= 2;
+                                else if (reaction.Emote.Equals(TimesFive) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 5)
+                                    joinedReactions[user].Multiple *= 5;
+                                else if (reaction.Emote.Equals(TimesTen) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 10)
+                                    joinedReactions[user].Multiple *= 10;
+                                else if (currency >= joinedReactions[user].Amount + _reactionMap[reaction.Emote] * joinedReactions[user].Multiple) 
+                                    joinedReactions[user].Amount += _reactionMap[reaction.Emote];
+                                else
+                                {
+                                    var notEnoughMsg = await ctx.Channel.SendErrorAsync($"<@{reaction.User.Value.Id}> You do not have enough {_roki.Properties.CurrencyIcon} to make that bet.")
+                                        .ConfigureAwait(false);
+                                    await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
+                                    notEnoughMsg.DeleteAfter(5);
+                                }
+                                return Task.CompletedTask;
+                            }
+                            await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
+                            return Task.CompletedTask;
+                        });
+                        
+                        return Task.CompletedTask;
+                    };
+
+                    Thread.Sleep(TimeSpan.FromSeconds(35));
+                    
+                    if (joinedReactions.Count == 0)
+                    {
+                        await ctx.Channel.SendErrorAsync("Not enough players to start the bet.\nBet is cancelled").ConfigureAwait(false);
+                        await startMsg.RemoveAllReactionsAsync().ConfigureAwait(false);
+                        _service.Games.TryRemove(ctx.Channel.Id, out _);
+                        await Task.Delay(10000).ConfigureAwait(false);
+                        await _service.GetWinnerAsync(uid).ConfigureAwait(false);
+                        return;
+                    }
+
+                    foreach (var (key, value) in joinedReactions)
+                    {
+                        await _currency
+                            .ChangeAsync(key, "BetShowdown Entry", -value.Amount * value.Multiple, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}", ctx.Guild.Id, ctx.Channel.Id,
+                                ctx.Message.Id)
+                            .ConfigureAwait(false);
+                    }
+
+                    int winner;
+                    try
+                    {
+                        winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        await ctx.Channel
+                            .EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("The game is taking longer than usual, please be patient."))
+                            .ConfigureAwait(false);
+                        await Task.Delay(5000).ConfigureAwait(false);
+                        winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
+                    }
+                    var result = winner == 1 ? BetPlayer.P1 : BetPlayer.P2;
+
+                    var winners = "";
+                    var losers = "";
+
+                    foreach (var (key, value) in joinedReactions)
+                    {
+                        if (result != value.Bet)
+                        {
+                            losers += $"{key.Username}\n";
+                            continue;
+                        }
+                        var won = value.Amount * value.Multiple * 2;
+                        winners += $"{key.Username} won {won.FormatNumber()} {_roki.Properties.CurrencyIcon}\n";
+                        await _currency.ChangeAsync(key, "BetShowdown Payout", won, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id,
+                            ctx.Channel.Id, ctx.Message.Id);
+                    }
+                    
+                    var embed = new EmbedBuilder().WithOkColor();
+                    if (winners.Length > 1)
+                    {
+                        embed.WithDescription($"Player {winner} has won the battle!\nCongratulations!\n{winners}\n");
+                        await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                    }
+                    if (losers.Length > 1)
+                    {
+                        if (winners.Length > 1)
+                            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
+                                .WithDescription($"Better luck next time!\n{losers}\n")).ConfigureAwait(false);
+                        else 
+                            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
+                                .WithDescription($"Player {winner} has won the battle!\nBetter luck next time!\n{losers}\n")).ConfigureAwait(false);
+                    }
+                    _service.Games.TryRemove(ctx.Channel.Id, out _);
+                    await startMsg.RemoveReactionsAsync(ctx.Client.CurrentUser, _reactionMap.Keys.ToArray()).ConfigureAwait(false);
                 }
                 catch (Exception e)
                 {
                     _log.Warn(e);
-                    _log.Info(gameIntro);
+                    _log.Info(uid);
                     await ctx.Channel.SendErrorAsync("Unable to start game, please try again.\nplease @snow about this issue.");
                     _service.Games.TryRemove(ctx.Channel.Id, out _);
-                    return;
                 }
-
-                var joinedReactions = new Dictionary<IUser, PlayerBet>();
-                var timeout = DateTime.UtcNow + TimeSpan.FromSeconds(30);
-                _client.ReactionAdded += (cachedMessage, channel, reaction) =>
-                {
-                    if (ctx.Channel.Id != channel.Id || cachedMessage.Value.Id != startMsg.Id || !_reactionMap.ContainsKey(reaction.Emote) ||
-                        DateTime.UtcNow > timeout || reaction.User.Value.IsBot) return Task.CompletedTask;
-                    var user = reaction.User.Value;
-                    var _ = Task.Run(async () =>
-                    {
-                        // If user doesn't exist in the dictionary yet
-                        if (!joinedReactions.ContainsKey(user))
-                        {
-                            if (Equals(reaction.Emote, Player1))
-                                joinedReactions.Add(user, new PlayerBet{Bet = BetPlayer.P1, Amount = 0});
-                            else if (Equals(reaction.Emote, Player2))
-                                joinedReactions.Add(user, new PlayerBet{Bet = BetPlayer.P2, Amount = 0});
-                            else
-                            {
-                                var notEnoughMsg = await ctx.Channel.SendErrorAsync($"<@{reaction.UserId}> Please select a player to bet on first.").ConfigureAwait(false);
-                                notEnoughMsg.DeleteAfter(3);
-                            }
-                            await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, RequestOptions.Default).ConfigureAwait(false);
-                            return Task.CompletedTask;
-                        }
-                        // If user exists in dictionary and reacted with player1 
-                        if (reaction.Emote.Equals(Player1))
-                            joinedReactions[user].Bet = BetPlayer.P1;
-                        // If user exists in dictionary and reacted with player2 
-                        else if (reaction.Emote.Equals(Player2))
-                            joinedReactions[user].Bet = BetPlayer.P2;
-                        // If user exists in dictionary and reacted with any other emote in the reactionMap
-                        else if (_reactionMap.ContainsKey(reaction.Emote))
-                        {
-                            var currency = _currency.GetCurrency(user.Id);
-                            if (reaction.Emote.Equals(AllIn))
-                                joinedReactions[user].Amount = currency;
-                            else if (reaction.Emote.Equals(TimesTwo) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 2)
-                                joinedReactions[user].Multiple *= 2;
-                            else if (reaction.Emote.Equals(TimesFive) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 5)
-                                joinedReactions[user].Multiple *= 5;
-                            else if (reaction.Emote.Equals(TimesTen) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 10)
-                                joinedReactions[user].Multiple *= 10;
-                            else if (currency >= joinedReactions[user].Amount + _reactionMap[reaction.Emote] * joinedReactions[user].Multiple) 
-                                joinedReactions[user].Amount += _reactionMap[reaction.Emote];
-                            else
-                            {
-                                var notEnoughMsg = await ctx.Channel.SendErrorAsync($"<@{reaction.User.Value.Id}> You do not have enough {_roki.Properties.CurrencyIcon} to make that bet.")
-                                    .ConfigureAwait(false);
-                                await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
-                                notEnoughMsg.DeleteAfter(5);
-                            }
-                            return Task.CompletedTask;
-                        }
-                        await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
-                        return Task.CompletedTask;
-                    });
-                    
-                    return Task.CompletedTask;
-                };
-
-                Thread.Sleep(TimeSpan.FromSeconds(35));
-                if (joinedReactions.Count == 0)
-                {
-                    await ctx.Channel.SendErrorAsync("Not enough players to start the bet.\nBet is cancelled");
-                    await startMsg.RemoveAllReactionsAsync().ConfigureAwait(false);
-                    _service.Games.TryRemove(ctx.Channel.Id, out _);
-                    return;
-                }
-
-                foreach (var (key, value) in joinedReactions)
-                {
-                    await _currency
-                        .ChangeAsync(key, "BetShowdown Entry", -value.Amount * value.Multiple, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}", ctx.Guild.Id, ctx.Channel.Id,
-                            ctx.Message.Id)
-                        .ConfigureAwait(false);
-                }
-                
-                var win = ShowdownService.GetWinner(gameTurns.Substring(gameTurns.IndexOf("|win", StringComparison.Ordinal)));
-                var result = win.Contains("1", StringComparison.Ordinal) ? BetPlayer.P1 : BetPlayer.P2;
-
-                var winners = "";
-                var losers = "";
-
-                foreach (var (key, value) in joinedReactions)
-                {
-                    if (result != value.Bet)
-                    {
-                        losers += $"{key.Username}\n";
-                        continue;
-                    }
-                    var won = value.Amount * value.Multiple * 2;
-                    winners += $"{key.Username} won {won.FormatNumber()} {_roki.Properties.CurrencyIcon}\n";
-                    await _currency.ChangeAsync(key, "BetShowdown Payout", won, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id,
-                        ctx.Channel.Id, ctx.Message.Id);
-                }
-                
-                var embed = new EmbedBuilder().WithOkColor();
-                if (winners.Length > 1)
-                {
-                    embed.WithDescription($"Player {win} has won the battle!\nCongratulations!\n{winners}\n");
-                    await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
-                }
-                if (losers.Length > 1)
-                {
-                    if (winners.Length > 1)
-                        await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                            .WithDescription($"Better luck next time!\n{losers}\n")).ConfigureAwait(false);
-                    else 
-                        await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                            .WithDescription($"Player {win} has won the battle!\nBetter luck next time!\n{losers}\n")).ConfigureAwait(false);
-                }
-                await startMsg.RemoveReactionsAsync(ctx.Client.CurrentUser, _reactionMap.Keys.ToArray()).ConfigureAwait(false);
-                _service.Games.TryRemove(ctx.Channel.Id, out _);
             }
 
             [RokiCommand, Description, Aliases, Usage]
             [RequireContext(ContextType.Guild)]
-            public async Task BetPokemonLog([Leftover] string uid = null)
+            public async Task BetPokemonReplay([Leftover] string uid = null)
             {
                 uid = uid.SanitizeStringFull();
                 if (uid.Length != 8)
@@ -283,74 +294,16 @@ namespace Roki.Modules.Games
                     await ctx.Channel.SendErrorAsync("Invalid Game ID").ConfigureAwait(false);
                     return;
                 }
-                var game = await _service.LoadSavedGameAsync(uid).ConfigureAwait(false);
-                if (game == null)
-                {
-                    await ctx.Channel.SendErrorAsync("Game not found").ConfigureAwait(false);
-                    return;
-                }
-                if (_service.Games.TryGetValue(ctx.Channel.Id, out var gameUid) && gameUid == uid)
-                {
-                    await ctx.Channel.SendErrorAsync("Game currently in progress. Please wait until game is finished.").ConfigureAwait(false);
-                    return;
-                }
-                
-                var index = game.IndexOf("|start", StringComparison.Ordinal);
-                var generation = uid.Substring(0, 1);
-                var gameIntro = game.Substring(0, index);
-                var gameTurns = game.Substring(index + 1);
-                var intro = _service.ParseIntro(gameIntro);
-                var t1 = new List<Image<Rgba32>>();
-                var t2 = new List<Image<Rgba32>>();
 
-                ctx.Message.DeleteAfter(5);
-                IDMChannel dm;
-                try
+                var url = await _service.GetBetPokemonGame(uid);
+                if (url == null)
                 {
-                    dm = await ctx.User.GetOrCreateDMChannelAsync().ConfigureAwait(false);
-                }
-                catch 
-                {
-                    await ctx.Channel.SendErrorAsync("Unable to send DM message. Please try again.").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync("Cannot find replay with that ID.").ConfigureAwait(false);
                     return;
                 }
 
-                for (int i = 0; i < intro[0].Count; i++)
-                {
-                    t1.Add(GetPokemonImage(intro[0][i], generation));
-                    t2.Add(GetPokemonImage(intro[1][i], generation));
-                }
-
-                using var bitmap1 = t1.MergePokemonTeam();
-                using var bitmap2 = t2.MergePokemonTeam();
-                using var bitmap = bitmap1.MergeTwoVertical(bitmap2, out var format);
-                await using var ms = bitmap.ToStream(format);
-                for (int i = 0; i < t1.Count; i++)
-                {
-                    t1[i].Dispose();
-                    t2[i].Dispose();
-                }
-
-                var startEmbed = new EmbedBuilder().WithOkColor()
-                    .WithTitle($"[Gen {generation}] Random Battle Replay - ID: `{uid}`")
-                    .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
-                    .AddField("Player 1", string.Join('\n', intro[0]), true)
-                    .AddField("Player 2", string.Join('\n', intro[1]), true);
-                await dm.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: startEmbed.Build()).ConfigureAwait(false);
-
-                var turns = _service.ParseTurns(gameTurns);
-                await dm.TriggerTypingAsync().ConfigureAwait(false);
-                await dm.SendPaginatedDmAsync(_client, 0, TurnFunc, turns.Count, 1).ConfigureAwait(false);
-
-                EmbedBuilder TurnFunc(int turnNum)
-                {
-                    var turn = turns[turnNum];
-                    return new EmbedBuilder().WithOkColor()
-                        .WithAuthor($"[Gen {generation}] Random Battle Replay - ID: {uid}")
-                        .WithTitle($"Turn: {turnNum + 1}")
-                        .WithDescription(turn)
-                        .WithFooter($"Turn {turnNum + 1}/{turns.Count}");
-                }
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"{ctx.User.Mention} Here is the replay url:\nhttps://replay.pokemonshowdown.com/{url}"))
+                    .ConfigureAwait(false);
             }
             
             private Image<Rgba32> GetPokemonImage(string pokemon, string generation)
