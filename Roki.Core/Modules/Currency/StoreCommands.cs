@@ -198,7 +198,7 @@ namespace Roki.Modules.Currency
                 foreach (var sub in subs)
                 {
                     var listing = _service.GetListingById(sub.ItemId);
-                    desc += $"{listing.ItemName} - Purchased: {sub.StartDate:MMM dd yyyy} - Expires: {sub.EndDate:MMM dd yyyy}\n";
+                    desc += $"{listing.ItemName} - Expires: {sub.StartDate - sub.EndDate:d\\.hh\\:mm}\n";
                 }
 
                 await ctx.Channel.EmbedAsync(embed.WithDescription(desc)).ConfigureAwait(false);
