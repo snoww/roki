@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
 using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
 using Roki.Modules.Xp.Common;
@@ -29,11 +28,12 @@ namespace Roki.Core.Services.Database.Repositories
         Task ChangeNotificationLocation(ulong userId, byte notify);
         Task<Inventory> GetOrCreateUserInventory(ulong userId);
         Task UpdateUserInventory(ulong userId, string key, int value);
-        Task<List<Portfolio>> GetOrCreateUserPortfolio(ulong userId);
-        Task UpdateUserPortfolio(ulong userId, string symbol, long amount);
+        Task<List<Investment>> GetOrCreateUserPortfolio(ulong userId);
+        Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, long amount);
         long GetUserInvestingAccount(ulong userId);
-        Task<bool> UpdateInvestingAccountAsync(IUser user, long amount);
-        IEnumerable<DUser> GetPortfolioLeaderboard(ulong userId, int page);
+        Task<bool> UpdateInvestingAccountAsync(ulong userId, long amount);
+        Task<bool> TransferToFromInvestingAccountAsync(ulong userId, long amount);
+        IEnumerable<DUser> GetAllPortfolios();
     }
 
     public class DUserRepository : Repository<DUser>, IDUserRepository
@@ -208,29 +208,116 @@ WHERE UserId={userId}")
                 .ConfigureAwait(false);
         }
 
-        public Task<List<Portfolio>> GetOrCreateUserPortfolio(ulong userId)
+        public async Task<List<Investment>> GetOrCreateUserPortfolio(ulong userId)
         {
-            throw new NotImplementedException();
+            var user = Set.First(u => u.UserId == userId);
+            if (user.Portfolio != null) return JsonSerializer.Deserialize<List<Investment>>(user.Portfolio);
+            await Context.Database.ExecuteSqlInterpolatedAsync($@"
+UPDATE IGNORE users
+SET Portfolio=[]
+WHERE UserId={userId}");
+            return null;
         }
 
-        public Task UpdateUserPortfolio(ulong userId, string symbol, long amount)
+        public async Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, long amount)
         {
-            throw new NotImplementedException();
+            var portfolio = await GetOrCreateUserPortfolio(userId).ConfigureAwait(false);
+            if (portfolio == null)
+            {
+                Investment[] investment = {new Investment
+                {
+                    Symbol = symbol,
+                    Position = position,
+                    Shares = amount
+                }};
+                var json = JsonSerializer.Serialize(investment);
+                await Context.Database.ExecuteSqlInterpolatedAsync($@"
+UPDATE IGNORE users
+SET Portfolio={json}
+WHERE UserId={userId}")
+                    .ConfigureAwait(false);
+            }
+            else if (!portfolio.Any(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)))
+            {
+                var investment = new Investment
+                {
+                    Symbol = symbol,
+                    Position = position,
+                    Shares = amount
+                };
+                portfolio.Add(investment);
+                var json = JsonSerializer.Serialize(portfolio);
+                await Context.Database.ExecuteSqlInterpolatedAsync($@"
+UPDATE IGNORE users
+SET Portfolio={json}
+WHERE UserId={userId}").
+                    ConfigureAwait(false);
+            }
+            else
+            {
+                var investment = portfolio.First(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
+                if (investment.Shares + amount < 0) return false;
+                investment.Shares += amount;
+                if (investment.Shares == 0)
+                    portfolio.Remove(investment);
+                var json = JsonSerializer.Serialize(portfolio);
+                await Context.Database.ExecuteSqlInterpolatedAsync($@"
+UPDATE IGNORE users
+SET Portfolio={json}
+WHERE UserId={userId}").
+                    ConfigureAwait(false);
+            }
+
+            return true;
         }
 
         public long GetUserInvestingAccount(ulong userId)
         {
-            throw new NotImplementedException();
+            return Set.First(u => u.UserId == userId).InvestingAccount;
         }
 
-        public Task<bool> UpdateInvestingAccountAsync(IUser user, long amount)
+        public async Task<bool> UpdateInvestingAccountAsync(ulong userId, long amount)
         {
-            throw new NotImplementedException();
+            var currentAmount = Set.First(u => u.UserId == userId).InvestingAccount;
+            if (currentAmount + amount < 0) return false;
+            await Context.Database.ExecuteSqlInterpolatedAsync($@"
+UPDATE IGNORE users
+SET InvestingAccount={currentAmount + amount}
+WHERE UserId={userId}")
+                .ConfigureAwait(false);
+            return true;
         }
 
-        public IEnumerable<DUser> GetPortfolioLeaderboard(ulong userId, int page)
+        public async Task<bool> TransferToFromInvestingAccountAsync(ulong userId, long amount)
         {
-            throw new NotImplementedException();
+            var user = Set.First(u => u.UserId == userId);
+            var currencyAcc = user.Currency;
+            var investAcc = user.InvestingAccount;
+            // todo create transaction
+            if (amount > 0 && currencyAcc - amount >= 0)
+            {
+                await Context.Database.ExecuteSqlInterpolatedAsync($@"
+UPDATE IGNORE users
+SET Currency={currencyAcc - amount},
+    InvestingAccount={investAcc + amount}
+WHERE UserId={userId}")
+                    .ConfigureAwait(false);
+                return true;
+            }
+
+            if (amount >= 0 || investAcc + amount < 0) return false;
+            await Context.Database.ExecuteSqlInterpolatedAsync($@"
+UPDATE IGNORE users
+SET Currency={currencyAcc - amount},
+    InvestingAccount={investAcc + amount}
+WHERE UserId={userId}")
+                .ConfigureAwait(false);
+            return true;
+        }
+
+        public IEnumerable<DUser> GetAllPortfolios()
+        {
+            return Set.Where(u => u.Portfolio != null).ToList();
         }
 
         private static async Task SendNotification(DUser user, SocketMessage msg, int level)
