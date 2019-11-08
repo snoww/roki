@@ -20,15 +20,15 @@ namespace Roki.Modules.Stocks
             }
 
             string desc;
-
             if (all == "false")
             {
-                desc = $"```Market Cap\n{stats.MarketCap:N0}\n\n52 Week High\n{stats.Week52High:N}\n\n52 Week Low\n{stats.Week52Low:N}\n\n52 Week Change\n{stats.Week52Change:P}\n\nShares Outstanding\n{stats.SharesOutstanding:N}\n\nAverage 30 Day Volume\n{stats.Avg30Volume:N1}\n\nAverage 10 Day Volume\n{stats.Avg10Volume:N1}\n\nFloat\n{stats.Float:N3}\n\nEmployees\n{stats.Employees:N0}\n\nTrailing 12 Month Earnings Per Share\n{stats.TtmEps}\n\nNext Earnings Date\n{stats.NextEarningsDate:yyyy-MM-dd}\n\nPrice to Earnings Ratio\n{stats.PeRatio}\n\nBeta\n{stats.Beta}```";
+                desc = $"Market Cap:\t`{stats.MarketCap:N0}`\n52 Week High:\t`{stats.Week52High:N}`\n52 Week Low:\t`{stats.Week52Low:N}`\n52 Week Change:\t`{stats.Week52Change:P}`\nShares Outstanding:\t`{stats.SharesOutstanding:N}`\nAverage 30 Day Volume:\t`{stats.Avg30Volume:N1}`\nAverage 10 Day Volume:\t`{stats.Avg10Volume:N1}`\nFloat:\t`{stats.Float:N3}`\nEmployees:\t`{stats.Employees:N0}`\nTrailing 12 Month Earnings Per Share:\t`{stats.TtmEps}`\nNext Earnings Date:\t`{stats.NextEarningsDate:yyyy-MM-dd}`\nPrice to Earnings Ratio:\t`{stats.PeRatio}`\nBeta:\t`{stats.Beta}`";
             }
             else
             {
-                desc = $"```Market Cap\n{stats.MarketCap:N0}\n\n52 Week High\n{stats.Week52High:N}\n\n52 Week Low\n{stats.Week52Low:N}\n\n52 Week Change\n{stats.Week52Change:P}\n\nShares Outstanding\n{stats.SharesOutstanding:N}\n\nAverage 30 Day Volume\n{stats.Avg30Volume:N1}\n\nAverage 10 Day Volume\n{stats.Avg10Volume:N1}\n\nFloat\n{stats.Float:N3}\n\nEmployees\n{stats.Employees:N0}\n\nTrailing 12 Month Earnings Per Share\n{stats.TtmEps}\n\nNext Earnings Date\n{stats.NextEarningsDate:yyyy-MM-dd}\n\nPrice to Earnings Ratio\n{stats.PeRatio}\n\nBeta\n{stats.Beta}" +
-                       $"5 Day Change\n{stats.Day5ChangePercent:P}\n\n30 Day Change\n{stats.Day30ChangePercent:P}```";
+                desc = $"Market Cap:\t`{stats.MarketCap:N0}`\n52 Week High:\t`{stats.Week52High:N}`\n52 Week Low:\t`{stats.Week52Low:N}`\n52 Week Change:\t`{stats.Week52Change:P}`\nShares Outstanding:\t`{stats.SharesOutstanding:N}`\nAverage 30 Day Volume:\t`{stats.Avg30Volume:N1}`\nAverage 10 Day Volume:\t`{stats.Avg10Volume:N1}`\nFloat:\t`{stats.Float:N3}`\nEmployees:\t`{stats.Employees:N0}`\nTrailing 12 Month Earnings Per Share:\t`{stats.TtmEps}`\nNext Earnings Date:\t`{stats.NextEarningsDate:yyyy-MM-dd}`\nPrice to Earnings Ratio:\t`{stats.PeRatio}`\nBeta:\t`{stats.Beta}`" +
+                       "`===============`" + 
+                       $"5 Day Change:\t`{stats.Day5ChangePercent:P}`\n30 Day Change:\t`{stats.Day30ChangePercent:P}`\n1 Month Change:\t`{stats.Month1ChangePercent:P}`\n3 Month Change:\t`{stats.Month3ChangePercent:P}`\n6 Month Change:\t`{stats.Month6ChangePercent:P}`\nYTD Change:\t`{stats.YtdChangePercent:P}`\n1 year Change:\t`{stats.Year1ChangePercent:P}`\n1 Year Change:\t`{stats.Year1ChangePercent:P}`\n2 Year Change:\t`{stats.Year2ChangePercent:P}`\n5 Year Change:\t`{stats.Year1ChangePercent:P}`\nMax Change:\t`{stats.MaxChangePercent:P}`";
             }
             
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
@@ -41,13 +41,78 @@ namespace Roki.Modules.Stocks
         [RokiCommand, Usage, Description, Aliases]
         public async Task Company(string symbol)
         {
-            
+            var company = await _service.GetCompanyAsync(symbol);
+            var logo = await _service.GetLogoAsync(symbol);
+            if (company == null)
+            {
+                await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
+                return;
+            }
+
+            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    .WithTitle(company.Symbol)
+                    .WithAuthor(company.CompanyName, logo, company.Website)
+                    .WithDescription(company.Description)
+                    .AddField("Primary Exchange", company.Exchange, true)
+                    .AddField("CEO", company.Ceo, true)
+                    .AddField("Tags", string.Join(", ", company.Tags))
+                    .AddField("Employees", company.Employees, true)
+                    .AddField("Country", company.Country, true))
+                .ConfigureAwait(false);
         }
         
         [RokiCommand, Usage, Description, Aliases]
         public async Task News(string symbol)
         {
+            var news = await _service.GetNewsAsync(symbol);
+            if (news == null)
+            {
+                await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
+                return;
+            }
+
+            await ctx.SendPaginatedConfirmAsync(0, p =>
+            {
+                var article = news[p];
+                var embed = new EmbedBuilder().WithOkColor()
+                    .WithTitle(article.Headline)
+                    .WithAuthor(article.Source, article.Url)
+                    .WithDescription(article.Summary)
+                    .WithImageUrl(article.Image)
+                    .WithFooter($"{article.DateTime.UnixTimeStampToDateTime():yyyy-MM-dd HH:mm}");
+                if (article.HasPayWall)
+                    embed.WithDescription("Has Pay Wall\n" + article.Summary);
+                return embed;
+            }, news.Length, 1, false).ConfigureAwait(false);
+        }
+        
+        [RokiCommand, Usage, Description, Aliases]
+        public async Task StockQuote(string symbol)
+        {
+            var quote = await _service.GetQuoteAsync(symbol);
+            var logo = await _service.GetLogoAsync(symbol);
+            if (quote == null)
+            {
+                await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
+                return;
+            }
+
+            var embed = new EmbedBuilder().WithOkColor()
+                .WithTitle($"{quote.CompanyName} - {quote.Symbol}")
+                .WithThumbnailUrl(logo)
+                .AddField("Primary Exchange", quote.PrimaryExchange, true)
+                .AddField("Latest Price", quote.LatestPrice.ToString("N"), true)
+                .AddField("Latest Time", quote.LatestTime, true);
+            if (quote.Open != null)
+                embed.AddField("Open", quote.Open.Value.ToString("N"), true);
+            if (quote.Close != null)
+                embed.AddField("Close", quote.Close.Value.ToString("N"), true);
+            if (quote.High != null)
+                embed.AddField("High", quote.High.Value.ToString("N"), true);
+            if (quote.Low != null)
+                embed.AddField("Low", quote.Low.Value.ToString("N"), true);
             
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
     }
 }

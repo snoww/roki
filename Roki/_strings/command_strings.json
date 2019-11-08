@@ -530,10 +530,32 @@
     ]
   },
   "stockstats": {
-    "Command": "stockstats",
-    "Description": "Shows the statistics of the specified stock",
+    "Command": "stockstats ss",
+    "Description": "Shows the statistics of the specified stock, optional all details",
     "Usage": [
-      "{0}stockstats AAPL"
+      "{0}stockstats AAPL",
+      "{0}stockstats AAPL true"
+    ]
+  },
+  "stockquote": {
+    "Command": "stockquote sq",
+    "Description": "Shows current quote of the specified stock",
+    "Usage": [
+      "{0}stockquote AAPL"
+    ]
+  },
+  "stocknews": {
+    "Command": "stocknews sn",
+    "Description": "Shows the current news about the specified company",
+    "Usage": [
+      "{0}stocknews AAPL"
+    ]
+  },
+  "stockcompany": {
+    "Command": "stockcompany sc",
+    "Description": "Shows details about the specified company",
+    "Usage": [
+      "{0}stockcompany AAPL"
     ]
   }
 }
