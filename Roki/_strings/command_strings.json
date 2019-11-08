@@ -564,5 +564,14 @@
     "Usage": [
       "{0}stockprice AAPL"
     ]
+  },
+  "stockbuy": {
+    "Command": "stockbuy sb",
+    "Description": "Buys shares of a company at the current price, with a specified position (long or short), defaults to long.",
+    "Usage": [
+      "{0}stockbuy AAPL 50",
+      "{0}stockbuy AAPL 23 short",
+      "{0}stockbuy AAPL 15 long"
+    ]
   }
 }
