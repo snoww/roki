@@ -41,7 +41,7 @@ namespace Roki.Modules.Stocks
             {
                 Long,
                 Short
-            }   
+            }
         }
     }
 }

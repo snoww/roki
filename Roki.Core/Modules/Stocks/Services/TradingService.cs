@@ -1,7 +1,10 @@
+using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Roki.Core.Services;
+using Roki.Core.Services.Database.Models;
 
 namespace Roki.Modules.Stocks.Services
 {
@@ -32,6 +35,35 @@ namespace Roki.Modules.Stocks.Services
         {
             using var uow = _db.GetDbContext();
             var success = await uow.DUsers.UpdateInvestingAccountAsync(userId, amount).ConfigureAwait(false);
+            await uow.SaveChangesAsync().ConfigureAwait(false);
+            return success;
+        }
+
+        public async Task<List<Investment>> GetUserPortfolioAsync(ulong userId)
+        {
+            using var uow = _db.GetDbContext();
+            return await uow.DUsers.GetOrCreateUserPortfolio(userId).ConfigureAwait(false);
+        }
+
+        public async Task<bool> UpdateUserPortfolioAsync(ulong userId, string symbol, Stocks.TradingCommands.Position position, 
+            string action, decimal price, long amount)
+        {
+            using var uow = _db.GetDbContext();
+            var pos = "";
+            if (position == Stocks.TradingCommands.Position.Long) pos = "long";
+            else if (position == Stocks.TradingCommands.Position.Short) pos = "short";
+            uow.Trades.Add(new Trades
+            {
+                UserId = userId,
+                Symbol = symbol.ToUpper(),
+                Position = pos,
+                Action = action,
+                Shares = amount,
+                PurchasePrice = price,
+                TransactionDate = DateTime.UtcNow
+            });
+            var success = await uow.DUsers.UpdateUserPortfolio(userId, symbol, pos, amount);
+            await uow.SaveChangesAsync().ConfigureAwait(false);
             return success;
         }
     }
