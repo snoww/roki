@@ -29,6 +29,11 @@ namespace Roki.Core.Services.Database.Repositories
         Task ChangeNotificationLocation(ulong userId, byte notify);
         Task<Inventory> GetOrCreateUserInventory(ulong userId);
         Task UpdateUserInventory(ulong userId, string key, int value);
+        Task<List<Portfolio>> GetOrCreateUserPortfolio(ulong userId);
+        Task UpdateUserPortfolio(ulong userId, string symbol, long amount);
+        long GetUserInvestingAccount(ulong userId);
+        Task<bool> UpdateInvestingAccountAsync(IUser user, long amount);
+        IEnumerable<DUser> GetPortfolioLeaderboard(ulong userId, int page);
     }
 
     public class DUserRepository : Repository<DUser>, IDUserRepository
@@ -201,6 +206,31 @@ UPDATE IGNORE users
 SET Inventory={json}
 WHERE UserId={userId}")
                 .ConfigureAwait(false);
+        }
+
+        public Task<List<Portfolio>> GetOrCreateUserPortfolio(ulong userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateUserPortfolio(ulong userId, string symbol, long amount)
+        {
+            throw new NotImplementedException();
+        }
+
+        public long GetUserInvestingAccount(ulong userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> UpdateInvestingAccountAsync(IUser user, long amount)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<DUser> GetPortfolioLeaderboard(ulong userId, int page)
+        {
+            throw new NotImplementedException();
         }
 
         private static async Task SendNotification(DUser user, SocketMessage msg, int level)

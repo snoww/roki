@@ -16,6 +16,8 @@ namespace Roki.Core.Services.Database.Models
         public byte NotificationLocation { get; set; } = 1;
         public long Currency { get; set; } = 0;
         public string Inventory { get; set; } = null;
+        public long InvestingAccount { get; set; } = 0;
+        public string Portfolio { get; set; } = null;
         
         public override bool Equals(object obj) => 
             obj is DUser dUser && dUser.UserId == UserId;
@@ -34,5 +36,11 @@ namespace Roki.Core.Services.Database.Models
         public int Timeout { get; set; } = 0;
         public int DeleteMessage { get; set; } = 0;
         public int SlowMode { get; set; } = 0;
+    }
+
+    public class Portfolio
+    {
+        public string Symbol { get; set; }
+        public long Shares { get; set; } = 0;
     }
 }
