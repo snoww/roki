@@ -69,7 +69,7 @@ namespace Roki.Extensions
             return number == Math.Truncate(number);
         }
 
-        public static DateTime ToUnixTimestamp(this double number)
+        public static DateTime UnixTimeStampToDateTime(this double number)
         {
             return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(number);
         }

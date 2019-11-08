@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -49,13 +50,27 @@ namespace Roki.Modules.Stocks.Services
             }
         }
 
-        public async Task<StockNews> GetNewsAsync(string symbol)
+        public async Task<StockNews[]> GetNewsAsync(string symbol)
         {
             using var http = _httpFactory.CreateClient();
             var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/news?token={_config.IexToken}").ConfigureAwait(false);
             try
             {
-                return JsonSerializer.Deserialize<StockNews>(result);
+                return JsonSerializer.Deserialize<StockNews[]>(result);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<Quote> GetQuoteAsync(string symbol)
+        {
+            using var http = _httpFactory.CreateClient();
+            var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/quote?token={_config.IexToken}").ConfigureAwait(false);
+            try
+            {
+                return JsonSerializer.Deserialize<Quote>(result);
             }
             catch
             {
