@@ -1,4 +1,6 @@
+using System;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Extensions;
@@ -11,8 +13,15 @@ namespace Roki.Modules.Stocks
         [Group]
         public class TradingCommands : RokiSubmodule<TradingService>
         {
+            private readonly Roki _roki;
+
+            public TradingCommands(Roki roki)
+            {
+                _roki = roki;
+            }
+
             [RokiCommand, Usage, Description, Aliases]
-            public async Task StockBuy(string symbol, Position position, long amount)
+            public async Task StockBuy(string symbol, long amount, Position position = Position.Long)
             {
                 if (amount <= 0)
                 {
@@ -27,14 +36,24 @@ namespace Roki.Modules.Stocks
                     return;
                 }
 
-                if (position == Position.Long)
+                var cost = (long) Math.Ceiling(amount * price.Value);
+                var removed = await _service.UpdateInvAccountAsync(ctx.User.Id, cost).ConfigureAwait(false);
+                if (!removed)
                 {
-                    
+                    await ctx.Channel.SendErrorAsync("You do not have enough in your Investing Account to invest").ConfigureAwait(false);
+                    return;
                 }
-                else if (position == Position.Short)
-                {
-                    
-                }
+
+                await _service.UpdateUserPortfolioAsync(ctx.User.Id, symbol, Position.Long, "buy", price.Value, amount).ConfigureAwait(false);
+                var embed = new EmbedBuilder().WithOkColor();
+                if (amount == 1)
+                    embed.WithDescription($"{ctx.User.Mention}\n You've successfully purchased 1 share of {symbol.ToUpper()} at {price.Value}\n" +
+                                          $"Total Cost: {cost} {_roki.Properties.CurrencyIcon}");
+                else
+                    embed.WithDescription($"{ctx.User.Mention}\n You've successfully purchased {amount} shares of {symbol.ToUpper()} at {price.Value}\n" +
+                                          $"Total Cost: {cost} {_roki.Properties.CurrencyIcon}");
+
+                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
             
             public enum Position
