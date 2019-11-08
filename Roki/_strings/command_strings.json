@@ -557,5 +557,12 @@
     "Usage": [
       "{0}stockcompany AAPL"
     ]
+  },
+  "stockprice": {
+    "Command": "stockprice price sp",
+    "Description": "Shows the current price of the stock for the specified company",
+    "Usage": [
+      "{0}stockprice AAPL"
+    ]
   }
 }

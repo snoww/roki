@@ -85,5 +85,14 @@ namespace Roki.Modules.Stocks.Services
             using var json = JsonDocument.Parse(result);
             return json.RootElement.GetProperty("url").GetString();
         }
+
+        public async Task<decimal?> GetLatestPriceAsync(string symbol)
+        {
+            using var http = _httpFactory.CreateClient();
+            var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/quote/latestPrice?token={_config.IexToken}").ConfigureAwait(false);
+            var success = decimal.TryParse(result, out var price);
+            if (!success) return null;
+            return price;
+        }
     }
 }
