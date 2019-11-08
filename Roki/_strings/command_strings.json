@@ -530,11 +530,11 @@
     ]
   },
   "stockstats": {
-    "Command": "stockstats ss",
+    "Command": "stockstats sst",
     "Description": "Shows the statistics of the specified stock, optional all details",
     "Usage": [
       "{0}stockstats AAPL",
-      "{0}stockstats AAPL true"
+      "{0}sst AAPL true"
     ]
   },
   "stockquote": {
@@ -572,6 +572,14 @@
       "{0}stockbuy AAPL 50",
       "{0}stockbuy AAPL 23 short",
       "{0}sb AAPL 15"
+    ]
+  },
+  "stocksell": {
+    "Command": "stocksell ss",
+    "Description": "Sell a specified amount of shares from your portfolio.",
+    "Usage": [
+      "{0}stocksell AAPL 50",
+      "{0}ss AAPL 20"
     ]
   }
 }
