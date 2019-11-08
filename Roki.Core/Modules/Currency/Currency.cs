@@ -32,13 +32,20 @@ namespace Roki.Modules.Currency
             return uow.DUsers.GetUserCurrency(userId);
         }
 
+        private long GetInvAccount(ulong userId)
+        {
+            using var uow = _db.GetDbContext();
+            return uow.DUsers.GetUserInvestingAccount(userId);
+        }
+
         [RokiCommand, Description, Usage, Aliases]
         [RequireContext(ContextType.Guild)]
         public async Task Cash([Leftover] IUser user = null)
         {
             user ??= ctx.User;
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{user.Mention} has {GetCurrency(user.Id).FormatNumber()} {_roki.Properties.CurrencyIcon}")).ConfigureAwait(false);
+                .WithDescription($"{user.Mention}'s Accounts\nCash Account: {GetCurrency(user.Id):N0} {_roki.Properties.CurrencyIcon}\n" +
+                                 $"Investing Account: {GetInvAccount(user.Id):N0} {_roki.Properties.CurrencyIcon}")).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -49,19 +56,17 @@ namespace Roki.Modules.Currency
                 return;
             if (page > 0)
                 page -= 1;
-            using (var uow = _db.GetDbContext())
+            using var uow = _db.GetDbContext();
+            var list = uow.DUsers.GetCurrencyLeaderboard(ctx.Client.CurrentUser.Id, page);
+            var embed = new EmbedBuilder().WithOkColor()
+                .WithTitle("Currency Leaderboard");
+            var i = 9 * page + 1;
+            foreach (var user in list)
             {
-                var list = uow.DUsers.GetCurrencyLeaderboard(ctx.Client.CurrentUser.Id, page);
-                var embed = new EmbedBuilder().WithOkColor()
-                    .WithTitle("Currency Leaderboard");
-                var i = 9 * page + 1;
-                foreach (var user in list)
-                {
-                    embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"{user.Currency.FormatNumber()} {_roki.Properties.CurrencyIcon}");
-                }
-
-                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"{user.Currency.FormatNumber()} {_roki.Properties.CurrencyIcon}");
             }
+
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
