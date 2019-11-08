@@ -114,5 +114,20 @@ namespace Roki.Modules.Stocks
             
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
+
+        [RokiCommand, Usage, Description, Aliases]
+        public async Task StockPrice(string symbol)
+        {
+            var price = await _service.GetLatestPriceAsync(symbol);
+            if (price == null)
+            {
+                await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
+                return;
+            }
+
+            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    .WithTitle($"Latest Price for {symbol.ToUpperInvariant()}\n`{price:N}`"))
+                .ConfigureAwait(false);
+        }
     }
 }
