@@ -22,11 +22,11 @@ namespace Roki.Modules.Stocks
             string desc;
             if (all == "false")
             {
-                desc = $"Market Cap:\t`{stats.MarketCap:N0}`\n52 Week High:\t`{stats.Week52High:N}`\n52 Week Low:\t`{stats.Week52Low:N}`\n52 Week Change:\t`{stats.Week52Change:P}`\nShares Outstanding:\t`{stats.SharesOutstanding:N}`\nAverage 30 Day Volume:\t`{stats.Avg30Volume:N1}`\nAverage 10 Day Volume:\t`{stats.Avg10Volume:N1}`\nFloat:\t`{stats.Float:N3}`\nEmployees:\t`{stats.Employees:N0}`\nTrailing 12 Month Earnings Per Share:\t`{stats.TtmEps}`\nNext Earnings Date:\t`{stats.NextEarningsDate:yyyy-MM-dd}`\nPrice to Earnings Ratio:\t`{stats.PeRatio}`\nBeta:\t`{stats.Beta}`";
+                desc = $"Market Cap:\t`{stats.MarketCap:N0}`\n52 Week High:\t`{stats.Week52High:N2}`\n52 Week Low:\t`{stats.Week52Low:N2}`\n52 Week Change:\t`{stats.Week52Change:P}`\nShares Outstanding:\t`{stats.SharesOutstanding:N2}`\nAverage 30 Day Volume:\t`{stats.Avg30Volume:N1}`\nAverage 10 Day Volume:\t`{stats.Avg10Volume:N1}`\nFloat:\t`{stats.Float:N3}`\nEmployees:\t`{stats.Employees:N0}`\nTrailing 12 Month Earnings Per Share:\t`{stats.TtmEps}`\nNext Earnings Date:\t`{stats.NextEarningsDate:yyyy-MM-dd}`\nPrice to Earnings Ratio:\t`{stats.PeRatio}`\nBeta:\t`{stats.Beta}`";
             }
             else
             {
-                desc = $"Market Cap:\t`{stats.MarketCap:N0}`\n52 Week High:\t`{stats.Week52High:N}`\n52 Week Low:\t`{stats.Week52Low:N}`\n52 Week Change:\t`{stats.Week52Change:P}`\nShares Outstanding:\t`{stats.SharesOutstanding:N}`\nAverage 30 Day Volume:\t`{stats.Avg30Volume:N1}`\nAverage 10 Day Volume:\t`{stats.Avg10Volume:N1}`\nFloat:\t`{stats.Float:N3}`\nEmployees:\t`{stats.Employees:N0}`\nTrailing 12 Month Earnings Per Share:\t`{stats.TtmEps}`\nNext Earnings Date:\t`{stats.NextEarningsDate:yyyy-MM-dd}`\nPrice to Earnings Ratio:\t`{stats.PeRatio}`\nBeta:\t`{stats.Beta}`" +
+                desc = $"Market Cap:\t`{stats.MarketCap:N0}`\n52 Week High:\t`{stats.Week52High:N2}`\n52 Week Low:\t`{stats.Week52Low:N2}`\n52 Week Change:\t`{stats.Week52Change:P}`\nShares Outstanding:\t`{stats.SharesOutstanding:N2}`\nAverage 30 Day Volume:\t`{stats.Avg30Volume:N1}`\nAverage 10 Day Volume:\t`{stats.Avg10Volume:N1}`\nFloat:\t`{stats.Float:N3}`\nEmployees:\t`{stats.Employees:N0}`\nTrailing 12 Month Earnings Per Share:\t`{stats.TtmEps}`\nNext Earnings Date:\t`{stats.NextEarningsDate:yyyy-MM-dd}`\nPrice to Earnings Ratio:\t`{stats.PeRatio}`\nBeta:\t`{stats.Beta}`" +
                        "`===============`" + 
                        $"5 Day Change:\t`{stats.Day5ChangePercent:P}`\n30 Day Change:\t`{stats.Day30ChangePercent:P}`\n1 Month Change:\t`{stats.Month1ChangePercent:P}`\n3 Month Change:\t`{stats.Month3ChangePercent:P}`\n6 Month Change:\t`{stats.Month6ChangePercent:P}`\nYTD Change:\t`{stats.YtdChangePercent:P}`\n1 year Change:\t`{stats.Year1ChangePercent:P}`\n1 Year Change:\t`{stats.Year1ChangePercent:P}`\n2 Year Change:\t`{stats.Year2ChangePercent:P}`\n5 Year Change:\t`{stats.Year1ChangePercent:P}`\nMax Change:\t`{stats.MaxChangePercent:P}`";
             }
@@ -104,13 +104,13 @@ namespace Roki.Modules.Stocks
                 .AddField("Latest Price", quote.LatestPrice.ToString("N"), true)
                 .AddField("Latest Time", quote.LatestTime, true);
             if (quote.Open != null)
-                embed.AddField("Open", quote.Open.Value.ToString("N"), true);
+                embed.AddField("Open", quote.Open.Value.ToString("N2"), true);
             if (quote.Close != null)
-                embed.AddField("Close", quote.Close.Value.ToString("N"), true);
+                embed.AddField("Close", quote.Close.Value.ToString("N2"), true);
             if (quote.High != null)
-                embed.AddField("High", quote.High.Value.ToString("N"), true);
+                embed.AddField("High", quote.High.Value.ToString("N2"), true);
             if (quote.Low != null)
-                embed.AddField("Low", quote.Low.Value.ToString("N"), true);
+                embed.AddField("Low", quote.Low.Value.ToString("N2"), true);
             
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
@@ -126,7 +126,7 @@ namespace Roki.Modules.Stocks
             }
 
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                    .WithTitle($"Latest Price for {symbol.ToUpperInvariant()}\n`{price:N}`"))
+                    .WithTitle($"Latest Price for {symbol.ToUpperInvariant()}\n`{price:N2}`"))
                 .ConfigureAwait(false);
         }
     }
