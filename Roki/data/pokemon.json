@@ -3334,6 +3334,26 @@
     "sprite": "genesect",
     "name": "Genesect"
   },
+  "genesect-chill": {
+    "api": 649,
+    "sprite": "genesect-chill",
+    "name": "Genesect-Chill"
+  },
+  "genesect-burn": {
+    "api": 649,
+    "sprite": "genesect-burn",
+    "name": "Genesect-Burn"
+  },
+  "genesect-shock": {
+    "api": 649,
+    "sprite": "genesect-shock",
+    "name": "Genesect-Shock"
+  },
+  "genesect-douse": {
+    "api": 649,
+    "sprite": "genesect-douse",
+    "name": "Genesect-Douse"
+  },
   "chespin": {
     "api": 650,
     "sprite": "chespin",
