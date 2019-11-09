@@ -102,7 +102,7 @@ namespace Roki.Modules.Stocks
                 .WithThumbnailUrl(logo)
                 .AddField("Primary Exchange", quote.PrimaryExchange, true)
                 .AddField("Latest Price", quote.LatestPrice.ToString("N"), true)
-                .AddField("Latest Time", quote.LatestTime, true);
+                .AddField("Latest Time", quote.LatestUpdate.UnixTimeStampToDateTime().ToString("yyyy-MM-dd hh:mm:ss"), true);
             if (quote.Open != null)
                 embed.AddField("Open", quote.Open.Value.ToString("N2"), true);
             if (quote.Close != null)
