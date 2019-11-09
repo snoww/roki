@@ -64,8 +64,8 @@ SET Username={username},
     AvatarId={avatarId}
 WHERE UserId={userId};
 
-INSERT IGNORE INTO users (UserId, Username, Discriminator, AvatarId, LastLevelUp, LastXpGain)
-VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.MinValue}, {DateTime.MinValue});
+INSERT IGNORE INTO users (UserId, Username, Discriminator, AvatarId, LastLevelUp, LastXpGain, InvestingAccount)
+VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.MinValue}, {DateTime.MinValue}, 50000);
 ");
         }
 
@@ -305,7 +305,7 @@ WHERE UserId={userId}")
                 return true;
             }
 
-            if (amount >= 0 || investAcc + amount < 0) return false;
+            if (amount <= 0 || investAcc + amount < 0) return false;
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE IGNORE users
 SET Currency={currencyAcc - amount},

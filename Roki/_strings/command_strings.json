@@ -581,5 +581,13 @@
       "{0}stocksell AAPL 50",
       "{0}ss AAPL 20"
     ]
+  },
+  "transfer": {
+    "Command": "transfer",
+    "Description": "Transfers stones to/from your investing account and cash account.",
+    "Usage": [
+      "{0}transfer cash 5000",
+      "{0}transfer investing 20000"
+    ]
   }
 }
