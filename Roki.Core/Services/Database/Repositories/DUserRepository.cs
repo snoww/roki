@@ -214,7 +214,7 @@ WHERE UserId={userId}")
             if (user.Portfolio != null) return JsonSerializer.Deserialize<List<Investment>>(user.Portfolio);
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE IGNORE users
-SET Portfolio=[]
+SET Portfolio='[]'
 WHERE UserId={userId}");
             return null;
         }
