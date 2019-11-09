@@ -14,7 +14,7 @@ namespace Roki.Modules.Stocks.Services
         private readonly IRokiConfig _config;
         private readonly IHttpClientFactory _httpFactory;
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
-        private const string IexStocksUrl = "https://cloud.iexapis.com/stable/stock/";
+        private const string IexStocksUrl = "https://cloud.iexapis.com/stable/stock";
 
         public StocksService(IRokiConfig config, IHttpClientFactory httpFactory)
         {
@@ -28,7 +28,7 @@ namespace Roki.Modules.Stocks.Services
             var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/company?token={_config.IexToken}").ConfigureAwait(false);
             try
             {
-                return JsonSerializer.Deserialize<Company>(result);
+                return JsonSerializer.Deserialize<Company>(result, Options);
             }
             catch
             {
@@ -42,7 +42,7 @@ namespace Roki.Modules.Stocks.Services
             var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/stats?token={_config.IexToken}").ConfigureAwait(false);
             try
             {
-                return JsonSerializer.Deserialize<StockStats>(result);
+                return JsonSerializer.Deserialize<StockStats>(result, Options);
             }
             catch
             {
@@ -56,7 +56,7 @@ namespace Roki.Modules.Stocks.Services
             var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/news?token={_config.IexToken}").ConfigureAwait(false);
             try
             {
-                return JsonSerializer.Deserialize<StockNews[]>(result);
+                return JsonSerializer.Deserialize<StockNews[]>(result, Options);
             }
             catch
             {
@@ -70,7 +70,7 @@ namespace Roki.Modules.Stocks.Services
             var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/quote?token={_config.IexToken}").ConfigureAwait(false);
             try
             {
-                return JsonSerializer.Deserialize<Quote>(result);
+                return JsonSerializer.Deserialize<Quote>(result, Options);
             }
             catch
             {
