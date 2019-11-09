@@ -71,7 +71,7 @@ namespace Roki.Extensions
 
         public static DateTime UnixTimeStampToDateTime(this double number)
         {
-            return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(number);
+            return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(number);
         }
 
         public static string DegreesToCardinal(this double degrees)
