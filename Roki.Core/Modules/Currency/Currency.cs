@@ -71,6 +71,42 @@ namespace Roki.Modules.Currency
 
         [RokiCommand, Description, Usage, Aliases]
         [RequireContext(ContextType.Guild)]
+        public async Task Transfer(Account account, long amount)
+        {
+            if (amount == 0)
+            {
+                await ctx.Channel.SendErrorAsync($"You must transfer at least 1 {_roki.Properties.CurrencyIcon}").ConfigureAwait(false);
+                return;
+            }
+
+            using var uow = _db.GetDbContext();
+            var success = false;
+            var fromAcc = "";
+            var toAcc = "";
+            if ((int) account == 0)
+            {
+                success = await uow.DUsers.TransferToFromInvestingAccountAsync(ctx.User.Id, -amount).ConfigureAwait(false);
+                fromAcc = "Investing Account";
+                toAcc = "Cash Account";
+            }
+            else if ((int) account == 2)
+            {
+                success = await uow.DUsers.TransferToFromInvestingAccountAsync(ctx.User.Id, amount).ConfigureAwait(false);
+                toAcc = "Investing Account";
+                fromAcc = "Cash Account";
+            }
+
+            if (!success)
+            {
+                await ctx.Channel.SendErrorAsync($"You do not have enough {_roki.Properties.CurrencyIcon} to transfer.").ConfigureAwait(false);
+                return;
+            }
+
+            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"You've successfully transferred {amount} {_roki.Properties.CurrencyIcon} from `{fromAcc}` to `{toAcc}`")).ConfigureAwait(false);
+        }
+
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
         public async Task Give(long amount, IGuildUser user, [Leftover] string message = null)
         {
             if (amount <= 0 || ctx.User.Id == user.Id || user.IsBot)
@@ -135,6 +171,17 @@ namespace Roki.Modules.Currency
                 .WithFooter($"Page {page + 1}");
             
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+        }
+        
+        public enum Account
+        {
+            Cash = 0,
+            Stone = 0,
+            Debit = 0,
+            Investing = 1,
+            Invest = 1,
+            Inv = 1,
+            Trading = 1
         }
     }
 }
