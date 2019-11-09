@@ -9,7 +9,7 @@ namespace Roki.Modules.Stocks
     public partial class Stocks : RokiTopLevelModule<StocksService>
     {
         [RokiCommand, Usage, Description, Aliases]
-        public async Task StocksStats(string symbol, string all = "false")
+        public async Task StockStats(string symbol, [Leftover] string all = "false")
         {
             var stats = await _service.GetStockStatsAsync(symbol).ConfigureAwait(false);
             var logo = await _service.GetLogoAsync(symbol).ConfigureAwait(false);
