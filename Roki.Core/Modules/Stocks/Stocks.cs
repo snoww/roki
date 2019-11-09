@@ -77,7 +77,7 @@ namespace Roki.Modules.Stocks
                 var embed = new EmbedBuilder().WithOkColor()
                     .WithTitle(article.Headline)
                     .WithAuthor(article.Source, article.Url)
-                    .WithDescription(article.Summary)
+                    .WithDescription(article.Summary + $"\nSource: [{article.Source}]({article.Url})")
                     .WithImageUrl(article.Image)
                     .WithFooter($"{article.DateTime.UnixTimeStampToDateTime():yyyy-MM-dd HH:mm}");
                 if (article.HasPayWall)
