@@ -589,5 +589,13 @@
       "{0}transfer cash 5000",
       "{0}transfer investing 20000"
     ]
+  },
+  "portfolio": {
+    "Command": "portfolio",
+    "Description": "Shows your or the specified user's portfolio.",
+    "Usage": [
+      "{0}portfolio",
+      "{0}portfolio @snow"
+    ]
   }
 }
