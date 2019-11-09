@@ -95,6 +95,18 @@ namespace Roki.Modules.Currency
                 toAcc = "Investing Account";
                 fromAcc = "Cash Account";
             }
+            
+            uow.Transaction.Add(new CurrencyTransaction
+            {
+                Amount = amount,
+                ChannelId = ctx.Channel.Id,
+                From = ctx.User.Id.ToString(),
+                To = ctx.User.Id.ToString(),
+                GuildId = ctx.Guild.Id,
+                MessageId = ctx.Message.Id,
+                Reason = $"Transfer from {fromAcc} to {toAcc}",
+                TransactionDate = DateTime.UtcNow
+            });
 
             if (!success)
             {
@@ -103,6 +115,7 @@ namespace Roki.Modules.Currency
             }
 
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"You've successfully transferred {amount} {_roki.Properties.CurrencyIcon} from `{fromAcc}` to `{toAcc}`")).ConfigureAwait(false);
+            await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
