@@ -29,7 +29,6 @@ namespace Roki.Modules.Stocks.Services
 
         public async Task<long> GetPortfolioValue(List<Investment> portfolio)
         {
-            using var uow = _db.GetDbContext();
             var value = 0L;
             foreach (var investment in portfolio)
             {
