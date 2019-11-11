@@ -4784,6 +4784,11 @@
     "sprite": "oricorio-pompom",
     "name": "Oricorio Pom-Pom"
   },
+  "oricorio-pom-pom": {
+    "api": 10123,
+    "sprite": "oricorio-pompom",
+    "name": "Oricorio Pom-Pom"
+  },
   "oricorio-pa'u": {
     "api": 10124,
     "sprite": "oricorio-pau",
