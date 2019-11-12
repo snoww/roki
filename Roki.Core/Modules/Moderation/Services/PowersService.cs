@@ -25,21 +25,16 @@ namespace Roki.Modules.Moderation.Services
 
         public async Task<bool> AvailablePower(ulong userId, string power)
         {
-            using (var uow = _db.GetDbContext())
-            {
-                var inv =  await uow.DUsers.GetOrCreateUserInventory(userId).ConfigureAwait(false);
-                var invJson = (JObject) JToken.FromObject(inv);
-                return invJson[power].Value<int>() > 0;
-            }
+            using var uow = _db.GetDbContext();
+            var inv =  await uow.DUsers.GetOrCreateUserInventory(userId).ConfigureAwait(false);
+            return inv.Any(i => i.Name.Equals(power, StringComparison.OrdinalIgnoreCase));
         }
         
         public async Task ConsumePower(ulong userId, string power)
         {
-            using (var uow = _db.GetDbContext())
-            {
-                await uow.DUsers.UpdateUserInventory(userId, power, -1).ConfigureAwait(false);
-                await uow.SaveChangesAsync().ConfigureAwait(false);
-            }
+            using var uow = _db.GetDbContext();
+            await uow.DUsers.UpdateUserInventory(userId, power, -1).ConfigureAwait(false);
+            await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task MuteUser(ICommandContext ctx, IGuildUser user)

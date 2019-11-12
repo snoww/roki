@@ -26,8 +26,8 @@ namespace Roki.Core.Services.Database.Repositories
         IEnumerable<DUser> GetCurrencyLeaderboard(ulong botId, int page);
         Task UpdateXp(DUser dUser, SocketMessage message, bool boost = false);
         Task ChangeNotificationLocation(ulong userId, byte notify);
-        Task<Inventory> GetOrCreateUserInventory(ulong userId);
-        Task UpdateUserInventory(ulong userId, string key, int value);
+        Task<List<Item>> GetOrCreateUserInventory(ulong userId);
+        Task<bool> UpdateUserInventory(ulong userId, string name, int quantity);
         Task<List<Investment>> GetOrCreateUserPortfolio(ulong userId);
         Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, long amount);
         long GetUserInvestingAccount(ulong userId);
@@ -181,31 +181,70 @@ WHERE UserId={userId}
 ").ConfigureAwait(false);
         }
 
-        public async Task<Inventory> GetOrCreateUserInventory(ulong userId)
+        public async Task<List<Item>> GetOrCreateUserInventory(ulong userId)
         {
             var user = Set.First(u => u.UserId == userId);
-            if (user.Inventory != null) return JsonSerializer.Deserialize<Inventory>(user.Inventory);
-            var inv = new Inventory();
-            var json = JsonSerializer.Serialize(inv);
+            if (user.Inventory != null) return JsonSerializer.Deserialize<List<Item>>(user.Inventory);
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE IGNORE users
-SET Inventory={json}
+SET Inventory='[]'
 WHERE UserId={userId}")
                 .ConfigureAwait(false);
 
-            return inv;
+            return null;
         }
 
-        public async Task UpdateUserInventory(ulong userId, string key, int value)
+        public async Task<bool> UpdateUserInventory(ulong userId, string name, int quantity)
         {
             var inv = await GetOrCreateUserInventory(userId).ConfigureAwait(false);
-            inv.UpdateJsonProperty(key, value);
-            var json = JsonSerializer.Serialize(inv);
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
+            if (inv == null)
+            {
+                Item[] inventory =
+                {
+                    new Item
+                    {
+                        Name = name,
+                        Quantity = quantity
+                    }
+                };
+                var json = JsonSerializer.Serialize(inventory);
+                await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE IGNORE users
 SET Inventory={json}
 WHERE UserId={userId}")
-                .ConfigureAwait(false);
+                    .ConfigureAwait(false);
+            }
+            else if (!inv.Any(i => i.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
+            {
+                var item = new Item
+                {
+                    Name = name,
+                    Quantity = quantity
+                };
+                inv.Add(item);
+                var json = JsonSerializer.Serialize(inv);
+                await Context.Database.ExecuteSqlInterpolatedAsync($@"
+UPDATE IGNORE users
+SET Inventory={json}
+WHERE UserId={userId}")
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                var item = inv.First(i => i.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                if (item.Quantity + quantity < 0) return false;
+                item.Quantity += quantity;
+                if (item.Quantity == 0)
+                    inv.Remove(item);
+                var json = JsonSerializer.Serialize(inv);
+                await Context.Database.ExecuteSqlInterpolatedAsync($@"
+UPDATE IGNORE users
+SET Inventory={json}
+WHERE UserId={userId}")
+                    .ConfigureAwait(false);
+            }
+
+            return true;
         }
 
         public async Task<List<Investment>> GetOrCreateUserPortfolio(ulong userId)
