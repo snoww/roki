@@ -11,8 +11,8 @@ namespace Roki.Modules.Stocks
         [RokiCommand, Usage, Description, Aliases]
         public async Task StockStats(string symbol, [Leftover] string all = "false")
         {
-            var stats = await _service.GetStockStatsAsync(symbol).ConfigureAwait(false);
-            var logo = await _service.GetLogoAsync(symbol).ConfigureAwait(false);
+            var stats = await _service.GetStockStatsAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
+            var logo = await _service.GetLogoAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
             if (stats == null)
             {
                 await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
@@ -41,8 +41,8 @@ namespace Roki.Modules.Stocks
         [RokiCommand, Usage, Description, Aliases]
         public async Task Company(string symbol)
         {
-            var company = await _service.GetCompanyAsync(symbol).ConfigureAwait(false);
-            var logo = await _service.GetLogoAsync(symbol).ConfigureAwait(false);
+            var company = await _service.GetCompanyAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
+            var logo = await _service.GetLogoAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
             if (company == null)
             {
                 await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
@@ -64,7 +64,7 @@ namespace Roki.Modules.Stocks
         [RokiCommand, Usage, Description, Aliases]
         public async Task News(string symbol)
         {
-            var news = await _service.GetNewsAsync(symbol).ConfigureAwait(false);
+            var news = await _service.GetNewsAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
             if (news == null)
             {
                 await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
@@ -89,8 +89,8 @@ namespace Roki.Modules.Stocks
         [RokiCommand, Usage, Description, Aliases]
         public async Task StockQuote(string symbol)
         {
-            var quote = await _service.GetQuoteAsync(symbol).ConfigureAwait(false);
-            var logo = await _service.GetLogoAsync(symbol).ConfigureAwait(false);
+            var quote = await _service.GetQuoteAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
+            var logo = await _service.GetLogoAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
             if (quote == null)
             {
                 await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
@@ -118,7 +118,7 @@ namespace Roki.Modules.Stocks
         [RokiCommand, Usage, Description, Aliases]
         public async Task StockPrice(string symbol)
         {
-            var price = await _service.GetLatestPriceAsync(symbol).ConfigureAwait(false);
+            var price = await _service.GetLatestPriceAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
             if (price == null)
             {
                 await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
