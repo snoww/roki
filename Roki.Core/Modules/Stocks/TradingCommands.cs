@@ -29,7 +29,7 @@ namespace Roki.Modules.Stocks
                     return;
                 }
 
-                var price = await _service.GetLatestPriceAsync(symbol).ConfigureAwait(false);
+                var price = await _service.GetLatestPriceAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
                 if (price == null)
                 {
                     await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
@@ -71,7 +71,7 @@ namespace Roki.Modules.Stocks
                     return;
                 }
 
-                var price = await _service.GetLatestPriceAsync(symbol).ConfigureAwait(false);
+                var price = await _service.GetLatestPriceAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
                 if (price == null)
                 {
                     await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);

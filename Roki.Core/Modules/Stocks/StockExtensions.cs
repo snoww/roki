@@ -24,14 +24,15 @@ namespace Roki.Modules.Stocks
         };
         public static string ParseStockTicker(this string symbol)
         {
-            var rgx = new Regex(@"^\w{3}:*$");
+            symbol = symbol.Trim();
+            var rgx = new Regex(@"^\w{3}:\w+$");
             if (!rgx.IsMatch(symbol)) return symbol;
             var parsed = symbol.Split(":");
             var exchange = parsed[0];
             var ticker = parsed[1];
             if (ExchangeMap.ContainsKey(exchange.ToUpper()))
-                return ticker + ExchangeMap[exchange.ToUpper()];
-            return ticker;
+                return ticker.ToUpper() + ExchangeMap[exchange.ToUpper()];
+            return ticker.ToUpper();
         }
     }
 }
