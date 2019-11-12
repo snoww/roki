@@ -53,11 +53,11 @@ namespace Roki.Modules.Stocks
                 await _service.UpdateUserPortfolioAsync(ctx.User.Id, symbol, Position.Long, "buy", price.Value, amount).ConfigureAwait(false);
                 var embed = new EmbedBuilder().WithOkColor();
                 if (amount == 1)
-                    embed.WithDescription($"{ctx.User.Mention}\n You've successfully purchased 1 share of {symbol.ToUpper()} at {price.Value}\n" +
-                                          $"Total Cost: {cost} {_roki.Properties.CurrencyIcon}");
+                    embed.WithDescription($"{ctx.User.Mention}\nYou've successfully purchased `1` share of `{symbol.ToUpper()}` at `{price.Value}`\n" +
+                                          $"Total Cost: `{cost}` {_roki.Properties.CurrencyIcon}");
                 else
-                    embed.WithDescription($"{ctx.User.Mention}\n You've successfully purchased {amount} shares of {symbol.ToUpper()} at {price.Value}\n" +
-                                          $"Total Cost: {cost} {_roki.Properties.CurrencyIcon}");
+                    embed.WithDescription($"{ctx.User.Mention}\nYou've successfully purchased `{amount}` shares of `{symbol.ToUpper()}` at `{price.Value}`\n" +
+                                          $"Total Cost: `{cost}` {_roki.Properties.CurrencyIcon}");
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
