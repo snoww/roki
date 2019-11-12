@@ -118,7 +118,7 @@ namespace Roki.Modules.Stocks
         [RokiCommand, Usage, Description, Aliases]
         public async Task StockPrice(string symbol)
         {
-            var price = await _service.GetLatestPriceAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
+            var price = await _service.GetQuoteAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
             if (price == null)
             {
                 await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
@@ -126,7 +126,8 @@ namespace Roki.Modules.Stocks
             }
 
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                    .WithTitle($"Latest Price for {symbol.ToUpperInvariant()}\n`{price:N2}`"))
+                    .WithTitle($"Latest Price for {symbol.ToUpperInvariant()}\n`{price.LatestPrice:N2}`")
+                    .WithFooter($"Last Updated {price.LatestTime}"))
                 .ConfigureAwait(false);
         }
     }
