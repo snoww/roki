@@ -199,8 +199,13 @@ namespace Roki.Modules.Currency
             {
                 var inv = await _service.GetOrCreateInventoryAsync(ctx.User.Id).ConfigureAwait(false);
                 var embed = new EmbedBuilder().WithOkColor().WithTitle($"{ctx.User.Username}'s Inventory");
-                var desc = string.Join("\n", inv
-                    .Select(i => $"{i.Name.ToTitleCase()}: {i.Quantity}"));
+                string desc;
+                if (inv.Count == 0)
+                    desc = "Your inventory is empty";
+                else
+                    desc = string.Join("\n", inv
+                        .Select(i => $"{i.Name.ToTitleCase()}: {i.Quantity}"));
+
                 embed.WithDescription(desc);
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
