@@ -197,7 +197,7 @@ WHERE UserId={userId}")
         public async Task<bool> UpdateUserInventory(ulong userId, string name, int quantity)
         {
             var inv = await GetOrCreateUserInventory(userId).ConfigureAwait(false);
-            if (inv == null)
+            if (inv == null || inv.Count == 0)
             {
                 Item[] inventory =
                 {
@@ -261,7 +261,7 @@ WHERE UserId={userId}");
         public async Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, long amount)
         {
             var portfolio = await GetOrCreateUserPortfolio(userId).ConfigureAwait(false);
-            if (portfolio == null)
+            if (portfolio == null || portfolio.Count == 0)
             {
                 Investment[] investment = {new Investment
                 {
