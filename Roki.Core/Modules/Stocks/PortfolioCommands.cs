@@ -40,7 +40,7 @@ namespace Roki.Modules.Stocks
                     var desc = string.Join("\n", portfolio
                         .Skip(startAt)
                         .Take(itemsPP)
-                        .Select(i => $"`{i.Symbol.ToUpper()}`: `{i.Position.ToTitleCase()}` - `{i.Shares}` Shares"));
+                        .Select(i => $"`{i.Symbol.ToUpper()}`: `{i.Position}` - `{i.Shares}` shares"));
 
                     desc = $"Your current portfolio value:\n{value:N0} {_roki.Properties.CurrencyIcon}\n" + desc;
                     
