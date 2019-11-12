@@ -80,7 +80,7 @@ namespace Roki.Modules.Stocks
 
                 var cost = (long) Math.Ceiling(amount * price.Value);
                 await _service.UpdateInvAccountAsync(ctx.User.Id, cost).ConfigureAwait(false);
-                var success = await _service.UpdateUserPortfolioAsync(ctx.User.Id, symbol, Position.Long, "sell", price.Value, amount).ConfigureAwait(false);
+                var success = await _service.UpdateUserPortfolioAsync(ctx.User.Id, symbol, Position.Long, "sell", price.Value, -amount).ConfigureAwait(false);
                 if (!success)
                 {
                     await ctx.Channel.SendErrorAsync($"You do not have that many shares to sell.").ConfigureAwait(false);

@@ -59,7 +59,7 @@ namespace Roki.Modules.Stocks.Services
                 Position = pos,
                 Action = action,
                 Shares = amount,
-                PurchasePrice = price,
+                Price = price,
                 TransactionDate = DateTime.UtcNow
             });
             var success = await uow.DUsers.UpdateUserPortfolio(userId, symbol, pos, amount);
