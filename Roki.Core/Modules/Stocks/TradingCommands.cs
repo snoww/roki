@@ -36,6 +36,12 @@ namespace Roki.Modules.Stocks
                     return;
                 }
 
+                if (position == Position.Short)
+                {
+                    await ctx.Channel.SendErrorAsync("shorting is coming soon").ConfigureAwait(false);
+                    return;
+                }
+
                 var cost = (long) Math.Ceiling(amount * price.Value);
                 var removed = await _service.UpdateInvAccountAsync(ctx.User.Id, -cost).ConfigureAwait(false);
                 if (!removed)
