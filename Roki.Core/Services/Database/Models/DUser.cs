@@ -29,13 +29,10 @@ namespace Roki.Core.Services.Database.Models
             Username + "#" + Discriminator;
     }
 
-    public class Inventory
+    public class Item
     {
-        public int Mute { get; set; } = 0;
-        public int Block { get; set; } = 0;
-        public int Timeout { get; set; } = 0;
-        public int DeleteMessage { get; set; } = 0;
-        public int SlowMode { get; set; } = 0;
+        public string Name { get; set; }
+        public int Quantity { get; set; }
     }
 
     public class Investment

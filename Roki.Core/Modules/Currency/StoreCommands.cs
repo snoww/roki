@@ -132,17 +132,6 @@ namespace Roki.Modules.Currency
                     case Category.Power:
                         Enum.TryParse<Power>(listing.ItemDetails, out var power);
                         await _service.UpdateInventoryAsync(buyer.Id, listing.ItemDetails, 1).ConfigureAwait(false);
-//                        switch (power)
-//                        {
-//                            case Power.Mute:
-//                                break;
-//                            case Power.Timeout:
-//                                break;
-//                            case Power.DeleteMessage:
-//                                break;
-//                            case Power.SlowMode:
-//                                break;
-//                        }
                         break;
                     case Category.Boost:
                         if (await _service.GetOrUpdateSubAsync(buyer.Id, listing.Id, listing.SubscriptionDays ?? 7)) break;
@@ -209,8 +198,10 @@ namespace Roki.Modules.Currency
             public async Task Inventory()
             {
                 var inv = await _service.GetOrCreateInventoryAsync(ctx.User.Id).ConfigureAwait(false);
-                var embed = new EmbedBuilder().WithOkColor().WithTitle($"{ctx.User.Username}'s Inventory")
-                    .WithDescription($"Powers:\nMutes: {inv.Mute}\nBlocks: {inv.Block}\nTimeouts: {inv.Timeout}\nDelete Messages: {inv.DeleteMessage}\nSlow Modes: {inv.SlowMode}");
+                var embed = new EmbedBuilder().WithOkColor().WithTitle($"{ctx.User.Username}'s Inventory");
+                var desc = string.Join("\n", inv
+                    .Select(i => $"{i.Name.ToTitleCase()}: {i.Quantity}"));
+                embed.WithDescription(desc);
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
