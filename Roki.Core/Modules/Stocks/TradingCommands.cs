@@ -88,11 +88,11 @@ namespace Roki.Modules.Stocks
                 }
                 var embed = new EmbedBuilder().WithOkColor();
                 if (amount == 1)
-                    embed.WithDescription($"{ctx.User.Mention}\n You've successfully sold 1 share of {symbol.ToUpper()} at {price.Value}\n" +
-                                          $"Total sold for: {cost} {_roki.Properties.CurrencyIcon}");
+                    embed.WithDescription($"{ctx.User.Mention}\nYou've successfully sold `1` share of `{symbol.ToUpper()}` at `{price.Value}`\n" +
+                                          $"Total sold for: `{cost}` {_roki.Properties.CurrencyIcon}");
                 else
-                    embed.WithDescription($"{ctx.User.Mention}\n You've successfully sold {amount} shares of {symbol.ToUpper()} at {price.Value}\n" +
-                                          $"Total sold for: {cost} {_roki.Properties.CurrencyIcon}");
+                    embed.WithDescription($"{ctx.User.Mention}\nYou've successfully sold `{amount}` shares of `{symbol.ToUpper()}` at `{price.Value}`\n" +
+                                          $"Total sold for: `{cost}` {_roki.Properties.CurrencyIcon}");
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
