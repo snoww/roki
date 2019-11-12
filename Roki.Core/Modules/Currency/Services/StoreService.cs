@@ -88,10 +88,10 @@ namespace Roki.Modules.Currency.Services
             return uow.Listing.GetListingById(id);
         }
 
-        public async Task UpdateListingAsync(int id)
+        public async Task UpdateListingAsync(int id, int amount)
         {
             using var uow = _db.GetDbContext();
-            await uow.Listing.UpdateQuantityAsync(id).ConfigureAwait(false);
+            await uow.Listing.UpdateQuantityAsync(id, amount).ConfigureAwait(false);
             await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
