@@ -487,10 +487,10 @@
   },
   "buy": {
     "Command": "buy",
-    "Description": "Buy an item from the store using its name or id.",
+    "Description": "Buy an item from the store using its name or id, with an optional amount or all (default is 1).",
     "Usage": [
-      "{0}buy 123",
-      "{0}buy pizza"
+      "{0}buy 123 1",
+      "{0}buy pizza all"
     ]
   },
   "subscriptions": {
