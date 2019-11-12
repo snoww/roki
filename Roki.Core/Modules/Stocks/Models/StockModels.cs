@@ -68,6 +68,7 @@ namespace Roki.Modules.Stocks.Models
         public decimal? High { get; set; }
         public decimal? Low { get; set; }
         public decimal LatestPrice { get; set; }
+        public string LatestTime { get; set; }
         public double LatestUpdate { get; set; }
     }
 }
