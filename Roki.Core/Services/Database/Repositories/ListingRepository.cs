@@ -11,7 +11,7 @@ namespace Roki.Core.Services.Database.Repositories
         List<Listing> GetStoreCatalog();
         Listing GetListingByName(string name);
         Listing GetListingById(int id);
-        Task UpdateQuantityAsync(int id);
+        Task UpdateQuantityAsync(int id, int amount);
     }
 
     public class ListingRepository : Repository<Listing>, IListingRepository
@@ -35,11 +35,11 @@ namespace Roki.Core.Services.Database.Repositories
             return Set.FirstOrDefault(l => l.Id == id);
         }
 
-        public async Task UpdateQuantityAsync(int id)
+        public async Task UpdateQuantityAsync(int id, int amount)
         {
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE IGNORE store
-SET `quantity` = `quantity` - 1
+SET `quantity` = `quantity` - {amount}
 WHERE `id` = {id}
 ").ConfigureAwait(false);
         }

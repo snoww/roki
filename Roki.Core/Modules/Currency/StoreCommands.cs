@@ -19,12 +19,13 @@ namespace Roki.Modules.Currency
         {
             private readonly DiscordSocketClient _client;
             private readonly ICurrencyService _currency;
-            private const string Stone = "<:stone:269130892100763649>";
+            private readonly Roki _roki;
 
-            private StoreCommands(DiscordSocketClient client, ICurrencyService currency)
+            private StoreCommands(DiscordSocketClient client, ICurrencyService currency, Roki roki)
             {
                 _client = client;
                 _currency = currency;
+                _roki = roki;
             }
             
             [RokiCommand, Description, Usage, Aliases]
@@ -45,7 +46,7 @@ namespace Roki.Modules.Currency
                             .Select(c =>
                             {
                                 var type = c.Type == "Subscription" ? $"{c.SubscriptionDays} Day {c.Type}" : c.Type;
-                                var desc = $"{Format.Bold(c.ItemName)} | {type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remaining" : "**Sold Out**")} | {c.Cost.FormatNumber()} {Stone}";
+                                var desc = $"{Format.Bold(c.ItemName)} | {type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remaining" : "**Sold Out**")} | {c.Cost.FormatNumber()} {_roki.Properties.CurrencyIcon}";
                                 return $"`ID: {c.Id}` {desc}\n\t{c.Description.TrimTo(120)}";
                             }));
                         return new EmbedBuilder().WithOkColor()
@@ -66,7 +67,7 @@ namespace Roki.Modules.Currency
                 }
 
                 var embed = new EmbedBuilder().WithOkColor()
-                    .WithTitle($"ID {item.Id} | {item.ItemName} | {item.Cost.FormatNumber()} {Stone}")
+                    .WithTitle($"ID {item.Id} | {item.ItemName} | {item.Cost.FormatNumber()} {_roki.Properties.CurrencyIcon}")
                     .WithDescription(item.Description)
                     .AddField("Category", $"{item.Category}", true)
                     .AddField("Quantity", $"{(item.Quantity > 0 ? $"**{item.Quantity}** Remaining" : "**Sold Out**")}")
@@ -86,7 +87,7 @@ namespace Roki.Modules.Currency
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
             [Priority(0)]
-            public async Task Buy(string name)
+            public async Task Buy(string name, string quantity = "1")
             {
                 var listing = _service.GetListingByName(name);
                 if (listing == null)
@@ -101,9 +102,26 @@ namespace Roki.Modules.Currency
                     return;
                 }
 
+                int amount;
+                if (quantity.Equals("all", StringComparison.OrdinalIgnoreCase))
+                    amount = listing.Quantity;
+                else
+                {
+                    int.TryParse(quantity, out amount);
+                    if (amount <= 0)
+                    {
+                        await ctx.Channel.SendErrorAsync("You need to buy at least 1.").ConfigureAwait(false);
+                        return;
+                    }
+                }
+
+                if (listing.Quantity < amount)
+                    amount = listing.Quantity;
+
                 var buyer = ctx.User;
                 var seller = _client.GetUser(listing.SellerId) as IUser;
-                var removed = await _currency.TransferAsync(buyer, seller, $"Store Purchase - ID {listing.Id}", listing.Cost, 
+                var cost = listing.Cost * amount;
+                var removed = await _currency.TransferAsync(buyer, seller, $"Store Purchase - ID {listing.Id} x{amount}", cost, 
                     ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id).ConfigureAwait(false);
                 if (!removed)
                 {
@@ -111,7 +129,7 @@ namespace Roki.Modules.Currency
                     return;
                 }
 
-                await _service.UpdateListingAsync(listing.Id).ConfigureAwait(false);
+                await _service.UpdateListingAsync(listing.Id, amount).ConfigureAwait(false);
                 Enum.TryParse<Category>(listing.Category, out var category); 
                 Enum.TryParse<Type>(listing.Type, out var type); 
                 switch (category)
@@ -123,20 +141,20 @@ namespace Roki.Modules.Currency
                             break;
                         }
 
-                        if (await _service.GetOrUpdateSubAsync(buyer.Id, listing.Id, listing.SubscriptionDays ?? 7)) break;
+                        if (await _service.GetOrUpdateSubAsync(buyer.Id, listing.Id, listing.SubscriptionDays * amount ?? 7)) break;
                         await ((IGuildUser) buyer).AddRoleAsync(await _service.GetRoleAsync(ctx, listing.ItemDetails).ConfigureAwait(false));
                         await _service.AddNewSubscriptionAsync(buyer.Id, ctx.Guild.Id, listing.Id, listing.Category.ToUpperInvariant(),listing.ItemDetails, DateTime.UtcNow, 
-                                DateTime.UtcNow + new TimeSpan(listing.SubscriptionDays ?? 7, 0, 0, 0)
+                                DateTime.UtcNow + new TimeSpan(listing.SubscriptionDays * amount ?? 7, 0, 0, 0)
                             ).ConfigureAwait(false);
                         break;
                     case Category.Power:
-                        Enum.TryParse<Power>(listing.ItemDetails, out var power);
-                        await _service.UpdateInventoryAsync(buyer.Id, listing.ItemDetails, 1).ConfigureAwait(false);
+                        Enum.TryParse<Power>(listing.ItemDetails, out _);
+                        await _service.UpdateInventoryAsync(buyer.Id, listing.ItemDetails, amount).ConfigureAwait(false);
                         break;
                     case Category.Boost:
-                        if (await _service.GetOrUpdateSubAsync(buyer.Id, listing.Id, listing.SubscriptionDays ?? 7)) break;
+                        if (await _service.GetOrUpdateSubAsync(buyer.Id, listing.Id, listing.SubscriptionDays * amount ?? 7)) break;
                         await _service.AddNewSubscriptionAsync(buyer.Id, ctx.Guild.Id, listing.Id, listing.Category.ToUpperInvariant(), listing.ItemDetails, DateTime.UtcNow, 
-                            DateTime.UtcNow + new TimeSpan(listing.SubscriptionDays ?? 7, 0, 0, 0)
+                            DateTime.UtcNow + new TimeSpan(listing.SubscriptionDays * amount ?? 7, 0, 0, 0)
                         ).ConfigureAwait(false);
                         break;
                     case Category.Digital:
@@ -146,14 +164,14 @@ namespace Roki.Modules.Currency
                 }
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                        .WithDescription($"{buyer.Mention} Purchase Successful!"))
+                        .WithDescription($"{buyer.Mention} Purchase Successful!\nYou bought {amount}x {listing.ItemName}\n{cost} {_roki.Properties.CurrencyIcon} has been billed to your account"))
                     .ConfigureAwait(false);
             }
             
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
             [Priority(1)]
-            public async Task Buy(int id)
+            public async Task Buy(int id, string quantity = "1")
             {
                 var listing = _service.GetListingById(id);
                 if (listing == null)
