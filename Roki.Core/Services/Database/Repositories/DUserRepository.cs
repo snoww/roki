@@ -29,10 +29,10 @@ namespace Roki.Core.Services.Database.Repositories
         Task<List<Item>> GetOrCreateUserInventory(ulong userId);
         Task<bool> UpdateUserInventory(ulong userId, string name, int quantity);
         Task<List<Investment>> GetOrCreateUserPortfolio(ulong userId);
-        Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, long amount);
-        long GetUserInvestingAccount(ulong userId);
-        Task<bool> UpdateInvestingAccountAsync(ulong userId, long amount);
-        Task<bool> TransferToFromInvestingAccountAsync(ulong userId, long amount);
+        Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, decimal price, long shares);
+        decimal GetUserInvestingAccount(ulong userId);
+        Task<bool> UpdateInvestingAccountAsync(ulong userId, decimal amount);
+        Task<bool> TransferToFromInvestingAccountAsync(ulong userId, decimal amount);
         IEnumerable<DUser> GetAllPortfolios();
     }
 
@@ -258,7 +258,7 @@ WHERE UserId={userId}");
             return null;
         }
 
-        public async Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, long amount)
+        public async Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, decimal price, long shares)
         {
             var portfolio = await GetOrCreateUserPortfolio(userId).ConfigureAwait(false);
             if (portfolio == null || portfolio.Count == 0)
@@ -267,7 +267,8 @@ WHERE UserId={userId}");
                 {
                     Symbol = symbol,
                     Position = position,
-                    Shares = amount
+                    Shares = shares,
+                    Price = price
                 }};
                 var json = JsonSerializer.Serialize(investment);
                 await Context.Database.ExecuteSqlInterpolatedAsync($@"
@@ -282,7 +283,8 @@ WHERE UserId={userId}")
                 {
                     Symbol = symbol,
                     Position = position,
-                    Shares = amount
+                    Shares = shares,
+                    Price = price
                 };
                 portfolio.Add(investment);
                 var json = JsonSerializer.Serialize(portfolio);
@@ -295,27 +297,47 @@ WHERE UserId={userId}").
             else
             {
                 var investment = portfolio.First(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
-                if (investment.Shares + amount < 0) return false;
-                investment.Shares += amount;
-                if (investment.Shares == 0)
-                    portfolio.Remove(investment);
-                var json = JsonSerializer.Serialize(portfolio);
-                await Context.Database.ExecuteSqlInterpolatedAsync($@"
+                if (investment.Price == price)
+                {
+                    if (investment.Shares + shares < 0) return false;
+                    investment.Shares += shares;
+                    if (investment.Shares == 0)
+                        portfolio.Remove(investment);
+                    var json = JsonSerializer.Serialize(portfolio);
+                    await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE IGNORE users
 SET Portfolio={json}
 WHERE UserId={userId}").
-                    ConfigureAwait(false);
+                        ConfigureAwait(false);
+                }
+                else
+                {
+                    portfolio.Add(new Investment
+                    {
+                        Symbol = symbol,
+                        Position = position,
+                        Shares = shares,
+                        Price = price
+                    });
+                    var json = JsonSerializer.Serialize(portfolio);
+                    await Context.Database.ExecuteSqlInterpolatedAsync($@"
+UPDATE IGNORE users
+SET Portfolio={json}
+WHERE UserId={userId}")
+                        .ConfigureAwait(false);
+                }
+                
             }
 
             return true;
         }
 
-        public long GetUserInvestingAccount(ulong userId)
+        public decimal GetUserInvestingAccount(ulong userId)
         {
             return Set.First(u => u.UserId == userId).InvestingAccount;
         }
 
-        public async Task<bool> UpdateInvestingAccountAsync(ulong userId, long amount)
+        public async Task<bool> UpdateInvestingAccountAsync(ulong userId, decimal amount)
         {
             var currentAmount = Set.First(u => u.UserId == userId).InvestingAccount;
             if (currentAmount + amount < 0) return false;
@@ -327,24 +349,12 @@ WHERE UserId={userId}")
             return true;
         }
 
-        public async Task<bool> TransferToFromInvestingAccountAsync(ulong userId, long amount)
+        public async Task<bool> TransferToFromInvestingAccountAsync(ulong userId, decimal amount)
         {
             var user = Set.First(u => u.UserId == userId);
             var currencyAcc = user.Currency;
             var investAcc = user.InvestingAccount;
-            // todo create transaction
-            if (amount > 0 && currencyAcc - amount >= 0)
-            {
-                await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET Currency={currencyAcc - amount},
-    InvestingAccount={investAcc + amount}
-WHERE UserId={userId}")
-                    .ConfigureAwait(false);
-                return true;
-            }
-
-            if (amount <= 0 || investAcc + amount < 0) return false;
+            if ((amount <= 0 || currencyAcc - amount < 0) && (amount >= 0 || investAcc + amount > 0)) return false;
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE IGNORE users
 SET Currency={currencyAcc - amount},
