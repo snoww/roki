@@ -63,7 +63,7 @@ namespace Roki.Modules.Currency
             var i = 9 * page + 1;
             foreach (var user in list)
             {
-                embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"{user.Currency.FormatNumber()} {_roki.Properties.CurrencyIcon}");
+                embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"`{user.Currency.FormatNumber()}` {_roki.Properties.CurrencyIcon}");
             }
 
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
