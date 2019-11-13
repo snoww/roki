@@ -46,7 +46,7 @@ namespace Roki.Modules.Currency
                             .Select(c =>
                             {
                                 var type = c.Type == "Subscription" ? $"{c.SubscriptionDays} Day {c.Type}" : c.Type;
-                                var desc = $"{Format.Bold(c.ItemName)} | {type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remaining" : "**Sold Out**")} | {c.Cost.FormatNumber()} {_roki.Properties.CurrencyIcon}";
+                                var desc = $"{Format.Bold(c.ItemName)} | {type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remaining" : "**Sold Out**")} | `{c.Cost.FormatNumber()}` {_roki.Properties.CurrencyIcon}";
                                 return $"`ID: {c.Id}` {desc}\n\t{c.Description.TrimTo(120)}";
                             }));
                         return new EmbedBuilder().WithOkColor()
@@ -67,7 +67,7 @@ namespace Roki.Modules.Currency
                 }
 
                 var embed = new EmbedBuilder().WithOkColor()
-                    .WithTitle($"ID {item.Id} | {item.ItemName} | {item.Cost.FormatNumber()} {_roki.Properties.CurrencyIcon}")
+                    .WithTitle($"ID {item.Id} | {item.ItemName} | `{item.Cost.FormatNumber()}` {_roki.Properties.CurrencyIcon}")
                     .WithDescription(item.Description)
                     .AddField("Category", $"{item.Category}", true)
                     .AddField("Quantity", $"{(item.Quantity > 0 ? $"**{item.Quantity}** Remaining" : "**Sold Out**")}")
@@ -110,7 +110,7 @@ namespace Roki.Modules.Currency
                     int.TryParse(quantity, out amount);
                     if (amount <= 0)
                     {
-                        await ctx.Channel.SendErrorAsync("You need to buy at least 1.").ConfigureAwait(false);
+                        await ctx.Channel.SendErrorAsync("You need to buy at least `1`.").ConfigureAwait(false);
                         return;
                     }
                 }
@@ -125,7 +125,7 @@ namespace Roki.Modules.Currency
                     ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id).ConfigureAwait(false);
                 if (!removed)
                 {
-                    await ctx.Channel.SendErrorAsync("You do not have enough to purchase this item.").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync($"You do not have enough {_roki.Properties.CurrencyIcon} to purchase this item.").ConfigureAwait(false);
                     return;
                 }
 
@@ -164,7 +164,7 @@ namespace Roki.Modules.Currency
                 }
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                        .WithDescription($"{buyer.Mention} Purchase Successful!\nYou bought {amount}x {listing.ItemName}\n{cost} {_roki.Properties.CurrencyIcon} has been billed to your account"))
+                        .WithDescription($"{buyer.Mention} Purchase Successful!\nYou bought `{amount}x` {listing.ItemName}\n`{cost}` {_roki.Properties.CurrencyIcon} has been billed to your account"))
                     .ConfigureAwait(false);
             }
             
