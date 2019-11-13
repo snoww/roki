@@ -62,7 +62,7 @@ namespace Roki.Modules.Stocks.Services
                 Price = price,
                 TransactionDate = DateTime.UtcNow
             });
-            var success = await uow.DUsers.UpdateUserPortfolio(userId, symbol, pos, amount);
+            var success = await uow.DUsers.UpdateUserPortfolio(userId, symbol, pos, price, amount);
             await uow.SaveChangesAsync().ConfigureAwait(false);
             return success;
         }

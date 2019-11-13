@@ -32,7 +32,7 @@ namespace Roki.Modules.Currency
             return uow.DUsers.GetUserCurrency(userId);
         }
 
-        private long GetInvAccount(ulong userId)
+        private decimal GetInvAccount(ulong userId)
         {
             using var uow = _db.GetDbContext();
             return uow.DUsers.GetUserInvestingAccount(userId);
@@ -44,8 +44,8 @@ namespace Roki.Modules.Currency
         {
             user ??= ctx.User;
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{user.Mention}'s Accounts\nCash Account: {GetCurrency(user.Id):N0} {_roki.Properties.CurrencyIcon}\n" +
-                                 $"Investing Account: {GetInvAccount(user.Id):N0} {_roki.Properties.CurrencyIcon}")).ConfigureAwait(false);
+                .WithDescription($"{user.Mention}'s Accounts\nCash Account: `{GetCurrency(user.Id):N0}` {_roki.Properties.CurrencyIcon}\n" +
+                                 $"Investing Account: `{GetInvAccount(user.Id):N}` {_roki.Properties.CurrencyIcon}")).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -75,7 +75,7 @@ namespace Roki.Modules.Currency
         {
             if (amount == 0)
             {
-                await ctx.Channel.SendErrorAsync($"You must transfer at least 1 {_roki.Properties.CurrencyIcon}").ConfigureAwait(false);
+                await ctx.Channel.SendErrorAsync($"You must transfer at least `1` {_roki.Properties.CurrencyIcon}").ConfigureAwait(false);
                 return;
             }
 
@@ -114,7 +114,7 @@ namespace Roki.Modules.Currency
                 return;
             }
 
-            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"You've successfully transferred {amount:N0} {_roki.Properties.CurrencyIcon} from `{fromAcc}` to `{toAcc}`")).ConfigureAwait(false);
+            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"You've successfully transferred `{amount:N0}` {_roki.Properties.CurrencyIcon} from `{fromAcc}` to `{toAcc}`")).ConfigureAwait(false);
             await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
@@ -138,7 +138,7 @@ namespace Roki.Modules.Currency
             }
 
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{ctx.User.Username} gifted {amount.FormatNumber()} {_roki.Properties.CurrencyNamePlural} to {user.Mention}")).ConfigureAwait(false);
+                .WithDescription($"{ctx.User.Username} gifted `{amount.FormatNumber()}` {_roki.Properties.CurrencyNamePlural} to {user.Mention}")).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -177,7 +177,7 @@ namespace Roki.Modules.Currency
                     amount = amount.Insert(0, "-");
                 }
                 var date = Format.Code($"{tran.TransactionDate.ToLocalTime():HH:mm yyyy-MM-dd}");
-                desc += $"{type} {tran.Reason?.Trim()} {date}\n\t\t{Format.Bold(amount)} {_roki.Properties.CurrencyIcon}\n";
+                desc += $"{type} {tran.Reason?.Trim()} {date}\n\t\t{Format.Code(amount)} {_roki.Properties.CurrencyIcon}\n";
             }
 
             embed.WithDescription(desc)

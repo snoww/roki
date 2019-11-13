@@ -16,7 +16,7 @@ namespace Roki.Core.Services.Database.Models
         public byte NotificationLocation { get; set; } = 1;
         public long Currency { get; set; } = 0;
         public string Inventory { get; set; } = null;
-        public long InvestingAccount { get; set; } = 50000;
+        public decimal InvestingAccount { get; set; } = 50000;
         public string Portfolio { get; set; } = null;
         
         public override bool Equals(object obj) => 
@@ -40,5 +40,6 @@ namespace Roki.Core.Services.Database.Models
         public string Symbol { get; set; }
         public string Position { get; set; }
         public long Shares { get; set; } = 0;
+        public decimal Price { get; set; }
     }
 }
