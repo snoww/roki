@@ -31,7 +31,7 @@ namespace Roki.Modules.Stocks.Services
             return price;
         }
 
-        public async Task<bool> UpdateInvAccountAsync(ulong userId, long amount)
+        public async Task<bool> UpdateInvAccountAsync(ulong userId, decimal amount)
         {
             using var uow = _db.GetDbContext();
             var success = await uow.DUsers.UpdateInvestingAccountAsync(userId, amount).ConfigureAwait(false);

@@ -36,14 +36,33 @@ namespace Roki.Modules.Stocks
                     return;
                 }
 
+                bool removed;
+                var embed = new EmbedBuilder().WithOkColor();
                 if (position == Position.Short)
                 {
-                    await ctx.Channel.SendErrorAsync("shorting is coming soon").ConfigureAwait(false);
+                    var fee = amount * price.Value * 0.05m;
+                    removed = await _service.UpdateInvAccountAsync(ctx.User.Id, -fee).ConfigureAwait(false);
+                    if (!removed)
+                    {
+                        await ctx.Channel.SendErrorAsync("You do not have enough in your Investing Account to invest").ConfigureAwait(false);
+                        return;
+                    }
+
+                    await _service.UpdateUserPortfolioAsync(ctx.User.Id, symbol, Position.Short, "buy", price.Value, amount).ConfigureAwait(false);
+                    if (amount == 1)
+                        embed.WithDescription($"{ctx.User.Mention}\nYou have a loan of `1` share of `{symbol.ToUpper()}` at `{price.Value}`\n" +
+                                              $"Value: `{price.Value}` {_roki.Properties.CurrencyIcon}");
+                    else
+                        embed.WithDescription($"{ctx.User.Mention}\nYou have a loan of `{amount}` share of `{symbol.ToUpper()}` at `{price.Value}`\n" +
+                                              $"Value: `{amount * price.Value}` {_roki.Properties.CurrencyIcon}");
+                    embed.WithFooter(Format.Italics("Expires in 7 days unless renewed."));
+
+                    await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                     return;
                 }
 
-                var cost = (long) Math.Ceiling(amount * price.Value);
-                var removed = await _service.UpdateInvAccountAsync(ctx.User.Id, -cost).ConfigureAwait(false);
+                var cost = amount * price.Value;
+                removed = await _service.UpdateInvAccountAsync(ctx.User.Id, -cost).ConfigureAwait(false);
                 if (!removed)
                 {
                     await ctx.Channel.SendErrorAsync("You do not have enough in your Investing Account to invest").ConfigureAwait(false);
@@ -51,7 +70,6 @@ namespace Roki.Modules.Stocks
                 }
 
                 await _service.UpdateUserPortfolioAsync(ctx.User.Id, symbol, Position.Long, "buy", price.Value, amount).ConfigureAwait(false);
-                var embed = new EmbedBuilder().WithOkColor();
                 if (amount == 1)
                     embed.WithDescription($"{ctx.User.Mention}\nYou've successfully purchased `1` share of `{symbol.ToUpper()}` at `{price.Value}`\n" +
                                           $"Total Cost: `{cost}` {_roki.Properties.CurrencyIcon}");

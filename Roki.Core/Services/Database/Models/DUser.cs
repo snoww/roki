@@ -39,7 +39,8 @@ namespace Roki.Core.Services.Database.Models
     {
         public string Symbol { get; set; }
         public string Position { get; set; }
-        public long Shares { get; set; } = 0;
+        public long Shares { get; set; }
         public decimal Price { get; set; }
+        public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
     }
 }
