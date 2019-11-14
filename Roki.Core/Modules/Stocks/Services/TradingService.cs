@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -125,11 +124,11 @@ namespace Roki.Modules.Stocks.Services
         
         private async Task<bool> CanShortStock(List<Investment> portfolio)
         {
-            var value = 0L;
-            foreach (var investment in portfolio.Where(investment => !investment.Position.Equals("long", StringComparison.OrdinalIgnoreCase)))
+            var value = 0m;
+            foreach (var investment in portfolio.Where(investment => investment.Position.Equals("short", StringComparison.OrdinalIgnoreCase)))
             {
                 var price = await GetLatestPriceAsync(investment.Symbol).ConfigureAwait(false);
-                value += (long) Math.Ceiling(price.Value * investment.Shares);
+                value += price.Value * investment.Shares;
             }
             return value <= 100000;
         }
