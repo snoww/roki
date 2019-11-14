@@ -27,13 +27,13 @@ namespace Roki.Modules.Stocks.Services
             return await uow.DUsers.GetOrCreateUserPortfolio(userId).ConfigureAwait(false);
         }
 
-        public async Task<long> GetPortfolioValue(List<Investment> portfolio)
+        public async Task<decimal> GetPortfolioValue(List<Investment> portfolio)
         {
-            var value = 0L;
+            var value = 0m;
             foreach (var investment in portfolio)
             {
                 var price = await GetStockPrice(investment.Symbol).ConfigureAwait(false);
-                value += (long) Math.Ceiling(price * investment.Shares);
+                value += price * investment.Shares;
             }
 
             return value;

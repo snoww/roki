@@ -30,7 +30,7 @@ namespace Roki.Core.Services.Database.Repositories
         Task<List<Item>> GetOrCreateUserInventory(ulong userId);
         Task<bool> UpdateUserInventory(ulong userId, string name, int quantity);
         Task<List<Investment>> GetOrCreateUserPortfolio(ulong userId);
-        Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, long shares);
+        Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, string action, long shares);
         decimal GetUserInvestingAccount(ulong userId);
         Task<bool> UpdateInvestingAccountAsync(ulong userId, decimal amount);
         Task<bool> TransferToFromInvestingAccountAsync(ulong userId, decimal amount);
@@ -260,7 +260,7 @@ WHERE UserId={userId}");
             return null;
         }
 
-        public async Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, long shares)
+        public async Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, string action, long shares)
         {
             var portfolio = await GetOrCreateUserPortfolio(userId).ConfigureAwait(false);
             DateTime? interestDate = null;
@@ -306,10 +306,14 @@ WHERE UserId={userId}").
             else
             {
                 var investment = portfolio.First(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
-                if (investment.Position == "short")
+                if (investment.Position == "short" && action == "buy")
                     shares = -shares;
-                if (investment.Position == "long")
+                else if (investment.Position == "short" && action == "sell")
                     shares = Math.Abs(shares);
+                else if (investment.Position == "long" && action == "buy")
+                    shares = Math.Abs(shares);
+                else
+                    shares = -shares;
                 if (investment.Shares + shares < 0) return false;
                 investment.Shares += shares;
                 if (investment.Shares == 0)
