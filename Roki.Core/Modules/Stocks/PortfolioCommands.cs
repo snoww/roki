@@ -27,7 +27,7 @@ namespace Roki.Modules.Stocks
                 var portfolio = await _service.GetUserPortfolio(user.Id).ConfigureAwait(false);
                 if (portfolio == null || portfolio.Count < 1)
                 {
-                    await ctx.Channel.SendErrorAsync("You do not currently have a portfolio. Invest in some companies to create your portfolio.").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync($"{user.Mention} You do not currently have a portfolio. Invest in some companies to create your portfolio.").ConfigureAwait(false);
                     return;
                 }
 
