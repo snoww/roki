@@ -265,11 +265,11 @@ WHERE UserId={userId}");
             var portfolio = await GetOrCreateUserPortfolio(userId).ConfigureAwait(false);
             if (portfolio == null || portfolio.Count == 0)
             {
-                DateTime? interestDate = DateTime.UtcNow.AddDays(7);
+                DateTime? interestDate = null;
                 if (position == "short")
                 {
                     shares = -shares;
-                    interestDate = null;
+                    interestDate = DateTime.UtcNow.AddDays(7);;
                 }
                 Investment[] investment = {new Investment
                 {
@@ -287,11 +287,11 @@ WHERE UserId={userId}")
             }
             else if (!portfolio.Any(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)))
             {
-                DateTime? interestDate = DateTime.UtcNow.AddDays(7);
+                DateTime? interestDate = null;
                 if (position == "short")
                 {
                     shares = -shares;
-                    interestDate = null;
+                    interestDate = DateTime.UtcNow.AddDays(7);;
                 }
                 var investment = new Investment
                 {
