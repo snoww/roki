@@ -103,7 +103,7 @@ namespace Roki.Modules.Stocks.Services
             var portfolio = await uow.DUsers.GetOrCreateUserPortfolio(userId).ConfigureAwait(false);
             if (!portfolio.Any(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)) && price * amount >= 100000)
                 return false;
-            if (await CanShortStock(portfolio).ConfigureAwait(false))
+            if (!await CanShortStock(portfolio).ConfigureAwait(false))
                 return false;
             
             var pos = position == Stocks.TradingCommands.Position.Long ? "long" : "short";
