@@ -263,14 +263,15 @@ WHERE UserId={userId}");
         public async Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, long shares)
         {
             var portfolio = await GetOrCreateUserPortfolio(userId).ConfigureAwait(false);
+            DateTime? interestDate = null;
+            if (position == "short")
+            {
+                shares = -shares;
+                interestDate = DateTime.UtcNow.AddDays(7);;
+            }
+            
             if (portfolio == null || portfolio.Count == 0)
             {
-                DateTime? interestDate = null;
-                if (position == "short")
-                {
-                    shares = -shares;
-                    interestDate = DateTime.UtcNow.AddDays(7);;
-                }
                 Investment[] investment = {new Investment
                 {
                     Symbol = symbol,
@@ -287,12 +288,6 @@ WHERE UserId={userId}")
             }
             else if (!portfolio.Any(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)))
             {
-                DateTime? interestDate = null;
-                if (position == "short")
-                {
-                    shares = -shares;
-                    interestDate = DateTime.UtcNow.AddDays(7);;
-                }
                 var investment = new Investment
                 {
                     Symbol = symbol,
