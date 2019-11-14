@@ -45,7 +45,7 @@ namespace Roki.Modules.Currency
             user ??= ctx.User;
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                 .WithDescription($"{user.Mention}'s Accounts\nCash Account: `{GetCurrency(user.Id):N0}` {_roki.Properties.CurrencyIcon}\n" +
-                                 $"Investing Account: `{GetInvAccount(user.Id):N}` {_roki.Properties.CurrencyIcon}")).ConfigureAwait(false);
+                                 $"Investing Account: `{GetInvAccount(user.Id):N2}` {_roki.Properties.CurrencyIcon}")).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
