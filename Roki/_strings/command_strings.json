@@ -567,16 +567,15 @@
   },
   "stockbuy": {
     "Command": "stockbuy sb",
-    "Description": "Buy or Short shares of a company at the current price, with a specified position (long or short), defaults to long.",
+    "Description": "Buy shares of a company at the current price.",
     "Usage": [
       "{0}stockbuy AAPL 50",
-      "{0}stockbuy AAPL 23 short",
       "{0}sb AAPL 15"
     ]
   },
   "stocksell": {
     "Command": "stocksell ss",
-    "Description": "Sell a specified amount of shares from your portfolio.",
+    "Description": "Sell a specified amount of shares. If you do not have the shares in your portfolio, you will lend them from the bank.",
     "Usage": [
       "{0}stocksell AAPL 50",
       "{0}ss AAPL 20"
