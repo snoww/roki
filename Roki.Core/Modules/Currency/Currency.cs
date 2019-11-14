@@ -89,11 +89,17 @@ namespace Roki.Modules.Currency
                 fromAcc = "Investing Account";
                 toAcc = "Cash Account";
             }
-            else if ((int) account == 2)
+            else if ((int) account == 1)
             {
                 success = await uow.DUsers.TransferToFromInvestingAccountAsync(ctx.User.Id, amount).ConfigureAwait(false);
                 toAcc = "Investing Account";
                 fromAcc = "Cash Account";
+            }
+            
+            if (!success)
+            {
+                await ctx.Channel.SendErrorAsync($"You do not have enough {_roki.Properties.CurrencyIcon} to transfer.").ConfigureAwait(false);
+                return;
             }
             
             uow.Transaction.Add(new CurrencyTransaction
@@ -107,12 +113,6 @@ namespace Roki.Modules.Currency
                 Reason = $"Transfer from {fromAcc} to {toAcc}",
                 TransactionDate = DateTime.UtcNow
             });
-
-            if (!success)
-            {
-                await ctx.Channel.SendErrorAsync($"You do not have enough {_roki.Properties.CurrencyIcon} to transfer.").ConfigureAwait(false);
-                return;
-            }
 
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"You've successfully transferred `{amount:N0}` {_roki.Properties.CurrencyIcon} from `{fromAcc}` to `{toAcc}`")).ConfigureAwait(false);
             await uow.SaveChangesAsync().ConfigureAwait(false);
