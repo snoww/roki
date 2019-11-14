@@ -72,7 +72,7 @@ namespace Roki.Modules.Stocks
                     return;
                 }
 
-                var cost = (long) Math.Ceiling(amount * price.Value);
+                var cost = amount * price.Value;
                 var success = await _service.UpdateUserPortfolioAsync(ctx.User.Id, symbol, Position.Short, "sell", price.Value, -amount).ConfigureAwait(false);
                 await _service.UpdateInvAccountAsync(ctx.User.Id, cost).ConfigureAwait(false);
                 if (!success)
