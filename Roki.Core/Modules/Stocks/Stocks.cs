@@ -126,7 +126,7 @@ namespace Roki.Modules.Stocks
             }
 
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                    .WithTitle($"Latest Price for {symbol.ToUpperInvariant()}\n`{price.LatestPrice:N}`")
+                    .WithTitle($"Latest Price for {symbol.ToUpperInvariant()}\n`{price.LatestPrice:N2}`")
                     .WithFooter($"Last Updated: {price.LatestTime}"))
                 .ConfigureAwait(false);
         }

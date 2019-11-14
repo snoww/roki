@@ -48,10 +48,10 @@ namespace Roki.Modules.Stocks
                 var embed = new EmbedBuilder().WithOkColor();
                 if (amount == 1)
                     embed.WithDescription($"{ctx.User.Mention}\nYou've successfully purchased `1` share of `{symbol.ToUpper()}` at `{price.Value}`\n" +
-                                          $"Total Cost: `{cost}` {_roki.Properties.CurrencyIcon}");
+                                          $"Total Cost: `{cost:N2}` {_roki.Properties.CurrencyIcon}");
                 else
                     embed.WithDescription($"{ctx.User.Mention}\nYou've successfully purchased `{amount}` shares of `{symbol.ToUpper()}` at `{price.Value}`\n" +
-                                          $"Total Cost: `{cost}` {_roki.Properties.CurrencyIcon}");
+                                          $"Total Cost: `{cost:N2}` {_roki.Properties.CurrencyIcon}");
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
@@ -83,10 +83,10 @@ namespace Roki.Modules.Stocks
                 var embed = new EmbedBuilder().WithOkColor();
                 if (amount == 1)
                     embed.WithDescription($"{ctx.User.Mention}\nYou've successfully sold `1` share of `{symbol.ToUpper()}` at `{price.Value}`\n" +
-                                          $"Total sold for: `{cost}` {_roki.Properties.CurrencyIcon}");
+                                          $"Total sold for: `{cost:N2}` {_roki.Properties.CurrencyIcon}");
                 else
                     embed.WithDescription($"{ctx.User.Mention}\nYou've successfully sold `{amount}` shares of `{symbol.ToUpper()}` at `{price.Value}`\n" +
-                                          $"Total sold for: `{cost}` {_roki.Properties.CurrencyIcon}");
+                                          $"Total sold for: `{cost:N2}` {_roki.Properties.CurrencyIcon}");
                 embed.WithFooter("Short selling stocks charges a premium weekly");
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
