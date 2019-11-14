@@ -306,6 +306,10 @@ WHERE UserId={userId}").
             else
             {
                 var investment = portfolio.First(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
+                if (investment.Position == "short")
+                    shares = -shares;
+                if (investment.Position == "long")
+                    shares = Math.Abs(shares);
                 if (investment.Shares + shares < 0) return false;
                 investment.Shares += shares;
                 if (investment.Shares == 0)
