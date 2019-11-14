@@ -46,7 +46,7 @@ namespace Roki.Modules.Stocks.Services
                 var interestList = portfolio.Where(investment => !investment.Position.Equals("long", StringComparison.OrdinalIgnoreCase))
                     .Where(investment => investment.InterestDate != null && !(DateTime.UtcNow.AddDays(1) < investment.InterestDate.Value))
                     .ToList();
-                if (interestList.Count < 0) continue;
+                if (interestList.Count <= 0) continue;
                 var user = _client.GetUser(userId);
                 var dm = await user.GetOrCreateDMChannelAsync().ConfigureAwait(false);
                 decimal total = 0;
