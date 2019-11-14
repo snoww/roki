@@ -351,14 +351,18 @@ WHERE UserId={userId}")
             var user = Set.First(u => u.UserId == userId);
             var currencyAcc = user.Currency;
             var investAcc = user.InvestingAccount;
-            if ((amount <= 0 || currencyAcc - amount < 0) && (amount >= 0 || investAcc + amount > 0)) return false;
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
+            if (amount > 0 && currencyAcc - amount >= 0 || amount < 0 && investAcc + amount <= 0)
+            {
+                await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE IGNORE users
 SET Currency={currencyAcc - amount},
     InvestingAccount={investAcc + amount}
 WHERE UserId={userId}")
-                .ConfigureAwait(false);
-            return true;
+                    .ConfigureAwait(false);
+                return true;
+            }
+
+            return false;
         }
 
         public async Task<Dictionary<ulong, List<Investment>>> GetAllPortfolios()
