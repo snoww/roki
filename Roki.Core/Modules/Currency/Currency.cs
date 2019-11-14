@@ -98,7 +98,7 @@ namespace Roki.Modules.Currency
             
             if (!success)
             {
-                await ctx.Channel.SendErrorAsync($"You do not have enough {_roki.Properties.CurrencyIcon} to transfer.").ConfigureAwait(false);
+                await ctx.Channel.SendErrorAsync($"You do not have enough {_roki.Properties.CurrencyIcon} in your `{fromAcc}` to transfer.").ConfigureAwait(false);
                 return;
             }
             
@@ -114,7 +114,8 @@ namespace Roki.Modules.Currency
                 TransactionDate = DateTime.UtcNow
             });
 
-            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"You've successfully transferred `{amount:N0}` {_roki.Properties.CurrencyIcon} from `{fromAcc}` to `{toAcc}`")).ConfigureAwait(false);
+            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                .WithDescription($"{ctx.User.Mention} You've successfully transferred `{amount:N0}` {_roki.Properties.CurrencyIcon}\nFrom `{fromAcc}` ➡️ `{toAcc}`")).ConfigureAwait(false);
             await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
