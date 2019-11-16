@@ -1,5 +1,8 @@
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Stocks.Services;
@@ -129,6 +132,28 @@ namespace Roki.Modules.Stocks
                     .WithTitle($"Latest Price for {symbol.ToUpperInvariant()}\n`{price.LatestPrice:N2}`")
                     .WithFooter($"Last Updated: {price.LatestTime}"))
                 .ConfigureAwait(false);
+        }
+
+        [RokiCommand, Usage, Description, Aliases]
+        public async Task StockChart(string symbol, string period = "1m")
+        {
+            await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+            string[] options = {"max", "5y", "2y", "1y", "ytd", "6m", "3m", "1m", "5dm", "5d", "today"};
+            var logo = await _service.GetLogoAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(logo) || !options.Contains(period.Trim(), StringComparer.OrdinalIgnoreCase))
+            {
+                await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false); 
+                return;
+            }
+
+            if (period.Equals("5d", StringComparison.OrdinalIgnoreCase))
+                period = "5dm";
+            
+            _service.GenerateChartAsync(symbol, period);
+            var embed = new EmbedBuilder().WithOkColor()
+                .WithTitle($"{symbol.ToUpper()} - {period.ToUpper()}")
+                .WithImageUrl("attachment://image.png");
+            await ctx.Channel.SendFileAsync("./temp/image.png", embed: embed.Build()).ConfigureAwait(false);
         }
     }
 }
