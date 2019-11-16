@@ -98,7 +98,7 @@ namespace Roki.Modules.Stocks.Services
 
         public void GenerateChartAsync(string symbol, string options)
         {
-            using var proc = new Process {StartInfo = {FileName = "image.py", UseShellExecute = false, Arguments = $"{symbol} {options}"}};
+            using var proc = new Process {StartInfo = {FileName = "./scripts/image.py", UseShellExecute = false, Arguments = $"{symbol} {options}"}};
             proc.Start();
             proc.WaitForExit();
         }
