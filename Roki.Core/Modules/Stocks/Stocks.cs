@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -138,9 +139,23 @@ namespace Roki.Modules.Stocks
         public async Task StockChart(string symbol, string period = "1m")
         {
             await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
-            string[] options = {"max", "5y", "2y", "1y", "ytd", "6m", "3m", "1m", "5dm", "5d", "today"};
+            var options = new Dictionary<string, string>
+            {
+                {"max", "Max"},
+                {"5y", "5 Years"},
+                {"2y", "2 Years"},
+                {"1y", "1 Year"},
+                {"ytd", "Year to Date"},
+                {"6m", "6 Months"},
+                {"3m", "3 Months"},
+                {"1m", "1 Month"},
+                {"5dm", "5 Days"},
+                {"5d", "5 Days"},
+                {"today", "Today"},
+            };
             var logo = await _service.GetLogoAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
-            if (string.IsNullOrWhiteSpace(logo) || !options.Contains(period.Trim(), StringComparer.OrdinalIgnoreCase))
+            period = period.Trim().ToLower();
+            if (string.IsNullOrWhiteSpace(logo) || !options.ContainsKey(period))
             {
                 await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false); 
                 return;
@@ -151,7 +166,7 @@ namespace Roki.Modules.Stocks
             
             _service.GenerateChartAsync(symbol, period);
             var embed = new EmbedBuilder().WithOkColor()
-                .WithTitle($"{symbol.ToUpper()} - {period.ToUpper()}")
+                .WithTitle($"{symbol.ToUpper()} - {options[period]}")
                 .WithImageUrl("attachment://image.png");
             await ctx.Channel.SendFileAsync("./temp/image.png", embed: embed.Build()).ConfigureAwait(false);
         }
