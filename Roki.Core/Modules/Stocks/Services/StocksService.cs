@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -93,6 +94,13 @@ namespace Roki.Modules.Stocks.Services
             var success = decimal.TryParse(result, out var price);
             if (!success) return null;
             return price;
+        }
+
+        public void GenerateChartAsync(string symbol, string options)
+        {
+            using var proc = new Process {StartInfo = {FileName = "image.py", UseShellExecute = false, Arguments = $"{symbol} {options}"}};
+            proc.Start();
+            proc.WaitForExit();
         }
     }
 }
