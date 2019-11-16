@@ -142,20 +142,20 @@ namespace Roki.Modules.Stocks
             var options = new Dictionary<string, string>
             {
                 {"max", "Max"},
-                {"5y", "5 Years"},
-                {"2y", "2 Years"},
+                {"5y", "5 Year"},
+                {"2y", "2 Year"},
                 {"1y", "1 Year"},
                 {"ytd", "Year to Date"},
-                {"6m", "6 Months"},
-                {"3m", "3 Months"},
+                {"6m", "6 Month"},
+                {"3m", "3 Month"},
                 {"1m", "1 Month"},
-                {"5dm", "5 Days"},
-                {"5d", "5 Days"},
-                {"today", "Today"},
+                {"5dm", "5 Day"},
+                {"5d", "5 Day"},
+                {"today", "Today's"},
             };
-            var logo = await _service.GetLogoAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
+            var quote = await _service.GetQuoteAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
             period = period.Trim().ToLower();
-            if (string.IsNullOrWhiteSpace(logo) || !options.ContainsKey(period))
+            if (quote == null || !options.ContainsKey(period))
             {
                 await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false); 
                 return;
@@ -166,7 +166,9 @@ namespace Roki.Modules.Stocks
             
             _service.GenerateChartAsync(symbol, period);
             var embed = new EmbedBuilder().WithOkColor()
-                .WithTitle($"{symbol.ToUpper()} - {options[period]}")
+                .WithTitle($"{quote.CompanyName}")
+                .WithAuthor(symbol)
+                .WithDescription($"{options[period]} Price")
                 .WithImageUrl("attachment://image.png");
             await ctx.Channel.SendFileAsync("./temp/image.png", embed: embed.Build()).ConfigureAwait(false);
         }
