@@ -167,7 +167,7 @@ namespace Roki.Modules.Stocks
             _service.GenerateChartAsync(symbol, period);
             var embed = new EmbedBuilder().WithOkColor()
                 .WithTitle($"{quote.CompanyName}")
-                .WithAuthor(symbol)
+                .WithAuthor(quote.Symbol.ToUpper())
                 .WithDescription($"{options[period]} Price")
                 .WithImageUrl("attachment://image.png");
             await ctx.Channel.SendFileAsync("./temp/image.png", embed: embed.Build()).ConfigureAwait(false);
