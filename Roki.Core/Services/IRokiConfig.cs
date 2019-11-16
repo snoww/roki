@@ -14,6 +14,7 @@ namespace Roki.Core.Services
         string TwitterConsumerSecret { get; }
         string TwitterAccessToken { get; }
         string TwitterAccessSecret { get; }
+        string IexToken { get; }
 
         ImmutableArray<ulong> OwnerIds { get; }
 

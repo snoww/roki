@@ -22,6 +22,7 @@ namespace Roki.Core.Services.Impl
         public string TwitterConsumerSecret { get; }
         public string TwitterAccessToken { get; }
         public string TwitterAccessSecret { get; }
+        public string IexToken { get; set; }
         public ImmutableArray<ulong> OwnerIds { get; }
 
         public DbConfig Db { get; }
@@ -60,6 +61,7 @@ namespace Roki.Core.Services.Impl
                 TwitterConsumerSecret = data[nameof(TwitterConsumerSecret)];
                 TwitterAccessToken = data[nameof(TwitterAccessToken)];
                 TwitterAccessSecret = data[nameof(TwitterAccessSecret)];
+                IexToken = data[nameof(IexToken)];
 
                 if (!ulong.TryParse(data[nameof(ClientId)], out var clId))
                     clId = 0;

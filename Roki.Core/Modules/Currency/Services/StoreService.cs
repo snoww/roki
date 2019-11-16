@@ -88,10 +88,10 @@ namespace Roki.Modules.Currency.Services
             return uow.Listing.GetListingById(id);
         }
 
-        public async Task UpdateListingAsync(int id)
+        public async Task UpdateListingAsync(int id, int amount)
         {
             using var uow = _db.GetDbContext();
-            await uow.Listing.UpdateQuantityAsync(id).ConfigureAwait(false);
+            await uow.Listing.UpdateQuantityAsync(id, amount).ConfigureAwait(false);
             await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
@@ -138,16 +138,16 @@ namespace Roki.Modules.Currency.Services
             return rRoles.First() ?? first;
         }
 
-        public async Task<Inventory> GetOrCreateInventoryAsync(ulong userId)
+        public async Task<List<Item>> GetOrCreateInventoryAsync(ulong userId)
         {
             using var uow = _db.GetDbContext();
             return await uow.DUsers.GetOrCreateUserInventory(userId).ConfigureAwait(false);
         }
 
-        public async Task UpdateInventoryAsync(ulong userId, string key, int value)
+        public async Task UpdateInventoryAsync(ulong userId, string name, int quantity)
         {
             using var uow = _db.GetDbContext();
-            await uow.DUsers.UpdateUserInventory(userId, key, value).ConfigureAwait(false);
+            await uow.DUsers.UpdateUserInventory(userId, name, quantity).ConfigureAwait(false);
             await uow.SaveChangesAsync().ConfigureAwait(false);
         }
     }
