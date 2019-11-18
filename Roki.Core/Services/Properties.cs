@@ -66,9 +66,9 @@ namespace Roki.Core.Services
         #region Trivia
 
         public double TriviaMinCorrect { get; set; } = 0.6;
-        public int TriviaEasy { get; set; } = 1;
-        public int TriviaMedium { get; set; } = 3;
-        public int TriviaHard { get; set; } = 5;
+        public int TriviaEasy { get; set; } = 100;
+        public int TriviaMedium { get; set; } = 300;
+        public int TriviaHard { get; set; } = 500;
 
         #endregion
     }

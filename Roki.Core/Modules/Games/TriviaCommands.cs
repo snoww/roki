@@ -120,11 +120,11 @@ namespace Roki.Modules.Games
                     foreach (var question in questions.Results)
                     {
                         if (question.Difficulty == "easy")
-                            prizePool += 1;
+                            prizePool += _roki.Properties.TriviaEasy;
                         else if (question.Difficulty == "medium")
-                            prizePool += 3;
+                            prizePool += _roki.Properties.TriviaMedium;
                         else
-                            prizePool += 5;
+                            prizePool += _roki.Properties.TriviaHard;
                     }
                 }
                 catch (Exception e)
@@ -284,9 +284,9 @@ namespace Roki.Modules.Games
                 var winners = false;
                 foreach (var (user, score) in playerScore)
                 {
-                    scoreStr += $"{user.Username} {score.Correct}/{score.Incorrect + score.Correct}\n";
+                    scoreStr += $"{user.Username} `{score.Correct}/{score.Incorrect + score.Correct}`\n";
                     if (score.Amount <= 0 || score.Correct / (float) (score.Correct + score.Incorrect) < _roki.Properties.TriviaMinCorrect) continue;
-                    winStr += $"{user.Username} won {score.Amount.FormatNumber()} {_roki.Properties.CurrencyIcon}\n";
+                    winStr += $"{user.Username} won `{score.Amount:N0}` {_roki.Properties.CurrencyIcon}\n";
                     winners = true;
                     await _currency.ChangeAsync(user, "Trivia Reward", score.Amount, $"{ctx.Client.CurrentUser.Id}", user.Id.ToString(), ctx.Guild.Id, ctx.Channel.Id,
                         ctx.Message.Id).ConfigureAwait(false);

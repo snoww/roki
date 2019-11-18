@@ -252,7 +252,7 @@ namespace Roki.Modules.Games
                             continue;
                         }
                         var won = value.Amount * value.Multiple * 2;
-                        winners += $"{key.Username} won {won.FormatNumber()} {_roki.Properties.CurrencyIcon}\n";
+                        winners += $"{key.Username} won `{won:N0}` {_roki.Properties.CurrencyIcon}\n";
                         await _currency.ChangeAsync(key, "BetShowdown Payout", won, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id,
                             ctx.Channel.Id, ctx.Message.Id);
                     }
