@@ -22,13 +22,11 @@ namespace Roki.Modules.Xp
         [RokiCommand, Description, Usage, Aliases]
         public async Task Experience([Leftover] IUser user = null)
         {
-            user = user ?? ctx.User;
-            using (var uow = _db.GetDbContext())
-            {
-                var dUser = uow.DUsers.GetOrCreate(user);
-                var xp = new XpLevel(dUser.TotalXp);
-                await ctx.Channel.SendMessageAsync($"{user.Username}\nLevel: {xp.Level}\nTotal XP: {xp.TotalXp}\nXP Progress: {xp.LevelXp}/{xp.RequiredXp}");
-            }
+            user ??= ctx.User;
+            using var uow = _db.GetDbContext();
+            var dUser = uow.DUsers.GetOrCreate(user);
+            var xp = new XpLevel(dUser.TotalXp);
+            await ctx.Channel.SendMessageAsync($"{user.Username}\nLevel: `{xp.Level:N0}`\nTotal XP: `{xp.TotalXp:N0}`\nXP Progress: `{xp.LevelXp:N0}/{xp.RequiredXp:N0}`");
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -46,7 +44,7 @@ namespace Roki.Modules.Xp
                 var i = 9 * page + 1;
                 foreach (var user in list)
                 {
-                    embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"Level {new XpLevel(user.TotalXp).Level} - {user.TotalXp}xp");
+                    embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"Level `{new XpLevel(user.TotalXp).Level:N0}` - `{user.TotalXp:N0}` xp");
                 }
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
@@ -91,15 +89,13 @@ namespace Roki.Modules.Xp
                     return;
             }
 
-            using (var uow = _db.GetDbContext())
-            {
-                if (!isAdmin)
-                    await uow.DUsers.ChangeNotificationLocation(ctx.User.Id, notif).ConfigureAwait(false);
-                else
-                    await uow.DUsers.ChangeNotificationLocation(user.Id, notif).ConfigureAwait(false);
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Successfully changed xp notification preferences."))
-                    .ConfigureAwait(false);
-            }
+            using var uow = _db.GetDbContext();
+            if (!isAdmin)
+                await uow.DUsers.ChangeNotificationLocation(ctx.User.Id, notif).ConfigureAwait(false);
+            else
+                await uow.DUsers.ChangeNotificationLocation(user.Id, notif).ConfigureAwait(false);
+            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Successfully changed xp notification preferences."))
+                .ConfigureAwait(false);
         }
     }
 }
