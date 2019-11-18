@@ -8,8 +8,24 @@ using Discord.WebSocket;
 using NLog;
 using Roki.Extensions;
 
-namespace Roki.Core.Services.Impl
+namespace Roki.Core.Services
 {
+    public interface IStatsService : IRService
+    {
+        string Author { get; }
+        long CommandsRan { get; }
+        string Heap { get; }
+        string Library { get; }
+        long MessageCounter { get; }
+        double MessagesPerSecond { get; }
+        long TextChannels { get; }
+        long VoiceChannels { get; }
+
+        TimeSpan GetUptime();
+        string GetUptimeString(string separator = ", ");
+        void Initialize();
+    }
+    
     public class StatsService : IStatsService
     {
         public const string BotVersion = "0.5.0";

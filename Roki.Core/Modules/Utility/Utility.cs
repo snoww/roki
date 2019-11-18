@@ -5,7 +5,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
-using Roki.Core.Services.Impl;
 using Roki.Extensions;
 using Roki.Modules.Utility.Services;
 
