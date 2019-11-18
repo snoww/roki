@@ -44,7 +44,7 @@ namespace Roki.Modules.Gambling
                 // TODO min/max bet amounts
                 if (amount < _roki.Properties.BetFlipMin)
                 {
-                    await ctx.Channel.SendErrorAsync($"The minimum bet is {_roki.Properties.BetFlipMin} {_roki.Properties.CurrencyIcon}")
+                    await ctx.Channel.SendErrorAsync($"The minimum bet is `{_roki.Properties.BetFlipMin}` {_roki.Properties.CurrencyIcon}")
                         .ConfigureAwait(false);
                     return;
                 }
@@ -76,7 +76,7 @@ namespace Roki.Modules.Gambling
                     var won = (long) Math.Ceiling(amount * _roki.Properties.BetFlipMultiplier);
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithDescription(
-                                $"Result is: {result}\n{ctx.User.Mention} Congratulations! You've won {won.FormatNumber()} {_roki.Properties.CurrencyNamePlural}"))
+                                $"Result is: {result}\n{ctx.User.Mention} Congratulations! You've won `{won:N0}` {_roki.Properties.CurrencyNamePlural}"))
                         .ConfigureAwait(false);
                     await _currency.ChangeAsync(ctx.User, "BetFlip Payout", won, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
@@ -95,14 +95,14 @@ namespace Roki.Modules.Gambling
 
                 if (guesses.Length < _roki.Properties.BetFlipMMinGuesses)
                 {
-                    await ctx.Channel.SendErrorAsync("Needs at least 5 guesses.").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync("Needs at least `5` guesses.").ConfigureAwait(false);
                     return;
                 }
 
                 var minAmount = guesses.Length * 2;
                 if (guesses.Length >= _roki.Properties.BetFlipMMinGuesses && amount < minAmount)
                 {
-                    await ctx.Channel.SendErrorAsync($"{guesses.Length} guesses requires you to bet at least {minAmount.FormatNumber()} {_roki.Properties.CurrencyNamePlural}.")
+                    await ctx.Channel.SendErrorAsync($"`{guesses.Length}` guesses requires you to bet at least `{minAmount:N0}` {_roki.Properties.CurrencyNamePlural}.")
                         .ConfigureAwait(false);
                     return;
                 }

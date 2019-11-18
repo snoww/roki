@@ -46,7 +46,7 @@ namespace Roki.Modules.Currency
                             .Select(c =>
                             {
                                 var type = c.Type == "Subscription" ? $"{c.SubscriptionDays} Day {c.Type}" : c.Type;
-                                var desc = $"{Format.Bold(c.ItemName)} | {type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remaining" : "**Sold Out**")} | `{c.Cost.FormatNumber()}` {_roki.Properties.CurrencyIcon}";
+                                var desc = $"{Format.Bold(c.ItemName)} | {type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remaining" : "**Sold Out**")} | `{c.Cost:N0}` {_roki.Properties.CurrencyIcon}";
                                 return $"`ID: {c.Id}` {desc}\n\t{c.Description.TrimTo(120)}";
                             }));
                         return new EmbedBuilder().WithOkColor()
@@ -67,7 +67,7 @@ namespace Roki.Modules.Currency
                 }
 
                 var embed = new EmbedBuilder().WithOkColor()
-                    .WithTitle($"ID {item.Id} | {item.ItemName} | `{item.Cost.FormatNumber()}` {_roki.Properties.CurrencyIcon}")
+                    .WithTitle($"ID {item.Id} | {item.ItemName} | `{item.Cost:N0}` {_roki.Properties.CurrencyIcon}")
                     .WithDescription(item.Description)
                     .AddField("Category", $"{item.Category}", true)
                     .AddField("Quantity", $"{(item.Quantity > 0 ? $"**{item.Quantity}** Remaining" : "**Sold Out**")}")
