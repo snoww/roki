@@ -37,7 +37,7 @@ namespace Roki.Modules.Gambling
                 return;
             }
             var roll = new Random().Next(1, 101);
-            var rollStr = $"{ctx.User.Mention} rolled {roll}.";
+            var rollStr = $"{ctx.User.Mention} rolled `{roll}`.";
             if (roll < 70)
             {
                 await ctx.Channel.SendErrorAsync($"{rollStr}\nBetter luck next time.");
@@ -55,7 +55,7 @@ namespace Roki.Modules.Gambling
             await _currency.ChangeAsync(ctx.User, "BetRoll Payout", win, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id, ctx.Channel.Id,
                 ctx.Message.Id);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{rollStr}\nCongratulations, you won {win.FormatNumber()} {_roki.Properties.CurrencyIcon}"));
+                .WithDescription($"{rollStr}\nCongratulations, you won `{win:N0}` {_roki.Properties.CurrencyIcon}"));
         }
     }
 }
