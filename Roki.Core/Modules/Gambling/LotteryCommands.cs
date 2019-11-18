@@ -42,7 +42,7 @@ namespace Roki.Modules.Gambling
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle("Stone Lottery")
-                        .WithDescription($"Current Jackpot: {Format.Bold(jackpot.FormatNumber())} {_roki.Properties.CurrencyIcon}"))
+                        .WithDescription($"Current Jackpot: `{jackpot:N0}` {_roki.Properties.CurrencyIcon}"))
                     .ConfigureAwait(false);
             }
 
@@ -52,7 +52,7 @@ namespace Roki.Modules.Gambling
             {
                 if (tickets < 2)
                 {
-                    await ctx.Channel.SendErrorAsync("Needs to buy at least 2 tickets.");
+                    await ctx.Channel.SendErrorAsync("Needs to buy at least `2` tickets.");
                     return;
                 }
                 var user = ctx.User;
@@ -79,7 +79,7 @@ namespace Roki.Modules.Gambling
                 }
                 var entries = uow.Lottery.GetTotalEntries(user.Id, lotteryId);
                 var embed = new EmbedBuilder().WithOkColor()
-                    .WithTitle($"Purchase Successful - You have {entries.FormatNumber()} total entries")
+                    .WithTitle($"Purchase Successful - You have `{entries:N0}` total entries")
                     .WithDescription($"{user.Mention} Here are your lottery numbers:\n`{string.Join('\n', numbers)}`")
                     .WithFooter("Note: Only shows first 10 tickets.");
 
@@ -124,8 +124,8 @@ namespace Roki.Modules.Gambling
                 var embed = new EmbedBuilder().WithOkColor()
                     .WithDescription($"{user.Mention} Here's your lottery number:\n`{string.Join('-', numbers)}`\n");
                 embed.WithAuthor(entries == 1
-                    ? $"Purchase Successful - You have {entries} entry in the lottery."
-                    : $"Purchase Successful - You have {entries} total entries in the lottery.");
+                    ? $"Purchase Successful - You have `1` entry in the lottery."
+                    : $"Purchase Successful - You have `{entries}` total entries in the lottery.");
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 await uow.SaveChangesAsync().ConfigureAwait(false);
 
@@ -142,7 +142,7 @@ namespace Roki.Modules.Gambling
                 if (page == 0)
                 {
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                            .WithDescription($"{ctx.User.Username} has {uow.Lottery.GetTotalEntries(ctx.User.Id, lotteryId).FormatNumber()} tickets"))
+                            .WithDescription($"{ctx.User.Username} has `{uow.Lottery.GetTotalEntries(ctx.User.Id, lotteryId):N0}` tickets"))
                         .ConfigureAwait(false);
                     return;
                 }
@@ -152,7 +152,7 @@ namespace Roki.Modules.Gambling
                     await ctx.Channel.SendErrorAsync("You have no tickets for the current lottery.").ConfigureAwait(false);
                 }
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                        .WithTitle($"{ctx.User.Username}'s Lottery Tickets - Total {uow.Lottery.GetTotalEntries(ctx.User.Id, lotteryId)}")
+                        .WithTitle($"{ctx.User.Username}'s Lottery Tickets - Total `{uow.Lottery.GetTotalEntries(ctx.User.Id, lotteryId):N0}`")
                         .WithDescription($"`{string.Join("\n", entries)}`")
                         .WithFooter($"Page {page}"))
                     .ConfigureAwait(false);
@@ -163,6 +163,13 @@ namespace Roki.Modules.Gambling
             [RequireContext(ContextType.Guild)]
             public async Task NextDraw()
             {
+                var jackpot = (long) (_currency.GetCurrency(ctx.Client.CurrentUser.Id) * _roki.Properties.LotteryJackpot);
+                if (jackpot < _roki.Properties.LotteryMin)
+                {
+                    await ctx.Channel.SendErrorAsync("The lottery is currently down. Please check back another time.").ConfigureAwait(false);
+                    return;
+                }
+                
                 var today = DateTime.UtcNow;
                 var drawToday = new DateTime(today.Year, today.Month, today.Day, 23, 0, 0);
                 var drawTmr = drawToday.AddDays(1);
@@ -171,13 +178,13 @@ namespace Roki.Modules.Gambling
                 {
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithTitle("Next Lottery Draw")
-                            .WithDescription($"Today at {drawToday.ToLocalTime():HH:mm}"))
+                            .WithDescription($"Today at `{drawToday.ToLocalTime():HH:mm}`"))
                         .ConfigureAwait(false);
                     return;
                 }
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle("Next Lottery Draw")
-                        .WithDescription($"Tomorrow at {drawTmr.ToLocalTime():HH:mm}"))
+                        .WithDescription($"Tomorrow at `{drawTmr.ToLocalTime():HH:mm}`"))
                     .ConfigureAwait(false);
             }
         }
