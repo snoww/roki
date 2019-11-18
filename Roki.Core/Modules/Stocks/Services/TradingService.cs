@@ -105,12 +105,12 @@ namespace Roki.Modules.Stocks.Services
                 return false;
             if (!await CanShortStock(portfolio).ConfigureAwait(false))
                 return false;
-            
+            symbol = symbol.ToUpper();
             var pos = position == Stocks.TradingCommands.Position.Long ? "long" : "short";
             uow.Trades.Add(new Trades
             {
                 UserId = userId,
-                Symbol = symbol.ToUpper(),
+                Symbol = symbol,
                 Position = pos,
                 Action = action,
                 Shares = amount,
