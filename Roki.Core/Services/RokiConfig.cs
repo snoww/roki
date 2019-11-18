@@ -6,8 +6,51 @@ using Discord;
 using Microsoft.Extensions.Configuration;
 using NLog;
 
-namespace Roki.Core.Services.Impl
+namespace Roki.Core.Services
 {
+    public interface IRokiConfig
+    {
+        ulong ClientId { get; }
+        string Token { get; }
+        string GoogleApi { get; }
+        string OmdbApi { get; }
+        string DarkSkyApi { get; }
+        string TwitterConsumer { get; }
+        string TwitterConsumerSecret { get; }
+        string TwitterAccessToken { get; }
+        string TwitterAccessSecret { get; }
+        string IexToken { get; }
+
+        ImmutableArray<ulong> OwnerIds { get; }
+
+        DbConfig Db { get; }
+
+        bool IsOwner(IUser u);
+    }
+
+//    public class RestartConfig
+//    {
+//        public RestartConfig(string cmd, string args)
+//        {
+//            this.Cmd = cmd;
+//            this.Args = args;
+//        }
+//        
+//        public string Cmd { get; }
+//        public string Args { get; }
+//    }
+
+    public class DbConfig
+    {
+        public DbConfig(string type, string connectionString)
+        {
+            Type = type;
+            ConnectionString = connectionString;
+        }
+
+        public string Type { get; }
+        public string ConnectionString { get; }
+    }
     public class RokiConfig : IRokiConfig
     {
         private readonly string _credsFileName = Path.Combine(Directory.GetCurrentDirectory(), "config.json");

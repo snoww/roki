@@ -12,7 +12,6 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Core.Services;
-using Roki.Core.Services.Impl;
 using Roki.Extensions;
 using Roki.Services;
 using Victoria;
@@ -29,8 +28,6 @@ namespace Roki
         {
             LogSetup.SetupLogger();
             _log = LogManager.GetCurrentClassLogger();
-            // TODO elevated permission check?
-
 
             Config = new RokiConfig();
             _db = new DbService(Config);

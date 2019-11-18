@@ -4,13 +4,33 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Google.Apis.Customsearch.v1;
+using Google.Apis.Customsearch.v1.Data;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 using NLog;
 using Roki.Extensions;
 
-namespace Roki.Core.Services.Impl
+namespace Roki.Core.Services
 {
+    public interface IGoogleApiService : IRService
+    {
+        Task<IEnumerable<string>> GetVideoLinksByKeywordAsync(string keywords, int count = 1);
+        Task<IEnumerable<(string Name, string Id, string Url)>> GetVideoInfoByKeywordAsync(string keywords, int count = 1);
+        Task<ImageResult> GetImagesAsync(string query, bool random = false);
+    }
+
+    public struct ImageResult
+    {
+        public Result.ImageData Image { get; }
+        public string Link { get; }
+
+        public ImageResult(Result.ImageData image, string link)
+        {
+            Image = image;
+            Link = link;
+        }
+    }
+    
     public class GoogleApiService : IGoogleApiService
     {
         private const string search_engine_id = "009851753967553605166:ffip6ctnuaq";
