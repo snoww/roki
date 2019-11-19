@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -172,6 +173,7 @@ namespace Roki.Modules.Stocks
                 .WithDescription($"{options[period]} Price")
                 .WithImageUrl("attachment://image.png");
             await ctx.Channel.SendFileAsync("./temp/image.png", embed: embed.Build()).ConfigureAwait(false);
+            File.Delete("./temp/image.png");
         }
     }
 }
