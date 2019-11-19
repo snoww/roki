@@ -284,7 +284,7 @@ namespace Roki.Modules.Games
                 var winners = false;
                 foreach (var (user, score) in playerScore)
                 {
-                    scoreStr += $"{user.Username} `{score.Correct}/{score.Incorrect + score.Correct}`\n";
+                    scoreStr += $"{user.Username} `{score.Correct}`/`{score.Incorrect + score.Correct}`\n";
                     if (score.Amount <= 0 || score.Correct / (float) (score.Correct + score.Incorrect) < _roki.Properties.TriviaMinCorrect) continue;
                     winStr += $"{user.Username} won `{score.Amount:N0}` {_roki.Properties.CurrencyIcon}\n";
                     winners = true;
