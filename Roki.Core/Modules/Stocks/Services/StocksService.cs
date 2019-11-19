@@ -26,9 +26,9 @@ namespace Roki.Modules.Stocks.Services
         public async Task<Company> GetCompanyAsync(string symbol)
         {
             using var http = _httpFactory.CreateClient();
-            var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/company?token={_config.IexToken}").ConfigureAwait(false);
             try
             {
+                var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/company?token={_config.IexToken}").ConfigureAwait(false);
                 return JsonSerializer.Deserialize<Company>(result, Options);
             }
             catch
@@ -40,9 +40,9 @@ namespace Roki.Modules.Stocks.Services
         public async Task<StockStats> GetStockStatsAsync(string symbol)
         {
             using var http = _httpFactory.CreateClient();
-            var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/stats?token={_config.IexToken}").ConfigureAwait(false);
             try
             {
+                var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/stats?token={_config.IexToken}").ConfigureAwait(false);
                 return JsonSerializer.Deserialize<StockStats>(result, Options);
             }
             catch
@@ -54,9 +54,9 @@ namespace Roki.Modules.Stocks.Services
         public async Task<StockNews[]> GetNewsAsync(string symbol)
         {
             using var http = _httpFactory.CreateClient();
-            var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/news?token={_config.IexToken}").ConfigureAwait(false);
             try
             {
+                var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/news?token={_config.IexToken}").ConfigureAwait(false);
                 return JsonSerializer.Deserialize<StockNews[]>(result, Options);
             }
             catch
@@ -68,9 +68,9 @@ namespace Roki.Modules.Stocks.Services
         public async Task<Quote> GetQuoteAsync(string symbol)
         {
             using var http = _httpFactory.CreateClient();
-            var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/quote?token={_config.IexToken}").ConfigureAwait(false);
             try
             {
+                var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/quote?token={_config.IexToken}").ConfigureAwait(false);
                 return JsonSerializer.Deserialize<Quote>(result, Options);
             }
             catch
@@ -90,10 +90,16 @@ namespace Roki.Modules.Stocks.Services
         public async Task<decimal?> GetLatestPriceAsync(string symbol)
         {
             using var http = _httpFactory.CreateClient();
-            var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/quote/latestPrice?token={_config.IexToken}").ConfigureAwait(false);
-            var success = decimal.TryParse(result, out var price);
-            if (!success) return null;
-            return price;
+            try
+            {
+                var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/quote/latestPrice?token={_config.IexToken}").ConfigureAwait(false);
+                decimal.TryParse(result, out var price);
+                return price;
+            }
+            catch (HttpRequestException)
+            {
+                return null;
+            }
         }
 
         public void GenerateChartAsync(string symbol, string options)

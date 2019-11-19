@@ -76,10 +76,16 @@ namespace Roki.Modules.Stocks.Services
         public async Task<decimal?> GetLatestPriceAsync(string symbol)
         {
             using var http = _httpFactory.CreateClient();
-            var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/quote/latestPrice?token={_config.IexToken}").ConfigureAwait(false);
-            var success = decimal.TryParse(result, out var price);
-            if (!success) return null;
-            return price;
+            try
+            {
+                var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/quote/latestPrice?token={_config.IexToken}").ConfigureAwait(false);
+                decimal.TryParse(result, out var price);
+                return price;
+            }
+            catch (HttpRequestException)
+            {
+                return null;
+            }
         }
 
         public async Task<bool> UpdateInvAccountAsync(ulong userId, decimal amount)
