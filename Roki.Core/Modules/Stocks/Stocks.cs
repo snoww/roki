@@ -36,8 +36,8 @@ namespace Roki.Modules.Stocks
             }
             
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                    .WithTitle($"{stats.CompanyName} - {symbol.ToUpperInvariant()}")
-                    .WithThumbnailUrl(logo)
+                    .WithAuthor(symbol.ToUpper(), logo)
+                    .WithTitle(stats.CompanyName)
                     .WithDescription(desc))
                 .ConfigureAwait(false);
         }
@@ -102,8 +102,8 @@ namespace Roki.Modules.Stocks
             }
 
             var embed = new EmbedBuilder().WithOkColor()
-                .WithTitle($"{quote.CompanyName} - {quote.Symbol}")
-                .WithThumbnailUrl(logo)
+                .WithAuthor(quote.Symbol, logo)
+                .WithTitle(quote.CompanyName)
                 .AddField("Primary Exchange", quote.PrimaryExchange, true)
                 .AddField("Latest Price", quote.LatestPrice.ToString("N2"), true)
                 .AddField("Latest Time", quote.LatestUpdate.UnixTimeStampToDateTime().ToString("yyyy-MM-dd HH:mm"), true);
