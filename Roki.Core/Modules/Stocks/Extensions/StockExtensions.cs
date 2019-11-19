@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace Roki.Modules.Stocks
+namespace Roki.Modules.Stocks.Extensions
 {
     public static class StockExtensions
     {
@@ -32,7 +32,7 @@ namespace Roki.Modules.Stocks
             var ticker = parsed[1];
             if (ExchangeMap.ContainsKey(exchange.ToUpper()))
                 return ticker.ToUpper() + ExchangeMap[exchange.ToUpper()];
-            return ticker.ToUpper();
+            return ticker;
         }
     }
 }

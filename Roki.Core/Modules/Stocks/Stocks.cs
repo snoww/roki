@@ -6,6 +6,7 @@ using Discord;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Roki.Common.Attributes;
 using Roki.Extensions;
+using Roki.Modules.Stocks.Extensions;
 using Roki.Modules.Stocks.Services;
 
 namespace Roki.Modules.Stocks
