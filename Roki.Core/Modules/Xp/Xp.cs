@@ -26,7 +26,7 @@ namespace Roki.Modules.Xp
             using var uow = _db.GetDbContext();
             var dUser = uow.DUsers.GetOrCreate(user);
             var xp = new XpLevel(dUser.TotalXp);
-            await ctx.Channel.SendMessageAsync($"{user.Username}\nLevel: `{xp.Level:N0}`\nTotal XP: `{xp.TotalXp:N0}`\nXP Progress: `{xp.LevelXp:N0}/{xp.RequiredXp:N0}`");
+            await ctx.Channel.SendMessageAsync($"{user.Username}\nLevel: `{xp.Level:N0}`\nTotal XP: `{xp.TotalXp:N0}`\nXP Progress: `{xp.LevelXp:N0}`/`{xp.RequiredXp:N0}`");
         }
 
         [RokiCommand, Description, Usage, Aliases]
