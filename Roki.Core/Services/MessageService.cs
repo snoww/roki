@@ -36,40 +36,38 @@ namespace Roki.Services
 
         private async Task MessageReceived(SocketMessage message)
         {
+            if (message.Author.IsBot) return;
             using (var uow = _db.GetDbContext())
             {
-                if (!message.Author.IsBot)
+                var user = uow.DUsers.GetOrCreate(message.Author);
+                var doubleXp = uow.Subscriptions.DoubleXpIsActive(message.Author.Id);
+                var fastXp = uow.Subscriptions.FastXpIsActive(message.Author.Id);
+                if (fastXp)
                 {
-                    var user = uow.DUsers.GetOrCreate(message.Author);
-                    var doubleXp = uow.Subscriptions.DoubleXpIsActive(message.Author.Id);
-                    var fastXp = uow.Subscriptions.FastXpIsActive(message.Author.Id);
-                    if (fastXp)
-                    {
-                        if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpFastCooldown))
-                            await uow.DUsers.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpCooldown))
-                            await uow.DUsers.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
-                    }
-
-                    uow.DMessages.Add(new DMessage
-                    {
-                        AuthorId = message.Author.Id,
-                        Author = message.Author.Username,
-                        ChannelId = message.Channel.Id,
-                        Channel = message.Channel.Name,
-                        GuildId = message.Channel is ITextChannel chId ? chId.GuildId : (ulong?) null,
-                        Guild = message.Channel is ITextChannel ch ? ch.Guild.Name : null,
-                        MessageId = message.Id,
-                        Content = message.Content,
-                        EditedTimestamp = message.EditedTimestamp?.UtcDateTime,
-                        Timestamp = message.Timestamp.UtcDateTime
-                    });
-
-                    await uow.SaveChangesAsync().ConfigureAwait(false);
+                    if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpFastCooldown))
+                        await uow.DUsers.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
                 }
+                else
+                {
+                    if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpCooldown))
+                        await uow.DUsers.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
+                }
+
+                uow.DMessages.Add(new DMessage
+                {
+                    AuthorId = message.Author.Id,
+                    Author = message.Author.Username,
+                    ChannelId = message.Channel.Id,
+                    Channel = message.Channel.Name,
+                    GuildId = message.Channel is ITextChannel chId ? chId.GuildId : (ulong?) null,
+                    Guild = message.Channel is ITextChannel ch ? ch.Guild.Name : null,
+                    MessageId = message.Id,
+                    Content = message.Content,
+                    EditedTimestamp = message.EditedTimestamp?.UtcDateTime,
+                    Timestamp = message.Timestamp.UtcDateTime
+                });
+
+                await uow.SaveChangesAsync().ConfigureAwait(false);
             }
 
             await Task.CompletedTask;
