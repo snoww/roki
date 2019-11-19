@@ -155,7 +155,8 @@ namespace Roki.Modules.Stocks
                 {"5d", "5 Day"},
                 {"today", "Today's"},
             };
-            var quote = await _service.GetQuoteAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
+            symbol = symbol.ParseStockTicker();
+            var quote = await _service.GetQuoteAsync(symbol).ConfigureAwait(false);
             period = period.Trim().ToLower();
             if (quote == null || !options.ContainsKey(period))
             {
