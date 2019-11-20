@@ -16,13 +16,19 @@ namespace Roki.Core.Services.Database.Models
             Trades = new HashSet<Trades>();
         }
         
+        [Column("user_id")]
         public ulong UserId { get; set; }
         public string Username { get; set; }
         public string Discriminator { get; set; }
+        [Column("avatar_id")]
         public string AvatarId { get; set; }
+        [Column("total_xp")]
         public int TotalXp { get; set; }
+        [Column("last_level_up")]
         public DateTimeOffset LastLevelUp { get; set; } = DateTimeOffset.UtcNow;
+        [Column("last_xp_gain")]
         public DateTimeOffset LastXpGain { get; set; } = DateTimeOffset.UtcNow;
+        [Column("notification_location")]
         public string NotificationLocation { get; set; } = "dm";
         public long Currency { get; set; } = 0;
         public string Inventory { get; set; } = null;
