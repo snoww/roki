@@ -50,7 +50,7 @@ namespace Roki.Core.Services.Database.Repositories
         {
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE quotes
-SET UseCount=UseCount+1
+SET use_count=use_count+1
 WHERE id={id}")
                 .ConfigureAwait(false);
         }

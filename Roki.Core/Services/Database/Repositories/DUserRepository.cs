@@ -61,12 +61,12 @@ namespace Roki.Core.Services.Database.Repositories
 //            }
             Context.Database.ExecuteSqlInterpolated($@"
 UPDATE users
-SET Username={username},
-    Discriminator={discriminator},
-    AvatarId={avatarId}
-WHERE UserId={userId};
+SET username={username},
+    discriminator={discriminator},
+    avatar_id={avatarId}
+WHERE user_id={userId};
 
-INSERT INTO users (UserId, Username, Discriminator, AvatarId, LastLevelUp, LastXpGain, InvestingAccount)
+INSERT INTO users (user_id, username, discriminator, avatar_id, last_level_up, last_xp_gain, investing)
 VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTimeOffset.MinValue}, {DateTimeOffset.MinValue}, 50000)
 ON CONFLICT (user_id) DO NOTHING
 ");
@@ -109,8 +109,8 @@ ON CONFLICT (user_id) DO NOTHING
                 return false;
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE users
-SET Currency=Currency+{amount}
-WHERE UserId={dUser.UserId}
+SET currency=currency+{amount}
+WHERE user_id={dUser.UserId}
 ").ConfigureAwait(false);
             return true;
         }
@@ -119,8 +119,8 @@ WHERE UserId={dUser.UserId}
         {
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE users
-SET Currency=Currency+{amount}
-WHERE UserId={userId}
+SET currency=currency+{amount}
+WHERE user_id={userId}
 ").ConfigureAwait(false);
         }
 
@@ -128,8 +128,8 @@ WHERE UserId={userId}
         {
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE users
-SET Currency=Currency+{amount}
-WHERE UserId={botId}
+SET currency=currency+{amount}
+WHERE user_id={botId}
 ").ConfigureAwait(false);
         }
 
@@ -157,10 +157,10 @@ WHERE UserId={botId}
             {
                 await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE users
-SET TotalXp={xp},
-    LastLevelUp={DateTimeOffset.UtcNow},
-    LastXpGain={DateTimeOffset.UtcNow}
-WHERE UserId={user.UserId};
+SET total_xp={xp},
+    last_level_up={DateTimeOffset.UtcNow},
+    last_xp_gain={DateTimeOffset.UtcNow}
+WHERE user_id={user.UserId};
 ").ConfigureAwait(false);
                 
                 await SendNotification(user, message, new XpLevel(xp).Level).ConfigureAwait(false);
@@ -169,9 +169,9 @@ WHERE UserId={user.UserId};
             
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE users
-SET TotalXp={xp},
-    LastXpGain={DateTimeOffset.UtcNow}
-WHERE UserId={user.UserId};
+SET total_xp={xp},
+    last_xp_gain={DateTimeOffset.UtcNow}
+WHERE user_id={user.UserId};
 ").ConfigureAwait(false);
         }
 
@@ -179,8 +179,8 @@ WHERE UserId={user.UserId};
         {
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE users
-SET NotificationLocation={notify}
-WHERE UserId={userId}
+SET notification_location={notify}
+WHERE user_id={userId}
 ").ConfigureAwait(false);
         }
 
@@ -190,8 +190,8 @@ WHERE UserId={userId}
             if (user.Inventory != null) return JsonSerializer.Deserialize<List<Item>>(user.Inventory);
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE users
-SET Inventory='[]'
-WHERE UserId={userId}")
+SET inventory='[]'
+WHERE user_id={userId}")
                 .ConfigureAwait(false);
 
             return null;
@@ -213,8 +213,8 @@ WHERE UserId={userId}")
                 var json = JsonSerializer.Serialize(inventory);
                 await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE users
-SET Inventory={json}
-WHERE UserId={userId}")
+SET inventory={json}
+WHERE user_id={userId}")
                     .ConfigureAwait(false);
             }
             else if (!inv.Any(i => i.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
@@ -228,8 +228,8 @@ WHERE UserId={userId}")
                 var json = JsonSerializer.Serialize(inv);
                 await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE users
-SET Inventory={json}
-WHERE UserId={userId}")
+SET inventory={json}
+WHERE user_id={userId}")
                     .ConfigureAwait(false);
             }
             else
@@ -242,8 +242,8 @@ WHERE UserId={userId}")
                 var json = JsonSerializer.Serialize(inv);
                 await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE users
-SET Inventory={json}
-WHERE UserId={userId}")
+SET inventory={json}
+WHERE user_id={userId}")
                     .ConfigureAwait(false);
             }
 
@@ -256,8 +256,8 @@ WHERE UserId={userId}")
             if (user.Portfolio != null) return JsonSerializer.Deserialize<List<Investment>>(user.Portfolio);
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE users
-SET Portfolio='[]'
-WHERE UserId={userId}");
+SET portfolio='[]'
+WHERE user_id={userId}");
             return null;
         }
 
@@ -283,8 +283,8 @@ WHERE UserId={userId}");
                 var json = JsonSerializer.Serialize(investment);
                 await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE users
-SET Portfolio={json}
-WHERE UserId={userId}")
+SET portfolio={json}
+WHERE user_id={userId}")
                     .ConfigureAwait(false);
             }
             else if (!portfolio.Any(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)))
@@ -300,8 +300,8 @@ WHERE UserId={userId}")
                 var json = JsonSerializer.Serialize(portfolio);
                 await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE users
-SET Portfolio={json}
-WHERE UserId={userId}").
+SET portfolio={json}
+WHERE user_id={userId}").
                     ConfigureAwait(false);
             }
             else
@@ -322,8 +322,8 @@ WHERE UserId={userId}").
                 var json = JsonSerializer.Serialize(portfolio);
                 await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE users
-SET Portfolio={json}
-WHERE UserId={userId}").
+SET portfolio={json}
+WHERE user_id={userId}").
                     ConfigureAwait(false);
             }
 
@@ -341,8 +341,8 @@ WHERE UserId={userId}").
             if (currentAmount + amount < 0) return false;
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE users
-SET InvestingAccount={currentAmount + amount}
-WHERE UserId={userId}")
+SET investing={currentAmount + amount}
+WHERE user_id={userId}")
                 .ConfigureAwait(false);
             return true;
         }
@@ -356,9 +356,9 @@ WHERE UserId={userId}")
             {
                 await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE users
-SET Currency={currencyAcc - amount},
-    InvestingAccount={investAcc + amount}
-WHERE UserId={userId}")
+SET currency={currencyAcc - amount},
+    investing={investAcc + amount}
+WHERE user_id={userId}")
                     .ConfigureAwait(false);
                 return true;
             }
@@ -389,16 +389,16 @@ WHERE UserId={userId}")
             {
                 await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE users
-SET InvestingAccount={invAcc - amount}
-WHERE userid={userId}")
+SET investing={invAcc - amount}
+WHERE user_id={userId}")
                     .ConfigureAwait(false);
                 return;
             }
 
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE users
-SET Currency={(long) (cashAcc - amount)}
-WHERE userid={userId}")
+SET currency={(long) (cashAcc - amount)}
+WHERE user_id={userId}")
                 .ConfigureAwait(false);
         }
 
