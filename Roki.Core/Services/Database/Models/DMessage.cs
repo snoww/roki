@@ -12,6 +12,7 @@ namespace Roki.Core.Services.Database.Models
         public string Author { get; set; }
         [Column("channel_id")]
         public ulong ChannelId { get; set; }
+        [Column("channel")]
         public string Channel { get; set; }
         [Column("guild_id")]
         public ulong? GuildId { get; set; }
