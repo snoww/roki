@@ -44,7 +44,7 @@ WHERE id={id}")
 
         public IEnumerable<Subscriptions> GetExpiredSubscriptions()
         {
-            return Set.Where(s => s.EndDate.DateTime <= DateTime.UtcNow).ToList();
+            return Set.Where(s => s.EndDate != null && s.EndDate.DateTime <= DateTime.UtcNow).ToList();
         }
 
         public async Task<int> CheckSubscription(ulong userId, int itemId)
