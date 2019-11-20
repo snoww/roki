@@ -27,8 +27,6 @@ namespace Roki.Core.Services.Database.Models
         [Column("use_count")]
         public int UseCount { get; set; } = 1;
         
-        public virtual DUser Author { get; set; }
-
     }
 
     public enum OrderType

@@ -7,15 +7,6 @@ namespace Roki.Core.Services.Database.Models
     [Table("users")]
     public class DUser : DbEntity
     {
-        public DUser()
-        {
-            Lottery = new HashSet<Lottery>();
-            Quotes = new HashSet<Quote>();
-            Store = new HashSet<Listing>();
-            Subscriptions = new HashSet<Subscriptions>();
-            Trades = new HashSet<Trades>();
-        }
-        
         [Column("user_id")]
         public ulong UserId { get; set; }
         [Column("username")]
@@ -40,13 +31,6 @@ namespace Roki.Core.Services.Database.Models
         public decimal InvestingAccount { get; set; } = 50000;
         [Column("portfolio")]
         public string Portfolio { get; set; } = null;
-        
-        public ICollection<Lottery> Lottery { get; set; }
-        public ICollection<Quote> Quotes { get; set; }
-        public ICollection<Listing> Store { get; set; }
-        public ICollection<Subscriptions> Subscriptions { get; set; }
-        public ICollection<Trades> Trades { get; set; }
-
         
         public override bool Equals(object obj) => 
             obj is DUser dUser && dUser.UserId == UserId;

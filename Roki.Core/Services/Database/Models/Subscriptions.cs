@@ -20,7 +20,5 @@ namespace Roki.Core.Services.Database.Models
         public DateTimeOffset StartDate { get; set; } = DateTimeOffset.UtcNow;
         [Column("end_date")]
         public DateTimeOffset EndDate { get; set; }
-        
-        public virtual DUser User { get; set; }
     }
 }
