@@ -64,7 +64,7 @@ namespace Roki.Modules.Currency.Services
                 Type = type,
                 SubscriptionDays = subDays,
                 Quantity = quantity,
-                ListDate = DateTime.UtcNow
+                ListDate = DateTimeOffset.UtcNow
             });
                 
             await uow.SaveChangesAsync().ConfigureAwait(false);

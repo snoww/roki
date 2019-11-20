@@ -17,7 +17,7 @@ namespace Roki.Core.Services.Database.Repositories
         Task<bool> NewLottery(ulong botId, List<int> numbers);
         Lottery GetLottery(ulong botId);
         string GetLotteryId();
-        DateTime GetLotteryDate(ulong botId);
+        DateTimeOffset GetLotteryDate(ulong botId);
     }
 
     public class LotteryRepository : Repository<Lottery>, ILotteryRepository
@@ -68,7 +68,7 @@ VALUES({botId}, {numbers[0]}, {numbers[1]}, {numbers[2]}, {numbers[3]}, {numbers
         public string GetLotteryId() =>
             Set.OrderByDescending(l => l.Id).First(u => u.UserId == 549644503351296040).LotteryId;
 
-        public DateTime GetLotteryDate(ulong botId) =>
+        public DateTimeOffset GetLotteryDate(ulong botId) =>
             Set.OrderByDescending(l => l.Id).First(u => u.UserId == 549644503351296040).Date;
     }
 }

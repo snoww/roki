@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -70,30 +71,21 @@ namespace Roki.Modules.Xp
                 return;
             }
 
-            byte notif;
-            switch (notify.ToUpperInvariant())
+            if (!notify.Equals("none", StringComparison.OrdinalIgnoreCase) ||
+                !notify.Equals("dm", StringComparison.OrdinalIgnoreCase) ||
+                !notify.Equals("server", StringComparison.OrdinalIgnoreCase))
             {
-                case "NONE":
-                    notif = 0;
-                    break;
-                case "DM":
-                    notif = 1;
-                    break;
-                case "SERVER":
-                    notif = 2;
-                    break;
-                default:
-                    await ctx.Channel
-                        .EmbedAsync(new EmbedBuilder().WithErrorColor().WithDescription("Not a valid option. Options are none, dm, or server."))
-                        .ConfigureAwait(false);
-                    return;
+                await ctx.Channel
+                    .EmbedAsync(new EmbedBuilder().WithErrorColor().WithDescription("Not a valid option. Options are none, dm, or server."))
+                    .ConfigureAwait(false);
+                return;
             }
 
             using var uow = _db.GetDbContext();
             if (!isAdmin)
-                await uow.DUsers.ChangeNotificationLocation(ctx.User.Id, notif).ConfigureAwait(false);
+                await uow.DUsers.ChangeNotificationLocation(ctx.User.Id, notify).ConfigureAwait(false);
             else
-                await uow.DUsers.ChangeNotificationLocation(user.Id, notif).ConfigureAwait(false);
+                await uow.DUsers.ChangeNotificationLocation(user.Id, notify).ConfigureAwait(false);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Successfully changed xp notification preferences."))
                 .ConfigureAwait(false);
         }

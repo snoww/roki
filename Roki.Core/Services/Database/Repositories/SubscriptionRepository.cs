@@ -44,7 +44,7 @@ WHERE id={id}")
 
         public IEnumerable<Subscriptions> GetExpiredSubscriptions()
         {
-            return Set.Where(s => s.EndDate <= DateTime.UtcNow).AsEnumerable().ToList();
+            return Set.Where(s => s.EndDate <= DateTimeOffset.UtcNow).AsEnumerable().ToList();
         }
 
         public async Task<int> CheckSubscription(ulong userId, int itemId)
@@ -59,7 +59,7 @@ WHERE id={id}")
             var newEndDate = sub.EndDate + TimeSpan.FromDays(days);
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE IGNORE `subscriptions`
-SET enddate = {newEndDate}
+SET end_date = {newEndDate}
 WHERE id = {id} ")
                 .ConfigureAwait(false);
         }
