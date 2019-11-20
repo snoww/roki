@@ -20,7 +20,5 @@ namespace Roki.Core.Services.Database.Models
         public decimal Price { get; set; }
         [Column("transaction_date")]
         public DateTimeOffset TransactionDate { get; set; }
-        
-        public virtual DUser User { get; set; }
     }
 }

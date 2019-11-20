@@ -26,7 +26,5 @@ namespace Roki.Core.Services.Database.Models
         public int Quantity { get; set; } = 1;
         [Column("list_date")]
         public DateTimeOffset ListDate { get; set; } = DateTimeOffset.UtcNow;
-        
-        public virtual DUser Seller { get; set; }
     }
 }
