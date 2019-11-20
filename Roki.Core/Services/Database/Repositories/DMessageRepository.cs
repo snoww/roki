@@ -23,8 +23,8 @@ namespace Roki.Core.Services.Database.Repositories
         {
             Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE messages
-SET IsDeleted=1
-WHERE MessageId={messageId}
+SET is_deleted=1
+WHERE message_id={messageId}
 ");
         }
 

@@ -29,7 +29,7 @@ namespace Roki.Core.Services.Database.Repositories
         public async Task NewSubscriptionAsync(ulong userId, ulong guildId, int itemId, string type, string description, DateTime startDate, DateTime endDate)
         {
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
-INSERT INTO `subscriptions`(userid, guildId, itemId, type, description, startdate, enddate)
+INSERT INTO `subscriptions`(user_id, guild_id, item_id, type, description, start_date, end_date)
 VALUES({userId}, {guildId}, {itemId}, {type}, {description}, {startDate}, {endDate})")
                 .ConfigureAwait(false);
         }
