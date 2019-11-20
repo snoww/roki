@@ -18,7 +18,9 @@ namespace Roki.Core.Services.Database.Models
         
         [Column("user_id")]
         public ulong UserId { get; set; }
+        [Column("username")]
         public string Username { get; set; }
+        [Column("discriminator")]
         public string Discriminator { get; set; }
         [Column("avatar_id")]
         public string AvatarId { get; set; }
@@ -30,10 +32,13 @@ namespace Roki.Core.Services.Database.Models
         public DateTimeOffset LastXpGain { get; set; } = DateTimeOffset.UtcNow;
         [Column("notification_location")]
         public string NotificationLocation { get; set; } = "dm";
+        [Column("currency")]
         public long Currency { get; set; } = 0;
+        [Column("inventory")]
         public string Inventory { get; set; } = null;
         [Column("investing")]
         public decimal InvestingAccount { get; set; } = 50000;
+        [Column("portfolio")]
         public string Portfolio { get; set; } = null;
         
         public ICollection<Lottery> Lottery { get; set; }

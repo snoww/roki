@@ -10,6 +10,7 @@ namespace Roki.Core.Services.Database.Models
         [Column("guild_id")]
         public ulong GuildId { get; set; }
         [Required]
+        [Column("keyword")]
         public string Keyword { get; set; }
         [Required]
         [Column("author_name")]
@@ -17,7 +18,9 @@ namespace Roki.Core.Services.Database.Models
         [Column("author_id")]
         public ulong AuthorId { get; set; }
         [Required]
+        [Column("text")]
         public string Text { get; set; }
+        [Column("context")]
         public string Context { get; set; }
         [Column("date_added")]
         public DateTimeOffset? DateAdded { get; set; } = DateTimeOffset.UtcNow;

@@ -22,6 +22,7 @@ namespace Roki.Core.Services.Database.Models
         public int Num6 { get; set; }
         [Column("lottery_id")]
         public string LotteryId { get; set; }
+        [Column("date")]
         public DateTimeOffset Date { get; set; }
         
         public virtual DUser User { get; set; }

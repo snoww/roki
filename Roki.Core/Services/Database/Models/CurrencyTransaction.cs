@@ -6,9 +6,13 @@ namespace Roki.Core.Services.Database.Models
     [Table("transactions")]
     public class CurrencyTransaction : DbEntity
     {
+        [Column("amount")]
         public long Amount { get; set; }
+        [Column("reason")]
         public string Reason { get; set; }
+        [Column("to")]
         public string To { get; set; } = "-";
+        [Column("from")]
         public string From { get; set; } = "-";
         [Column("guild_id")]
         public ulong GuildId { get; set; }
