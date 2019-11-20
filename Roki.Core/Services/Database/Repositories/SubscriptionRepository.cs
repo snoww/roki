@@ -58,7 +58,7 @@ WHERE id={id}")
             var sub = await Set.FirstOrDefaultAsync(s => s.Id == id).ConfigureAwait(false);
             var newEndDate = sub.EndDate + TimeSpan.FromDays(days);
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE `subscriptions`
+UPDATE `subscriptions`
 SET end_date = {newEndDate}
 WHERE id = {id} ")
                 .ConfigureAwait(false);
