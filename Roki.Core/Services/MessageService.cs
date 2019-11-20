@@ -44,12 +44,12 @@ namespace Roki.Services
                 var fastXp = uow.Subscriptions.FastXpIsActive(message.Author.Id);
                 if (fastXp)
                 {
-                    if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpFastCooldown))
+                    if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpFastCooldown))
                         await uow.DUsers.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
                 }
                 else
                 {
-                    if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpCooldown))
+                    if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpCooldown))
                         await uow.DUsers.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
                 }
 
@@ -63,8 +63,8 @@ namespace Roki.Services
                     Guild = message.Channel is ITextChannel ch ? ch.Guild.Name : null,
                     MessageId = message.Id,
                     Content = message.Content,
-                    EditedTimestamp = message.EditedTimestamp?.UtcDateTime,
-                    Timestamp = message.Timestamp.UtcDateTime
+                    EditedTimestamp = message.EditedTimestamp?.ToUniversalTime(),
+                    Timestamp = message.Timestamp.ToUniversalTime()
                 });
 
                 await uow.SaveChangesAsync().ConfigureAwait(false);
@@ -89,8 +89,8 @@ namespace Roki.Services
                     Guild = after.Channel is ITextChannel ch ? ch.Guild.Name : null,
                     MessageId = after.Id,
                     Content = after.Content,
-                    EditedTimestamp = after.EditedTimestamp?.UtcDateTime,
-                    Timestamp = after.Timestamp.UtcDateTime
+                    EditedTimestamp = after.EditedTimestamp?.ToUniversalTime(),
+                    Timestamp = after.Timestamp.ToUniversalTime()
                 });
                     
                 await uow.SaveChangesAsync().ConfigureAwait(false);

@@ -1,7 +1,5 @@
-using System;
 using Microsoft.EntityFrameworkCore;
-using MySql.Data.MySqlClient;
-using NLog;
+using Npgsql;
 using Roki.Core.Services.Database;
 
 namespace Roki.Core.Services
@@ -12,9 +10,9 @@ namespace Roki.Core.Services
 
         public DbService(IRokiConfig config)
         {
-            var builder = new MySqlConnectionStringBuilder(config.Db.ConnectionString);
+            var builder = new NpgsqlConnectionStringBuilder(config.Db.ConnectionString);
             var optionsBuilder = new DbContextOptionsBuilder<RokiContext>();
-            optionsBuilder.UseMySql(builder.ToString());
+            optionsBuilder.UseNpgsql(builder.ToString());
             _options = optionsBuilder.Options;
         }
 

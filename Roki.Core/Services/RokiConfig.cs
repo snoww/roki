@@ -112,7 +112,7 @@ namespace Roki.Core.Services
 
                 var dbSection = data.GetSection("db");
                 Db = new DbConfig(string.IsNullOrWhiteSpace(dbSection["Type"])
-                        ? "mysql"
+                        ? "postgres"
                         : dbSection["Type"],
                     string.IsNullOrWhiteSpace(dbSection["ConnectionString"])
                         ? "server=localhost;database=roki;user=roki;password=roki-snow"

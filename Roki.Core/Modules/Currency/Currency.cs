@@ -111,7 +111,7 @@ namespace Roki.Modules.Currency
                 GuildId = ctx.Guild.Id,
                 MessageId = ctx.Message.Id,
                 Reason = $"Transfer from {fromAcc} to {toAcc}",
-                TransactionDate = DateTime.UtcNow
+                TransactionDate = DateTimeOffset.UtcNow
             });
 
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()

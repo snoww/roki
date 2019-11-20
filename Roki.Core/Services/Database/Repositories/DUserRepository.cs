@@ -26,7 +26,7 @@ namespace Roki.Core.Services.Database.Repositories
         Task UpdateBotCurrencyAsync(ulong botId, long amount);
         IEnumerable<DUser> GetCurrencyLeaderboard(ulong botId, int page);
         Task UpdateXp(DUser dUser, SocketMessage message, bool boost = false);
-        Task ChangeNotificationLocation(ulong userId, byte notify);
+        Task ChangeNotificationLocation(ulong userId, string notify);
         Task<List<Item>> GetOrCreateUserInventory(ulong userId);
         Task<bool> UpdateUserInventory(ulong userId, string name, int quantity);
         Task<List<Investment>> GetOrCreateUserPortfolio(ulong userId);
@@ -174,7 +174,7 @@ WHERE UserId={user.UserId};
 ").ConfigureAwait(false);
         }
 
-        public async Task ChangeNotificationLocation(ulong userId, byte notify)
+        public async Task ChangeNotificationLocation(ulong userId, string notify)
         {
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE IGNORE users
@@ -403,17 +403,17 @@ WHERE userid={userId}")
 
         private static async Task SendNotification(DUser user, SocketMessage msg, int level)
         {
-            switch (user.NotificationLocation)
+            if (user.NotificationLocation.Equals("none", StringComparison.OrdinalIgnoreCase))
             {
-                case 0:
-                    return;
-                case 1:
-                    var dm = await msg.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
-                    await dm.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
-                    return;
-                case 2:
-                    await msg.Channel.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
-                    return;
+            }
+            else if (user.NotificationLocation.Equals("dm", StringComparison.OrdinalIgnoreCase))
+            {
+                var dm = await msg.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
+                await dm.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
+            }
+            else if (user.NotificationLocation.Equals("server", StringComparison.OrdinalIgnoreCase))
+            {
+                await msg.Channel.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
             }
         }
     }
