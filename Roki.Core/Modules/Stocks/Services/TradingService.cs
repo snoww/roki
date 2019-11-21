@@ -29,7 +29,7 @@ namespace Roki.Modules.Stocks.Services
             _db = db;
             _client = client;
             _roki = roki;
-            ShortPremiumTimer();
+//            ShortPremiumTimer();
         }
 
         private void ShortPremiumTimer()
