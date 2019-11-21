@@ -121,42 +121,19 @@ namespace Roki.Services
 
         private async Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
         {
-            await Task.Run(async () =>
-            {
-                using var uow = _db.GetDbContext();
-                if (!cache.HasValue)
-                {
-                    uow.DMessages.MessageDeleted(cache.Id);
-                    await uow.SaveChangesAsync().ConfigureAwait(false);
-                    return;
-                }
-
-                if (cache.Value.Author.IsBot)
-                    return;
-                uow.DMessages.MessageDeleted(cache.Value.Id);
-
-                await uow.SaveChangesAsync().ConfigureAwait(false);
-            });
-            
+            if (cache.HasValue && cache.Value.Author.IsBot) return;
+            using var uow = _db.GetDbContext();
+            uow.DMessages.MessageDeleted(cache.Id);
             await Task.CompletedTask;
         }
 
         private async Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> caches, ISocketMessageChannel channel)
         {
+            using var uow = _db.GetDbContext();
             foreach (var cache in caches)
             {
-                using var uow = _db.GetDbContext();
-                if (!cache.HasValue)
-                {
-                    uow.DMessages.MessageDeleted(cache.Id);
-                    await uow.SaveChangesAsync().ConfigureAwait(false);
-                    continue;
-                }
-                if (cache.Value.Author.IsBot)
-                    return;
-                uow.DMessages.MessageDeleted(cache.Value.Id);
-                
-                await uow.SaveChangesAsync().ConfigureAwait(false);
+                if (cache.HasValue && cache.Value.Author.IsBot) continue;
+                uow.DMessages.MessageDeleted(cache.Id);
             }
             
             await Task.CompletedTask;
