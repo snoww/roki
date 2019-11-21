@@ -106,8 +106,8 @@ namespace Roki.Modules.Currency
             {
                 Amount = amount,
                 ChannelId = ctx.Channel.Id,
-                From = ctx.User.Id.ToString(),
-                To = ctx.User.Id.ToString(),
+                From = ctx.User.Id,
+                To = ctx.User.Id,
                 GuildId = ctx.Guild.Id,
                 MessageId = ctx.Message.Id,
                 Reason = $"Transfer from {fromAcc} to {toAcc}",
@@ -172,7 +172,7 @@ namespace Roki.Modules.Currency
             {
                 var type = tran.Amount > 0 ? "🔵" : "🔴";
                 var amount = tran.Amount.FormatNumber();
-                if (tran.Reason.StartsWith("Gift from") && tran.From == userId.ToString())
+                if (tran.Reason.StartsWith("Gift from") && tran.From == userId)
                 {
                     type = "🔴";
                     amount = amount.Insert(0, "-");

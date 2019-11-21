@@ -59,8 +59,8 @@ namespace Roki.Modules.Stocks.Services
                     {
                        Amount = (long) cost,
                        Reason = "Short sell interest charge",
-                       To = _roki.Properties.BotId.ToString(),
-                       From = userId.ToString(),
+                       To = _roki.Properties.BotId,
+                       From = userId
                     });
                     total += cost;
                     embed.AddField($"{investment.Symbol} - {investment.Shares} Shares", $"{cost} {_roki.Properties.CurrencyIcon}", true);

@@ -35,7 +35,7 @@ WHERE channel_id={channelId} AND (reason={"GCA"} OR reason={"UserDrop"})
 
         public List<CurrencyTransaction> GetTransactions(ulong userId, int page)
         {
-            return Set.Where(t => t.From == userId.ToString() || t.To == userId.ToString())
+            return Set.Where(t => t.From == userId || t.To == userId)
                 .OrderByDescending(t => t.TransactionDate)
                 .Skip(15 * page)
                 .Take(15)
