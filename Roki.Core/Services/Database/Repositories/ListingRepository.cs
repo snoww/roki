@@ -37,11 +37,9 @@ namespace Roki.Core.Services.Database.Repositories
 
         public async Task UpdateQuantityAsync(int id, int amount)
         {
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE store
-SET `quantity` = `quantity` - {amount}
-WHERE `id` = {id}
-").ConfigureAwait(false);
+            var listing = await Set.FirstAsync(l => l.Id == id).ConfigureAwait(false);
+            listing.Quantity -= amount;
+            await Context.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

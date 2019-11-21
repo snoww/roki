@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Roki.Core.Services.Database.Models
@@ -6,17 +7,29 @@ namespace Roki.Core.Services.Database.Models
     [Table("users")]
     public class DUser : DbEntity
     {
+        [Column("user_id")]
         public ulong UserId { get; set; }
+        [Column("username")]
         public string Username { get; set; }
+        [Column("discriminator")]
         public string Discriminator { get; set; }
+        [Column("avatar_id")]
         public string AvatarId { get; set; }
-        public int TotalXp { get; set; }
-        public DateTime LastLevelUp { get; set; } = DateTime.UtcNow;
-        public DateTime LastXpGain { get; set; } = DateTime.MinValue;
-        public byte NotificationLocation { get; set; } = 1;
+        [Column("total_xp")] 
+        public int TotalXp { get; set; } = 0;
+        [Column("last_level_up")]
+        public DateTimeOffset LastLevelUp { get; set; } = DateTimeOffset.MinValue;
+        [Column("last_xp_gain")]
+        public DateTimeOffset LastXpGain { get; set; } = DateTimeOffset.MinValue;
+        [Column("notification_location")]
+        public string NotificationLocation { get; set; } = "dm";
+        [Column("currency")]
         public long Currency { get; set; } = 0;
+        [Column("inventory")]
         public string Inventory { get; set; } = null;
+        [Column("investing")]
         public decimal InvestingAccount { get; set; } = 50000;
+        [Column("portfolio")]
         public string Portfolio { get; set; } = null;
         
         public override bool Equals(object obj) => 
@@ -40,6 +53,6 @@ namespace Roki.Core.Services.Database.Models
         public string Symbol { get; set; }
         public string Position { get; set; }
         public long Shares { get; set; }
-        public DateTime? InterestDate { get; set; } = null;
+        public DateTimeOffset? InterestDate { get; set; }
     }
 }

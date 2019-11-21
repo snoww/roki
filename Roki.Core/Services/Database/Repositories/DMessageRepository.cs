@@ -22,9 +22,9 @@ namespace Roki.Core.Services.Database.Repositories
         public void MessageDeleted(ulong messageId)
         {
             Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE messages
-SET IsDeleted=1
-WHERE MessageId={messageId}
+UPDATE messages
+SET is_deleted=true
+WHERE message_id={messageId}
 ");
         }
 

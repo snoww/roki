@@ -64,7 +64,7 @@ namespace Roki.Modules.Currency.Services
                 Type = type,
                 SubscriptionDays = subDays,
                 Quantity = quantity,
-                ListDate = DateTime.UtcNow
+                ListDate = DateTimeOffset.UtcNow
             });
                 
             await uow.SaveChangesAsync().ConfigureAwait(false);
@@ -141,7 +141,7 @@ namespace Roki.Modules.Currency.Services
         public async Task<List<Item>> GetOrCreateInventoryAsync(ulong userId)
         {
             using var uow = _db.GetDbContext();
-            return await uow.DUsers.GetOrCreateUserInventory(userId).ConfigureAwait(false);
+            return await uow.DUsers.GetUserInventory(userId).ConfigureAwait(false);
         }
 
         public async Task UpdateInventoryAsync(ulong userId, string name, int quantity)

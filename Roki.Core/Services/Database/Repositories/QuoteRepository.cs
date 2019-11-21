@@ -10,7 +10,7 @@ namespace Roki.Core.Services.Database.Repositories
 {
     public interface IQuoteRepository : IRepository<Quote>
     {
-        Quote GetRandomQuoteByKeywordAsync(ulong guildId, string keyword);
+        Task<Quote> GetRandomQuoteByKeywordAsync(ulong guildId, string keyword);
         Task<Quote> SearchQuoteKeywordTextAsync(ulong guildId, string keyword, string text);
         IEnumerable<Quote> GetGroup(ulong guildId, int page, OrderType order);
         Task IncrementUseCount(int id);
@@ -23,11 +23,14 @@ namespace Roki.Core.Services.Database.Repositories
         {
         }
 
-        public Quote GetRandomQuoteByKeywordAsync(ulong guildId, string keyword)
+        public async Task<Quote> GetRandomQuoteByKeywordAsync(ulong guildId, string keyword)
         {
             var rand = new Random();
             var quotes = Set.Where(q => q.GuildId == guildId && q.Keyword == keyword).ToList();
-            return quotes.OrderBy(q => rand.Next()).FirstOrDefault();
+            var quote = quotes.OrderBy(q => rand.Next()).FirstOrDefault();
+            if (quote != null) quote.UseCount += 1;
+            await Context.SaveChangesAsync().ConfigureAwait(false);
+            return quote;
         }
 
         public Task<Quote> SearchQuoteKeywordTextAsync(ulong guildId, string keyword, string text)
@@ -48,11 +51,9 @@ namespace Roki.Core.Services.Database.Repositories
 
         public async Task IncrementUseCount(int id)
         {
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE quotes
-SET UseCount=UseCount+1
-WHERE id={id}")
-                .ConfigureAwait(false);
+            var quote = await Set.FirstAsync(q => q.Id == id).ConfigureAwait(false);
+            quote.UseCount += 1;
+            await Context.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public void RemoveAllByKeyword(ulong guildId, string keyword)

@@ -25,17 +25,17 @@ namespace Roki.Core.Services.Database.Repositories
                 return (0, new ulong[0]);
             var toReturn = (trans.Sum(t => t.Amount), trans.Select(t => t.MessageId).ToArray());
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE transactions
-SET `Reason`={"Picked"},
-    `To`={userId}
-WHERE `ChannelId`={channelId} AND (`Reason`={"GCA"} OR `Reason`={"UserDrop"})
+UPDATE transactions
+SET reason={"Picked"},
+    ""to""={userId}
+WHERE channel_id={channelId} AND (reason={"GCA"} OR reason={"UserDrop"})
 ").ConfigureAwait(false);
             return toReturn;
         }
 
         public List<CurrencyTransaction> GetTransactions(ulong userId, int page)
         {
-            return Set.Where(t => t.From == userId.ToString() || t.To == userId.ToString())
+            return Set.Where(t => t.From == userId || t.To == userId)
                 .OrderByDescending(t => t.TransactionDate)
                 .Skip(15 * page)
                 .Take(15)

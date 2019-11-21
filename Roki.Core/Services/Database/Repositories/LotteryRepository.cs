@@ -17,7 +17,7 @@ namespace Roki.Core.Services.Database.Repositories
         Task<bool> NewLottery(ulong botId, List<int> numbers);
         Lottery GetLottery(ulong botId);
         string GetLotteryId();
-        DateTime GetLotteryDate(ulong botId);
+        DateTimeOffset GetLotteryDate(ulong botId);
     }
 
     public class LotteryRepository : Repository<Lottery>, ILotteryRepository
@@ -43,20 +43,38 @@ namespace Roki.Core.Services.Database.Repositories
 
         public async Task<bool> AddLotteryEntry(ulong userId, List<int> numbers, string lotteryId)
         {
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-INSERT INTO lottery(userId, num1, num2, num3, num4, num5, num6, lotteryId, date)
-VALUES({userId}, {numbers[0]}, {numbers[1]}, {numbers[2]}, {numbers[3]}, {numbers[4]}, {numbers[5]}, {lotteryId}, {DateTime.UtcNow})")
-                .ConfigureAwait(false);
+            await Set.AddAsync(new Lottery
+            {
+                UserId = userId,
+                Num1 = numbers[0],
+                Num2 = numbers[1],
+                Num3 = numbers[2],
+                Num4 = numbers[3],
+                Num5 = numbers[4],
+                Num6 = numbers[5],
+                LotteryId = lotteryId,
+                Date = DateTimeOffset.UtcNow
+            });
+            await Context.SaveChangesAsync().ConfigureAwait(false);
             return true;
         }
 
         public async Task<bool> NewLottery(ulong botId, List<int> numbers)
         {
             var lotteryId = Guid.NewGuid().ToString();
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-INSERT INTO lottery(userId, num1, num2, num3, num4, num5, num6, lotteryId, date)
-VALUES({botId}, {numbers[0]}, {numbers[1]}, {numbers[2]}, {numbers[3]}, {numbers[4]}, {numbers[5]}, {lotteryId}, {DateTime.UtcNow})")
-                .ConfigureAwait(false);
+            await Set.AddAsync(new Lottery
+            {
+                UserId = botId,
+                Num1 = numbers[0],
+                Num2 = numbers[1],
+                Num3 = numbers[2],
+                Num4 = numbers[3],
+                Num5 = numbers[4],
+                Num6 = numbers[5],
+                LotteryId = lotteryId,
+                Date = DateTimeOffset.UtcNow
+            });
+            await Context.SaveChangesAsync().ConfigureAwait(false);
             return true;
         }
 
@@ -68,7 +86,7 @@ VALUES({botId}, {numbers[0]}, {numbers[1]}, {numbers[2]}, {numbers[3]}, {numbers
         public string GetLotteryId() =>
             Set.OrderByDescending(l => l.Id).First(u => u.UserId == 549644503351296040).LotteryId;
 
-        public DateTime GetLotteryDate(ulong botId) =>
+        public DateTimeOffset GetLotteryDate(ulong botId) =>
             Set.OrderByDescending(l => l.Id).First(u => u.UserId == 549644503351296040).Date;
     }
 }

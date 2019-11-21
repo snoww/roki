@@ -111,12 +111,13 @@ namespace Roki.Core.Services
                 ClientId = clId;
 
                 var dbSection = data.GetSection("db");
-                Db = new DbConfig(string.IsNullOrWhiteSpace(dbSection["Type"])
-                        ? "mysql"
-                        : dbSection["Type"],
-                    string.IsNullOrWhiteSpace(dbSection["ConnectionString"])
-                        ? "server=localhost;database=roki;user=roki;password=roki-snow"
-                        : dbSection["ConnectionString"]);
+//                Db = new DbConfig(string.IsNullOrWhiteSpace(dbSection["Type"])
+//                        ? "postgres"
+//                        : dbSection["Type"],
+//                    string.IsNullOrWhiteSpace(dbSection["ConnectionString"])
+//                        ? "server=localhost;database=roki;user=roki;password=roki-snow"
+//                        : dbSection["ConnectionString"]);
+                Db = new DbConfig("postgres", "Host=localhost;Database=roki;Username=roki;Password=roki-snow");
             }
             catch (Exception e)
             {

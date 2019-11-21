@@ -29,7 +29,7 @@ namespace Roki.Modules.Stocks.Services
             _db = db;
             _client = client;
             _roki = roki;
-            ShortPremiumTimer();
+//            ShortPremiumTimer();
         }
 
         private void ShortPremiumTimer()
@@ -59,8 +59,8 @@ namespace Roki.Modules.Stocks.Services
                     {
                        Amount = (long) cost,
                        Reason = "Short sell interest charge",
-                       To = _roki.Properties.BotId.ToString(),
-                       From = userId.ToString(),
+                       To = _roki.Properties.BotId,
+                       From = userId
                     });
                     total += cost;
                     embed.AddField($"{investment.Symbol} - {investment.Shares} Shares", $"{cost} {_roki.Properties.CurrencyIcon}", true);
@@ -99,15 +99,15 @@ namespace Roki.Modules.Stocks.Services
         public async Task<List<Investment>> GetUserPortfolioAsync(ulong userId)
         {
             using var uow = _db.GetDbContext();
-            return await uow.DUsers.GetOrCreateUserPortfolio(userId).ConfigureAwait(false);
+            return await uow.DUsers.GetUserPortfolio(userId).ConfigureAwait(false);
         }
 
         public async Task<bool> UpdateUserPortfolioAsync(ulong userId, string symbol, Stocks.TradingCommands.Position position, 
             string action, decimal price, long amount)
         {
             using var uow = _db.GetDbContext();
-            var portfolio = await uow.DUsers.GetOrCreateUserPortfolio(userId).ConfigureAwait(false);
-            if (!portfolio.Any(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)) && price * amount >= 100000)
+            var portfolio = await uow.DUsers.GetUserPortfolio(userId).ConfigureAwait(false);
+            if (!portfolio.Any(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)) && Math.Abs(price * amount) >= 100000)
                 return false;
             if (!await CanShortStock(portfolio).ConfigureAwait(false))
                 return false;
@@ -121,7 +121,7 @@ namespace Roki.Modules.Stocks.Services
                 Action = action,
                 Shares = amount,
                 Price = price,
-                TransactionDate = DateTime.UtcNow
+                TransactionDate = DateTimeOffset.UtcNow
             });
             var success = await uow.DUsers.UpdateUserPortfolio(userId, symbol, pos, action, amount);
             await uow.SaveChangesAsync().ConfigureAwait(false);

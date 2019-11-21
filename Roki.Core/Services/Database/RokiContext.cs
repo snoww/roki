@@ -4,21 +4,6 @@ using Roki.Core.Services.Database.Models;
 
 namespace Roki.Core.Services.Database
 {
-//    public class RokiContextFactory : IDesignTimeDbContextFactory<RokiContext>
-//    {
-//        public RokiContext CreateDbContext(string[] args)
-//        {
-//            var optionsBuilder = new DbContextOptionsBuilder<RokiContext>();
-//            IRokiConfig config = new RokiConfig();
-//            var builder = new SqliteConnectionStringBuilder(config.Db.ConnectionString);
-//            builder.DataSource = Path.Combine(Directory.GetCurrentDirectory(), builder.DataSource);
-//            optionsBuilder.UseSqlite(builder.ToString());
-//            var ctx = new RokiContext(optionsBuilder.Options);
-//            ctx.Database.SetCommandTimeout(60);
-//            return ctx;
-//        }
-//    }
-
     public class RokiContext : DbContext
     {
         public RokiContext(DbContextOptions options) : base(options)
@@ -28,11 +13,6 @@ namespace Roki.Core.Services.Database
         public DbSet<Quote> Quotes { get; set; }
         public DbSet<DUser> DUsers { get; set; }
         public DbSet<DMessage> DMessages { get; set; }
-
-//        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-//        {
-//            optionsBuilder.UseMySQL("server=localhost;database=roki;user=roki;password=roki");
-//        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -52,7 +32,7 @@ namespace Roki.Core.Services.Database
             {
                 entity.HasAlternateKey(u => u.UserId);
                 entity.Property(u => u.LastLevelUp)
-                    .HasDefaultValue(new DateTime(2017, 1, 1, 1, 1, 1, 1, DateTimeKind.Utc));
+                    .HasDefaultValue(DateTimeOffset.MinValue);
                 entity.HasIndex(u => u.TotalXp);
                 entity.HasIndex(u => u.Currency);
                 entity.HasIndex(u => u.UserId);
@@ -62,33 +42,19 @@ namespace Roki.Core.Services.Database
 
             #region DMessage
 
-            modelBuilder.Entity<DMessage>(entity =>
-            {
-                entity.HasAlternateKey(m => m.MessageId);
-                entity.HasIndex(m => m.MessageId);
-                entity.HasIndex(m => m.Timestamp);
-                entity.Property(m => m.IsDeleted)
-                    .HasDefaultValue(false);
-            });
+            modelBuilder.Entity<DMessage>();
 
             #endregion
 
             #region CurrencyTransaction
 
-            modelBuilder.Entity<CurrencyTransaction>(entity =>
-            {
-                entity.HasIndex(c => c.TransactionDate);
-            });
+            modelBuilder.Entity<CurrencyTransaction>();
 
             #endregion
 
             #region Lottery
 
-            modelBuilder.Entity<Lottery>(entity =>
-            {
-                entity.HasIndex(l => l.LotteryId);
-                entity.HasIndex(l => l.Date);
-            });
+            modelBuilder.Entity<Lottery>();
 
             #endregion
 
@@ -103,13 +69,13 @@ namespace Roki.Core.Services.Database
 
             #region Subscriptions
 
-            modelBuilder.Entity<Subscriptions>(entity => { entity.HasIndex(s => s.Description); });
+            modelBuilder.Entity<Subscriptions>();
 
             #endregion
 
             #region Trades
 
-            modelBuilder.Entity<Trades>(entity => { entity.HasIndex(s => s.Shares); });
+            modelBuilder.Entity<Trades>();
 
             #endregion
         }

@@ -7,29 +7,25 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
 using Roki.Core.Services.Database.Models;
-using Roki.Extensions;
 using Roki.Modules.Xp.Common;
 
 namespace Roki.Core.Services.Database.Repositories
 {
     public interface IDUserRepository : IRepository<DUser>
     {
-        void EnsureCreated(ulong userId, string username, string discriminator, string avatarId);
-        DUser GetOrCreate(ulong userId, string username, string discriminator, string avatarId);
-        DUser GetOrCreate(IUser original);
+        Task<DUser> GetOrCreate(IUser original);
         DUser[] GetUsersXpLeaderboard(int page);
         long GetUserCurrency(ulong userId);
         Task<bool> UpdateCurrencyAsync(IUser user, long amount);
         Task LotteryAwardAsync(ulong userId, long amount);
         Task UpdateBotCurrencyAsync(ulong botId, long amount);
         IEnumerable<DUser> GetCurrencyLeaderboard(ulong botId, int page);
-        Task UpdateXp(DUser dUser, SocketMessage message, bool boost = false);
-        Task ChangeNotificationLocation(ulong userId, byte notify);
-        Task<List<Item>> GetOrCreateUserInventory(ulong userId);
+        Task UpdateXp(DUser user, SocketMessage message, bool boost = false);
+        Task ChangeNotificationLocation(ulong userId, string notify);
+        Task<List<Item>> GetUserInventory(ulong userId);
         Task<bool> UpdateUserInventory(ulong userId, string name, int quantity);
-        Task<List<Investment>> GetOrCreateUserPortfolio(ulong userId);
+        Task<List<Investment>> GetUserPortfolio(ulong userId);
         Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, string action, long shares);
         decimal GetUserInvestingAccount(ulong userId);
         Task<bool> UpdateInvestingAccountAsync(ulong userId, decimal amount);
@@ -45,46 +41,33 @@ namespace Roki.Core.Services.Database.Repositories
         {
         }
 
-        public void EnsureCreated(ulong userId, string username, string discriminator, string avatarId)
-        {
-//            var user = Set.FirstOrDefault(u => u.UserId == userId);
-//
-//            if (user == null)
-//            {
-//                Context.Update(user = new DUser
-//                {
-//                    UserId = userId,
-//                    Username = username,
-//                    Discriminator = discriminator,
-//                    AvatarId = avatarId
-//                });
-//            }
-            Context.Database.ExecuteSqlInterpolated($@"
-UPDATE IGNORE users
-SET Username={username},
-    Discriminator={discriminator},
-    AvatarId={avatarId}
-WHERE UserId={userId};
-
-INSERT IGNORE INTO users (UserId, Username, Discriminator, AvatarId, LastLevelUp, LastXpGain, InvestingAccount)
-VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.MinValue}, {DateTime.MinValue}, 50000);
-");
-        }
-
-        public DUser GetOrCreate(ulong userId, string username, string discriminator, string avatarId)
+        private async Task<DUser> EnsureCreated(ulong userId, string username, string discriminator, string avatarId)
         {
             var user = Set.FirstOrDefault(u => u.UserId == userId);
-            if (user != null && user.Username == username && user.Discriminator == discriminator && user.AvatarId == avatarId) 
-                return user;
-            
-            EnsureCreated(userId, username, discriminator, avatarId);
-            user = Set.First(u => u.UserId == userId);
 
+            if (user == null)
+            {
+                Context.Add(user = new DUser
+                {
+                    UserId = userId,
+                    Username = username,
+                    Discriminator = discriminator,
+                    AvatarId = avatarId,
+                });
+            }
+            else if (username != user.Username || discriminator != user.Discriminator || avatarId != user.AvatarId)
+            {
+                user.Username = username;
+                user.Discriminator = discriminator;
+                user.AvatarId = avatarId;
+            }
+
+            await Context.SaveChangesAsync().ConfigureAwait(false);
             return user;
         }
 
-        public DUser GetOrCreate(IUser original) => 
-            GetOrCreate(original.Id, original.Username, original.Discriminator, original.AvatarId);
+        public async Task<DUser> GetOrCreate(IUser original) =>
+            await EnsureCreated(original.Id, original.Username, original.Discriminator, original.AvatarId).ConfigureAwait(false);
 
         public DUser[] GetUsersXpLeaderboard(int page)
         {
@@ -96,40 +79,33 @@ VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTime.MinValue}, 
                 .ToArray();
         }
 
-        public long GetUserCurrency(ulong userId) =>
-                Set.FirstOrDefault(x => x.UserId == userId)?.Currency ?? 0;
+        public long GetUserCurrency(ulong userId) => 
+            Set.FirstOrDefault(x => x.UserId == userId)?.Currency ?? 0;
 
         public async Task<bool> UpdateCurrencyAsync(IUser user, long amount)
         {
             if (amount == 0)
                 return false;
-            var dUser = GetOrCreate(user);
+            var dUser = await GetOrCreate(user).ConfigureAwait(false);
             if (dUser.Currency + amount < 0)
                 return false;
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET Currency=Currency+{amount}
-WHERE UserId={dUser.UserId}
-").ConfigureAwait(false);
+            dUser.Currency += amount;
+            await Context.SaveChangesAsync().ConfigureAwait(false);
             return true;
         }
 
         public async Task LotteryAwardAsync(ulong userId, long amount)
         {
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET Currency=Currency+{amount}
-WHERE UserId={userId}
-").ConfigureAwait(false);
+            var user = Set.First(u => u.UserId == userId);
+            user.Currency += amount;
+            await Context.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task UpdateBotCurrencyAsync(ulong botId, long amount)
         {
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET Currency=Currency+{amount}
-WHERE UserId={botId}
-").ConfigureAwait(false);
+            var bot = Set.First(b => b.UserId == botId);
+            bot.Currency += amount;
+            await Context.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public IEnumerable<DUser> GetCurrencyLeaderboard(ulong botId, int page)
@@ -141,95 +117,56 @@ WHERE UserId={botId}
                 .ToList();
         }
 
-        public async Task UpdateXp(DUser dUser, SocketMessage message, bool boost = false)
+        public async Task UpdateXp(DUser user, SocketMessage message, bool boost = false)
         {
-            var user = Set.FirstOrDefault(u => u.Equals(dUser));
             if (user == null) return;
             var level = new XpLevel(user.TotalXp);
             int xp;
             if (boost)
-                xp = user.TotalXp + _properties.XpPerMessage * 2;
+                xp = _properties.XpPerMessage * 2;
             else 
-                xp = user.TotalXp + _properties.XpPerMessage;
+                xp = _properties.XpPerMessage;
             var newLevel = new XpLevel(xp);
+            user.TotalXp += xp;
+            user.LastXpGain = DateTimeOffset.UtcNow;
             if (newLevel.Level > level.Level)
             {
-                await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET TotalXp={xp},
-    LastLevelUp={DateTime.UtcNow},
-    LastXpGain={DateTime.UtcNow}
-WHERE UserId={user.UserId};
-").ConfigureAwait(false);
-                
+                user.LastLevelUp = DateTimeOffset.UtcNow;
                 await SendNotification(user, message, new XpLevel(xp).Level).ConfigureAwait(false);
-                return;
             }
-            
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET TotalXp={xp},
-    LastXpGain={DateTime.UtcNow}
-WHERE UserId={user.UserId};
-").ConfigureAwait(false);
+
+            await Context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task ChangeNotificationLocation(ulong userId, byte notify)
+        public async Task ChangeNotificationLocation(ulong userId, string notify)
         {
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET NotificationLocation={notify}
-WHERE UserId={userId}
-").ConfigureAwait(false);
+            var user = await Set.FirstAsync(u => u.UserId == userId).ConfigureAwait(false);
+            user.NotificationLocation = notify;
+            await Context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async Task<List<Item>> GetOrCreateUserInventory(ulong userId)
+        public async Task<List<Item>> GetUserInventory(ulong userId)
         {
-            var user = Set.First(u => u.UserId == userId);
-            if (user.Inventory != null) return JsonSerializer.Deserialize<List<Item>>(user.Inventory);
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET Inventory='[]'
-WHERE UserId={userId}")
-                .ConfigureAwait(false);
-
-            return null;
+            var user = await Set.FirstAsync(u => u.UserId == userId).ConfigureAwait(false);
+            return user.Inventory != null ? JsonSerializer.Deserialize<List<Item>>(user.Inventory) : null;
         }
 
         public async Task<bool> UpdateUserInventory(ulong userId, string name, int quantity)
         {
-            var inv = await GetOrCreateUserInventory(userId).ConfigureAwait(false);
+            var user = await Set.FirstAsync(u => u.UserId == userId).ConfigureAwait(false);
+            var inv = await GetUserInventory(userId).ConfigureAwait(false);
             if (inv == null || inv.Count == 0)
             {
-                Item[] inventory =
-                {
-                    new Item
-                    {
-                        Name = name,
-                        Quantity = quantity
-                    }
-                };
+                Item[] inventory = {new Item {Name = name, Quantity = quantity}};
                 var json = JsonSerializer.Serialize(inventory);
-                await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET Inventory={json}
-WHERE UserId={userId}")
-                    .ConfigureAwait(false);
+                user.Inventory = json;
             }
             else if (!inv.Any(i => i.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
             {
-                var item = new Item
-                {
-                    Name = name,
-                    Quantity = quantity
-                };
+                var item = new Item {Name = name, Quantity = quantity};
                 inv.Add(item);
                 var json = JsonSerializer.Serialize(inv);
-                await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET Inventory={json}
-WHERE UserId={userId}")
-                    .ConfigureAwait(false);
+                user.Inventory = json;
             }
             else
             {
@@ -239,52 +176,35 @@ WHERE UserId={userId}")
                 if (item.Quantity == 0)
                     inv.Remove(item);
                 var json = JsonSerializer.Serialize(inv);
-                await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET Inventory={json}
-WHERE UserId={userId}")
-                    .ConfigureAwait(false);
+                user.Inventory = json;
             }
 
+            await Context.SaveChangesAsync().ConfigureAwait(false);
             return true;
         }
 
-        public async Task<List<Investment>> GetOrCreateUserPortfolio(ulong userId)
+        public async Task<List<Investment>> GetUserPortfolio(ulong userId)
         {
-            var user = Set.First(u => u.UserId == userId);
-            if (user.Portfolio != null) return JsonSerializer.Deserialize<List<Investment>>(user.Portfolio);
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET Portfolio='[]'
-WHERE UserId={userId}");
-            return null;
+            var user = await Set.FirstAsync(u => u.UserId == userId).ConfigureAwait(false);
+            return user.Portfolio != null ? JsonSerializer.Deserialize<List<Investment>>(user.Portfolio) : null;
         }
 
         public async Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, string action, long shares)
         {
-            var portfolio = await GetOrCreateUserPortfolio(userId).ConfigureAwait(false);
-            DateTime? interestDate = null;
+            var user = await Set.FirstAsync(u => u.UserId == userId).ConfigureAwait(false);
+            var portfolio = await GetUserPortfolio(userId).ConfigureAwait(false);
+            DateTimeOffset? interestDate = null;
             if (position == "short")
             {
                 shares = -shares;
-                interestDate = DateTime.UtcNow.AddDays(7);;
+                interestDate = DateTimeOffset.UtcNow.AddDays(7);
             }
             
             if (portfolio == null || portfolio.Count == 0)
             {
-                Investment[] investment = {new Investment
-                {
-                    Symbol = symbol,
-                    Position = position,
-                    Shares = shares,
-                    InterestDate = interestDate
-                }};
+                Investment[] investment = {new Investment {Symbol = symbol, Position = position, Shares = shares, InterestDate = interestDate}};
                 var json = JsonSerializer.Serialize(investment);
-                await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET Portfolio={json}
-WHERE UserId={userId}")
-                    .ConfigureAwait(false);
+                user.Portfolio = json;
             }
             else if (!portfolio.Any(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)))
             {
@@ -297,11 +217,7 @@ WHERE UserId={userId}")
                  };
                 portfolio.Add(investment);
                 var json = JsonSerializer.Serialize(portfolio);
-                await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET Portfolio={json}
-WHERE UserId={userId}").
-                    ConfigureAwait(false);
+                user.Portfolio = json;
             }
             else
             {
@@ -319,13 +235,10 @@ WHERE UserId={userId}").
                 if (investment.Shares == 0)
                     portfolio.Remove(investment);
                 var json = JsonSerializer.Serialize(portfolio);
-                await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET Portfolio={json}
-WHERE UserId={userId}").
-                    ConfigureAwait(false);
+                user.Portfolio = json;
             }
 
+            await Context.SaveChangesAsync().ConfigureAwait(false);
             return true;
         }
 
@@ -336,33 +249,23 @@ WHERE UserId={userId}").
 
         public async Task<bool> UpdateInvestingAccountAsync(ulong userId, decimal amount)
         {
-            var currentAmount = Set.First(u => u.UserId == userId).InvestingAccount;
-            if (currentAmount + amount < 0) return false;
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET InvestingAccount={currentAmount + amount}
-WHERE UserId={userId}")
-                .ConfigureAwait(false);
+            var user = Set.First(u => u.UserId == userId);
+            if (user.InvestingAccount + amount < 0) return false;
+            user.InvestingAccount += amount;
+            await Context.SaveChangesAsync().ConfigureAwait(false);
             return true;
         }
 
         public async Task<bool> TransferToFromInvestingAccountAsync(ulong userId, decimal amount)
         {
-            var user = Set.First(u => u.UserId == userId);
+            var user = await Set.FirstAsync(u => u.UserId == userId).ConfigureAwait(false);
             var currencyAcc = user.Currency;
             var investAcc = user.InvestingAccount;
-            if (amount > 0 && currencyAcc - amount >= 0 || amount < 0 && investAcc + amount >= 0)
-            {
-                await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET Currency={currencyAcc - amount},
-    InvestingAccount={investAcc + amount}
-WHERE UserId={userId}")
-                    .ConfigureAwait(false);
-                return true;
-            }
-
-            return false;
+            if ((amount <= 0 || currencyAcc - amount < 0) && (amount >= 0 || investAcc + amount < 0)) return false;
+            user.Currency -= (long) amount;
+            user.InvestingAccount += amount;
+            await Context.SaveChangesAsync().ConfigureAwait(false);
+            return true;
         }
 
         public async Task<Dictionary<ulong, List<Investment>>> GetAllPortfolios()
@@ -371,7 +274,7 @@ WHERE UserId={userId}")
             var portfolios = new Dictionary<ulong, List<Investment>>();
             foreach (var user in users)
             {
-                var port = await GetOrCreateUserPortfolio(user.UserId).ConfigureAwait(false);
+                var port = await GetUserPortfolio(user.UserId).ConfigureAwait(false);
                 if (port == null || port.Count <= 0)
                     continue;
                 portfolios.Add(user.UserId, port);
@@ -382,38 +285,28 @@ WHERE UserId={userId}")
 
         public async Task ChargeInterestAsync(ulong userId, decimal amount)
         {
-            var invAcc = GetUserInvestingAccount(userId);
-            var cashAcc = GetUserCurrency(userId);
-            if (invAcc > 0)
-            {
-                await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET InvestingAccount={invAcc - amount}
-WHERE userid={userId}")
-                    .ConfigureAwait(false);
-                return;
-            }
+            var user = await Set.FirstAsync(u => u.UserId == userId).ConfigureAwait(false);
+            if (user.InvestingAccount > 0)
+                user.InvestingAccount -= amount;
+            else
+                user.Currency -= (long) amount;
 
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE IGNORE users
-SET Currency={(long) (cashAcc - amount)}
-WHERE userid={userId}")
-                .ConfigureAwait(false);
+            await Context.SaveChangesAsync().ConfigureAwait(false);
         }
 
         private static async Task SendNotification(DUser user, SocketMessage msg, int level)
         {
-            switch (user.NotificationLocation)
+            if (user.NotificationLocation.Equals("none", StringComparison.OrdinalIgnoreCase))
             {
-                case 0:
-                    return;
-                case 1:
-                    var dm = await msg.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
-                    await dm.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
-                    return;
-                case 2:
-                    await msg.Channel.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
-                    return;
+            }
+            else if (user.NotificationLocation.Equals("dm", StringComparison.OrdinalIgnoreCase))
+            {
+                var dm = await msg.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
+                await dm.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
+            }
+            else if (user.NotificationLocation.Equals("server", StringComparison.OrdinalIgnoreCase))
+            {
+                await msg.Channel.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
             }
         }
     }
