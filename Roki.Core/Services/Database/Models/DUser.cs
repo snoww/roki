@@ -15,12 +15,12 @@ namespace Roki.Core.Services.Database.Models
         public string Discriminator { get; set; }
         [Column("avatar_id")]
         public string AvatarId { get; set; }
-        [Column("total_xp")]
-        public int TotalXp { get; set; }
+        [Column("total_xp")] 
+        public int TotalXp { get; set; } = 0;
         [Column("last_level_up")]
-        public DateTimeOffset LastLevelUp { get; set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset LastLevelUp { get; set; } = DateTimeOffset.MinValue;
         [Column("last_xp_gain")]
-        public DateTimeOffset LastXpGain { get; set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset LastXpGain { get; set; } = DateTimeOffset.MinValue;
         [Column("notification_location")]
         public string NotificationLocation { get; set; } = "dm";
         [Column("currency")]
