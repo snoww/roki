@@ -56,7 +56,7 @@ namespace Roki.Modules.Gambling
                     return;
                 }
                 var user = ctx.User;
-                var removed = await _currency.ChangeAsync(ctx.User, $"Lottery Entry x{tickets}", -tickets * _roki.Properties.LotteryTicketCost, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}",
+                var removed = await _currency.ChangeAsync(ctx.User, $"Lottery Entry x{tickets}", -tickets * _roki.Properties.LotteryTicketCost, ctx.User.Id, ctx.Client.CurrentUser.Id,
                     ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id).ConfigureAwait(false);
                 if (!removed)
                 {
@@ -103,7 +103,7 @@ namespace Roki.Modules.Gambling
                     }
                 }
                 var user = ctx.User;
-                var removed = await _currency.ChangeAsync(ctx.User, "Lottery Entry", -_roki.Properties.LotteryTicketCost, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}",
+                var removed = await _currency.ChangeAsync(ctx.User, "Lottery Entry", -_roki.Properties.LotteryTicketCost, ctx.User.Id, ctx.Client.CurrentUser.Id,
                     ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id).ConfigureAwait(false);
                 if (!removed)
                 {

@@ -69,8 +69,7 @@ namespace Roki.Modules.Currency.Services
                     {
                         Amount = drop,
                         Reason = "GCA",
-                        From = "Server",
-                        To = "-",
+                        From = _roki.Properties.BotId,
                         GuildId = channel.GuildId,
                         ChannelId = channel.Id,
                         MessageId = curMessage.Id
@@ -134,8 +133,7 @@ namespace Roki.Modules.Currency.Services
             {
                 Amount = amount,
                 Reason = "UserDrop",
-                From = dUser.UserId.ToString(),
-                To = "-",
+                From = dUser.UserId,
                 GuildId = ctx.Guild.Id,
                 ChannelId = msg.Channel.Id,
                 MessageId = msg.Id

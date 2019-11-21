@@ -221,7 +221,7 @@ namespace Roki.Modules.Games
                     foreach (var (key, value) in joinedReactions)
                     {
                         await _currency
-                            .ChangeAsync(key, "BetShowdown Entry", -value.Amount * value.Multiple, ctx.User.Id.ToString(), $"{ctx.Client.CurrentUser.Id}", ctx.Guild.Id, ctx.Channel.Id,
+                            .ChangeAsync(key, "BetShowdown Entry", -value.Amount * value.Multiple, ctx.User.Id, ctx.Client.CurrentUser.Id, ctx.Guild.Id, ctx.Channel.Id,
                                 ctx.Message.Id)
                             .ConfigureAwait(false);
                     }
@@ -253,7 +253,7 @@ namespace Roki.Modules.Games
                         }
                         var won = value.Amount * value.Multiple * 2;
                         winners += $"{key.Username} won `{won:N0}` {_roki.Properties.CurrencyIcon}\n";
-                        await _currency.ChangeAsync(key, "BetShowdown Payout", won, $"{ctx.Client.CurrentUser.Id}", ctx.User.Id.ToString(), ctx.Guild.Id,
+                        await _currency.ChangeAsync(key, "BetShowdown Payout", won, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id,
                             ctx.Channel.Id, ctx.Message.Id);
                     }
                     

@@ -11,9 +11,9 @@ namespace Roki.Core.Services.Database.Models
         [Column("reason")]
         public string Reason { get; set; }
         [Column("to")]
-        public string To { get; set; } = "-";
+        public ulong To { get; set; }
         [Column("from")]
-        public string From { get; set; } = "-";
+        public ulong From { get; set; }
         [Column("guild_id")]
         public ulong GuildId { get; set; }
         [Column("channel_id")]
