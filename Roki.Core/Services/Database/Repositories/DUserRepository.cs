@@ -16,9 +16,7 @@ namespace Roki.Core.Services.Database.Repositories
 {
     public interface IDUserRepository : IRepository<DUser>
     {
-        void EnsureCreated(ulong userId, string username, string discriminator, string avatarId);
-        DUser GetOrCreate(ulong userId, string username, string discriminator, string avatarId);
-        DUser GetOrCreate(IUser original);
+        Task<DUser> GetOrCreate(IUser original);
         DUser[] GetUsersXpLeaderboard(int page);
         long GetUserCurrency(ulong userId);
         Task<bool> UpdateCurrencyAsync(IUser user, long amount);
@@ -45,47 +43,33 @@ namespace Roki.Core.Services.Database.Repositories
         {
         }
 
-        public void EnsureCreated(ulong userId, string username, string discriminator, string avatarId)
-        {
-//            var user = Set.FirstOrDefault(u => u.UserId == userId);
-//
-//            if (user == null)
-//            {
-//                Context.Update(user = new DUser
-//                {
-//                    UserId = userId,
-//                    Username = username,
-//                    Discriminator = discriminator,
-//                    AvatarId = avatarId
-//                });
-//            }
-            Context.Database.ExecuteSqlInterpolated($@"
-UPDATE users
-SET username={username},
-    discriminator={discriminator},
-    avatar_id={avatarId}
-WHERE user_id={userId};
-
-INSERT INTO users (user_id, username, discriminator, avatar_id, last_level_up, last_xp_gain, investing)
-VALUES ({userId}, {username}, {discriminator}, {avatarId}, {DateTimeOffset.MinValue}, {DateTimeOffset.MinValue}, 50000)
-ON CONFLICT (user_id) DO NOTHING
-");
-        }
-
-        public DUser GetOrCreate(ulong userId, string username, string discriminator, string avatarId)
+        private async Task<DUser> EnsureCreated(ulong userId, string username, string discriminator, string avatarId)
         {
             var user = Set.FirstOrDefault(u => u.UserId == userId);
-            if (user != null && user.Username == username && user.Discriminator == discriminator && user.AvatarId == avatarId) 
-                return user;
-            
-            EnsureCreated(userId, username, discriminator, avatarId);
-            user = Set.First(u => u.UserId == userId);
 
+            if (user == null)
+            {
+                Context.Add(user = new DUser
+                {
+                    UserId = userId,
+                    Username = username,
+                    Discriminator = discriminator,
+                    AvatarId = avatarId,
+                });
+            }
+            else if (username != user.Username || discriminator != user.Discriminator || avatarId != user.AvatarId)
+            {
+                user.Username = username;
+                user.Discriminator = discriminator;
+                user.AvatarId = avatarId;
+            }
+
+            await Context.SaveChangesAsync().ConfigureAwait(false);
             return user;
         }
 
-        public DUser GetOrCreate(IUser original) => 
-            GetOrCreate(original.Id, original.Username, original.Discriminator, original.AvatarId);
+        public async Task<DUser> GetOrCreate(IUser original) =>
+            await EnsureCreated(original.Id, original.Username, original.Discriminator, original.AvatarId).ConfigureAwait(false);
 
         public DUser[] GetUsersXpLeaderboard(int page)
         {
@@ -104,7 +88,7 @@ ON CONFLICT (user_id) DO NOTHING
         {
             if (amount == 0)
                 return false;
-            var dUser = GetOrCreate(user);
+            var dUser = await GetOrCreate(user).ConfigureAwait(false);
             if (dUser.Currency + amount < 0)
                 return false;
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
