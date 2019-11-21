@@ -26,9 +26,9 @@ namespace Roki.Core.Services.Database.Repositories
             var toReturn = (trans.Sum(t => t.Amount), trans.Select(t => t.MessageId).ToArray());
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 UPDATE transactions
-SET `reason`={"Picked"},
-    `to`={userId}
-WHERE `channel_id`={channelId} AND (`reason`={"GCA"} OR `reason`={"UserDrop"})
+SET reason={"Picked"},
+    'to'={userId}
+WHERE channel_id={channelId} AND (reason={"GCA"} OR reason={"UserDrop"})
 ").ConfigureAwait(false);
             return toReturn;
         }
