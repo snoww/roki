@@ -28,18 +28,24 @@ namespace Roki.Core.Services.Database.Repositories
 
         public async Task NewSubscriptionAsync(ulong userId, ulong guildId, int itemId, string type, string description, DateTime startDate, DateTime endDate)
         {
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-INSERT INTO subscriptions(user_id, guild_id, item_id, type, description, start_date, end_date)
-VALUES({userId}, {guildId}, {itemId}, {type}, {description}, {startDate}, {endDate})")
-                .ConfigureAwait(false);
+            await Set.AddAsync(new Subscriptions
+            {
+                UserId = userId,
+                GuildId = guildId,
+                ItemId = itemId,
+                Type = type,
+                Description = description,
+                StartDate = startDate,
+                EndDate = endDate
+            }).ConfigureAwait(false);
+            await Context.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task RemoveSubscriptionAsync(int id)
         {
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-DELETE FROM subscriptions
-WHERE id={id}")
-                .ConfigureAwait(false);
+            var sub = await Set.FirstAsync(s => s.Id == id).ConfigureAwait(false);
+            Set.Remove(sub);
+            await Context.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public IEnumerable<Subscriptions> GetExpiredSubscriptions()
@@ -56,13 +62,10 @@ WHERE id={id}")
 
         public async Task UpdateSubscriptionsAsync(int id, int days)
         {
-            var sub = await Set.FirstOrDefaultAsync(s => s.Id == id).ConfigureAwait(false);
+            var sub = await Set.FirstAsync(s => s.Id == id).ConfigureAwait(false);
             var newEndDate = sub.EndDate + TimeSpan.FromDays(days);
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE subscriptions
-SET end_date = {newEndDate}
-WHERE id = {id} ")
-                .ConfigureAwait(false);
+            sub.EndDate = newEndDate;
+            await Context.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public List<Subscriptions> GetUserSubscriptions(ulong userId)

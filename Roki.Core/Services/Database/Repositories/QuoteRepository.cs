@@ -48,11 +48,9 @@ namespace Roki.Core.Services.Database.Repositories
 
         public async Task IncrementUseCount(int id)
         {
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-UPDATE quotes
-SET use_count=use_count+1
-WHERE id={id}")
-                .ConfigureAwait(false);
+            var quote = await Set.FirstAsync(q => q.Id == id).ConfigureAwait(false);
+            quote.UseCount += 1;
+            await Context.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public void RemoveAllByKeyword(ulong guildId, string keyword)
