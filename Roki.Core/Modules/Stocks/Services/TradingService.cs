@@ -107,7 +107,7 @@ namespace Roki.Modules.Stocks.Services
         {
             using var uow = _db.GetDbContext();
             var portfolio = await uow.DUsers.GetOrCreateUserPortfolio(userId).ConfigureAwait(false);
-            if (!portfolio.Any(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)) && price * amount >= 100000)
+            if (!portfolio.Any(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)) && Math.Abs(price * amount) >= 100000)
                 return false;
             if (!await CanShortStock(portfolio).ConfigureAwait(false))
                 return false;
