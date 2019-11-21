@@ -7,9 +7,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
 using Roki.Core.Services.Database.Models;
-using Roki.Extensions;
 using Roki.Modules.Xp.Common;
 
 namespace Roki.Core.Services.Database.Repositories
@@ -199,7 +197,7 @@ namespace Roki.Core.Services.Database.Repositories
             if (position == "short")
             {
                 shares = -shares;
-                interestDate = DateTimeOffset.UtcNow.AddDays(7);;
+                interestDate = DateTimeOffset.UtcNow.AddDays(7);
             }
             
             if (portfolio == null || portfolio.Count == 0)
