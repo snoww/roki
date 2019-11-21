@@ -53,6 +53,6 @@ namespace Roki.Core.Services.Database.Models
         public string Symbol { get; set; }
         public string Position { get; set; }
         public long Shares { get; set; }
-        public DateTime? InterestDate { get; set; } = null;
+        public DateTimeOffset? InterestDate { get; set; }
     }
 }

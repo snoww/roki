@@ -99,14 +99,14 @@ namespace Roki.Modules.Stocks.Services
         public async Task<List<Investment>> GetUserPortfolioAsync(ulong userId)
         {
             using var uow = _db.GetDbContext();
-            return await uow.DUsers.GetOrCreateUserPortfolio(userId).ConfigureAwait(false);
+            return await uow.DUsers.GetUserPortfolio(userId).ConfigureAwait(false);
         }
 
         public async Task<bool> UpdateUserPortfolioAsync(ulong userId, string symbol, Stocks.TradingCommands.Position position, 
             string action, decimal price, long amount)
         {
             using var uow = _db.GetDbContext();
-            var portfolio = await uow.DUsers.GetOrCreateUserPortfolio(userId).ConfigureAwait(false);
+            var portfolio = await uow.DUsers.GetUserPortfolio(userId).ConfigureAwait(false);
             if (!portfolio.Any(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)) && Math.Abs(price * amount) >= 100000)
                 return false;
             if (!await CanShortStock(portfolio).ConfigureAwait(false))

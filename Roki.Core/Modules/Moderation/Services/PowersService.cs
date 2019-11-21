@@ -26,7 +26,7 @@ namespace Roki.Modules.Moderation.Services
         public async Task<bool> AvailablePower(ulong userId, string power)
         {
             using var uow = _db.GetDbContext();
-            var inv =  await uow.DUsers.GetOrCreateUserInventory(userId).ConfigureAwait(false);
+            var inv =  await uow.DUsers.GetUserInventory(userId).ConfigureAwait(false);
             return inv.Any(i => i.Name.Equals(power, StringComparison.OrdinalIgnoreCase));
         }
         
