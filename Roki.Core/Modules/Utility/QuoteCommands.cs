@@ -56,11 +56,9 @@ namespace Roki.Modules.Utility
                 Quote quote;
                 using (var uow = _db.GetDbContext())
                 {
-                    quote = uow.Quotes.GetRandomQuoteByKeywordAsync(ctx.Guild.Id, keyword);
+                    quote = await uow.Quotes.GetRandomQuoteByKeywordAsync(ctx.Guild.Id, keyword).ConfigureAwait(false);
                     if (quote == null)
                         return;
-                    await uow.Quotes.IncrementUseCount(quote.Id).ConfigureAwait(false);
-                    await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
                 var author = await ctx.Guild.GetUserAsync(quote.AuthorId).ConfigureAwait(false);
                 if (context)
@@ -158,6 +156,7 @@ namespace Roki.Modules.Utility
                     quote = uow.Quotes.GetById(id);
                     if (quote.GuildId != ctx.Guild.Id)
                         quote = null;
+                    await uow.Quotes.IncrementUseCount(id).ConfigureAwait(false);
                 }
 
                 if (quote == null)

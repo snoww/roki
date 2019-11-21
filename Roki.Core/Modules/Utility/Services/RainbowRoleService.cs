@@ -22,7 +22,7 @@ namespace Roki.Modules.Utility.Services
 
         private void ColorChangeTimer()
         {
-            _timer = new Timer(ChangeRoleColor, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
+            _timer = new Timer(ChangeRoleColor, null, TimeSpan.Zero, TimeSpan.FromMinutes(30));
         }
         
         private async void ChangeRoleColor(object state)

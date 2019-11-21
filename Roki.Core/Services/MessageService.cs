@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -39,20 +40,30 @@ namespace Roki.Services
             if (message.Author.IsBot) return;
             using (var uow = _db.GetDbContext())
             {
-                var user = uow.DUsers.GetOrCreate(message.Author);
+                var user = await uow.DUsers.GetOrCreate(message.Author).ConfigureAwait(false);
                 var doubleXp = uow.Subscriptions.DoubleXpIsActive(message.Author.Id);
                 var fastXp = uow.Subscriptions.FastXpIsActive(message.Author.Id);
                 if (fastXp)
                 {
-                    if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpFastCooldown))
+                    if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpFastCooldown))
                         await uow.DUsers.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
                 }
                 else
                 {
-                    if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpCooldown))
+                    if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpCooldown))
                         await uow.DUsers.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
                 }
 
+                string content;
+                if (!string.IsNullOrWhiteSpace(message.Content) && message.Attachments.Count == 0)
+                    content = message.Content;
+                else if (!string.IsNullOrWhiteSpace(message.Content) && message.Attachments.Count > 0)
+                    content = message.Content + "\n" + string.Join("\n", message.Attachments.Select(a => a.Url));
+                else if (message.Attachments.Count > 0)
+                    content = string.Join("\n", message.Attachments.Select(a => a.Url));
+                else
+                    content = "";
+                
                 uow.DMessages.Add(new DMessage
                 {
                     AuthorId = message.Author.Id,
@@ -62,9 +73,9 @@ namespace Roki.Services
                     GuildId = message.Channel is ITextChannel chId ? chId.GuildId : (ulong?) null,
                     Guild = message.Channel is ITextChannel ch ? ch.Guild.Name : null,
                     MessageId = message.Id,
-                    Content = message.Content,
-                    EditedTimestamp = message.EditedTimestamp?.UtcDateTime,
-                    Timestamp = message.Timestamp.UtcDateTime
+                    Content = content,
+                    EditedTimestamp = message.EditedTimestamp?.ToUniversalTime(),
+                    Timestamp = message.Timestamp.ToUniversalTime()
                 });
 
                 await uow.SaveChangesAsync().ConfigureAwait(false);
@@ -79,6 +90,15 @@ namespace Roki.Services
                 return;
             using (var uow = _db.GetDbContext())
             {
+                string content;
+                if (!string.IsNullOrWhiteSpace(after.Content) && after.Attachments.Count == 0)
+                    content = after.Content;
+                else if (!string.IsNullOrWhiteSpace(after.Content) && after.Attachments.Count > 0)
+                    content = after.Content + "\n" + string.Join("\n", after.Attachments.Select(a => a.Url));
+                else if (after.Attachments.Count > 0)
+                    content = string.Join("\n", after.Attachments.Select(a => a.Url));
+                else
+                    content = "";
                 uow.DMessages.Add(new DMessage
                 {
                     AuthorId = after.Author.Id,
@@ -88,9 +108,9 @@ namespace Roki.Services
                     GuildId = after.Channel is ITextChannel chId ? chId.GuildId : (ulong?) null,
                     Guild = after.Channel is ITextChannel ch ? ch.Guild.Name : null,
                     MessageId = after.Id,
-                    Content = after.Content,
-                    EditedTimestamp = after.EditedTimestamp?.UtcDateTime,
-                    Timestamp = after.Timestamp.UtcDateTime
+                    Content = content,
+                    EditedTimestamp = after.EditedTimestamp?.ToUniversalTime(),
+                    Timestamp = after.Timestamp.ToUniversalTime()
                 });
                     
                 await uow.SaveChangesAsync().ConfigureAwait(false);
