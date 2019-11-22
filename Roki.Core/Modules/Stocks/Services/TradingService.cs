@@ -172,7 +172,38 @@ namespace Roki.Modules.Stocks.Services
         
         public async Task<bool> LongPositionAsync(ulong userId, string symbol, string action, decimal price, long amount)
         {
+            using var uow = _db.GetDbContext();
+            var total = price * amount;
+            bool success;
+            symbol = symbol.ToUpper();
+            if (action == "buy") // BUYING SHARES
+            {
+                var update = await uow.DUsers.UpdateInvestingAccountAsync(userId, -total).ConfigureAwait(false);
+                if (!update) return false;
+                success = await uow.DUsers.UpdateUserPortfolio(userId, symbol, "long", action, amount);
+            }
+            else // SELLING SHARES
+            {
+                var update = await uow.DUsers.UpdateInvestingAccountAsync(userId, total).ConfigureAwait(false);
+                if (!update) return false;
+                success = await uow.DUsers.UpdateUserPortfolio(userId, symbol, "long", action, -amount);
+            }
+
+            if (!success) return false;
             
+            uow.Trades.Add(new Trades
+            {
+                UserId = userId,
+                Symbol = symbol,
+                Position = "short",
+                Action = action,
+                Shares = amount,
+                Price = price,
+                TransactionDate = DateTimeOffset.UtcNow
+            });
+            
+            await uow.SaveChangesAsync().ConfigureAwait(false);
+            return true;
         }
         
         private async Task<bool> CanShortStock(List<Investment> portfolio, decimal cost)
