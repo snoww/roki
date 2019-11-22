@@ -39,7 +39,8 @@ namespace Roki.Modules.Help
                 .WithDescription(string.Join("\n",
                     _command.Modules.GroupBy(module => module.GetTopLevelModule())
                         .Select(module => "• " + module.Key.Name)
-                        .OrderBy(s => s)));
+                        .OrderBy(s => s)))
+                .WithFooter("Use .commands <module> to see commands of that module");
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
@@ -77,7 +78,7 @@ namespace Roki.Modules.Help
             if (!cmds.Any())
             {
                 if (opts.View != CommandOptions.ViewType.Hide)
-                    await ctx.Channel.SendErrorAsync("Module not found").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync("Module not found, use `.modules` to see the list of modules.").ConfigureAwait(false);
                 else
                     await ctx.Channel.SendErrorAsync("Module not found or can't execute");
                 return;
@@ -85,20 +86,18 @@ namespace Roki.Modules.Help
 
             var i = 0;
             var groups = cmdsWithGroup.GroupBy(x => i++ / 48).ToArray();
-            var embed = new EmbedBuilder().WithOkColor();
+            var embed = new EmbedBuilder().WithOkColor()
+                .WithTitle($"{module} Module Commands")
+                .WithFooter(string.Format("Type `{0}h <command>` to see the help for that specified command. e.g. `{0}h {0}help`", Prefix));
 
             foreach (var group in groups)
             {
                 var last = group.Count();
                 for (i = 0; i < last; i++)
                 {
-                    var transformed = group.ElementAt(i).Select(x =>
-                    {
-                        if (opts.View == CommandOptions.ViewType.Cross)
-                            return
-                                $"{(success.Contains(x) ? "✅" : "❌")}{Prefix + x.Aliases.First(),-15} {"[" + x.Aliases.Skip(1).FirstOrDefault() + "]",-8}";
-                        return $"{Prefix + x.Aliases.First(),-13} {"[" + x.Aliases.Skip(1).FirstOrDefault() + "]",-5}";
-                    });
+                    var transformed = group.ElementAt(i).Select(x => opts.View == CommandOptions.ViewType.Cross 
+                        ? $"{(success.Contains(x) ? "✅" : "❌")}{Prefix + x.Aliases.First(),-15} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}\n" 
+                        : $"{Prefix + x.Aliases.First(),-15} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}");
 
                     if (i == last - 1 && (i + 1) % 2 != 0)
                     {
@@ -109,11 +108,10 @@ namespace Roki.Modules.Help
                             .Select(x => x.Count() == 1 ? $"{x.First()}" : string.Concat(x));
                     }
 
-                    embed.AddField(group.ElementAt(i).Key, "```css\n" + string.Join("\n", transformed) + "\n```", true);
+                    embed.AddField(group.ElementAt(i).Key, "```css\n" + string.Join("\n", transformed) + "\n```");
                 }
             }
-
-            embed.WithFooter(string.Format("Type `{0}h CommandName` to see the help for that specified command. e.g. `{0}h {0}8ball`", Prefix));
+            
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
@@ -128,7 +126,7 @@ namespace Roki.Modules.Help
                 return;
             }
             
-            await ctx.Channel.SendErrorAsync("Command not found.\nTry `.modules` to find the correct module, then `.commands Module` to find the specific command.").ConfigureAwait(false);
+            await ctx.Channel.SendErrorAsync("Command not found.\nTry `.modules` to find the correct module, then `.commands <module>` to find the specific command.").ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -144,11 +142,12 @@ namespace Roki.Modules.Help
                     : channel;
 
                 await ch.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    .WithTitle("Roki Help")
                     // TODO add this in botconfig
                     .WithDescription(string.Format(@"
 You can use `{0}modules` command to see a list of all modules.
-You can use `{0}commands ModuleName` to see a list of all the commands in that module (e.g. `{0}commands Utility`).
-You can use `{0}h CommandName` to get help for a specific command (e.g. `{0}h listquotes`).
+You can use `{0}commands <module>` to see a list of all the commands in that module (e.g. `{0}commands Utility`).
+You can use `{0}h <command>` to get help for a specific command (e.g. `{0}h listquotes`).
 ", Prefix))).ConfigureAwait(false);
             }
 

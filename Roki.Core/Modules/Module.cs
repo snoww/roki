@@ -10,8 +10,6 @@ namespace Roki.Modules
 {
     public abstract class RokiTopLevelModule : ModuleBase
     {
-        public string Prefix = ".";
-
         protected RokiTopLevelModule(bool isTopLevelModule = true)
         {
             ModuleTypeName = isTopLevelModule ? GetType().Name : GetType().DeclaringType.Name;
@@ -25,7 +23,7 @@ namespace Roki.Modules
         public string LowerModuleTypeName { get; }
 
         public CommandHandler Handler { get; }
-//        public string Prefix => Handler.DefaultPrefix;
+        public string Prefix => Handler.DefaultPrefix;
 
         protected ICommandContext ctx => Context;
 
