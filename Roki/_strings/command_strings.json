@@ -570,7 +570,7 @@
     "Description": "Long or short shares of a company. Shorted shares will be charged a premium every week.",
     "Usage": [
       "{0}stockbuy AAPL long 50",
-      "{0}sb AAPL short 15"
+      "{0}position AAPL short 15"
     ]
   },
   "stocksell": {
