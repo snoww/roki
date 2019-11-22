@@ -144,11 +144,10 @@ namespace Roki.Modules.Games
                     await startMsg.AddReactionsAsync(_reactionMap.Keys.ToArray()).ConfigureAwait(false);
 
                     var joinedReactions = new Dictionary<IUser, PlayerBet>();
-                    var timeout = DateTime.UtcNow + TimeSpan.FromSeconds(30);
-                    _client.ReactionAdded += (cachedMessage, channel, reaction) =>
+                    _client.ReactionAdded += ReactionAddedHandler;
+                    Task ReactionAddedHandler(Cacheable<IUserMessage, ulong> cachedMessage, ISocketMessageChannel channel, SocketReaction reaction)
                     {
-                        if (ctx.Channel.Id != channel.Id || cachedMessage.Value.Id != startMsg.Id || !_reactionMap.ContainsKey(reaction.Emote) ||
-                            DateTime.UtcNow > timeout || reaction.User.Value.IsBot) return Task.CompletedTask;
+                        if (ctx.Channel.Id != channel.Id || cachedMessage.Value.Id != startMsg.Id || !_reactionMap.ContainsKey(reaction.Emote) || reaction.User.Value.IsBot) return Task.CompletedTask;
                         var user = reaction.User.Value;
                         var _ = Task.Run(async () =>
                         {
@@ -181,6 +180,8 @@ namespace Roki.Modules.Games
                                 {
                                     joinedReactions[user].Amount = currency;
                                     joinedReactions[user].Multiple = 1;
+                                    await startMsg.RemoveReactionsAsync(reaction.User.Value, _reactionMap.Keys.Where(r => !r.Equals(AllIn)).ToArray())
+                                        .ConfigureAwait(false);
                                 }
                                 else if (reaction.Emote.Equals(TimesTwo) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 2)
                                     joinedReactions[user].Multiple *= 2;
@@ -204,9 +205,10 @@ namespace Roki.Modules.Games
                         });
                         
                         return Task.CompletedTask;
-                    };
+                    }
 
-                    Thread.Sleep(TimeSpan.FromSeconds(35));
+                    await Task.Delay(TimeSpan.FromSeconds(35)).ConfigureAwait(false);
+                    _client.ReactionAdded -= ReactionAddedHandler;
                     
                     if (joinedReactions.Count == 0)
                     {
