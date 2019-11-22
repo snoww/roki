@@ -168,12 +168,19 @@ namespace Roki.Modules.Games
                             }
                             // If user exists in dictionary and reacted with player1 
                             if (reaction.Emote.Equals(Player1))
+                            {
                                 joinedReactions[user].Bet = BetPlayer.P1;
+                                return Task.CompletedTask;
+                            }
+                            
                             // If user exists in dictionary and reacted with player2 
-                            else if (reaction.Emote.Equals(Player2))
+                            if (reaction.Emote.Equals(Player2))
+                            {
                                 joinedReactions[user].Bet = BetPlayer.P2;
+                                return Task.CompletedTask;
+                            }
                             // If user exists in dictionary and reacted with any other emote in the reactionMap
-                            else if (_reactionMap.ContainsKey(reaction.Emote))
+                            if (_reactionMap.ContainsKey(reaction.Emote))
                             {
                                 var currency = _currency.GetCurrency(user.Id);
                                 if (reaction.Emote.Equals(AllIn))
@@ -189,7 +196,8 @@ namespace Roki.Modules.Games
                                     joinedReactions[user].Multiple *= 5;
                                 else if (reaction.Emote.Equals(TimesTen) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 10)
                                     joinedReactions[user].Multiple *= 10;
-                                else if (currency >= joinedReactions[user].Amount + _reactionMap[reaction.Emote] * joinedReactions[user].Multiple) 
+                                else if (!reaction.Emote.Equals(TimesTwo) && !reaction.Emote.Equals(TimesFive) && !reaction.Emote.Equals(TimesTen) && 
+                                         currency >= joinedReactions[user].Amount + _reactionMap[reaction.Emote] * joinedReactions[user].Multiple) 
                                     joinedReactions[user].Amount += _reactionMap[reaction.Emote];
                                 else
                                 {
