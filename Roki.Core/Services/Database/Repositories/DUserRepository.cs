@@ -186,7 +186,9 @@ namespace Roki.Core.Services.Database.Repositories
         public async Task<List<Investment>> GetUserPortfolio(ulong userId)
         {
             var user = await Set.FirstAsync(u => u.UserId == userId).ConfigureAwait(false);
-            return user.Portfolio != null ? JsonSerializer.Deserialize<List<Investment>>(user.Portfolio) : null;
+            var portfolio = user.Portfolio != null ? JsonSerializer.Deserialize<List<Investment>>(user.Portfolio) : null;
+            if (portfolio != null && portfolio.Count == 0) return null;
+            return portfolio;
         }
 
         public async Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, string action, long shares)
@@ -195,12 +197,9 @@ namespace Roki.Core.Services.Database.Repositories
             var portfolio = await GetUserPortfolio(userId).ConfigureAwait(false);
             DateTimeOffset? interestDate = null;
             if (position == "short")
-            {
-                shares = -shares;
                 interestDate = DateTimeOffset.UtcNow.AddDays(7);
-            }
-            
-            if (portfolio == null || portfolio.Count == 0)
+
+            if (portfolio == null)
             {
                 Investment[] investment = {new Investment {Symbol = symbol, Position = position, Shares = shares, InterestDate = interestDate}};
                 var json = JsonSerializer.Serialize(investment);
@@ -222,14 +221,6 @@ namespace Roki.Core.Services.Database.Repositories
             else
             {
                 var investment = portfolio.First(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
-                if (investment.Position == "short" && action == "buy")
-                    shares = -shares;
-                else if (investment.Position == "short" && action == "sell")
-                    shares = Math.Abs(shares);
-                else if (investment.Position == "long" && action == "buy")
-                    shares = Math.Abs(shares);
-                else
-                    shares = -shares;
                 if (investment.Shares + shares < 0) return false;
                 investment.Shares += shares;
                 if (investment.Shares == 0)
@@ -275,7 +266,7 @@ namespace Roki.Core.Services.Database.Repositories
             foreach (var user in users)
             {
                 var port = await GetUserPortfolio(user.UserId).ConfigureAwait(false);
-                if (port == null || port.Count <= 0)
+                if (port == null)
                     continue;
                 portfolios.Add(user.UserId, port);
             }
