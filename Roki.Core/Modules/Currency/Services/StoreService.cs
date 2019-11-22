@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 using Roki.Core.Services;
 using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
@@ -73,7 +74,7 @@ namespace Roki.Modules.Currency.Services
         public List<Listing> GetStoreCatalog()
         {
             using var uow = _db.GetDbContext();
-            return uow.Listing.GetStoreCatalog();
+            return uow.Context.Listings.AsNoTracking().OrderByDescending(l => l.Cost).ToList();
         }
 
         public Listing GetListingByName(string name)
