@@ -22,7 +22,7 @@ namespace Roki.Core.Services.Database.Repositories
 
         public List<Listing> GetStoreCatalog()
         {
-            return Set.OrderByDescending(l => l.Cost).AsEnumerable().ToList();
+            return Set.OrderByDescending(l => l.Cost).ToList();
         }
 
         public Listing GetListingByName(string name)

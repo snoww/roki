@@ -13,6 +13,11 @@ namespace Roki.Core.Services.Database
         public DbSet<Quote> Quotes { get; set; }
         public DbSet<DUser> DUsers { get; set; }
         public DbSet<DMessage> DMessages { get; set; }
+        public DbSet<CurrencyTransaction> Transactions { get; set; }
+        public DbSet<Listing> Listings { get; set; }
+        public DbSet<Subscriptions> Subscriptions { get; set; }
+        public DbSet<Lottery> Lotteries { get; set; }
+        public DbSet<Trades> Trades { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
