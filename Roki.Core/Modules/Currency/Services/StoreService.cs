@@ -74,7 +74,7 @@ namespace Roki.Modules.Currency.Services
         public List<Listing> GetStoreCatalog()
         {
             using var uow = _db.GetDbContext();
-            return uow.Context.Listings.AsNoTracking().OrderByDescending(l => l.Cost).ToList();
+            return uow.Context.Listings.AsNoTracking().ToList();
         }
 
         public Listing GetListingByName(string name)
