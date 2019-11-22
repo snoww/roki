@@ -45,11 +45,10 @@
     ]
   },
   "commands": {
-    "Command": "commands Commands",
+    "Command": "commands cmds",
     "Description": "List all of the bot's commands from a certain module. You can either specify the full name or only the first few letters of the module name.",
     "Usage": [
-      "{0}Commands Admin",
-      "{0}Commands Admin --view 1"
+      "{0}Commands stocks"
     ]
   },
   "h": {
