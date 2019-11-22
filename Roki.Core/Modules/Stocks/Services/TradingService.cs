@@ -109,8 +109,8 @@ namespace Roki.Modules.Stocks.Services
             var portfolio = await uow.DUsers.GetUserPortfolio(userId).ConfigureAwait(false);
             if (!portfolio.Any(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)) && Math.Abs(price * amount) >= 100000)
                 return false;
-            if (!await CanShortStock(portfolio).ConfigureAwait(false))
-                return false;
+//            if (!await CanShortStock(portfolio).ConfigureAwait(false))
+//                return false;
             symbol = symbol.ToUpper();
             var pos = position == Stocks.TradingCommands.Position.Long ? "long" : "short";
             uow.Trades.Add(new Trades
@@ -127,16 +127,62 @@ namespace Roki.Modules.Stocks.Services
             await uow.SaveChangesAsync().ConfigureAwait(false);
             return success;
         }
-        
-        private async Task<bool> CanShortStock(List<Investment> portfolio)
+
+        public async Task<bool> ShortPositionAsync(ulong userId, string symbol, string action, decimal price, long amount)
         {
-            var value = 0m;
+            using var uow = _db.GetDbContext();
+            var total = price * amount;
+            bool success;
+            symbol = symbol.ToUpper();
+            var portfolio = await uow.DUsers.GetUserPortfolio(userId).ConfigureAwait(false);
+            if (action == "buy") // LENDING SHARES FROM BANK, SELLING IMMEDIATELY
+            {
+                if (!portfolio.Any(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)) && total >= 100000)
+                    return false;
+                if (!await CanShortStock(portfolio, total).ConfigureAwait(false))
+                    return false;
+                var update = await uow.DUsers.UpdateInvestingAccountAsync(userId, total).ConfigureAwait(false);
+                if (!update) return false;
+                success = await uow.DUsers.UpdateUserPortfolio(userId, symbol, "short", action, amount);
+                return success;
+            }
+            else // SELLING SHARES BACK TO BANK
+            {
+                var update = await uow.DUsers.UpdateInvestingAccountAsync(userId, -total).ConfigureAwait(false);
+                if (!update) return false;
+                success = await uow.DUsers.UpdateUserPortfolio(userId, symbol, "short", action, -amount);
+            }
+
+            if (!success) return false;
+            
+            uow.Trades.Add(new Trades
+            {
+                UserId = userId,
+                Symbol = symbol,
+                Position = "short",
+                Action = action,
+                Shares = amount,
+                Price = price,
+                TransactionDate = DateTimeOffset.UtcNow
+            });
+            
+            await uow.SaveChangesAsync().ConfigureAwait(false);
+            return true;
+        }
+        
+        public async Task<bool> LongPositionAsync(ulong userId, string symbol, string action, decimal price, long amount)
+        {
+            
+        }
+        
+        private async Task<bool> CanShortStock(List<Investment> portfolio, decimal cost)
+        {
             foreach (var investment in portfolio.Where(investment => investment.Position.Equals("short", StringComparison.OrdinalIgnoreCase)))
             {
                 var price = await GetLatestPriceAsync(investment.Symbol).ConfigureAwait(false);
-                value += price.Value * investment.Shares;
+                cost += price.Value * investment.Shares;
             }
-            return value <= 100000;
+            return cost <= 100000;
         }
 
         private async Task<decimal> CalculateInterest(string symbol, long shares)
