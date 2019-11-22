@@ -153,7 +153,6 @@ namespace Roki.Modules.Games
 
                     async Task ReactionAdded(SocketReaction r)
                     {
-                        if (r.User.Value.IsBot) return;
                         var user = r.User.Value;
                         if (!joinedReactions.ContainsKey(user))
                         {
