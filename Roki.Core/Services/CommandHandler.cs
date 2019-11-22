@@ -51,14 +51,12 @@ namespace Roki.Core.Services
         public CommandHandler(DiscordSocketClient client,
             CommandService commandService,
             DbService db,
-//            Configuration config,
             Roki roki,
             IServiceProvider services)
         {
             _client = client;
             _commandService = commandService;
             _db = db;
-//            _config = config;
             _roki = roki;
             _services = services;
 
