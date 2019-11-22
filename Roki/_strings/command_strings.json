@@ -566,7 +566,7 @@
     ]
   },
   "stockposition": {
-    "Command": "stockbuy sb position",
+    "Command": "stockbuy position",
     "Description": "Long or short shares of a company. Shorted shares will be charged a premium every week.",
     "Usage": [
       "{0}stockbuy AAPL long 50",
