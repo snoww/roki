@@ -88,72 +88,37 @@ namespace Roki.Modules.Stocks.Services
             }
         }
 
-        public async Task<bool> UpdateInvAccountAsync(ulong userId, decimal amount)
-        {
-            using var uow = _db.GetDbContext();
-            var success = await uow.DUsers.UpdateInvestingAccountAsync(userId, amount).ConfigureAwait(false);
-            await uow.SaveChangesAsync().ConfigureAwait(false);
-            return success;
-        }
-
-        public async Task<List<Investment>> GetUserPortfolioAsync(ulong userId)
-        {
-            using var uow = _db.GetDbContext();
-            return await uow.DUsers.GetUserPortfolio(userId).ConfigureAwait(false);
-        }
-
-        public async Task<bool> UpdateUserPortfolioAsync(ulong userId, string symbol, Stocks.TradingCommands.Position position, 
-            string action, decimal price, long amount)
+        public async Task<Investment> GetOwnedShares(ulong userId, string symbol)
         {
             using var uow = _db.GetDbContext();
             var portfolio = await uow.DUsers.GetUserPortfolio(userId).ConfigureAwait(false);
-            if (!portfolio.Any(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)) && Math.Abs(price * amount) >= 100000)
-                return false;
-//            if (!await CanShortStock(portfolio).ConfigureAwait(false))
-//                return false;
-            symbol = symbol.ToUpper();
-            var pos = position == Stocks.TradingCommands.Position.Long ? "long" : "short";
-            uow.Trades.Add(new Trades
-            {
-                UserId = userId,
-                Symbol = symbol,
-                Position = pos,
-                Action = action,
-                Shares = amount,
-                Price = price,
-                TransactionDate = DateTimeOffset.UtcNow
-            });
-            var success = await uow.DUsers.UpdateUserPortfolio(userId, symbol, pos, action, amount);
-            await uow.SaveChangesAsync().ConfigureAwait(false);
-            return success;
+            var inv = portfolio.FirstOrDefault(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
+            return inv;
         }
 
-        public async Task<bool> ShortPositionAsync(ulong userId, string symbol, string action, decimal price, long amount)
+        public async Task<Status> ShortPositionAsync(ulong userId, string symbol, string action, decimal price, long amount)
         {
             using var uow = _db.GetDbContext();
             var total = price * amount;
             bool success;
-            symbol = symbol.ToUpper();
             var portfolio = await uow.DUsers.GetUserPortfolio(userId).ConfigureAwait(false);
             if (action == "buy") // LENDING SHARES FROM BANK, SELLING IMMEDIATELY
             {
                 if (!portfolio.Any(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)) && total >= 100000)
-                    return false;
+                    return Status.TooMuchLeverage;
                 if (!await CanShortStock(portfolio, total).ConfigureAwait(false))
-                    return false;
-                var update = await uow.DUsers.UpdateInvestingAccountAsync(userId, total).ConfigureAwait(false);
-                if (!update) return false;
+                    return Status.TooMuchLeverage;
+                await uow.DUsers.UpdateInvestingAccountAsync(userId, total).ConfigureAwait(false);
                 success = await uow.DUsers.UpdateUserPortfolio(userId, symbol, "short", action, amount);
-                return success;
             }
             else // SELLING SHARES BACK TO BANK
             {
                 var update = await uow.DUsers.UpdateInvestingAccountAsync(userId, -total).ConfigureAwait(false);
-                if (!update) return false;
+                if (!update) return Status.NotEnoughInvesting;
                 success = await uow.DUsers.UpdateUserPortfolio(userId, symbol, "short", action, -amount);
             }
 
-            if (!success) return false;
+            if (!success) return Status.NotEnoughShares;
             
             uow.Trades.Add(new Trades
             {
@@ -167,29 +132,27 @@ namespace Roki.Modules.Stocks.Services
             });
             
             await uow.SaveChangesAsync().ConfigureAwait(false);
-            return true;
+            return Status.Success;
         }
         
-        public async Task<bool> LongPositionAsync(ulong userId, string symbol, string action, decimal price, long amount)
+        public async Task<Status> LongPositionAsync(ulong userId, string symbol, string action, decimal price, long amount)
         {
             using var uow = _db.GetDbContext();
             var total = price * amount;
             bool success;
-            symbol = symbol.ToUpper();
             if (action == "buy") // BUYING SHARES
             {
                 var update = await uow.DUsers.UpdateInvestingAccountAsync(userId, -total).ConfigureAwait(false);
-                if (!update) return false;
+                if (!update) return Status.NotEnoughInvesting;
                 success = await uow.DUsers.UpdateUserPortfolio(userId, symbol, "long", action, amount);
             }
             else // SELLING SHARES
             {
-                var update = await uow.DUsers.UpdateInvestingAccountAsync(userId, total).ConfigureAwait(false);
-                if (!update) return false;
+                await uow.DUsers.UpdateInvestingAccountAsync(userId, total).ConfigureAwait(false);
                 success = await uow.DUsers.UpdateUserPortfolio(userId, symbol, "long", action, -amount);
             }
 
-            if (!success) return false;
+            if (!success) return Status.NotEnoughShares;
             
             uow.Trades.Add(new Trades
             {
@@ -203,7 +166,7 @@ namespace Roki.Modules.Stocks.Services
             });
             
             await uow.SaveChangesAsync().ConfigureAwait(false);
-            return true;
+            return Status.Success;
         }
         
         private async Task<bool> CanShortStock(List<Investment> portfolio, decimal cost)
@@ -220,6 +183,14 @@ namespace Roki.Modules.Stocks.Services
         {
             var price = (await GetLatestPriceAsync(symbol).ConfigureAwait(false)).Value;
             return price * shares * 0.025m;
+        }
+        
+        public enum Status
+        {
+            NotEnoughInvesting = -1,
+            NotEnoughShares = -2,
+            TooMuchLeverage = -3,
+            Success = 1
         }
     }
 }

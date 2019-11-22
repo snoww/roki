@@ -565,17 +565,17 @@
       "{0}stockprice AAPL"
     ]
   },
-  "stockbuy": {
-    "Command": "stockbuy sb",
-    "Description": "Buy shares of a company at the current price.",
+  "stockposition": {
+    "Command": "stockbuy sb position",
+    "Description": "Long or short shares of a company. Shorted shares will be charged a premium every week.",
     "Usage": [
-      "{0}stockbuy AAPL 50",
-      "{0}sb AAPL 15"
+      "{0}stockbuy AAPL long 50",
+      "{0}sb AAPL short 15"
     ]
   },
   "stocksell": {
     "Command": "stocksell ss",
-    "Description": "Sell a specified amount of shares. If you do not have the shares in your portfolio, you will lend them from the bank.",
+    "Description": "Sell a specified amount of shares.",
     "Usage": [
       "{0}stocksell AAPL 50",
       "{0}ss AAPL 20"
@@ -602,7 +602,7 @@
     "Description": "Shows the chart for the specified company, default is 1m. Options are `5y` `2y` `1y` `ytd` `6m` `3m` `1m` `5d` `today`",
     "Usage": [
       "{0}chart aapl",
-      "{0}chart goog 1m"
+      "{0}chart goog today"
     ]
   }
 }
