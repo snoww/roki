@@ -35,10 +35,10 @@ namespace Roki.Services
             await Task.CompletedTask;
         }
 
-        private async Task MessageReceived(SocketMessage message)
+        private Task MessageReceived(SocketMessage message)
         {
-            if (message.Author.IsBot) return;
-            await Task.Run(async () =>
+            if (message.Author.IsBot) return Task.CompletedTask;
+            var _ =  Task.Run(async () =>
             {
                 using var uow = _db.GetDbContext();
                 var user = uow.DUsers.GetOrCreate(message.Author).Result;
@@ -82,14 +82,13 @@ namespace Roki.Services
                 await uow.SaveChangesAsync().ConfigureAwait(false);
             });
 
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
-        private async Task MessageUpdated(Cacheable<IMessage, ulong> cache, SocketMessage after, ISocketMessageChannel channel)
+        private Task MessageUpdated(Cacheable<IMessage, ulong> cache, SocketMessage after, ISocketMessageChannel channel)
         {
-            if (after.Author.IsBot)
-                return;
-            await Task.Run(async () =>
+            if (after.Author.IsBot) return Task.CompletedTask;
+            var _ = Task.Run(async () =>
             {
                 using var uow = _db.GetDbContext();
                 string content;
@@ -118,23 +117,23 @@ namespace Roki.Services
                 await uow.SaveChangesAsync().ConfigureAwait(false);
             });
                 
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
-        private async Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
+        private Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
         {
-            if (cache.HasValue && cache.Value.Author.IsBot) return;
-            await Task.Run(() =>
+            if (cache.HasValue && cache.Value.Author.IsBot) return Task.CompletedTask;
+            var _ = Task.Run(() =>
             {
                 using var uow = _db.GetDbContext();
                 uow.DMessages.MessageDeleted(cache.Id);
             });
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
-        private async Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> caches, ISocketMessageChannel channel)
+        private Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> caches, ISocketMessageChannel channel)
         {
-            await Task.Run(() =>
+            var _ = Task.Run(() =>
             {
                 using var uow = _db.GetDbContext();
                 foreach (var cache in caches)
@@ -144,7 +143,7 @@ namespace Roki.Services
                 }
             });
             
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
     }
 }
