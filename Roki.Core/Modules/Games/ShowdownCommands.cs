@@ -132,82 +132,85 @@ namespace Roki.Modules.Games
                         t1[i].Dispose();
                         t2[i].Dispose();
                     }
-                    
+
                     var start = new EmbedBuilder().WithOkColor()
                         .WithTitle($"[Gen {generation}] Random Battle - ID: `{uid}`")
-                        .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 100` means betting on 110 on P1.")
+                        .WithDescription(
+                            "A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 100` means betting on 110 on P1.")
                         .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
                         .AddField("Player 1", string.Join('\n', teams[0]), true)
                         .AddField("Player 2", string.Join('\n', teams[1]), true);
 
-                    var startMsg = await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: start.Build()).ConfigureAwait(false);
+                    var startMsg = await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: start.Build())
+                        .ConfigureAwait(false);
                     await startMsg.AddReactionsAsync(_reactionMap.Keys.ToArray()).ConfigureAwait(false);
 
                     var joinedReactions = new Dictionary<IUser, PlayerBet>();
-                    var timeout = DateTime.UtcNow + TimeSpan.FromSeconds(30);
-                    _client.ReactionAdded += (cachedMessage, channel, reaction) =>
+                    using (startMsg.OnReaction(_client, ReactionAdded))
                     {
-                        if (ctx.Channel.Id != channel.Id || cachedMessage.Value.Id != startMsg.Id || !_reactionMap.ContainsKey(reaction.Emote) ||
-                            DateTime.UtcNow > timeout || reaction.User.Value.IsBot) return Task.CompletedTask;
-                        var user = reaction.User.Value;
-                        var _ = Task.Run(async () =>
-                        {
-                            // If user doesn't exist in the dictionary yet
-                            if (!joinedReactions.ContainsKey(user))
-                            {
-                                if (Equals(reaction.Emote, Player1))
-                                    joinedReactions.Add(user, new PlayerBet{Bet = BetPlayer.P1, Amount = 0});
-                                else if (Equals(reaction.Emote, Player2))
-                                    joinedReactions.Add(user, new PlayerBet{Bet = BetPlayer.P2, Amount = 0});
-                                else
-                                {
-                                    var notEnoughMsg = await ctx.Channel.SendErrorAsync($"<@{reaction.UserId}> Please select a player to bet on first.").ConfigureAwait(false);
-                                    notEnoughMsg.DeleteAfter(3);
-                                }
-                                await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, RequestOptions.Default).ConfigureAwait(false);
-                                return Task.CompletedTask;
-                            }
-                            // If user exists in dictionary and reacted with player1 
-                            if (reaction.Emote.Equals(Player1))
-                                joinedReactions[user].Bet = BetPlayer.P1;
-                            // If user exists in dictionary and reacted with player2 
-                            else if (reaction.Emote.Equals(Player2))
-                                joinedReactions[user].Bet = BetPlayer.P2;
-                            // If user exists in dictionary and reacted with any other emote in the reactionMap
-                            else if (_reactionMap.ContainsKey(reaction.Emote))
-                            {
-                                var currency = _currency.GetCurrency(user.Id);
-                                if (reaction.Emote.Equals(AllIn))
-                                {
-                                    joinedReactions[user].Amount = currency;
-                                    joinedReactions[user].Multiple = 1;
-                                }
-                                else if (reaction.Emote.Equals(TimesTwo) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 2)
-                                    joinedReactions[user].Multiple *= 2;
-                                else if (reaction.Emote.Equals(TimesFive) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 5)
-                                    joinedReactions[user].Multiple *= 5;
-                                else if (reaction.Emote.Equals(TimesTen) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 10)
-                                    joinedReactions[user].Multiple *= 10;
-                                else if (currency >= joinedReactions[user].Amount + _reactionMap[reaction.Emote] * joinedReactions[user].Multiple) 
-                                    joinedReactions[user].Amount += _reactionMap[reaction.Emote];
-                                else
-                                {
-                                    var notEnoughMsg = await ctx.Channel.SendErrorAsync($"<@{reaction.User.Value.Id}> You do not have enough {_roki.Properties.CurrencyIcon} to make that bet.")
-                                        .ConfigureAwait(false);
-                                    await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
-                                    notEnoughMsg.DeleteAfter(5);
-                                }
-                                return Task.CompletedTask;
-                            }
-                            await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
-                            return Task.CompletedTask;
-                        });
-                        
-                        return Task.CompletedTask;
-                    };
+                        await Task.Delay(TimeSpan.FromSeconds(25)).ConfigureAwait(false);
+                    }
 
-                    Thread.Sleep(TimeSpan.FromSeconds(35));
-                    
+                    async Task ReactionAdded(SocketReaction r)
+                    {
+                        var user = r.User.Value;
+                        if (!joinedReactions.ContainsKey(user))
+                        {
+                            if (Equals(r.Emote, Player1))
+                                joinedReactions.Add(user, new PlayerBet {Bet = BetPlayer.P1, Amount = 0});
+                            else if (Equals(r.Emote, Player2))
+                                joinedReactions.Add(user, new PlayerBet {Bet = BetPlayer.P2, Amount = 0});
+                            else
+                            {
+                                var notEnoughMsg = await ctx.Channel.SendErrorAsync($"<@{r.UserId}> Please select a player to bet on first.")
+                                    .ConfigureAwait(false);
+                                notEnoughMsg.DeleteAfter(3);
+                            }
+
+                            await startMsg.RemoveReactionAsync(r.Emote, r.User.Value, RequestOptions.Default).ConfigureAwait(false);
+                            return;
+                        }
+
+                        // If user exists in dictionary and reacted with player1 
+                        if (r.Emote.Equals(Player1))
+                            joinedReactions[user].Bet = BetPlayer.P1;
+                        // If user exists in dictionary and reacted with player2 
+                        else if (r.Emote.Equals(Player2))
+                            joinedReactions[user].Bet = BetPlayer.P2;
+                        // If user exists in dictionary and reacted with any other emote in the reactionMap
+                        else if (_reactionMap.ContainsKey(r.Emote))
+                        {
+                            var currency = _currency.GetCurrency(user.Id);
+                            if (r.Emote.Equals(AllIn))
+                            {
+                                joinedReactions[user].Amount = currency;
+                                joinedReactions[user].Multiple = 1;
+                                await startMsg.RemoveReactionsAsync(r.User.Value, _reactionMap.Keys.Where(k => !Equals(k, AllIn)).ToArray());
+                            }
+                            else if (r.Emote.Equals(TimesTwo) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 2)
+                                joinedReactions[user].Multiple *= 2;
+                            else if (r.Emote.Equals(TimesFive) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 5)
+                                joinedReactions[user].Multiple *= 5;
+                            else if (r.Emote.Equals(TimesTen) && currency >= joinedReactions[user].Amount * joinedReactions[user].Multiple * 10)
+                                joinedReactions[user].Multiple *= 10;
+                            else if (currency >= joinedReactions[user].Amount + _reactionMap[r.Emote] * joinedReactions[user].Multiple)
+                                joinedReactions[user].Amount += _reactionMap[r.Emote];
+                            else
+                            {
+                                var notEnoughMsg = await ctx.Channel
+                                    .SendErrorAsync(
+                                        $"<@{r.User.Value.Id}> You do not have enough {_roki.Properties.CurrencyIcon} to make that bet.")
+                                    .ConfigureAwait(false);
+                                await startMsg.RemoveReactionAsync(r.Emote, r.User.Value).ConfigureAwait(false);
+                                notEnoughMsg.DeleteAfter(5);
+                            }
+
+                            return;
+                        }
+
+                        await startMsg.RemoveReactionAsync(r.Emote, r.User.Value).ConfigureAwait(false);
+                    }
+
                     if (joinedReactions.Count == 0)
                     {
                         await ctx.Channel.SendErrorAsync("Not enough players to start the bet.\nBet is cancelled").ConfigureAwait(false);
