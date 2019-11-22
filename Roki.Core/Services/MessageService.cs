@@ -38,9 +38,10 @@ namespace Roki.Services
         private async Task MessageReceived(SocketMessage message)
         {
             if (message.Author.IsBot) return;
-            using (var uow = _db.GetDbContext())
+            await Task.Run(async () =>
             {
-                var user = await uow.DUsers.GetOrCreate(message.Author).ConfigureAwait(false);
+                using var uow = _db.GetDbContext();
+                var user = uow.DUsers.GetOrCreate(message.Author).Result;
                 var doubleXp = uow.Subscriptions.DoubleXpIsActive(message.Author.Id);
                 var fastXp = uow.Subscriptions.FastXpIsActive(message.Author.Id);
                 if (fastXp)
@@ -79,7 +80,7 @@ namespace Roki.Services
                 });
 
                 await uow.SaveChangesAsync().ConfigureAwait(false);
-            }
+            });
 
             await Task.CompletedTask;
         }
@@ -88,8 +89,9 @@ namespace Roki.Services
         {
             if (after.Author.IsBot)
                 return;
-            using (var uow = _db.GetDbContext())
+            await Task.Run(async () =>
             {
+                using var uow = _db.GetDbContext();
                 string content;
                 if (!string.IsNullOrWhiteSpace(after.Content) && after.Attachments.Count == 0)
                     content = after.Content;
@@ -112,9 +114,9 @@ namespace Roki.Services
                     EditedTimestamp = after.EditedTimestamp?.ToUniversalTime(),
                     Timestamp = after.Timestamp.ToUniversalTime()
                 });
-                    
+
                 await uow.SaveChangesAsync().ConfigureAwait(false);
-            }
+            });
                 
             await Task.CompletedTask;
         }
@@ -122,19 +124,25 @@ namespace Roki.Services
         private async Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
         {
             if (cache.HasValue && cache.Value.Author.IsBot) return;
-            using var uow = _db.GetDbContext();
-            uow.DMessages.MessageDeleted(cache.Id);
+            await Task.Run(() =>
+            {
+                using var uow = _db.GetDbContext();
+                uow.DMessages.MessageDeleted(cache.Id);
+            });
             await Task.CompletedTask;
         }
 
         private async Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> caches, ISocketMessageChannel channel)
         {
-            using var uow = _db.GetDbContext();
-            foreach (var cache in caches)
+            await Task.Run(() =>
             {
-                if (cache.HasValue && cache.Value.Author.IsBot) continue;
-                uow.DMessages.MessageDeleted(cache.Id);
-            }
+                using var uow = _db.GetDbContext();
+                foreach (var cache in caches)
+                {
+                    if (cache.HasValue && cache.Value.Author.IsBot) continue;
+                    uow.DMessages.MessageDeleted(cache.Id);
+                }
+            });
             
             await Task.CompletedTask;
         }
