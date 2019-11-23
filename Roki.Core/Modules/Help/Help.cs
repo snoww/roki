@@ -97,7 +97,7 @@ namespace Roki.Modules.Help
                 {
                     var transformed = group.ElementAt(i).Select(x => opts.View == CommandOptions.ViewType.Cross 
                         ? $"{(success.Contains(x) ? "✅" : "❌")}{Prefix + x.Aliases.First(),-15} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}\n" 
-                        : $"{Prefix + x.Aliases.First(),-15} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}");
+                        : $"{Prefix + x.Aliases.First(),-15} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}\n");
 
                     if (i == last - 1 && (i + 1) % 2 != 0)
                     {
