@@ -8,7 +8,7 @@ namespace Roki.Core.Services.Database.Models
     {
         [Column("seller_id")]
         public ulong SellerId { get; set; }
-        [Column("name")]
+        [Column("item")]
         public string ItemName { get; set; }
         [Column("details")]
         public string ItemDetails { get; set; }
