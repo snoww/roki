@@ -29,7 +29,7 @@ namespace Roki.Modules.Stocks.Services
             _db = db;
             _client = client;
             _roki = roki;
-//            ShortPremiumTimer();
+            ShortPremiumTimer();
         }
 
         private void ShortPremiumTimer()
@@ -44,7 +44,7 @@ namespace Roki.Modules.Stocks.Services
             foreach (var (userId, portfolio) in portfolios)
             {
                 var interestList = portfolio.Where(investment => !investment.Position.Equals("long", StringComparison.OrdinalIgnoreCase))
-                    .Where(investment => investment.InterestDate != null && !(DateTime.UtcNow.AddDays(1) < investment.InterestDate.Value))
+                    .Where(investment => investment.InterestDate != null && !(DateTimeOffset.UtcNow.AddDays(1) < investment.InterestDate.Value))
                     .ToList();
                 if (interestList.Count <= 0) continue;
                 var user = _client.GetUser(userId);
@@ -55,18 +55,19 @@ namespace Roki.Modules.Stocks.Services
                 {
                     var cost = await CalculateInterest(investment.Symbol, investment.Shares).ConfigureAwait(false);
                     await uow.DUsers.ChargeInterestAsync(userId, cost).ConfigureAwait(false);
+                    investment.InterestDate += TimeSpan.FromDays(7);
                     uow.Transaction.Add(new CurrencyTransaction
                     {
                        Amount = (long) cost,
-                       Reason = "Short sell interest charge",
+                       Reason = "Short position interest charge",
                        To = _roki.Properties.BotId,
                        From = userId
                     });
                     total += cost;
-                    embed.AddField($"{investment.Symbol} - {investment.Shares} Shares", $"{cost} {_roki.Properties.CurrencyIcon}", true);
+                    embed.AddField($"`{investment.Symbol}` - `{investment.Shares}` Shares", $"`{cost}` {_roki.Properties.CurrencyIcon}", true);
                 }
 
-                embed.WithDescription($"You have been charged a total of {total} {_roki.Properties.CurrencyIcon}\n");
+                embed.WithDescription($"You have been charged a total of `{total}` {_roki.Properties.CurrencyIcon}\n");
                 await dm.EmbedAsync(embed).ConfigureAwait(false);
             }
 
