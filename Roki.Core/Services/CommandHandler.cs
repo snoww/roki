@@ -66,7 +66,7 @@ namespace Roki.Core.Services
         }
 
 
-        public string DefaultPrefix { get; }
+        public string DefaultPrefix { get; set; }
 
         public ConcurrentDictionary<ulong, uint> UserMessagesSent { get; } = new ConcurrentDictionary<ulong, uint>();
 
