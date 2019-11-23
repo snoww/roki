@@ -21,8 +21,7 @@ namespace Roki.Modules
 
         public string ModuleTypeName { get; }
         public string LowerModuleTypeName { get; }
-        public string Prefix = ".";
-
+        
         protected ICommandContext ctx => Context;
 
 
