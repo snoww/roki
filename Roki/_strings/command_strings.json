@@ -605,7 +605,7 @@
     ]
   },
   "userdetails": {
-    "Command": "userdetails ",
+    "Command": "userdetails",
     "Description": "Shows the users userid, username, discriminator, and avatarid/",
     "Usage": [
       "{0}userdetails @snow"

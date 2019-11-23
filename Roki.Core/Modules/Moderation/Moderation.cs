@@ -7,13 +7,6 @@ namespace Roki.Modules.Moderation
 {
     public partial class Moderation : RokiTopLevelModule
     {
-        private readonly Roki _roki;
-        
-        public Moderation(Roki roki)
-        {
-            _roki = roki;
-        }
-        
         [RokiCommand, Description, Usage, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequireUserPermission(GuildPermission.ManageMessages)]
