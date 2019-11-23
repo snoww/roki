@@ -96,8 +96,8 @@ namespace Roki.Modules.Help
                 for (i = 0; i < last; i++)
                 {
                     var transformed = group.ElementAt(i).Select(x => opts.View == CommandOptions.ViewType.Cross 
-                        ? $"{(success.Contains(x) ? "✅" : "❌")}{Prefix + x.Aliases.First(),-15} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",15}\n" 
-                        : $"{Prefix + x.Aliases.First(),-15} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",15}");
+                        ? $"{(success.Contains(x) ? "✅" : "❌")}{Prefix + x.Aliases.First(),-18} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}\n" 
+                        : $"{Prefix + x.Aliases.First(),-18} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}");
 
                     embed.AddField(group.ElementAt(i).Key, "```css\n" + string.Join("\n", transformed) + "\n```");
                 }
