@@ -5,7 +5,7 @@ using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Moderation.Services;
 
-namespace Roki.Modules.Games
+namespace Roki.Modules.Moderation
 {
     public partial class Moderation
     {

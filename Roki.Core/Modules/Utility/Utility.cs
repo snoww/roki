@@ -36,10 +36,10 @@ namespace Roki.Modules.Utility
                     .WithAuthor(eab => eab.WithName($"Roki v{StatsService.BotVersion}").WithIconUrl("https://i.imgur.com/KmPRRKh.png"))
                     .AddField("Author", _stats.Author, true)
                     .AddField("Bot ID", _client.CurrentUser.Id.ToString(), true)
+                    .AddField("Owner ID", ownerId, true)
                     .AddField("Commands ran", _stats.CommandsRan.ToString(), true)
                     .AddField("Messages", _stats.MessageCounter, true)
                     .AddField("Memory", $"{_stats.Heap} MB", true)
-                    .AddField("Owner ID", ownerId, true)
                     .AddField("Uptime", _stats.GetUptimeString("\n"), true)
                     .AddField("Presence", $"{_stats.TextChannels} Text Channels\n{_stats.VoiceChannels} Voice Channels", true));
         }
@@ -83,15 +83,6 @@ namespace Roki.Modules.Utility
                 return;
             
             await ctx.Channel.SendMessageAsync(ctx.Message.Content).ConfigureAwait(false);
-        }
-
-        [RokiCommand, Description, Usage, Aliases]
-        [RequireContext(ContextType.Guild)]
-        [RequireUserPermission(GuildPermission.Administrator)]
-        public async Task UserDetails(IUser user)
-        {
-            await ctx.Channel.SendMessageAsync(
-                $"UserId: {user.Id}\nUsername: {user.Username}\nDiscriminator: {user.Discriminator}\nAvatarId: {user.AvatarId}\n").ConfigureAwait(false);
         }
     }
 }
