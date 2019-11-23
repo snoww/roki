@@ -433,7 +433,7 @@
     ]
   },
   "triviacategories": {
-    "Command": "tc",
+    "Command": "triviacategories tc",
     "Description": "Lists all the trivia categories.",
     "Usage": [
       "{0}tc"

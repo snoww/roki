@@ -87,7 +87,7 @@ namespace Roki.Modules.Help
             var i = 0;
             var groups = cmdsWithGroup.GroupBy(x => i++ / 48).ToArray();
             var embed = new EmbedBuilder().WithOkColor()
-                .WithTitle($"{module.ToTitleCase()} Module Commands")
+                .WithTitle($"{cmds.First().Module.GetTopLevelModule().Name} Module Commands")
                 .WithFooter($"Use {Prefix}h <command> to see the help for that command");
 
             foreach (var group in groups)
