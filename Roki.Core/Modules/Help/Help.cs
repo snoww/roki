@@ -87,8 +87,8 @@ namespace Roki.Modules.Help
             var i = 0;
             var groups = cmdsWithGroup.GroupBy(x => i++ / 48).ToArray();
             var embed = new EmbedBuilder().WithOkColor()
-                .WithTitle($"{module} Module Commands")
-                .WithFooter(string.Format("Type `{0}h <command>` to see the help for that specified command. e.g. `{0}h {0}help`", Prefix));
+                .WithTitle($"{module.ToTitleCase()} Module Commands")
+                .WithFooter($"Use {Prefix}h <command> to see the help for that command");
 
             foreach (var group in groups)
             {
@@ -97,16 +97,7 @@ namespace Roki.Modules.Help
                 {
                     var transformed = group.ElementAt(i).Select(x => opts.View == CommandOptions.ViewType.Cross 
                         ? $"{(success.Contains(x) ? "✅" : "❌")}{Prefix + x.Aliases.First(),-15} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}\n" 
-                        : $"{Prefix + x.Aliases.First(),-15} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}\n");
-
-                    if (i == last - 1 && (i + 1) % 2 != 0)
-                    {
-                        var grp = 0;
-                        var count = transformed.Count();
-                        transformed = transformed
-                            .GroupBy(x => grp++ % count / 2)
-                            .Select(x => x.Count() == 1 ? $"{x.First()}" : string.Concat(x));
-                    }
+                        : $"{Prefix + x.Aliases.First(),-15} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}");
 
                     embed.AddField(group.ElementAt(i).Key, "```css\n" + string.Join("\n", transformed) + "\n```");
                 }
