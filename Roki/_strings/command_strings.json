@@ -112,14 +112,14 @@
     ]
   },
   "addquote": {
-    "Command": ".",
+    "Command": "addquote .",
     "Description": "Adds a new quote with the specified name and message.",
     "Usage": [
       "{0}. sayhi Hi"
     ]
   },
   "showquote": {
-    "Command": "..",
+    "Command": "showquote ..",
     "Description": "Shows a random quote with a specified name.",
     "Usage": [
       "{0}.. abc"
