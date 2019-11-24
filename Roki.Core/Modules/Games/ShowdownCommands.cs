@@ -215,66 +215,63 @@ namespace Roki.Modules.Games
                         return Task.CompletedTask;
                     }
 
-                    var __ = Task.Run(async () =>
+                    await Task.Delay(TimeSpan.FromSeconds(35)).ConfigureAwait(false);
+                    _client.ReactionAdded -= ReactionAddedHandler;
+                
+                    if (joinedReactions.Count == 0)
                     {
-                        await Task.Delay(TimeSpan.FromSeconds(35)).ConfigureAwait(false);
-                        _client.ReactionAdded -= ReactionAddedHandler;
-                    
-                        if (joinedReactions.Count == 0)
-                        {
-                            await ctx.Channel.SendErrorAsync("Not enough players to start the bet.\nBet is cancelled").ConfigureAwait(false);
-                            await startMsg.RemoveAllReactionsAsync().ConfigureAwait(false);
-                            _service.Games.TryRemove(ctx.Channel.Id, out _);
-                            await Task.Delay(10000).ConfigureAwait(false);
-                            await _service.GetWinnerAsync(uid).ConfigureAwait(false);
-                            return;
-                        }
-
-                        foreach (var (key, value) in joinedReactions)
-                        {
-                            await _currency
-                                .ChangeAsync(key, "BetShowdown Entry", -value.Amount * value.Multiple, ctx.User.Id, ctx.Client.CurrentUser.Id, ctx.Guild.Id, ctx.Channel.Id,
-                                    ctx.Message.Id)
-                                .ConfigureAwait(false);
-                        }
-
-                        var winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
-                        var result = winner == 1 ? BetPlayer.P1 : BetPlayer.P2;
-
-                        var winners = "";
-                        var losers = "";
-
-                        foreach (var (key, value) in joinedReactions)
-                        {
-                            if (result != value.Bet)
-                            {
-                                losers += $"{key.Username}\n";
-                                continue;
-                            }
-                            var won = value.Amount * value.Multiple * 2;
-                            winners += $"{key.Username} won `{won:N0}` {_roki.Properties.CurrencyIcon}\n";
-                            await _currency.ChangeAsync(key, "BetShowdown Payout", won, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id,
-                                ctx.Channel.Id, ctx.Message.Id);
-                        }
-                        
-                        var embed = new EmbedBuilder().WithOkColor();
-                        if (winners.Length > 1)
-                        {
-                            embed.WithDescription($"Player {winner} has won the battle!\nCongratulations!\n{winners}\n");
-                            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
-                        }
-                        if (losers.Length > 1)
-                        {
-                            if (winners.Length > 1)
-                                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                                    .WithDescription($"Better luck next time!\n{losers}\n")).ConfigureAwait(false);
-                            else 
-                                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                                    .WithDescription($"Player {winner} has won the battle!\nBetter luck next time!\n{losers}\n")).ConfigureAwait(false);
-                        }
+                        await ctx.Channel.SendErrorAsync("Not enough players to start the bet.\nBet is cancelled").ConfigureAwait(false);
+                        await startMsg.RemoveAllReactionsAsync().ConfigureAwait(false);
                         _service.Games.TryRemove(ctx.Channel.Id, out _);
-                        await startMsg.RemoveReactionsAsync(ctx.Client.CurrentUser, _reactionMap.Keys.ToArray()).ConfigureAwait(false); 
-                    });
+                        await Task.Delay(10000).ConfigureAwait(false);
+                        await _service.GetWinnerAsync(uid).ConfigureAwait(false);
+                        return;
+                    }
+
+                    foreach (var (key, value) in joinedReactions)
+                    {
+                        await _currency
+                            .ChangeAsync(key, "BetShowdown Entry", -value.Amount * value.Multiple, ctx.User.Id, ctx.Client.CurrentUser.Id, ctx.Guild.Id, ctx.Channel.Id,
+                                ctx.Message.Id)
+                            .ConfigureAwait(false);
+                    }
+
+                    var winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
+                    var result = winner == 1 ? BetPlayer.P1 : BetPlayer.P2;
+
+                    var winners = "";
+                    var losers = "";
+
+                    foreach (var (key, value) in joinedReactions)
+                    {
+                        if (result != value.Bet)
+                        {
+                            losers += $"{key.Username}\n";
+                            continue;
+                        }
+                        var won = value.Amount * value.Multiple * 2;
+                        winners += $"{key.Username} won `{won:N0}` {_roki.Properties.CurrencyIcon}\n";
+                        await _currency.ChangeAsync(key, "BetShowdown Payout", won, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id,
+                            ctx.Channel.Id, ctx.Message.Id);
+                    }
+                    
+                    var embed = new EmbedBuilder().WithOkColor();
+                    if (winners.Length > 1)
+                    {
+                        embed.WithDescription($"Player {winner} has won the battle!\nCongratulations!\n{winners}\n");
+                        await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                    }
+                    if (losers.Length > 1)
+                    {
+                        if (winners.Length > 1)
+                            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
+                                .WithDescription($"Better luck next time!\n{losers}\n")).ConfigureAwait(false);
+                        else 
+                            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
+                                .WithDescription($"Player {winner} has won the battle!\nBetter luck next time!\n{losers}\n")).ConfigureAwait(false);
+                    }
+                    _service.Games.TryRemove(ctx.Channel.Id, out _);
+                    await startMsg.RemoveReactionsAsync(ctx.Client.CurrentUser, _reactionMap.Keys.ToArray()).ConfigureAwait(false); 
                 }
                 catch (Exception e)
                 {
