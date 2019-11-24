@@ -258,9 +258,18 @@ namespace Roki.Modules.Rsvp.Services
                 .WithTimestamp(eventDate.Value);
 
             await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
-            var rsvp = await eventChannel.EmbedAsync(eventEmbed).ConfigureAwait(false);
-            await rsvp.AddReactionsAsync(Choices).ConfigureAwait(false);
+            IUserMessage rsvp;
+            try
+            {
+                rsvp = await eventChannel.EmbedAsync(eventEmbed).ConfigureAwait(false);
+            }
+            catch
+            {
+                await ctx.Channel.SendErrorAsync($"Insufficient Permissions in <#{eventChannel.Id}>");
+                return;
+            }
             
+            await rsvp.AddReactionsAsync(Choices).ConfigureAwait(false);
             using var uow = _db.GetDbContext();
             uow.Context.Events.Add(new Event
             {
@@ -359,8 +368,8 @@ namespace Roki.Modules.Rsvp.Services
                und.Add(r.User.Value.ToString());
             }
 
-            ev.Participants = string.Join(',', par);
-            ev.Undecided = string.Join(',', und);
+            ev.Participants = string.Join('\n', par);
+            ev.Undecided = string.Join('\n', und);
             if (par.Count == 0)
                 newEmbed.AddField($"Participants ({par.Count})", "```None```");
             else
