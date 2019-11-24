@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -14,11 +16,52 @@ namespace Roki.Modules.Rsvp.Services
     {
         private readonly DbService _db;
         private readonly DiscordSocketClient _client;
+        private Timer _timer;
 
         public RsvpService(DbService db, DiscordSocketClient client)
         {
             _db = db;
             _client = client;
+            EventTimer();
+        }
+
+        private void EventTimer()
+        {
+            _timer = new Timer(EventUpdate, null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
+        }
+
+        private async void EventUpdate(object state)
+        {
+            using var uow = _db.GetDbContext();
+            var events = uow.Events.GetAllActiveEvents();
+            if (events.Count == 0) return;
+            foreach (var e in events)
+            {
+                var message = await _client.GetGuild(e.GuildId).GetTextChannel(e.ChannelId).GetMessageAsync(e.MessageId).ConfigureAwait(false) as IUserMessage;
+                var old = message?.Embeds.First();
+                if (old == null) continue;
+                var part = old.Fields.First(f => f.Name.Contains("part", StringComparison.OrdinalIgnoreCase));
+                var und = old.Fields.First(f => f.Name.Contains("unde", StringComparison.OrdinalIgnoreCase));
+                var newEmbed = new EmbedBuilder().WithOkColor()
+                    .WithAuthor(old.Author?.Name, old.Author?.Url)
+                    .WithTitle(old.Title)
+                    .AddField("Event Date", e.StartDate.ToString("f"))
+                    .AddField(part.Name, part.Value)
+                    .AddField(und.Name, und.Value)
+                    .WithTimestamp(e.StartDate)
+                    .WithDescription($"Starts in {(e.StartDate - DateTimeOffset.Now).ToReadableString()}`")
+                    .WithFooter("Event starts");
+                if (e.StartDate <= DateTimeOffset.Now)
+                {
+                    newEmbed.WithDescription("Event started")
+                        .WithFooter("Event started");
+                    await message.ModifyAsync(m => m.Embed = newEmbed.Build()).ConfigureAwait(false);
+                    uow.Context.Events.Remove(e);
+                    continue;
+                }
+                
+                await message.ModifyAsync(m => m.Embed = newEmbed.Build()).ConfigureAwait(false);
+            }
         }
 
         public async Task CreateEvent(ICommandContext ctx)

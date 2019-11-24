@@ -17,6 +17,7 @@ namespace Roki.Core.Services.Database
         IListingRepository Listing { get; }
         ISubscriptionRepository Subscriptions { get; }
         ITradesRepository Trades { get; }
+        IEventsRepository Events { get; }
 
         int SaveChanges();
         Task<int> SaveChangesAsync();
@@ -32,6 +33,7 @@ namespace Roki.Core.Services.Database
         private IListingRepository _listing;
         private ISubscriptionRepository _subscriptions;
         private ITradesRepository _trades;
+        private IEventsRepository _events;
         public UnitOfWork(RokiContext context)
         {
             Context = context;
@@ -46,6 +48,7 @@ namespace Roki.Core.Services.Database
         public IListingRepository Listing => _listing ??= new ListingRepository(Context);
         public ISubscriptionRepository Subscriptions => _subscriptions ??= new SubscriptionRepository(Context);
         public ITradesRepository Trades => _trades ??= new TradesRepository(Context);
+        public IEventsRepository Events => _events ??= new EventsRepository(Context);
 
         public int SaveChanges()
         {
