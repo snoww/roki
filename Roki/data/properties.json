@@ -33,7 +33,7 @@
   "BetRoll92Multiplier": 4,
   "BetRoll100Multiplier": 10,
   "TriviaMinCorrect": 0.6,
-  "TriviaEasy": 1,
-  "TriviaMedium": 3,
-  "TriviaHard": 5
+  "TriviaEasy": 100,
+  "TriviaMedium": 300,
+  "TriviaHard": 500
 }
