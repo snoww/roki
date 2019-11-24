@@ -5,6 +5,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Roki.Core.Services;
+using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
 
 namespace Roki.Modules.Rsvp.Services
@@ -22,12 +23,11 @@ namespace Roki.Modules.Rsvp.Services
 
         public async Task CreateEvent(ICommandContext ctx)
         {
-            var q1 = new EmbedBuilder().WithOkColor()
+            var q1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                 .WithTitle("RSVP Event Setup Step 1")
 //                    .WithAuthor(ctx.User.Username, ctx.User.GetAvatarUrl())
-                .WithDescription("Which channel should the event be in? (Defaults to <#217668245644247041>");
-            
-            await ctx.Channel.EmbedAsync(q1).ConfigureAwait(false);
+                .WithDescription("Which channel should the event be in? (Defaults to <#217668245644247041>")
+            ).ConfigureAwait(false);
             
             var replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
             if (replyMessage == null)
@@ -36,23 +36,24 @@ namespace Roki.Modules.Rsvp.Services
                 return;
             }
 
-            var eventChannel = replyMessage.MentionedChannels.FirstOrDefault();
+            var eventChannel = replyMessage.MentionedChannels.FirstOrDefault() as IMessageChannel;
             while (eventChannel == null)
             {
-                await ctx.Channel.SendErrorAsync("No channel specified. Please specify the channel using #\ni.e. <#220571291617329154>").ConfigureAwait(false);
+                var err = await ctx.Channel.SendErrorAsync("No channel specified. Please specify the channel using #\ni.e. <#220571291617329154>").ConfigureAwait(false);
+                err.DeleteAfter(60);
                 replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                 if (replyMessage == null)
                 {
                     await ctx.Channel.SendErrorAsync("RSVP Event setup timed out.\nNo message received for 1 minute. If you still want to setup and event, you must start over.");
                     return;
                 }
-                eventChannel = replyMessage.MentionedChannels.FirstOrDefault();
+                eventChannel = replyMessage.MentionedChannels.FirstOrDefault() as IMessageChannel;
             }
-
-            var q2 = new EmbedBuilder().WithOkColor()
-                .WithTitle("RSVP Event Setup Step 2")
-                .WithDescription($"Using channel {eventChannel} for the event.\nNow enter a title for the event.");
-            await ctx.Channel.EmbedAsync(q2).ConfigureAwait(false);
+            
+            var q2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    .WithTitle("RSVP Event Setup Step 2")
+                    .WithDescription($"Using channel {eventChannel} for the event.\nNow enter a title for the event."))
+                .ConfigureAwait(false);
             replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
             if (replyMessage == null)
             {
@@ -61,12 +62,25 @@ namespace Roki.Modules.Rsvp.Services
             }
 
             var eventTitle = replyMessage.Content.TrimTo(250, true);
-            var q3 = new EmbedBuilder().WithOkColor()
-                .WithTitle("RSVP Event Setup Step 3")
-                .WithDescription($"The title of the event has been set to {Format.Bold(eventTitle)}\n" +
-                                 $"Now please enter when this event starts. Default timezone is `{TimeZoneInfo.Local.StandardName}` or `UTC`" +
-                                 "Examples: `tomorrow 1pm`, `nov 24 5pm`, `21:30 jan 19 2020 utc`");
-            await ctx.Channel.EmbedAsync(q3).ConfigureAwait(false);
+            
+            var q3 =await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    .WithTitle("RSVP Event Setup Step 3")
+                    .WithDescription($"The title of the event has been set to {Format.Bold(eventTitle)}\n" +
+                                     $"Please enter a description for the event.\n"))
+                .ConfigureAwait(false);
+            replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
+            if (replyMessage == null)
+            {
+                await ctx.Channel.SendErrorAsync("RSVP Event setup timed out.\nNo message received for 3 minutes. If you still want to setup and event, you must start over.");
+                return;
+            }
+            var eventDesc = replyMessage.Content;
+            
+            var q4 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    .WithTitle("RSVP Event Setup Step 3")
+                    .WithDescription($"Now please enter the date and time when this event starts. Default timezone is `{TimeZoneInfo.Local.StandardName}` or `UTC`\n" +
+                                     "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`"))
+                .ConfigureAwait(false);
             replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
             if (replyMessage == null)
             {
@@ -75,9 +89,10 @@ namespace Roki.Modules.Rsvp.Services
             }
 
             var eventDate = ParseDateTimeFromString(replyMessage.Content);
-            while (eventDate == null)
+            while (eventDate == null || eventDate.Value <= DateTimeOffset.Now)
             {
-                await ctx.Channel.SendErrorAsync("Could not parse date time. Please try again.").ConfigureAwait(false);
+                var err = await ctx.Channel.SendErrorAsync("Could not parse the date. Please try again.\nExamples: `tomorrow 1pm`, `nov 24 5pm`, `21:30 jan 19 2020 utc`").ConfigureAwait(false);
+                err.DeleteAfter(60);
                 replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                 if (replyMessage == null)
                 {
@@ -91,10 +106,10 @@ namespace Roki.Modules.Rsvp.Services
             if (eventDate.Value.Offset == TimeSpan.Zero)
                 dateStr += "UTC";
             
-            var q3Confirm = new EmbedBuilder().WithOkColor()
+            var q4Confirm = new EmbedBuilder().WithOkColor()
                 .WithTitle("RSVP Event Setup Step 3")
                 .WithDescription($"Is the date correct (yes/no)?\n{dateStr}");
-            await ctx.Channel.EmbedAsync(q3Confirm).ConfigureAwait(false);
+            await ctx.Channel.EmbedAsync(q4Confirm).ConfigureAwait(false);
             var confirm = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
             if (confirm == null)
             {
@@ -104,10 +119,11 @@ namespace Roki.Modules.Rsvp.Services
 
             while (!confirm.Content.Equals("yes") || !confirm.Content.Equals("y"))
             {
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithTitle("RSVP Event Setup Step 3")
+                var err = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithTitle("RSVP Event Setup Step 3")
                         .WithDescription($"Please enter the date this event starts. Default timezone is `{TimeZoneInfo.Local.StandardName}` or `UTC`" +
-                                         "Examples: `tomorrow 1pm`, `nov 24 5pm`, `21:30 jan 19 2020 utc`"))
+                                         "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`"))
                     .ConfigureAwait(false);
+                err.DeleteAfter(60);
                 replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
                 if (replyMessage == null)
                 {
@@ -116,9 +132,10 @@ namespace Roki.Modules.Rsvp.Services
                 }
 
                 eventDate = ParseDateTimeFromString(replyMessage.Content);
-                while (eventDate == null)
+                while (eventDate == null || eventDate.Value <= DateTimeOffset.Now)
                 {
-                    await ctx.Channel.SendErrorAsync("Could not parse date time. Please try again.").ConfigureAwait(false);
+                    var err2 = await ctx.Channel.SendErrorAsync("Could not parse the date. Please try again.\nExamples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`").ConfigureAwait(false);
+                    err2.DeleteAfter(60);
                     replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                     if (replyMessage == null)
                     {
@@ -132,16 +149,42 @@ namespace Roki.Modules.Rsvp.Services
                 if (eventDate.Value.Offset == TimeSpan.Zero)
                     dateStr += "UTC";
             
-                q3Confirm = new EmbedBuilder().WithOkColor()
+                q4Confirm = new EmbedBuilder().WithOkColor()
                     .WithTitle("RSVP Event Setup Step 3")
                     .WithDescription($"Is the date correct (yes/no)?\n{dateStr}");
-                await ctx.Channel.EmbedAsync(q3Confirm).ConfigureAwait(false);
+                var con = await ctx.Channel.EmbedAsync(q4Confirm).ConfigureAwait(false);
+                con.DeleteAfter(10);
             }
-            
+
+            var startsIn = eventDate.Value - DateTimeOffset.Now;
             var eventEmbed = new EmbedBuilder().WithOkColor()
                 .WithTitle(eventTitle)
                 .WithAuthor(ctx.User.Username, ctx.User.GetAvatarUrl())
-                .WithDescription($"Starts in ");
+                .WithDescription($"Starts in `{startsIn.ToReadableString()}`")
+                .AddField("Event Date", eventDate.Value.ToString("f"))
+                .AddField("Participants(0)", "```None```")
+                .AddField("❔ Undecided", "```None```")
+                .WithFooter("Event starts")
+                .WithTimestamp(eventDate.Value);
+
+            await q1.DeleteAsync().ConfigureAwait(false);
+            await q2.DeleteAsync().ConfigureAwait(false);
+            await q3.DeleteAsync().ConfigureAwait(false);
+            await q4.DeleteAsync().ConfigureAwait(false);
+            var rsvp = await eventChannel.EmbedAsync(eventEmbed).ConfigureAwait(false);
+            
+            using var uow = _db.GetDbContext();
+            uow.Context.Events.Add(new Event
+            {
+                Name = eventTitle,
+                Description = eventDesc,
+                Host = ctx.User.Id,
+                StartDate = eventDate.Value,
+                GuildId = ctx.Guild.Id,
+                ChannelId = eventChannel.Id,
+                MessageId = rsvp.Id,
+            });
+            await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
         private async Task<SocketMessage> ReplyHandler(ICommandContext ctx, TimeSpan? timeout = null)

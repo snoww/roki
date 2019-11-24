@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Roki.Core.Services.Database.Models
 {
     [Table("events")]
-    public class Events : DbEntity
+    public class Event : DbEntity
     {
         [Column("name")]
         public string Name { get; set; }
@@ -21,11 +21,11 @@ namespace Roki.Core.Services.Database.Models
         [Column("message_id")]
         public ulong MessageId { get; set; }
         [Column("participants")]
-        public ulong[] Participants { get; set; }
-        [Column("waiting_list")]
-        public ulong[] WaitingList { get; set; }
+        public ulong[] Participants { get; set; } = {};
+//        [Column("waiting_list")]
+//        public ulong[] WaitingList { get; set; } = {};
         [Column("undecided")]
-        public ulong[] Undecided { get; set; }
+        public ulong[] Undecided { get; set; } = {};
         [Column("created_date")]
         public DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.UtcNow;
     }
