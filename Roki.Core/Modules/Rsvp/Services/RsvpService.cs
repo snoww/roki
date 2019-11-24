@@ -100,13 +100,13 @@ namespace Roki.Modules.Rsvp.Services
                 replyMessage.Content.Contains("here", StringComparison.OrdinalIgnoreCase))
                 eventChannel = ctx.Channel;
             else if (replyMessage.Content.Contains("default", StringComparison.OrdinalIgnoreCase))
-                eventChannel = _client.GetChannel(220571291617329154) as IMessageChannel;
+                eventChannel = _client.GetChannel(217668245644247041) as IMessageChannel;
             else
                 eventChannel = replyMessage.MentionedChannels.FirstOrDefault() as IMessageChannel;
             
             while (eventChannel == null)
             {
-                var err = await ctx.Channel.SendErrorAsync("No channel specified. Please specify the channel using #\ni.e. <#220571291617329154>").ConfigureAwait(false);
+                var err = await ctx.Channel.SendErrorAsync("No channel specified. Please specify the channel using #\ni.e. <#217668245644247041>").ConfigureAwait(false);
                 toDelete.Add(err);
                 replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                 if (replyMessage == null)
@@ -120,7 +120,7 @@ namespace Roki.Modules.Rsvp.Services
                     replyMessage.Content.Contains("here", StringComparison.OrdinalIgnoreCase))
                     eventChannel = ctx.Channel;
                 else if (replyMessage.Content.Contains("default", StringComparison.OrdinalIgnoreCase))
-                    eventChannel = _client.GetChannel(220571291617329154) as IMessageChannel;
+                    eventChannel = _client.GetChannel(217668245644247041) as IMessageChannel;
                 else
                     eventChannel = replyMessage.MentionedChannels.FirstOrDefault() as IMessageChannel;
             }
