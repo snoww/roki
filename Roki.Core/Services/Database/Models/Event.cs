@@ -27,6 +27,5 @@ namespace Roki.Core.Services.Database.Models
         [Column("undecided")]
         public ulong[] Undecided { get; set; } = {};
         [Column("created_date")]
-        public DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.UtcNow;
     }
 }
