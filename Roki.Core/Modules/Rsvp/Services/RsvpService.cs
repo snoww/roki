@@ -335,9 +335,6 @@ namespace Roki.Modules.Rsvp.Services
             if (!string.IsNullOrWhiteSpace(ev.Participants))
                 par = ev.Participants.Split(',').ToList();
 
-            if (und.Contains("None", StringComparer.OrdinalIgnoreCase)) und.Remove("None");
-            if (par.Contains("None", StringComparer.OrdinalIgnoreCase)) par.Remove("None");
-            
             if (r.Emote.Equals(Confirm))
             {
                 await msg.RemoveReactionAsync(Cancel, r.User.Value).ConfigureAwait(false);
@@ -362,16 +359,14 @@ namespace Roki.Modules.Rsvp.Services
                und.Add(r.User.Value.ToString());
             }
 
-            if (und.Count == 0)
-                und.Add("None");
             if (par.Count == 0)
-                par.Add("None");
+                newEmbed.AddField($"Participants ({par.Count})", $"```None```");
+            if (und.Count == 0)
+                newEmbed.AddField($"Undecided ({und.Count})", $"```None```");
+            
             ev.Participants = string.Join(',', par);
             ev.Undecided = string.Join(',', und);
             await uow.SaveChangesAsync().ConfigureAwait(false);
-
-            newEmbed.AddField($"Participants ({par.Count})", $"```{string.Join(", ", ev.Participants)}```")
-                .AddField($"Undecided ({und.Count})", $"```{string.Join(", ", ev.Undecided)}```");
             await msg.ModifyAsync(m => m.Embed = newEmbed.Build()).ConfigureAwait(false);
         }
 
