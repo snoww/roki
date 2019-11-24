@@ -35,12 +35,12 @@ namespace Roki.Modules.Searches.Services
             throw new NotImplementedException();
         }
         
-        public async Task<string> GetWeatherDataAsync(float lat, float lon)
+        public async Task<string> GetWeatherDataAsync(float lat, float lng)
         {
             try
             {
                 using var http = _httpFactory.CreateClient();
-                var result = await http.GetStringAsync($"https://wttr.in/{lat},{lon}?0AT").ConfigureAwait(false);
+                var result = await http.GetStringAsync($"https://wttr.in/{lat},{lng}?0ATQ").ConfigureAwait(false);
                 return result;
             }
             catch (Exception e)
@@ -54,30 +54,7 @@ namespace Roki.Modules.Searches.Services
         {
             return GetTimeDataFactory(arg);
         }
-
-        public async Task<GeolocationResult> GetLocationDataAsync(string location)
-        {
-            try
-            {
-                using var http = _httpFactory.CreateClient();
-                var result = await http.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={location}&key={_config.GoogleApi}")
-                    .ConfigureAwait(false);
-                var obj = JsonSerializer.Deserialize<GeolocationResult>(result, Options);
-                if (obj?.Results == null || obj.Results.Length == 0)
-                {
-                    _log.Warn("Geocode lookup failed for {0}", location);
-                    return null;
-                }
-
-                return obj;
-            }
-            catch (Exception e)
-            {
-                _log.Warn(e);
-                return null;
-            }
-        }
-
+        
         private async Task<TimeData> GetTimeDataFactory(string arg)
         {
             try
@@ -99,6 +76,41 @@ namespace Roki.Modules.Searches.Services
                     TimeZoneName = timeObj.TimeZoneName
                 };
                 return toReturn;
+            }
+            catch (Exception e)
+            {
+                _log.Warn(e);
+                return null;
+            }
+        }
+
+        public async Task<TimeZoneResult> GetLocalDateTime(float lat, float lng)
+        {
+            using var http = _httpFactory.CreateClient();
+            var currentSeconds = DateTime.UtcNow.UnixTimestamp();
+            var timeResult = await http
+                .GetStringAsync(
+                    $"https://maps.googleapis.com/maps/api/timezone/json?location={lat},{lng}&timestamp={currentSeconds}&key={_config.GoogleApi}")
+                .ConfigureAwait(false);
+            return JsonSerializer.Deserialize<TimeZoneResult>(timeResult, Options);
+//            return (TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, timeZone.TimeZoneName), timeZone.TimeZoneName);
+        }
+
+        public async Task<GeolocationResult> GetLocationDataAsync(string location)
+        {
+            try
+            {
+                using var http = _httpFactory.CreateClient();
+                var result = await http.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={location}&key={_config.GoogleApi}")
+                    .ConfigureAwait(false);
+                var obj = JsonSerializer.Deserialize<GeolocationResult>(result, Options);
+                if (obj?.Results == null || obj.Results.Length == 0)
+                {
+                    _log.Warn("Geocode lookup failed for {0}", location);
+                    return null;
+                }
+
+                return obj;
             }
             catch (Exception e)
             {

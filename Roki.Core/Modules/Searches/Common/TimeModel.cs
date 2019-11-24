@@ -7,6 +7,7 @@ namespace Roki.Modules.Searches.Common
     {
         public double DstOffset { get; set; }
         public double RawOffset { get; set; }
+        public string TimeZoneId { get; set; }
 
         public string TimeZoneName { get; set; }
     }
