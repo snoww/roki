@@ -18,6 +18,7 @@ namespace Roki.Core.Services.Database
         public DbSet<Subscriptions> Subscriptions { get; set; }
         public DbSet<Lottery> Lotteries { get; set; }
         public DbSet<Trades> Trades { get; set; }
+        public DbSet<Events> Events { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
