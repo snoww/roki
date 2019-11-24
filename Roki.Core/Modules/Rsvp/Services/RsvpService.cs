@@ -141,7 +141,7 @@ namespace Roki.Modules.Rsvp.Services
             var q3 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithTitle("RSVP Event Setup - Step 3")
                     .WithDescription($"The title of the event has been set to: {Format.Bold(eventTitle)}\n" +
-                                     $"Please enter a description for the event.\n"))
+                                     $"Please enter a **description** for the event.\n"))
                 .ConfigureAwait(false);
             toDelete.Add(q3);
             replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
