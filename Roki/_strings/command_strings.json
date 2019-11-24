@@ -610,5 +610,14 @@
     "Usage": [
       "{0}userdetails @snow"
     ]
+  },
+  "events": {
+    "Command": "events event",
+    "Description": "Create, edit, show events in the current server.",
+    "Usage": [
+      "{0}events new",
+      "{0}events edit",
+      "{0}events list"
+    ]
   }
 }
