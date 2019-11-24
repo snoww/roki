@@ -98,7 +98,7 @@
     ]
   },
   "weather": {
-    "Command": "weather",
+    "Command": "weather w",
     "Description": "Looks up weather of specified city using Dark Sky's api.",
     "Usage": [
       "{0}weather toronto"

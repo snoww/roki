@@ -217,7 +217,7 @@ namespace Roki.Modules.Games
 
                     await Task.Delay(TimeSpan.FromSeconds(35)).ConfigureAwait(false);
                     _client.ReactionAdded -= ReactionAddedHandler;
-                    
+                
                     if (joinedReactions.Count == 0)
                     {
                         await ctx.Channel.SendErrorAsync("Not enough players to start the bet.\nBet is cancelled").ConfigureAwait(false);
@@ -236,19 +236,7 @@ namespace Roki.Modules.Games
                             .ConfigureAwait(false);
                     }
 
-                    int winner;
-                    try
-                    {
-                        winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
-                    }
-                    catch (FileNotFoundException)
-                    {
-                        await ctx.Channel
-                            .EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("The game is taking longer than usual, please be patient."))
-                            .ConfigureAwait(false);
-                        await Task.Delay(5000).ConfigureAwait(false);
-                        winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
-                    }
+                    var winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
                     var result = winner == 1 ? BetPlayer.P1 : BetPlayer.P2;
 
                     var winners = "";
@@ -283,13 +271,13 @@ namespace Roki.Modules.Games
                                 .WithDescription($"Player {winner} has won the battle!\nBetter luck next time!\n{losers}\n")).ConfigureAwait(false);
                     }
                     _service.Games.TryRemove(ctx.Channel.Id, out _);
-                    await startMsg.RemoveReactionsAsync(ctx.Client.CurrentUser, _reactionMap.Keys.ToArray()).ConfigureAwait(false);
+                    await startMsg.RemoveReactionsAsync(ctx.Client.CurrentUser, _reactionMap.Keys.ToArray()).ConfigureAwait(false); 
                 }
                 catch (Exception e)
                 {
                     _log.Warn(e);
                     _log.Info(uid);
-                    await ctx.Channel.SendErrorAsync("Unable to start game, please try again.\nplease @snow about this issue.");
+                    await ctx.Channel.SendErrorAsync("An error occured, please try again.");
                     _service.Games.TryRemove(ctx.Channel.Id, out _);
                 }
             }

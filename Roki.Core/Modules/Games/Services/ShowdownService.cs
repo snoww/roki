@@ -67,7 +67,7 @@ namespace Roki.Modules.Games.Services
         {
             var gameId = await GetBetPokemonGame(uid).ConfigureAwait(false);
             var p1 = await File.ReadAllLinesAsync($@"./logs/1-{gameId}.log").ConfigureAwait(false);
-            while (p1.Any(l => !l.Contains("W: 1", StringComparison.OrdinalIgnoreCase) || !l.Contains("W: 0", StringComparison.OrdinalIgnoreCase)))
+            while (!p1[^6..^1].Any(l => l.Contains("W: 1", StringComparison.OrdinalIgnoreCase) || l.Contains("W: 0", StringComparison.OrdinalIgnoreCase)))
             {
                 await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
                 p1 = await File.ReadAllLinesAsync($@"./logs/1-{gameId}.log").ConfigureAwait(false);
