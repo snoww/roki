@@ -47,9 +47,12 @@ namespace Roki.Modules.Searches
 
                 var addr = location.Results[0];
                 var result = await _service.GetWeatherDataAsync(addr.Geometry.Location.Lat, addr.Geometry.Location.Lng).ConfigureAwait(false);
+                var tz = await _service.GetLocalDateTime(addr.Geometry.Location.Lat, addr.Geometry.Location.Lng).ConfigureAwait(false);
+                var localDt = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, tz.TimeZoneId);
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                        .WithTitle(addr.FormattedAddress)
-                        .WithDescription(Format.Code(result)))
+                        .WithAuthor("Weather Report")
+                        .WithDescription(addr.FormattedAddress + "\n" + Format.Code(result))
+                        .WithFooter($"{localDt:MMM dd, yyyy hh:mm}, {tz.TimeZoneName}, UTC{localDt:zz}"))
                     .ConfigureAwait(false);
             }
             catch
@@ -68,7 +71,7 @@ namespace Roki.Modules.Searches
                 await ctx.Channel.SendErrorAsync("No Google Api key provided.").ConfigureAwait(false);
                 return;
             }
-
+            
             var data = await _service.GetTimeDataAsync(query).ConfigureAwait(false);
 
             var embed = new EmbedBuilder().WithOkColor()
