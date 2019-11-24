@@ -28,7 +28,7 @@ namespace Roki.Modules.Rsvp
 
             if (args.Equals("new", StringComparison.OrdinalIgnoreCase) || args.Equals("create", StringComparison.OrdinalIgnoreCase))
             {
-                
+                await _service.CreateEvent(ctx).ConfigureAwait(false);
             }
             else if (args.Equals("edit", StringComparison.OrdinalIgnoreCase) || args.Equals("e", StringComparison.OrdinalIgnoreCase))
             {
