@@ -48,7 +48,7 @@ namespace Roki.Modules.Searches
                 var addr = location.Results[0];
                 var result = await _service.GetWeatherDataAsync(addr.Geometry.Location.Lat, addr.Geometry.Location.Lng).ConfigureAwait(false);
                 var tz = await _service.GetLocalDateTime(addr.Geometry.Location.Lat, addr.Geometry.Location.Lng).ConfigureAwait(false);
-                DateTimeOffset localDt = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, tz.TimeZoneId);
+                var localDt = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTimeOffset.UtcNow, tz.TimeZoneId);
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithAuthor("Weather Report")
                         .WithDescription(addr.FormattedAddress + "\n" + Format.Code(result))
