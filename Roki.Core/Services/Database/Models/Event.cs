@@ -26,6 +26,5 @@ namespace Roki.Core.Services.Database.Models
 //        public ulong[] WaitingList { get; set; } = {};
         [Column("undecided")]
         public ulong[] Undecided { get; set; } = {};
-        [Column("created_date")]
     }
 }
