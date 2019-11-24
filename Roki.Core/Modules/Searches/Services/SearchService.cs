@@ -35,16 +35,18 @@ namespace Roki.Modules.Searches.Services
             throw new NotImplementedException();
         }
         
-        public async Task GetWeatherDataAsync(string query)
+        public async Task<string> GetWeatherDataAsync(float lat, float lon)
         {
             try
             {
-                using var client = new WebClient();
-                await client.DownloadFileTaskAsync(new Uri($"https://wttr.in/{query}_0Fmnpqt.png"), "./temp/weather.png");
+                using var http = _httpFactory.CreateClient();
+                var result = await http.GetStringAsync($"https://wttr.in/{lat},{lon}?0AT").ConfigureAwait(false);
+                return result;
             }
             catch (Exception e)
             {
                 _log.Warn(e);
+                return null;
             }
         }
 
@@ -53,20 +55,35 @@ namespace Roki.Modules.Searches.Services
             return GetTimeDataFactory(arg);
         }
 
+        public async Task<GeolocationResult> GetLocationDataAsync(string location)
+        {
+            try
+            {
+                using var http = _httpFactory.CreateClient();
+                var result = await http.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={location}&key={_config.GoogleApi}")
+                    .ConfigureAwait(false);
+                var obj = JsonSerializer.Deserialize<GeolocationResult>(result, Options);
+                if (obj?.Results == null || obj.Results.Length == 0)
+                {
+                    _log.Warn("Geocode lookup failed for {0}", location);
+                    return null;
+                }
+
+                return obj;
+            }
+            catch (Exception e)
+            {
+                _log.Warn(e);
+                return null;
+            }
+        }
+
         private async Task<TimeData> GetTimeDataFactory(string arg)
         {
             try
             {
                 using var http = _httpFactory.CreateClient();
-                var result = await http.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={arg}&key={_config.GoogleApi}")
-                    .ConfigureAwait(false);
-                var obj = JsonSerializer.Deserialize<GeolocationResult>(result, Options);
-                if (obj?.Results == null || obj.Results.Length == 0)
-                {
-                    _log.Warn("Geocode lookup failed for {0}", arg);
-                    return null;
-                }
-
+                var obj = await GetLocationDataAsync(arg);
                 var currentSeconds = DateTime.UtcNow.UnixTimestamp();
                 var timeResult = await http
                     .GetStringAsync(
