@@ -52,7 +52,7 @@ namespace Roki.Modules.Searches
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithAuthor("Weather Report")
                         .WithDescription(addr.FormattedAddress + "\n" + Format.Code(result))
-                        .WithFooter($"{localDt:MMM dd, yyyy hh:mm}, {tz.TimeZoneName}, UTC{localDt:zz}"))
+                        .WithFooter($"{localDt:HH:mm, MMM dd, yyyy}, {tz.TimeZoneName}, UTC{localDt:zz}"))
                     .ConfigureAwait(false);
             }
             catch
