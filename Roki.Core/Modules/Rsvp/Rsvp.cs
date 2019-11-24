@@ -1,6 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Commands;
+using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Rsvp.Services;
 
@@ -15,7 +17,9 @@ namespace Roki.Modules.Rsvp
             _roki = roki;
         }
 
-        public async Task Events(string args)
+        [RokiCommand, Description, Aliases, Usage]
+        [RequireContext(ContextType.Guild)]
+        public async Task Events(string args = null)
         {
             var err = string.Format("`{0}events new/create`: Create a new event\n" +
                                     "`{0}events edit`: Edits an event\n" +

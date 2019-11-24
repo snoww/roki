@@ -22,10 +22,10 @@ namespace Roki.Core.Services.Database.Models
         [Column("message_id")]
         public ulong MessageId { get; set; }
         [Column("participants")]
-        public List<ulong> Participants { get; set; } = new List<ulong>();
+        public string Participants { get; set; }
 //        [Column("waiting_list")]
 //        public ulong[] WaitingList { get; set; } = {};
         [Column("undecided")]
-        public List<ulong> Undecided { get; set; } = new List<ulong>();
+        public string Undecided { get; set; }
     }
 }
