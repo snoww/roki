@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Roki.Core.Services.Database.Models
@@ -21,10 +22,10 @@ namespace Roki.Core.Services.Database.Models
         [Column("message_id")]
         public ulong MessageId { get; set; }
         [Column("participants")]
-        public ulong[] Participants { get; set; } = {};
+        public List<ulong> Participants { get; set; } = new List<ulong>();
 //        [Column("waiting_list")]
 //        public ulong[] WaitingList { get; set; } = {};
         [Column("undecided")]
-        public ulong[] Undecided { get; set; } = {};
+        public List<ulong> Undecided { get; set; } = new List<ulong>();
     }
 }

@@ -17,6 +17,16 @@ namespace Roki.Modules.Rsvp.Services
         private readonly DbService _db;
         private readonly DiscordSocketClient _client;
         private Timer _timer;
+        private static readonly IEmote Confirm = new Emoji("✅");
+        private static readonly IEmote Cancel = new Emoji("❌");
+        private static readonly IEmote Uncertain = new Emoji("❔");
+
+        private static readonly IEmote[] Choices =
+        {
+            Confirm,
+            Cancel,
+            Uncertain
+        };
 
         public RsvpService(DbService db, DiscordSocketClient client)
         {
@@ -57,6 +67,7 @@ namespace Roki.Modules.Rsvp.Services
                         .WithFooter("Event started");
                     await message.ModifyAsync(m => m.Embed = newEmbed.Build()).ConfigureAwait(false);
                     uow.Context.Events.Remove(e);
+                    await message.RemoveAllReactionsAsync().ConfigureAwait(false);
                     continue;
                 }
                 
@@ -205,7 +216,7 @@ namespace Roki.Modules.Rsvp.Services
                 .WithAuthor(ctx.User.Username, ctx.User.GetAvatarUrl())
                 .WithDescription($"Starts in `{startsIn.ToReadableString()}`")
                 .AddField("Event Date", eventDate.Value.ToString("f"))
-                .AddField("Participants(0)", "```None```")
+                .AddField("Participants (0)", "```None```")
                 .AddField("❔ Undecided", "```None```")
                 .WithFooter("Event starts")
                 .WithTimestamp(eventDate.Value);
@@ -255,6 +266,62 @@ namespace Roki.Modules.Rsvp.Services
             if (task == trigger)
                 return await trigger.ConfigureAwait(false);
             return null;
+        }
+
+        public async Task ReactionHandler(SocketReaction r)
+        {
+            if (r.User.Value.IsBot) return;
+            using var uow = _db.GetDbContext();
+            var events = uow.Events.GetAllActiveEvents();
+            var messageIds = events.Select(e => e.MessageId).ToList();
+            
+            if (!messageIds.Contains(r.MessageId) || !Choices.Contains(r.Emote)) return;
+
+            var msg = r.Message.Value as IUserMessage;
+            var old = msg.Embeds.First();
+            if (old == null) return;
+            
+            var part = old.Fields.First(f => f.Name.Contains("part", StringComparison.OrdinalIgnoreCase));
+            var und = old.Fields.First(f => f.Name.Contains("unde", StringComparison.OrdinalIgnoreCase));
+            var date = old.Fields.First(f => f.Name.Contains("date", StringComparison.OrdinalIgnoreCase));
+
+            var ev = events.First(e => e.MessageId == r.MessageId);
+
+            var newEmbed = new EmbedBuilder().WithOkColor()
+                .WithAuthor(old.Author?.Name, old.Author?.Url)
+                .WithTitle(old.Title)
+                .AddField("Event Date", date.Value)
+                .WithTimestamp(old.Timestamp.GetValueOrDefault())
+                .WithDescription($"Starts in {(old.Timestamp.GetValueOrDefault() - DateTimeOffset.Now).ToReadableString()}`")
+                .WithFooter("Event starts");
+            
+            if (r.Emote.Equals(Confirm))
+            {
+                await msg.RemoveReactionAsync(Cancel, r.User.Value).ConfigureAwait(false);
+                await msg.RemoveReactionAsync(Uncertain, r.User.Value).ConfigureAwait(false);
+                if (ev.Undecided.Contains(r.UserId)) ev.Undecided.Remove(r.UserId);
+                if (ev.Participants.Contains(r.UserId)) return;
+                ev.Participants.Add(r.UserId);
+            }
+            else if (r.Emote.Equals(Cancel))
+            {
+                await msg.RemoveReactionAsync(Confirm, r.User.Value).ConfigureAwait(false);
+                await msg.RemoveReactionAsync(Uncertain, r.User.Value).ConfigureAwait(false);
+                if (ev.Undecided.Contains(r.UserId)) ev.Undecided.Remove(r.UserId);
+                if (ev.Participants.Contains(r.UserId)) ev.Participants.Remove(r.UserId);
+            }
+            else 
+            {
+                await msg.RemoveReactionAsync(Cancel, r.User.Value).ConfigureAwait(false);
+                await msg.RemoveReactionAsync(Confirm, r.User.Value).ConfigureAwait(false);
+                if (ev.Participants.Contains(r.UserId)) ev.Participants.Remove(r.UserId);
+                if (ev.Undecided.Contains(r.UserId)) return;
+                ev.Undecided.Add(r.UserId);
+            }
+
+            newEmbed.AddField($"Participants ({ev.Participants.Count})", $"```{string.Join(", ", ev.Participants)}```")
+                .AddField($"Undecided ({ev.Undecided.Count})", $"```{string.Join(", ", ev.Undecided)}```");
+            await msg.ModifyAsync(m => m.Embed = newEmbed.Build()).ConfigureAwait(false);
         }
 
         private DateTimeOffset? ParseDateTimeFromString(string datetime)
