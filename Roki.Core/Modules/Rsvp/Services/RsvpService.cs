@@ -55,10 +55,10 @@ namespace Roki.Modules.Rsvp.Services
                 var part = old.Fields.First(f => f.Name.Contains("part", StringComparison.OrdinalIgnoreCase));
                 var und = old.Fields.First(f => f.Name.Contains("unde", StringComparison.OrdinalIgnoreCase));
                 var newEmbed = new EmbedBuilder().WithOkColor()
-                    .WithAuthor(old.Author?.Name, old.Author?.Url)
+                    .WithAuthor(old.Author?.Name, old.Author?.IconUrl)
                     .WithTitle(old.Title)
                     .AddField("Description", e.Description)
-                    .AddField("Event Date", $"`{e.StartDate::dddd, MMMM dd, yyyy h:mm tt}`")
+                    .AddField("Event Date", $"`{e.StartDate:f}`")
                     .AddField(part.Name, part.Value)
                     .AddField(und.Name, und.Value)
                     .WithTimestamp(e.StartDate)
@@ -251,7 +251,7 @@ namespace Roki.Modules.Rsvp.Services
                 .WithAuthor(ctx.User.Username, ctx.User.GetAvatarUrl())
                 .WithDescription($"Starts in `{startsIn.ToReadableString()}`")
                 .AddField("Description", eventDesc)
-                .AddField("Event Date", $"`{eventDate.Value:dddd, MMMM dd, yyyy h:mm tt}`")
+                .AddField("Event Date", $"`{eventDate.Value:f}`")
                 .AddField("Participants (0)", "```None```")
                 .AddField("Undecided", "```None```")
                 .WithFooter("Event starts")
@@ -320,7 +320,7 @@ namespace Roki.Modules.Rsvp.Services
             var ev = events.First(e => e.MessageId == r.MessageId);
 
             var newEmbed = new EmbedBuilder().WithOkColor()
-                .WithAuthor(old.Author?.Name, old.Author?.Url)
+                .WithAuthor(old.Author?.Name, old.Author?.IconUrl)
                 .WithTitle(old.Title)
                 .AddField("Description", ev.Description)
                 .AddField("Event Date", date.Value)
