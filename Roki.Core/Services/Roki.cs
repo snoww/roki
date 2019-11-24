@@ -39,7 +39,8 @@ namespace Roki
             {
                 MessageCacheSize = 500,
                 LogLevel = LogSeverity.Warning,
-                ConnectionTimeout = int.MaxValue
+                ConnectionTimeout = int.MaxValue,
+                ExclusiveBulkDelete = true
             });
             CommandService = new CommandService(new CommandServiceConfig
             {
