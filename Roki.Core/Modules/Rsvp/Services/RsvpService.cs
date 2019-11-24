@@ -58,7 +58,7 @@ namespace Roki.Modules.Rsvp.Services
                     .WithAuthor(old.Author?.Name, old.Author?.Url)
                     .WithTitle(old.Title)
                     .AddField("Description", e.Description)
-                    .AddField("Event Date", $"`{e.StartDate:f}`")
+                    .AddField("Event Date", $"`{e.StartDate::dddd, MMMM dd, yyyy h:mm tt}`")
                     .AddField(part.Name, part.Value)
                     .AddField(und.Name, und.Value)
                     .WithTimestamp(e.StartDate)
@@ -107,7 +107,7 @@ namespace Roki.Modules.Rsvp.Services
             while (eventChannel == null)
             {
                 var err = await ctx.Channel.SendErrorAsync("No channel specified. Please specify the channel using #\ni.e. <#220571291617329154>").ConfigureAwait(false);
-                err.DeleteAfter(60);
+                toDelete.Add(err);
                 replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                 if (replyMessage == null)
                 {
@@ -251,9 +251,9 @@ namespace Roki.Modules.Rsvp.Services
                 .WithAuthor(ctx.User.Username, ctx.User.GetAvatarUrl())
                 .WithDescription($"Starts in `{startsIn.ToReadableString()}`")
                 .AddField("Description", eventDesc)
-                .AddField("Event Date", $"`{eventDate.Value:f}`")
+                .AddField("Event Date", $"`{eventDate.Value:dddd, MMMM dd, yyyy h:mm tt}`")
                 .AddField("Participants (0)", "```None```")
-                .AddField("❔ Undecided", "```None```")
+                .AddField("Undecided", "```None```")
                 .WithFooter("Event starts")
                 .WithTimestamp(eventDate.Value);
 
@@ -359,13 +359,17 @@ namespace Roki.Modules.Rsvp.Services
                und.Add(r.User.Value.ToString());
             }
 
-            if (par.Count == 0)
-                newEmbed.AddField($"Participants ({par.Count})", $"```None```");
-            if (und.Count == 0)
-                newEmbed.AddField($"Undecided ({und.Count})", $"```None```");
-            
             ev.Participants = string.Join(',', par);
             ev.Undecided = string.Join(',', und);
+            if (par.Count == 0)
+                newEmbed.AddField($"Participants ({par.Count})", "```None```");
+            else
+                newEmbed.AddField($"Participants ({par.Count})", $"```{ev.Participants}```");
+            if (und.Count == 0)
+                newEmbed.AddField($"Undecided", "```None```");
+            else
+                newEmbed.AddField($"Undecided ({und.Count})", $"```{ev.Undecided}```");
+            
             await uow.SaveChangesAsync().ConfigureAwait(false);
             await msg.ModifyAsync(m => m.Embed = newEmbed.Build()).ConfigureAwait(false);
         }
