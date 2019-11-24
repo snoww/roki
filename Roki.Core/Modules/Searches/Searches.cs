@@ -35,14 +35,22 @@ namespace Roki.Modules.Searches
         {
             if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
                 return;
-            query = query.Trim().Replace(" ", "+");
             try
             {
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
-                await _service.GetWeatherDataAsync(query).ConfigureAwait(false);
+                var location = await _service.GetLocationDataAsync(query).ConfigureAwait(false);
+                if (location == null)
+                {
+                    await ctx.Channel.SendErrorAsync("Cannot find specified location. Please try again.");
+                    return;
+                }
 
-                await ctx.Channel.SendFileAsync("./temp/weather.png").ConfigureAwait(false);
-                File.Delete("./temp/weather.png");
+                var addr = location.Results[0];
+                var result = await _service.GetWeatherDataAsync(addr.Geometry.Location.Lat, addr.Geometry.Location.Lng).ConfigureAwait(false);
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                        .WithTitle(addr.FormattedAddress)
+                        .WithDescription(Format.Code(result)))
+                    .ConfigureAwait(false);
             }
             catch
             {
