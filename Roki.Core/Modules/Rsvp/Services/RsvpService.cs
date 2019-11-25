@@ -77,6 +77,8 @@ namespace Roki.Modules.Rsvp.Services
                 
                 await message.ModifyAsync(m => m.Embed = newEmbed.Build()).ConfigureAwait(false);
             }
+
+            await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task CreateEvent(ICommandContext ctx)
@@ -352,7 +354,37 @@ namespace Roki.Modules.Rsvp.Services
 
         public async Task EditEvent(ICommandContext ctx)
         {
-            
+            var toDelete = new List<IUserMessage> {ctx.Message};
+            var events = new List<Event>();
+            using (var uow = _db.GetDbContext())
+            {
+                events = uow.Context.Events.Where(e => e.Host == ctx.User.Id).ToList();
+            }
+
+            if (events.Count == 0)
+            {
+                await ctx.Channel.SendErrorAsync("You do not have any active events.").ConfigureAwait(false);
+                return;
+            }
+            var q1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                .WithTitle("RSVP Event Editor")
+                .WithDescription("Which Event would you like to edit?\n")
+                .WithFooter("Type stop to cancel event edit")
+            ).ConfigureAwait(false);
+            toDelete.Add(q1);
+            var replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
+            if (replyMessage == null)
+            {
+                await ctx.Channel.SendErrorAsync(Error);
+                return;
+            }
+            toDelete.Add(replyMessage as IUserMessage);
+            if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+            { 
+                await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
+                await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+                return;
+            }
         }
 
         private async Task<SocketMessage> ReplyHandler(ICommandContext ctx, TimeSpan? timeout = null)

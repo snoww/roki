@@ -19,7 +19,7 @@ namespace Roki.Modules.Rsvp
 
         [RokiCommand, Description, Aliases, Usage]
         [RequireContext(ContextType.Guild)]
-        public async Task Events(string args = null)
+        public async Task Events([Leftover] string args = null)
         {
             var err = string.Format("`{0}events new/create`: Create a new event\n" +
                                     "`{0}events edit`: Edits an event\n" +
