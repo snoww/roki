@@ -22,6 +22,8 @@ namespace Roki.Modules.Rsvp.Services
         private static readonly IEmote Uncertain = new Emoji("❔");
         private const string Error = "RSVP Event setup timed out. No message received.\nIf you still want to setup and event, you must start over.";
         private const string Stop = "RSVP Event setup canceled.\nIf you still want to setup and event, you must start over.";
+        private const string ErrorEdit = "RSVP Event edit cancelled. No message received.";
+        private const string StopEdit = "RSVP Event edit completed.";
 
         private static readonly IEmote[] Choices =
         {
@@ -356,6 +358,7 @@ namespace Roki.Modules.Rsvp.Services
         {
             var toDelete = new List<IUserMessage> {ctx.Message};
             var events = new List<Event>();
+            var formattedEvents = events.Select(e => $"`#{e.Id}`: {e.Name} `{e.StartDate:f}`");
             using (var uow = _db.GetDbContext())
             {
                 events = uow.Context.Events.Where(e => e.Host == ctx.User.Id).ToList();
@@ -366,25 +369,105 @@ namespace Roki.Modules.Rsvp.Services
                 await ctx.Channel.SendErrorAsync("You do not have any active events.").ConfigureAwait(false);
                 return;
             }
-            var q1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+
+            SocketMessage replyMessage;
+            var ev = events.First();
+            if (events.Count > 1)
+            {
+                var q1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    .WithTitle("RSVP Event Editor")
+                    .WithDescription($"Which Event would you like to edit? Type in the # to select.\n{string.Join("\n", formattedEvents)}")
+                    .WithFooter("Type stop to cancel event edit")
+                ).ConfigureAwait(false);
+                toDelete.Add(q1);
+                replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
+                if (replyMessage == null)
+                {
+                    await ctx.Channel.SendErrorAsync(ErrorEdit);
+                    return;
+                }
+                toDelete.Add(replyMessage as IUserMessage);
+                if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+                { 
+                    await ctx.Channel.SendErrorAsync(StopEdit).ConfigureAwait(false);
+                    await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+                    return;
+                }
+
+                ev = events.FirstOrDefault(e => e.Id.ToString().Equals(replyMessage.Content, StringComparison.OrdinalIgnoreCase));
+                while (ev == null)
+                {
+                    var err = await ctx.Channel.SendErrorAsync("Cannot find an event with that ID, please try again.").ConfigureAwait(false);
+                    toDelete.Add(err);
+                    replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
+                    if (replyMessage == null)
+                    {
+                        await ctx.Channel.SendErrorAsync(ErrorEdit);
+                        return;
+                    }
+                    toDelete.Add(replyMessage as IUserMessage);
+                    if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+                    { 
+                        await ctx.Channel.SendErrorAsync(StopEdit).ConfigureAwait(false);
+                        await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+                        return;
+                    }
+                    ev = events.FirstOrDefault(e => e.Id.ToString().Equals(replyMessage.Content, StringComparison.OrdinalIgnoreCase));
+                }
+            }
+            
+            var q2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                 .WithTitle("RSVP Event Editor")
-                .WithDescription("Which Event would you like to edit?\n")
-                .WithFooter("Type stop to cancel event edit")
+                .WithDescription($"What do you want to change for: #{ev.Id} {ev.Name}\n1. Edit Title\n2. Edit Description\n3. Edit Start Date\n4. Delete Event")
+                .WithFooter("Type stop to finish editing")
             ).ConfigureAwait(false);
-            toDelete.Add(q1);
-            var replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
+            toDelete.Add(q2);
+            replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
             if (replyMessage == null)
             {
-                await ctx.Channel.SendErrorAsync(Error);
+                await ctx.Channel.SendErrorAsync(ErrorEdit);
                 return;
             }
             toDelete.Add(replyMessage as IUserMessage);
-            if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
-            { 
-                await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
-                await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
-                return;
+            while (!replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+            {
+                if (replyMessage.Content.StartsWith("1"))
+                {
+                    
+                }
+                else if (replyMessage.Content.StartsWith("2"))
+                {
+                    
+                }
+                else if (replyMessage.Content.StartsWith("3"))
+                {
+                    
+                }
+                else if (replyMessage.Content.StartsWith("4"))
+                {
+                    
+                }
+                else
+                {
+                    var err = await ctx.Channel.SendErrorAsync("Unknown Option, please select a valid option.");
+                    toDelete.Add(err);
+                }
+                var q2Repeat = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    .WithTitle("RSVP Event Editor")
+                    .WithDescription($"What do you want to change for: #{ev.Id} {ev.Name}\n1. Edit Title\n2. Edit Description\n3. Edit Start Date\n4. Delete Event")
+                    .WithFooter("Type stop to finish editing")
+                ).ConfigureAwait(false);
+                toDelete.Add(q2Repeat);
+                replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
+                if (replyMessage == null)
+                {
+                    await ctx.Channel.SendErrorAsync(ErrorEdit);
+                    await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+                    return;
+                }
             }
+            await ctx.Channel.SendErrorAsync(StopEdit).ConfigureAwait(false);
+            await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
         }
 
         private async Task<SocketMessage> ReplyHandler(ICommandContext ctx, TimeSpan? timeout = null)
