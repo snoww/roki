@@ -21,7 +21,7 @@ namespace Roki.Modules.Stocks
                 _roki = roki;
             }
             
-//            [RokiCommand, Usage, Description, Aliases]
+            [RokiCommand, Usage, Description, Aliases]
             public async Task StockSell(string symbol, long amount)
             {
                 if (amount <= 0)
@@ -66,7 +66,7 @@ namespace Roki.Modules.Stocks
                 }
             }
 
-//            [RokiCommand, Usage, Description, Aliases]
+            [RokiCommand, Usage, Description, Aliases]
             public async Task StockPosition(Position position, string symbol, long amount)
             {
                 if (amount <= 0)
@@ -91,6 +91,11 @@ namespace Roki.Modules.Stocks
                         await ctx.Channel.SendErrorAsync("You do not have enough in your Investing Account to invest").ConfigureAwait(false);
                         return;
                     }
+                    if (status == TradingService.Status.OwnsShortShares)
+                    {
+                        await ctx.Channel.SendErrorAsync("You already own shorted shares of this company.").ConfigureAwait(false);
+                        return;
+                    }
                     var embed = new EmbedBuilder().WithOkColor();
                     if (amount == 1)
                         embed.WithDescription($"{ctx.User.Mention}\nYou've successfully purchased `1` share of `{symbol.ToUpper()}` at `{price.Value:N2}`\n" +
@@ -108,6 +113,11 @@ namespace Roki.Modules.Stocks
                     {
                         await ctx.Channel.SendErrorAsync($"You have leveraged over `{100000:N2}` {_roki.Properties.CurrencyIcon}.\n" +
                                                          "You cannot short any more stocks until they are returned.").ConfigureAwait(false);
+                        return;
+                    }
+                    if (status == TradingService.Status.OwnsLongShares)
+                    {
+                        await ctx.Channel.SendErrorAsync("You already own long shares of this company.").ConfigureAwait(false);
                         return;
                     }
                     var embed = new EmbedBuilder().WithOkColor();
