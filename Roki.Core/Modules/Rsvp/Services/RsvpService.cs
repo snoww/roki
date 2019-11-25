@@ -340,9 +340,9 @@ namespace Roki.Modules.Rsvp.Services
             var und = new List<string>();
             var par = new List<string>();
             if (!string.IsNullOrWhiteSpace(ev.Undecided))
-                und = ev.Undecided.Split(',').ToList();
+                und = ev.Undecided.Split('\n').ToList();
             if (!string.IsNullOrWhiteSpace(ev.Participants))
-                par = ev.Participants.Split(',').ToList();
+                par = ev.Participants.Split('\n').ToList();
 
             if (r.Emote.Equals(Confirm))
             {
@@ -365,7 +365,7 @@ namespace Roki.Modules.Rsvp.Services
                 await msg.RemoveReactionAsync(Confirm, r.User.Value).ConfigureAwait(false);
                 if (par.Contains(r.User.Value.ToString())) par.Remove(r.User.Value.ToString());
                 if (und.Contains(r.User.Value.ToString())) return;
-               und.Add(r.User.Value.ToString());
+                und.Add(r.User.Value.ToString());
             }
 
             ev.Participants = string.Join('\n', par);
