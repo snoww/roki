@@ -55,7 +55,7 @@ namespace Roki.Modules.Stocks.Services
                 {
                     var cost = await CalculateInterest(investment.Symbol, investment.Shares).ConfigureAwait(false);
                     await uow.DUsers.ChargeInterestAsync(userId, cost).ConfigureAwait(false);
-                    investment.InterestDate += TimeSpan.FromDays(7);
+                    investment.InterestDate = DateTimeOffset.UtcNow + TimeSpan.FromDays(7);
                     uow.Transaction.Add(new CurrencyTransaction
                     {
                        Amount = (long) cost,
