@@ -21,7 +21,7 @@ namespace Roki.Modules.Stocks
                 _roki = roki;
             }
             
-            [RokiCommand, Usage, Description, Aliases]
+//            [RokiCommand, Usage, Description, Aliases]
             public async Task StockSell(string symbol, long amount)
             {
                 if (amount <= 0)
@@ -66,7 +66,7 @@ namespace Roki.Modules.Stocks
                 }
             }
 
-            [RokiCommand, Usage, Description, Aliases]
+//            [RokiCommand, Usage, Description, Aliases]
             public async Task StockPosition(Position position, string symbol, long amount)
             {
                 if (amount <= 0)
