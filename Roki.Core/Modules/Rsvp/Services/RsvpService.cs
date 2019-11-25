@@ -21,6 +21,7 @@ namespace Roki.Modules.Rsvp.Services
         private static readonly IEmote Cancel = new Emoji("❌");
         private static readonly IEmote Uncertain = new Emoji("❔");
         private const string Error = "RSVP Event setup timed out. No message received.\nIf you still want to setup and event, you must start over.";
+        private const string Stop = "RSVP Event setup canceled.\nIf you still want to setup and event, you must start over.";
 
         private static readonly IEmote[] Choices =
         {
@@ -83,8 +84,8 @@ namespace Roki.Modules.Rsvp.Services
             var toDelete = new List<IUserMessage>();
             var q1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                 .WithTitle("RSVP Event Setup - Step 1")
-//                    .WithAuthor(ctx.User.Username, ctx.User.GetAvatarUrl())
                 .WithDescription("Which **channel** should the event be in?\n`this`, `current` or `here` for current channel, `default` for default channel\n(default is <#217668245644247041>)")
+                .WithFooter("Type stop to cancel event setup")
             ).ConfigureAwait(false);
             toDelete.Add(q1);
             var replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
@@ -94,16 +95,22 @@ namespace Roki.Modules.Rsvp.Services
                 return;
             }
             toDelete.Add(replyMessage as IUserMessage);
-            IMessageChannel eventChannel;
-            if (replyMessage.Content.Contains("this", StringComparison.OrdinalIgnoreCase) || 
+            if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+            {
+                var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
+                toDelete.Add(stop);
+                await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+                return;
+            }
+            IMessageChannel eventChannel = null;
+            if (replyMessage.MentionedChannels.Count > 1)
+                eventChannel = replyMessage.MentionedChannels.FirstOrDefault() as IMessageChannel;
+            else if (replyMessage.Content.Contains("this", StringComparison.OrdinalIgnoreCase) || 
                 replyMessage.Content.Contains("current", StringComparison.OrdinalIgnoreCase) || 
                 replyMessage.Content.Contains("here", StringComparison.OrdinalIgnoreCase))
                 eventChannel = ctx.Channel;
             else if (replyMessage.Content.Contains("default", StringComparison.OrdinalIgnoreCase))
                 eventChannel = _client.GetChannel(217668245644247041) as IMessageChannel;
-            else
-                eventChannel = replyMessage.MentionedChannels.FirstOrDefault() as IMessageChannel;
-            
             while (eventChannel == null)
             {
                 var err = await ctx.Channel.SendErrorAsync("No channel specified. Please specify the channel using #\ni.e. <#217668245644247041>").ConfigureAwait(false);
@@ -115,19 +122,27 @@ namespace Roki.Modules.Rsvp.Services
                     return;
                 }
                 toDelete.Add(replyMessage as IUserMessage);
-                if (replyMessage.Content.Contains("this", StringComparison.OrdinalIgnoreCase) || 
+                if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+                {
+                    var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
+                    toDelete.Add(stop);
+                    await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+                    return;
+                }
+                if (replyMessage.MentionedChannels.Count > 1)
+                    eventChannel = replyMessage.MentionedChannels.FirstOrDefault() as IMessageChannel;
+                else if (replyMessage.Content.Contains("this", StringComparison.OrdinalIgnoreCase) || 
                     replyMessage.Content.Contains("current", StringComparison.OrdinalIgnoreCase) || 
                     replyMessage.Content.Contains("here", StringComparison.OrdinalIgnoreCase))
                     eventChannel = ctx.Channel;
                 else if (replyMessage.Content.Contains("default", StringComparison.OrdinalIgnoreCase))
                     eventChannel = _client.GetChannel(217668245644247041) as IMessageChannel;
-                else
-                    eventChannel = replyMessage.MentionedChannels.FirstOrDefault() as IMessageChannel;
             }
 
             var q2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithTitle("RSVP Event Setup - Step 2")
-                    .WithDescription($"Using <#{eventChannel.Id}> for the event.\nNow enter a **title** for the event."))
+                    .WithDescription($"Using <#{eventChannel.Id}> for the event.\nNow enter a **title** for the event.")
+                    .WithFooter("Type stop to cancel event setup"))
                 .ConfigureAwait(false);
             toDelete.Add(q2);
             replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
@@ -137,11 +152,20 @@ namespace Roki.Modules.Rsvp.Services
                 return;
             }
             toDelete.Add(replyMessage as IUserMessage);
+            if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+            {
+                var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
+                toDelete.Add(stop);
+                await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+                return;
+            }
             var eventTitle = replyMessage.Content.TrimTo(250, true);
+            
             var q3 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithTitle("RSVP Event Setup - Step 3")
                     .WithDescription($"The title of the event has been set to: {Format.Bold(eventTitle)}\n" +
-                                     $"Please enter a **description** for the event.\n"))
+                                     $"Please enter a **description** for the event.\n")
+                    .WithFooter("Type stop to cancel event setup"))
                 .ConfigureAwait(false);
             toDelete.Add(q3);
             replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
@@ -152,10 +176,19 @@ namespace Roki.Modules.Rsvp.Services
             }
             var eventDesc = replyMessage.Content;
             toDelete.Add(replyMessage as IUserMessage);
+            if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+            {
+                var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
+                toDelete.Add(stop);
+                await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+                return;
+            }
+            
             var q4 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithTitle("RSVP Event Setup - Step 4")
                     .WithDescription($"Now please enter the date and time when this event starts.\nDefault timezone is `{TimeZoneInfo.Local.StandardName}` or you can specify `UTC`\n" +
-                                     "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`"))
+                                     "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`")
+                    .WithFooter("Type stop to cancel event setup"))
                 .ConfigureAwait(false);
             toDelete.Add(q4);
             replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
@@ -164,9 +197,15 @@ namespace Roki.Modules.Rsvp.Services
                 await ctx.Channel.SendErrorAsync(Error);
                 return;
             }
-
             var eventDate = ParseDateTimeFromString(replyMessage.Content);
             toDelete.Add(replyMessage as IUserMessage);
+            if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+            {
+                var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
+                toDelete.Add(stop);
+                await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+                return;
+            }
             while (eventDate == null || eventDate.Value <= DateTimeOffset.Now)
             {
                 var err = await ctx.Channel.SendErrorAsync("Could not parse the date. Please try again.\nExamples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`").ConfigureAwait(false);
@@ -179,16 +218,21 @@ namespace Roki.Modules.Rsvp.Services
                 }
                 eventDate = ParseDateTimeFromString(replyMessage.Content);
                 toDelete.Add(replyMessage as IUserMessage);
+                if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+                {
+                    var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
+                    toDelete.Add(stop);
+                    await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+                    return;
+                }
             }
-            
             var dateStr = eventDate.Value.ToString("f");
             if (eventDate.Value.Offset == TimeSpan.Zero)
                 dateStr += "UTC";
-            
             var q4Confirm = new EmbedBuilder().WithOkColor()
                 .WithTitle("RSVP Event Setup - Step 4")
-                .WithDescription($"Is the date correct? `yes`/`no`\n`{dateStr}`");
-            
+                .WithDescription($"Is the date correct? `yes`/`no`\n`{dateStr}`")
+                .WithFooter("Type stop to cancel event setup");
             var conf = await ctx.Channel.EmbedAsync(q4Confirm).ConfigureAwait(false);
             toDelete.Add(conf);
             var confirm = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
@@ -198,11 +242,19 @@ namespace Roki.Modules.Rsvp.Services
                 return;
             }
             toDelete.Add(confirm as IUserMessage);
+            if (confirm.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+            {
+                var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
+                toDelete.Add(stop);
+                await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+                return;
+            }
             while (!confirm.Content.Contains("yes", StringComparison.OrdinalIgnoreCase) || !confirm.Content.Contains("y", StringComparison.OrdinalIgnoreCase))
             {
                 var err = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithTitle("RSVP Event Setup - Step 4")
                         .WithDescription($"Please enter the date this event starts. Default timezone is `{TimeZoneInfo.Local.StandardName}` or `UTC`" +
-                                         "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`"))
+                                         "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`")
+                        .WithFooter("Type stop to cancel event setup"))
                     .ConfigureAwait(false);
                 err.DeleteAfter(60);
                 replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
@@ -214,6 +266,13 @@ namespace Roki.Modules.Rsvp.Services
 
                 eventDate = ParseDateTimeFromString(replyMessage.Content);
                 toDelete.Add(replyMessage as IUserMessage);
+                if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+                {
+                    var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
+                    toDelete.Add(stop);
+                    await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+                    return;
+                }
                 while (eventDate == null || eventDate.Value <= DateTimeOffset.Now)
                 {
                     var err2 = await ctx.Channel.SendErrorAsync("Could not parse the date. Please try again.\nExamples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`").ConfigureAwait(false);
@@ -226,6 +285,13 @@ namespace Roki.Modules.Rsvp.Services
                     }
                     eventDate = ParseDateTimeFromString(replyMessage.Content);
                     toDelete.Add(replyMessage as IUserMessage);
+                    if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
+                        toDelete.Add(stop);
+                        await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+                        return;
+                    }
                 }
                 dateStr = eventDate.Value.ToString("f");
                 if (eventDate.Value.Offset == TimeSpan.Zero)
@@ -233,7 +299,8 @@ namespace Roki.Modules.Rsvp.Services
                 
                 q4Confirm = new EmbedBuilder().WithOkColor()
                     .WithTitle("RSVP Event Setup - Step 4")
-                    .WithDescription($"Is the date correct? `yes`/`no`\n`{dateStr}`");
+                    .WithDescription($"Is the date correct? `yes`/`no`\n`{dateStr}`")
+                    .WithFooter("Type stop to cancel event setup");
                 var con = await ctx.Channel.EmbedAsync(q4Confirm).ConfigureAwait(false);
                 toDelete.Add(con);
                 confirm = await ReplyHandler(ctx, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
@@ -243,7 +310,15 @@ namespace Roki.Modules.Rsvp.Services
                     return;
                 }
                 toDelete.Add(confirm as IUserMessage);
+                if (confirm.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+                {
+                    var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
+                    toDelete.Add(stop);
+                    await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+                    return;
+                }
             }
+            
             using var uow = _db.GetDbContext();
             var ev = uow.Context.Events.Add(new Event
             {
@@ -285,6 +360,11 @@ namespace Roki.Modules.Rsvp.Services
             await rsvp.AddReactionsAsync(Choices).ConfigureAwait(false);
         }
 
+        public async Task EditEvent(ICommandContext ctx)
+        {
+            
+        }
+
         private async Task<SocketMessage> ReplyHandler(ICommandContext ctx, TimeSpan? timeout = null)
         {
             timeout ??= TimeSpan.FromMinutes(5);
@@ -312,7 +392,7 @@ namespace Roki.Modules.Rsvp.Services
             return null;
         }
 
-        public async Task ReactionHandler(Cacheable<IUserMessage, ulong> cache, ISocketMessageChannel channel, SocketReaction r)
+        private async Task ReactionHandler(Cacheable<IUserMessage, ulong> cache, ISocketMessageChannel channel, SocketReaction r)
         {
             if (r.User.Value.IsBot) return;
             using var uow = _db.GetDbContext();
