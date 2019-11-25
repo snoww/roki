@@ -44,7 +44,7 @@ namespace Roki.Modules.Stocks.Services
             foreach (var (userId, portfolio) in portfolios)
             {
                 var interestList = portfolio.Where(investment => !investment.Position.Equals("long", StringComparison.OrdinalIgnoreCase))
-                    .Where(investment => investment.InterestDate != null && !(DateTimeOffset.UtcNow.AddDays(1) < investment.InterestDate.Value))
+                    .Where(investment => investment.InterestDate != null && DateTimeOffset.UtcNow.AddDays(1) >= investment.InterestDate.Value)
                     .ToList();
                 if (interestList.Count <= 0) continue;
                 var user = _client.GetUser(userId);
