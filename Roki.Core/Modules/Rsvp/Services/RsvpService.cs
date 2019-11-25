@@ -7,6 +7,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Roki.Core.Services;
+using Roki.Core.Services.Database;
 using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
 
@@ -175,7 +176,7 @@ namespace Roki.Modules.Rsvp.Services
                 await ctx.Channel.SendErrorAsync(Error);
                 return;
             }
-            var eventDesc = replyMessage.Content;
+            var eventDesc = replyMessage.Content.TrimTo(1000, true);
             toDelete.Add(replyMessage as IUserMessage);
             if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
             {
@@ -359,10 +360,8 @@ namespace Roki.Modules.Rsvp.Services
             var toDelete = new List<IUserMessage> {ctx.Message};
             var events = new List<Event>();
             var formattedEvents = events.Select(e => $"`#{e.Id}`: {e.Name} `{e.StartDate:f}`");
-            using (var uow = _db.GetDbContext())
-            {
-                events = uow.Context.Events.Where(e => e.Host == ctx.User.Id).ToList();
-            }
+            using var uow = _db.GetDbContext();
+            events = uow.Context.Events.Where(e => e.Host == ctx.User.Id).ToList();
 
             if (events.Count == 0)
             {
@@ -418,7 +417,7 @@ namespace Roki.Modules.Rsvp.Services
             
             var q2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                 .WithTitle("RSVP Event Editor")
-                .WithDescription($"What do you want to change for: #{ev.Id} {ev.Name}\n1. Edit Title\n2. Edit Description\n3. Edit Start Date\n4. Delete Event")
+                .WithDescription($"What do you want to change for: #{ev.Id} {ev.Name}\n1. Edit Title\n2. Edit Description\n3. Edit Event Date\n4. Delete Event")
                 .WithFooter("Type stop to finish editing")
             ).ConfigureAwait(false);
             toDelete.Add(q2);
@@ -431,19 +430,74 @@ namespace Roki.Modules.Rsvp.Services
             toDelete.Add(replyMessage as IUserMessage);
             while (!replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
             {
-                if (replyMessage.Content.StartsWith("1"))
+                // Edit Title
+                SocketMessage editReply;
+                if (replyMessage.Content.StartsWith("1", StringComparison.OrdinalIgnoreCase))
+                {
+                    var e1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                            .WithTitle("RSVP Event Editor - Edit Title")
+                            .WithDescription("What should the new **title** be?"))
+                        .ConfigureAwait(false);
+                    toDelete.Add(e1);
+                    editReply = await ReplyHandler(ctx).ConfigureAwait(false);
+                    if (editReply == null)
+                    {
+                        await ctx.Channel.SendErrorAsync(ErrorEdit);
+                        return;
+                    }
+                    toDelete.Add(editReply as IUserMessage);
+                    if (editReply.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+                    {
+                        await ctx.Channel.SendErrorAsync(StopEdit).ConfigureAwait(false);
+                        await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+                        return;
+                    }
+
+                    ev.Name = editReply.Content.TrimTo(250, true);
+                    var er1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                            .WithTitle("RSVP Event Editor - Edit Title")
+                            .WithDescription($"The event title has been set to: **{ev.Name}**"))
+                        .ConfigureAwait(false);
+                    toDelete.Add(er1);
+                    await uow.SaveChangesAsync().ConfigureAwait(false);
+                }
+                // Edit Description
+                else if (replyMessage.Content.StartsWith("2", StringComparison.OrdinalIgnoreCase))
+                {
+                    var e2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                            .WithTitle("RSVP Event Editor - Edit Description")
+                            .WithDescription("What should the new **description** be?"))
+                        .ConfigureAwait(false);
+                    toDelete.Add(e2);
+                    editReply = await ReplyHandler(ctx).ConfigureAwait(false);
+                    if (editReply == null)
+                    {
+                        await ctx.Channel.SendErrorAsync(ErrorEdit);
+                        return;
+                    }
+                    toDelete.Add(editReply as IUserMessage);
+                    if (editReply.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+                    {
+                        await ctx.Channel.SendErrorAsync(StopEdit).ConfigureAwait(false);
+                        await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+                        return;
+                    }
+
+                    ev.Description = editReply.Content.TrimTo(1000, true);
+                    var er2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                            .WithTitle("RSVP Event Editor - Edit Description")
+                            .WithDescription($"The event description has been changed to:\n{ev.Description}"))
+                        .ConfigureAwait(false);
+                    toDelete.Add(er2);
+                    await uow.SaveChangesAsync().ConfigureAwait(false);
+                }
+                // Edit Event Date
+                else if (replyMessage.Content.StartsWith("3", StringComparison.OrdinalIgnoreCase))
                 {
                     
                 }
-                else if (replyMessage.Content.StartsWith("2"))
-                {
-                    
-                }
-                else if (replyMessage.Content.StartsWith("3"))
-                {
-                    
-                }
-                else if (replyMessage.Content.StartsWith("4"))
+                // Delete
+                else if (replyMessage.Content.StartsWith("4", StringComparison.OrdinalIgnoreCase))
                 {
                     
                 }
@@ -468,6 +522,10 @@ namespace Roki.Modules.Rsvp.Services
             }
             await ctx.Channel.SendErrorAsync(StopEdit).ConfigureAwait(false);
             await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    .WithTitle("RSVP Event Editor")
+                    .WithDescription("The event has been successfully edited."))
+                .ConfigureAwait(false);
         }
 
         private async Task<SocketMessage> ReplyHandler(ICommandContext ctx, TimeSpan? timeout = null)
