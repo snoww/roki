@@ -96,9 +96,8 @@ namespace Roki.Modules.Rsvp.Services
             }
             toDelete.Add(replyMessage as IUserMessage);
             if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
-            {
-                var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
-                toDelete.Add(stop);
+            { 
+                await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
                 await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                 return;
             }
@@ -124,8 +123,7 @@ namespace Roki.Modules.Rsvp.Services
                 toDelete.Add(replyMessage as IUserMessage);
                 if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
                 {
-                    var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
-                    toDelete.Add(stop);
+                    await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
                     await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                     return;
                 }
@@ -154,8 +152,7 @@ namespace Roki.Modules.Rsvp.Services
             toDelete.Add(replyMessage as IUserMessage);
             if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
             {
-                var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
-                toDelete.Add(stop);
+                await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
                 await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                 return;
             }
@@ -178,8 +175,7 @@ namespace Roki.Modules.Rsvp.Services
             toDelete.Add(replyMessage as IUserMessage);
             if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
             {
-                var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
-                toDelete.Add(stop);
+                await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
                 await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                 return;
             }
@@ -201,8 +197,7 @@ namespace Roki.Modules.Rsvp.Services
             toDelete.Add(replyMessage as IUserMessage);
             if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
             {
-                var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
-                toDelete.Add(stop);
+                await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
                 await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                 return;
             }
@@ -220,8 +215,7 @@ namespace Roki.Modules.Rsvp.Services
                 toDelete.Add(replyMessage as IUserMessage);
                 if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
                 {
-                    var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
-                    toDelete.Add(stop);
+                    await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
                     await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                     return;
                 }
@@ -244,8 +238,7 @@ namespace Roki.Modules.Rsvp.Services
             toDelete.Add(confirm as IUserMessage);
             if (confirm.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
             {
-                var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
-                toDelete.Add(stop);
+                await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
                 await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                 return;
             }
@@ -268,8 +261,7 @@ namespace Roki.Modules.Rsvp.Services
                 toDelete.Add(replyMessage as IUserMessage);
                 if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
                 {
-                    var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
-                    toDelete.Add(stop);
+                    await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
                     await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                     return;
                 }
@@ -287,8 +279,7 @@ namespace Roki.Modules.Rsvp.Services
                     toDelete.Add(replyMessage as IUserMessage);
                     if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
                     {
-                        var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
-                        toDelete.Add(stop);
+                        await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
                         await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                         return;
                     }
@@ -312,8 +303,7 @@ namespace Roki.Modules.Rsvp.Services
                 toDelete.Add(confirm as IUserMessage);
                 if (confirm.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
                 {
-                    var stop = await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
-                    toDelete.Add(stop);
+                    await ctx.Channel.SendErrorAsync(Stop).ConfigureAwait(false);
                     await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                     return;
                 }
