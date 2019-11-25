@@ -244,10 +244,21 @@ namespace Roki.Modules.Rsvp.Services
                 }
                 toDelete.Add(confirm as IUserMessage);
             }
+            using var uow = _db.GetDbContext();
+            var ev = uow.Context.Events.Add(new Event
+            {
+                Name = eventTitle,
+                Description = eventDesc,
+                Host = ctx.User.Id,
+                StartDate = eventDate.Value,
+                GuildId = ctx.Guild.Id,
+                ChannelId = eventChannel.Id,
+            });
+            await uow.SaveChangesAsync().ConfigureAwait(false);
 
             var startsIn = eventDate.Value - DateTimeOffset.Now;
             var eventEmbed = new EmbedBuilder().WithOkColor()
-                .WithTitle(eventTitle)
+                .WithTitle($"#{ev.Entity.Id}: {eventTitle}")
                 .WithAuthor(ctx.User.Username, ctx.User.GetAvatarUrl())
                 .WithDescription($"Starts in `{startsIn.ToReadableString()}`")
                 .AddField("Description", eventDesc)
@@ -268,20 +279,10 @@ namespace Roki.Modules.Rsvp.Services
                 await ctx.Channel.SendErrorAsync($"Insufficient Permissions in <#{eventChannel.Id}>");
                 return;
             }
-            
-            await rsvp.AddReactionsAsync(Choices).ConfigureAwait(false);
-            using var uow = _db.GetDbContext();
-            uow.Context.Events.Add(new Event
-            {
-                Name = eventTitle,
-                Description = eventDesc,
-                Host = ctx.User.Id,
-                StartDate = eventDate.Value,
-                GuildId = ctx.Guild.Id,
-                ChannelId = eventChannel.Id,
-                MessageId = rsvp.Id,
-            });
+
+            ev.Entity.MessageId = rsvp.Id;
             await uow.SaveChangesAsync().ConfigureAwait(false);
+            await rsvp.AddReactionsAsync(Choices).ConfigureAwait(false);
         }
 
         private async Task<SocketMessage> ReplyHandler(ICommandContext ctx, TimeSpan? timeout = null)
