@@ -92,7 +92,7 @@ namespace Roki.Modules.Stocks.Services
         public async Task<Investment> GetOwnedShares(ulong userId, string symbol)
         {
             using var uow = _db.GetDbContext();
-            var portfolio = await uow.DUsers.GetUserPortfolio(userId).ConfigureAwait(false);
+            var portfolio = await uow.DUsers.GetUserPortfolioAsync(userId).ConfigureAwait(false);
             var inv = portfolio.FirstOrDefault(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
             return inv;
         }
@@ -100,9 +100,14 @@ namespace Roki.Modules.Stocks.Services
         public async Task<Status> ShortPositionAsync(ulong userId, string symbol, string action, decimal price, long amount)
         {
             using var uow = _db.GetDbContext();
+            var existing = (await uow.DUsers.GetUserPortfolioAsync(userId).ConfigureAwait(false)).FirstOrDefault(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
+            if (existing != null && !existing.Position.Equals("short"))
+            {
+                return Status.OwnsLongShares;
+            }
             var total = price * amount;
             bool success;
-            var portfolio = await uow.DUsers.GetUserPortfolio(userId).ConfigureAwait(false);
+            var portfolio = await uow.DUsers.GetUserPortfolioAsync(userId).ConfigureAwait(false);
             if (action == "buy") // LENDING SHARES FROM BANK, SELLING IMMEDIATELY
             {
                 if (!portfolio.Any(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)) && total >= 100000)
@@ -139,6 +144,11 @@ namespace Roki.Modules.Stocks.Services
         public async Task<Status> LongPositionAsync(ulong userId, string symbol, string action, decimal price, long amount)
         {
             using var uow = _db.GetDbContext();
+            var existing = (await uow.DUsers.GetUserPortfolioAsync(userId).ConfigureAwait(false)).FirstOrDefault(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
+            if (existing != null && !existing.Position.Equals("long"))
+            {
+                return Status.OwnsShortShares;
+            }
             var total = price * amount;
             bool success;
             if (action == "buy") // BUYING SHARES
@@ -191,6 +201,8 @@ namespace Roki.Modules.Stocks.Services
             NotEnoughInvesting = -1,
             NotEnoughShares = -2,
             TooMuchLeverage = -3,
+            OwnsShortShares = -4,
+            OwnsLongShares = -5,
             Success = 1
         }
     }

@@ -24,7 +24,7 @@ namespace Roki.Modules.Stocks.Services
         public async Task<List<Investment>> GetUserPortfolio(ulong userId)
         {
             using var uow = _db.GetDbContext();
-            return await uow.DUsers.GetUserPortfolio(userId).ConfigureAwait(false);
+            return await uow.DUsers.GetUserPortfolioAsync(userId).ConfigureAwait(false);
         }
 
         public async Task<decimal> GetPortfolioValue(List<Investment> portfolio)
