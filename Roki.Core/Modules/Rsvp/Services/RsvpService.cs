@@ -81,7 +81,7 @@ namespace Roki.Modules.Rsvp.Services
 
         public async Task CreateEvent(ICommandContext ctx)
         {
-            var toDelete = new List<IUserMessage>();
+            var toDelete = new List<IUserMessage> {ctx.Message};
             var q1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                 .WithTitle("RSVP Event Setup - Step 1")
                 .WithDescription("Which **channel** should the event be in?\n`this`, `current` or `here` for current channel, `default` for default channel\n(default is <#217668245644247041>)")
