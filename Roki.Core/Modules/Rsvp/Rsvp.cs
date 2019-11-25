@@ -36,7 +36,7 @@ namespace Roki.Modules.Rsvp
             }
             else if (args.Equals("edit", StringComparison.OrdinalIgnoreCase) || args.Equals("e", StringComparison.OrdinalIgnoreCase))
             {
-                await ctx.Channel.SendErrorAsync("Sorry this is not implemented yet").ConfigureAwait(false);
+                await _service.EditEvent(ctx).ConfigureAwait(false);
             }
             else if (args.Equals("list", StringComparison.OrdinalIgnoreCase) || args.Equals("ls", StringComparison.OrdinalIgnoreCase))
             {

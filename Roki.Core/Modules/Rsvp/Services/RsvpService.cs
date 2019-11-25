@@ -24,7 +24,7 @@ namespace Roki.Modules.Rsvp.Services
         private const string Error = "RSVP Event setup timed out. No message received.\nIf you still want to setup and event, you must start over.";
         private const string Stop = "RSVP Event setup canceled.\nIf you still want to setup and event, you must start over.";
         private const string ErrorEdit = "RSVP Event edit cancelled. No message received.";
-        private const string StopEdit = "RSVP Event edit completed.";
+        private const string StopEdit = "RSVP Event edit stopped.";
 
         private static readonly IEmote[] Choices =
         {
@@ -209,7 +209,7 @@ namespace Roki.Modules.Rsvp.Services
             while (eventDate == null || eventDate.Value <= DateTimeOffset.Now)
             {
                 var err = await ctx.Channel.SendErrorAsync("Could not parse the date. Please try again.\nExamples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`").ConfigureAwait(false);
-                err.DeleteAfter(60);
+                toDelete.Add(err);
                 replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                 if (replyMessage == null)
                 {
@@ -237,7 +237,7 @@ namespace Roki.Modules.Rsvp.Services
             var confirm = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
             if (confirm == null)
             {
-                await ctx.Channel.SendErrorAsync(Error);
+                await ctx.Channel.SendErrorAsync(Error).ConfigureAwait(false);
                 return;
             }
             toDelete.Add(confirm as IUserMessage);
@@ -250,15 +250,15 @@ namespace Roki.Modules.Rsvp.Services
             while (!confirm.Content.Contains("yes", StringComparison.OrdinalIgnoreCase) || !confirm.Content.Contains("y", StringComparison.OrdinalIgnoreCase))
             {
                 var err = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithTitle("RSVP Event Setup - Step 4")
-                        .WithDescription($"Please enter the date this event starts. Default timezone is `{TimeZoneInfo.Local.StandardName}` or `UTC`" +
+                        .WithDescription($"Please enter the date this event starts. Default timezone is `{TimeZoneInfo.Local.StandardName}` or you can specify `UTC`" +
                                          "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`")
                         .WithFooter("Type stop to cancel event setup"))
                     .ConfigureAwait(false);
-                err.DeleteAfter(60);
+                toDelete.Add(err);
                 replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
                 if (replyMessage == null)
                 {
-                    await ctx.Channel.SendErrorAsync(Error);
+                    await ctx.Channel.SendErrorAsync(Error).ConfigureAwait(false);
                     return;
                 }
 
@@ -428,7 +428,8 @@ namespace Roki.Modules.Rsvp.Services
                 return;
             }
             toDelete.Add(replyMessage as IUserMessage);
-            while (!replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+            var stop = false;
+            while (!replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase) || stop)
             {
                 // Edit Title
                 SocketMessage editReply;
@@ -442,15 +443,14 @@ namespace Roki.Modules.Rsvp.Services
                     editReply = await ReplyHandler(ctx).ConfigureAwait(false);
                     if (editReply == null)
                     {
-                        await ctx.Channel.SendErrorAsync(ErrorEdit);
+                        await ctx.Channel.SendErrorAsync(ErrorEdit).ConfigureAwait(false);
                         return;
                     }
                     toDelete.Add(editReply as IUserMessage);
                     if (editReply.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
                     {
-                        await ctx.Channel.SendErrorAsync(StopEdit).ConfigureAwait(false);
-                        await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
-                        return;
+                        stop = true;
+                        continue;
                     }
 
                     ev.Name = editReply.Content.TrimTo(250, true);
@@ -469,18 +469,17 @@ namespace Roki.Modules.Rsvp.Services
                             .WithDescription("What should the new **description** be?"))
                         .ConfigureAwait(false);
                     toDelete.Add(e2);
-                    editReply = await ReplyHandler(ctx).ConfigureAwait(false);
+                    editReply = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
                     if (editReply == null)
                     {
-                        await ctx.Channel.SendErrorAsync(ErrorEdit);
+                        await ctx.Channel.SendErrorAsync(ErrorEdit).ConfigureAwait(false);
                         return;
                     }
                     toDelete.Add(editReply as IUserMessage);
                     if (editReply.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
                     {
-                        await ctx.Channel.SendErrorAsync(StopEdit).ConfigureAwait(false);
-                        await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
-                        return;
+                        stop = true;
+                        continue;
                     }
 
                     ev.Description = editReply.Content.TrimTo(1000, true);
@@ -494,28 +493,193 @@ namespace Roki.Modules.Rsvp.Services
                 // Edit Event Date
                 else if (replyMessage.Content.StartsWith("3", StringComparison.OrdinalIgnoreCase))
                 {
+                    var e3 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                            .WithTitle("RSVP Event Editor - Edit Event Date")
+                            .WithDescription("What should the new event date be?" +
+                                             $"Default timezone is `{TimeZoneInfo.Local.StandardName}` or you can specify `UTC`" +
+                                             "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`"))
+                        .ConfigureAwait(false);
+                    toDelete.Add(e3);
+                    editReply = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
+                    if (editReply == null)
+                    {
+                        await ctx.Channel.SendErrorAsync(ErrorEdit).ConfigureAwait(false);
+                        return;
+                    }
+                    toDelete.Add(editReply as IUserMessage);
+                    if (editReply.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+                    {
+                        stop = true;
+                        continue;
+                    }
+                    var newDate = ParseDateTimeFromString(editReply.Content);
+                    while (newDate == null || newDate.Value <= DateTimeOffset.Now)
+                    {
+                        var err = await ctx.Channel.SendErrorAsync("Could not parse the date. Please try again.\nExamples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`").ConfigureAwait(false);
+                        toDelete.Add(err);
+                        replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
+                        if (replyMessage == null)
+                        {
+                            await ctx.Channel.SendErrorAsync(ErrorEdit).ConfigureAwait(false);
+                            return;
+                        }
+                        newDate = ParseDateTimeFromString(replyMessage.Content);
+                        toDelete.Add(replyMessage as IUserMessage);
+                        if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+                        {
+                            stop = true;
+                            break;
+                        }
+                    }
+                    if (stop) continue;
                     
+                    var dateStr = newDate.Value.ToString("f");
+                    if (newDate.Value.Offset == TimeSpan.Zero)
+                        dateStr += "UTC";
+
+                    var econ3 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                            .WithTitle("RSVP Event Editor - Edit Event Date")
+                            .WithDescription($"Is the date correct? `yes`/`no`\n`{dateStr}`"))
+                        .ConfigureAwait(false);
+                    toDelete.Add(econ3);
+                    var con = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
+                    if (con == null)
+                    {
+                        await ctx.Channel.SendErrorAsync(ErrorEdit).ConfigureAwait(false);
+                        return;
+                    }
+                    toDelete.Add(con as IUserMessage);
+                    if (con.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+                    {
+                        stop = true;
+                        continue;
+                    }
+
+                    while (!con.Content.Contains("yes", StringComparison.OrdinalIgnoreCase) || !con.Content.Contains("y", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var err = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithTitle("RSVP Event Editor - Edit Event Date")
+                                .WithDescription(
+                                    $"Please enter the correct date. Default timezone is `{TimeZoneInfo.Local.StandardName}` or you can specify `UTC`" +
+                                    "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`"))
+                            .ConfigureAwait(false);
+                        toDelete.Add(err);
+                        replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
+                        if (replyMessage == null)
+                        {
+                            await ctx.Channel.SendErrorAsync(ErrorEdit).ConfigureAwait(false);
+                            return;
+                        }
+
+                        newDate = ParseDateTimeFromString(replyMessage.Content);
+                        toDelete.Add(replyMessage as IUserMessage);
+                        if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+                        {
+                            stop = true;
+                            break;
+                        }
+                        while (newDate == null || newDate.Value <= DateTimeOffset.Now)
+                        {
+                            var err2 = await ctx.Channel.SendErrorAsync("Could not parse the date. Please try again.\nExamples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`").ConfigureAwait(false);
+                            toDelete.Add(err2);
+                            replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
+                            if (replyMessage == null)
+                            {
+                                await ctx.Channel.SendErrorAsync(ErrorEdit).ConfigureAwait(false);
+                                return;
+                            }
+                            newDate = ParseDateTimeFromString(replyMessage.Content);
+                            toDelete.Add(replyMessage as IUserMessage);
+                            if (replyMessage.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+                            {
+                                stop = true;
+                                break;
+                            }
+                        }
+                        if (stop) continue;
+                    
+                        dateStr = newDate.Value.ToString("f");
+                        if (newDate.Value.Offset == TimeSpan.Zero)
+                            dateStr += "UTC";
+
+                        var con2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                                .WithTitle("RSVP Event Editor - Edit Event Date")
+                                .WithDescription($"Is the date correct? `yes`/`no`\n`{dateStr}`"))
+                            .ConfigureAwait(false);
+                        toDelete.Add(con2);
+                        con = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
+                        if (con == null)
+                        {
+                            await ctx.Channel.SendErrorAsync(ErrorEdit).ConfigureAwait(false);
+                            return;
+                        }
+                        toDelete.Add(con as IUserMessage);
+                        if (con.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+                        {
+                            stop = true;
+                            break;
+                        }
+                    }
+                    if (stop) continue;
+                    ev.StartDate = newDate.Value;
+                    var er2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                            .WithTitle("RSVP Event Editor - Edit Event Date")
+                            .WithDescription($"The event date has been changed to:\n`{ev.StartDate:f}`"))
+                        .ConfigureAwait(false);
+                    toDelete.Add(er2);
+                    await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
                 // Delete
                 else if (replyMessage.Content.StartsWith("4", StringComparison.OrdinalIgnoreCase))
                 {
-                    
+                    var e4 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                            .WithTitle("RSVP Event Editor - Delete Event")
+                            .WithDescription($"Are you sure you want to delete the event? `yes`/`no`\n#{ev.Id} {ev.Name}\n**You cannot undo this process.**"))
+                        .ConfigureAwait(false);
+                    toDelete.Add(e4);
+                    replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
+                    if (replyMessage == null)
+                    {
+                        await ctx.Channel.SendErrorAsync(ErrorEdit).ConfigureAwait(false);
+                        return;
+                    }
+
+                    if (replyMessage.Content.Equals("yes", StringComparison.OrdinalIgnoreCase) ||
+                        replyMessage.Content.Equals("y", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var message = await _client.GetGuild(ev.GuildId).GetTextChannel(ev.ChannelId).GetMessageAsync(ev.MessageId).ConfigureAwait(false) as IUserMessage;
+                        uow.Context.Events.Remove(ev);
+                        await uow.SaveChangesAsync().ConfigureAwait(false);
+                        try
+                        {
+                            await message.DeleteAsync().ConfigureAwait(false);
+                        }
+                        catch
+                        {
+                            // ignored
+                        }
+
+                        await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                                .WithTitle("RSVP Event Editor - Event Deleted")
+                                .WithDescription($"#{ev.Id} {ev.Name} has been deleted"))
+                            .ConfigureAwait(false);
+                        return;
+                    }
                 }
                 else
                 {
-                    var err = await ctx.Channel.SendErrorAsync("Unknown Option, please select a valid option.");
+                    var err = await ctx.Channel.SendErrorAsync("Unknown Option, please select a valid option.").ConfigureAwait(false);
                     toDelete.Add(err);
                 }
                 var q2Repeat = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithTitle("RSVP Event Editor")
-                    .WithDescription($"What do you want to change for: #{ev.Id} {ev.Name}\n1. Edit Title\n2. Edit Description\n3. Edit Start Date\n4. Delete Event")
+                    .WithDescription($"What else do you want to change for: #{ev.Id} {ev.Name}\n1. Edit Title\n2. Edit Description\n3. Edit Start Date\n4. Delete Event")
                     .WithFooter("Type stop to finish editing")
                 ).ConfigureAwait(false);
                 toDelete.Add(q2Repeat);
                 replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                 if (replyMessage == null)
                 {
-                    await ctx.Channel.SendErrorAsync(ErrorEdit);
+                    await ctx.Channel.SendErrorAsync(ErrorEdit).ConfigureAwait(false);
                     await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                     return;
                 }
@@ -524,7 +688,7 @@ namespace Roki.Modules.Rsvp.Services
             await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithTitle("RSVP Event Editor")
-                    .WithDescription("The event has been successfully edited."))
+                    .WithDescription("The event editor has been stopped. Any changes you've made have been saved."))
                 .ConfigureAwait(false);
         }
 
