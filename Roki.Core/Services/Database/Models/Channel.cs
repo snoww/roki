@@ -17,11 +17,11 @@ namespace Roki.Core.Services.Database.Models
         public int UserCount { get; set; }
         [Column("is_nsfw")]
         public bool IsNsfw { get; set; }
-        [Column("currency_generation")]
-        public bool CurrencyGeneration { get; set; }
-        [Column("xp_gain")]
-        public bool XpGain { get; set; }
+        [Column("currency_generation")] 
+        public bool CurrencyGeneration { get; set; } = true;
+        [Column("xp_gain")] 
+        public bool XpGain { get; set; } = true;
         [Column("is_deleted")]
-        public bool Deleted { get; set; } = false;
+        public bool Deleted { get; set; }
     }
 }
