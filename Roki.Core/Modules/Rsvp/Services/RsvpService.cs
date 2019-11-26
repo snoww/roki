@@ -328,7 +328,7 @@ namespace Roki.Modules.Rsvp.Services
 
             var startsIn = eventDate.Value - DateTimeOffset.Now;
             var eventEmbed = new EmbedBuilder().WithOkColor()
-                .WithTitle($"#{ev.Entity.Id}: {eventTitle}")
+                .WithTitle($"`#{ev.Entity.Id}` {eventTitle}")
                 .WithAuthor(ctx.User.Username, ctx.User.GetAvatarUrl())
                 .WithDescription($"Starts in `{startsIn.ToReadableString()}`")
                 .AddField("Description", eventDesc)
@@ -417,7 +417,7 @@ namespace Roki.Modules.Rsvp.Services
             
             var q2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                 .WithTitle("RSVP Event Editor")
-                .WithDescription($"What do you want to change for: #{ev.Id} {ev.Name}\n1. Edit Title\n2. Edit Description\n3. Edit Event Date\n4. Delete Event")
+                .WithDescription($"What do you want to change for: `#{ev.Id}` **{ev.Name}**\n`1.` Edit Title\n`2.` Edit Description\n`3.` Edit Event Date\n`4.` Delete Event")
                 .WithFooter("Type stop to finish editing")
             ).ConfigureAwait(false);
             toDelete.Add(q2);
@@ -633,7 +633,7 @@ namespace Roki.Modules.Rsvp.Services
                 {
                     var e4 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithTitle("RSVP Event Editor - Delete Event")
-                            .WithDescription($"Are you sure you want to delete the event? `yes`/`no`\n#{ev.Id} {ev.Name}\n**You cannot undo this process.**"))
+                            .WithDescription($"Are you sure you want to delete the event? `yes`/`no`\n`#{ev.Id}` **{ev.Name}**\n**You cannot undo this process.**"))
                         .ConfigureAwait(false);
                     toDelete.Add(e4);
                     replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
@@ -660,7 +660,7 @@ namespace Roki.Modules.Rsvp.Services
 
                         await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                                 .WithTitle("RSVP Event Editor - Event Deleted")
-                                .WithDescription($"#{ev.Id} {ev.Name} has been deleted"))
+                                .WithDescription($"`#{ev.Id}` **{ev.Name}** has been deleted"))
                             .ConfigureAwait(false);
                         return;
                     }
@@ -672,7 +672,7 @@ namespace Roki.Modules.Rsvp.Services
                 }
                 var q2Repeat = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithTitle("RSVP Event Editor")
-                    .WithDescription($"What else do you want to change for: #{ev.Id} {ev.Name}\n1. Edit Title\n2. Edit Description\n3. Edit Start Date\n4. Delete Event")
+                    .WithDescription($"What else do you want to change for: `#{ev.Id}` **{ev.Name}**\n1. Edit Title\n2. Edit Description\n3. Edit Start Date\n4. Delete Event")
                     .WithFooter("Type stop to finish editing")
                 ).ConfigureAwait(false);
                 toDelete.Add(q2Repeat);
