@@ -53,7 +53,7 @@ namespace Roki.Modules.Rsvp
                 }
                 var events = _service.ListEvents(ctx.Guild.Id, page);
                 var embed = new EmbedBuilder().WithOkColor().WithTitle("List of Events")
-                    .WithDescription($"{string.Join("\n", events.Select(e => $"#{e.Id}: {e.Name} - {e.StartDate:f}\n\thttps://discordapp.com/channels/{e.GuildId}/{e.ChannelId}/{e.MessageId}"))}");
+                    .WithDescription($"{string.Join("\n", events.Select(e => $"`#{e.Id}` **{e.Name}** - `{(e.StartDate - DateTimeOffset.UtcNow).ToReadableString()}` https://discordapp.com/channels/{e.GuildId}/{e.ChannelId}/{e.MessageId}"))}");
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
