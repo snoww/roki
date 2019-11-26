@@ -20,7 +20,7 @@ namespace Roki.Core.Services.Database.Repositories
         {
             var chn = await Set.FirstOrDefaultAsync(c => c.ChannelId == channel.Id).ConfigureAwait(false);
             if (chn != null) return chn;
-            var newChannel = new Channel
+            var newChannel = Set.Add(new Channel
             {
                 ChannelId = channel.Id,
                 Name = channel.Name,
@@ -28,10 +28,9 @@ namespace Roki.Core.Services.Database.Repositories
                 GuildName = channel.Guild.Name,
                 UserCount = channel.Users.Count,
                 IsNsfw = channel.IsNsfw
-            };
-            Set.Add(newChannel);
+            });
             await Context.SaveChangesAsync().ConfigureAwait(false);
-            return newChannel;
+            return newChannel.Entity;
         }
     }
 }

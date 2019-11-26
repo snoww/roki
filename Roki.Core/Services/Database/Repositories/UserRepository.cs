@@ -46,7 +46,7 @@ namespace Roki.Core.Services.Database.Repositories
             var existing = await Set.FirstOrDefaultAsync(u => u.UserId == user.Id).ConfigureAwait(false);
             if (existing != null) return existing;
             
-            var usr =  await Context.AddAsync(new User
+            var usr = await Context.AddAsync(new User
             {
                 UserId = user.Id,
                 Username = user.Username,

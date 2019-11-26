@@ -20,7 +20,7 @@ namespace Roki.Core.Services.Database.Repositories
         {
             var gd = await Set.FirstOrDefaultAsync(g => g.GuildId == guild.Id).ConfigureAwait(false);
             if (gd != null) return gd;
-            var newGuild = new Guild
+            var newGuild = Set.Add(new Guild
             {
                 GuildId = guild.Id,
                 Name = guild.Name,
@@ -31,9 +31,9 @@ namespace Roki.Core.Services.Database.Repositories
                 OwnerId = guild.OwnerId,
                 RegionId = guild.VoiceRegionId,
                 CreatedAt = guild.CreatedAt
-            };
+            });
             await Context.SaveChangesAsync().ConfigureAwait(false);
-            return newGuild;
+            return newGuild.Entity;
         }
     }
 }
