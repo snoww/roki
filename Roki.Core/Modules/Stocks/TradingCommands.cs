@@ -51,8 +51,8 @@ namespace Roki.Modules.Stocks
                     return;
                 }
 
-                Enum.TryParse<Position>(investment.Position, out var pos);
-                if (pos == Position.Long)
+                Enum.TryParse<Position>(investment.Position.ToUpper(), out var pos);
+                if (pos == Position.LONG)
                 {
                     var status = await _service.LongPositionAsync(ctx.User.Id, symbol, "sell", price.Value, amount).ConfigureAwait(false);
                     if (status == TradingService.Status.NotEnoughShares)
@@ -66,7 +66,7 @@ namespace Roki.Modules.Stocks
                                              $"Total Revenue: `{price.Value * amount:N2}`"))
                         .ConfigureAwait(false);
                 }
-                else if (pos == Position.Short)
+                else if (pos == Position.SHORT)
                 {
                     var status = await _service.ShortPositionAsync(ctx.User.Id, symbol, "sell", price.Value, amount).ConfigureAwait(false);
                     if (status == TradingService.Status.NotEnoughInvesting)
@@ -98,7 +98,7 @@ namespace Roki.Modules.Stocks
                     return;
                 }
                 var cost = amount * price.Value;
-                if (position == Position.Long)
+                if (position == Position.LONG)
                 {
                     var status = await _service.LongPositionAsync(ctx.User.Id, symbol, "buy", price.Value, amount).ConfigureAwait(false);
                     if (status == TradingService.Status.NotEnoughInvesting)
@@ -150,8 +150,8 @@ namespace Roki.Modules.Stocks
             
             public enum Position
             {
-                Long,
-                Short
+                LONG,
+                SHORT
             }
         }
     }
