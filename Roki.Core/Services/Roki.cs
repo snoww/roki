@@ -218,9 +218,9 @@ namespace Roki
 
                         await uow.SaveChangesAsync().ConfigureAwait(false);
                     }
-                    catch
+                    catch (Exception e)
                     {
-                        //
+                        _log.Error(e);
                     }
                 });
                 return Task.CompletedTask;
