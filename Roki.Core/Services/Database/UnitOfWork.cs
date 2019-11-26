@@ -18,6 +18,8 @@ namespace Roki.Core.Services.Database
         ISubscriptionRepository Subscriptions { get; }
         ITradesRepository Trades { get; }
         IEventsRepository Events { get; }
+        IGuildRepository Guilds { get; }
+        IChannelRepository Channels { get; }
 
         int SaveChanges();
         Task<int> SaveChangesAsync();
@@ -34,6 +36,8 @@ namespace Roki.Core.Services.Database
         private ISubscriptionRepository _subscriptions;
         private ITradesRepository _trades;
         private IEventsRepository _events;
+        private IGuildRepository _guilds;
+        private IChannelRepository _channels;
         public UnitOfWork(RokiContext context)
         {
             Context = context;
@@ -49,6 +53,8 @@ namespace Roki.Core.Services.Database
         public ISubscriptionRepository Subscriptions => _subscriptions ??= new SubscriptionRepository(Context);
         public ITradesRepository Trades => _trades ??= new TradesRepository(Context);
         public IEventsRepository Events => _events ??= new EventsRepository(Context);
+        public IGuildRepository Guilds => _guilds ??= new GuildRepository(Context);
+        public IChannelRepository Channels => _channels ??= new ChannelRepository(Context);
 
         public int SaveChanges()
         {

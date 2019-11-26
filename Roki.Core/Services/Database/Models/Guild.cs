@@ -13,7 +13,7 @@ namespace Roki.Core.Services.Database.Models
         [Column("icon_id")]
         public string IconId { get; set; }
         [Column("owner_id")]
-        public string OwnerId { get; set; }
+        public ulong OwnerId { get; set; }
         [Column("channel_count")]
         public int ChannelCount { get; set; }
         [Column("member_count")]
