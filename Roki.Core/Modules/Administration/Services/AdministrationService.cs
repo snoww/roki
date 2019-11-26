@@ -16,7 +16,7 @@ namespace Roki.Modules.Administration.Services
             _db = db;
         }
 
-        public async Task RetrieveMissingMessages(ICommandContext ctx, ulong messageId)
+        public async Task FillMissingMessagesAsync(ICommandContext ctx, ulong messageId)
         {
             var channel = ctx.Channel as SocketTextChannel;
             var rawMessages = channel?.GetMessagesAsync(messageId, Direction.After, int.MaxValue);
@@ -27,6 +27,9 @@ namespace Roki.Modules.Administration.Services
                 if (await uow.Messages.MessageExists(message.Id).ConfigureAwait(false)) continue;
                 await uow.Messages.AddToTempTableAsync(message).ConfigureAwait(false);
             }
+
+            await uow.Messages.MoveToTempTableAsync(messageId).ConfigureAwait(false);
+            await uow.Messages.MoveBackToMessagesAsync(messageId).ConfigureAwait(false);
         }
     }
 }

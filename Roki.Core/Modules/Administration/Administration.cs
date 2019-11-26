@@ -10,11 +10,11 @@ namespace Roki.Modules.Administration
 {
     public class Administration : RokiTopLevelModule<AdministrationService>
     {
-        [RokiCommand, Description, Usage, Aliases]
-        [RequireUserPermission(GuildPermission.Administrator)]
+//        [RokiCommand, Description, Usage, Aliases]
+//        [RequireUserPermission(GuildPermission.Administrator)]
         public async Task Fill(ulong afterMessage = 646848809707503666)
         {
-            await _service.RetrieveMissingMessages(ctx, afterMessage).ConfigureAwait(false);
+            await _service.FillMissingMessagesAsync(ctx, afterMessage).ConfigureAwait(false);
         }
     }
 }
