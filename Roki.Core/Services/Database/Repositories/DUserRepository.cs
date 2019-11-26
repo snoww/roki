@@ -25,7 +25,7 @@ namespace Roki.Core.Services.Database.Repositories
         Task ChangeNotificationLocation(ulong userId, string notify);
         Task<List<Item>> GetUserInventory(ulong userId);
         Task<bool> UpdateUserInventory(ulong userId, string name, int quantity);
-        Task<List<Investment>> GetUserPortfolio(ulong userId);
+        Task<List<Investment>> GetUserPortfolioAsync(ulong userId);
         Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, string action, long shares);
         decimal GetUserInvestingAccount(ulong userId);
         Task<bool> UpdateInvestingAccountAsync(ulong userId, decimal amount);
@@ -183,7 +183,7 @@ namespace Roki.Core.Services.Database.Repositories
             return true;
         }
 
-        public async Task<List<Investment>> GetUserPortfolio(ulong userId)
+        public async Task<List<Investment>> GetUserPortfolioAsync(ulong userId)
         {
             var user = await Set.FirstAsync(u => u.UserId == userId).ConfigureAwait(false);
             var portfolio = user.Portfolio != null ? JsonSerializer.Deserialize<List<Investment>>(user.Portfolio) : null;
@@ -194,7 +194,7 @@ namespace Roki.Core.Services.Database.Repositories
         public async Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, string action, long shares)
         {
             var user = await Set.FirstAsync(u => u.UserId == userId).ConfigureAwait(false);
-            var portfolio = await GetUserPortfolio(userId).ConfigureAwait(false);
+            var portfolio = await GetUserPortfolioAsync(userId).ConfigureAwait(false);
             DateTimeOffset? interestDate = null;
             if (position == "short")
                 interestDate = DateTimeOffset.UtcNow.AddDays(7);
@@ -265,7 +265,7 @@ namespace Roki.Core.Services.Database.Repositories
             var portfolios = new Dictionary<ulong, List<Investment>>();
             foreach (var user in users)
             {
-                var port = await GetUserPortfolio(user.UserId).ConfigureAwait(false);
+                var port = await GetUserPortfolioAsync(user.UserId).ConfigureAwait(false);
                 if (port == null)
                     continue;
                 portfolios.Add(user.UserId, port);

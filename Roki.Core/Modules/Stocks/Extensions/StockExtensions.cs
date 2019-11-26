@@ -32,7 +32,7 @@ namespace Roki.Modules.Stocks.Extensions
             var ticker = parsed[1];
             if (ExchangeMap.ContainsKey(exchange.ToUpper()))
                 return ticker.ToUpper() + ExchangeMap[exchange.ToUpper()];
-            return ticker;
+            return ticker.ToUpper();
         }
     }
 }

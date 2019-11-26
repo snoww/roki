@@ -565,11 +565,11 @@
     ]
   },
   "stockposition": {
-    "Command": "stockbuy position",
+    "Command": "stockbuy position sb",
     "Description": "Long or short shares of a company. Shorted shares will be charged a premium every week.",
     "Usage": [
-      "{0}stockbuy AAPL long 50",
-      "{0}position AAPL short 15"
+      "{0}stockbuy long AAPL 50",
+      "{0}position short AAPL 15"
     ]
   },
   "stocksell": {
@@ -609,6 +609,15 @@
     "Description": "Shows the users userid, username, discriminator, and avatarid/",
     "Usage": [
       "{0}userdetails @snow"
+    ]
+  },
+  "events": {
+    "Command": "events event",
+    "Description": "Create, edit, show events in the current server.",
+    "Usage": [
+      "{0}events new",
+      "{0}events edit",
+      "{0}events list"
     ]
   }
 }

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Roki.Core.Services.Database.Models
@@ -25,11 +24,11 @@ namespace Roki.Core.Services.Database.Models
         public string NotificationLocation { get; set; } = "dm";
         [Column("currency")]
         public long Currency { get; set; } = 0;
-        [Column("inventory")]
+        [Column("inventory", TypeName = "json")]
         public string Inventory { get; set; } = null;
         [Column("investing")]
         public decimal InvestingAccount { get; set; } = 50000;
-        [Column("portfolio")]
+        [Column("portfolio", TypeName = "json")]
         public string Portfolio { get; set; } = null;
         
         public override bool Equals(object obj) => 
