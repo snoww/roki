@@ -181,7 +181,7 @@ namespace Roki.Core.Services
             var _ = Task.Run(async () =>
             {
                 using var uow = _db.GetDbContext();
-                var guild = await uow.Context.Guilds.FirstAsync(g => g.GuildId == before.Id).ConfigureAwait(false);
+                var guild = await uow.Guilds.GetOrCreateGuildAsync(before).ConfigureAwait(false);
                 guild.Name = after.Name;
                 guild.ChannelCount = after.Channels.Count;
                 guild.EmoteCount = after.Emotes.Count;
