@@ -42,7 +42,7 @@ namespace Roki.Modules.Gambling
 
 
                 var removed = await _currency
-                    .ChangeAsync(ctx.User, "BetDie Entry", -amount, ctx.User.Id, ctx.Client.CurrentUser.Id, ctx.Guild.Id, ctx.Channel.Id,
+                    .ChangeAsync(ctx.User.Id, "BetDie Entry", -amount, ctx.User.Id, ctx.Client.CurrentUser.Id, ctx.Guild.Id, ctx.Channel.Id,
                         ctx.Message.Id)
                     .ConfigureAwait(false);
                 if (!removed)
@@ -130,7 +130,7 @@ namespace Roki.Modules.Gambling
                 {
                     embed.WithOkColor()
                         .WithDescription($"{ctx.User.Mention} You rolled a total of `{total}`\nCongratulations! You've won `{won:N0}` {_roki.Properties.CurrencyIcon}");
-                    await _currency.ChangeAsync(ctx.User, "BetDie Payout", won, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id,
+                    await _currency.ChangeAsync(ctx.User.Id, "BetDie Payout", won, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
                 }
                 else

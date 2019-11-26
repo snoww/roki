@@ -29,13 +29,13 @@ namespace Roki.Modules.Currency
         private long GetCurrency(ulong userId)
         {
             using var uow = _db.GetDbContext();
-            return uow.DUsers.GetUserCurrency(userId);
+            return uow.Users.GetUserCurrency(userId);
         }
 
         private decimal GetInvAccount(ulong userId)
         {
             using var uow = _db.GetDbContext();
-            return uow.DUsers.GetUserInvestingAccount(userId);
+            return uow.Users.GetUserInvestingAccount(userId);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -57,7 +57,7 @@ namespace Roki.Modules.Currency
             if (page > 0)
                 page -= 1;
             using var uow = _db.GetDbContext();
-            var list = uow.DUsers.GetCurrencyLeaderboard(ctx.Client.CurrentUser.Id, page);
+            var list = uow.Users.GetCurrencyLeaderboard(ctx.Client.CurrentUser.Id, page);
             var embed = new EmbedBuilder().WithOkColor()
                 .WithTitle("Currency Leaderboard");
             var i = 9 * page + 1;
@@ -85,13 +85,13 @@ namespace Roki.Modules.Currency
             var toAcc = "";
             if ((int) account == 0)
             {
-                success = await uow.DUsers.TransferToFromInvestingAccountAsync(ctx.User.Id, -amount).ConfigureAwait(false);
+                success = await uow.Users.TransferToFromInvestingAccountAsync(ctx.User.Id, -amount).ConfigureAwait(false);
                 fromAcc = "Investing Account";
                 toAcc = "Cash Account";
             }
             else if ((int) account == 1)
             {
-                success = await uow.DUsers.TransferToFromInvestingAccountAsync(ctx.User.Id, amount).ConfigureAwait(false);
+                success = await uow.Users.TransferToFromInvestingAccountAsync(ctx.User.Id, amount).ConfigureAwait(false);
                 toAcc = "Investing Account";
                 fromAcc = "Cash Account";
             }
@@ -129,7 +129,7 @@ namespace Roki.Modules.Currency
             if (string.IsNullOrWhiteSpace(message))
                 message = "No Message";
             message = $"Gift from {ctx.User.Username} to {user.Username} - {message}";
-            var success = await _currency.TransferAsync(ctx.User, user, message, amount, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
+            var success = await _currency.TransferAsync(ctx.User.Id, user.Id, message, amount, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
                 .ConfigureAwait(false);
 
             if (!success)
