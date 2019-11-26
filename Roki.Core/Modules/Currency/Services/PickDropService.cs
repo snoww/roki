@@ -91,7 +91,7 @@ namespace Roki.Modules.Currency.Services
                     (amount, ids) = await uow.Transaction.PickCurrency(channel.Id, user.Id).ConfigureAwait(false);
                     if (amount > 0)
                     {
-                        await uow.Users.UpdateCurrencyAsync(user, amount).ConfigureAwait(false);
+                        await uow.Users.UpdateCurrencyAsync(user.Id, amount).ConfigureAwait(false);
                     }
 
                     await uow.SaveChangesAsync().ConfigureAwait(false);
@@ -119,11 +119,11 @@ namespace Roki.Modules.Currency.Services
         public async Task<bool> DropAsync(ICommandContext ctx, IUser user, long amount)
         {
             using var uow = _db.GetDbContext();
-            var dUser = await uow.Users.GetOrCreate(user).ConfigureAwait(false);
+            var dUser = await uow.Users.GetUserAsync(user.Id).ConfigureAwait(false);
             if (dUser.Currency < amount)
                 return false;
 
-            var updated = await uow.Users.UpdateCurrencyAsync(user, -amount).ConfigureAwait(false);
+            var updated = await uow.Users.UpdateCurrencyAsync(user.Id, -amount).ConfigureAwait(false);
 
             if (!updated) return false;
                 

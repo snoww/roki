@@ -41,7 +41,7 @@ namespace Roki.Services
             var _ =  Task.Run(async () =>
             {
                 using var uow = _db.GetDbContext();
-                var user = await uow.Users.GetOrCreate(message.Author).ConfigureAwait(false);
+                var user = await uow.Users.GetUserAsync(message.Author.Id).ConfigureAwait(false);
                 var doubleXp = uow.Subscriptions.DoubleXpIsActive(message.Author.Id);
                 var fastXp = uow.Subscriptions.FastXpIsActive(message.Author.Id);
                 if (fastXp)

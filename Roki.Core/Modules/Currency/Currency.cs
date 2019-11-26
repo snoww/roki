@@ -129,7 +129,7 @@ namespace Roki.Modules.Currency
             if (string.IsNullOrWhiteSpace(message))
                 message = "No Message";
             message = $"Gift from {ctx.User.Username} to {user.Username} - {message}";
-            var success = await _currency.TransferAsync(ctx.User, user, message, amount, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
+            var success = await _currency.TransferAsync(ctx.User.Id, user.Id, message, amount, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
                 .ConfigureAwait(false);
 
             if (!success)
