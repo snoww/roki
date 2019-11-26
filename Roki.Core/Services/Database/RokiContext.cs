@@ -11,8 +11,8 @@ namespace Roki.Core.Services.Database
         }
 
         public DbSet<Quote> Quotes { get; set; }
-        public DbSet<User> DUsers { get; set; }
-        public DbSet<Message> DMessages { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Message> Messages { get; set; }
         public DbSet<CurrencyTransaction> Transactions { get; set; }
         public DbSet<Listing> Listings { get; set; }
         public DbSet<Subscriptions> Subscriptions { get; set; }
@@ -32,7 +32,7 @@ namespace Roki.Core.Services.Database
 
             #endregion
 
-            #region DUser
+            #region User
 
             modelBuilder.Entity<User>(entity =>
             {
@@ -46,7 +46,7 @@ namespace Roki.Core.Services.Database
 
             #endregion
 
-            #region DMessage
+            #region Message
 
             modelBuilder.Entity<Message>();
 

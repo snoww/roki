@@ -1,5 +1,7 @@
+using System.Linq;
 using System.Threading.Tasks;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 
 namespace Roki.Core.Services
 {
@@ -18,13 +20,26 @@ namespace Roki.Core.Services
 
         private Task UserUpdated(SocketUser before, SocketUser after)
         {
-            throw new System.NotImplementedException();
+            var _ = Task.Run(async () =>
+            {
+                using var uow = _db.GetDbContext();
+                var user = await uow.Context.Users.FirstAsync(u => u.UserId == before.Id).ConfigureAwait(false);
+                user.Username = after.Username;
+                user.Discriminator = after.Discriminator;
+                user.AvatarId = after.AvatarId;
+                await uow.SaveChangesAsync().ConfigureAwait(false);
+            });
+            return Task.CompletedTask;
         }
 
         private Task UserJoined(SocketGuildUser user)
         {
-            using var uow = _db.GetDbContext();
-//            uow.Users
+            var _ = Task.Run(async () =>
+            {
+                using var uow = _db.GetDbContext();
+                await uow.Users.CreateUserAsync(user).ConfigureAwait(false);
+            });
+            return Task.CompletedTask;
         }
     }
 }
