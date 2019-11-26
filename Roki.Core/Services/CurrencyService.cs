@@ -45,14 +45,14 @@ namespace Roki.Services
             ulong messageId)
         {
             using var uow = _db.GetDbContext();
-            var success = await uow.DUsers.UpdateCurrencyAsync(user, amount).ConfigureAwait(false);
+            var success = await uow.Users.UpdateCurrencyAsync(user, amount).ConfigureAwait(false);
             if (from == _roki.Properties.BotId)
             {
-                await uow.DUsers.UpdateBotCurrencyAsync(from, -amount);
+                await uow.Users.UpdateBotCurrencyAsync(from, -amount);
             }
             else if (to == _roki.Properties.BotId)
             {
-                await uow.DUsers.UpdateBotCurrencyAsync(to, -amount);
+                await uow.Users.UpdateBotCurrencyAsync(to, -amount);
             }
             if (success)
             {
@@ -69,10 +69,10 @@ namespace Roki.Services
         {
             using (var uow = _db.GetDbContext())
             {
-                var success = await uow.DUsers.UpdateCurrencyAsync(userFrom, -amount).ConfigureAwait(false);
+                var success = await uow.Users.UpdateCurrencyAsync(userFrom, -amount).ConfigureAwait(false);
                 if (success)
                 {
-                    await uow.DUsers.UpdateCurrencyAsync(userTo, amount).ConfigureAwait(false);
+                    await uow.Users.UpdateCurrencyAsync(userTo, amount).ConfigureAwait(false);
                     var _ = CreateTransaction(reason, amount, userFrom.Id, userTo.Id, guildId, channelId, messageId);
                     uow.Transaction.Add(_);
                 }
@@ -120,7 +120,7 @@ namespace Roki.Services
         public long GetCurrency(ulong userId)
         {
             using var uow = _db.GetDbContext();
-            return uow.DUsers.GetUserCurrency(userId);
+            return uow.Users.GetUserCurrency(userId);
         }
     }
 }

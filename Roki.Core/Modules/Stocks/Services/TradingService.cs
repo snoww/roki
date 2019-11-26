@@ -40,7 +40,7 @@ namespace Roki.Modules.Stocks.Services
         private async void ChargePremium(object state)
         {
             using var uow = _db.GetDbContext();
-            var portfolios = await uow.DUsers.GetAllPortfolios().ConfigureAwait(false);
+            var portfolios = await uow.Users.GetAllPortfolios().ConfigureAwait(false);
             foreach (var (userId, portfolio) in portfolios)
             {
                 var interestList = portfolio.Where(investment => !investment.Position.Equals("long", StringComparison.OrdinalIgnoreCase))
@@ -54,7 +54,7 @@ namespace Roki.Modules.Stocks.Services
                 foreach (var investment in interestList)
                 {
                     var cost = await CalculateInterest(investment.Symbol, investment.Shares).ConfigureAwait(false);
-                    await uow.DUsers.ChargeInterestAsync(userId, cost).ConfigureAwait(false);
+                    await uow.Users.ChargeInterestAsync(userId, cost).ConfigureAwait(false);
                     investment.InterestDate = DateTimeOffset.UtcNow + TimeSpan.FromDays(7);
                     uow.Transaction.Add(new CurrencyTransaction
                     {
@@ -92,7 +92,7 @@ namespace Roki.Modules.Stocks.Services
         public async Task<Investment> GetOwnedShares(ulong userId, string symbol)
         {
             using var uow = _db.GetDbContext();
-            var portfolio = await uow.DUsers.GetUserPortfolioAsync(userId).ConfigureAwait(false);
+            var portfolio = await uow.Users.GetUserPortfolioAsync(userId).ConfigureAwait(false);
             var inv = portfolio.FirstOrDefault(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
             return inv;
         }
@@ -100,28 +100,28 @@ namespace Roki.Modules.Stocks.Services
         public async Task<Status> ShortPositionAsync(ulong userId, string symbol, string action, decimal price, long amount)
         {
             using var uow = _db.GetDbContext();
-            var existing = (await uow.DUsers.GetUserPortfolioAsync(userId).ConfigureAwait(false)).FirstOrDefault(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
+            var existing = (await uow.Users.GetUserPortfolioAsync(userId).ConfigureAwait(false)).FirstOrDefault(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
             if (existing != null && !existing.Position.Equals("short"))
             {
                 return Status.OwnsLongShares;
             }
             var total = price * amount;
             bool success;
-            var portfolio = await uow.DUsers.GetUserPortfolioAsync(userId).ConfigureAwait(false);
+            var portfolio = await uow.Users.GetUserPortfolioAsync(userId).ConfigureAwait(false);
             if (action == "buy") // LENDING SHARES FROM BANK, SELLING IMMEDIATELY
             {
                 if (!portfolio.Any(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)) && total >= 100000)
                     return Status.TooMuchLeverage;
                 if (!await CanShortStock(portfolio, total).ConfigureAwait(false))
                     return Status.TooMuchLeverage;
-                await uow.DUsers.UpdateInvestingAccountAsync(userId, total).ConfigureAwait(false);
-                success = await uow.DUsers.UpdateUserPortfolio(userId, symbol, "short", action, amount);
+                await uow.Users.UpdateInvestingAccountAsync(userId, total).ConfigureAwait(false);
+                success = await uow.Users.UpdateUserPortfolio(userId, symbol, "short", action, amount);
             }
             else // SELLING SHARES BACK TO BANK
             {
-                var update = await uow.DUsers.UpdateInvestingAccountAsync(userId, -total).ConfigureAwait(false);
+                var update = await uow.Users.UpdateInvestingAccountAsync(userId, -total).ConfigureAwait(false);
                 if (!update) return Status.NotEnoughInvesting;
-                success = await uow.DUsers.UpdateUserPortfolio(userId, symbol, "short", action, -amount);
+                success = await uow.Users.UpdateUserPortfolio(userId, symbol, "short", action, -amount);
             }
 
             if (!success) return Status.NotEnoughShares;
@@ -144,7 +144,7 @@ namespace Roki.Modules.Stocks.Services
         public async Task<Status> LongPositionAsync(ulong userId, string symbol, string action, decimal price, long amount)
         {
             using var uow = _db.GetDbContext();
-            var existing = (await uow.DUsers.GetUserPortfolioAsync(userId).ConfigureAwait(false)).FirstOrDefault(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
+            var existing = (await uow.Users.GetUserPortfolioAsync(userId).ConfigureAwait(false)).FirstOrDefault(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
             if (existing != null && !existing.Position.Equals("long"))
             {
                 return Status.OwnsShortShares;
@@ -153,14 +153,14 @@ namespace Roki.Modules.Stocks.Services
             bool success;
             if (action == "buy") // BUYING SHARES
             {
-                var update = await uow.DUsers.UpdateInvestingAccountAsync(userId, -total).ConfigureAwait(false);
+                var update = await uow.Users.UpdateInvestingAccountAsync(userId, -total).ConfigureAwait(false);
                 if (!update) return Status.NotEnoughInvesting;
-                success = await uow.DUsers.UpdateUserPortfolio(userId, symbol, "long", action, amount);
+                success = await uow.Users.UpdateUserPortfolio(userId, symbol, "long", action, amount);
             }
             else // SELLING SHARES
             {
-                await uow.DUsers.UpdateInvestingAccountAsync(userId, total).ConfigureAwait(false);
-                success = await uow.DUsers.UpdateUserPortfolio(userId, symbol, "long", action, -amount);
+                await uow.Users.UpdateInvestingAccountAsync(userId, total).ConfigureAwait(false);
+                success = await uow.Users.UpdateUserPortfolio(userId, symbol, "long", action, -amount);
             }
 
             if (!success) return Status.NotEnoughShares;

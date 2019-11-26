@@ -12,16 +12,16 @@ using Roki.Modules.Xp.Common;
 
 namespace Roki.Core.Services.Database.Repositories
 {
-    public interface IDUserRepository : IRepository<DUser>
+    public interface IUserRepository : IRepository<User>
     {
-        Task<DUser> GetOrCreate(IUser original);
-        DUser[] GetUsersXpLeaderboard(int page);
+        Task<User> GetOrCreate(IUser original);
+        User[] GetUsersXpLeaderboard(int page);
         long GetUserCurrency(ulong userId);
         Task<bool> UpdateCurrencyAsync(IUser user, long amount);
         Task LotteryAwardAsync(ulong userId, long amount);
         Task UpdateBotCurrencyAsync(ulong botId, long amount);
-        IEnumerable<DUser> GetCurrencyLeaderboard(ulong botId, int page);
-        Task UpdateXp(DUser user, SocketMessage message, bool boost = false);
+        IEnumerable<User> GetCurrencyLeaderboard(ulong botId, int page);
+        Task UpdateXp(User user, SocketMessage message, bool boost = false);
         Task ChangeNotificationLocation(ulong userId, string notify);
         Task<List<Item>> GetUserInventory(ulong userId);
         Task<bool> UpdateUserInventory(ulong userId, string name, int quantity);
@@ -34,20 +34,20 @@ namespace Roki.Core.Services.Database.Repositories
         Task ChargeInterestAsync(ulong userId, decimal amount);
     }
 
-    public class DUserRepository : Repository<DUser>, IDUserRepository
+    public class UserRepository : Repository<User>, IUserRepository
     {
         private readonly Properties _properties = JsonSerializer.Deserialize<Properties>(File.ReadAllText("./data/properties.json"));
-        public DUserRepository(DbContext context) : base(context)
+        public UserRepository(DbContext context) : base(context)
         {
         }
 
-        private async Task<DUser> EnsureCreated(ulong userId, string username, string discriminator, string avatarId)
+        private async Task<User> EnsureCreated(ulong userId, string username, string discriminator, string avatarId)
         {
             var user = Set.FirstOrDefault(u => u.UserId == userId);
 
             if (user == null)
             {
-                Context.Add(user = new DUser
+                Context.Add(user = new User
                 {
                     UserId = userId,
                     Username = username,
@@ -66,10 +66,10 @@ namespace Roki.Core.Services.Database.Repositories
             return user;
         }
 
-        public async Task<DUser> GetOrCreate(IUser original) =>
+        public async Task<User> GetOrCreate(IUser original) =>
             await EnsureCreated(original.Id, original.Username, original.Discriminator, original.AvatarId).ConfigureAwait(false);
 
-        public DUser[] GetUsersXpLeaderboard(int page)
+        public User[] GetUsersXpLeaderboard(int page)
         {
             return Set
                 .OrderByDescending(x => x.TotalXp)
@@ -108,7 +108,7 @@ namespace Roki.Core.Services.Database.Repositories
             await Context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public IEnumerable<DUser> GetCurrencyLeaderboard(ulong botId, int page)
+        public IEnumerable<User> GetCurrencyLeaderboard(ulong botId, int page)
         {
             return Set.Where(c => c.Currency > 0 && botId != c.UserId)
                 .OrderByDescending(c => c.Currency)
@@ -117,7 +117,7 @@ namespace Roki.Core.Services.Database.Repositories
                 .ToList();
         }
 
-        public async Task UpdateXp(DUser user, SocketMessage message, bool boost = false)
+        public async Task UpdateXp(User user, SocketMessage message, bool boost = false)
         {
             if (user == null) return;
             var level = new XpLevel(user.TotalXp);
@@ -285,7 +285,7 @@ namespace Roki.Core.Services.Database.Repositories
             await Context.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        private static async Task SendNotification(DUser user, SocketMessage msg, int level)
+        private static async Task SendNotification(User user, SocketMessage msg, int level)
         {
             if (user.NotificationLocation.Equals("none", StringComparison.OrdinalIgnoreCase))
             {

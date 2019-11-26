@@ -11,8 +11,8 @@ namespace Roki.Core.Services.Database
         }
 
         public DbSet<Quote> Quotes { get; set; }
-        public DbSet<DUser> DUsers { get; set; }
-        public DbSet<DMessage> DMessages { get; set; }
+        public DbSet<User> DUsers { get; set; }
+        public DbSet<Message> DMessages { get; set; }
         public DbSet<CurrencyTransaction> Transactions { get; set; }
         public DbSet<Listing> Listings { get; set; }
         public DbSet<Subscriptions> Subscriptions { get; set; }
@@ -34,7 +34,7 @@ namespace Roki.Core.Services.Database
 
             #region DUser
 
-            modelBuilder.Entity<DUser>(entity =>
+            modelBuilder.Entity<User>(entity =>
             {
                 entity.HasAlternateKey(u => u.UserId);
                 entity.Property(u => u.LastLevelUp)
@@ -48,7 +48,7 @@ namespace Roki.Core.Services.Database
 
             #region DMessage
 
-            modelBuilder.Entity<DMessage>();
+            modelBuilder.Entity<Message>();
 
             #endregion
 
