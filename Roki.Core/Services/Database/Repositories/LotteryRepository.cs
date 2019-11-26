@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Roki.Core.Services.Database.Models;
-using Roki.Modules.Gambling;
 
 namespace Roki.Core.Services.Database.Repositories
 {

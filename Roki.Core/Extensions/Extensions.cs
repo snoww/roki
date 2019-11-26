@@ -254,5 +254,20 @@ namespace Roki.Extensions
                 list[n] = value;  
             }  
         }
+        
+        public static string ToReadableString(this TimeSpan span)
+        {
+            var formatted = string.Format("{0}{1}{2}{3}",
+                span.Duration().Days >= 7 ? $"{span.Days / 7} week{(span.Days / 7 == 1 ? string.Empty : "s")}, " : string.Empty,
+                span.Duration().Days % 7 > 0 ? $"{span.Days % 7} day{(span.Days % 7 == 1 ? string.Empty : "s")}, " : string.Empty,
+                span.Duration().Hours > 0 ? $"{span.Hours:0} hour{(span.Hours == 1 ? string.Empty : "s")}, " : string.Empty,
+                span.Duration().Minutes > 0 ? $"{span.Minutes:0} minute{(span.Minutes == 1 ? string.Empty : "s")}, " : string.Empty);
+
+            if (formatted.EndsWith(", ")) formatted = formatted.Substring(0, formatted.Length - 2);
+
+            if (string.IsNullOrEmpty(formatted)) formatted = "0 seconds";
+
+            return formatted;
+        }
     }
 }
