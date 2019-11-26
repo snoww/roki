@@ -62,7 +62,7 @@ namespace Roki.Modules.Stocks
                     }
 
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                            .WithDescription($"{ctx.User.Mention}\nYou've successfully sold `{amount}` share{(amount == 1 ? string.Empty : "s")} of `{symbol}` at `{price.Value:N2}`" +
+                            .WithDescription($"{ctx.User.Mention}\nYou've successfully sold `{amount}` share{(amount == 1 ? string.Empty : "s")} of `{symbol}` at `{price.Value:N2}`\n" +
                                              $"Total Revenue: `{price.Value * amount:N2}`"))
                         .ConfigureAwait(false);
                 }
@@ -75,7 +75,7 @@ namespace Roki.Modules.Stocks
                         return;
                     }
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                            .WithDescription($"{ctx.User.Mention}\nYou've returned `{amount}` share{(amount == 1 ? string.Empty : "s")} of `{symbol}` back to the bank, at `{price.Value:N2}`" +
+                            .WithDescription($"{ctx.User.Mention}\nYou've returned `{amount}` share{(amount == 1 ? string.Empty : "s")} of `{symbol}` back to the bank, at `{price.Value:N2}`\n" +
                                              $"Total Cost: `{price.Value * amount:N2}`"))
                         .ConfigureAwait(false);
                 }
