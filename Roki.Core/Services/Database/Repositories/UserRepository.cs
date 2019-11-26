@@ -15,10 +15,10 @@ namespace Roki.Core.Services.Database.Repositories
     public interface IUserRepository : IRepository<User>
     {
         Task<User> CreateUserAsync(IUser user);
-        Task<User> GetOrCreate(IUser original);
+        Task<User> GetUserAsync(ulong userId);
         User[] GetUsersXpLeaderboard(int page);
         long GetUserCurrency(ulong userId);
-        Task<bool> UpdateCurrencyAsync(IUser user, long amount);
+        Task<bool> UpdateCurrencyAsync(ulong userId, long amount);
         Task LotteryAwardAsync(ulong userId, long amount);
         Task UpdateBotCurrencyAsync(ulong botId, long amount);
         IEnumerable<User> GetCurrencyLeaderboard(ulong botId, int page);
@@ -41,32 +41,6 @@ namespace Roki.Core.Services.Database.Repositories
         public UserRepository(DbContext context) : base(context)
         {
         }
-
-        private async Task<User> EnsureCreated(ulong userId, string username, string discriminator, string avatarId)
-        {
-            var user = Set.FirstOrDefault(u => u.UserId == userId);
-
-            if (user == null)
-            {
-                Context.Add(user = new User
-                {
-                    UserId = userId,
-                    Username = username,
-                    Discriminator = discriminator,
-                    AvatarId = avatarId,
-                });
-            }
-            else if (username != user.Username || discriminator != user.Discriminator || avatarId != user.AvatarId)
-            {
-                user.Username = username;
-                user.Discriminator = discriminator;
-                user.AvatarId = avatarId;
-            }
-
-            await Context.SaveChangesAsync().ConfigureAwait(false);
-            return user;
-        }
-
         public async Task<User> CreateUserAsync(IUser user)
         {
             var usr =  await Context.AddAsync(new User
@@ -80,8 +54,8 @@ namespace Roki.Core.Services.Database.Repositories
             return usr.Entity;
         }
 
-        public async Task<User> GetOrCreate(IUser original) =>
-            await EnsureCreated(original.Id, original.Username, original.Discriminator, original.AvatarId).ConfigureAwait(false);
+        public async Task<User> GetUserAsync(ulong userId) =>
+            await Set.FirstAsync(u => u.UserId == userId).ConfigureAwait(false);
 
         public User[] GetUsersXpLeaderboard(int page)
         {
@@ -96,11 +70,11 @@ namespace Roki.Core.Services.Database.Repositories
         public long GetUserCurrency(ulong userId) => 
             Set.FirstOrDefault(x => x.UserId == userId)?.Currency ?? 0;
 
-        public async Task<bool> UpdateCurrencyAsync(IUser user, long amount)
+        public async Task<bool> UpdateCurrencyAsync(ulong userId, long amount)
         {
             if (amount == 0)
                 return false;
-            var dUser = await GetOrCreate(user).ConfigureAwait(false);
+            var dUser = await GetUserAsync(userId).ConfigureAwait(false);
             if (dUser.Currency + amount < 0)
                 return false;
             dUser.Currency += amount;

@@ -121,7 +121,7 @@ namespace Roki.Modules.Currency
                 var buyer = ctx.User;
                 var seller = _client.GetUser(listing.SellerId) as IUser;
                 var cost = listing.Cost * amount;
-                var removed = await _currency.TransferAsync(buyer, seller, $"Store Purchase - ID {listing.Id} x{amount}", cost, 
+                var removed = await _currency.TransferAsync(buyer.Id, seller.Id, $"Store Purchase - ID {listing.Id} x{amount}", cost, 
                     ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id).ConfigureAwait(false);
                 if (!removed)
                 {
