@@ -21,5 +21,7 @@ namespace Roki.Core.Services.Database.Models
         public bool CurrencyGeneration { get; set; }
         [Column("xp_gain")]
         public bool XpGain { get; set; }
+        [Column("is_deleted")]
+        public bool Deleted { get; set; } = false;
     }
 }

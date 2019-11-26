@@ -24,5 +24,7 @@ namespace Roki.Core.Services.Database.Models
         public string RegionId { get; set; }
         [Column("created_at")]
         public DateTimeOffset CreatedAt { get; set; }
+        [Column("available")] 
+        public bool Available { get; set; } = true;
     }
 }

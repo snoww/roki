@@ -32,12 +32,15 @@ namespace Roki.Core.Services
             _client.UserUpdated += UserUpdated;
             _client.JoinedGuild += JoinedGuild;
             _client.GuildUpdated += GuildUpdated;
+            _client.GuildAvailable += GuildAvailable;
+            _client.GuildUnavailable += GuildUnavailable;
             _client.ChannelCreated += ChannelCreated;
             _client.ChannelUpdated += ChannelUpdated;
+            _client.ChannelDestroyed += ChannelDestroyed;
             
             await Task.CompletedTask;
         }
-        
+
         private Task MessageReceived(SocketMessage message)
         {
             if (message.Author.IsBot) return Task.CompletedTask;
@@ -148,6 +151,30 @@ namespace Roki.Core.Services
             
             return Task.CompletedTask;
         }
+        
+        private Task GuildAvailable(SocketGuild guild)
+        {
+            var _ = Task.Run(async () =>
+            {
+                using var uow = _db.GetDbContext();
+                var g = await uow.Guilds.GetOrCreateGuildAsync(guild).ConfigureAwait(false);
+                g.Available = true;
+                await uow.SaveChangesAsync().ConfigureAwait(false);
+            });
+            return Task.CompletedTask;
+        }
+
+        private Task GuildUnavailable(SocketGuild guild)
+        {
+            var _ = Task.Run(async () =>
+            {
+                using var uow = _db.GetDbContext();
+                var g = await uow.Guilds.GetOrCreateGuildAsync(guild).ConfigureAwait(false);
+                g.Available = false;
+                await uow.SaveChangesAsync().ConfigureAwait(false);
+            });
+            return Task.CompletedTask;
+        }
 
         private Task GuildUpdated(SocketGuild before, SocketGuild after)
         {
@@ -163,6 +190,23 @@ namespace Roki.Core.Services
                 guild.RegionId = after.VoiceRegionId;
                 await uow.SaveChangesAsync().ConfigureAwait(false);
             });
+            return Task.CompletedTask;
+        }
+
+        private Task ChannelDestroyed(SocketChannel channel)
+        {
+            if (!(channel is SocketGuildChannel guildChannel)) return Task.CompletedTask;
+            if (guildChannel is SocketTextChannel textChannel)
+            {
+                var _ = Task.Run(async () =>
+                {
+                    using var uow = _db.GetDbContext();
+                    var ch = await uow.Channels.GetOrCreateChannelAsync(textChannel).ConfigureAwait(false);
+                    ch.Deleted = true;
+                    await uow.SaveChangesAsync().ConfigureAwait(false);
+                });
+            }
+
             return Task.CompletedTask;
         }
 
