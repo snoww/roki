@@ -105,6 +105,10 @@ namespace Roki.Core.Services.Database
             {
                 entity.HasKey(c => c.Id);
                 entity.HasAlternateKey(c => c.ChannelId);
+                entity.Property(c => c.CurrencyGeneration)
+                    .HasDefaultValue(true);
+                entity.Property(c => c.XpGain)
+                    .HasDefaultValue(true);
             });
 
             #endregion
