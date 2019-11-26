@@ -94,6 +94,7 @@ namespace Roki.Core.Services
         private Task MessageUpdated(Cacheable<IMessage, ulong> cache, SocketMessage after, ISocketMessageChannel channel)
         {
             if (after.Author.IsBot) return Task.CompletedTask;
+            if (string.IsNullOrWhiteSpace(after.Author.Username)) return Task.CompletedTask;
             var _ = Task.Run(async () =>
             {
                 using var uow = _db.GetDbContext();
