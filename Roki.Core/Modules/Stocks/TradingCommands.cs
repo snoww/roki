@@ -54,7 +54,17 @@ namespace Roki.Modules.Stocks
                 Enum.TryParse<Position>(investment.Position, out var pos);
                 if (pos == Position.Long)
                 {
-                    await _service.LongPositionAsync(ctx.User.Id, symbol, "sell", price.Value, amount).ConfigureAwait(false);
+                    var status = await _service.LongPositionAsync(ctx.User.Id, symbol, "sell", price.Value, amount).ConfigureAwait(false);
+                    if (status == TradingService.Status.NotEnoughShares)
+                    {
+                        await ctx.Channel.SendErrorAsync("You do not have enough in your Investing Account sell these shares").ConfigureAwait(false);
+                        return;
+                    }
+
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                            .WithDescription($"{ctx.User.Mention}\nYou've successfully sold `{amount}` share{(amount == 1 ? string.Empty : "s")} of `{symbol}` at `{price.Value:N2}`" +
+                                             $"Total Revenue: `{price.Value * amount:N2}`"))
+                        .ConfigureAwait(false);
                 }
                 else if (pos == Position.Short)
                 {
@@ -62,7 +72,12 @@ namespace Roki.Modules.Stocks
                     if (status == TradingService.Status.NotEnoughInvesting)
                     {
                         await ctx.Channel.SendErrorAsync("You do not have enough in your Investing Account sell these shares").ConfigureAwait(false);
+                        return;
                     }
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                            .WithDescription($"{ctx.User.Mention}\nYou've returned `{amount}` share{(amount == 1 ? string.Empty : "s")} of `{symbol}` back to the bank, at `{price.Value:N2}`" +
+                                             $"Total Cost: `{price.Value * amount:N2}`"))
+                        .ConfigureAwait(false);
                 }
             }
 
