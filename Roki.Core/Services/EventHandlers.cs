@@ -16,6 +16,22 @@ namespace Roki.Core.Services
             _client = client;
             _client.UserJoined += UserJoined;
             _client.UserUpdated += UserUpdated;
+            _client.JoinedGuild += JoinedGuild;
+        }
+
+        private Task JoinedGuild(SocketGuild guild)
+        {
+            var _ = Task.Run(async () =>
+            {
+                using var uow = _db.GetDbContext();
+                await guild.DownloadUsersAsync().ConfigureAwait(false);
+                var users = guild.Users;
+                foreach (var user in users)
+                {
+                    await uow.Users.GetOrCreateUserAsync(user);
+                }
+            });
+            return Task.CompletedTask;
         }
 
         private Task UserUpdated(SocketUser before, SocketUser after)
@@ -37,7 +53,7 @@ namespace Roki.Core.Services
             var _ = Task.Run(async () =>
             {
                 using var uow = _db.GetDbContext();
-                await uow.Users.CreateUserAsync(user).ConfigureAwait(false);
+                await uow.Users.GetOrCreateUserAsync(user).ConfigureAwait(false);
             });
             return Task.CompletedTask;
         }

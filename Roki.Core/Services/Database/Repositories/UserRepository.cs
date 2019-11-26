@@ -14,7 +14,7 @@ namespace Roki.Core.Services.Database.Repositories
 {
     public interface IUserRepository : IRepository<User>
     {
-        Task<User> CreateUserAsync(IUser user);
+        Task<User> GetOrCreateUserAsync(IUser user);
         Task<User> GetUserAsync(ulong userId);
         User[] GetUsersXpLeaderboard(int page);
         long GetUserCurrency(ulong userId);
@@ -41,8 +41,11 @@ namespace Roki.Core.Services.Database.Repositories
         public UserRepository(DbContext context) : base(context)
         {
         }
-        public async Task<User> CreateUserAsync(IUser user)
+        public async Task<User> GetOrCreateUserAsync(IUser user)
         {
+            var existing = await Set.FirstOrDefaultAsync(u => u.UserId == user.Id).ConfigureAwait(false);
+            if (existing != null) return existing;
+            
             var usr =  await Context.AddAsync(new User
             {
                 UserId = user.Id,
