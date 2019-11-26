@@ -41,6 +41,8 @@ namespace Roki.Core.Services.Database
                 entity.HasAlternateKey(u => u.UserId);
                 entity.Property(u => u.LastLevelUp)
                     .HasDefaultValue(DateTimeOffset.MinValue);
+                entity.Property(u => u.LastXpGain)
+                    .HasDefaultValue(DateTimeOffset.MinValue);
                 entity.HasIndex(u => u.TotalXp);
                 entity.HasIndex(u => u.Currency);
                 entity.HasIndex(u => u.UserId);
@@ -84,6 +86,26 @@ namespace Roki.Core.Services.Database
             #region Trades
 
             modelBuilder.Entity<Trades>();
+
+            #endregion
+
+            #region Guilds
+
+            modelBuilder.Entity<Guild>(entity =>
+            {
+                entity.HasKey(g => g.Id);
+                entity.HasAlternateKey(g => g.GuildId);
+            });
+
+            #endregion
+            
+            #region Channels
+
+            modelBuilder.Entity<Channel>(entity =>
+            {
+                entity.HasKey(c => c.Id);
+                entity.HasAlternateKey(c => c.ChannelId);
+            });
 
             #endregion
         }
