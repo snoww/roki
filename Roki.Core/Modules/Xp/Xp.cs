@@ -25,7 +25,7 @@ namespace Roki.Modules.Xp
         {
             user ??= ctx.User;
             using var uow = _db.GetDbContext();
-            var dUser = await uow.DUsers.GetOrCreate(user).ConfigureAwait(false);
+            var dUser = await uow.Users.GetOrCreate(user).ConfigureAwait(false);
             var xp = new XpLevel(dUser.TotalXp);
             await ctx.Channel.SendMessageAsync($"{user.Username}\nLevel: `{xp.Level:N0}`\nTotal XP: `{xp.TotalXp:N0}`\nXP Progress: `{xp.LevelXp:N0}`/`{xp.RequiredXp:N0}`");
         }
@@ -39,7 +39,7 @@ namespace Roki.Modules.Xp
                 page -= 1;
             using (var uow = _db.GetDbContext())
             {
-                var list = uow.DUsers.GetUsersXpLeaderboard(page);
+                var list = uow.Users.GetUsersXpLeaderboard(page);
                 var embed = new EmbedBuilder().WithOkColor()
                     .WithTitle("XP Leaderboard");
                 var i = 9 * page + 1;
@@ -83,9 +83,9 @@ namespace Roki.Modules.Xp
 
             using var uow = _db.GetDbContext();
             if (!isAdmin)
-                await uow.DUsers.ChangeNotificationLocation(ctx.User.Id, notify).ConfigureAwait(false);
+                await uow.Users.ChangeNotificationLocation(ctx.User.Id, notify).ConfigureAwait(false);
             else
-                await uow.DUsers.ChangeNotificationLocation(user.Id, notify).ConfigureAwait(false);
+                await uow.Users.ChangeNotificationLocation(user.Id, notify).ConfigureAwait(false);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Successfully changed xp notification preferences."))
                 .ConfigureAwait(false);
         }

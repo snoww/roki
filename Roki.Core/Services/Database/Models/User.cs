@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Roki.Core.Services.Database.Models
 {
     [Table("users")]
-    public class DUser : DbEntity
+    public class User : DbEntity
     {
         [Column("user_id")]
         public ulong UserId { get; set; }
@@ -32,7 +32,7 @@ namespace Roki.Core.Services.Database.Models
         public string Portfolio { get; set; } = null;
         
         public override bool Equals(object obj) => 
-            obj is DUser dUser && dUser.UserId == UserId;
+            obj is User dUser && dUser.UserId == UserId;
         
         public override int GetHashCode() => 
             UserId.GetHashCode();

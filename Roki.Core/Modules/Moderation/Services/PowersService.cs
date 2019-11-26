@@ -26,14 +26,14 @@ namespace Roki.Modules.Moderation.Services
         public async Task<bool> AvailablePower(ulong userId, string power)
         {
             using var uow = _db.GetDbContext();
-            var inv =  await uow.DUsers.GetUserInventory(userId).ConfigureAwait(false);
+            var inv =  await uow.Users.GetUserInventory(userId).ConfigureAwait(false);
             return inv.Any(i => i.Name.Equals(power, StringComparison.OrdinalIgnoreCase));
         }
         
         public async Task ConsumePower(ulong userId, string power)
         {
             using var uow = _db.GetDbContext();
-            await uow.DUsers.UpdateUserInventory(userId, power, -1).ConfigureAwait(false);
+            await uow.Users.UpdateUserInventory(userId, power, -1).ConfigureAwait(false);
             await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 

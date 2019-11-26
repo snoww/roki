@@ -10,8 +10,8 @@ namespace Roki.Core.Services.Database
         RokiContext Context { get; }
 
         IQuoteRepository Quotes { get; }
-        IDUserRepository DUsers { get; }
-        IDMessageRepository DMessages { get; }
+        IUserRepository Users { get; }
+        IMessageRepository Messages { get; }
         ICurrencyTransactionRepository Transaction { get; }
         ILotteryRepository Lottery { get; }
         IListingRepository Listing { get; }
@@ -26,8 +26,8 @@ namespace Roki.Core.Services.Database
     public sealed class UnitOfWork : IUnitOfWork
     {
         private IQuoteRepository _quotes;
-        private IDUserRepository _dUsers;
-        private IDMessageRepository _dMessages;
+        private IUserRepository _users;
+        private IMessageRepository _messages;
         private ICurrencyTransactionRepository _transaction;
         private ILotteryRepository _lottery;
         private IListingRepository _listing;
@@ -41,8 +41,8 @@ namespace Roki.Core.Services.Database
 
         public RokiContext Context { get; }
         public IQuoteRepository Quotes => _quotes ??= new QuoteRepository(Context);
-        public IDUserRepository DUsers => _dUsers ??= new DUserRepository(Context);
-        public IDMessageRepository DMessages => _dMessages ??= new DMessageRepository(Context);
+        public IUserRepository Users => _users ??= new UserRepository(Context);
+        public IMessageRepository Messages => _messages ??= new MessageRepository(Context);
         public ICurrencyTransactionRepository Transaction => _transaction ??= new CurrencyTransactionRepository(Context);
         public ILotteryRepository Lottery => _lottery ??= new LotteryRepository(Context);
         public IListingRepository Listing => _listing ??= new ListingRepository(Context);

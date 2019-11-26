@@ -142,13 +142,13 @@ namespace Roki.Modules.Currency.Services
         public async Task<List<Item>> GetOrCreateInventoryAsync(ulong userId)
         {
             using var uow = _db.GetDbContext();
-            return await uow.DUsers.GetUserInventory(userId).ConfigureAwait(false);
+            return await uow.Users.GetUserInventory(userId).ConfigureAwait(false);
         }
 
         public async Task UpdateInventoryAsync(ulong userId, string name, int quantity)
         {
             using var uow = _db.GetDbContext();
-            await uow.DUsers.UpdateUserInventory(userId, name, quantity).ConfigureAwait(false);
+            await uow.Users.UpdateUserInventory(userId, name, quantity).ConfigureAwait(false);
             await uow.SaveChangesAsync().ConfigureAwait(false);
         }
     }

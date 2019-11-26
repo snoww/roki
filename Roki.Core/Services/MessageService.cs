@@ -41,18 +41,18 @@ namespace Roki.Services
             var _ =  Task.Run(async () =>
             {
                 using var uow = _db.GetDbContext();
-                var user = await uow.DUsers.GetOrCreate(message.Author).ConfigureAwait(false);
+                var user = await uow.Users.GetOrCreate(message.Author).ConfigureAwait(false);
                 var doubleXp = uow.Subscriptions.DoubleXpIsActive(message.Author.Id);
                 var fastXp = uow.Subscriptions.FastXpIsActive(message.Author.Id);
                 if (fastXp)
                 {
                     if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpFastCooldown))
-                        await uow.DUsers.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
+                        await uow.Users.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
                 }
                 else
                 {
                     if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpCooldown))
-                        await uow.DUsers.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
+                        await uow.Users.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
                 }
 
                 string content;
@@ -65,7 +65,7 @@ namespace Roki.Services
                 else
                     content = "";
                 
-                uow.DMessages.Add(new DMessage
+                uow.Messages.Add(new Message
                 {
                     AuthorId = message.Author.Id,
                     Author = message.Author.Username,
@@ -100,7 +100,7 @@ namespace Roki.Services
                     content = string.Join("\n", after.Attachments.Select(a => a.Url));
                 else
                     content = "";
-                uow.DMessages.Add(new DMessage
+                uow.Messages.Add(new Message
                 {
                     AuthorId = after.Author.Id,
                     Author = after.Author.Username,
@@ -126,7 +126,7 @@ namespace Roki.Services
             var _ = Task.Run(() =>
             {
                 using var uow = _db.GetDbContext();
-                uow.DMessages.MessageDeleted(cache.Id);
+                uow.Messages.MessageDeleted(cache.Id);
             });
             return Task.CompletedTask;
         }
@@ -139,7 +139,7 @@ namespace Roki.Services
                 foreach (var cache in caches)
                 {
                     if (cache.HasValue && cache.Value.Author.IsBot) continue;
-                    uow.DMessages.MessageDeleted(cache.Id);
+                    uow.Messages.MessageDeleted(cache.Id);
                 }
             });
             
