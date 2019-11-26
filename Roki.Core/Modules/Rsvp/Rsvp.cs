@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -23,7 +24,7 @@ namespace Roki.Modules.Rsvp
         {
             var err = string.Format("`{0}events new/create`: Create a new event\n" +
                                     "`{0}events edit`: Edits an event\n" +
-                                    "`{0}events list/ls`: Lists events in this server\n", _roki.Properties.Prefix);
+                                    "`{0}events list/ls <optional_page>`: Lists events in this server\n", _roki.Properties.Prefix);
             if (string.IsNullOrWhiteSpace(args))
             {
                 await ctx.Channel.SendErrorAsync(err).ConfigureAwait(false);
@@ -38,9 +39,23 @@ namespace Roki.Modules.Rsvp
             {
                 await _service.EditEvent(ctx).ConfigureAwait(false);
             }
-            else if (args.Equals("list", StringComparison.OrdinalIgnoreCase) || args.Equals("ls", StringComparison.OrdinalIgnoreCase))
+            else if (args.StartsWith("list", StringComparison.OrdinalIgnoreCase) || args.Equals("ls", StringComparison.OrdinalIgnoreCase))
             {
-                await ctx.Channel.SendErrorAsync("Sorry this is not implemented yet").ConfigureAwait(false);
+                var split = args.Split();
+                var page = 0;
+                if (split.Length > 1)
+                {
+                    if (!int.TryParse(split[1], out page))
+                    {
+                        await ctx.Channel.SendErrorAsync("Could not parse page number. Please try again.").ConfigureAwait(false);
+                        return;
+                    }
+                }
+                var events = _service.ListEvents(ctx.Guild.Id, page);
+                var embed = new EmbedBuilder().WithOkColor().WithTitle("List of Events")
+                    .WithDescription($"{string.Join("\n", events.Select(e => $"#{e.Id}: {e.Name} - {e.StartDate:f}\n\thttps://discordapp.com/channels/{e.GuildId}/{e.ChannelId}/{e.MessageId}"))}");
+
+                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
             else
             {

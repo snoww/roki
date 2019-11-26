@@ -692,6 +692,16 @@ namespace Roki.Modules.Rsvp.Services
                 .ConfigureAwait(false);
         }
 
+        public List<Event> ListEvents(ulong guildId, int page = 0)
+        {
+            var uow = _db.GetDbContext();
+            return uow.Context.Events.Where(e => e.GuildId == guildId)
+                .OrderByDescending(e => e.StartDate)
+                .Skip(page * 9)
+                .Take(9)
+                .ToList();
+        }
+
         private async Task<SocketMessage> ReplyHandler(ICommandContext ctx, TimeSpan? timeout = null)
         {
             timeout ??= TimeSpan.FromMinutes(5);
