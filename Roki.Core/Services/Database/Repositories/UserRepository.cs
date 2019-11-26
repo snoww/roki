@@ -14,6 +14,7 @@ namespace Roki.Core.Services.Database.Repositories
 {
     public interface IUserRepository : IRepository<User>
     {
+        Task<User> CreateUserAsync(IUser user);
         Task<User> GetOrCreate(IUser original);
         User[] GetUsersXpLeaderboard(int page);
         long GetUserCurrency(ulong userId);
@@ -64,6 +65,19 @@ namespace Roki.Core.Services.Database.Repositories
 
             await Context.SaveChangesAsync().ConfigureAwait(false);
             return user;
+        }
+
+        public async Task<User> CreateUserAsync(IUser user)
+        {
+            var usr =  await Context.AddAsync(new User
+            {
+                UserId = user.Id,
+                Username = user.Username,
+                Discriminator = user.Discriminator,
+                AvatarId = user.AvatarId,
+            }).ConfigureAwait(false);
+            await Context.SaveChangesAsync().ConfigureAwait(false);
+            return usr.Entity;
         }
 
         public async Task<User> GetOrCreate(IUser original) =>
