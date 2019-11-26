@@ -205,6 +205,18 @@ namespace Roki
                     {
                         foreach (var channel in await Client.GetDMChannelsAsync().ConfigureAwait(false))
                             await channel.CloseAsync().ConfigureAwait(false);
+                        using var uow = _db.GetDbContext();
+                        foreach (var guild in Client.Guilds)
+                        {
+                            await uow.Guilds.GetOrCreateGuildAsync(guild).ConfigureAwait(false);
+                            foreach (var channel in guild.Channels)
+                            {
+                                if (channel is SocketTextChannel textChannel)
+                                    await uow.Channels.GetOrCreateChannelAsync(textChannel).ConfigureAwait(false);
+                            }
+                        }
+
+                        await uow.SaveChangesAsync().ConfigureAwait(false);
                     }
                     catch
                     {

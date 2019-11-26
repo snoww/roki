@@ -195,51 +195,42 @@ namespace Roki.Core.Services
 
         private Task ChannelDestroyed(SocketChannel channel)
         {
-            if (!(channel is SocketGuildChannel guildChannel)) return Task.CompletedTask;
-            if (guildChannel is SocketTextChannel textChannel)
+            if (!(channel is SocketTextChannel textChannel)) return Task.CompletedTask;
+            var _ = Task.Run(async () =>
             {
-                var _ = Task.Run(async () =>
-                {
-                    using var uow = _db.GetDbContext();
-                    var ch = await uow.Channels.GetOrCreateChannelAsync(textChannel).ConfigureAwait(false);
-                    ch.Deleted = true;
-                    await uow.SaveChangesAsync().ConfigureAwait(false);
-                });
-            }
+                using var uow = _db.GetDbContext();
+                var ch = await uow.Channels.GetOrCreateChannelAsync(textChannel).ConfigureAwait(false);
+                ch.Deleted = true;
+                await uow.SaveChangesAsync().ConfigureAwait(false);
+            });
 
             return Task.CompletedTask;
         }
 
         private Task ChannelUpdated(SocketChannel before, SocketChannel after)
         {
-            if (!(before is SocketGuildChannel guildChannel)) return Task.CompletedTask;
-            if (guildChannel is SocketTextChannel textChannel)
+            if (!(before is SocketTextChannel textChannel)) return Task.CompletedTask;
+            var _ = Task.Run(async () =>
             {
-                var _ = Task.Run(async () =>
-                {
-                    using var uow = _db.GetDbContext();
-                    var channel = await uow.Channels.GetOrCreateChannelAsync(textChannel).ConfigureAwait(false);
-                    channel.Name = textChannel.Name;
-                    channel.GuildName = textChannel.Guild.Name;
-                    channel.UserCount = textChannel.Users.Count;
-                    channel.IsNsfw = textChannel.IsNsfw;
-                    await uow.SaveChangesAsync().ConfigureAwait(false);
-                });
-            }
+                using var uow = _db.GetDbContext();
+                var channel = await uow.Channels.GetOrCreateChannelAsync(textChannel).ConfigureAwait(false);
+                channel.Name = textChannel.Name;
+                channel.GuildName = textChannel.Guild.Name;
+                channel.UserCount = textChannel.Users.Count;
+                channel.IsNsfw = textChannel.IsNsfw;
+                await uow.SaveChangesAsync().ConfigureAwait(false);
+            });
             return Task.CompletedTask;
         }
 
         private Task ChannelCreated(SocketChannel channel)
         {
-            if (!(channel is SocketGuildChannel guildChannel)) return Task.CompletedTask;
-            if (guildChannel is SocketTextChannel textChannel)
+            if (!(channel is SocketTextChannel textChannel)) return Task.CompletedTask;
+            var _ = Task.Run(async () =>
             {
-                var _ = Task.Run(async () =>
-                {
-                    using var uow = _db.GetDbContext();
-                    await uow.Channels.GetOrCreateChannelAsync(textChannel).ConfigureAwait(false);
-                });
-            }
+                using var uow = _db.GetDbContext();
+                await uow.Channels.GetOrCreateChannelAsync(textChannel).ConfigureAwait(false);
+            });
             return Task.CompletedTask;
         }
 
