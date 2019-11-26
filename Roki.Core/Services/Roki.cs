@@ -100,7 +100,7 @@ namespace Roki
             service.AddHttpClient();
 
             service.LoadFrom(Assembly.GetAssembly(typeof(CommandHandler)));
-            service.LoadFrom(Assembly.GetAssembly(typeof(MessageService)));
+            service.LoadFrom(Assembly.GetAssembly(typeof(EventHandlers)));
 
             Services = service.BuildServiceProvider();
             var commandHandler = Services.GetService<CommandHandler>();
@@ -181,10 +181,10 @@ namespace Roki
             stats.Initialize();
             var commandHandler = Services.GetService<CommandHandler>();
             var commandService = Services.GetService<CommandService>();
-            var messageLogger = Services.GetService<MessageService>();
+            var eventHandlers = Services.GetService<EventHandlers>();
 
             await commandHandler.StartHandling().ConfigureAwait(false);
-            await messageLogger.StartService().ConfigureAwait(false);
+            await eventHandlers.HandleEvents().ConfigureAwait(false);
 
             var _ = await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
             
@@ -205,10 +205,22 @@ namespace Roki
                     {
                         foreach (var channel in await Client.GetDMChannelsAsync().ConfigureAwait(false))
                             await channel.CloseAsync().ConfigureAwait(false);
+                        using var uow = _db.GetDbContext();
+                        foreach (var guild in Client.Guilds)
+                        {
+                            await uow.Guilds.GetOrCreateGuildAsync(guild).ConfigureAwait(false);
+                            foreach (var channel in guild.Channels)
+                            {
+                                if (channel is SocketTextChannel textChannel)
+                                    await uow.Channels.GetOrCreateChannelAsync(textChannel).ConfigureAwait(false);
+                            }
+                        }
+
+                        await uow.SaveChangesAsync().ConfigureAwait(false);
                     }
-                    catch
+                    catch (Exception e)
                     {
-                        //
+                        _log.Error(e);
                     }
                 });
                 return Task.CompletedTask;

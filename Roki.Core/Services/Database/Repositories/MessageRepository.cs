@@ -7,15 +7,15 @@ using Roki.Core.Services.Database.Models;
 
 namespace Roki.Core.Services.Database.Repositories
 {
-    public interface IDMessageRepository: IRepository<DMessage>
+    public interface IMessageRepository: IRepository<Message>
     {
         void MessageDeleted(ulong messageId);
-        DMessage GetMessageById(int id);
+        Message GetMessageById(int id);
     }
 
-    public class DMessageRepository : Repository<DMessage>, IDMessageRepository
+    public class MessageRepository : Repository<Message>, IMessageRepository
     {
-        public DMessageRepository(DbContext context) : base(context)
+        public MessageRepository(DbContext context) : base(context)
         {
         }
 
@@ -27,7 +27,7 @@ namespace Roki.Core.Services.Database.Repositories
                 .ForEach(m => m.IsDeleted = true);;
         }
 
-        public DMessage GetMessageById(int id)
+        public Message GetMessageById(int id)
         {
             return Set.Last(m => m.Id == id);
         }

@@ -105,8 +105,8 @@ namespace Roki.Modules.Gambling.Services
                 toReturn += "JACKPOT WINNERS\n";
                 foreach (var winner in six)
                 {
-                    await uow.DUsers.LotteryAwardAsync(winner, amount).ConfigureAwait(false);
-                    await uow.DUsers.UpdateBotCurrencyAsync(_client.CurrentUser.Id, -amount);
+                    await uow.Users.LotteryAwardAsync(winner, amount).ConfigureAwait(false);
+                    await uow.Users.UpdateBotCurrencyAsync(_client.CurrentUser.Id, -amount);
                     toReturn += $"<@{winner}> WON {amount.FormatNumber()} {_roki.Properties.CurrencyIcon}\n";
                 }
                 
@@ -117,8 +117,8 @@ namespace Roki.Modules.Gambling.Services
                 var amount = (long) (_currency.GetCurrency(_client.CurrentUser.Id) * _roki.Properties.Lottery5) / five.Count;
                 foreach (var winner in five)
                 {
-                    await uow.DUsers.LotteryAwardAsync(winner, amount).ConfigureAwait(false);
-                    await uow.DUsers.UpdateBotCurrencyAsync(_client.CurrentUser.Id, -amount);
+                    await uow.Users.LotteryAwardAsync(winner, amount).ConfigureAwait(false);
+                    await uow.Users.UpdateBotCurrencyAsync(_client.CurrentUser.Id, -amount);
                     toReturn += $"<@{winner}> won {amount.FormatNumber()} {_roki.Properties.CurrencyIcon}\n";
                 }
             }
@@ -128,8 +128,8 @@ namespace Roki.Modules.Gambling.Services
                 var amount = (long) (_currency.GetCurrency(_client.CurrentUser.Id) * _roki.Properties.Lottery4) / four.Count;
                 foreach (var winner in four)
                 {
-                    await uow.DUsers.LotteryAwardAsync(winner, amount).ConfigureAwait(false);
-                    await uow.DUsers.UpdateBotCurrencyAsync(_client.CurrentUser.Id, -amount);
+                    await uow.Users.LotteryAwardAsync(winner, amount).ConfigureAwait(false);
+                    await uow.Users.UpdateBotCurrencyAsync(_client.CurrentUser.Id, -amount);
                     toReturn += $"<@{winner}> won {amount.FormatNumber()} {_roki.Properties.CurrencyIcon}\n";
                 }
             }

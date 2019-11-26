@@ -10,14 +10,16 @@ namespace Roki.Core.Services.Database
         RokiContext Context { get; }
 
         IQuoteRepository Quotes { get; }
-        IDUserRepository DUsers { get; }
-        IDMessageRepository DMessages { get; }
+        IUserRepository Users { get; }
+        IMessageRepository Messages { get; }
         ICurrencyTransactionRepository Transaction { get; }
         ILotteryRepository Lottery { get; }
         IListingRepository Listing { get; }
         ISubscriptionRepository Subscriptions { get; }
         ITradesRepository Trades { get; }
         IEventsRepository Events { get; }
+        IGuildRepository Guilds { get; }
+        IChannelRepository Channels { get; }
 
         int SaveChanges();
         Task<int> SaveChangesAsync();
@@ -26,14 +28,16 @@ namespace Roki.Core.Services.Database
     public sealed class UnitOfWork : IUnitOfWork
     {
         private IQuoteRepository _quotes;
-        private IDUserRepository _dUsers;
-        private IDMessageRepository _dMessages;
+        private IUserRepository _users;
+        private IMessageRepository _messages;
         private ICurrencyTransactionRepository _transaction;
         private ILotteryRepository _lottery;
         private IListingRepository _listing;
         private ISubscriptionRepository _subscriptions;
         private ITradesRepository _trades;
         private IEventsRepository _events;
+        private IGuildRepository _guilds;
+        private IChannelRepository _channels;
         public UnitOfWork(RokiContext context)
         {
             Context = context;
@@ -41,14 +45,16 @@ namespace Roki.Core.Services.Database
 
         public RokiContext Context { get; }
         public IQuoteRepository Quotes => _quotes ??= new QuoteRepository(Context);
-        public IDUserRepository DUsers => _dUsers ??= new DUserRepository(Context);
-        public IDMessageRepository DMessages => _dMessages ??= new DMessageRepository(Context);
+        public IUserRepository Users => _users ??= new UserRepository(Context);
+        public IMessageRepository Messages => _messages ??= new MessageRepository(Context);
         public ICurrencyTransactionRepository Transaction => _transaction ??= new CurrencyTransactionRepository(Context);
         public ILotteryRepository Lottery => _lottery ??= new LotteryRepository(Context);
         public IListingRepository Listing => _listing ??= new ListingRepository(Context);
         public ISubscriptionRepository Subscriptions => _subscriptions ??= new SubscriptionRepository(Context);
         public ITradesRepository Trades => _trades ??= new TradesRepository(Context);
         public IEventsRepository Events => _events ??= new EventsRepository(Context);
+        public IGuildRepository Guilds => _guilds ??= new GuildRepository(Context);
+        public IChannelRepository Channels => _channels ??= new ChannelRepository(Context);
 
         public int SaveChanges()
         {

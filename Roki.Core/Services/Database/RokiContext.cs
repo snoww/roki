@@ -11,14 +11,16 @@ namespace Roki.Core.Services.Database
         }
 
         public DbSet<Quote> Quotes { get; set; }
-        public DbSet<DUser> DUsers { get; set; }
-        public DbSet<DMessage> DMessages { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Message> Messages { get; set; }
         public DbSet<CurrencyTransaction> Transactions { get; set; }
         public DbSet<Listing> Listings { get; set; }
         public DbSet<Subscriptions> Subscriptions { get; set; }
         public DbSet<Lottery> Lotteries { get; set; }
         public DbSet<Trades> Trades { get; set; }
         public DbSet<Event> Events { get; set; }
+        public DbSet<Guild> Guilds { get; set; }
+        public DbSet<Channel> Channels { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,12 +34,14 @@ namespace Roki.Core.Services.Database
 
             #endregion
 
-            #region DUser
+            #region User
 
-            modelBuilder.Entity<DUser>(entity =>
+            modelBuilder.Entity<User>(entity =>
             {
                 entity.HasAlternateKey(u => u.UserId);
                 entity.Property(u => u.LastLevelUp)
+                    .HasDefaultValue(DateTimeOffset.MinValue);
+                entity.Property(u => u.LastXpGain)
                     .HasDefaultValue(DateTimeOffset.MinValue);
                 entity.HasIndex(u => u.TotalXp);
                 entity.HasIndex(u => u.Currency);
@@ -46,9 +50,9 @@ namespace Roki.Core.Services.Database
 
             #endregion
 
-            #region DMessage
+            #region Message
 
-            modelBuilder.Entity<DMessage>();
+            modelBuilder.Entity<Message>();
 
             #endregion
 
@@ -82,6 +86,30 @@ namespace Roki.Core.Services.Database
             #region Trades
 
             modelBuilder.Entity<Trades>();
+
+            #endregion
+
+            #region Guilds
+
+            modelBuilder.Entity<Guild>(entity =>
+            {
+                entity.HasKey(g => g.Id);
+                entity.HasAlternateKey(g => g.GuildId);
+            });
+
+            #endregion
+            
+            #region Channels
+
+            modelBuilder.Entity<Channel>(entity =>
+            {
+                entity.HasKey(c => c.Id);
+                entity.HasAlternateKey(c => c.ChannelId);
+                entity.Property(c => c.CurrencyGeneration)
+                    .HasDefaultValue(true);
+                entity.Property(c => c.XpGain)
+                    .HasDefaultValue(true);
+            });
 
             #endregion
         }
