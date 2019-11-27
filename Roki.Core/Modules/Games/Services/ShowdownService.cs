@@ -15,12 +15,14 @@ namespace Roki.Modules.Games.Services
 {
     public class ShowdownService : IRService
     {
+        private readonly DbService _db;
         public readonly ConcurrentDictionary<ulong, string> Games = new ConcurrentDictionary<ulong, string>();
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
         private static readonly Dictionary<string, PokemonData> Data = JsonSerializer.Deserialize<Dictionary<string, PokemonData>>(File.ReadAllText("./data/pokemon.json"), Options);
         
-        public ShowdownService()
+        public ShowdownService(DbService db)
         {
+            _db = db;
         }
 
         public async Task ConfigureAiGameAsync(string generation)
@@ -99,6 +101,12 @@ namespace Roki.Modules.Games.Services
         {
             var logs = await File.ReadAllLinesAsync(@"./data/pokemon-logs/battle-logs").ConfigureAwait(false);
             return (from log in logs where log.StartsWith(uid, StringComparison.OrdinalIgnoreCase) select log.Substring(9)).FirstOrDefault();
+        }
+        
+        public long GetCurrencyAsync(ulong userId)
+        {
+            using var uow = _db.GetDbContext();
+            return uow.Users.GetUserCurrency(userId);
         }
     }
 }
