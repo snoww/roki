@@ -619,5 +619,14 @@
       "{0}events edit",
       "{0}events list"
     ]
+  },
+  "logging": {
+    "Command": "logging log",
+    "Description": "Enables or disables logging of a channel. Logging is disabled by default in channels.",
+    "Usage": [
+      "{0}log",
+      "{0}log false",
+      "{0}logging true"
+    ]
   }
 }
