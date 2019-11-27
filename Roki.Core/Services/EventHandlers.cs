@@ -61,6 +61,9 @@ namespace Roki.Core.Services
                         await uow.Users.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
                 }
 
+                if (message.Channel is SocketTextChannel textChannel)
+                    if (!await uow.Channels.IsLoggingEnabled(textChannel)) return;
+
                 string content;
                 if (!string.IsNullOrWhiteSpace(message.Content) && message.Attachments.Count == 0)
                     content = message.Content;
@@ -98,6 +101,8 @@ namespace Roki.Core.Services
             var _ = Task.Run(async () =>
             {
                 using var uow = _db.GetDbContext();
+                if (after.Channel is SocketTextChannel textChannel)
+                    if (!await uow.Channels.IsLoggingEnabled(textChannel)) return;
                 string content;
                 if (!string.IsNullOrWhiteSpace(after.Content) && after.Attachments.Count == 0)
                     content = after.Content;
@@ -130,9 +135,11 @@ namespace Roki.Core.Services
         private Task MessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel)
         {
             if (cache.HasValue && cache.Value.Author.IsBot) return Task.CompletedTask;
-            var _ = Task.Run(() =>
+            var _ = Task.Run(async () =>
             {
                 using var uow = _db.GetDbContext();
+                if (channel is SocketTextChannel textChannel)
+                    if (!await uow.Channels.IsLoggingEnabled(textChannel)) return;
                 uow.Messages.MessageDeleted(cache.Id);
             });
             return Task.CompletedTask;
@@ -140,9 +147,11 @@ namespace Roki.Core.Services
 
         private Task MessagesBulkDeleted(IReadOnlyCollection<Cacheable<IMessage, ulong>> caches, ISocketMessageChannel channel)
         {
-            var _ = Task.Run(() =>
+            var _ = Task.Run(async () =>
             {
                 using var uow = _db.GetDbContext();
+                if (channel is SocketTextChannel textChannel)
+                    if (!await uow.Channels.IsLoggingEnabled(textChannel)) return;
                 foreach (var cache in caches)
                 {
                     if (cache.HasValue && cache.Value.Author.IsBot) continue;

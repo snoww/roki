@@ -35,7 +35,6 @@ namespace Roki.Core.Services.Database.Repositories
 
         public async Task AddMissingMessageAsync(IMessage message)
         {
-            var guild = message.Channel as ITextChannel;
             string content;
             if (!string.IsNullOrWhiteSpace(message.Content) && message.Attachments.Count == 0)
                 content = message.Content;
