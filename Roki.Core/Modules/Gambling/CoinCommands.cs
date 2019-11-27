@@ -7,6 +7,7 @@ using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
 using Roki.Extensions;
+using Roki.Modules.Gambling.Services;
 using Roki.Services;
 
 namespace Roki.Modules.Gambling
@@ -14,16 +15,14 @@ namespace Roki.Modules.Gambling
     public partial class Gambling
     {
         [Group]
-        public class CoinCommands : RokiSubmodule
+        public class CoinCommands : RokiSubmodule<GamblingService>
         {
-            private readonly DbService _db;
             private readonly ICurrencyService _currency;
             private static readonly Random Rng = new Random();
             private readonly Roki _roki;
 
-            public CoinCommands(DbService db, ICurrencyService currency, Roki roki)
+            public CoinCommands(ICurrencyService currency, Roki roki)
             {
-                _db = db;
                 _currency = currency;
                 _roki = roki;
             }
@@ -56,7 +55,8 @@ namespace Roki.Modules.Gambling
 
                 if (!removed)
                 {
-                    await ctx.Channel.SendErrorAsync($"Not enough {_roki.Properties.CurrencyIcon}").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync($"Not enough {_roki.Properties.CurrencyIcon}\n" +
+                                                     $"You have `{_service.GetCurrencyAsync(ctx.User.Id)}`").ConfigureAwait(false);
                     return;
                 }
 
@@ -76,7 +76,8 @@ namespace Roki.Modules.Gambling
                     var won = (long) Math.Ceiling(amount * _roki.Properties.BetFlipMultiplier);
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithDescription(
-                                $"Result is: {result}\n{ctx.User.Mention} Congratulations! You've won `{won:N0}` {_roki.Properties.CurrencyNamePlural}"))
+                                $"Result is: {result}\n{ctx.User.Mention} Congratulations! You've won `{won:N0}` {_roki.Properties.CurrencyIcon}\n" +
+                                $"New Balance: `{_service.GetCurrencyAsync(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}"))
                         .ConfigureAwait(false);
                     await _currency.ChangeAsync(ctx.User.Id, "BetFlip Payout", won, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
@@ -84,7 +85,8 @@ namespace Roki.Modules.Gambling
                 }
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                    .WithDescription($"Result is: {result}\n{ctx.User.Mention} Better luck next time!")).ConfigureAwait(false);
+                    .WithDescription($"Result is: {result}\n{ctx.User.Mention} Better luck next time!\n" +
+                                     $"New Balance: `{_service.GetCurrencyAsync(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}")).ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Aliases, Usage]
@@ -102,7 +104,7 @@ namespace Roki.Modules.Gambling
                 var minAmount = guesses.Length * 2;
                 if (guesses.Length >= _roki.Properties.BetFlipMMinGuesses && amount < minAmount)
                 {
-                    await ctx.Channel.SendErrorAsync($"`{guesses.Length}` guesses requires you to bet at least `{minAmount:N0}` {_roki.Properties.CurrencyNamePlural}.")
+                    await ctx.Channel.SendErrorAsync($"`{guesses.Length}` guesses requires you to bet at least `{minAmount:N0}` {_roki.Properties.CurrencyIcon}.")
                         .ConfigureAwait(false);
                     return;
                 }
@@ -114,7 +116,8 @@ namespace Roki.Modules.Gambling
 
                 if (!removed)
                 {
-                    await ctx.Channel.SendErrorAsync($"Not enough {_roki.Properties.CurrencyIcon}").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync($"Not enough {_roki.Properties.CurrencyIcon}\n" +
+                                                     $"You have `{_service.GetCurrencyAsync(ctx.User.Id)}`").ConfigureAwait(false);
                     return;
                 }
 
@@ -131,7 +134,8 @@ namespace Roki.Modules.Gambling
                     var won = (long) Math.Ceiling(amount * Math.Pow(correct, _roki.Properties.BetFlipMMultiplier));
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithDescription(
-                                $"Results are: {string.Join(", ", results)}\n{ctx.User.Mention} Congratulations! You got `{correct}/{guesses.Length}` correct. You've won `{won:N0}` {_roki.Properties.CurrencyNamePlural}"))
+                                $"Results are: {string.Join(", ", results)}\n{ctx.User.Mention} Congratulations! You got `{correct}/{guesses.Length}` correct. You've won `{won:N0}` {_roki.Properties.CurrencyIcon}" +
+                                $"New Balance: `{_service.GetCurrencyAsync(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}"))
                         .ConfigureAwait(false);
                     await _currency.ChangeAsync(ctx.User.Id, "BetFlipMulti Payout", won, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
@@ -139,7 +143,8 @@ namespace Roki.Modules.Gambling
                 }
                 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                    .WithDescription($"Results are: {string.Join(", ", results)}\n{ctx.User.Mention} You got `{correct}/{guesses.Length}` correct. Better luck next time!"))
+                    .WithDescription($"Results are: {string.Join(", ", results)}\n{ctx.User.Mention} You got `{correct}/{guesses.Length}` correct. Better luck next time!\n" +
+                                     $"New Balance: `{_service.GetCurrencyAsync(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}"))
                     .ConfigureAwait(false);
             }
         }
