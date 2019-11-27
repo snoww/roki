@@ -91,27 +91,13 @@ namespace Roki.Modules.Games
                 }
                 _service.Games.TryAdd(ctx.Channel.Id, "");
 
-                string generation;
-                if (gen == 6)
-                    generation = "6";
-                else if (gen == 5)
-                    generation = "5";
-                else if (gen == 4)
-                    generation = "4";
-//                else if (gen == 3)
-//                    generation = "3";
-//                else if (gen == 2)
-//                    generation = "2"; 
-//                else if (gen == 1)
-//                    generation = "1";
-                else
-                    generation = "7";
+                if (gen > 7 || gen < 4) gen = 7;
                 
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
-                var uid = generation + Guid.NewGuid().ToString().Substring(0, 7);
+                var uid = $"{gen}{Guid.NewGuid().ToString().Substring(0, 7)}";
                 try
                 {
-                    await _service.ConfigureAiGameAsync(generation).ConfigureAwait(false);
+                    await _service.ConfigureAiGameAsync(gen).ConfigureAwait(false);
                     var teams = await _service.RunAiGameAsync(uid).ConfigureAwait(false);
 
                     var t1 = new List<Image<Rgba32>>();
@@ -119,8 +105,8 @@ namespace Roki.Modules.Games
 
                     for (int i = 0; i < teams[0].Count; i++)
                     {
-                        t1.Add(GetPokemonImage(teams[0][i], generation));
-                        t2.Add(GetPokemonImage(teams[1][i], generation));
+                        t1.Add(GetPokemonImage(teams[0][i], gen));
+                        t2.Add(GetPokemonImage(teams[1][i], gen));
                     }
 
                     using var bitmap1 = t1.MergePokemonTeam();
@@ -134,7 +120,7 @@ namespace Roki.Modules.Games
                     }
                     
                     var start = new EmbedBuilder().WithOkColor()
-                        .WithTitle($"[Gen {generation}] Random Battle - ID: `{uid}`")
+                        .WithTitle($"[Gen {gen}] Random Battle - ID: `{uid}`")
                         .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 100` means betting on 110 on P1.")
                         .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
                         .AddField("Player 1", string.Join('\n', teams[0]), true)
@@ -305,22 +291,22 @@ namespace Roki.Modules.Games
                     .ConfigureAwait(false);
             }
             
-            private Image<Rgba32> GetPokemonImage(string pokemon, string generation)
+            private Image<Rgba32> GetPokemonImage(string pokemon, int generation)
             {
                 var sprite = _service.GetPokemonSprite(pokemon);
                 var wc = new WebClient();
                 string genUrl;
-                if (generation == "7")
+                if (generation == 7)
                     genUrl = Gen5SpriteUrl;
-                else if (generation == "6")
+                else if (generation == 6)
                     genUrl = Gen5SpriteUrl;
-                else if (generation == "5")
+                else if (generation == 5)
                     genUrl = Gen5SpriteUrl;
-                else if (generation == "4")
+                else if (generation == 4)
                     genUrl = Gen4SpriteUrl;
-                else if (generation == "3")
+                else if (generation == 3)
                     genUrl = Gen3SpriteUrl;
-                else if (generation == "2")
+                else if (generation == 2)
                     genUrl = Gen2SpriteUrl;
                 else
                     genUrl = Gen1SpriteUrl;
