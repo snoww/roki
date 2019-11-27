@@ -4,6 +4,7 @@ namespace Roki.Core.Services
     {
         public string Prefix { get; set; } = ".";
         public ulong BotId { get; set; } = 549644503351296040;
+        public ulong PrimaryGuildId { get; set; } = 125025699827417095;
 
         #region Currency
 
