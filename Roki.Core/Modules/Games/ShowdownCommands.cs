@@ -230,16 +230,18 @@ namespace Roki.Modules.Games
 
                     foreach (var (key, value) in joinedReactions)
                     {
+                        var before = _service.GetCurrency(ctx.User.Id) + value.Amount * value.Multiple;
                         if (result != value.Bet)
                         {
-                            losers += $"{key.Username} ⇒ `{_service.GetCurrency(ctx.User.Id):N0}`\n";
+                            losers += $"{key.Username} " +
+                                      $"\t`{before:N0}` ⇒ `{_service.GetCurrency(ctx.User.Id):N0}`\n";
                             continue;
                         }
                         var won = value.Amount * value.Multiple * 2;
-                        var before = _service.GetCurrency(ctx.User.Id) + value.Amount * value.Multiple;
                         await _currency.ChangeAsync(key.Id, "BetShowdown Payout", won, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id,
                             ctx.Channel.Id, ctx.Message.Id);
-                        winners += $"{key.Username} won `{won:N0}` {_roki.Properties.CurrencyIcon}\n`{before:N0}` ⇒ `{_service.GetCurrency(ctx.User.Id):N0}`\n";
+                        winners += $"{key.Username} won `{won:N0}` {_roki.Properties.CurrencyIcon}\n" +
+                                   $"\t`{before:N0}` ⇒ `{_service.GetCurrency(ctx.User.Id):N0}`\n";
                     }
                     
                     var embed = new EmbedBuilder().WithOkColor();
