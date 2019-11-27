@@ -25,17 +25,15 @@ namespace Roki.Modules.Games.Services
 
         public async Task<TriviaModel> GetTriviaQuestionsAsync(int category)
         {
-            using (var http = _http.CreateClient())
-            {
-                string result;
-                if (category == 0)
-                    result = await http.GetStringAsync($"{OpenTdbUrl}?amount=10").ConfigureAwait(false);
-                else 
-                    result = await http.GetStringAsync($"{OpenTdbUrl}?amount=10&category={category}").ConfigureAwait(false);
+            using var http = _http.CreateClient();
+            string result;
+            if (category == 0)
+                result = await http.GetStringAsync($"{OpenTdbUrl}?amount=10").ConfigureAwait(false);
+            else 
+                result = await http.GetStringAsync($"{OpenTdbUrl}?amount=10&category={category}").ConfigureAwait(false);
                 
-                var questions = JsonSerializer.Deserialize<TriviaModel>(result, Options);
-                return questions;
-            }
+            var questions = JsonSerializer.Deserialize<TriviaModel>(result, Options);
+            return questions;
         }
 
         public List<string> RandomizeAnswersOrder(string correct, string[] incorrect)
