@@ -8,6 +8,7 @@ namespace Roki.Core.Services.Database.Repositories
     public interface IChannelRepository : IRepository<Channel>
     {
         Task<Channel> GetOrCreateChannelAsync(SocketTextChannel channel);
+        Task<bool> IsLoggingEnabled(SocketTextChannel channel);
     }
     
     public class ChannelRepository : Repository<Channel>, IChannelRepository
@@ -27,10 +28,15 @@ namespace Roki.Core.Services.Database.Repositories
                 GuildId = channel.Guild.Id,
                 GuildName = channel.Guild.Name,
                 UserCount = channel.Users.Count,
-                IsNsfw = channel.IsNsfw
+                IsNsfw = channel.IsNsfw,
             });
             await Context.SaveChangesAsync().ConfigureAwait(false);
             return newChannel.Entity;
+        }
+
+        public async Task<bool> IsLoggingEnabled(SocketTextChannel channel)
+        {
+            return (await Set.FirstAsync(c => c.ChannelId == channel.Id).ConfigureAwait(false)).Logging;
         }
     }
 }

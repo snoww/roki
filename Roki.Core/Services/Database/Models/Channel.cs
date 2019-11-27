@@ -23,5 +23,7 @@ namespace Roki.Core.Services.Database.Models
         public bool XpGain { get; set; } = true;
         [Column("is_deleted")]
         public bool Deleted { get; set; }
+        [Column("logging")] 
+        public bool Logging { get; set; } = false;
     }
 }
