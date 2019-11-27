@@ -14,7 +14,13 @@ namespace Roki.Modules.Administration
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task Fill(ulong afterMessage = 649060390386401300)
         {
-            await _service.FillMissingMessagesAsync(ctx, afterMessage).ConfigureAwait(false);
+            var count = await _service.FillMissingMessagesAsync(afterMessage).ConfigureAwait(false);
+            var str = "";
+            foreach (var (channel, num) in count)
+            {
+                str += $"{channel}: `num` messages added\n";
+            }
+            await ctx.Channel.SendMessageAsync(str).ConfigureAwait(false);
         }
     }
 }
