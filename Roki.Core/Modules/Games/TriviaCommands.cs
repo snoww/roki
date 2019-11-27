@@ -137,12 +137,19 @@ namespace Roki.Modules.Games
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle($"Trivia Game - {category}")
-                        .WithDescription($"Starting new trivia game.\nYou can earn up to **{prizePool}** {_roki.Properties.CurrencyNamePlural}!\nReact with the correct emote to answer questions.\nType `stop` to cancel game early"))
+                        .WithDescription($"Starting new trivia game.\nYou can earn up to `{prizePool:N0}` {_roki.Properties.CurrencyNamePlural}!\nReact with the correct emote to answer questions.\nType `stop` to cancel game early"))
                     .ConfigureAwait(false);
 
                 await Task.Delay(5000).ConfigureAwait(false);
 
                 var exit = false;
+                _client.MessageReceived += message =>
+                {
+                    if (message.Channel.Id != ctx.Channel.Id || message.Author.IsBot || message.Content.Contains("stop", StringComparison.OrdinalIgnoreCase))
+                        return Task.CompletedTask;
+                    exit = true;
+                    return Task.CompletedTask;
+                };
                 var count = 1;
                 var playerScore = new Dictionary<IUser, PlayerScore>();
                 foreach (var q in questions.Results)
@@ -161,7 +168,8 @@ namespace Roki.Modules.Games
                     IUserMessage msg;
 
                     var embed = new EmbedBuilder().WithOkColor()
-                        .WithTitle($"Question {count++}: {q.Category.ToTitleCase()} - {q.Difficulty.ToTitleCase()}");
+                        .WithTitle($"Question {count++}: {q.Category.ToTitleCase()} - {q.Difficulty.ToTitleCase()}")
+                        .WithFooter("Type stop to stop trivia game.");
                     if (q.Type == "multiple")
                     {
                         embed.WithDescription($"**Multiple Choice**\n{question}\n{string.Join('\n', shuffledAnswers)}");
@@ -251,32 +259,6 @@ namespace Roki.Modules.Games
                         await Task.Delay(500);
                         await msg.RemoveReactionAsync(r.Emote, r.User.Value).ConfigureAwait(false);
                     }
-
-                    /*async Task AnswerRemoved(SocketReaction r)
-                    {
-                        if (r.Channel != ctx.Channel || r.User.Value.IsBot || r.Message.Value != msg)
-                            await Task.CompletedTask;
-                        if (MultipleChoice.Contains(r.Emote))
-                        {
-                            if (playerChoice.ContainsKey(r.User.Value))
-                                playerChoice.Remove(r.User.Value, out _);
-                            await Task.CompletedTask;
-                        }
-                        if (TrueFalse.Contains(r.Emote))
-                        {
-                            if (playerChoice.ContainsKey(r.User.Value))
-                                playerChoice.Remove(r.User.Value, out _);
-                            await Task.CompletedTask;
-                        }
-                    }*/
-
-                    _client.MessageReceived += message =>
-                    {
-                        if (message.Channel.Id != ctx.Channel.Id || message.Author.IsBot || message.Content.ToUpper() != "STOP")
-                            return Task.CompletedTask;
-                        exit = true;
-                        return Task.CompletedTask;
-                    };
                 }
 
                 var winStr = "";
