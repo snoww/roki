@@ -270,10 +270,11 @@ namespace Roki.Modules.Games
                 {
                     scoreStr += $"{user.Username} `{score.Correct}`/`{score.Incorrect + score.Correct}`\n";
                     if (score.Amount <= 0 || score.Correct / (float) (score.Correct + score.Incorrect) < _roki.Properties.TriviaMinCorrect) continue;
-                    winStr += $"{user.Username} won `{score.Amount:N0}` ⇒ `{_service.GetCurrencyAsync(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}\n";
-                    winners = true;
+                    var before = _service.GetCurrency(ctx.User.Id);
                     await _currency.ChangeAsync(user.Id, "Trivia Reward", score.Amount, ctx.Client.CurrentUser.Id, user.Id, ctx.Guild.Id, ctx.Channel.Id,
                         ctx.Message.Id).ConfigureAwait(false);
+                    winStr += $"{user.Username} won `{score.Amount:N0}` {_roki.Properties.CurrencyIcon}\n`{before:N0}` ⇒ `{_service.GetCurrency(ctx.User.Id):N0}`\n";
+                    winners = true;
                 }
 
                 if (winners)
