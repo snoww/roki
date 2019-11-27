@@ -11,9 +11,7 @@ namespace Roki.Core.Services.Database.Repositories
     {
         void MessageDeleted(ulong messageId);
         Task <bool> MessageExists(ulong messageId);
-        Task MoveToTempTableAsync(ulong messageId);
-        Task AddToTempTableAsync(IMessage message);
-        Task MoveBackToMessagesAsync(ulong messageId);
+        Task AddMissingMessageAsync(IMessage message);
     }
 
     public class MessageRepository : Repository<Message>, IMessageRepository
@@ -35,15 +33,7 @@ namespace Roki.Core.Services.Database.Repositories
             return await Set.AnyAsync(m => m.MessageId == messageId).ConfigureAwait(false);
         }
 
-        public async Task MoveToTempTableAsync(ulong messageId)
-        {
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-INSERT INTO messages_transfer 
-SELECT * from messages
-WHERE author_id != 0 AND message_id >= {messageId}").ConfigureAwait(false);
-        }
-
-        public async Task AddToTempTableAsync(IMessage message)
+        public async Task AddMissingMessageAsync(IMessage message)
         {
             var guild = message.Channel as ITextChannel;
             string content;
@@ -55,29 +45,21 @@ WHERE author_id != 0 AND message_id >= {messageId}").ConfigureAwait(false);
                 content = string.Join("\n", message.Attachments.Select(a => a.Url));
             else
                 content = "";
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-INSERT INTO messages_transfer(author_id, author, channel_id, channel, guild_id, guild, message_id, content, edited_timestamp, timestamp)
-VALUES ({message.Author.Id}, {message.Author.Username}, {message.Channel.Id}, {message.Channel.Name}, {guild?.Id}, {guild?.Name}, {message.Id}, {content}, {message.EditedTimestamp?.ToUniversalTime()}, {message.Timestamp.ToUniversalTime()})"
-            ).ConfigureAwait(false);
+            Set.Add(new Message
+            {
+                AuthorId = message.Author.Id,
+                Author = message.Author.Username,
+                ChannelId = message.Channel.Id,
+                Channel = message.Channel.Name,
+                GuildId = message.Channel is ITextChannel chId ? chId.GuildId : (ulong?) null,
+                Guild = message.Channel is ITextChannel ch ? ch.Guild.Name : null,
+                MessageId = message.Id,
+                Content = content,
+                EditedTimestamp = message.EditedTimestamp?.ToUniversalTime(),
+                Timestamp = message.Timestamp.ToUniversalTime()
+            });
             await Context.SaveChangesAsync().ConfigureAwait(false);
         }
-
-        public async Task MoveBackToMessagesAsync(ulong messageId)
-        {
-            var message = await Set.FirstAsync(m => m.MessageId == messageId).ConfigureAwait(false);
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-DELETE FROM messages
-WHERE message_id >= {messageId}
-").ConfigureAwait(false);
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-ALTER SEQUENCE messages_id_seq RESTART WITH {message.Id}
-").ConfigureAwait(false);
-            await Context.Database.ExecuteSqlInterpolatedAsync($@"
-INSERT INTO messages(author_id, author, channel_id, channel, guild_id, guild, message_id, content, edited_timestamp, timestamp)
-SELECT author_id, author, channel_id, channel, guild_id, guild, message_id, content, edited_timestamp, timestamp
-FROM messages_transfer 
-ORDER BY timestamp
-").ConfigureAwait(false);
-        }
+        
     }
 }
