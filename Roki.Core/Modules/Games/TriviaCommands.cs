@@ -143,6 +143,7 @@ namespace Roki.Modules.Games
                 await Task.Delay(5000).ConfigureAwait(false);
 
                 var exit = false;
+                var toDelete = new List<IUserMessage>();
                 _client.MessageReceived += message =>
                 {
                     if (message.Channel.Id != ctx.Channel.Id || message.Author.IsBot || message.Content.Contains("stop", StringComparison.OrdinalIgnoreCase))
@@ -182,7 +183,7 @@ namespace Roki.Modules.Games
                         msg = await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                         await msg.AddReactionsAsync(TrueFalse).ConfigureAwait(false);
                     }
-
+                    toDelete.Add(msg);
                     using (msg.OnReaction(_client, AnswerAdded))
                     {
                         await Task.Delay(20000).ConfigureAwait(false);
@@ -190,7 +191,8 @@ namespace Roki.Modules.Games
 
                     if (exit)
                     {
-                        await ctx.Channel.SendErrorAsync("Stopping current trivia game...").ConfigureAwait(false);
+                        await ctx.Channel.SendErrorAsync("Current trivia game stopped.").ConfigureAwait(false);
+                        await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                         return;
                     }
 
@@ -226,13 +228,13 @@ namespace Roki.Modules.Games
                         corrStr += user.Username + '\n';
                     }
                     
-                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    var ans = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithTitle("Answer")
                             .WithDescription($"{answer}")
                             .AddField("Correct", !string.IsNullOrWhiteSpace(corrStr) ? corrStr : "None", true)
                             .AddField("Incorrect", !string.IsNullOrWhiteSpace(incorrStr) ? incorrStr : "None", true))
                         .ConfigureAwait(false);
-                    
+                    toDelete.Add(ans);
                     await Task.Delay(5000).ConfigureAwait(false);
 
                     async Task AnswerAdded(SocketReaction r)
@@ -281,6 +283,8 @@ namespace Roki.Modules.Games
                     await ctx.Channel.SendErrorAsync($"Better luck next time!\n{scoreStr}").ConfigureAwait(false);
                 
                 _service.TriviaGames.TryRemove(ctx.Channel.Id, out _);
+                await Task.Delay(5000).ConfigureAwait(false);
+                await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]
