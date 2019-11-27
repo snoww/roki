@@ -9,7 +9,7 @@ namespace Roki.Core.Services.Database.Repositories
 {
     public interface IMessageRepository: IRepository<Message>
     {
-        void MessageDeleted(ulong messageId);
+        Task MessageDeleted(ulong messageId);
         Task <bool> MessageExists(ulong messageId);
         Task AddMissingMessageAsync(IMessage message);
     }
@@ -20,12 +20,12 @@ namespace Roki.Core.Services.Database.Repositories
         {
         }
 
-        public void MessageDeleted(ulong messageId)
+        public async Task MessageDeleted(ulong messageId)
         {
             Set.Where(m => m.MessageId == messageId)
-                .AsNoTracking()
                 .ToList()
-                .ForEach(m => m.IsDeleted = true);;
+                .ForEach(m => m.IsDeleted = true);
+            await Context.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task<bool> MessageExists(ulong messageId)

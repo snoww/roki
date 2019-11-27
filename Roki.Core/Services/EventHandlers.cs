@@ -139,8 +139,8 @@ namespace Roki.Core.Services
             {
                 using var uow = _db.GetDbContext();
                 if (channel is SocketTextChannel textChannel)
-                    if (!await uow.Channels.IsLoggingEnabled(textChannel)) return;
-                uow.Messages.MessageDeleted(cache.Id);
+                    if (!await uow.Channels.IsLoggingEnabled(textChannel).ConfigureAwait(false)) return;
+                await uow.Messages.MessageDeleted(cache.Id).ConfigureAwait(false);
             });
             return Task.CompletedTask;
         }
@@ -151,11 +151,11 @@ namespace Roki.Core.Services
             {
                 using var uow = _db.GetDbContext();
                 if (channel is SocketTextChannel textChannel)
-                    if (!await uow.Channels.IsLoggingEnabled(textChannel)) return;
+                    if (!await uow.Channels.IsLoggingEnabled(textChannel).ConfigureAwait(false)) return;
                 foreach (var cache in caches)
                 {
                     if (cache.HasValue && cache.Value.Author.IsBot) continue;
-                    uow.Messages.MessageDeleted(cache.Id);
+                    await uow.Messages.MessageDeleted(cache.Id).ConfigureAwait(false);
                 }
             });
             
