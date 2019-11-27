@@ -22,6 +22,7 @@ namespace Roki.Modules.Administration.Services
             var rawMessages = channel?.GetMessagesAsync(messageId, Direction.After, int.MaxValue);
             var messages = await rawMessages.FlattenAsync().ConfigureAwait(false);
             using var uow = _db.GetDbContext();
+            await using var transaction = uow.Context.Database.BeginTransaction();
             foreach (var message in messages)
             {
                 if (await uow.Messages.MessageExists(message.Id).ConfigureAwait(false)) continue;
@@ -30,6 +31,7 @@ namespace Roki.Modules.Administration.Services
 
             await uow.Messages.MoveToTempTableAsync(messageId).ConfigureAwait(false);
             await uow.Messages.MoveBackToMessagesAsync(messageId).ConfigureAwait(false);
+            transaction.Commit();
         }
     }
 }
