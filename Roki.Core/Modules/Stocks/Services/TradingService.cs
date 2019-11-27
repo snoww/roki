@@ -66,9 +66,9 @@ namespace Roki.Modules.Stocks.Services
                     total += cost;
                     embed.AddField($"`{investment.Symbol}` - `{investment.Shares}` Shares", $"`{cost}` {_roki.Properties.CurrencyIcon}", true);
                 }
-
                 embed.WithDescription($"You have been charged a total of `{total}` {_roki.Properties.CurrencyIcon}\n");
                 await dm.EmbedAsync(embed).ConfigureAwait(false);
+                await uow.Users.UpdateUserPortfolio(userId, portfolio).ConfigureAwait(false);
             }
 
             await uow.SaveChangesAsync().ConfigureAwait(false);

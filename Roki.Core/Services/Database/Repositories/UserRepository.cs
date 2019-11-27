@@ -28,6 +28,7 @@ namespace Roki.Core.Services.Database.Repositories
         Task<bool> UpdateUserInventory(ulong userId, string name, int quantity);
         Task<List<Investment>> GetUserPortfolioAsync(ulong userId);
         Task<bool> UpdateUserPortfolio(ulong userId, string symbol, string position, string action, long shares);
+        Task UpdateUserPortfolio(ulong userId, List<Investment> investments);
         decimal GetUserInvestingAccount(ulong userId);
         Task<bool> UpdateInvestingAccountAsync(ulong userId, decimal amount);
         Task<bool> TransferToFromInvestingAccountAsync(ulong userId, decimal amount);
@@ -222,6 +223,13 @@ namespace Roki.Core.Services.Database.Repositories
 
             await Context.SaveChangesAsync().ConfigureAwait(false);
             return true;
+        }
+
+        public async Task UpdateUserPortfolio(ulong userId, List<Investment> investments)
+        {
+            var user = await Set.FirstAsync(u => u.UserId == userId);
+            user.Portfolio = JsonSerializer.Serialize(investments);
+            await Context.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public decimal GetUserInvestingAccount(ulong userId)
