@@ -628,5 +628,12 @@
       "{0}log false",
       "{0}logging true"
     ]
+  },
+  "stalk": {
+    "Command": "stalk",
+    "Description": "Searches all of discord for a user by their userId.",
+    "Usage": [
+      "{0}stalk 123123123123"
+    ]
   }
 }
