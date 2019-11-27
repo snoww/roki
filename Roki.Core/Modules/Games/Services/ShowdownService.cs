@@ -25,7 +25,7 @@ namespace Roki.Modules.Games.Services
             _db = db;
         }
 
-        public async Task ConfigureAiGameAsync(string generation)
+        public async Task ConfigureAiGameAsync(int generation)
         {
             var env = await File.ReadAllTextAsync("/home/snow/Documents/showdown/.env").ConfigureAwait(false);
             var env2 = await File.ReadAllTextAsync("/home/snow/Documents/showdown2/.env").ConfigureAwait(false);
