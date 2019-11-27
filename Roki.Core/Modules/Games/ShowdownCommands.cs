@@ -234,7 +234,7 @@ namespace Roki.Modules.Games
                         if (result != value.Bet)
                         {
                             losers += $"{key.Username} " +
-                                      $"\t`{before:N0}` ⇒ `{_service.GetCurrency(ctx.User.Id):N0}`\n";
+                                      $"`{before:N0}` ⇒ `{_service.GetCurrency(ctx.User.Id):N0}`\n";
                             continue;
                         }
                         var won = value.Amount * value.Multiple * 2;
