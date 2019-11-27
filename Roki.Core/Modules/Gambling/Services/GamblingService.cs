@@ -11,7 +11,7 @@ namespace Roki.Modules.Gambling.Services
             _db = db;
         }
 
-        public long GetCurrencyAsync(ulong userId)
+        public long GetCurrency(ulong userId)
         {
             using var uow = _db.GetDbContext();
             return uow.Users.GetUserCurrency(userId);

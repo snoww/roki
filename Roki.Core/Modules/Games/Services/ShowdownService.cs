@@ -103,7 +103,7 @@ namespace Roki.Modules.Games.Services
             return (from log in logs where log.StartsWith(uid, StringComparison.OrdinalIgnoreCase) select log.Substring(9)).FirstOrDefault();
         }
         
-        public long GetCurrencyAsync(ulong userId)
+        public long GetCurrency(ulong userId)
         {
             using var uow = _db.GetDbContext();
             return uow.Users.GetUserCurrency(userId);

@@ -56,7 +56,7 @@ namespace Roki.Modules.Gambling
                 if (!removed)
                 {
                     await ctx.Channel.SendErrorAsync($"Not enough {_roki.Properties.CurrencyIcon}\n" +
-                                                     $"You have `{_service.GetCurrencyAsync(ctx.User.Id)}`").ConfigureAwait(false);
+                                                     $"You have `{_service.GetCurrency(ctx.User.Id)}`").ConfigureAwait(false);
                     return;
                 }
 
@@ -79,14 +79,14 @@ namespace Roki.Modules.Gambling
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithDescription(
                                 $"Result is: {result}\n{ctx.User.Mention} Congratulations! You've won `{won:N0}` {_roki.Properties.CurrencyIcon}\n" +
-                                $"New Balance: `{_service.GetCurrencyAsync(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}"))
+                                $"New Balance: `{_service.GetCurrency(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}"))
                         .ConfigureAwait(false);
                     return;
                 }
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
                     .WithDescription($"Result is: {result}\n{ctx.User.Mention} Better luck next time!\n" +
-                                     $"New Balance: `{_service.GetCurrencyAsync(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}")).ConfigureAwait(false);
+                                     $"New Balance: `{_service.GetCurrency(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}")).ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Aliases, Usage]
@@ -117,7 +117,7 @@ namespace Roki.Modules.Gambling
                 if (!removed)
                 {
                     await ctx.Channel.SendErrorAsync($"Not enough {_roki.Properties.CurrencyIcon}\n" +
-                                                     $"You have `{_service.GetCurrencyAsync(ctx.User.Id)}`").ConfigureAwait(false);
+                                                     $"You have `{_service.GetCurrency(ctx.User.Id)}`").ConfigureAwait(false);
                     return;
                 }
 
@@ -137,14 +137,14 @@ namespace Roki.Modules.Gambling
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithDescription(
                                 $"Results are: {string.Join(", ", results)}\n{ctx.User.Mention} Congratulations! You got `{correct}/{guesses.Length}` correct. You've won `{won:N0}` {_roki.Properties.CurrencyIcon}" +
-                                $"New Balance: `{_service.GetCurrencyAsync(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}"))
+                                $"New Balance: `{_service.GetCurrency(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}"))
                         .ConfigureAwait(false);
                     return;
                 }
                 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
                     .WithDescription($"Results are: {string.Join(", ", results)}\n{ctx.User.Mention} You got `{correct}/{guesses.Length}` correct. Better luck next time!\n" +
-                                     $"New Balance: `{_service.GetCurrencyAsync(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}"))
+                                     $"New Balance: `{_service.GetCurrency(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}"))
                     .ConfigureAwait(false);
             }
         }
