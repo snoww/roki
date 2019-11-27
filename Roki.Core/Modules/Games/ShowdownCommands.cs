@@ -246,13 +246,13 @@ namespace Roki.Modules.Games
                     {
                         if (result != value.Bet)
                         {
-                            losers += $"{key.Username}\n";
+                            losers += $"{key.Username} `{_service.GetCurrencyAsync(ctx.User.Id):N0}`\n";
                             continue;
                         }
                         var won = value.Amount * value.Multiple * 2;
-                        winners += $"{key.Username} won `{won:N0}` {_roki.Properties.CurrencyIcon}\n";
                         await _currency.ChangeAsync(key.Id, "BetShowdown Payout", won, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id,
                             ctx.Channel.Id, ctx.Message.Id);
+                        winners += $"{key.Username} won `{won:N0}` ⇒ `{_service.GetCurrencyAsync(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}\n";
                     }
                     
                     var embed = new EmbedBuilder().WithOkColor();

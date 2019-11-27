@@ -14,13 +14,15 @@ namespace Roki.Modules.Games.Services
     public class TriviaService : IRService
     {
         private readonly IHttpClientFactory _http;
+        private readonly DbService _db;
         public readonly ConcurrentDictionary<ulong, ulong> TriviaGames = new ConcurrentDictionary<ulong, ulong>();
         private const string OpenTdbUrl = "https://opentdb.com/api.php";
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
 
-        public TriviaService(IHttpClientFactory http)
+        public TriviaService(IHttpClientFactory http, DbService db)
         {
             _http = http;
+            _db = db;
         }
 
         public async Task<TriviaModel> GetTriviaQuestionsAsync(int category)
@@ -50,6 +52,12 @@ namespace Roki.Modules.Games.Services
             }
             
             return questions;
+        }
+        
+        public long GetCurrencyAsync(ulong userId)
+        {
+            using var uow = _db.GetDbContext();
+            return uow.Users.GetUserCurrency(userId);
         }
     }
 }

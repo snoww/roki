@@ -4,11 +4,12 @@ using Discord;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
 using Roki.Extensions;
+using Roki.Modules.Gambling.Services;
 using Roki.Services;
 
 namespace Roki.Modules.Gambling
 {
-    public partial class Gambling : RokiTopLevelModule
+    public partial class Gambling : RokiTopLevelModule<GamblingService>
     {
         private readonly DbService _db;
         private readonly ICurrencyService _currency;
@@ -33,14 +34,18 @@ namespace Roki.Modules.Gambling
                 .ConfigureAwait(false);
             if (!removed)
             {
-                await ctx.Channel.SendErrorAsync($"Not enough {_roki.Properties.CurrencyIcon}").ConfigureAwait(false);
+                await ctx.Channel.SendErrorAsync($"Not enough {_roki.Properties.CurrencyIcon}" +
+                                                 $"You have `{_service.GetCurrencyAsync(ctx.User.Id):N0}`")
+                    .ConfigureAwait(false);
                 return;
             }
             var roll = new Random().Next(1, 101);
             var rollStr = $"{ctx.User.Mention} rolled `{roll}`.";
             if (roll < 70)
             {
-                await ctx.Channel.SendErrorAsync($"{rollStr}\nBetter luck next time.");
+                await ctx.Channel.SendErrorAsync($"{rollStr}\nBetter luck next time." +
+                                                 $"New Balance: `{_service.GetCurrencyAsync(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}")
+                    .ConfigureAwait(false);
                 return;
             }
             
@@ -55,7 +60,8 @@ namespace Roki.Modules.Gambling
             await _currency.ChangeAsync(ctx.User.Id, "BetRoll Payout", win, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id, ctx.Channel.Id,
                 ctx.Message.Id);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{rollStr}\nCongratulations, you won `{win:N0}` {_roki.Properties.CurrencyIcon}"));
+                .WithDescription($"{rollStr}\nCongratulations, you won `{win:N0}` {_roki.Properties.CurrencyIcon}" +
+                                 $"New Balance: `{_service.GetCurrencyAsync(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}"));
         }
     }
 }

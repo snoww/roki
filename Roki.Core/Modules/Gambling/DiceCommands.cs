@@ -7,6 +7,7 @@ using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Extensions;
+using Roki.Modules.Gambling.Services;
 using Roki.Services;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
@@ -18,7 +19,7 @@ namespace Roki.Modules.Gambling
     public partial class Gambling
     {
         [Group]
-        public class DiceCommands : RokiSubmodule
+        public class DiceCommands : RokiSubmodule<GamblingService>
         {
             private readonly ICurrencyService _currency;
             private readonly Roki _roki;
@@ -47,7 +48,8 @@ namespace Roki.Modules.Gambling
                     .ConfigureAwait(false);
                 if (!removed)
                 {
-                    await ctx.Channel.SendErrorAsync($"Not enough {_roki.Properties.CurrencyIcon}").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync($"Not enough {_roki.Properties.CurrencyIcon}" +
+                                                     $"You have `{_service.GetCurrencyAsync(ctx.User.Id):N0}`").ConfigureAwait(false);
                     return;
                 }
 
@@ -128,15 +130,17 @@ namespace Roki.Modules.Gambling
 
                 if (won > 0)
                 {
-                    embed.WithOkColor()
-                        .WithDescription($"{ctx.User.Mention} You rolled a total of `{total}`\nCongratulations! You've won `{won:N0}` {_roki.Properties.CurrencyIcon}");
                     await _currency.ChangeAsync(ctx.User.Id, "BetDie Payout", won, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
+                    embed.WithOkColor()
+                        .WithDescription($"{ctx.User.Mention} You rolled a total of `{total}`\nCongratulations! You've won `{won:N0}` {_roki.Properties.CurrencyIcon}" +
+                                         $"New Balance: `{_service.GetCurrencyAsync(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}");
                 }
                 else
                 {
                     embed.WithErrorColor()
-                        .WithDescription($"{ctx.User.Mention} You rolled a total of `{total}`\nBetter luck next time!");
+                        .WithDescription($"{ctx.User.Mention} You rolled a total of `{total}`\nBetter luck next time!" +
+                                         $"New Balance: `{_service.GetCurrencyAsync(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}");
                 }
 
                 await ctx.Channel.SendFileAsync(ms, $"dice.{format.FileExtensions.First()}", embed: embed.Build()).ConfigureAwait(false);
