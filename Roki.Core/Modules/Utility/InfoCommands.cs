@@ -114,6 +114,28 @@ namespace Roki.Modules.Utility
             }
 
             [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
+            public async Task Stalk(ulong userId)
+            {
+                var client = (IDiscordClient) _client;
+                var user = await client.GetUserAsync(userId).ConfigureAwait(false);
+                if (user == null)
+                {
+                    await ctx.Channel.SendErrorAsync("No user found with that ID").ConfigureAwait(false);
+                    return;
+                }
+
+                var embed = new EmbedBuilder().WithOkColor()
+                    .AddField("Name", $"**{user.Username}**#{user.Discriminator}", true)
+                    .AddField("Joined Discord", $"{user.CreatedAt:MM/dd/yyyy HH:mm}", true);
+
+                var avatar = user.RealAvatarUrl();
+                if (avatar != null && avatar.IsAbsoluteUri)
+                    embed.WithThumbnailUrl(avatar.ToString());
+
+                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            }
+
+            [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
             public async Task Avatar([Leftover] IGuildUser user = null)
             {
                 if (user == null)
