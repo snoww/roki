@@ -236,7 +236,7 @@ namespace Roki.Modules.Games
                             continue;
                         }
                         var won = value.Amount * value.Multiple * 2;
-                        var before = _service.GetCurrency(ctx.User.Id);
+                        var before = _service.GetCurrency(ctx.User.Id) + value.Amount * value.Multiple;
                         await _currency.ChangeAsync(key.Id, "BetShowdown Payout", won, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id,
                             ctx.Channel.Id, ctx.Message.Id);
                         winners += $"{key.Username} won `{won:N0}` {_roki.Properties.CurrencyIcon}\n`{before:N0}` ⇒ `{_service.GetCurrency(ctx.User.Id):N0}`\n";
