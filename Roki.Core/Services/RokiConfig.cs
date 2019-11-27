@@ -115,7 +115,7 @@ namespace Roki.Core.Services
                         ? "postgres"
                         : dbSection["Type"],
                     string.IsNullOrWhiteSpace(dbSection["ConnectionString"])
-                        ? "Host=localhost;Database=test;Username=postgres;Password=roki-snow"
+                        ? "Host=localhost;Database=roki;Username=postgres;Password=roki-snow"
                         : dbSection["ConnectionString"]);
             }
             catch (Exception e)
