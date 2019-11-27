@@ -18,20 +18,25 @@ namespace Roki.Modules.Administration.Services
 
         public async Task FillMissingMessagesAsync(ICommandContext ctx, ulong messageId)
         {
-            var channel = ctx.Channel as SocketTextChannel;
-            var rawMessages = channel?.GetMessagesAsync(messageId, Direction.After, int.MaxValue);
-            var messages = await rawMessages.FlattenAsync().ConfigureAwait(false);
+            if (!(ctx.Channel is SocketTextChannel channel)) return;
+            var messages = await channel.GetMessagesAsync(messageId, Direction.After, 10000).FlattenAsync().ConfigureAwait(false);
             using var uow = _db.GetDbContext();
-            await using var transaction = uow.Context.Database.BeginTransaction();
+            int i = 1;
             foreach (var message in messages)
             {
-                if (await uow.Messages.MessageExists(message.Id).ConfigureAwait(false)) continue;
+                if (message.Author.IsBot) continue;
+                i++;
+                Console.Write(i + ": ");
+                if (await uow.Messages.MessageExists(message.Id).ConfigureAwait(false))
+                {
+                    Console.WriteLine($"[{message.Id}] exists");
+                    continue;
+                }
                 await uow.Messages.AddToTempTableAsync(message).ConfigureAwait(false);
+                Console.WriteLine($"[{message.Id}] added");
             }
-
             await uow.Messages.MoveToTempTableAsync(messageId).ConfigureAwait(false);
-            await uow.Messages.MoveBackToMessagesAsync(messageId).ConfigureAwait(false);
-            transaction.Commit();
+            await uow.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

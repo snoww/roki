@@ -57,8 +57,9 @@ WHERE author_id != 0 AND message_id >= {messageId}").ConfigureAwait(false);
                 content = "";
             await Context.Database.ExecuteSqlInterpolatedAsync($@"
 INSERT INTO messages_transfer(author_id, author, channel_id, channel, guild_id, guild, message_id, content, edited_timestamp, timestamp)
-VALUES ({message.Author.Id}, {message.Author}, {message.Channel.Id}, {message.Channel.Name}, {guild?.Id}, {guild?.Name}, {message.Id}, {content}, {message.EditedTimestamp?.ToUniversalTime()}, {message.Timestamp.ToUniversalTime()})"
+VALUES ({message.Author.Id}, {message.Author.Username}, {message.Channel.Id}, {message.Channel.Name}, {guild?.Id}, {guild?.Name}, {message.Id}, {content}, {message.EditedTimestamp?.ToUniversalTime()}, {message.Timestamp.ToUniversalTime()})"
             ).ConfigureAwait(false);
+            await Context.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task MoveBackToMessagesAsync(ulong messageId)
