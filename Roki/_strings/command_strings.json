@@ -631,9 +631,9 @@
   },
   "stalk": {
     "Command": "stalk",
-    "Description": "Searches all of discord for a user by their userId.",
+    "Description": "Searches all of discord for a user by their username and discriminator.",
     "Usage": [
-      "{0}stalk 123123123123"
+      "{0}stalk Snow#7777"
     ]
   }
 }

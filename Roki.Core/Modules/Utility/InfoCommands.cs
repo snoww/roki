@@ -114,10 +114,11 @@ namespace Roki.Modules.Utility
             }
 
             [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
-            public async Task Stalk(ulong userId)
+            public async Task Stalk([Leftover] string username)
             {
                 var client = (IDiscordClient) _client;
-                var user = await client.GetUserAsync(userId).ConfigureAwait(false);
+                var usr = username.Split("#");
+                var user = await client.GetUserAsync(usr[0], usr[1]).ConfigureAwait(false);
                 if (user == null)
                 {
                     await ctx.Channel.SendErrorAsync("No user found with that ID").ConfigureAwait(false);
