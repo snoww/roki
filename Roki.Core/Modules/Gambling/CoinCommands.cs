@@ -74,13 +74,13 @@ namespace Roki.Modules.Gambling
                 if (guess == result)
                 {
                     var won = (long) Math.Ceiling(amount * _roki.Properties.BetFlipMultiplier);
+                    await _currency.ChangeAsync(ctx.User.Id, "BetFlip Payout", won, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id,
+                        ctx.Channel.Id, ctx.Message.Id);
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithDescription(
                                 $"Result is: {result}\n{ctx.User.Mention} Congratulations! You've won `{won:N0}` {_roki.Properties.CurrencyIcon}\n" +
                                 $"New Balance: `{_service.GetCurrencyAsync(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}"))
                         .ConfigureAwait(false);
-                    await _currency.ChangeAsync(ctx.User.Id, "BetFlip Payout", won, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id,
-                        ctx.Channel.Id, ctx.Message.Id);
                     return;
                 }
 
@@ -132,13 +132,13 @@ namespace Roki.Modules.Gambling
                 if ((float) correct / guesses.Length >= _roki.Properties.BetFlipMMinCorrect)
                 {
                     var won = (long) Math.Ceiling(amount * Math.Pow(correct, _roki.Properties.BetFlipMMultiplier));
+                    await _currency.ChangeAsync(ctx.User.Id, "BetFlipMulti Payout", won, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id,
+                        ctx.Channel.Id, ctx.Message.Id);
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithDescription(
                                 $"Results are: {string.Join(", ", results)}\n{ctx.User.Mention} Congratulations! You got `{correct}/{guesses.Length}` correct. You've won `{won:N0}` {_roki.Properties.CurrencyIcon}" +
                                 $"New Balance: `{_service.GetCurrencyAsync(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}"))
                         .ConfigureAwait(false);
-                    await _currency.ChangeAsync(ctx.User.Id, "BetFlipMulti Payout", won, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id,
-                        ctx.Channel.Id, ctx.Message.Id);
                     return;
                 }
                 
