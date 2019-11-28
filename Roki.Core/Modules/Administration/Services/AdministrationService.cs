@@ -34,12 +34,17 @@ namespace Roki.Modules.Administration.Services
                 using var uow = _db.GetDbContext();
                 foreach (var message in messages.Reverse())
                 {
-                    if (message.Author.IsBot) continue;
+                    if (message.Author.IsBot)
+                    {
+                        Console.WriteLine($"[{message.Id}] skipped");
+                        continue;
+                    }
                     if (await uow.Messages.MessageExists(message.Id).ConfigureAwait(false))
                     {
                         continue;
                     }
                     await uow.Messages.AddMissingMessageAsync(message).ConfigureAwait(false);
+                    Console.WriteLine($"[{message.Id}] added");
                     count++;
                 }
                 await uow.SaveChangesAsync().ConfigureAwait(false);
