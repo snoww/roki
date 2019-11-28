@@ -12,7 +12,7 @@ namespace Roki.Modules.Administration
     {
         [RokiCommand, Description, Usage, Aliases]
         [RequireUserPermission(GuildPermission.Administrator)]
-        public async Task Fill(ulong afterMessage = 646848809707503666)
+        public async Task Fill(ulong afterMessage = 649101719569039362)
         {
             var start = DateTime.UtcNow;
             await _service.FillMissingMessagesAsync(afterMessage).ConfigureAwait(false);

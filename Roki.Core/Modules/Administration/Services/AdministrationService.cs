@@ -47,16 +47,9 @@ namespace Roki.Modules.Administration.Services
                 var count = 0;
                 foreach (var message in messages.Reverse())
                 {
-                    if (message.Author.IsBot)
-                    {
-                        continue;
-                    }
-                    if (await uow.Messages.MessageExists(message.Id).ConfigureAwait(false))
-                    {
-                        continue;
-                    }
+                    if (message.Author.IsBot) continue;
+                    if (await uow.Messages.MessageExists(message.Id).ConfigureAwait(false)) continue;
                     await uow.Messages.AddMissingMessageAsync(message).ConfigureAwait(false);
-                    Console.WriteLine($"[{message.Id}] added");
                     count++;
                 }
                 Console.WriteLine($"{count} total messages added");
