@@ -32,30 +32,23 @@ namespace Roki.Modules.Administration.Services
                 var messages = await channel.GetMessagesAsync(messageId, Direction.After, int.MaxValue).FlattenAsync().ConfigureAwait(false);
                 var count = 1;
                 using var uow = _db.GetDbContext();
-                try
+                Console.WriteLine($"{channel.Name}: " + messages.Count());
+                foreach (var message in messages.Reverse())
                 {
-                    foreach (var message in messages.Reverse())
+                    if (message.Author.IsBot)
                     {
-                        if (message.Author.IsBot)
-                        {
-                            Console.WriteLine($"[{message.Id}] skipped");
-                            continue;
-                        }
-                        if (await uow.Messages.MessageExists(message.Id).ConfigureAwait(false))
-                        {
-                            continue;
-                        }
-                        await uow.Messages.AddMissingMessageAsync(message).ConfigureAwait(false);
-                        Console.WriteLine($"[{message.Id}] added");
-                        count++;
+                        continue;
                     }
-                    await uow.SaveChangesAsync().ConfigureAwait(false);
-                    total.Add(channel.Name, count);
+                    if (await uow.Messages.MessageExists(message.Id).ConfigureAwait(false))
+                    {
+                        continue;
+                    }
+                    await uow.Messages.AddMissingMessageAsync(message).ConfigureAwait(false);
+                    Console.WriteLine($"[{message.Id}] added");
+                    count++;
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
+                await uow.SaveChangesAsync().ConfigureAwait(false);
+                total.Add(channel.Name, count);
             }
 
             return total;
