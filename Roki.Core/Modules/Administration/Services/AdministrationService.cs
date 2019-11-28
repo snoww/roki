@@ -25,16 +25,26 @@ namespace Roki.Modules.Administration.Services
 
         public async Task FillMissingMessagesAsync(ulong messageId)
         {
-            var guild = _client.Guilds.First(g => g.Id == _roki.Properties.PrimaryGuildId);
-            var total = new Dictionary<string, int>();
-            foreach (var channel in guild.TextChannels)
+            using var uow = _db.GetDbContext();
+            var channels = uow.Context.Channels.Where(c => c.Logging).ToList();
+            foreach (var channel in channels.Select(ch => _client.GetChannel(ch.ChannelId) as ITextChannel))
             {
+                if (channel == null) return;
                 Console.Write($"{channel.Name}: ");
-                var messages = await channel.GetMessagesAsync(messageId, Direction.After, int.MaxValue).FlattenAsync().ConfigureAwait(false);
+                IEnumerable<IMessage> messages;
+                try
+                {
+                    messages = await channel.GetMessagesAsync(messageId, Direction.After, int.MaxValue).FlattenAsync().ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    continue;
+                }
                 Console.WriteLine(messages.Count());
                 if (!messages.Any()) continue;
+                
                 var count = 0;
-                using var uow = _db.GetDbContext();
                 foreach (var message in messages.Reverse())
                 {
                     if (message.Author.IsBot)
