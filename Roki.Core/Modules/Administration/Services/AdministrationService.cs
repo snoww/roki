@@ -29,11 +29,12 @@ namespace Roki.Modules.Administration.Services
             var total = new Dictionary<string, int>();
             foreach (var channel in guild.TextChannels)
             {
+                Console.Write($"{channel.Name}: ");
                 var messages = await channel.GetMessagesAsync(messageId, Direction.After, int.MaxValue).FlattenAsync().ConfigureAwait(false);
+                Console.WriteLine(messages.Count());
                 if (!messages.Any()) continue;
-                var count = 1;
+                var count = 0;
                 using var uow = _db.GetDbContext();
-                Console.WriteLine($"{channel.Name}: " + messages.Count());
                 foreach (var message in messages.Reverse())
                 {
                     if (message.Author.IsBot)
@@ -49,7 +50,6 @@ namespace Roki.Modules.Administration.Services
                     count++;
                 }
                 Console.WriteLine($"{count} total messages added");
-                await uow.SaveChangesAsync().ConfigureAwait(false);
             }
         }
     }
