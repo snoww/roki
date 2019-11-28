@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Roki.Core.Services.Database.Models
@@ -5,6 +6,7 @@ namespace Roki.Core.Services.Database.Models
     [Table("pokedex")]
     public class Pokemon : DbEntity
     {
+        [Key]
         public string Name { get; set; }
         public int Number { get; set; }
         public string Species { get; set; }
