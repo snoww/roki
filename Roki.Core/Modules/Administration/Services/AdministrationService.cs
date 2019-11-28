@@ -23,7 +23,7 @@ namespace Roki.Modules.Administration.Services
             _roki = roki;
         }
 
-        public async Task<Dictionary<string, int>> FillMissingMessagesAsync(ulong messageId)
+        public async Task FillMissingMessagesAsync(ulong messageId)
         {
             var guild = _client.Guilds.First(g => g.Id == _roki.Properties.PrimaryGuildId);
             var total = new Dictionary<string, int>();
@@ -48,11 +48,9 @@ namespace Roki.Modules.Administration.Services
                     Console.WriteLine($"[{message.Id}] added");
                     count++;
                 }
+                Console.WriteLine($"{count} total messages added");
                 await uow.SaveChangesAsync().ConfigureAwait(false);
-                total.Add(channel.Name, count);
             }
-
-            return total;
         }
     }
 }
