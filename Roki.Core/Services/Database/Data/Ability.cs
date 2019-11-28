@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Roki.Core.Services.Database.Models
@@ -5,6 +6,7 @@ namespace Roki.Core.Services.Database.Models
     [Table("abilities")]
     public class Ability : DbEntity
     {
+        [Key]
         public int Id { get; set; }
         public string Name { get; set; }
         [Column("desc")]

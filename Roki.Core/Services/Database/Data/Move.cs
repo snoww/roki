@@ -1,9 +1,11 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Roki.Core.Services.Database.Models
 {
-    public class Move
+    public class Move : DbEntity
     {
+        [Key]
         public string Id { get; set; }
         public string Name { get; set; }
         public int? Accuracy { get; set; }

@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Discord;
-using PokeApiNet.Models;
+using Microsoft.EntityFrameworkCore;
 using Roki.Core.Services;
+using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
 using Roki.Modules.Searches.Common;
 
@@ -13,11 +15,18 @@ namespace Roki.Modules.Searches.Services
 {
     public class PokemonService : IRService
     {
+        private readonly DbService _db;
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
         private static readonly Dictionary<string, PokemonData> Data = JsonSerializer.Deserialize<Dictionary<string, PokemonData>>(File.ReadAllText("./data/pokemon.json"), Options);
-        
+
+        public PokemonService(DbService db)
+        {
+            _db = db;
+        }
+
         public Color GetColorOfPokemon(string color)
         {
+            color = color.ToLower();
             switch (color)
             {
                 case "black":
@@ -45,41 +54,56 @@ namespace Roki.Modules.Searches.Services
             }
         }
 
-        public PokemonData GetPokemonData(string query)
+        public async Task<Pokemon> GetPokemonByNameAsync(string query)
         {
-            return Data[query.Trim().Replace(' ', '-')];
+            using var uow = _db.GetDbContext();
+            query = query.SanitizeStringFull();
+            return await uow.Context.Pokedex.FirstOrDefaultAsync(p => p.Name.Equals(query, StringComparison.OrdinalIgnoreCase))
+                .ConfigureAwait(false);
         }
 
-        public PokemonData GetPokemonById(int id)
+        public async Task<Pokemon> GetPokemonByIdAsync(int number)
         {
-            return (from pokemon in Data where pokemon.Value.Api == id select Data[pokemon.Value.Name.ToLowerInvariant().Replace(' ', '-')]).FirstOrDefault();
+            using var uow = _db.GetDbContext();
+            return await uow.Context.Pokedex.FirstOrDefaultAsync(p => p.Number == number).ConfigureAwait(false);
+        }
+
+        public async Task<string> GetGen8SpriteAsync(string pokemon, int number)
+        {
+            // temp solution for missing sprites
+            string[] sprites;
+            if (number > 809 || pokemon.Contains("gmax", StringComparison.OrdinalIgnoreCase) || pokemon.Contains("galar"))
+                sprites = Directory.GetFiles("./data/pokemon/gen5", $"{pokemon.Substring(0, 3)}*");
+            else
+                sprites = Directory.GetFiles("./data/pokemon/ani", $"{pokemon.Substring(0, 3)}*");
+            return sprites.FirstOrDefault(path => path.Replace("-", "").Contains(pokemon, StringComparison.OrdinalIgnoreCase));
         }
         
-        public string GetPokemonEvolutionChain(string pokemon, EvolutionChain evoChain)
-        {
-            // hardcode wurmple?
-            if (evoChain.Chain.EvolvesTo.Count < 1)
-                return "No Evolutions";
-            var evoStr = "";
-            evoStr += pokemon == evoChain.Chain.Species.Name
-                ? $"**{evoChain.Chain.Species.Name.ToTitleCase()}** > "
-                : $"{evoChain.Chain.Species.Name.ToTitleCase()} > ";
-
-            foreach (var evo in evoChain.Chain.EvolvesTo)
-            {
-                evoStr += pokemon == evo.Species.Name
-                    ? $"**{evo.Species.Name.ToTitleCase()}**"
-                    : $"{evo.Species.Name.ToTitleCase()}";
-                if (evo.EvolvesTo.Count <= 0)
-                {
-                    evoStr += ", "; 
-                    continue;
-                }
-
-                evoStr += evo.EvolvesTo.Aggregate("", (current, link) => current + (pokemon == link.Species.Name ? $" > **{link.Species.Name.ToTitleCase()}**, " : $" > {link.Species.Name.ToTitleCase()}"));
-            }
-            
-            return evoStr.TrimEnd(',', ' ');
-        }
+//        public string GetPokemonEvolutionChain(string pokemon, EvolutionChain evoChain)
+//        {
+//            // hardcode wurmple?
+//            if (evoChain.Chain.EvolvesTo.Count < 1)
+//                return "No Evolutions";
+//            var evoStr = "";
+//            evoStr += pokemon == evoChain.Chain.Species.Name
+//                ? $"**{evoChain.Chain.Species.Name.ToTitleCase()}** > "
+//                : $"{evoChain.Chain.Species.Name.ToTitleCase()} > ";
+//
+//            foreach (var evo in evoChain.Chain.EvolvesTo)
+//            {
+//                evoStr += pokemon == evo.Species.Name
+//                    ? $"**{evo.Species.Name.ToTitleCase()}**"
+//                    : $"{evo.Species.Name.ToTitleCase()}";
+//                if (evo.EvolvesTo.Count <= 0)
+//                {
+//                    evoStr += ", "; 
+//                    continue;
+//                }
+//
+//                evoStr += evo.EvolvesTo.Aggregate("", (current, link) => current + (pokemon == link.Species.Name ? $" > **{link.Species.Name.ToTitleCase()}**, " : $" > {link.Species.Name.ToTitleCase()}"));
+//            }
+//            
+//            return evoStr.TrimEnd(',', ' ');
+//        }
     }
 }
