@@ -18,7 +18,7 @@ namespace Roki.Modules.Administration
             var str = "";
             foreach (var (channel, num) in count)
             {
-                str += $"{channel}: `num` messages added\n";
+                str += $"{channel}: `{num}` messages added\n";
             }
             await ctx.Channel.SendMessageAsync(str).ConfigureAwait(false);
         }
