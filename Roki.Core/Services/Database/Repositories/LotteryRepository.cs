@@ -79,13 +79,13 @@ namespace Roki.Core.Services.Database.Repositories
 
         public Lottery GetLottery(ulong botId)
         {
-            return Set.OrderByDescending(l => l.Id).First(u => u.UserId == botId);
+            return Set.OrderByDescending(l => l.Date).First(u => u.UserId == botId);
         }
 
         public string GetLotteryId() =>
-            Set.OrderByDescending(l => l.Id).First(u => u.UserId == 549644503351296040).LotteryId;
+            Set.OrderByDescending(l => l.Date).First(u => u.UserId == 549644503351296040).LotteryId;
 
         public DateTimeOffset GetLotteryDate(ulong botId) =>
-            Set.OrderByDescending(l => l.Id).First(u => u.UserId == 549644503351296040).Date;
+            Set.OrderByDescending(l => l.Date).First(u => u.UserId == 549644503351296040).Date;
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Roki.Core.Services.Database.Models
@@ -7,6 +8,9 @@ namespace Roki.Core.Services.Database.Models
     [Table("events")]
     public class Event : DbEntity
     {
+        [Key]
+        [Column("id")]
+        public int Id { get; set; }
         [Column("name")]
         public string Name { get; set; }
         [Column("description")]

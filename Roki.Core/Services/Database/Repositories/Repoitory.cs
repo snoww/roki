@@ -7,54 +7,35 @@ namespace Roki.Core.Services.Database.Repositories
 {
     public interface IRepository<T> where T : DbEntity
     {
-        T GetById(int id);
-        IEnumerable<T> GetAll();
-
         void Add(T obj);
-        void AddRange(params T[] objs);
-
-        void Remove(int id);
+        void AddRange(params T[] objects);
+        
         void Remove(T obj);
-        void RemoveRange(params T[] objs);
-
+        void RemoveRange(params T[] objects);
+        
         void Update(T obj);
-        void UpdateRange(params T[] objs);
+        void UpdateRange(params T[] objects);
     }
     
     public class Repository<T> : IRepository<T> where T : DbEntity
     {
-        public Repository(DbContext context)
+        protected Repository(DbContext context)
         {
             Context = context;
             Set = context.Set<T>();
         }
 
-        protected DbContext Context { get; set; }
-        protected DbSet<T> Set { get; set; }
+        protected DbContext Context { get; }
+        protected DbSet<T> Set { get; }
 
         public void Add(T obj)
         {
             Set.Add(obj);
         }
 
-        public void AddRange(params T[] objs)
+        public void AddRange(params T[] objects)
         {
-            Set.AddRange(objs);
-        }
-
-        public T GetById(int id)
-        {
-            return Set.FirstOrDefault(e => e.Id == id);
-        }
-
-        public IEnumerable<T> GetAll()
-        {
-            return Set.ToList();
-        }
-
-        public void Remove(int id)
-        {
-            Set.Remove(GetById(id));
+            Set.AddRange(objects);
         }
 
         public void Remove(T obj)
@@ -62,9 +43,9 @@ namespace Roki.Core.Services.Database.Repositories
             Set.Remove(obj);
         }
 
-        public void RemoveRange(params T[] objs)
+        public void RemoveRange(params T[] objects)
         {
-            Set.RemoveRange(objs);
+            Set.RemoveRange(objects);
         }
 
         public void Update(T obj)
@@ -72,9 +53,9 @@ namespace Roki.Core.Services.Database.Repositories
             Set.Update(obj);
         }
 
-        public void UpdateRange(params T[] objs)
+        public void UpdateRange(params T[] objects)
         {
-            Set.UpdateRange(objs);
+            Set.UpdateRange(objects);
         }
     }
 }

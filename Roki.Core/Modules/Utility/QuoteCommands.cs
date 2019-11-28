@@ -103,15 +103,15 @@ namespace Roki.Modules.Utility
 
                 using (var uow = _db.GetDbContext())
                 {
-                    var q = uow.Quotes.GetById(id);
+                    var quote = uow.Context.Quotes.First(q => q.Id == id);
 
-                    if (q.GuildId != ctx.Guild.Id || !isAdmin && q.AuthorId != ctx.Message.Author.Id)
+                    if (quote.GuildId != ctx.Guild.Id || !isAdmin && quote.AuthorId != ctx.Message.Author.Id)
                     {
                         response = "No quotes found which you can remove.";
                     }
                     else
                     {
-                        uow.Quotes.Remove(q);
+                        uow.Quotes.Remove(quote);
                         await uow.SaveChangesAsync().ConfigureAwait(false);
                         success = true;
                         response = $"Quote #{id} deleted";
@@ -153,7 +153,7 @@ namespace Roki.Modules.Utility
                 Quote quote;
                 using (var uow = _db.GetDbContext())
                 {
-                    quote = uow.Quotes.GetById(id);
+                    quote = uow.Context.Quotes.First(q => q.Id == id);
                     if (quote.GuildId != ctx.Guild.Id)
                         quote = null;
                     await uow.Quotes.IncrementUseCount(id).ConfigureAwait(false);

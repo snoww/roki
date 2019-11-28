@@ -6,8 +6,5 @@ namespace Roki.Core.Services.Database.Models
 {
     public class DbEntity
     {
-        [Key] 
-        [Column("id")]
-        public int Id { get; set; }
     }
 }
