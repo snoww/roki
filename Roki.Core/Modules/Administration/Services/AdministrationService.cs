@@ -32,23 +32,30 @@ namespace Roki.Modules.Administration.Services
                 var messages = await channel.GetMessagesAsync(messageId, Direction.After, int.MaxValue).FlattenAsync().ConfigureAwait(false);
                 var count = 1;
                 using var uow = _db.GetDbContext();
-                foreach (var message in messages.Reverse())
+                try
                 {
-                    if (message.Author.IsBot)
+                    foreach (var message in messages.Reverse())
                     {
-                        Console.WriteLine($"[{message.Id}] skipped");
-                        continue;
+                        if (message.Author.IsBot)
+                        {
+                            Console.WriteLine($"[{message.Id}] skipped");
+                            continue;
+                        }
+                        if (await uow.Messages.MessageExists(message.Id).ConfigureAwait(false))
+                        {
+                            continue;
+                        }
+                        await uow.Messages.AddMissingMessageAsync(message).ConfigureAwait(false);
+                        Console.WriteLine($"[{message.Id}] added");
+                        count++;
                     }
-                    if (await uow.Messages.MessageExists(message.Id).ConfigureAwait(false))
-                    {
-                        continue;
-                    }
-                    await uow.Messages.AddMissingMessageAsync(message).ConfigureAwait(false);
-                    Console.WriteLine($"[{message.Id}] added");
-                    count++;
+                    await uow.SaveChangesAsync().ConfigureAwait(false);
+                    total.Add(channel.Name, count);
                 }
-                await uow.SaveChangesAsync().ConfigureAwait(false);
-                total.Add(channel.Name, count);
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
             }
 
             return total;
