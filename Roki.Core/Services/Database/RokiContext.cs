@@ -93,8 +93,7 @@ namespace Roki.Core.Services.Database
 
             modelBuilder.Entity<Guild>(entity =>
             {
-                entity.HasKey(g => g.Id);
-                entity.HasAlternateKey(g => g.GuildId);
+                entity.HasKey(g => g.GuildId);
             });
 
             #endregion
@@ -103,8 +102,7 @@ namespace Roki.Core.Services.Database
 
             modelBuilder.Entity<Channel>(entity =>
             {
-                entity.HasKey(c => c.Id);
-                entity.HasAlternateKey(c => c.ChannelId);
+                entity.HasKey(c => c.ChannelId);
                 entity.Property(c => c.CurrencyGeneration)
                     .HasDefaultValue(true);
                 entity.Property(c => c.XpGain)

@@ -7,6 +7,9 @@ namespace Roki.Core.Services.Database.Models
     [Table("quotes")]
     public class Quote : DbEntity
     {
+        [Key]
+        [Column("Id")]
+        public int Id { get; set; }
         [Column("guild_id")]
         public ulong GuildId { get; set; }
         [Required]
