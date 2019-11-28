@@ -32,7 +32,7 @@ namespace Roki.Modules.Administration.Services
                 var messages = await channel.GetMessagesAsync(messageId, Direction.After, int.MaxValue).FlattenAsync().ConfigureAwait(false);
                 var count = 1;
                 using var uow = _db.GetDbContext();
-                foreach (var message in messages)
+                foreach (var message in messages.Reverse())
                 {
                     if (message.Author.IsBot) continue;
                     if (await uow.Messages.MessageExists(message.Id).ConfigureAwait(false))
