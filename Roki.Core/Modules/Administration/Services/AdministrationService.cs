@@ -30,6 +30,7 @@ namespace Roki.Modules.Administration.Services
             foreach (var channel in guild.TextChannels)
             {
                 var messages = await channel.GetMessagesAsync(messageId, Direction.After, int.MaxValue).FlattenAsync().ConfigureAwait(false);
+                if (!messages.Any()) continue;
                 var count = 1;
                 using var uow = _db.GetDbContext();
                 Console.WriteLine($"{channel.Name}: " + messages.Count());
