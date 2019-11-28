@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Roki.Core.Services.Database.Models
@@ -5,6 +6,7 @@ namespace Roki.Core.Services.Database.Models
     [Table("channels")]
     public class Channel : DbEntity
     {
+        [Key]
         [Column("channel_id")]
         public ulong ChannelId { get; set; }
         [Column("name")]

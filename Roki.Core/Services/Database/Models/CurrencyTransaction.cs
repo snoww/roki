@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Roki.Core.Services.Database.Models
@@ -6,6 +7,9 @@ namespace Roki.Core.Services.Database.Models
     [Table("transactions")]
     public class CurrencyTransaction : DbEntity
     {
+        [Key]
+        [Column("id")]
+        public int Id { get; set; }
         [Column("amount")]
         public long Amount { get; set; }
         [Column("reason")]
