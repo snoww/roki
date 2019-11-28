@@ -45,7 +45,7 @@ namespace Roki.Modules.Stocks
                     desc = $"Your current portfolio value:\n`{value:N2}` {_roki.Properties.CurrencyIcon}\n" + desc;
                     
                     var embed = new EmbedBuilder().WithOkColor()
-                        .WithTitle($"{ctx.User.Username}'s Portfolio")
+                        .WithTitle($"{user.Username}'s Portfolio")
                         .WithDescription(desc);
 
                     return embed;
