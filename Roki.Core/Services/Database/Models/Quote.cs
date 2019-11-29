@@ -8,7 +8,7 @@ namespace Roki.Core.Services.Database.Models
     public class Quote : DbEntity
     {
         [Key]
-        [Column("Id")]
+        [Column("id")]
         public int Id { get; set; }
         [Column("guild_id")]
         public ulong GuildId { get; set; }
