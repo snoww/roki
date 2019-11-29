@@ -48,6 +48,7 @@ namespace Roki.Modules.Searches
                     .AddField("Base Stats", baseStats, true)
                     .AddField("Height", $"{pokemon.Height:N1} m", true)
                     .AddField("Weight", $"{pokemon.Weight} kg", true)
+                    .AddField("Evolution", _service.GetEvolution(pokemon))
                     .AddField("Egg Groups", string.Join(", ", pokemon.EggGroups), true);
 
                 if (pokemon.MaleRatio.HasValue)
@@ -55,27 +56,8 @@ namespace Roki.Modules.Searches
                 
                 var sprite = _service.GetSprite(pokemon.Name, pokemon.Number);
                 embed.WithThumbnailUrl($"attachment://{sprite.Split("/").Last()}");
-                    
-//
-//                    var embed = new EmbedBuilder()
-//                        .WithColor(_service.GetColorOfPokemon(species.Color.Name))
-//                        .WithTitle($"#{pokemon.Id} {data.Name}")
-//                        .WithDescription($"{species.Genera[2].Genus}")
-//                        .WithThumbnailUrl("https://play.pokemonshowdown.com/sprites/xyani/" + data.Sprite + ".gif")
-//                        .AddField("Types", string.Join(", ", pokemon.Types.OrderBy(t => t.Slot).Select(t => t.Type.Name.ToTitleCase()).ToList()), true)
-//                        .AddField("Abilities", string.Join(", ", 
-//                            pokemon.Abilities.OrderBy(a => a.Slot).Select(a =>
-//                            {
-//                                if (a.IsHidden)
-//                                    return "*" + a.Ability.Name.ToTitleCase().Replace('-', ' ') + "*";
-//                                return a.Ability.Name.ToTitleCase().Replace('-', ' ');
-//                            }).ToList()), true)
-//                        .AddField("Base Stats", $"`HP: {pokemon.Stats[5].BaseStat} Atk: {pokemon.Stats[4].BaseStat} Def: {pokemon.Stats[3].BaseStat} Sp. Atk: {pokemon.Stats[2].BaseStat} Sp. Def: {pokemon.Stats[1].BaseStat} Speed: {pokemon.Stats[0].BaseStat}`")
-//                        .AddField("Height", $"{(double) pokemon.Height / 10} m", true)
-//                        .AddField("Weight", $"{(double) pokemon.Weight / 10} kg", true)
-//                        .AddField("Evolution", _service.GetPokemonEvolutionChain(pokemon.Name, evoChain));
-//                    
-//                    await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+
+                await ctx.Channel.SendFileAsync(sprite, embed: embed.Build()).ConfigureAwait(false);
             }
 
             [RokiCommand, Usage, Description, Aliases]

@@ -80,15 +80,13 @@ namespace Roki.Modules.Searches.Services
             return sprites.FirstOrDefault(path => path.Replace("-", "").Contains(pokemon, StringComparison.OrdinalIgnoreCase));
         }
 
-        public List<string> GetEvolution(Pokemon pokemon)
+        public string GetEvolution(Pokemon pokemon)
         {
             using var uow = _db.GetDbContext();
-            var basic = GetBaseEvo(uow, pokemon);
-            var evo = "";
-            
-            
-            
-            return null;
+            var pkmn = GetBaseEvo(uow, pokemon);
+            return !pkmn.Evolutions.Any() 
+                ? "N/A" 
+                : GetEvolutionChain(uow, pkmn).Replace(pokemon.Species, Format.Bold(pokemon.Species));
         }
 
         private static Pokemon GetBaseEvo(IUnitOfWork uow, Pokemon pokemon)
@@ -103,6 +101,13 @@ namespace Roki.Modules.Searches.Services
             } while (!string.IsNullOrEmpty(pokemon.PreEvolution));
 
             return basic;
+        }
+
+        private static string GetEvolutionChain(IUnitOfWork uow, Pokemon pokemon)
+        {
+            return !pokemon.Evolutions.Any() 
+                ? pokemon.Species 
+                : pokemon.Evolutions.Aggregate(pokemon.Species, (current, evolution) => current + " > " + GetEvolutionChain(uow, uow.Context.Pokedex.First(p => p.Name.Equals(evolution))));
         }
     }
 }
