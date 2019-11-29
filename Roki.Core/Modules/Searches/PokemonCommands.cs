@@ -6,7 +6,6 @@ using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
-using Roki.Modules.Searches.Common;
 using Roki.Modules.Searches.Services;
 
 namespace Roki.Modules.Searches
@@ -61,53 +60,43 @@ namespace Roki.Modules.Searches
             }
 
             [RokiCommand, Usage, Description, Aliases]
-            public async Task Ability([Leftover] string query)
+            public async Task Ability([Leftover] string query = null)
             {
                 if (string.IsNullOrWhiteSpace(query))
                     return;
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
 
-//                try
-//                {
-//                    var ability = await _pokeClient.GetResourceAsync<Ability>(query).ConfigureAwait(false);
-//                    
-//                    var embed = new EmbedBuilder().WithOkColor()
-//                        .WithTitle(ability.Name.ToTitleCase().Replace('-', ' '))
-//                        .WithDescription(ability.EffectEntries[0].Effect)
-//                        .AddField("Introduced In", $"Generation {ability.Generation.Name.Split('-')[1].ToUpperInvariant()}");
-//                    
-//                    await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
-//                }
-//                catch
-//                {
-//                    await ctx.Channel.SendErrorAsync("No ability of that name found.").ConfigureAwait(false);
-//                }
+                var ability = await _service.GetAbilityAsync(query.ToLower()).ConfigureAwait(false);
+                if (ability == null)
+                {
+                    await ctx.Channel.SendErrorAsync("No ability of that name found.").ConfigureAwait(false);
+                    return;
+                }
+
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                        .WithTitle(ability.Name)
+                        .WithDescription(ability.ShortDescription)
+                        .AddField("Rating", $"{ability.Rating:N1}"))
+                    .ConfigureAwait(false);
             }
 
             [RokiCommand, Usage, Description, Aliases]
-            public async Task Move([Leftover] string query)
+            public async Task Move([Leftover] string query = null)
             {
                 if (string.IsNullOrWhiteSpace(query))
                     return;
-//                await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
-//                try
-//                {
-//                    var move = await _pokeClient.GetResourceAsync<Move>(query).ConfigureAwait(false);
-//
-//                    var embed = new EmbedBuilder().WithOkColor()
-//                        .WithTitle(move.Name.ToTitleCase().Replace('-', ' '))
-//                        .WithDescription(move.EffectChanges != null
-//                            ? move.EffectEntries[0].Effect.Replace("$effect_chance", move.EffectChance.ToString())
-//                            : move.EffectEntries[0].Effect)
-//                        .AddField("Type", move.Type.Name.ToTitleCase(), true)
-//                        .AddField("Damage Type", move.DamageClass.Name.ToTitleCase(), true)
-//                        .AddField("Accuracy", move.Accuracy != null ? $"{move.Accuracy}%" : "—", true)
-//                        .AddField("Power", move.Power != null ? $"{move.Power}" : "—", true)
-//                        .AddField("PP", move.Pp, true)
-//                        .AddField("Priority", move.Priority, true)
-//                        .AddField("Introduced In", $"Generation {move.Generation.Name.Split('-')[1].ToUpperInvariant()}", true);
-//
-//                    await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+                var move = await _service.GetMoveAsync(query).ConfigureAwait(false);
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                        .WithTitle(move.Name)
+                        .WithDescription(move.ShortDescription)
+                        .AddField("Type", move.Type, true)
+                        .AddField("Category", move.Category, true)
+                        .AddField("Accuracy", move.Accuracy != null ? $"{move.Accuracy.Value}" : "-", true)
+                        .AddField("Power", move.BasePower, true)
+                        .AddField("PP", move.Pp, true)
+                        .AddField("Priority", move.Priority, true))
+                    .ConfigureAwait(false);
             }
 
             [RokiCommand, Usage, Description, Aliases]

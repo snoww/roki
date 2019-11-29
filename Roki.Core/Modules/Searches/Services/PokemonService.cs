@@ -109,5 +109,19 @@ namespace Roki.Modules.Searches.Services
                 ? pokemon.Species 
                 : pokemon.Evolutions.Aggregate(pokemon.Species, (current, evolution) => current + " > " + GetEvolutionChain(uow, uow.Context.Pokedex.First(p => p.Name.Equals(evolution))));
         }
+
+        public async Task<Ability> GetAbilityAsync(string query)
+        {
+            query = query.SanitizeStringFull();
+            using var uow = _db.GetDbContext();
+            return await uow.Context.Abilities.FirstAsync(a => a.Id.Equals(query, StringComparison.OrdinalIgnoreCase)).ConfigureAwait(false);
+        }
+
+        public async Task<Move> GetMoveAsync(string query)
+        {
+            query = query.SanitizeStringFull();
+            using var uow = _db.GetDbContext();
+            return await uow.Context.Moves.FirstAsync(m => m.Id.Equals(query, StringComparison.OrdinalIgnoreCase)).ConfigureAwait(false);
+        }
     }
 }

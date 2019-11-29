@@ -7,7 +7,7 @@ namespace Roki.Core.Services.Database.Models
     public class Ability : DbEntity
     {
         [Key]
-        public int Id { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
         [Column("desc")]
         public string Description { get; set; }
