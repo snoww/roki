@@ -146,7 +146,7 @@ namespace Roki.Modules.Games
                 var toDelete = new List<IUserMessage>();
                 _client.MessageReceived += message =>
                 {
-                    if (message.Channel.Id != ctx.Channel.Id || message.Author.IsBot || message.Content.Contains("stop", StringComparison.OrdinalIgnoreCase))
+                    if (message.Channel.Id != ctx.Channel.Id || message.Author.IsBot || !message.Content.Contains("stop", StringComparison.OrdinalIgnoreCase))
                         return Task.CompletedTask;
                     exit = true;
                     return Task.CompletedTask;
