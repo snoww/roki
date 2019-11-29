@@ -48,13 +48,14 @@ namespace Roki.Modules.Searches
                     .AddField("Base Stats", baseStats, true)
                     .AddField("Height", $"{pokemon.Height:N1} m", true)
                     .AddField("Weight", $"{pokemon.Weight} kg", true)
-                    .AddField("Egg Groups", string.Join(", ", pokemon.EggGroups));
+                    .AddField("Egg Groups", string.Join(", ", pokemon.EggGroups), true);
 
-                if (pokemon.Number > 809 || pokemon.Name.Contains("gmax", StringComparison.OrdinalIgnoreCase) ||
-                    pokemon.Name.Contains("galar", StringComparison.OrdinalIgnoreCase))
-                {
-                    var sprite = await _service.GetGen8SpriteAsync(pokemon.Name).ConfigureAwait(false);
-                    embed.WithThumbnailUrl($"attachment://{sprite.Split("/").Last()}");
+                if (pokemon.MaleRatio.HasValue)
+                    embed.AddField("Gender Ratio", $"M: `{pokemon.MaleRatio.Value:P1}` F: `{pokemon.FemaleRatio:P1}`", true);
+                
+                var sprite = _service.GetSprite(pokemon.Name, pokemon.Number);
+                embed.WithThumbnailUrl($"attachment://{sprite.Split("/").Last()}");
+                    
 //
 //                    var embed = new EmbedBuilder()
 //                        .WithColor(_service.GetColorOfPokemon(species.Color.Name))

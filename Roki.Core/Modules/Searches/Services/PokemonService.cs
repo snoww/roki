@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Discord;
 using Microsoft.EntityFrameworkCore;
 using Roki.Core.Services;
+using Roki.Core.Services.Database;
 using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
 using Roki.Modules.Searches.Common;
@@ -68,7 +69,7 @@ namespace Roki.Modules.Searches.Services
             return await uow.Context.Pokedex.FirstOrDefaultAsync(p => p.Number == number).ConfigureAwait(false);
         }
 
-        public async Task<string> GetGen8SpriteAsync(string pokemon, int number)
+        public string GetSprite(string pokemon, int number)
         {
             // temp solution for missing sprites
             string[] sprites;
@@ -78,32 +79,30 @@ namespace Roki.Modules.Searches.Services
                 sprites = Directory.GetFiles("./data/pokemon/ani", $"{pokemon.Substring(0, 3)}*");
             return sprites.FirstOrDefault(path => path.Replace("-", "").Contains(pokemon, StringComparison.OrdinalIgnoreCase));
         }
-        
-//        public string GetPokemonEvolutionChain(string pokemon, EvolutionChain evoChain)
-//        {
-//            // hardcode wurmple?
-//            if (evoChain.Chain.EvolvesTo.Count < 1)
-//                return "No Evolutions";
-//            var evoStr = "";
-//            evoStr += pokemon == evoChain.Chain.Species.Name
-//                ? $"**{evoChain.Chain.Species.Name.ToTitleCase()}** > "
-//                : $"{evoChain.Chain.Species.Name.ToTitleCase()} > ";
-//
-//            foreach (var evo in evoChain.Chain.EvolvesTo)
-//            {
-//                evoStr += pokemon == evo.Species.Name
-//                    ? $"**{evo.Species.Name.ToTitleCase()}**"
-//                    : $"{evo.Species.Name.ToTitleCase()}";
-//                if (evo.EvolvesTo.Count <= 0)
-//                {
-//                    evoStr += ", "; 
-//                    continue;
-//                }
-//
-//                evoStr += evo.EvolvesTo.Aggregate("", (current, link) => current + (pokemon == link.Species.Name ? $" > **{link.Species.Name.ToTitleCase()}**, " : $" > {link.Species.Name.ToTitleCase()}"));
-//            }
-//            
-//            return evoStr.TrimEnd(',', ' ');
-//        }
+
+        public List<string> GetEvolution(Pokemon pokemon)
+        {
+            using var uow = _db.GetDbContext();
+            var basic = GetBaseEvo(uow, pokemon);
+            var evo = "";
+            
+            
+            
+            return null;
+        }
+
+        private static Pokemon GetBaseEvo(IUnitOfWork uow, Pokemon pokemon)
+        {
+            if (string.IsNullOrEmpty(pokemon.PreEvolution))
+                return pokemon;
+
+            Pokemon basic;
+            do
+            { 
+                basic = uow.Context.Pokedex.First(p => p.Name.Equals(pokemon.PreEvolution, StringComparison.OrdinalIgnoreCase));
+            } while (!string.IsNullOrEmpty(pokemon.PreEvolution));
+
+            return basic;
+        }
     }
 }
