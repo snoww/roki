@@ -144,13 +144,15 @@ namespace Roki.Modules.Games
 
                 var exit = false;
                 var toDelete = new List<IUserMessage>();
-                _client.MessageReceived += message =>
+                _client.MessageReceived += StopReceived;
+                Task StopReceived(SocketMessage message)
                 {
                     if (message.Channel.Id != ctx.Channel.Id || message.Author.IsBot || !message.Content.Contains("stop", StringComparison.OrdinalIgnoreCase))
                         return Task.CompletedTask;
                     exit = true;
                     return Task.CompletedTask;
-                };
+                }
+
                 var count = 1;
                 var playerScore = new Dictionary<IUser, PlayerScore>();
                 foreach (var q in questions.Results)
@@ -191,6 +193,7 @@ namespace Roki.Modules.Games
 
                     if (exit)
                     {
+                        _client.MessageReceived -= StopReceived;
                         await ctx.Channel.SendErrorAsync("Current trivia game stopped.").ConfigureAwait(false);
                         await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                         return;
