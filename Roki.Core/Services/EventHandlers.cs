@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -74,7 +75,7 @@ namespace Roki.Core.Services
                 else
                     content = "";
                 
-                uow.Messages.Add(new Message
+                uow.Context.Messages.Add(new Message
                 {
                     AuthorId = message.Author.Id,
                     Author = message.Author.Username,
@@ -98,6 +99,7 @@ namespace Roki.Core.Services
         {
             if (after.Author.IsBot) return Task.CompletedTask;
             if (string.IsNullOrWhiteSpace(after.Author.Username)) return Task.CompletedTask;
+            if (after.EditedTimestamp == null) return Task.CompletedTask;
             var _ = Task.Run(async () =>
             {
                 using var uow = _db.GetDbContext();
@@ -112,7 +114,7 @@ namespace Roki.Core.Services
                     content = string.Join("\n", after.Attachments.Select(a => a.Url));
                 else
                     content = "";
-                uow.Messages.Add(new Message
+                uow.Context.Messages.Add(new Message
                 {
                     AuthorId = after.Author.Id,
                     Author = after.Author.Username,
