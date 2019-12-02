@@ -213,6 +213,9 @@ namespace Roki.Modules.Games
                         await _service.GetWinnerAsync(uid).ConfigureAwait(false);
                         return;
                     }
+                    
+                    var winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
+                    var result = winner == 1 ? BetPlayer.P1 : BetPlayer.P2;
 
                     foreach (var (key, value) in joinedReactions)
                     {
@@ -221,9 +224,6 @@ namespace Roki.Modules.Games
                                 ctx.Message.Id)
                             .ConfigureAwait(false);
                     }
-
-                    var winner = await _service.GetWinnerAsync(uid).ConfigureAwait(false);
-                    var result = winner == 1 ? BetPlayer.P1 : BetPlayer.P2;
 
                     var winners = "";
                     var losers = "";
