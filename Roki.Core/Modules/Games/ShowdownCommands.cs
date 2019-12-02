@@ -149,13 +149,14 @@ namespace Roki.Modules.Games
                                     var notEnoughMsg = await ctx.Channel.SendErrorAsync($"<@{reaction.UserId}> Please select a player to bet on first.").ConfigureAwait(false);
                                     notEnoughMsg.DeleteAfter(3);
                                 }
-                                await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value, RequestOptions.Default).ConfigureAwait(false);
+                                await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
                                 return Task.CompletedTask;
                             }
                             // If user exists in dictionary and reacted with player1 
                             if (reaction.Emote.Equals(Player1))
                             {
                                 joinedReactions[user].Bet = BetPlayer.P1;
+                                await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
                                 return Task.CompletedTask;
                             }
                             
@@ -163,6 +164,7 @@ namespace Roki.Modules.Games
                             if (reaction.Emote.Equals(Player2))
                             {
                                 joinedReactions[user].Bet = BetPlayer.P2;
+                                await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
                                 return Task.CompletedTask;
                             }
                             // If user exists in dictionary and reacted with any other emote in the reactionMap
@@ -260,7 +262,7 @@ namespace Roki.Modules.Games
                                 .WithDescription($"Player {winner} has won the battle!\nBetter luck next time!\n{losers}\n")).ConfigureAwait(false);
                     }
                     _service.Games.TryRemove(ctx.Channel.Id, out _);
-                    await startMsg.RemoveReactionsAsync(ctx.Client.CurrentUser, _reactionMap.Keys.ToArray()).ConfigureAwait(false); 
+                    await startMsg.RemoveAllReactionsAsync().ConfigureAwait(false); 
                 }
                 catch (Exception e)
                 {
