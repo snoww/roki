@@ -12,7 +12,8 @@ namespace Roki.Core.Services
         {
             var builder = new NpgsqlConnectionStringBuilder(config.Db.ConnectionString);
             var optionsBuilder = new DbContextOptionsBuilder<RokiContext>();
-            optionsBuilder.UseNpgsql(builder.ToString());
+            optionsBuilder.UseNpgsql(builder.ToString())
+                .UseSnakeCaseNamingConvention();
             _options = optionsBuilder.Options;
         }
 

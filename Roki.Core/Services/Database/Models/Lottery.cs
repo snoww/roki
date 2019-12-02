@@ -6,7 +6,6 @@ namespace Roki.Core.Services.Database.Models
     [Table("lottery")]
     public class Lottery : DbEntity
     {
-        [Column("user_id")]
         public ulong UserId { get; set; }
         [Column("num_1")]
         public int Num1 { get; set; }
@@ -20,9 +19,7 @@ namespace Roki.Core.Services.Database.Models
         public int Num5 { get; set; }
         [Column("num_6")]
         public int Num6 { get; set; }
-        [Column("lottery_id")]
         public string LotteryId { get; set; }
-        [Column("date")]
         public DateTimeOffset Date { get; set; }
     }
 }
