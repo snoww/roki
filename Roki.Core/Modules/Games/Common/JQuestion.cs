@@ -1,6 +1,6 @@
 namespace Roki.Modules.Games.Common
 {
-    public class JeopardyModel
+    public class JQuestion
     {
         public string Category { get; set; }
         public string Clue { get; set; }

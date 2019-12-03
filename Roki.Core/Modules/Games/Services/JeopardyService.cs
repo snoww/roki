@@ -17,26 +17,26 @@ namespace Roki.Modules.Games.Services
             _db = db;
         }
 
-        public List<JeopardyModel> GenerateGame()
+        public Dictionary<string, List<JQuestion>> GenerateGame()
         {
-            var qs = new List<JeopardyModel>();
+            var qs = new Dictionary<string, List<JQuestion>>();
             for (int i = 0; i < 2; i++)
             {
                 var cat = GetRandomCategories();
-                var valid = ValidateGame(GetRandomQuestions(cat));
+                var valid = ValidateGame(GetRandomQuestions(cat.Id));
                 while (valid == null)
                 {
                     cat = GetRandomCategories();
-                    valid = ValidateGame(GetRandomQuestions(cat));
+                    valid = ValidateGame(GetRandomQuestions(cat.Id));
                 }
-                qs.AddRange(valid);
+                qs.Add(cat.Category, valid);
             }
             return qs;
         }
 
-        private List<JeopardyModel> ValidateGame(List<JeopardyModel> game)
+        private List<JQuestion> ValidateGame(List<JQuestion> game)
         {
-            var validated = new List<JeopardyModel>();
+            var validated = new List<JQuestion>();
             try
             {
                 validated.Add(game.First(g => g.Value == 200));
@@ -52,7 +52,7 @@ namespace Roki.Modules.Games.Services
             }  
         }
 
-        private List<JeopardyModel> GetRandomQuestions(int categoryId)
+        private List<JQuestion> GetRandomQuestions(int categoryId)
         {
             using var uow = _db.GetDbContext();
             var query = from clue in uow.Context.Set<Clues>()
@@ -61,7 +61,7 @@ namespace Roki.Modules.Games.Services
                 join classification in uow.Context.Set<Classification>() on clue.Id equals classification.ClueId
                 join categories in uow.Context.Set<Categories>() on classification.CategoryId equals categories.Id
                 where categories.Id == categoryId
-                select new JeopardyModel
+                select new JQuestion
                 {
                     Category = categories.Category,
                     Clue = document.Clue,
@@ -72,12 +72,12 @@ namespace Roki.Modules.Games.Services
             return query.ToList();
         }
 
-        private int GetRandomCategories()
+        private Categories GetRandomCategories()
         {
             using var uow = _db.GetDbContext();
             var rng = new Random();
             var count = uow.Context.Categories.Count();
-            return uow.Context.Categories.Skip(rng.Next(0, count)).Take(1).First().Id;
+            return uow.Context.Categories.Skip(rng.Next(0, count)).Take(1).First();
         }
     }
 }
