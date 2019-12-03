@@ -186,9 +186,16 @@ namespace Roki.Modules.Games
                         await msg.AddReactionsAsync(TrueFalse).ConfigureAwait(false);
                     }
                     toDelete.Add(msg);
+                    var answers = false;
                     using (msg.OnReaction(_client, AnswerAdded))
                     {
                         await Task.Delay(20000).ConfigureAwait(false);
+                    }
+
+                    if (answers == false)
+                    {
+                        await ctx.Channel.SendErrorAsync("Trivia stopped due to inactivity.").ConfigureAwait(false);
+                        return;
                     }
 
                     if (exit)
@@ -260,6 +267,7 @@ namespace Roki.Modules.Games
                                 playerChoice.Add(r.User.Value, r.Emote.Equals(Check) ? "True" : "False");
                         }
 
+                        answers = true;
                         await Task.CompletedTask;
                         await Task.Delay(500);
                         await msg.RemoveReactionAsync(r.Emote, r.User.Value).ConfigureAwait(false);
@@ -272,7 +280,6 @@ namespace Roki.Modules.Games
                 foreach (var (user, score) in playerScore)
                 {
                     scoreStr += $"{user.Username} `{score.Correct}`/`{score.Incorrect + score.Correct}`\n";
-                    if (score.Amount <= 0 || score.Correct / (float) (score.Correct + score.Incorrect) < _roki.Properties.TriviaMinCorrect) continue;
                     var before = _service.GetCurrency(user.Id);
                     await _currency.ChangeAsync(user.Id, "Trivia Reward", score.Amount, ctx.Client.CurrentUser.Id, user.Id, ctx.Guild.Id, ctx.Channel.Id,
                         ctx.Message.Id).ConfigureAwait(false);
