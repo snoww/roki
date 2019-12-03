@@ -202,6 +202,7 @@ namespace Roki.Modules.Games
                     {
                         _client.MessageReceived -= StopReceived;
                         await ctx.Channel.SendErrorAsync("Current trivia game stopped.").ConfigureAwait(false);
+                        _service.TriviaGames.TryRemove(ctx.Channel.Id, out _);
                         await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                         return;
                     }
