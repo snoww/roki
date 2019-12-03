@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,7 +11,8 @@ namespace Roki.Modules.Games.Services
 {
     public class JeopardyService : IRService
     {
-        private DbService _db;
+        private readonly DbService _db;
+        public ConcurrentDictionary<ulong, Jeopardy> ActiveGames = new ConcurrentDictionary<ulong, Jeopardy>();
 
         public JeopardyService(DbService db)
         {
