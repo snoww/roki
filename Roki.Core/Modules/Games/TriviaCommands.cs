@@ -192,9 +192,12 @@ namespace Roki.Modules.Games
                         await Task.Delay(20000).ConfigureAwait(false);
                     }
 
-                    if (answers == false)
+                    if (!answers)
                     {
+                        _client.MessageReceived -= StopReceived;
                         await ctx.Channel.SendErrorAsync("Trivia stopped due to inactivity.").ConfigureAwait(false);
+                        _service.TriviaGames.TryRemove(ctx.Channel.Id, out _);
+                        await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                         return;
                     }
 
