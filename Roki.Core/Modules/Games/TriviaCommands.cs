@@ -147,7 +147,7 @@ namespace Roki.Modules.Games
                 _client.MessageReceived += StopReceived;
                 Task StopReceived(SocketMessage message)
                 {
-                    if (message.Channel.Id != ctx.Channel.Id || message.Author.IsBot || !message.Content.Contains("stop", StringComparison.OrdinalIgnoreCase))
+                    if (message.Channel.Id != ctx.Channel.Id || message.Author.IsBot || !message.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
                         return Task.CompletedTask;
                     exit = true;
                     return Task.CompletedTask;
