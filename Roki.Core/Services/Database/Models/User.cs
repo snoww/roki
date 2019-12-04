@@ -18,9 +18,11 @@ namespace Roki.Core.Services.Database.Models
         public DateTimeOffset LastXpGain { get; set; } = DateTimeOffset.MinValue;
         public string NotificationLocation { get; set; } = "dm";
         public long Currency { get; set; }
+        [Column("inventory", TypeName = "json")]
         public string Inventory { get; set; }
         [Column("investing")]
         public decimal InvestingAccount { get; set; } = 50000;
+        [Column("portfolio", TypeName = "json")]
         public string Portfolio { get; set; }
         
         public override bool Equals(object obj) => 
