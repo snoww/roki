@@ -29,9 +29,16 @@ namespace Roki.Modules.Utility.Services
         {
             var guild = _client.GetGuild(GuildId);
             var roles = guild.Roles.Where(r => r.Name.Contains("rainbow", StringComparison.OrdinalIgnoreCase)).ToList();
-            foreach (var role in roles)
+            try
             {
-                await role.ModifyAsync(r => r.Color = new Color(_rng.Next(0, 256), _rng.Next(0, 256), _rng.Next(0, 256))).ConfigureAwait(false);
+                foreach (var role in roles)
+                {
+                    await role.ModifyAsync(r => r.Color = new Color(_rng.Next(0, 256), _rng.Next(0, 256), _rng.Next(0, 256))).ConfigureAwait(false);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
         }
     }
