@@ -11,6 +11,7 @@ namespace Roki.Core.Services.Database.Models
         public int Id { get; set; }
         public ulong SellerId { get; set; }
         public string ItemName { get; set; }
+        [Column("details")]
         public string ItemDetails { get; set; }
         public string Description { get; set; } = "-";
         public string Category { get; set; }
