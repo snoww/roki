@@ -643,5 +643,12 @@
       "{0}uwu hey how are you",
       "{0}uwu"
     ]
+  },
+  "Nickname": {
+    "Command": "nickname nick",
+    "Description": "Changes the target users nickname. Lasts forever or until user changes back. Must be a moderator or have an available power (Consumes the power).",
+    "Usage": [
+      "{0}nick @snow snowww"
+    ]
   }
 }
