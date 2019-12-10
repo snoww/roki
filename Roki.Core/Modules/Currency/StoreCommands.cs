@@ -36,7 +36,7 @@ namespace Roki.Modules.Currency
 
                 if (itemName == null)
                 {
-                    const int itemsPerPage = 10;
+                    const int itemsPerPage = 9;
                     EmbedBuilder Catalog(int page)
                     {
                         var startAt = itemsPerPage * page;
