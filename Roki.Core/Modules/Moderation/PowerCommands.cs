@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -72,9 +73,21 @@ namespace Roki.Modules.Moderation
                 }
                 if (user == null || user.IsBot || user.Equals(ctx.User) || string.IsNullOrWhiteSpace(nickname)) 
                     return;
-                await _service.ConsumePower(ctx.User.Id, "Nickname").ConfigureAwait(false);
 
-                await ((IGuildUser) user).ModifyAsync(u => u.Nickname = nickname.TrimTo(32, true)).ConfigureAwait(false);
+                try
+                {
+                    await ((IGuildUser) user).ModifyAsync(u => u.Nickname = nickname.TrimTo(32, true)).ConfigureAwait(false);
+                    await _service.ConsumePower(ctx.User.Id, "Nickname").ConfigureAwait(false);
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                            .WithTitle($"{ctx.User.Username} used a Nickname Power on {user.Username}")
+                            .WithDescription($"Successfully changed {user.Username}'s nickname to `{nickname.TrimTo(32, true)}`"))
+                        .ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    await ctx.Channel.SendErrorAsync("You cannot change that person's nickname").ConfigureAwait(false);
+                }
             }
         }
     }
