@@ -66,6 +66,9 @@ namespace Roki.Modules.Utility.Services
                             case 'M':
                                 result += "yo";
                                 break;
+                            default:
+                                result += currChar;
+                                break;
                         }
                         break;
                     default:
