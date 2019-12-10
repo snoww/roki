@@ -69,8 +69,8 @@ namespace Roki.Modules.Utility
             if (message == null)
             {
                 var msgs = await ctx.Channel.GetMessagesAsync(ctx.Message, Direction.Before, 5).FlattenAsync();
-                var userMsg = msgs.FirstOrDefault(m => !m.Author.IsBot);
-                if (userMsg == null || string.IsNullOrWhiteSpace(userMsg.Content))
+                var userMsg = msgs.FirstOrDefault(m => !string.IsNullOrWhiteSpace(m.Content));
+                if (userMsg == null)
                 {
                     await ctx.Channel.SendErrorAsync("nyothing to uwufy uwu").ConfigureAwait(false);
                     return;
