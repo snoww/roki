@@ -10,7 +10,7 @@ using Roki.Modules.Utility.Services;
 
 namespace Roki.Modules.Utility
 {
-    public partial class Utility : RokiTopLevelModule<RainbowRoleService>
+    public partial class Utility : RokiTopLevelModule<UtilityService>
     {
         private readonly DiscordSocketClient _client;
         private readonly IRokiConfig _config;
@@ -61,6 +61,26 @@ namespace Roki.Modules.Utility
                 .WithFooter($"{pin.Timestamp.ToLocalTime():hh:mm tt MM/dd/yyyy}");
             
             await ctx.Channel.EmbedAsync(embed);
+        }
+
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task Uwu(string message = null)
+        {
+            if (message == null)
+            {
+                var msgs = await ctx.Channel.GetMessagesAsync(ctx.Message, Direction.Before, 5).FlattenAsync();
+                var userMsg = msgs.FirstOrDefault(m => !m.Author.IsBot);
+                if (userMsg == null || string.IsNullOrWhiteSpace(userMsg.Content))
+                {
+                    await ctx.Channel.SendErrorAsync("nyothing to uwufy uwu").ConfigureAwait(false);
+                    return;
+                }
+
+                message = userMsg.Content;
+            }
+
+            var uwuize = _service.Uwulate(message);
+            await ctx.Channel.SendMessageAsync(uwuize).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
