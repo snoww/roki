@@ -19,7 +19,7 @@ namespace Roki.Modules.Moderation
             [Priority(0)]
             public async Task Mute(IUser user)
             {
-                if (!await _service.AvailablePower(ctx.User.Id, "Mute"))
+                if (!await _service.AvailablePower(ctx.User.Id, "Mute").ConfigureAwait(false))
                 {
                     await ctx.Channel.SendErrorAsync($"{ctx.User.Mention} do not have any mute powers available.").ConfigureAwait(false);
                     return;
@@ -35,7 +35,7 @@ namespace Roki.Modules.Moderation
             [Priority(0)]
             public async Task Block(IUser user)
             {
-                if (!await _service.AvailablePower(ctx.User.Id, "Block"))
+                if (!await _service.AvailablePower(ctx.User.Id, "Block").ConfigureAwait(false))
                 {
                     await ctx.Channel.SendErrorAsync($"{ctx.User.Mention} do not have any mute powers available.").ConfigureAwait(false);
                     return;
@@ -50,7 +50,7 @@ namespace Roki.Modules.Moderation
             [Priority(0)]
             public async Task Timeout(IUser user)
             {
-                if (!await _service.AvailablePower(ctx.User.Id, "Timeout"))
+                if (!await _service.AvailablePower(ctx.User.Id, "Timeout").ConfigureAwait(false))
                 {
                     await ctx.Channel.SendErrorAsync($"{ctx.User.Mention} do not have any mute powers available.").ConfigureAwait(false);
                     return;
@@ -65,13 +65,14 @@ namespace Roki.Modules.Moderation
             [Priority(0)]
             public async Task Nickname(IUser user, [Leftover] string nickname = null)
             {
-                if (!await _service.AvailablePower(ctx.User.Id, "Nickname"))
+                if (!await _service.AvailablePower(ctx.User.Id, "Nickname").ConfigureAwait(false))
                 {
                     await ctx.Channel.SendErrorAsync($"{ctx.User.Mention} do not have any nickname powers available.").ConfigureAwait(false);
                     return;
                 }
-                if (user == null || user.Equals(ctx.User) || string.IsNullOrWhiteSpace(nickname)) 
+                if (user == null || user.IsBot || user.Equals(ctx.User) || string.IsNullOrWhiteSpace(nickname)) 
                     return;
+                await _service.ConsumePower(ctx.User.Id, "Nickname").ConfigureAwait(false);
 
                 await ((IGuildUser) user).ModifyAsync(u => u.Nickname = nickname.TrimTo(32, true)).ConfigureAwait(false);
             }
