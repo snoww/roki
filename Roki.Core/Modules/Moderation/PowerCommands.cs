@@ -65,6 +65,11 @@ namespace Roki.Modules.Moderation
             [Priority(0)]
             public async Task Nickname(IUser user, [Leftover] string nickname = null)
             {
+                if (!await _service.AvailablePower(ctx.User.Id, "Nickname"))
+                {
+                    await ctx.Channel.SendErrorAsync($"{ctx.User.Mention} do not have any nickname powers available.").ConfigureAwait(false);
+                    return;
+                }
                 if (user == null || user.Equals(ctx.User) || string.IsNullOrWhiteSpace(nickname)) 
                     return;
 
