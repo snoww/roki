@@ -64,7 +64,7 @@ namespace Roki.Modules.Utility
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task Uwu(string message = null)
+        public async Task Uwu([Leftover] string message = null)
         {
             if (message == null)
             {

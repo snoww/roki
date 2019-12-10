@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading;
 using Discord;
 using Discord.WebSocket;
-using Roki.Common.Attributes;
 using Roki.Core.Services;
 
 namespace Roki.Modules.Utility.Services
@@ -36,7 +35,7 @@ namespace Roki.Modules.Utility.Services
             }
         }
 
-        public string Uwulate([Leftover] string message)
+        public string Uwulate(string message)
         {
             var result = string.Empty;
             for (int i = 0; i < message.Length; i++)
