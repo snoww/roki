@@ -6,5 +6,6 @@ namespace Roki.Modules.Games.Common
         public string Clue { get; set; }
         public string Answer { get; set; }
         public int Value { get; set; }
+        public bool Available { get; set; } = true;
     }
 }

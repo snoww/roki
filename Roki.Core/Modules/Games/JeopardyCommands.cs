@@ -30,7 +30,7 @@ namespace Roki.Modules.Games
             {
                 var channel = (ITextChannel) ctx.Channel;
                 var questions = _service.GenerateGame();
-                var jeopardy = new Jeopardy(_db, _client, questions, channel.Guild, channel);
+                var jeopardy = new Jeopardy(_db, _client, questions, channel.Guild, channel, ctx);
 
                 if (_service.ActiveGames.TryAdd(channel.Id, jeopardy))
                 {
