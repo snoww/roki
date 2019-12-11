@@ -59,9 +59,10 @@ namespace Roki.Modules.Games.Common
                 return;
             }
 
-            var question = ParseChoice(reply.Content);
-            while (question == null)
+            var (question, status) = ParseQuestionChoice(reply.Content);
+            while (status != ChoiceStatus.Success)
             {
+                if (status == ChoiceStatus.NoAmount) 
                 await _ctx.Channel.SendErrorAsync("Invalid choice, please try again.").ConfigureAwait(false);
                 reply = await ReplyHandler(TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                 if (reply == null)
@@ -69,8 +70,14 @@ namespace Roki.Modules.Games.Common
                     await _ctx.Channel.SendErrorAsync("No reply received. Stopping Jeopardy game.").ConfigureAwait(false);
                     return;
                 }
-                question = ParseChoice(reply.Content);
+
+                (question, status) = ParseQuestionChoice(reply.Content);
             }
+
+            await _ctx.Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.Blue)
+                    .WithTitle($"{question.Category} - ${question.Value}")
+                    .WithDescription(question.Clue))
+                .ConfigureAwait(false);
 
         }
 
@@ -84,28 +91,34 @@ namespace Roki.Modules.Games.Common
 
             await Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
+        
 
-        private JQuestion ParseChoice(string message)
+        private (JQuestion, ChoiceStatus) ParseQuestionChoice(string message)
         {
             var numStr = Regex.Match(message, @"\d+").Value;
-            if (!int.TryParse(numStr, out var amount)) return null;
+            if (string.IsNullOrWhiteSpace(numStr) || !int.TryParse(numStr, out var amount)) return (null, ChoiceStatus.NoAmount);
 
-            JQuestion ques = null;
-            if (message.Contains(_questions.First().Key))
+            JQuestion ques;
+            if (message.Contains(_questions.First().Key, StringComparison.OrdinalIgnoreCase))
             {
                 ques = _questions.First().Value.FirstOrDefault(q => q.Value == amount && q.Available);
-                if (ques != null) ques.Available = false;
+                if (ques == null) return (null, ChoiceStatus.WrongAmount);
+                ques.Available = false;
+                return (ques, ChoiceStatus.Success);
+
             }
-            if (message.Contains(_questions.Last().Key))
+            if (message.Contains(_questions.Last().Key, StringComparison.OrdinalIgnoreCase))
             {
                 ques = _questions.Last().Value.FirstOrDefault(q => q.Value == amount && q.Available);
-                if (ques != null) ques.Available = false;
+                if (ques == null) return (null, ChoiceStatus.WrongAmount);
+                ques.Available = false;
+                return (ques, ChoiceStatus.Success);
             }
 
-            return ques;
+            return (null, ChoiceStatus.WrongCategory);
         }
         
-        private async Task<SocketMessage> ReplyHandler(TimeSpan? timeout = null)
+        private async Task<SocketMessage> ReplyHandler(ReplyType type, TimeSpan? timeout = null)
         {
             timeout ??= TimeSpan.FromMinutes(2);
             var eventTrigger = new TaskCompletionSource<SocketMessage>();
@@ -130,6 +143,20 @@ namespace Roki.Modules.Games.Common
             if (task == trigger)
                 return await trigger.ConfigureAwait(false);
             return null;
+        }
+        
+        private enum ReplyType
+        {
+            Category,
+            Guess
+        }
+        
+        private enum ChoiceStatus
+        {
+            Success = 0,
+            NoAmount = -1,
+            WrongAmount = -1,
+            WrongCategory = -2,
         }
     }
 }
