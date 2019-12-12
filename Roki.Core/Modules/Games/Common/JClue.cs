@@ -22,7 +22,7 @@ namespace Roki.Modules.Games.Common
                 var optionalAnswer = minAnswer.SanitizeStringFull();
                 minAnswer = Regex.Replace(minAnswer, "(\\[.*\\])|(\".*\")|('.*')|(\\(.*\\))", "");
                 var optLev = new Levenshtein(optionalAnswer);
-                if (optLev.DistanceFrom(answer) <= Math.Round(optionalAnswer.Length * 0.15))
+                if (optLev.DistanceFrom(answer) <= Math.Round(optionalAnswer.Length * 0.1))
                     return true;
             }
             minAnswer = minAnswer.SanitizeStringFull();
@@ -31,20 +31,20 @@ namespace Roki.Modules.Games.Common
             var distance = minLev.DistanceFrom(answer);
             if (distance == 0)
                 return true;
-            if (minAnswer.Length <= 3)
-                return distance == 0;
             if (minAnswer.Length <= 5)
+                return distance == 0;
+            if (minAnswer.Length <= 9)
                 return distance <= 1;
 
-            return distance <= Math.Round(minAnswer.Length * 0.1);
+            return distance <= Math.Round(minAnswer.Length * 0.15);
         }
 
         private static string SanitizeAnswer(string answer)
         {
             answer = answer.ToLowerInvariant();
-            var removeQ = Regex.Replace(answer, "^(what |whats |where |wheres |who |whos )", "");
-            var removeP = Regex.Replace(removeQ, "^is |are |was |were", "");
-            return Regex.Replace(removeP, "^the |a | an", "").SanitizeStringFull();
+            answer = Regex.Replace(answer, "^(what |whats |where |wheres |who |whos )", "");
+            answer = Regex.Replace(answer, "^is |are |was |were", "");
+            return Regex.Replace(answer, "^the |a | an", "").SanitizeStringFull();
         }
     }
 }
