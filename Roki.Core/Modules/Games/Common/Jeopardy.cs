@@ -17,31 +17,32 @@ namespace Roki.Modules.Games.Common
 {
     public class Jeopardy
     {
+        private SemaphoreSlim _guess = new SemaphoreSlim(1, 1);
         private readonly DbService _db;
         private readonly DiscordSocketClient _client;
         private readonly ICommandContext _ctx;
-        private readonly Dictionary<string, List<JQuestion>> _questions;
+        private readonly Dictionary<string, List<JClue>> _clues;
 
         public IGuild Guild { get; }
         public ITextChannel Channel { get; }
 
         private CancellationTokenSource _cancel;
         
-        public JQuestion CurrentQuestion { get; private set; }
+        public JClue CurrentClue { get; private set; }
         
-        public ConcurrentDictionary<IGuildUser, int> Users = new ConcurrentDictionary<IGuildUser, int>();
+        public ConcurrentDictionary<IUser, int> Users = new ConcurrentDictionary<IUser, int>();
         
-        public bool IsActive { get; private set; }
+        public bool CanGuess { get; private set; }
         public bool StopGame { get; private set; }
         private int _timeout = 0;
 //        private Dictionary<int, bool> _choices1 = new Dictionary<int, bool> {{200, false},{400, false},{600, false},{800, false},{1000, false}};
 //        private Dictionary<int, bool> _choices2 = new Dictionary<int, bool> {{200, false},{400, false},{600, false},{800, false},{1000, false}};
         
-        public Jeopardy(DbService db, DiscordSocketClient client, Dictionary<string, List<JQuestion>> questions, IGuild guild, ITextChannel channel, ICommandContext ctx)
+        public Jeopardy(DbService db, DiscordSocketClient client, Dictionary<string, List<JClue>> clues, IGuild guild, ITextChannel channel, ICommandContext ctx)
         {
             _db = db;
             _client = client;
-            _questions = questions;
+            _clues = clues;
             
             Guild = guild;
             Channel = channel;
@@ -60,8 +61,43 @@ namespace Roki.Modules.Games.Common
                 _cancel = new CancellationTokenSource();
 
                 await ShowCategories().ConfigureAwait(false);
-                var category = await ReplyHandler(ReplyType.Category).ConfigureAwait(false);
+                var catResponse = await CategoryHandler().ConfigureAwait(false);
+                var catStatus = ParseCategoryAndClue(catResponse);
+                while (catStatus != CategoryStatus.Success)
+                {
+                    if (catStatus == CategoryStatus.UnavailableClue)
+                        await _ctx.Channel.SendErrorAsync("That clue is not available, please try again").ConfigureAwait(false);
+                    else if (catStatus == CategoryStatus.WrongAmount)
+                        await _ctx.Channel.SendErrorAsync("There are no clues available for that amount, please try again")
+                            .ConfigureAwait(false);
+                    else if (catStatus == CategoryStatus.WrongCategory)
+                        await _ctx.Channel.SendErrorAsync("No such category found, please try again").ConfigureAwait(false);
+                    else
+                    {
+                        await _ctx.Channel.SendErrorAsync("No response received, stopped Jeopardy! game.").ConfigureAwait(false);
+                        return;
+                    }
+                    
+                    catResponse = await CategoryHandler().ConfigureAwait(false);
+                    catStatus = ParseCategoryAndClue(catResponse);
+                }
                 
+                // CurrentClue is now the chosen clue
+                await _ctx.Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.Blue)
+                        .WithTitle($"{CurrentClue.Category} - {CurrentClue.Value}")
+                        .WithDescription(CurrentClue.Clue))
+                    .ConfigureAwait(false);
+
+                try
+                {
+                    _client.MessageReceived += Guesses;
+                    CanGuess = true;
+                }
+                finally
+                {
+                    CanGuess = false;
+                    _client.MessageReceived -= Guesses;
+                }
             }
 
         }
@@ -70,34 +106,62 @@ namespace Roki.Modules.Games.Common
         {
             var embed = new EmbedBuilder().WithColor(Color.Blue)
                 .WithTitle("Jeopardy!")
-                .WithDescription($"Please choose an available category and price from below.\ni.e. `{_questions.First().Key} for 200`");
-            foreach (var (category, questions) in _questions)
+                .WithDescription($"Please choose an available category and price from below.\ni.e. `{_clues.First().Key} for 200`");
+            foreach (var (category, clues) in _clues)
             {
-                embed.AddField(category, string.Join("\n", questions.Select(c => $"${(c.Available ? $"`{c.Value}`" : $"~~`{c.Value}`~~")}")));
+                embed.AddField(category, string.Join("\n", clues.Select(c => $"${(c.Available ? $"`{c.Value}`" : $"~~`{c.Value}`~~")}")));
             }
             
             await Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
-        private CategoryStatus ParseCategory(string message)
+        private CategoryStatus ParseCategoryAndClue(IMessage msg)
         {
+            if (msg == null) return CategoryStatus.NoResponse;
+            
+            var message = msg.Content.SanitizeStringFull().ToLowerInvariant();
             int.TryParse(new string(message.Where(char.IsDigit).ToArray()), out var amount);
 
-            JQuestion question;
-            if (message.Contains(_questions.First().Key, StringComparison.OrdinalIgnoreCase))
-                question = _questions.First().Value.FirstOrDefault(q => q.Value == amount);
-            else if (message.Contains(_questions.First().Key, StringComparison.OrdinalIgnoreCase))
-                question = _questions.First().Value.FirstOrDefault(q => q.Value == amount);
+            JClue clue;
+            if (message.Contains(_clues.First().Key.SanitizeStringFull(), StringComparison.OrdinalIgnoreCase))
+                clue = _clues.First().Value.FirstOrDefault(q => q.Value == amount);
+            else if (message.Contains(_clues.First().Key.SanitizeStringFull(), StringComparison.OrdinalIgnoreCase))
+                clue = _clues.First().Value.FirstOrDefault(q => q.Value == amount);
             else
                 return CategoryStatus.WrongCategory;
             
-            if (question == null) return CategoryStatus.WrongAmount;
-            if (!question.Available) return CategoryStatus.UnavailableQuestion;
-            CurrentQuestion = question;
+            if (clue == null) return CategoryStatus.WrongAmount;
+            if (!clue.Available) return CategoryStatus.UnavailableClue;
+            CurrentClue = clue;
             return CategoryStatus.Success;
         }
+
+        private Task Guesses(SocketMessage msg)
+        {
+            var _ = Task.Run(async () =>
+            {
+                if (msg.Author.IsBot || msg.Channel != Channel || !Regex.IsMatch(msg.Content, "^what|where|who")) return;
+                var guess = false;
+                await _guess.WaitAsync().ConfigureAwait(false);
+                try
+                {
+                    if (CanGuess && CurrentClue.CheckAnswer(msg.Content) && !_cancel.IsCancellationRequested)
+                    {
+                        Users.AddOrUpdate(msg.Author, CurrentClue.Value, (u, old) => old + CurrentClue.Value);
+                        guess = true;
+                    }
+                }
+                finally
+                {
+                    _guess.Release();
+                }
+                if (!guess) return;
+                _cancel.Cancel();
+            });
+            return Task.CompletedTask;
+        }
         
-        private async Task<SocketMessage> ReplyHandler(ReplyType type, TimeSpan? timeout = null)
+        private async Task<SocketMessage> CategoryHandler(TimeSpan? timeout = null)
         {
             timeout ??= TimeSpan.FromMinutes(2);
             var eventTrigger = new TaskCompletionSource<SocketMessage>();
@@ -105,11 +169,11 @@ namespace Roki.Modules.Games.Common
 
             Task Handler(SocketMessage message)
             {
-                if (message.Channel.Id != _ctx.Channel.Id || message.Author.IsBot) return Task.CompletedTask;
+                if (message.Channel.Id != Channel.Id || message.Author.IsBot) return Task.CompletedTask;
                 var content = message.Content.SanitizeStringFull().ToLowerInvariant();
-                if (type == ReplyType.Category && !content.Contains("for", StringComparison.Ordinal) && !Regex.IsMatch(content, "\\d\\d\\d+"))
+                if (!content.Contains("for", StringComparison.Ordinal) && !Regex.IsMatch(content, "\\d\\d\\d+"))
                     return Task.CompletedTask;
-                if (type == ReplyType.Guess && !Regex.IsMatch(content, "^what|where|who")) return Task.CompletedTask;
+                // if (type == ReplyType.Guess && !Regex.IsMatch(content, "^what|where|who")) return Task.CompletedTask;
 
                 eventTrigger.SetResult(message);
                 return Task.CompletedTask;
@@ -140,7 +204,8 @@ namespace Roki.Modules.Games.Common
             Success = 0,
             WrongAmount = -1,
             WrongCategory = -2,
-            UnavailableQuestion = -3
+            UnavailableClue = -3,
+            NoResponse = int.MinValue, 
         }
     }
 }

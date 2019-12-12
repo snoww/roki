@@ -20,9 +20,9 @@ namespace Roki.Modules.Games.Services
             _db = db;
         }
 
-        public Dictionary<string, List<JQuestion>> GenerateGame()
+        public Dictionary<string, List<JClue>> GenerateGame()
         {
-            var qs = new Dictionary<string, List<JQuestion>>();
+            var qs = new Dictionary<string, List<JClue>>();
             for (int i = 0; i < 2; i++)
             {
                 var cat = GetRandomCategories();
@@ -37,9 +37,9 @@ namespace Roki.Modules.Games.Services
             return qs;
         }
 
-        private List<JQuestion> ValidateGame(IList<JQuestion> game)
+        private List<JClue> ValidateGame(IList<JClue> game)
         {
-            var validated = new List<JQuestion>();
+            var validated = new List<JClue>();
             try
             {
                 game.Shuffle();
@@ -56,7 +56,7 @@ namespace Roki.Modules.Games.Services
             }  
         }
 
-        private List<JQuestion> GetRandomQuestions(int categoryId, int round = 1)
+        private List<JClue> GetRandomQuestions(int categoryId, int round = 1)
         {
             using var uow = _db.GetDbContext();
             var query = from clue in uow.Context.Set<Clues>()
@@ -65,7 +65,7 @@ namespace Roki.Modules.Games.Services
                 join classification in uow.Context.Set<Classification>() on clue.Id equals classification.ClueId
                 join categories in uow.Context.Set<Categories>() on classification.CategoryId equals categories.Id
                 where categories.Id == categoryId && clue.Round == round
-                select new JQuestion
+                select new JClue
                 {
                     Category = categories.Category,
                     Clue = document.Clue,

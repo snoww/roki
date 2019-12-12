@@ -37,7 +37,7 @@ namespace Roki.Modules.Games
                     
                 }
 
-                await ctx.Channel.SendErrorAsync($"Jeopardy game is already in progress.\n{jeopardy.CurrentQuestion}").ConfigureAwait(false);
+                await ctx.Channel.SendErrorAsync($"Jeopardy game is already in progress.\n{jeopardy.CurrentClue}").ConfigureAwait(false);
             }
         }
     }
