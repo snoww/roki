@@ -1,0 +1,50 @@
+using System;
+using System.Text.RegularExpressions;
+using Roki.Extensions;
+
+namespace Roki.Modules.Games.Common
+{
+    public class JClue
+    {
+        public string Category { get; set; }
+        public string Clue { get; set; }
+        public string Answer { get; set; }
+        public int Value { get; set; }
+        public bool Available { get; set; } = true;
+
+        public bool CheckAnswer(string answer)
+        {
+            var minAnswer = Regex.Replace(Answer.ToLowerInvariant(), "^(the |a |an )", "");
+            answer = SanitizeAnswer(answer);
+            // if it contains an optional answer
+            if (Answer.Contains('(', StringComparison.Ordinal) && Answer.Contains(')', StringComparison.Ordinal))
+            {
+                var optionalAnswer = minAnswer.SanitizeStringFull();
+                minAnswer = Regex.Replace(minAnswer, "(\\[.*\\])|(\".*\")|('.*')|(\\(.*\\))", "");
+                var optLev = new Levenshtein(optionalAnswer);
+                if (optLev.DistanceFrom(answer) <= Math.Round(optionalAnswer.Length * 0.15))
+                    return true;
+            }
+            minAnswer = minAnswer.SanitizeStringFull();
+            
+            var minLev = new Levenshtein(minAnswer);
+            var distance = minLev.DistanceFrom(answer);
+            if (distance == 0)
+                return true;
+            if (minAnswer.Length <= 3)
+                return distance == 0;
+            if (minAnswer.Length <= 5)
+                return distance <= 1;
+
+            return distance <= Math.Round(minAnswer.Length * 0.1);
+        }
+
+        private static string SanitizeAnswer(string answer)
+        {
+            answer = answer.ToLowerInvariant();
+            var removeQ = Regex.Replace(answer, "^(what |whats |where |wheres |who |whos )", "");
+            var removeP = Regex.Replace(removeQ, "^is |are |was |were", "");
+            return Regex.Replace(removeP, "^the |a | an", "").SanitizeStringFull();
+        }
+    }
+}
