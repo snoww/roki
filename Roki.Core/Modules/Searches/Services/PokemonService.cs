@@ -95,11 +95,11 @@ namespace Roki.Modules.Searches.Services
             if (string.IsNullOrEmpty(pokemon.PreEvolution))
                 return pokemon;
 
-            Pokemon basic;
+            var basic = pokemon;
             do
             { 
-                basic = uow.Context.Pokedex.First(p => p.Name == pokemon.PreEvolution);
-            } while (!string.IsNullOrEmpty(pokemon.PreEvolution));
+                basic = uow.Context.Pokedex.First(p => p.Name == basic.PreEvolution);
+            } while (!string.IsNullOrEmpty(basic.PreEvolution));
 
             return basic;
         }
