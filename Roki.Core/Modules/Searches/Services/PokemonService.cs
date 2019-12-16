@@ -114,7 +114,7 @@ namespace Roki.Modules.Searches.Services
             var chain = string.Empty;
 
             var first = pokemon.Evolutions.First();
-            var firstMon = uow.Context.Pokedex.First(p => p.Name.Equals(first, StringComparison.Ordinal));
+            var firstMon = uow.Context.Pokedex.First(p => p.Name == first);
             chain += $"{pokemon.Species} > {GetEvolutionChain(uow, firstMon)}";
             if (pokemon.Evolutions.Length <= 1) return chain;
             
