@@ -87,7 +87,7 @@ namespace Roki.Modules.Searches.Services
             var pkmn = GetBaseEvo(uow, pokemon);
             return !pkmn.Evolutions.Any() 
                 ? "N/A" 
-                : GetEvolutionChain(uow, pkmn).Replace(pokemon.Species, $"[{pokemon.Species}]");
+                : GetEvolutionChain(uow, pkmn);
         }
 
         private static Pokemon GetBaseEvo(IUnitOfWork uow, Pokemon pokemon)
