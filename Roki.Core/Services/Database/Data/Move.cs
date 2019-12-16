@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Roki.Core.Services.Database.Models
 {
+    [Table("moves", Schema = "data")]
     public class Move : DbEntity
     {
         [Key]
