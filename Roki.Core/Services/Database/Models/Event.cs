@@ -18,6 +18,7 @@ namespace Roki.Core.Services.Database.Models
         public ulong ChannelId { get; set; }
         public ulong MessageId { get; set; }
         public string Participants { get; set; }
+        // why not List<string> ???
 //        public ulong[] WaitingList { get; set; } = {};
         public string Undecided { get; set; }
     }

@@ -56,6 +56,7 @@ namespace Roki.Modules.Rsvp.Services
             {
                 foreach (var e in events)
                 {
+                    var now = DateTimeOffset.UtcNow;
                     var message = await _client.GetGuild(e.GuildId).GetTextChannel(e.ChannelId).GetMessageAsync(e.MessageId).ConfigureAwait(false) as IUserMessage;
                     var old = message?.Embeds.First();
                     if (old == null) continue;
@@ -69,13 +70,14 @@ namespace Roki.Modules.Rsvp.Services
                         .AddField(part.Name, part.Value)
                         .AddField(und.Name, und.Value)
                         .WithTimestamp(e.StartDate)
-                        .WithDescription($"Starts in `{(e.StartDate - DateTimeOffset.Now).ToReadableString()}`")
+                        .WithDescription($"Starts in `{(e.StartDate - now).ToReadableString()}`")
                         .WithFooter("Event starts");
-                    if (e.StartDate <= DateTimeOffset.Now)
+                    if (e.StartDate <= now)
                     {
                         newEmbed.WithDescription("Event started")
                             .WithFooter("Event started");
                         await message.ModifyAsync(m => m.Embed = newEmbed.Build()).ConfigureAwait(false);
+                        await SendNotification(e);
                         uow.Context.Events.Remove(e);
                         await message.RemoveAllReactionsAsync().ConfigureAwait(false);
                         continue;
@@ -809,7 +811,7 @@ namespace Roki.Modules.Rsvp.Services
             await msg.ModifyAsync(m => m.Embed = newEmbed.Build()).ConfigureAwait(false);
         }
 
-        private DateTimeOffset? ParseDateTimeFromString(string datetime)
+        private static DateTimeOffset? ParseDateTimeFromString(string datetime)
         {
             if (datetime.Contains("tomorrow", StringComparison.OrdinalIgnoreCase))
             {
@@ -830,6 +832,40 @@ namespace Roki.Modules.Rsvp.Services
             {
                 return null;
             }
+        }
+
+        private Task SendNotification(Event evn)
+        {
+            if (evn.Participants.Length == 0)
+                return Task.CompletedTask;
+
+            var participants = evn.Participants.Split('\n');
+            var _ = Task.Run(async () =>
+            {
+                foreach (var par in participants)
+                {
+                    try
+                    {
+                        var split = par.LastIndexOf("#", StringComparison.Ordinal);
+                        var username = par.Substring(0, split);
+                        var discrim = par.Substring(split + 1);
+                        var user = _client.GetUser(username, discrim);
+                        var guild = _client.GetGuild(evn.GuildId);
+                        var dm = await user.GetOrCreateDMChannelAsync().ConfigureAwait(false);
+                        await dm.EmbedAsync(new EmbedBuilder().WithOkColor()
+                                .WithTitle($"{evn.Name} starting now!")
+                                .WithDescription($"The event you registered for: {evn.Name} is starting now!")
+                                .WithFooter($"From server: {guild.Name}"))
+                            .ConfigureAwait(false);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                }
+            });
+
+            return Task.CompletedTask;
         }
     }
 }
