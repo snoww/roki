@@ -37,7 +37,7 @@ namespace Roki.Modules.Searches
                 return;
             try
             {
-                await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+                using var _ = ctx.Channel.EnterTypingState();
                 var location = await _service.GetLocationDataAsync(query).ConfigureAwait(false);
                 if (location == null)
                 {
