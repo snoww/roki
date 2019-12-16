@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Roki.Core.Services.Database.Models
 {
-    [Table("abilities")]
+    [Table("abilities", Schema = "data")]
     public class Ability : DbEntity
     {
         [Key]

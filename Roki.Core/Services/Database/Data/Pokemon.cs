@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Roki.Core.Services.Database.Models
 {
-    [Table("pokedex")]
+    [Table("pokedex", Schema = "data")]
     public class Pokemon : DbEntity
     {
         [Key]
