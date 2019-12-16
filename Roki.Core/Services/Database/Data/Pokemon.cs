@@ -10,7 +10,9 @@ namespace Roki.Core.Services.Database.Models
         public string Name { get; set; }
         public int Number { get; set; }
         public string Species { get; set; }
+        [Column("type_0")]
         public string Type0 { get; set; }
+        [Column("type_1")]
         public string Type1 { get; set; }
         public float? MaleRatio { get; set; }
         public float? FemaleRatio { get; set; }
@@ -25,7 +27,9 @@ namespace Roki.Core.Services.Database.Models
         public int SpecialDefense { get; set; }
         [Column("spe")]
         public int Speed { get; set; }
+        [Column("ability_0")]
         public string Ability0 { get; set; }
+        [Column("ability_1")]
         public string Ability1 { get; set; }
         public string AbilityH { get; set; }
         public float Height { get; set; }
