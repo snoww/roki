@@ -59,15 +59,15 @@ namespace Roki.Modules.Searches.Services
         public async Task<Pokemon> GetPokemonByNameAsync(string query)
         {
             using var uow = _db.GetDbContext();
-            query = query.SanitizeStringFull();
-            return await uow.Context.Pokedex.FirstOrDefaultAsync(p => p.Name.Equals(query, StringComparison.OrdinalIgnoreCase))
+            query = query.SanitizeStringFull().ToLowerInvariant();
+            return await uow.Context.Pokedex.FirstOrDefaultAsync(p => p.Name == query)
                 .ConfigureAwait(false);
         }
 
         public async Task<Pokemon> GetPokemonByIdAsync(int number)
         {
             using var uow = _db.GetDbContext();
-            return await uow.Context.Pokedex.FirstOrDefaultAsync(p => p.Number == number).ConfigureAwait(false);
+            return await uow.Context.Pokedex.Where(p => p.Number == number).OrderBy(p => p.Name).FirstOrDefaultAsync().ConfigureAwait(false);
         }
 
         public string GetSprite(string pokemon, int number)
@@ -98,7 +98,7 @@ namespace Roki.Modules.Searches.Services
             Pokemon basic;
             do
             { 
-                basic = uow.Context.Pokedex.First(p => p.Name.Equals(pokemon.PreEvolution, StringComparison.OrdinalIgnoreCase));
+                basic = uow.Context.Pokedex.First(p => p.Name == pokemon.PreEvolution);
             } while (!string.IsNullOrEmpty(pokemon.PreEvolution));
 
             return basic;
@@ -135,14 +135,14 @@ namespace Roki.Modules.Searches.Services
         {
             query = query.SanitizeStringFull();
             using var uow = _db.GetDbContext();
-            return await uow.Context.Abilities.FirstAsync(a => a.Id.Equals(query, StringComparison.OrdinalIgnoreCase)).ConfigureAwait(false);
+            return await uow.Context.Abilities.FirstAsync(a => a.Id == query).ConfigureAwait(false);
         }
 
         public async Task<Move> GetMoveAsync(string query)
         {
             query = query.SanitizeStringFull();
             using var uow = _db.GetDbContext();
-            return await uow.Context.Moves.FirstAsync(m => m.Id.Equals(query, StringComparison.OrdinalIgnoreCase)).ConfigureAwait(false);
+            return await uow.Context.Moves.FirstAsync(m => m.Id == query).ConfigureAwait(false);
         }
     }
 }
