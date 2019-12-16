@@ -112,10 +112,8 @@ namespace Roki.Modules.Searches.Services
             }
 
             var chain = string.Empty;
-
-            var first = pokemon.Evolutions.First();
-            var firstMon = uow.Context.Pokedex.First(p => p.Name == first);
-            chain += $"{pokemon.Species} > {GetEvolutionChain(uow, firstMon)}";
+            
+            chain += $"{pokemon.Species} > {GetEvolutionChain(uow, uow.Context.Pokedex.First(p => p.Name == pokemon.Evolutions.First()))}";
             if (pokemon.Evolutions.Length <= 1) return chain;
             
             foreach (var ev in pokemon.Evolutions.Skip(1))
@@ -125,7 +123,7 @@ namespace Roki.Modules.Searches.Services
                     pad += $"{Regex.Replace(pokemon.PreEvolution + pokemon.Species, ".", " ")}   ";
                 else
                     pad += Regex.Replace(pokemon.Species, ".", " ");
-                chain += $"\n{pad} > {GetEvolutionChain(uow, uow.Context.Pokedex.First(p => p.Name.Equals(ev, StringComparison.Ordinal)))}";
+                chain += $"\n{pad} > {GetEvolutionChain(uow, uow.Context.Pokedex.First(p => p.Name == ev))}";
             }
             
             return chain;
