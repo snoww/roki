@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
 using Microsoft.EntityFrameworkCore;
@@ -105,9 +106,27 @@ namespace Roki.Modules.Searches.Services
 
         private static string GetEvolutionChain(IUnitOfWork uow, Pokemon pokemon)
         {
-            return !pokemon.Evolutions.Any() 
-                ? pokemon.Species 
-                : pokemon.Evolutions.Aggregate(pokemon.Species, (current, evolution) => current + " > " + GetEvolutionChain(uow, uow.Context.Pokedex.First(p => p.Name.Equals(evolution))));
+            if (pokemon.Evolutions == null)
+            {
+                return pokemon.Species;
+            }
+
+            var chain = string.Empty;
+
+            chain += $"{pokemon.Species} > {GetEvolutionChain(uow, uow.Context.Pokedex.First(p => p.Name.Equals(pokemon.Evolutions.First(), StringComparison.Ordinal)))}";
+            if (pokemon.Evolutions.Length <= 1) return chain;
+            
+            foreach (var ev in pokemon.Evolutions.Skip(1))
+            {
+                var pad = string.Empty;
+                if (pokemon.PreEvolution != null)
+                    pad += $"{Regex.Replace(pokemon.PreEvolution + pokemon.Species, ".", " ")}   ";
+                else
+                    pad += Regex.Replace(pokemon.Species, ".", " ");
+                chain += $"\n{pad} > {GetEvolutionChain(uow, uow.Context.Pokedex.First(p => p.Name.Equals(ev, StringComparison.Ordinal)))}";
+            }
+            
+            return chain;
         }
 
         public async Task<Ability> GetAbilityAsync(string query)
