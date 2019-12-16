@@ -47,7 +47,7 @@ namespace Roki.Modules.Searches
                     .AddField("Base Stats", baseStats, true)
                     .AddField("Height", $"{pokemon.Height:N1} m", true)
                     .AddField("Weight", $"{pokemon.Weight} kg", true)
-                    .AddField("Evolution", _service.GetEvolution(pokemon))
+                    .AddField("Evolution", Format.Code(_service.GetEvolution(pokemon)))
                     .AddField("Egg Groups", string.Join(", ", pokemon.EggGroups), true);
 
                 if (pokemon.MaleRatio.HasValue)
