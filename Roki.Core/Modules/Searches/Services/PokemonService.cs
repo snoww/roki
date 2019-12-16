@@ -78,7 +78,7 @@ namespace Roki.Modules.Searches.Services
                 sprites = Directory.GetFiles("./data/pokemon/gen5", $"{pokemon.Substring(0, 3)}*");
             else
                 sprites = Directory.GetFiles("./data/pokemon/ani", $"{pokemon.Substring(0, 3)}*");
-            return sprites.First(path => path.Replace("-", "").Replace(".png", "").EndsWith(pokemon, StringComparison.OrdinalIgnoreCase));
+            return sprites.First(path => path.Replace("-", "").Replace(".gif", "").EndsWith(pokemon, StringComparison.OrdinalIgnoreCase));
         }
 
         public string GetEvolution(Pokemon pokemon)
