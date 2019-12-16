@@ -70,7 +70,7 @@ namespace Roki.Modules.Searches.Services
             return await uow.Context.Pokedex.Where(p => p.Number == number).OrderBy(p => p.Name).FirstOrDefaultAsync().ConfigureAwait(false);
         }
 
-        public string GetSprite(string pokemon, int number)
+        public static string GetSprite(string pokemon, int number)
         {
             // temp solution for missing sprites
             string[] sprites;
@@ -78,7 +78,7 @@ namespace Roki.Modules.Searches.Services
                 sprites = Directory.GetFiles("./data/pokemon/gen5", $"{pokemon.Substring(0, 3)}*");
             else
                 sprites = Directory.GetFiles("./data/pokemon/ani", $"{pokemon.Substring(0, 3)}*");
-            return sprites.FirstOrDefault(path => path.Replace("-", "").Contains(pokemon, StringComparison.OrdinalIgnoreCase));
+            return sprites.First(path => path.Replace("-", "").Replace(".png", "").EndsWith(pokemon, StringComparison.OrdinalIgnoreCase));
         }
 
         public string GetEvolution(Pokemon pokemon)

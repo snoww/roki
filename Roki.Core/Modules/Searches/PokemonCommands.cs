@@ -47,13 +47,13 @@ namespace Roki.Modules.Searches
                     .AddField("Base Stats", baseStats, true)
                     .AddField("Height", $"{pokemon.Height:N1} m", true)
                     .AddField("Weight", $"{pokemon.Weight} kg", true)
-                    .AddField("Evolution", _service.GetEvolution(pokemon))
+                    .AddField("Evolution", Format.Code(_service.GetEvolution(pokemon)))
                     .AddField("Egg Groups", string.Join(", ", pokemon.EggGroups), true);
 
                 if (pokemon.MaleRatio.HasValue)
                     embed.AddField("Gender Ratio", $"M: `{pokemon.MaleRatio.Value:P1}` F: `{pokemon.FemaleRatio:P1}`", true);
                 
-                var sprite = _service.GetSprite(pokemon.Name, pokemon.Number);
+                var sprite = PokemonService.GetSprite(pokemon.Name, pokemon.Number);
                 embed.WithThumbnailUrl($"attachment://{sprite.Split("/").Last()}");
 
                 await ctx.Channel.SendFileAsync(sprite, embed: embed.Build()).ConfigureAwait(false);
