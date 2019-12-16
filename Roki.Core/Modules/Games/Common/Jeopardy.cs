@@ -109,7 +109,7 @@ namespace Roki.Modules.Games.Common
                             .WithTitle("Times Up!")
                             .WithDescription($"The correct answer was: `{CurrentClue.Answer}`"))
                         .ConfigureAwait(false);
-                    if (++_timeout >= 2)
+                    if (++_timeout >= 5)
                         await StopJeopardyGame().ConfigureAwait(false);
                 }
             }
@@ -122,6 +122,7 @@ namespace Roki.Modules.Games.Common
             await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.Blue)
                     .WithAuthor("Jeopardy!")
                     .WithTitle("Final Results")
+                    // todo leaderboard
                     .WithDescription("Leaderboard"))
                 .ConfigureAwait(false);
         }
