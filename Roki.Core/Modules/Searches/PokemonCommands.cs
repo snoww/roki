@@ -38,7 +38,7 @@ namespace Roki.Modules.Searches
                 var abilities = pokemon.Ability0 + (string.IsNullOrEmpty(pokemon.Ability1) ? string.Empty : $", {pokemon.Ability1}") +
                                 (string.IsNullOrEmpty(pokemon.AbilityH) ? string.Empty : $", {Format.Italics(pokemon.AbilityH)}");
                 var baseStats = $"`HP: {pokemon.Hp} Atk: {pokemon.Attack} Def: {pokemon.Defence} Spa: {pokemon.SpecialAttack} " +
-                                $"Spd: {pokemon.SpecialDefense} Spe {pokemon.Speed}`";
+                                $"Spd: {pokemon.SpecialDefense} Spe: {pokemon.Speed}`";
                 
                 var embed = new EmbedBuilder().WithColor(_service.GetColorOfPokemon(pokemon.Color))
                     .WithTitle($"#{pokemon.Number:D3} {pokemon.Species}")
