@@ -113,7 +113,9 @@ namespace Roki.Modules.Searches.Services
 
             var chain = string.Empty;
 
-            chain += $"{pokemon.Species} > {GetEvolutionChain(uow, uow.Context.Pokedex.First(p => p.Name.Equals(pokemon.Evolutions.First(), StringComparison.Ordinal)))}";
+            var first = pokemon.Evolutions.First();
+            var firstMon = uow.Context.Pokedex.First(p => p.Name.Equals(first, StringComparison.Ordinal));
+            chain += $"{pokemon.Species} > {GetEvolutionChain(uow, firstMon)}";
             if (pokemon.Evolutions.Length <= 1) return chain;
             
             foreach (var ev in pokemon.Evolutions.Skip(1))
