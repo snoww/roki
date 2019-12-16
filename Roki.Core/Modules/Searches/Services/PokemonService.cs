@@ -85,7 +85,7 @@ namespace Roki.Modules.Searches.Services
         {
             using var uow = _db.GetDbContext();
             var pkmn = GetBaseEvo(uow, pokemon);
-            return !pkmn.Evolutions.Any() 
+            return pkmn.Evolutions == null
                 ? "N/A" 
                 : GetEvolutionChain(uow, pkmn);
         }
