@@ -66,7 +66,7 @@ namespace Roki.Modules.Searches
                     return;
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
 
-                var ability = await _service.GetAbilityAsync(query.ToLower()).ConfigureAwait(false);
+                var ability = await _service.GetAbilityAsync(query).ConfigureAwait(false);
                 if (ability == null)
                 {
                     await ctx.Channel.SendErrorAsync("No ability of that name found.").ConfigureAwait(false);
@@ -75,7 +75,7 @@ namespace Roki.Modules.Searches
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle(ability.Name)
-                        .WithDescription(ability.ShortDescription)
+                        .WithDescription((ability.Description ?? ability.ShortDescription).TrimTo(2048))
                         .AddField("Rating", $"{ability.Rating:N1}"))
                     .ConfigureAwait(false);
             }
@@ -89,7 +89,7 @@ namespace Roki.Modules.Searches
                 var move = await _service.GetMoveAsync(query).ConfigureAwait(false);
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle(move.Name)
-                        .WithDescription(move.ShortDescription)
+                        .WithDescription((move.Description ?? move.ShortDescription).TrimTo(2048))
                         .AddField("Type", move.Type, true)
                         .AddField("Category", move.Category, true)
                         .AddField("Accuracy", move.Accuracy != null ? $"{move.Accuracy.Value}" : "-", true)
