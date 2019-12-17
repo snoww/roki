@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -113,7 +114,6 @@ namespace Roki.Modules.Games.Common
                         await StopJeopardyGame().ConfigureAwait(false);
                 }
             }
-
         }
 
         private async Task EnsureStopped()
@@ -122,8 +122,7 @@ namespace Roki.Modules.Games.Common
             await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.Blue)
                     .WithAuthor("Jeopardy!")
                     .WithTitle("Final Results")
-                    // todo leaderboard
-                    .WithDescription("Leaderboard"))
+                    .WithDescription(GetLeaderboard()))
                 .ConfigureAwait(false);
         }
 
@@ -175,7 +174,7 @@ namespace Roki.Modules.Games.Common
             {
                 try
                 {
-                    if (msg.Author.IsBot || msg.Channel != Channel || !Regex.IsMatch(msg.Content, "^what|where|who")) return;
+                    if (msg.Author.IsBot || msg.Channel != Channel || !Regex.IsMatch(msg.Content.ToLowerInvariant(), "^what|where|who")) return;
                     var guess = false;
                     await _guess.WaitAsync().ConfigureAwait(false);
                     try
@@ -220,7 +219,6 @@ namespace Roki.Modules.Games.Common
                 var content = message.Content.SanitizeStringFull().ToLowerInvariant();
                 if (!content.Contains("for", StringComparison.Ordinal) && !Regex.IsMatch(content, "\\d\\d\\d+"))
                     return Task.CompletedTask;
-                // if (type == ReplyType.Guess && !Regex.IsMatch(content, "^what|where|who")) return Task.CompletedTask;
 
                 eventTrigger.SetResult(message);
                 return Task.CompletedTask;
@@ -239,13 +237,21 @@ namespace Roki.Modules.Games.Common
                 return await trigger.ConfigureAwait(false);
             return null;
         }
-        
-        private enum ReplyType
+
+        public string GetLeaderboard()
         {
-            Category,
-            Guess
+            if (Users.Count == 0)
+                return "No one is on the leaderboard yet. Answer some questions correctly.";
+            
+            var lb = new StringBuilder();
+            foreach (var kv in Users.OrderByDescending(k => k.Value))
+            {
+                lb.AppendLine($"{kv.Key.Username} - `{kv.Value:N0}`");
+            }
+
+            return lb.ToString();
         }
-        
+
         private enum CategoryStatus
         {
             Success = 0,
