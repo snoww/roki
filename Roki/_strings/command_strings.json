@@ -635,5 +635,26 @@
     "Usage": [
       "{0}stalk Snow#7777"
     ]
+  },
+  "jeopardy": {
+    "Command": "jeopardy jp",
+    "Description": "Starts a Jeopardy! game in the current channel. Choose a price from the categories, and give the correct answer to win.\nIf a game is active in the current channel, the current question will be sent again.",
+    "Usage": [
+      "{0}jp"
+    ]
+  },
+  "jeopardyleaderboard": {
+    "Command": "jeopardyleaderboard jl",
+    "Description": "Shows the score leaderboard for the current Jeopardy! game.",
+    "Usage": [
+      "{0}jl"
+    ]
+  },
+  "jeopardystop": {
+    "Command": "jeopardystop js",
+    "Description": "Stops current Jeopardy! game after the current question.",
+    "Usage": [
+      "{0}js"
+    ]
   }
 }
