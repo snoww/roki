@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -34,10 +35,48 @@ namespace Roki.Modules.Games
 
                 if (_service.ActiveGames.TryAdd(channel.Id, jeopardy))
                 {
-                    
+                    try
+                    {
+                        await jeopardy.StartGame().ConfigureAwait(false);
+                    }
+                    finally
+                    {
+                        _service.ActiveGames.TryRemove(channel.Id, out jeopardy);
+                        await jeopardy.EnsureStopped().ConfigureAwait(false);
+                    }
+                    return;
                 }
 
                 await ctx.Channel.SendErrorAsync($"Jeopardy game is already in progress.\n{jeopardy.CurrentClue}").ConfigureAwait(false);
+            }
+
+            [RokiCommand, Description, Aliases, Usage]
+            [RequireContext(ContextType.Guild)]
+            public async Task JeopardyLeaderboard()
+            {
+                if (_service.ActiveGames.TryGetValue(ctx.Channel.Id, out var jeopardy))
+                {
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.Blue)
+                            .WithTitle("Jeopardy! Scores")
+                            .WithDescription(jeopardy.GetLeaderboard()))
+                        .ConfigureAwait(false);
+                    return;
+                }
+
+                await ctx.Channel.SendErrorAsync("No active Jeopardy! game.").ConfigureAwait(false);
+            }
+
+            [RokiCommand, Description, Aliases, Usage]
+            [RequireContext(ContextType.Guild)]
+            public async Task JeopardyStop()
+            {
+                if (_service.ActiveGames.TryGetValue(ctx.Channel.Id, out var jeopardy))
+                {
+                    await jeopardy.StopJeopardyGame().ConfigureAwait(false);
+                    return;
+                }
+                
+                await ctx.Channel.SendErrorAsync("No active Jeopardy! game.").ConfigureAwait(false);
             }
         }
     }

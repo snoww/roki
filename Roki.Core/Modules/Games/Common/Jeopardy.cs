@@ -61,7 +61,7 @@ namespace Roki.Modules.Games.Common
             while (!StopGame)
             {
                 _cancel = new CancellationTokenSource();
-
+                
                 await ShowCategories().ConfigureAwait(false);
                 var catResponse = await CategoryHandler().ConfigureAwait(false);
                 var catStatus = ParseCategoryAndClue(catResponse);
@@ -113,10 +113,12 @@ namespace Roki.Modules.Games.Common
                     if (++_timeout >= 5)
                         await StopJeopardyGame().ConfigureAwait(false);
                 }
+                
+                AvailableClues();
             }
         }
 
-        private async Task EnsureStopped()
+        public async Task EnsureStopped()
         {
             StopGame = true;
             await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.Blue)
@@ -126,12 +128,17 @@ namespace Roki.Modules.Games.Common
                 .ConfigureAwait(false);
         }
 
-        private async Task StopJeopardyGame()
+        public async Task StopJeopardyGame()
         {
             var old = StopGame;
             StopGame = true;
             if (!old)
                 await Channel.SendErrorAsync("Jeopardy! game stopped. No answers received.").ConfigureAwait(false);
+        }
+
+        private void AvailableClues()
+        {
+            StopGame = !_clues.Values.Any(clues => clues.Any(c => c.Available));
         }
         
         private async Task ShowCategories()
