@@ -244,9 +244,9 @@ namespace Roki.Modules.Games.Common
                 return "No one is on the leaderboard yet. Answer some questions correctly.";
             
             var lb = new StringBuilder();
-            foreach (var kv in Users.OrderByDescending(k => k.Value))
+            foreach (var (user, value) in Users.OrderByDescending(k => k.Value))
             {
-                lb.AppendLine($"{kv.Key.Username} - `{kv.Value:N0}`");
+                lb.AppendLine($"{user.Username} - `{value:N0}`");
             }
 
             return lb.ToString();
