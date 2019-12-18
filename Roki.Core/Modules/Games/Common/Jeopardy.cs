@@ -59,9 +59,10 @@ namespace Roki.Modules.Games.Common
             await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithTitle("Jeopardy!")
                     .WithDescription(
-                        "Welcome to Jeopardy!\nTo choose a category, please use the format `category for xxx`, you can use short form category names.\nResponses must be in question form"))
+                        "Welcome to Jeopardy! Game is starting soon ...")
+                    .WithFooter("Responses must be in question form"))
                 .ConfigureAwait(false);
-            await Task.Delay(TimeSpan.FromSeconds(10)).ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             while (!StopGame)
             {
                 _cancel = new CancellationTokenSource();
