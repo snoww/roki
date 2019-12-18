@@ -58,7 +58,7 @@ namespace Roki.Modules.Games.Common
         {
             await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithTitle("Jeopardy!")
-                    .WithDescription("Welcome to Jeopardy! Game is starting soon ...")
+                    .WithDescription("Welcome to Jeopardy!\nGame is starting soon ...")
                     .WithFooter("Responses must be in question form"))
                 .ConfigureAwait(false);
             await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
@@ -165,7 +165,7 @@ namespace Roki.Modules.Games.Common
                 .WithDescription($"Please choose an available category and price from below.\ni.e. `{_clues.First().Key} for 200`");
             foreach (var (category, clues) in _clues)
             {
-                embed.AddField(category, string.Join("\n", clues.Select(c => $"${(c.Available ? $"`{c.Value}`" : $"~~`{c.Value}`~~")}")));
+                embed.AddField(category, string.Join("\n", clues.Select(c => $"{(c.Available ? $"`${c.Value}`" : $"~~`${c.Value}`~~")}")), true);
             }
             
             await Channel.EmbedAsync(embed).ConfigureAwait(false);
