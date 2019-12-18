@@ -37,6 +37,7 @@ namespace Roki.Modules.Games.Common
         public bool CanGuess { get; private set; }
         public bool StopGame { get; private set; }
         private int _timeout = 0;
+        private readonly Color _jpColor = new Color(0x060CE9);
 //        private Dictionary<int, bool> _choices1 = new Dictionary<int, bool> {{200, false},{400, false},{600, false},{800, false},{1000, false}};
 //        private Dictionary<int, bool> _choices2 = new Dictionary<int, bool> {{200, false},{400, false},{600, false},{800, false},{1000, false}};
         
@@ -53,7 +54,7 @@ namespace Roki.Modules.Games.Common
 
         public async Task StartGame()
         {
-            await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.DarkBlue)
+            await Channel.EmbedAsync(new EmbedBuilder().WithColor(_jpColor)
                     .WithTitle("Jeopardy!")
                     .WithDescription(
                         "Welcome to Jeopardy!\nTo choose a category, please use the format `category for xxx`, you must specify full category name.\nResponses must be in question form"))
@@ -77,7 +78,7 @@ namespace Roki.Modules.Games.Common
                         await Channel.SendErrorAsync("No such category found.\n Please try again.").ConfigureAwait(false);
                     else
                     {
-                        await Channel.SendErrorAsync("No response received, stopped Jeopardy! game.").ConfigureAwait(false);
+                        await Channel.SendErrorAsync("No response received, stopping Jeopardy! game.").ConfigureAwait(false);
                         return;
                     }
                     
@@ -86,7 +87,7 @@ namespace Roki.Modules.Games.Common
                 }
                 
                 // CurrentClue is now the chosen clue
-                await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.DarkBlue)
+                await Channel.EmbedAsync(new EmbedBuilder().WithColor(_jpColor)
                         .WithAuthor("Jeopardy!")
                         .WithTitle($"{CurrentClue.Category} - {CurrentClue.Value}")
                         .WithDescription(CurrentClue.Clue))
@@ -122,7 +123,7 @@ namespace Roki.Modules.Games.Common
         public async Task EnsureStopped()
         {
             StopGame = true;
-            await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.DarkBlue)
+            await Channel.EmbedAsync(new EmbedBuilder().WithColor(_jpColor)
                     .WithAuthor("Jeopardy!")
                     .WithTitle("Final Results")
                     .WithDescription(GetLeaderboard()))
@@ -134,7 +135,7 @@ namespace Roki.Modules.Games.Common
             var old = StopGame;
             StopGame = true;
             if (!old)
-                await Channel.SendErrorAsync("Jeopardy! game stopped. No answers received.").ConfigureAwait(false);
+                await Channel.SendErrorAsync("Jeopardy! game stopping after this question.").ConfigureAwait(false);
         }
 
         private void AvailableClues()
@@ -144,7 +145,7 @@ namespace Roki.Modules.Games.Common
         
         private async Task ShowCategories()
         {
-            var embed = new EmbedBuilder().WithColor(Color.DarkBlue)
+            var embed = new EmbedBuilder().WithColor(_jpColor)
                 .WithTitle("Jeopardy!")
                 .WithDescription($"Please choose an available category and price from below.\ni.e. `{_clues.First().Key} for 200`");
             foreach (var (category, clues) in _clues)
@@ -175,6 +176,7 @@ namespace Roki.Modules.Games.Common
             if (clue == null) return CategoryStatus.WrongAmount;
             if (!clue.Available) return CategoryStatus.UnavailableClue;
             CurrentClue = clue;
+            CurrentClue.Available = false;
             return CategoryStatus.Success;
         }
 
@@ -202,7 +204,7 @@ namespace Roki.Modules.Games.Common
                     if (!guess) return;
                     _cancel.Cancel();
 
-                    await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.DarkBlue)
+                    await Channel.EmbedAsync(new EmbedBuilder().WithColor(_jpColor)
                             .WithAuthor("Jeopardy!")
                             .WithTitle($"{CurrentClue.Category} - {CurrentClue.Value}")
                             .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was: `{CurrentClue.Answer}`\n" +
