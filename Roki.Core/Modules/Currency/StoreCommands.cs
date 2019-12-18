@@ -36,7 +36,7 @@ namespace Roki.Modules.Currency
 
                 if (itemName == null)
                 {
-                    const int itemsPerPage = 10;
+                    const int itemsPerPage = 9;
                     EmbedBuilder Catalog(int page)
                     {
                         var startAt = itemsPerPage * page;
@@ -45,9 +45,9 @@ namespace Roki.Modules.Currency
                             .Take(itemsPerPage)
                             .Select(c =>
                             {
-                                var type = c.Type == "Subscription" ? $"{c.SubscriptionDays} Day {c.Type}" : c.Type;
+                                var type = c.Type == "Subscription" ? $"**{c.SubscriptionDays}** Day {c.Type}" : c.Type;
                                 var desc = $"{Format.Bold(c.ItemName)} | {type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remaining" : "**Sold Out**")} | `{c.Cost:N0}` {_roki.Properties.CurrencyIcon}";
-                                return $"`ID: {c.Id}` {desc}\n\t{c.Description.TrimTo(120)}";
+                                return $"`{c.Id}:` {desc}\n\t{c.Description.TrimTo(120)}";
                             }));
                         return new EmbedBuilder().WithOkColor()
                             .WithTitle("Stone Shop")
@@ -67,11 +67,11 @@ namespace Roki.Modules.Currency
                 }
 
                 var embed = new EmbedBuilder().WithOkColor()
-                    .WithTitle($"ID {item.Id} | {item.ItemName} | `{item.Cost:N0}` {_roki.Properties.CurrencyIcon}")
+                    .WithTitle($"`{item.Id}:` | {item.ItemName} | `{item.Cost:N0}` {_roki.Properties.CurrencyIcon}")
                     .WithDescription(item.Description)
                     .AddField("Category", $"{item.Category}", true)
                     .AddField("Quantity", $"{(item.Quantity > 0 ? $"**{item.Quantity}** Remaining" : "**Sold Out**")}")
-                    .AddField("Type", item.Type == "Subscription" ? $"{item.SubscriptionDays} Day {item.Type}" : $"{item.Type}", true);
+                    .AddField("Type", item.Type == "Subscription" ? $"**{item.SubscriptionDays}** Day {item.Type}" : $"{item.Type}", true);
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }

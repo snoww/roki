@@ -27,6 +27,14 @@ namespace Roki.Core.Services.Database
         public DbSet<Clues> Clues { get; set; }
         public DbSet<Documents> Documents { get; set; }
 
+        #region PokemonData
+
+        public DbSet<Pokemon> Pokedex { get; set; }
+        public DbSet<Ability> Abilities { get; set; }
+        public DbSet<Move> Moves { get; set; }
+
+        #endregion
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             #region Quotes
