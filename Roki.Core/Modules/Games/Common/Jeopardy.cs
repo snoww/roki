@@ -239,10 +239,9 @@ namespace Roki.Modules.Games.Common
             {
                 if (message.Channel.Id != Channel.Id || message.Author.IsBot) return Task.CompletedTask;
                 var content = message.Content.SanitizeStringFull().ToLowerInvariant();
-                if (!content.Contains("for", StringComparison.Ordinal) && !Regex.IsMatch(content, "\\d\\d\\d+"))
-                    return Task.CompletedTask;
+                if (content.Contains("for", StringComparison.Ordinal) && Regex.IsMatch(content, "\\d\\d\\d+"))
+                    eventTrigger.SetResult(message);
 
-                eventTrigger.SetResult(message);
                 return Task.CompletedTask;
             }
             
