@@ -24,6 +24,7 @@ namespace Roki.Modules.Games.Common
         private readonly Logger _log;
         private readonly DiscordSocketClient _client;
         private readonly Dictionary<string, List<JClue>> _clues;
+        private readonly Roki _roki;
 
         public IGuild Guild { get; }
         public ITextChannel Channel { get; }
@@ -41,7 +42,7 @@ namespace Roki.Modules.Games.Common
 //        private Dictionary<int, bool> _choices1 = new Dictionary<int, bool> {{200, false},{400, false},{600, false},{800, false},{1000, false}};
 //        private Dictionary<int, bool> _choices2 = new Dictionary<int, bool> {{200, false},{400, false},{600, false},{800, false},{1000, false}};
         
-        public Jeopardy(DbService db, DiscordSocketClient client, Dictionary<string, List<JClue>> clues, IGuild guild, ITextChannel channel)
+        public Jeopardy(DbService db, DiscordSocketClient client, Dictionary<string, List<JClue>> clues, IGuild guild, ITextChannel channel, Roki roki)
         {
             _log = LogManager.GetCurrentClassLogger();
             _db = db;
@@ -50,6 +51,7 @@ namespace Roki.Modules.Games.Common
             
             Guild = guild;
             Channel = channel;
+            _roki = roki;
         }
 
         public async Task StartGame()
@@ -57,7 +59,7 @@ namespace Roki.Modules.Games.Common
             await Channel.EmbedAsync(new EmbedBuilder().WithColor(_jpColor)
                     .WithTitle("Jeopardy!")
                     .WithDescription(
-                        "Welcome to Jeopardy!\nTo choose a category, please use the format `category for xxx`, you must specify full category name.\nResponses must be in question form"))
+                        "Welcome to Jeopardy!\nTo choose a category, please use the format `category for xxx`, you can use short form category names.\nResponses must be in question form"))
                 .ConfigureAwait(false);
             await Task.Delay(TimeSpan.FromSeconds(10)).ConfigureAwait(false);
             while (!StopGame)
@@ -67,7 +69,7 @@ namespace Roki.Modules.Games.Common
                 await ShowCategories().ConfigureAwait(false);
                 var catResponse = await CategoryHandler().ConfigureAwait(false);
                 var catStatus = ParseCategoryAndClue(catResponse);
-                while (catStatus != CategoryStatus.Success)
+                while (catStatus != CategoryStatus.Success && !StopGame)
                 {
                     if (catStatus == CategoryStatus.UnavailableClue)
                         await Channel.SendErrorAsync("That clue is not available.\nPlease try again.").ConfigureAwait(false);
@@ -86,10 +88,12 @@ namespace Roki.Modules.Games.Common
                     catStatus = ParseCategoryAndClue(catResponse);
                 }
                 
+                if (StopGame) break;
+                
                 // CurrentClue is now the chosen clue
                 await Channel.EmbedAsync(new EmbedBuilder().WithColor(_jpColor)
                         .WithAuthor("Jeopardy!")
-                        .WithTitle($"{CurrentClue.Category} - {CurrentClue.Value}")
+                        .WithTitle($"{CurrentClue.Category} - ${CurrentClue.Value}")
                         .WithDescription(CurrentClue.Clue))
                     .ConfigureAwait(false);
 
@@ -117,6 +121,7 @@ namespace Roki.Modules.Games.Common
                 }
                 
                 AvailableClues();
+                await Task.Delay(5).ConfigureAwait(false);
             }
         }
 
@@ -258,7 +263,7 @@ namespace Roki.Modules.Games.Common
             var lb = new StringBuilder();
             foreach (var (user, value) in Users.OrderByDescending(k => k.Value))
             {
-                lb.AppendLine($"{user.Username} - `{value:N0}`");
+                lb.AppendLine($"{user.Username} `{value:N0}` {_roki.Properties.CurrencyIcon}");
             }
 
             return lb.ToString();

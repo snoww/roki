@@ -18,11 +18,13 @@ namespace Roki.Modules.Games
         {
             private readonly DbService _db;
             private readonly DiscordSocketClient _client;
+            private readonly Roki _roki;
 
-            public JeopardyCommands(DiscordSocketClient client, DbService db)
+            public JeopardyCommands(DiscordSocketClient client, DbService db, Roki roki)
             {
                 _client = client;
                 _db = db;
+                _roki = roki;
             }
 
             [RokiCommand, Description, Aliases, Usage]
@@ -31,7 +33,7 @@ namespace Roki.Modules.Games
             {
                 var channel = (ITextChannel) ctx.Channel;
                 var questions = _service.GenerateGame();
-                var jeopardy = new Jeopardy(_db, _client, questions, channel.Guild, channel);
+                var jeopardy = new Jeopardy(_db, _client, questions, channel.Guild, channel, _roki);
 
                 if (_service.ActiveGames.TryAdd(channel.Id, jeopardy))
                 {
