@@ -45,7 +45,7 @@ namespace Roki.Modules.Games.Common
             answer = answer.ToLowerInvariant();
             answer = Regex.Replace(answer, "^what |whats |where |wheres |who |whos ", "");
             answer = Regex.Replace(answer, "^is |are |was |were", "");
-            return Regex.Replace(answer, "^the |a | an", "").SanitizeStringFull();
+            return Regex.Replace(answer, "^the |a |an ", "").SanitizeStringFull();
         }
     }
 }
