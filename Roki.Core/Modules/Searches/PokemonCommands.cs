@@ -89,7 +89,7 @@ namespace Roki.Modules.Searches
                 var move = await _service.GetMoveAsync(query).ConfigureAwait(false);
                 if (move == null)
                 {
-                    await ctx.Channel.SendErrorAsync("No ability of that name found.").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync("No move of that name found.").ConfigureAwait(false);
                     return;
                 }
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
