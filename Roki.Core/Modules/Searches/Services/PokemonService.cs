@@ -160,7 +160,26 @@ namespace Roki.Modules.Searches.Services
         {
             query = query.SanitizeStringFull().ToLowerInvariant();
             using var uow = _db.GetDbContext();
-            return await uow.Context.Moves.FirstAsync(m => m.Id == query).ConfigureAwait(false);
+            var move = await uow.Context.Moves.FirstAsync(m => m.Id == query).ConfigureAwait(false);
+            if (move != null) return move;
+            return await GetMoveAliasAsync(query);
+        }
+
+        private async Task<Move> GetMoveAliasAsync(string query)
+        {
+            var aliases = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText("./data/pokemon_move_aliases"), Options);
+            try
+            {
+                using var uow = _db.GetDbContext();
+                var name = aliases[query];
+                return await uow.Context.Moves.FirstOrDefaultAsync(p => p.Name == name).ConfigureAwait(false);
+            }
+            catch
+            {
+                //
+            }
+
+            return null;
         }
     }
 }
