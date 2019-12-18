@@ -73,7 +73,7 @@ namespace Roki.Modules.Searches.Services
 
         private async Task<Pokemon> GetPokemonByAliasAsync(string query)
         {
-            var aliases = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText("./data/pokemon_aliases"), Options);
+            var aliases = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText("./data/pokemon_aliases.json"), Options);
             try
             {
                 using var uow = _db.GetDbContext();
@@ -167,7 +167,7 @@ namespace Roki.Modules.Searches.Services
 
         private async Task<Move> GetMoveAliasAsync(string query)
         {
-            var aliases = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText("./data/pokemon_move_aliases"), Options);
+            var aliases = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText("./data/pokemon_move_aliases.json"), Options);
             try
             {
                 using var uow = _db.GetDbContext();
