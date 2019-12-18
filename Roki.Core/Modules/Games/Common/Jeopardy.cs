@@ -119,7 +119,7 @@ namespace Roki.Modules.Games.Common
                 }
                 
                 AvailableClues();
-                await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             }
         }
 
