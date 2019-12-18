@@ -88,8 +88,6 @@ namespace Roki.Modules.Games.Common
                     catStatus = ParseCategoryAndClue(catResponse);
                 }
                 
-                if (StopGame) break;
-                
                 // CurrentClue is now the chosen clue
                 await Channel.EmbedAsync(new EmbedBuilder().WithColor(_jpColor)
                         .WithAuthor("Jeopardy!")
@@ -233,7 +231,6 @@ namespace Roki.Modules.Games.Common
             Task Handler(SocketMessage message)
             {
                 if (message.Channel.Id != Channel.Id || message.Author.IsBot) return Task.CompletedTask;
-                if (StopGame) cancelTrigger.SetResult(true);
                 var content = message.Content.SanitizeStringFull().ToLowerInvariant();
                 if (!content.Contains("for", StringComparison.Ordinal) && !Regex.IsMatch(content, "\\d\\d\\d+"))
                     return Task.CompletedTask;
