@@ -156,7 +156,7 @@ namespace Roki.Modules.Games.Common
 
         private bool AvailableClues()
         {
-            return !_clues.Values.Any(clues => clues.Any(c => c.Available));
+            return _clues.Values.Any(clues => clues.Any(c => c.Available));
         }
         
         private async Task ShowCategories()
