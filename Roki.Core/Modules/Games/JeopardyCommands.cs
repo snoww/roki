@@ -21,10 +21,11 @@ namespace Roki.Modules.Games
             private readonly DiscordSocketClient _client;
             private readonly Roki _roki;
 
-            public JeopardyCommands(DiscordSocketClient client, Roki roki)
+            public JeopardyCommands(DiscordSocketClient client, Roki roki, CurrencyService currency)
             {
                 _client = client;
                 _roki = roki;
+                _currency = currency;
             }
 
             [RokiCommand, Description, Aliases, Usage]
