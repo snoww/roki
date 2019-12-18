@@ -87,6 +87,11 @@ namespace Roki.Modules.Searches
                     return;
                 await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
                 var move = await _service.GetMoveAsync(query).ConfigureAwait(false);
+                if (move == null)
+                {
+                    await ctx.Channel.SendErrorAsync("No ability of that name found.").ConfigureAwait(false);
+                    return;
+                }
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle(move.Name)
                         .WithDescription((move.Description ?? move.ShortDescription).TrimTo(2048))
