@@ -184,7 +184,7 @@ namespace Roki.Modules.Games.Common
             JClue clue = null;
             foreach (var (cat, clues) in _clues)
             {
-                if (!cat.SanitizeStringFull().Contains(category, StringComparison.OrdinalIgnoreCase)) continue;
+                if (!cat.SanitizeStringFull().ToLowerInvariant().Contains(category, StringComparison.Ordinal)) continue;
                 clue = clues.FirstOrDefault(q => q.Value == amount);
                 if (clue == null) return CategoryStatus.WrongAmount;
                 break;
