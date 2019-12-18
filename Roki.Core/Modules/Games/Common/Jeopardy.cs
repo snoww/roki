@@ -53,11 +53,12 @@ namespace Roki.Modules.Games.Common
 
         public async Task StartGame()
         {
-            await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.Blue)
+            await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.DarkBlue)
                     .WithTitle("Jeopardy!")
                     .WithDescription(
                         "Welcome to Jeopardy!\nTo choose a category, please use the format `category for xxx`, you must specify full category name.\nResponses must be in question form"))
                 .ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromSeconds(10)).ConfigureAwait(false);
             while (!StopGame)
             {
                 _cancel = new CancellationTokenSource();
@@ -68,12 +69,12 @@ namespace Roki.Modules.Games.Common
                 while (catStatus != CategoryStatus.Success)
                 {
                     if (catStatus == CategoryStatus.UnavailableClue)
-                        await Channel.SendErrorAsync("That clue is not available, please try again").ConfigureAwait(false);
+                        await Channel.SendErrorAsync("That clue is not available.\n Please try again.").ConfigureAwait(false);
                     else if (catStatus == CategoryStatus.WrongAmount)
-                        await Channel.SendErrorAsync("There are no clues available for that amount, please try again")
+                        await Channel.SendErrorAsync("There are no clues available for that amount.\n Please try again.")
                             .ConfigureAwait(false);
                     else if (catStatus == CategoryStatus.WrongCategory)
-                        await Channel.SendErrorAsync("No such category found, please try again").ConfigureAwait(false);
+                        await Channel.SendErrorAsync("No such category found.\n Please try again.").ConfigureAwait(false);
                     else
                     {
                         await Channel.SendErrorAsync("No response received, stopped Jeopardy! game.").ConfigureAwait(false);
@@ -85,7 +86,7 @@ namespace Roki.Modules.Games.Common
                 }
                 
                 // CurrentClue is now the chosen clue
-                await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.Blue)
+                await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.DarkBlue)
                         .WithAuthor("Jeopardy!")
                         .WithTitle($"{CurrentClue.Category} - {CurrentClue.Value}")
                         .WithDescription(CurrentClue.Clue))
@@ -121,7 +122,7 @@ namespace Roki.Modules.Games.Common
         public async Task EnsureStopped()
         {
             StopGame = true;
-            await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.Blue)
+            await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.DarkBlue)
                     .WithAuthor("Jeopardy!")
                     .WithTitle("Final Results")
                     .WithDescription(GetLeaderboard()))
@@ -143,7 +144,7 @@ namespace Roki.Modules.Games.Common
         
         private async Task ShowCategories()
         {
-            var embed = new EmbedBuilder().WithColor(Color.Blue)
+            var embed = new EmbedBuilder().WithColor(Color.DarkBlue)
                 .WithTitle("Jeopardy!")
                 .WithDescription($"Please choose an available category and price from below.\ni.e. `{_clues.First().Key} for 200`");
             foreach (var (category, clues) in _clues)
@@ -159,13 +160,15 @@ namespace Roki.Modules.Games.Common
             if (msg == null) return CategoryStatus.NoResponse;
             
             var message = msg.Content.SanitizeStringFull().ToLowerInvariant();
-            int.TryParse(new string(message.Where(char.IsDigit).ToArray()), out var amount);
+            int.TryParse(new string(message.Substring(message.LastIndexOf("for", StringComparison.OrdinalIgnoreCase))
+                    .Where(char.IsDigit).ToArray()),
+                out var amount);
 
             JClue clue;
             if (message.Contains(_clues.First().Key.SanitizeStringFull(), StringComparison.OrdinalIgnoreCase))
                 clue = _clues.First().Value.FirstOrDefault(q => q.Value == amount);
-            else if (message.Contains(_clues.First().Key.SanitizeStringFull(), StringComparison.OrdinalIgnoreCase))
-                clue = _clues.First().Value.FirstOrDefault(q => q.Value == amount);
+            else if (message.Contains(_clues.Last().Key.SanitizeStringFull(), StringComparison.OrdinalIgnoreCase))
+                clue = _clues.Last().Value.FirstOrDefault(q => q.Value == amount);
             else
                 return CategoryStatus.WrongCategory;
             
@@ -199,7 +202,7 @@ namespace Roki.Modules.Games.Common
                     if (!guess) return;
                     _cancel.Cancel();
 
-                    await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.Blue)
+                    await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.DarkBlue)
                             .WithAuthor("Jeopardy!")
                             .WithTitle($"{CurrentClue.Category} - {CurrentClue.Value}")
                             .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was: `{CurrentClue.Answer}`\n" +
