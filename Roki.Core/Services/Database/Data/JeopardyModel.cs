@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Roki.Core.Services.Database.Models
 {
-    [Table("airdates")]
+    [Table("airdates", Schema = "data")]
     public class AirDate : DbEntity
     {
         [Key]
@@ -11,7 +11,7 @@ namespace Roki.Core.Services.Database.Models
         public string Airdate { get; set; }
     }
     
-    [Table("categories")]
+    [Table("categories", Schema = "data")]
     public class Categories : DbEntity
     {
         [Key]
@@ -19,25 +19,28 @@ namespace Roki.Core.Services.Database.Models
         public string Category { get; set; }
     }
     
-    [Table("classifications")]
+    [Table("classifications", Schema = "data")]
     public class Classification : DbEntity
     {
+        [Key]
         public int ClueId { get; set; }
         public int CategoryId { get; set; }
     }
 
-    [Table("clues")]
+    [Table("clues", Schema = "data")]
     public class Clues : DbEntity
     {
+        [Key]
         public int Id { get; set; }
         public int Game { get; set; }
         public int Round { get; set; }
         public int Value { get; set; }
     }
     
-    [Table("documents")]
+    [Table("documents", Schema = "data")]
     public class Documents : DbEntity
     {
+        [Key]
         public int Id { get; set; }
         public string Clue { get; set; }
         public string Answer { get; set; }
