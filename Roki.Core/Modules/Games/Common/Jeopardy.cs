@@ -58,8 +58,7 @@ namespace Roki.Modules.Games.Common
         {
             await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithTitle("Jeopardy!")
-                    .WithDescription(
-                        "Welcome to Jeopardy! Game is starting soon ...")
+                    .WithDescription("Welcome to Jeopardy! Game is starting soon ...")
                     .WithFooter("Responses must be in question form"))
                 .ConfigureAwait(false);
             await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
@@ -106,7 +105,7 @@ namespace Roki.Modules.Games.Common
                     }
                     catch (TaskCanceledException)
                     {
-                        //
+                        // correct answer
                     }
                 }
                 finally
@@ -122,8 +121,6 @@ namespace Roki.Modules.Games.Common
                             .WithTitle("Times Up!")
                             .WithDescription($"The correct answer was: `{CurrentClue.Answer}`"))
                         .ConfigureAwait(false);
-                    // if (++_timeout >= 5)
-                    //     await StopJeopardyGame().ConfigureAwait(false);
                 }
                 
                 AvailableClues();
@@ -184,6 +181,7 @@ namespace Roki.Modules.Games.Common
             int.TryParse(new string(price.Where(char.IsDigit).ToArray()), out var amount);
 
             JClue clue;
+            // replace with foreach in future when adding more categories
             if (_clues.First().Key.SanitizeStringFull().Contains(category, StringComparison.OrdinalIgnoreCase))
                 clue = _clues.First().Value.FirstOrDefault(q => q.Value == amount);
             else if (_clues.Last().Key.SanitizeStringFull().Contains(category, StringComparison.OrdinalIgnoreCase))
