@@ -73,20 +73,13 @@ namespace Roki.Modules.Searches.Services
 
         private async Task<Pokemon> GetPokemonByAliasAsync(string query)
         {
-            var aliases = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText("./data/pokemon_aliases.json"), Options);
-            try
-            {
-                using var uow = _db.GetDbContext();
-                var name = aliases[query];
-                return await uow.Context.Pokedex.FirstOrDefaultAsync(p => p.Species == name)
-                    .ConfigureAwait(false);
-            }
-            catch 
-            {
-                //
-            }
-
-            return null;
+            var aliases = JsonDocument.Parse(File.ReadAllText("./data/pokemon_aliases.json"));
+            if (!aliases.RootElement.TryGetProperty(query, out var name)) 
+                return null;
+            
+            using var uow = _db.GetDbContext();
+            return await uow.Context.Pokedex.FirstOrDefaultAsync(p => p.Species == name.GetString())
+                .ConfigureAwait(false);
         }
 
         public static string GetSprite(string pokemon, int number)
@@ -167,19 +160,12 @@ namespace Roki.Modules.Searches.Services
 
         private async Task<Move> GetMoveAliasAsync(string query)
         {
-            var aliases = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText("./data/pokemon_move_aliases.json"), Options);
-            try
-            {
-                using var uow = _db.GetDbContext();
-                var name = aliases[query];
-                return await uow.Context.Moves.FirstOrDefaultAsync(p => p.Name == name).ConfigureAwait(false);
-            }
-            catch
-            {
-                //
-            }
-
-            return null;
+            using var aliases = JsonDocument.Parse(File.ReadAllText("./data/pokemon_move_aliases.json"));
+            if (aliases.RootElement.TryGetProperty(query, out var name))
+                return null;
+            
+            using var uow = _db.GetDbContext();
+            return await uow.Context.Moves.FirstOrDefaultAsync(p => p.Name == name.GetString()).ConfigureAwait(false);
         }
     }
 }
