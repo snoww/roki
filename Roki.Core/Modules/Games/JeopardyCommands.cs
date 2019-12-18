@@ -17,11 +17,11 @@ namespace Roki.Modules.Games
         [Group]
         public class JeopardyCommands : RokiSubmodule<JeopardyService>
         {
-            private readonly CurrencyService _currency;
+            private readonly ICurrencyService _currency;
             private readonly DiscordSocketClient _client;
             private readonly Roki _roki;
 
-            public JeopardyCommands(DiscordSocketClient client, Roki roki, CurrencyService currency)
+            public JeopardyCommands(DiscordSocketClient client, Roki roki, ICurrencyService currency)
             {
                 _client = client;
                 _roki = roki;
