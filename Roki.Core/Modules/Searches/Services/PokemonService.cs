@@ -153,9 +153,9 @@ namespace Roki.Modules.Searches.Services
         {
             query = query.SanitizeStringFull().ToLowerInvariant();
             using var uow = _db.GetDbContext();
-            var move = await uow.Context.Moves.FirstAsync(m => m.Id == query).ConfigureAwait(false);
+            var move = await uow.Context.Moves.FirstOrDefaultAsync(m => m.Id == query).ConfigureAwait(false);
             if (move != null) return move;
-            return await GetMoveAliasAsync(query);
+            return await GetMoveAliasAsync(query).ConfigureAwait(false);
         }
 
         private async Task<Move> GetMoveAliasAsync(string query)
