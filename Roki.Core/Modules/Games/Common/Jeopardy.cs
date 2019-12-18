@@ -116,12 +116,12 @@ namespace Roki.Modules.Games.Common
                             .WithTitle("Times Up!")
                             .WithDescription($"The correct answer was: `{CurrentClue.Answer}`"))
                         .ConfigureAwait(false);
-                    if (++_timeout >= 5)
-                        await StopJeopardyGame().ConfigureAwait(false);
+                    // if (++_timeout >= 5)
+                    //     await StopJeopardyGame().ConfigureAwait(false);
                 }
                 
                 AvailableClues();
-                await Task.Delay(5).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             }
         }
 
@@ -258,7 +258,7 @@ namespace Roki.Modules.Games.Common
         public string GetLeaderboard()
         {
             if (Users.Count == 0)
-                return "No one is on the leaderboard yet. Answer some questions correctly.";
+                return "No one is on the leaderboard.";
             
             var lb = new StringBuilder();
             foreach (var (user, value) in Users.OrderByDescending(k => k.Value))
