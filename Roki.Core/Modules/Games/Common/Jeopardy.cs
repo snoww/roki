@@ -123,7 +123,7 @@ namespace Roki.Modules.Games.Common
                         .ConfigureAwait(false);
                 }
                 
-                AvailableClues();
+                if (!AvailableClues()) return;
                 await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             }
         }
@@ -153,9 +153,9 @@ namespace Roki.Modules.Games.Common
                 await Channel.SendErrorAsync("Jeopardy! game stopping after this question.").ConfigureAwait(false);
         }
 
-        private void AvailableClues()
+        private bool AvailableClues()
         {
-            StopGame = !_clues.Values.Any(clues => clues.Any(c => c.Available));
+            return !_clues.Values.Any(clues => clues.Any(c => c.Available));
         }
         
         private async Task ShowCategories()
