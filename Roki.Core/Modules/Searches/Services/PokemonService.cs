@@ -19,7 +19,6 @@ namespace Roki.Modules.Searches.Services
     {
         private readonly DbService _db;
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
-        private static readonly Dictionary<string, PokemonData> Data = JsonSerializer.Deserialize<Dictionary<string, PokemonData>>(File.ReadAllText("./data/pokemon.json"), Options);
 
         public PokemonService(DbService db)
         {
@@ -60,14 +59,34 @@ namespace Roki.Modules.Searches.Services
         {
             using var uow = _db.GetDbContext();
             query = query.SanitizeStringFull().ToLowerInvariant();
-            return await uow.Context.Pokedex.FirstOrDefaultAsync(p => p.Name == query)
+            var pokemon = await uow.Context.Pokedex.FirstOrDefaultAsync(p => p.Name == query)
                 .ConfigureAwait(false);
+            if (pokemon != null) return pokemon;
+            return await GetPokemonByAliasAsync(query).ConfigureAwait(false);
         }
-
+        
         public async Task<Pokemon> GetPokemonByIdAsync(int number)
         {
             using var uow = _db.GetDbContext();
             return await uow.Context.Pokedex.Where(p => p.Number == number).OrderBy(p => p.Name).FirstOrDefaultAsync().ConfigureAwait(false);
+        }
+
+        private async Task<Pokemon> GetPokemonByAliasAsync(string query)
+        {
+            var aliases = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText("./data/pokemon_aliases"), Options);
+            try
+            {
+                using var uow = _db.GetDbContext();
+                var name = aliases[query];
+                return await uow.Context.Pokedex.FirstOrDefaultAsync(p => p.Species == name)
+                    .ConfigureAwait(false);
+            }
+            catch 
+            {
+                //
+            }
+
+            return null;
         }
 
         public static string GetSprite(string pokemon, int number)
