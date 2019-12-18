@@ -37,7 +37,7 @@ namespace Roki.Modules.Games.Common
         public bool CanGuess { get; private set; }
         public bool StopGame { get; private set; }
         private int _timeout = 0;
-        private readonly Color _jpColor = new Color(0x060CE9);
+        private readonly Color _jpColor = new Color(0x0000FF);
 //        private Dictionary<int, bool> _choices1 = new Dictionary<int, bool> {{200, false},{400, false},{600, false},{800, false},{1000, false}};
 //        private Dictionary<int, bool> _choices2 = new Dictionary<int, bool> {{200, false},{400, false},{600, false},{800, false},{1000, false}};
         
