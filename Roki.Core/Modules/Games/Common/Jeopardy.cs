@@ -14,13 +14,14 @@ using NLog;
 using Roki.Common;
 using Roki.Core.Services;
 using Roki.Extensions;
+using Roki.Services;
 
 namespace Roki.Modules.Games.Common
 {
     public class Jeopardy
     {
         private SemaphoreSlim _guess = new SemaphoreSlim(1, 1);
-        private readonly DbService _db;
+        private readonly ICurrencyService _currency;
         private readonly Logger _log;
         private readonly DiscordSocketClient _client;
         private readonly Dictionary<string, List<JClue>> _clues;
@@ -42,16 +43,16 @@ namespace Roki.Modules.Games.Common
 //        private Dictionary<int, bool> _choices1 = new Dictionary<int, bool> {{200, false},{400, false},{600, false},{800, false},{1000, false}};
 //        private Dictionary<int, bool> _choices2 = new Dictionary<int, bool> {{200, false},{400, false},{600, false},{800, false},{1000, false}};
         
-        public Jeopardy(DbService db, DiscordSocketClient client, Dictionary<string, List<JClue>> clues, IGuild guild, ITextChannel channel, Roki roki)
+        public Jeopardy(DiscordSocketClient client, Dictionary<string, List<JClue>> clues, IGuild guild, ITextChannel channel, Roki roki, ICurrencyService currency)
         {
             _log = LogManager.GetCurrentClassLogger();
-            _db = db;
             _client = client;
             _clues = clues;
             
             Guild = guild;
             Channel = channel;
             _roki = roki;
+            _currency = currency;
         }
 
         public async Task StartGame()
@@ -119,18 +120,25 @@ namespace Roki.Modules.Games.Common
                 }
                 
                 AvailableClues();
-                await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
             }
         }
 
         public async Task EnsureStopped()
         {
             StopGame = true;
-            await Channel.EmbedAsync(new EmbedBuilder().WithColor(_jpColor)
+            var msg = await Channel.EmbedAsync(new EmbedBuilder().WithColor(_jpColor)
                     .WithAuthor("Jeopardy!")
-                    .WithTitle("Final Results")
+                    .WithTitle("Final Winnings")
                     .WithDescription(GetLeaderboard()))
                 .ConfigureAwait(false);
+
+            if (!Users.Any()) return;
+            foreach (var (user, winnings) in Users)
+            {
+                await _currency.ChangeAsync(user.Id, "Jeopardy Winnings", winnings, _client.CurrentUser.Id, user.Id, Guild.Id, Channel.Id, msg.Id)
+                    .ConfigureAwait(false);
+            }
         }
 
         public async Task StopJeopardyGame()
@@ -209,9 +217,9 @@ namespace Roki.Modules.Games.Common
 
                     await Channel.EmbedAsync(new EmbedBuilder().WithColor(_jpColor)
                             .WithAuthor("Jeopardy!")
-                            .WithTitle($"{CurrentClue.Category} - {CurrentClue.Value}")
+                            .WithTitle($"{CurrentClue.Category} - ${CurrentClue.Value}")
                             .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was: `{CurrentClue.Answer}`\n" +
-                                             $"Your total score is `{Users[msg.Author]:N0}`"))
+                                             $"Your total score is: `{Users[msg.Author]:N0}`"))
                         .ConfigureAwait(false);
                 }
                 catch (Exception e)
@@ -224,7 +232,7 @@ namespace Roki.Modules.Games.Common
         
         private async Task<SocketMessage> CategoryHandler(TimeSpan? timeout = null)
         {
-            timeout ??= TimeSpan.FromMinutes(2);
+            timeout ??= TimeSpan.FromSeconds(30);
             var eventTrigger = new TaskCompletionSource<SocketMessage>();
             var cancelTrigger = new TaskCompletionSource<bool>();
 
