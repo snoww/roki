@@ -666,7 +666,7 @@
     ]
   },
   "jeopardystop": {
-    "Command": "jeopardystop js",
+    "Command": "jeopardystop js jq",
     "Description": "Stops current Jeopardy! game after the current question.",
     "Usage": [
       "{0}js"
