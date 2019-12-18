@@ -99,7 +99,7 @@ namespace Roki.Modules.Games.Common
                 {
                     _client.MessageReceived += GuessHandler;
                     CanGuess = true;
-                    await Task.Delay(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+                    await Task.Delay(TimeSpan.FromSeconds(30), _cancel.Token).ConfigureAwait(false);
                 }
                 finally
                 {
