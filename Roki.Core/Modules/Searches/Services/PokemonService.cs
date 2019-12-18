@@ -161,7 +161,7 @@ namespace Roki.Modules.Searches.Services
         private async Task<Move> GetMoveAliasAsync(string query)
         {
             using var aliases = JsonDocument.Parse(File.ReadAllText("./data/pokemon_move_aliases.json"));
-            if (aliases.RootElement.TryGetProperty(query, out var name))
+            if (!aliases.RootElement.TryGetProperty(query, out var name))
                 return null;
             
             using var uow = _db.GetDbContext();
