@@ -38,7 +38,7 @@ namespace Roki.Modules.Games.Common
         
         public bool CanGuess { get; private set; }
         public bool StopGame { get; private set; }
-        private readonly Color _jpColor = Color.DarkBlue;
+        public readonly Color Color = Color.DarkBlue;
 //        private Dictionary<int, bool> _choices1 = new Dictionary<int, bool> {{200, false},{400, false},{600, false},{800, false},{1000, false}};
 //        private Dictionary<int, bool> _choices2 = new Dictionary<int, bool> {{200, false},{400, false},{600, false},{800, false},{1000, false}};
         
@@ -56,7 +56,7 @@ namespace Roki.Modules.Games.Common
 
         public async Task StartGame()
         {
-            await Channel.EmbedAsync(new EmbedBuilder().WithColor(_jpColor)
+            await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithTitle("Jeopardy!")
                     .WithDescription(
                         "Welcome to Jeopardy!\nTo choose a category, please use the format `category for xxx`, you can use short form category names.\nResponses must be in question form"))
@@ -89,7 +89,7 @@ namespace Roki.Modules.Games.Common
                 }
                 
                 // CurrentClue is now the chosen clue
-                await Channel.EmbedAsync(new EmbedBuilder().WithColor(_jpColor)
+                await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                         .WithAuthor("Jeopardy!")
                         .WithTitle($"{CurrentClue.Category} - ${CurrentClue.Value}")
                         .WithDescription(CurrentClue.Clue))
@@ -101,7 +101,7 @@ namespace Roki.Modules.Games.Common
                     CanGuess = true;
                     try
                     {
-                        await Task.Delay(TimeSpan.FromSeconds(30), _cancel.Token).ConfigureAwait(false);
+                        await Task.Delay(TimeSpan.FromSeconds(35), _cancel.Token).ConfigureAwait(false);
                     }
                     catch (TaskCanceledException)
                     {
@@ -133,7 +133,7 @@ namespace Roki.Modules.Games.Common
         public async Task EnsureStopped()
         {
             StopGame = true;
-            var msg = await Channel.EmbedAsync(new EmbedBuilder().WithColor(_jpColor)
+            var msg = await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithAuthor("Jeopardy!")
                     .WithTitle("Final Winnings")
                     .WithDescription(GetLeaderboard()))
@@ -162,7 +162,7 @@ namespace Roki.Modules.Games.Common
         
         private async Task ShowCategories()
         {
-            var embed = new EmbedBuilder().WithColor(_jpColor)
+            var embed = new EmbedBuilder().WithColor(Color)
                 .WithTitle("Jeopardy!")
                 .WithDescription($"Please choose an available category and price from below.\ni.e. `{_clues.First().Key} for 200`");
             foreach (var (category, clues) in _clues)
@@ -221,7 +221,7 @@ namespace Roki.Modules.Games.Common
                     if (!guess) return;
                     _cancel.Cancel();
 
-                    await Channel.EmbedAsync(new EmbedBuilder().WithColor(_jpColor)
+                    await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                             .WithAuthor("Jeopardy!")
                             .WithTitle($"{CurrentClue.Category} - ${CurrentClue.Value}")
                             .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was: `{CurrentClue.Answer}`\n" +
@@ -238,7 +238,7 @@ namespace Roki.Modules.Games.Common
         
         private async Task<SocketMessage> CategoryHandler(TimeSpan? timeout = null)
         {
-            timeout ??= TimeSpan.FromSeconds(30);
+            timeout ??= TimeSpan.FromSeconds(35);
             var eventTrigger = new TaskCompletionSource<SocketMessage>();
             var cancelTrigger = new TaskCompletionSource<bool>();
 

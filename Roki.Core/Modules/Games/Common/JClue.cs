@@ -1,5 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
+using Roki.Common;
 using Roki.Extensions;
 
 namespace Roki.Modules.Games.Common
@@ -14,7 +15,7 @@ namespace Roki.Modules.Games.Common
 
         public bool CheckAnswer(string answer)
         {
-            var minAnswer = Regex.Replace(Answer.ToLowerInvariant(), "^(the |a |an )", "");
+            var minAnswer = Regex.Replace(Answer.ToLowerInvariant(), "^the |a |an ", "");
             answer = SanitizeAnswer(answer);
             // if it contains an optional answer
             if (Answer.Contains('(', StringComparison.Ordinal) && Answer.Contains(')', StringComparison.Ordinal))
@@ -42,7 +43,7 @@ namespace Roki.Modules.Games.Common
         private static string SanitizeAnswer(string answer)
         {
             answer = answer.ToLowerInvariant();
-            answer = Regex.Replace(answer, "^(what |whats |where |wheres |who |whos )", "");
+            answer = Regex.Replace(answer, "^what |whats |where |wheres |who |whos ", "");
             answer = Regex.Replace(answer, "^is |are |was |were", "");
             return Regex.Replace(answer, "^the |a | an", "").SanitizeStringFull();
         }

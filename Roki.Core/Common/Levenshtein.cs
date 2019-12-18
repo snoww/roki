@@ -1,4 +1,4 @@
-namespace Roki.Modules.Games.Common
+namespace Roki.Common
 {
     // Copyright (c) 2017 DanHartley
     
