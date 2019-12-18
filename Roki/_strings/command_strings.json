@@ -161,11 +161,11 @@
       "{0}tex y=mx+b"
     ]
   },
-  "pokemon": {
-    "Command": "pokemon dex",
+  "pokedex": {
+    "Command": "pokemon pokedex dex",
     "Description": "Returns a short summary of the specified Pokémon.",
     "Usage": [
-      "{0}pokemon decidueye"
+      "{0}pokedex decidueye"
     ]
   },
   "ability": {
@@ -631,9 +631,24 @@
   },
   "stalk": {
     "Command": "stalk",
-    "Description": "Searches all of discord for a user by their username and discriminator.",
+    "Description": "**BROKEN** Searches all of discord for a user by their username and discriminator.",
     "Usage": [
       "{0}stalk Snow#7777"
+    ]
+  },
+  "uwu": {
+    "Command": "uwu",
+    "Description": "UwUizes the message. If no message is provided, UwUizes the previous message in the channel.",
+    "Usage": [
+      "{0}uwu hey how are you",
+      "{0}uwu"
+    ]
+  },
+  "nickname": {
+    "Command": "nickname nick",
+    "Description": "Changes the target users nickname. Lasts forever or until user changes back. Must be a moderator or have an available power (Consumes the power).",
+    "Usage": [
+      "{0}nick @snow snowww"
     ]
   },
   "jeopardy": {
