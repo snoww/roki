@@ -50,7 +50,12 @@ namespace Roki.Modules.Games
                     return;
                 }
 
-                await ctx.Channel.SendErrorAsync($"Jeopardy game is already in progress.\n{jeopardy.CurrentClue}").ConfigureAwait(false);
+                await ctx.Channel.SendErrorAsync($"Jeopardy game is already in progress.").ConfigureAwait(false);
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithColor(jeopardy.Color)
+                        .WithAuthor("Jeopardy!")
+                        .WithTitle($"{jeopardy.CurrentClue.Category} - ${jeopardy.CurrentClue.Value}")
+                        .WithDescription(jeopardy.CurrentClue.Clue))
+                    .ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Aliases, Usage]
