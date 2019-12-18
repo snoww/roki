@@ -180,16 +180,16 @@ namespace Roki.Modules.Games.Common
             var price = message.Substring(message.LastIndexOf("for", StringComparison.OrdinalIgnoreCase));
             int.TryParse(new string(price.Where(char.IsDigit).ToArray()), out var amount);
 
-            JClue clue;
-            // replace with foreach in future when adding more categories
-            if (_clues.First().Key.SanitizeStringFull().Contains(category, StringComparison.OrdinalIgnoreCase))
-                clue = _clues.First().Value.FirstOrDefault(q => q.Value == amount);
-            else if (_clues.Last().Key.SanitizeStringFull().Contains(category, StringComparison.OrdinalIgnoreCase))
-                clue = _clues.Last().Value.FirstOrDefault(q => q.Value == amount);
-            else
-                return CategoryStatus.WrongCategory;
-            
-            if (clue == null) return CategoryStatus.WrongAmount;
+            JClue clue = null;
+            foreach (var (cat, clues) in _clues)
+            {
+                if (!cat.SanitizeStringFull().Contains(category, StringComparison.OrdinalIgnoreCase)) continue;
+                clue = clues.FirstOrDefault(q => q.Value == amount);
+                if (clue == null) return CategoryStatus.WrongAmount;
+                break;
+            }
+
+            if (clue == null) return CategoryStatus.WrongCategory;
             if (!clue.Available) return CategoryStatus.UnavailableClue;
             CurrentClue = clue;
             CurrentClue.Available = false;
