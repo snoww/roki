@@ -10,9 +10,7 @@ namespace Roki.Core.Services.Database.Models
         [Key]
         public int Id { get; set; }
         public ulong SellerId { get; set; }
-        [Column("item")]
         public string ItemName { get; set; }
-        [Column("details")]
         public string ItemDetails { get; set; }
         public string Description { get; set; } = "-";
         public string Category { get; set; }
