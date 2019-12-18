@@ -61,6 +61,7 @@ namespace Roki.Modules.Games.Common
                     .WithDescription("Welcome to Jeopardy!\nGame is starting soon ...")
                     .WithFooter("Responses must be in question form"))
                 .ConfigureAwait(false);
+            await Channel.TriggerTypingAsync().ConfigureAwait(false);
             await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             while (!StopGame)
             {
