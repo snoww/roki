@@ -70,12 +70,12 @@ namespace Roki.Modules.Games.Common
                 while (catStatus != CategoryStatus.Success)
                 {
                     if (catStatus == CategoryStatus.UnavailableClue)
-                        await Channel.SendErrorAsync("That clue is not available.\n Please try again.").ConfigureAwait(false);
+                        await Channel.SendErrorAsync("That clue is not available.\nPlease try again.").ConfigureAwait(false);
                     else if (catStatus == CategoryStatus.WrongAmount)
-                        await Channel.SendErrorAsync("There are no clues available for that amount.\n Please try again.")
+                        await Channel.SendErrorAsync("There are no clues available for that amount.\nPlease try again.")
                             .ConfigureAwait(false);
                     else if (catStatus == CategoryStatus.WrongCategory)
-                        await Channel.SendErrorAsync("No such category found.\n Please try again.").ConfigureAwait(false);
+                        await Channel.SendErrorAsync("No such category found.\nPlease try again.").ConfigureAwait(false);
                     else
                     {
                         await Channel.SendErrorAsync("No response received, stopping Jeopardy! game.").ConfigureAwait(false);
@@ -161,14 +161,14 @@ namespace Roki.Modules.Games.Common
             if (msg == null) return CategoryStatus.NoResponse;
             
             var message = msg.Content.SanitizeStringFull().ToLowerInvariant();
-            int.TryParse(new string(message.Substring(message.LastIndexOf("for", StringComparison.OrdinalIgnoreCase))
-                    .Where(char.IsDigit).ToArray()),
-                out var amount);
+            var category = message.Substring(0, message.LastIndexOf("for", StringComparison.OrdinalIgnoreCase));
+            var price = message.Substring(message.LastIndexOf("for", StringComparison.OrdinalIgnoreCase));
+            int.TryParse(new string(price.Where(char.IsDigit).ToArray()), out var amount);
 
             JClue clue;
-            if (message.Contains(_clues.First().Key.SanitizeStringFull(), StringComparison.OrdinalIgnoreCase))
+            if (_clues.First().Key.SanitizeStringFull().Contains(category, StringComparison.OrdinalIgnoreCase))
                 clue = _clues.First().Value.FirstOrDefault(q => q.Value == amount);
-            else if (message.Contains(_clues.Last().Key.SanitizeStringFull(), StringComparison.OrdinalIgnoreCase))
+            else if (_clues.Last().Key.SanitizeStringFull().Contains(category, StringComparison.OrdinalIgnoreCase))
                 clue = _clues.Last().Value.FirstOrDefault(q => q.Value == amount);
             else
                 return CategoryStatus.WrongCategory;
