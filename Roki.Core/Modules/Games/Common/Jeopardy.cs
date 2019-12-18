@@ -233,6 +233,7 @@ namespace Roki.Modules.Games.Common
             Task Handler(SocketMessage message)
             {
                 if (message.Channel.Id != Channel.Id || message.Author.IsBot) return Task.CompletedTask;
+                if (StopGame) cancelTrigger.SetResult(true);
                 var content = message.Content.SanitizeStringFull().ToLowerInvariant();
                 if (!content.Contains("for", StringComparison.Ordinal) && !Regex.IsMatch(content, "\\d\\d\\d+"))
                     return Task.CompletedTask;
