@@ -69,7 +69,7 @@ namespace Roki.Modules.Games.Common
                 await ShowCategories().ConfigureAwait(false);
                 var catResponse = await CategoryHandler().ConfigureAwait(false);
                 var catStatus = ParseCategoryAndClue(catResponse);
-                while (catStatus != CategoryStatus.Success && !StopGame)
+                while (catStatus != CategoryStatus.Success)
                 {
                     if (catStatus == CategoryStatus.UnavailableClue)
                         await Channel.SendErrorAsync("That clue is not available.\nPlease try again.").ConfigureAwait(false);
