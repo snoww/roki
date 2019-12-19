@@ -52,8 +52,9 @@ namespace Roki.Modules.Games.Services
                     Answer = document.Answer,
                     Value = clue.Value
                 };
-            
-            var final = query.OrderBy(c => Guid.NewGuid()).First();
+
+            var guid = Guid.NewGuid();
+            var final = query.OrderBy(c => guid).First();
             final.SanitizeAnswer();
             return final;
         }
