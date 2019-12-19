@@ -311,6 +311,7 @@ namespace Roki.Modules.Games.Common
                         wager = -1;
                         await dm.SendErrorAsync($"You cannot wager more than your score.\nThe maximum you can wager is: `${amount:N0}`")
                             .ConfigureAwait(false);
+                        response = await ReplyHandler(dm.Id, true).ConfigureAwait(false);
                     }
                     
                     _users.AddOrUpdate(user, -wager, (u, old) => old - wager);
