@@ -53,7 +53,9 @@ namespace Roki.Modules.Games.Services
                     Value = clue.Value
                 };
             
-            return query.OrderBy(c => Guid.NewGuid()).First();
+            var final = query.OrderBy(c => Guid.NewGuid()).First();
+            final.SanitizeAnswer();
+            return final;
         }
 
         private List<JClue> ValidateGame(IList<JClue> game)
