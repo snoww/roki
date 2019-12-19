@@ -123,7 +123,7 @@ namespace Roki.Modules.Games.Common
                     await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.Red)
                             .WithAuthor("Jeopardy!")
                             .WithTitle("Times Up!")
-                            .WithDescription($"The correct answer was: `{CurrentClue.Answer}`"))
+                            .WithDescription($"The correct answer was:\n`{CurrentClue.Answer}`"))
                         .ConfigureAwait(false);
                 }
                 
@@ -131,9 +131,17 @@ namespace Roki.Modules.Games.Common
                 await Task.Delay(TimeSpan.FromSeconds(7)).ConfigureAwait(false);
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(7)).ConfigureAwait(false); 
+            await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             if (!StopGame && FinalJeopardy != null)
+            {
+                await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+                        .WithAuthor("Jeopardy!")
+                        .WithTitle("Current Winnings")
+                        .WithDescription(GetLeaderboard()))
+                    .ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
                 await StartFinalJeopardy().ConfigureAwait(false);
+            }
         }
 
         public async Task EnsureStopped()
@@ -231,7 +239,7 @@ namespace Roki.Modules.Games.Common
                     await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                             .WithAuthor("Jeopardy!")
                             .WithTitle($"{CurrentClue.Category} - ${CurrentClue.Value}")
-                            .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was: `{CurrentClue.Answer}`\n" +
+                            .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was:\n`{CurrentClue.Answer}`\n" +
                                              $"Your total score is: `{_users[msg.Author]:N0}`"))
                         .ConfigureAwait(false);
                 }
@@ -275,7 +283,7 @@ namespace Roki.Modules.Games.Common
                 
             await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithAuthor("Final Jeopardy!")
-                    .WithDescription($"The correct answer is: `{FinalJeopardy.Answer}`"))
+                    .WithDescription($"The correct answer is:\n`{FinalJeopardy.Answer}`"))
                 .ConfigureAwait(false);
 
             await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
@@ -381,7 +389,7 @@ namespace Roki.Modules.Games.Common
                                 await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
                                         .WithAuthor("Final Jeopardy!")
                                         .WithTitle($"{FinalJeopardy.Category}")
-                                        .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was: `{FinalJeopardy.Answer}`\n" +
+                                        .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was:\n`{FinalJeopardy.Answer}`\n" +
                                                          $"Your total score is: `{_users[msg.Author]:N0}`"))
                                     .ConfigureAwait(false);
                             }
