@@ -313,6 +313,12 @@ namespace Roki.Modules.Games.Common
                             .ConfigureAwait(false);
                         response = await ReplyHandler(dm.Id, true).ConfigureAwait(false);
                     }
+
+                    await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
+                            .WithAuthor("Final Jeopardy!")
+                            .WithDescription(
+                                $"You successfully wagered `${wager}`\nPlease wait until all other participants have submitted their wager."))
+                        .ConfigureAwait(false);
                     
                     _users.AddOrUpdate(user, -wager, (u, old) => old - wager);
                     _confirmed.TryTake(out var _);
