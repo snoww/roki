@@ -131,6 +131,7 @@ namespace Roki.Modules.Games.Common
                 await Task.Delay(TimeSpan.FromSeconds(7)).ConfigureAwait(false);
             }
 
+            await Task.Delay(TimeSpan.FromSeconds(7)).ConfigureAwait(false); 
             if (!StopGame && FinalJeopardy != null)
                 await StartFinalJeopardy().ConfigureAwait(false);
         }
@@ -277,9 +278,9 @@ namespace Roki.Modules.Games.Common
                 .ConfigureAwait(false);
 
             await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
-                    .WithAuthor("Jeopardy!")
-                    .WithTitle("Final Jeopardy! results")
-                    .WithDescription(string.Join("\n", _finalJeopardyAnswers)))
+                    .WithAuthor("Final Jeopardy!")
+                    .WithTitle("Results")
+                    .WithDescription(_finalJeopardyAnswers.Count > 0 ? string.Join("\n", _finalJeopardyAnswers) : "No wagers."))
                 .ConfigureAwait(false);
         }
 
