@@ -13,31 +13,42 @@ namespace Roki.Modules.Games.Common
         public int Value { get; set; }
         public bool Available { get; set; } = true;
 
-        public bool CheckAnswer(string answer)
+        private string MinAnswer { get; set; }
+        private string OptionalAnswer { get; set; }
+
+        public void SanitizeAnswer()
         {
             var minAnswer = Regex.Replace(Answer.ToLowerInvariant(), "^the |a |an ", "");
-            answer = SanitizeAnswer(answer);
             // if it contains an optional answer
             if (Answer.Contains('(', StringComparison.Ordinal) && Answer.Contains(')', StringComparison.Ordinal))
             {
-                var optionalAnswer = minAnswer.SanitizeStringFull();
+                OptionalAnswer = minAnswer.SanitizeStringFull();
                 minAnswer = Regex.Replace(minAnswer, "(\\[.*\\])|(\".*\")|('.*')|(\\(.*\\))", "");
-                var optLev = new Levenshtein(optionalAnswer);
-                if (optLev.DistanceFrom(answer) <= Math.Round(optionalAnswer.Length * 0.1))
+            }
+
+            MinAnswer = minAnswer.SanitizeStringFull();
+        }
+
+        public bool CheckAnswer(string answer)
+        {
+            answer = SanitizeAnswer(answer);
+            if (!string.IsNullOrEmpty(OptionalAnswer))
+            {
+                var optLev = new Levenshtein(OptionalAnswer);
+                if (optLev.DistanceFrom(answer) <= Math.Round(OptionalAnswer.Length * 0.1))
                     return true;
             }
-            minAnswer = minAnswer.SanitizeStringFull();
-            
-            var minLev = new Levenshtein(minAnswer);
+
+            var minLev = new Levenshtein(MinAnswer);
             var distance = minLev.DistanceFrom(answer);
             if (distance == 0)
                 return true;
-            if (minAnswer.Length <= 5)
+            if (MinAnswer.Length <= 5)
                 return distance == 0;
-            if (minAnswer.Length <= 9)
+            if (MinAnswer.Length <= 9)
                 return distance <= 1;
 
-            return distance <= Math.Round(minAnswer.Length * 0.15);
+            return distance <= Math.Round(MinAnswer.Length * 0.15);
         }
 
         private static string SanitizeAnswer(string answer)

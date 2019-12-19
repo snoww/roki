@@ -48,6 +48,8 @@ namespace Roki.Modules.Games.Services
                 validated.Add(game.First(g => g.Value == 600));
                 validated.Add(game.First(g => g.Value == 800));
                 validated.Add(game.First(g => g.Value == 1000));
+                
+                validated.ForEach(c => c.SanitizeAnswer());
                 return validated;
             }
             catch
