@@ -128,7 +128,7 @@ namespace Roki.Modules.Games.Common
                 }
                 
                 if (!AvailableClues()) return;
-                await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromSeconds(7)).ConfigureAwait(false);
             }
 
             if (!StopGame && FinalJeopardy != null)
