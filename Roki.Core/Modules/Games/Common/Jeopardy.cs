@@ -61,7 +61,7 @@ namespace Roki.Modules.Games.Common
         {
             await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithTitle("Jeopardy!")
-                    .WithDescription("Welcome to Jeopardy!\nGame is starting soon ...")
+                    .WithDescription("Welcome to Jeopardy!\nGame is starting soon...")
                     .WithFooter("Responses must be in question form"))
                 .ConfigureAwait(false);
             await Channel.TriggerTypingAsync().ConfigureAwait(false);
