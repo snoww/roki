@@ -296,7 +296,7 @@ namespace Roki.Modules.Games.Common
 
                     var response = await ReplyHandler(dm.Id, true).ConfigureAwait(false);
                     var wager = -1;
-                    while (wager != -1)
+                    while (wager == -1)
                     {
                         if (response == null)
                         {
