@@ -34,7 +34,7 @@ namespace Roki.Modules.Games.Common
         
         public JClue CurrentClue { get; private set; }
         private JClue FinalJeopardy { get; set; }
-        private readonly List<string> _finalJeopardyAnswers = new List<string>();
+        private readonly Dictionary<ulong, string> _finalJeopardyAnswers = new Dictionary<ulong, string>();
 
         private readonly ConcurrentDictionary<IUser, int> _users = new ConcurrentDictionary<IUser, int>();
         private readonly ConcurrentBag<bool> _confirmed = new ConcurrentBag<bool>();
@@ -262,7 +262,8 @@ namespace Roki.Modules.Games.Common
             {
                 await Task.Delay(1000).ConfigureAwait(false);
             }
-                
+            await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+
             await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithAuthor("Final Jeopardy!")
                     .WithTitle($"{FinalJeopardy.Category}")
@@ -280,7 +281,7 @@ namespace Roki.Modules.Games.Common
             await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithAuthor("Final Jeopardy!")
                     .WithTitle("Results")
-                    .WithDescription(_finalJeopardyAnswers.Count > 0 ? string.Join("\n", _finalJeopardyAnswers) : "No wagers."))
+                    .WithDescription(_finalJeopardyAnswers.Count > 0 ? string.Join("\n", _finalJeopardyAnswers.Values) : "No wagers."))
                 .ConfigureAwait(false);
         }
 
@@ -328,6 +329,7 @@ namespace Roki.Modules.Games.Common
                         await Task.Delay(1000).ConfigureAwait(false);
                     }
 
+                    await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
                     await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
                             .WithAuthor("Final Jeopardy!")
                             .WithTitle($"{FinalJeopardy.Category}")
@@ -335,6 +337,7 @@ namespace Roki.Modules.Games.Common
                             .WithFooter($"Your wager is ${wager:N0}"))
                         .ConfigureAwait(false);
 
+                    _finalJeopardyAnswers.Add(user.Id, $"{user.Username}: `${wager}` - `No Answer`");
                     var cancel = new CancellationTokenSource();
                     try
                     {
@@ -364,13 +367,13 @@ namespace Roki.Modules.Games.Common
                                 if (FinalJeopardy.CheckAnswer(msg.Content) && !cancel.IsCancellationRequested)
                                 {
                                     _users.AddOrUpdate(msg.Author, wager * 2, (u, old) => old + wager * 2);
-                                    _finalJeopardyAnswers.Add($"{user.Username}: `${wager}` - {msg.Content}");
+                                    _finalJeopardyAnswers[user.Id] = $"{user.Username}: `${wager}` - {msg.Content}";
                                     guess = true;
                                 }
 
                                 if (!guess)
                                 {
-                                    _finalJeopardyAnswers.Add($"{user.Username}: `${wager}` - {msg.Content.TrimTo(100)}");
+                                    _finalJeopardyAnswers[user.Id] = $"{user.Username}: `${wager}` - {msg.Content.TrimTo(100)}";
                                     return;
                                 }
                                 cancel.Cancel();
