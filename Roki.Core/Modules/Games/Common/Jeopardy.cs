@@ -359,7 +359,7 @@ namespace Roki.Modules.Games.Common
                         {
                             try
                             {
-                                if (msg.Author.IsBot || msg.Channel != dm || !Regex.IsMatch(msg.Content.ToLowerInvariant(), "^what|where|who")) return;
+                                if (msg.Author.IsBot || msg.Channel.Id != dm.Id || !Regex.IsMatch(msg.Content.ToLowerInvariant(), "^what|where|who")) return;
                                 var guess = false;
                                 if (FinalJeopardy.CheckAnswer(msg.Content) && !cancel.IsCancellationRequested)
                                 {
