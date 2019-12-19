@@ -380,7 +380,7 @@ namespace Roki.Modules.Games.Common
 
                                 await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
                                         .WithAuthor("Final Jeopardy!")
-                                        .WithTitle($"{FinalJeopardy.Category} - ${FinalJeopardy.Value}")
+                                        .WithTitle($"{FinalJeopardy.Category}")
                                         .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was: `{FinalJeopardy.Answer}`\n" +
                                                          $"Your total score is: `{_users[msg.Author]:N0}`"))
                                     .ConfigureAwait(false);
