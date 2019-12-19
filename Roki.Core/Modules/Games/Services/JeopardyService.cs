@@ -37,6 +37,25 @@ namespace Roki.Modules.Games.Services
             return qs;
         }
 
+        public JClue GetFinalJeopardy()
+        {
+            using var uow = _db.GetDbContext();
+            var query = from clue in uow.Context.Set<Clues>()
+                join document in uow.Context.Set<Documents>() on clue.Id equals document.Id
+                join classification in uow.Context.Set<Classification>() on clue.Id equals classification.ClueId
+                join categories in uow.Context.Set<Categories>() on classification.CategoryId equals categories.Id
+                where clue.Round == 3
+                select new JClue
+                {
+                    Category = categories.Category,
+                    Clue = document.Clue,
+                    Answer = document.Answer,
+                    Value = clue.Value
+                };
+            
+            return query.OrderBy(c => Guid.NewGuid()).First();
+        }
+
         private List<JClue> ValidateGame(IList<JClue> game)
         {
             var validated = new List<JClue>();
