@@ -61,9 +61,10 @@ namespace Roki.Modules.Games.Common
         {
             await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithTitle("Jeopardy!")
-                    .WithDescription("Welcome to Jeopardy! Game is starting soon ...")
+                    .WithDescription("Welcome to Jeopardy!\nGame is starting soon ...")
                     .WithFooter("Responses must be in question form"))
                 .ConfigureAwait(false);
+            await Channel.TriggerTypingAsync().ConfigureAwait(false);
             await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             while (!StopGame)
             {
@@ -126,7 +127,7 @@ namespace Roki.Modules.Games.Common
                         .ConfigureAwait(false);
                 }
                 
-                AvailableClues();
+                if (!AvailableClues()) return;
                 await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             }
 
@@ -159,9 +160,9 @@ namespace Roki.Modules.Games.Common
                 await Channel.SendErrorAsync("Jeopardy! game stopping after this question.").ConfigureAwait(false);
         }
 
-        private void AvailableClues()
+        private bool AvailableClues()
         {
-            StopGame = !_clues.Values.Any(clues => clues.Any(c => c.Available));
+            return _clues.Values.Any(clues => clues.Any(c => c.Available));
         }
         
         private async Task ShowCategories()
@@ -171,7 +172,7 @@ namespace Roki.Modules.Games.Common
                 .WithDescription($"Please choose an available category and price from below.\ni.e. `{_clues.First().Key} for 200`");
             foreach (var (category, clues) in _clues)
             {
-                embed.AddField(category, string.Join("\n", clues.Select(c => $"${(c.Available ? $"`{c.Value}`" : $"~~`{c.Value}`~~")}")));
+                embed.AddField(category, string.Join("\n", clues.Select(c => $"{(c.Available ? $"`${c.Value}`" : $"~~`${c.Value}`~~")}")), true);
             }
             
             await Channel.EmbedAsync(embed).ConfigureAwait(false);
@@ -186,16 +187,16 @@ namespace Roki.Modules.Games.Common
             var price = message.Substring(message.LastIndexOf("for", StringComparison.OrdinalIgnoreCase));
             int.TryParse(new string(price.Where(char.IsDigit).ToArray()), out var amount);
 
-            JClue clue;
-            // replace with foreach in future when adding more categories
-            if (_clues.First().Key.SanitizeStringFull().Contains(category, StringComparison.OrdinalIgnoreCase))
-                clue = _clues.First().Value.FirstOrDefault(q => q.Value == amount);
-            else if (_clues.Last().Key.SanitizeStringFull().Contains(category, StringComparison.OrdinalIgnoreCase))
-                clue = _clues.Last().Value.FirstOrDefault(q => q.Value == amount);
-            else
-                return CategoryStatus.WrongCategory;
-            
-            if (clue == null) return CategoryStatus.WrongAmount;
+            JClue clue = null;
+            foreach (var (cat, clues) in _clues)
+            {
+                if (!cat.SanitizeStringFull().ToLowerInvariant().Contains(category, StringComparison.Ordinal)) continue;
+                clue = clues.FirstOrDefault(q => q.Value == amount);
+                if (clue == null) return CategoryStatus.WrongAmount;
+                break;
+            }
+
+            if (clue == null) return CategoryStatus.WrongCategory;
             if (!clue.Available) return CategoryStatus.UnavailableClue;
             CurrentClue = clue;
             CurrentClue.Available = false;
