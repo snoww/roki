@@ -27,18 +27,20 @@ namespace Roki.Modules.Games.Common
         private readonly Dictionary<string, List<JClue>> _clues;
         private readonly Roki _roki;
 
-        public IGuild Guild { get; }
-        public ITextChannel Channel { get; }
+        private IGuild Guild { get; }
+        private ITextChannel Channel { get; }
 
         private CancellationTokenSource _cancel;
         
         public JClue CurrentClue { get; private set; }
         private JClue FinalJeopardy { get; set; }
-        
-        public ConcurrentDictionary<IUser, int> Users = new ConcurrentDictionary<IUser, int>();
-        
-        public bool CanGuess { get; private set; }
-        public bool StopGame { get; private set; }
+        private readonly List<string> _finalJeopardyAnswers = new List<string>();
+
+        private readonly ConcurrentDictionary<IUser, int> _users = new ConcurrentDictionary<IUser, int>();
+        private readonly ConcurrentBag<bool> _confirmed = new ConcurrentBag<bool>();
+
+        private bool CanGuess { get; set; }
+        private bool StopGame { get; set; }
         public readonly Color Color = Color.DarkBlue;
         
         public Jeopardy(DiscordSocketClient client, Dictionary<string, List<JClue>> clues, IGuild guild, ITextChannel channel, Roki roki, 
@@ -68,7 +70,7 @@ namespace Roki.Modules.Games.Common
                 _cancel = new CancellationTokenSource();
                 
                 await ShowCategories().ConfigureAwait(false);
-                var catResponse = await CategoryHandler().ConfigureAwait(false);
+                var catResponse = await ReplyHandler(Channel.Id).ConfigureAwait(false);
                 var catStatus = ParseCategoryAndClue(catResponse);
                 while (catStatus != CategoryStatus.Success)
                 {
@@ -85,7 +87,7 @@ namespace Roki.Modules.Games.Common
                         return;
                     }
                     
-                    catResponse = await CategoryHandler().ConfigureAwait(false);
+                    catResponse = await ReplyHandler(Channel.Id).ConfigureAwait(false);
                     catStatus = ParseCategoryAndClue(catResponse);
                 }
                 
@@ -141,8 +143,8 @@ namespace Roki.Modules.Games.Common
                     .WithDescription(GetLeaderboard()))
                 .ConfigureAwait(false);
 
-            if (!Users.Any()) return;
-            foreach (var (user, winnings) in Users)
+            if (!_users.Any()) return;
+            foreach (var (user, winnings) in _users)
             {
                 await _currency.ChangeAsync(user.Id, "Jeopardy Winnings", winnings, _client.CurrentUser.Id, user.Id, Guild.Id, Channel.Id, msg.Id)
                     .ConfigureAwait(false);
@@ -213,7 +215,7 @@ namespace Roki.Modules.Games.Common
                     {
                         if (CanGuess && CurrentClue.CheckAnswer(msg.Content) && !_cancel.IsCancellationRequested)
                         {
-                            Users.AddOrUpdate(msg.Author, CurrentClue.Value, (u, old) => old + CurrentClue.Value);
+                            _users.AddOrUpdate(msg.Author, CurrentClue.Value, (u, old) => old + CurrentClue.Value);
                             guess = true;
                         }
                     }
@@ -228,7 +230,7 @@ namespace Roki.Modules.Games.Common
                             .WithAuthor("Jeopardy!")
                             .WithTitle($"{CurrentClue.Category} - ${CurrentClue.Value}")
                             .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was: `{CurrentClue.Answer}`\n" +
-                                             $"Your total score is: `{Users[msg.Author]:N0}`"))
+                                             $"Your total score is: `{_users[msg.Author]:N0}`"))
                         .ConfigureAwait(false);
                 }
                 catch (Exception e)
@@ -239,24 +241,44 @@ namespace Roki.Modules.Games.Common
             return Task.CompletedTask;
         }
 
-        private Task StartFinalJeopardy()
+        private async Task StartFinalJeopardy()
         {
-            var _ = Task.Run(async () =>
+            await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+                    .WithAuthor("Jeopardy!")
+                    .WithTitle("Final Jeopardy!")
+                    .WithDescription("Check your DMs to play the Final Jeopardy!")
+                    .WithFooter("You must have a score to play the Final Jeopardy!"))
+                .ConfigureAwait(false);
+                
+            foreach (var (user, amount) in _users)
             {
-                await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
-                        .WithAuthor("Jeopardy!")
-                        .WithTitle("Final Jeopardy!")
-                        .WithDescription("Check your DMs to play the Final Jeopardy!")
-                        .WithFooter("You must have a score to play the Final Jeopardy!"))
-                    .ConfigureAwait(false);
+                _confirmed.Add(true);
+                await DmFinalJeopardy(user, amount).ConfigureAwait(false);
+            }
+                
+            while (!_confirmed.IsEmpty)
+            {
+                await Task.Delay(1000).ConfigureAwait(false);
+            }
+                
+            await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+                    .WithAuthor("Final Jeopardy!")
+                    .WithTitle($"{FinalJeopardy.Category}")
+                    .WithDescription(FinalJeopardy.Clue))
+                .ConfigureAwait(false);
+                
+            await Task.Delay(TimeSpan.FromSeconds(35)).ConfigureAwait(false);
+                
+            await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+                    .WithAuthor("Final Jeopardy!")
+                    .WithDescription($"The correct answer is: `{FinalJeopardy.Answer}`"))
+                .ConfigureAwait(false);
 
-                foreach (var (user, amount) in Users)
-                {
-                    await DmFinalJeopardy(user, amount).ConfigureAwait(false);
-                }
-            });
-            
-            return Task.CompletedTask;
+            await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+                    .WithAuthor("Jeopardy!")
+                    .WithTitle("Final Jeopardy! results")
+                    .WithDescription(string.Join("\n", _finalJeopardyAnswers)))
+                .ConfigureAwait(false);
         }
 
         private Task DmFinalJeopardy(IUser user, int amount)
@@ -270,17 +292,105 @@ namespace Roki.Modules.Games.Common
                             .WithTitle("Final Jeopardy!")
                             .WithDescription($"Please make your wager. You're current score is: `${amount:N0}`"))
                         .ConfigureAwait(false);
+
+                    var response = await ReplyHandler(dm.Id, true).ConfigureAwait(false);
+                    var wager = -1;
+                    while (wager != -1)
+                    {
+                        if (response == null)
+                        {
+                            await dm.SendErrorAsync("No response received. You are removed from the Final Jeopardy!").ConfigureAwait(false);
+                            _confirmed.TryTake(out var _);
+                            return;
+                        }
+
+                        int.TryParse(new string(response.Content.Where(char.IsDigit).ToArray()), out wager);
+                        if (wager <= amount) continue;
+                        wager = -1;
+                        await dm.SendErrorAsync($"You cannot wager more than your score.\nThe maximum you can wager is: `${amount:N0}`")
+                            .ConfigureAwait(false);
+                    }
+                    
+                    _users.AddOrUpdate(user, -wager, (u, old) => old - wager);
+                    _confirmed.TryTake(out var _);
+                    while (!_confirmed.IsEmpty)
+                    {
+                        await Task.Delay(1000).ConfigureAwait(false);
+                    }
+
+                    await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
+                            .WithAuthor("Final Jeopardy!")
+                            .WithTitle($"{FinalJeopardy.Category} - Your wager is `${wager:N0}`")
+                            .WithDescription(FinalJeopardy.Clue)
+                            .WithFooter("You have 35 seconds to submit your answers!"))
+                        .ConfigureAwait(false);
+
+                    var cancel = new CancellationTokenSource();
+                    try
+                    {
+                        _client.MessageReceived += FinalJeopardyGuessHandler;
+                        await Task.Delay(TimeSpan.FromSeconds(35), cancel.Token).ConfigureAwait(false);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        //
+                    }
+                    finally
+                    {
+                        _client.MessageReceived -= FinalJeopardyGuessHandler;
+                        await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
+                                .WithDescription("Please return back to the channel for final results."))
+                            .ConfigureAwait(false);
+                    }
+                    
+                    Task FinalJeopardyGuessHandler(SocketMessage msg)
+                    {
+                        var __ = Task.Run(async () =>
+                        {
+                            try
+                            {
+                                if (msg.Author.IsBot || msg.Channel != dm || !Regex.IsMatch(msg.Content.ToLowerInvariant(), "^what|where|who")) return;
+                                var guess = false;
+                                if (FinalJeopardy.CheckAnswer(msg.Content) && !cancel.IsCancellationRequested)
+                                {
+                                    _users.AddOrUpdate(msg.Author, wager * 2, (u, old) => old + wager * 2);
+                                    _finalJeopardyAnswers.Add($"{user.Username}: `${wager}` - {msg.Content}");
+                                    guess = true;
+                                }
+
+                                if (!guess)
+                                {
+                                    _finalJeopardyAnswers.Add($"{user.Username}: `${wager}` - {msg.Content.TrimTo(100)}");
+                                    return;
+                                }
+                                cancel.Cancel();
+
+                                await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
+                                        .WithAuthor("Final Jeopardy!")
+                                        .WithTitle($"{FinalJeopardy.Category} - ${FinalJeopardy.Value}")
+                                        .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was: `{FinalJeopardy.Answer}`\n" +
+                                                         $"Your total score is: `{_users[msg.Author]:N0}`"))
+                                    .ConfigureAwait(false);
+                            }
+                            catch (Exception e)
+                            {
+                                _log.Warn(e);
+                            }
+                        });
+
+                        return Task.CompletedTask;
+                    }
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    _log.Warn(e);
                 }
             });
             
             return Task.CompletedTask;
         }
         
-        private async Task<SocketMessage> CategoryHandler(TimeSpan? timeout = null)
+        private async Task<SocketMessage> ReplyHandler(ulong channelId, bool isFinal = false, TimeSpan? timeout = null)
         {
             timeout ??= TimeSpan.FromSeconds(35);
             var eventTrigger = new TaskCompletionSource<SocketMessage>();
@@ -288,8 +398,10 @@ namespace Roki.Modules.Games.Common
 
             Task Handler(SocketMessage message)
             {
-                if (message.Channel.Id != Channel.Id || message.Author.IsBot) return Task.CompletedTask;
+                if (message.Channel.Id != channelId || message.Author.IsBot) return Task.CompletedTask;
                 var content = message.Content.SanitizeStringFull().ToLowerInvariant();
+                if (isFinal && Regex.IsMatch(content, "\\d+")) 
+                    eventTrigger.SetResult(message);
                 if (content.Contains("for", StringComparison.Ordinal) && Regex.IsMatch(content, "\\d\\d\\d+"))
                     eventTrigger.SetResult(message);
 
@@ -312,11 +424,11 @@ namespace Roki.Modules.Games.Common
 
         public string GetLeaderboard()
         {
-            if (Users.Count == 0)
+            if (_users.Count == 0)
                 return "No one is on the leaderboard.";
             
             var lb = new StringBuilder();
-            foreach (var (user, value) in Users.OrderByDescending(k => k.Value))
+            foreach (var (user, value) in _users.OrderByDescending(k => k.Value))
             {
                 lb.AppendLine($"{user.Username} `{value:N0}` {_roki.Properties.CurrencyIcon}");
             }
