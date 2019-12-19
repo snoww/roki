@@ -56,7 +56,7 @@ namespace Roki.Modules.Help.Services
                 .AddField("Usage", info.RealRemarks(prefix), true)
                 .WithFooter($"Module: {info.Module.GetTopLevelModule().Name}");
 
-            var options = ((RokiOptionsAttribute) info.Attributes.FirstOrDefault(x => x is RokiOptionsAttribute))?.OptionType;
+            var options = ((RokiOptions) info.Attributes.FirstOrDefault(x => x is RokiOptions))?.OptionType;
             if (options != null)
             {
                 var helpString = GetCommandOptionHelp(options);

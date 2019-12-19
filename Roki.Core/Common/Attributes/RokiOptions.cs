@@ -3,9 +3,9 @@ using System;
 namespace Roki.Common.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public sealed class RokiOptionsAttribute : Attribute
+    public sealed class RokiOptions : Attribute
     {
-        public RokiOptionsAttribute(Type t)
+        public RokiOptions(Type t)
         {
             OptionType = t;
         }

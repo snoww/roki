@@ -20,16 +20,16 @@ namespace Roki.Modules.Games.Services
             _db = db;
         }
 
-        public Dictionary<string, List<JClue>> GenerateGame()
+        public Dictionary<string, List<JClue>> GenerateGame(int categories)
         {
             var qs = new Dictionary<string, List<JClue>>();
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < categories; i++)
             {
-                var cat = GetRandomCategories();
+                var cat = GetRandomCategory();
                 var valid = ValidateGame(GetRandomQuestions(cat.Id));
                 while (valid == null)
                 {
-                    cat = GetRandomCategories();
+                    cat = GetRandomCategory();
                     valid = ValidateGame(GetRandomQuestions(cat.Id));
                 }
                 qs.Add(cat.Category, valid);
@@ -78,7 +78,7 @@ namespace Roki.Modules.Games.Services
             return query.ToList();
         }
 
-        private Categories GetRandomCategories()
+        private Categories GetRandomCategory()
         {
             using var uow = _db.GetDbContext();
             var rng = new Random();

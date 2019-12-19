@@ -33,16 +33,16 @@ namespace Roki.Modules.Games.Common
         private CancellationTokenSource _cancel;
         
         public JClue CurrentClue { get; private set; }
+        private JClue FinalJeopardy { get; set; }
         
         public ConcurrentDictionary<IUser, int> Users = new ConcurrentDictionary<IUser, int>();
         
         public bool CanGuess { get; private set; }
         public bool StopGame { get; private set; }
         public readonly Color Color = Color.DarkBlue;
-//        private Dictionary<int, bool> _choices1 = new Dictionary<int, bool> {{200, false},{400, false},{600, false},{800, false},{1000, false}};
-//        private Dictionary<int, bool> _choices2 = new Dictionary<int, bool> {{200, false},{400, false},{600, false},{800, false},{1000, false}};
         
-        public Jeopardy(DiscordSocketClient client, Dictionary<string, List<JClue>> clues, IGuild guild, ITextChannel channel, Roki roki, ICurrencyService currency)
+        public Jeopardy(DiscordSocketClient client, Dictionary<string, List<JClue>> clues, IGuild guild, ITextChannel channel, Roki roki, 
+            ICurrencyService currency, JClue finalJeopardy = null)
         {
             _log = LogManager.GetCurrentClassLogger();
             _client = client;
@@ -52,6 +52,7 @@ namespace Roki.Modules.Games.Common
             Channel = channel;
             _roki = roki;
             _currency = currency;
+            FinalJeopardy = finalJeopardy;
         }
 
         public async Task StartGame()
