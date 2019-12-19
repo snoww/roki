@@ -366,7 +366,7 @@ namespace Roki.Modules.Games.Common
                                 var guess = false;
                                 if (FinalJeopardy.CheckAnswer(msg.Content) && !cancel.IsCancellationRequested)
                                 {
-                                    _users.AddOrUpdate(msg.Author, wager * 2, (u, old) => old + wager * 2);
+                                    _users.AddOrUpdate(user, wager * 2, (u, old) => old + wager * 2);
                                     _finalJeopardyAnswers[user.Id] = $"{user.Username}: `${wager}` - {msg.Content}";
                                     guess = true;
                                 }
