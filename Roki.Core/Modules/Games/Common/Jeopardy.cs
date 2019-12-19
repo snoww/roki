@@ -71,7 +71,7 @@ namespace Roki.Modules.Games.Common
                 _cancel = new CancellationTokenSource();
                 
                 await ShowCategories().ConfigureAwait(false);
-                var catResponse = await ReplyHandler(Channel.Id).ConfigureAwait(false);
+                var catResponse = await ReplyHandler(Channel.Id, timeout: TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                 var catStatus = ParseCategoryAndClue(catResponse);
                 while (catStatus != CategoryStatus.Success)
                 {
@@ -88,7 +88,7 @@ namespace Roki.Modules.Games.Common
                         return;
                     }
                     
-                    catResponse = await ReplyHandler(Channel.Id).ConfigureAwait(false);
+                    catResponse = await ReplyHandler(Channel.Id, timeout: TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                     catStatus = ParseCategoryAndClue(catResponse);
                 }
                 
