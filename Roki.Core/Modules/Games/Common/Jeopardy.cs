@@ -265,7 +265,8 @@ namespace Roki.Modules.Games.Common
             await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithAuthor("Final Jeopardy!")
                     .WithTitle($"{FinalJeopardy.Category}")
-                    .WithDescription(FinalJeopardy.Clue))
+                    .WithDescription(FinalJeopardy.Clue)
+                    .WithFooter("Note: your answers will not be checked here"))
                 .ConfigureAwait(false);
                 
             await Task.Delay(TimeSpan.FromSeconds(35)).ConfigureAwait(false);
@@ -321,9 +322,9 @@ namespace Roki.Modules.Games.Common
 
                     await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
                             .WithAuthor("Final Jeopardy!")
-                            .WithTitle($"{FinalJeopardy.Category} - Your wager is `${wager:N0}`")
+                            .WithTitle($"{FinalJeopardy.Category}")
                             .WithDescription(FinalJeopardy.Clue)
-                            .WithFooter("You have 35 seconds to submit your answers!"))
+                            .WithFooter($"Your wager is ${wager:N0}"))
                         .ConfigureAwait(false);
 
                     var cancel = new CancellationTokenSource();
