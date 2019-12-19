@@ -44,7 +44,7 @@ namespace Roki.Modules.Help
         [RokiCommand, Description, Usage, Aliases, RokiOptions(typeof(CommandOptions))]
         public async Task Commands(string module = null, params string[] args)
         {
-            var (opts, _) = OptionParser.ParseFrom(new CommandOptions(), args);
+            var (opts, _) = OptionsParser.ParseFrom(new CommandOptions(), args);
 
             module = module?.Trim().ToUpperInvariant();
             if (string.IsNullOrWhiteSpace(module))

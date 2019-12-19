@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Roki.Common;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
 using Roki.Extensions;
@@ -30,10 +31,13 @@ namespace Roki.Modules.Games
 
             [RokiCommand, Description, Aliases, Usage]
             [RequireContext(ContextType.Guild)]
-            public async Task Jeopardy()
+            [RokiOptions(typeof(JeopardyOptions))]
+            public async Task Jeopardy(params string[] args)
             {
+                var (opts, _) = OptionsParser.ParseFrom(new JeopardyOptions(), args);
+                
                 var channel = (ITextChannel) ctx.Channel;
-                var questions = _service.GenerateGame();
+                var questions = _service.GenerateGame(opts.NumCategories);
                 var jeopardy = new Jeopardy(_client, questions, channel.Guild, channel, _roki, _currency);
 
                 if (_service.ActiveGames.TryAdd(channel.Id, jeopardy))
