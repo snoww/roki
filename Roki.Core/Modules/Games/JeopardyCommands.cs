@@ -38,7 +38,10 @@ namespace Roki.Modules.Games
                 
                 var channel = (ITextChannel) ctx.Channel;
                 var questions = _service.GenerateGame(opts.NumCategories);
-                var jeopardy = new Jeopardy(_client, questions, channel.Guild, channel, _roki, _currency);
+
+                var jeopardy = opts.FinalJeopardy 
+                    ? new Jeopardy(_client, questions, channel.Guild, channel, _roki, _currency, _service.GetFinalJeopardy()) 
+                    : new Jeopardy(_client, questions, channel.Guild, channel, _roki, _currency);
 
                 if (_service.ActiveGames.TryAdd(channel.Id, jeopardy))
                 {

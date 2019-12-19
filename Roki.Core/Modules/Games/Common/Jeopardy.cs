@@ -127,6 +127,9 @@ namespace Roki.Modules.Games.Common
                 AvailableClues();
                 await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             }
+
+            if (!StopGame && FinalJeopardy != null)
+                await StartFinalJeopardy().ConfigureAwait(false);
         }
 
         public async Task EnsureStopped()
@@ -233,6 +236,47 @@ namespace Roki.Modules.Games.Common
                     _log.Warn(e);
                 }
             });
+            return Task.CompletedTask;
+        }
+
+        private Task StartFinalJeopardy()
+        {
+            var _ = Task.Run(async () =>
+            {
+                await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+                        .WithAuthor("Jeopardy!")
+                        .WithTitle("Final Jeopardy!")
+                        .WithDescription("Check your DMs to play the Final Jeopardy!")
+                        .WithFooter("You must have a score to play the Final Jeopardy!"))
+                    .ConfigureAwait(false);
+
+                foreach (var (user, amount) in Users)
+                {
+                    await DmFinalJeopardy(user, amount).ConfigureAwait(false);
+                }
+            });
+            
+            return Task.CompletedTask;
+        }
+
+        private Task DmFinalJeopardy(IUser user, int amount)
+        {
+            var _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var dm = await user.GetOrCreateDMChannelAsync().ConfigureAwait(false);
+                    await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
+                            .WithTitle("Final Jeopardy!")
+                            .WithDescription($"Please make your wager. You're current score is: `${amount:N0}`"))
+                        .ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            });
+            
             return Task.CompletedTask;
         }
         
