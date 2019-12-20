@@ -10,8 +10,8 @@ namespace Roki.Modules.Games.Common
         
         public void NormalizeOptions()
         {
-            if (NumCategories > 5) 
-                NumCategories = 5;
+            if (NumCategories > 6) 
+                NumCategories = 6;
             if (NumCategories <= 0)
                 NumCategories = 2;
         }
