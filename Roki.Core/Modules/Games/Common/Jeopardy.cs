@@ -241,6 +241,7 @@ namespace Roki.Modules.Games.Common
                     }
                     finally
                     {
+                        GuessCount = 0;
                         _guess.Release();
                     }
                     if (!guess) return;
