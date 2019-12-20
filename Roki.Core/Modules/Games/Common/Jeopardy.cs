@@ -116,6 +116,7 @@ namespace Roki.Modules.Games.Common
                 finally
                 {
                     CanGuess = false;
+                    GuessCount = 0;
                     _client.MessageReceived -= GuessHandler;
                 }
 
@@ -241,12 +242,10 @@ namespace Roki.Modules.Games.Common
                     }
                     finally
                     {
-                        GuessCount = 0;
                         _guess.Release();
                     }
                     if (!guess) return;
                     _cancel.Cancel();
-
                     await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                             .WithAuthor("Jeopardy!")
                             .WithTitle($"{CurrentClue.Category} - ${CurrentClue.Value}")
