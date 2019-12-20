@@ -390,7 +390,7 @@ namespace Roki.Modules.Games.Common
                                         .WithAuthor("Final Jeopardy!")
                                         .WithTitle($"{FinalJeopardy.Category}")
                                         .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was:\n`{FinalJeopardy.Answer}`\n" +
-                                                         $"Your total score is: `{_users[msg.Author]:N0}`"))
+                                                         $"Your total score is: `{_users[user]:N0}`"))
                                     .ConfigureAwait(false);
                             }
                             catch (Exception e)
