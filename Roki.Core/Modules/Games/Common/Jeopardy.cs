@@ -220,15 +220,6 @@ namespace Roki.Modules.Games.Common
             {
                 try
                 {
-                    if (++GuessCount > 7)
-                    {
-                        GuessCount = 0;
-                        await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
-                                .WithAuthor("Jeopardy!")
-                                .WithTitle($"{CurrentClue.Category} - ${CurrentClue.Value}")
-                                .WithDescription(CurrentClue.Clue))
-                            .ConfigureAwait(false);
-                    }
                     if (msg.Author.IsBot || msg.Channel != Channel || !Regex.IsMatch(msg.Content.ToLowerInvariant(), "^what|where|who")) return;
                     var guess = false;
                     await _guess.WaitAsync().ConfigureAwait(false);
@@ -244,7 +235,20 @@ namespace Roki.Modules.Games.Common
                     {
                         _guess.Release();
                     }
-                    if (!guess) return;
+
+                    if (!guess)
+                    {
+                        if (++GuessCount > 6)
+                        {
+                            GuessCount = 0;
+                            await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+                                    .WithAuthor("Jeopardy!")
+                                    .WithTitle($"{CurrentClue.Category} - ${CurrentClue.Value}")
+                                    .WithDescription(CurrentClue.Clue))
+                                .ConfigureAwait(false);
+                        }
+                        return;
+                    }
                     _cancel.Cancel();
                     await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                             .WithAuthor("Jeopardy!")
