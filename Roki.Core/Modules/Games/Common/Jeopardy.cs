@@ -45,7 +45,7 @@ namespace Roki.Modules.Games.Common
         public readonly Color Color = Color.DarkBlue;
         
         public Jeopardy(DiscordSocketClient client, Dictionary<string, List<JClue>> clues, IGuild guild, ITextChannel channel, Roki roki, 
-            ICurrencyService currency, JClue finalJeopardy = null)
+            ICurrencyService currency, JClue finalJeopardy)
         {
             _log = LogManager.GetCurrentClassLogger();
             _client = client;
@@ -134,7 +134,7 @@ namespace Roki.Modules.Games.Common
             }
 
             await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
-            if (!StopGame && FinalJeopardy != null)
+            if (!StopGame && !_users.IsEmpty)
             {
                 await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                         .WithAuthor("Jeopardy!")
