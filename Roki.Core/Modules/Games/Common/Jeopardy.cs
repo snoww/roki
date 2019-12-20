@@ -220,7 +220,7 @@ namespace Roki.Modules.Games.Common
             {
                 try
                 {
-                    if (++GuessCount >= 7)
+                    if (++GuessCount > 7)
                     {
                         GuessCount = 0;
                         await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
