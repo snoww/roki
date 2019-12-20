@@ -1,7 +1,7 @@
 {
   "Prefix": ".",
   "BotId": 549644503351296040,
-  "CurrencyGenerationChance": 0.02,
+  "CurrencyGenerationChance": 0.005,
   "CurrencyGenerationCooldown": 10,
   "CurrencyGenIgnoredChannels": [
     233696207350923266,
@@ -11,9 +11,9 @@
   "CurrencyIcon": "<:stone:269130892100763649>",
   "CurrencyName": "Stone",
   "CurrencyNamePlural": "Stones",
-  "CurrencyDropAmount": 1,
-  "CurrencyDropAmountMax": 5,
-  "CurrencyDropAmountRare": 100,
+  "CurrencyDropAmount": 30,
+  "CurrencyDropAmountMax": 100,
+  "CurrencyDropAmountRare": 500,
   "Lottery4": 0.055,
   "Lottery5": 0.045,
   "LotteryJackpot": 0.9,
