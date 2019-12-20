@@ -20,9 +20,36 @@ namespace Roki.Modules.Games.Common
 
         public void SanitizeAnswer()
         {
-            var minAnswer = Regex.Replace(Answer.ToLowerInvariant(), "^the |a |an ", "");
+            //todo option1/option2
+
+            var minAnswer = Regex.Replace(Answer.ToLowerInvariant(), "^the |a |an ", "").Replace("and ", "", StringComparison.Ordinal);
+
+            if (minAnswer.StartsWith("(1 of)", StringComparison.Ordinal))
+            {
+                var answers = minAnswer.Replace("(1 of) ", "").Split(", ");
+                foreach (var answer in answers)
+                {
+                    _optionalAnswers.Add(Regex.Replace(answer.ToLowerInvariant(), "^the |a |an |", "").SanitizeStringFull());
+                }
+            }
+            else if (minAnswer.StartsWith("(2 of)", StringComparison.Ordinal))
+            {
+                var answers = minAnswer.Replace("(2 of) ", "").Split(", ");
+                foreach (var answer in answers)
+                {
+                    _optionalAnswers.Add(Regex.Replace(answer.ToLowerInvariant(), "^the |a |an |", "").SanitizeStringFull());
+                }
+            }
+            else if (minAnswer.StartsWith("(3 of)", StringComparison.Ordinal))
+            {
+                var answers = minAnswer.Replace("(3 of) ", "").Split(", ");
+                foreach (var answer in answers)
+                {
+                    _optionalAnswers.Add(Regex.Replace(answer.ToLowerInvariant(), "^the |a |an |", "").SanitizeStringFull());
+                }
+            }
             // if it contains an optional answer
-            if (Answer.Contains('(', StringComparison.Ordinal) && Answer.Contains(')', StringComparison.Ordinal))
+            else if (Answer.Contains('(', StringComparison.Ordinal) && Answer.Contains(')', StringComparison.Ordinal))
             {
                 // currently this wont be correctly split: "termite (in term itemize) (mite accepted)"
                 var optional = minAnswer.Split('(', ')')[1];
@@ -66,7 +93,24 @@ namespace Roki.Modules.Games.Common
 
         public bool CheckAnswer(string answer)
         {
+            
+            if (Answer.StartsWith("(2 of)", StringComparison.Ordinal) || Answer.StartsWith("(3 of)", StringComparison.Ordinal))
+            {
+                var answers = SanitizeToList(answer);
+                if (answers == null) return false;
+                var correct = answers
+                    .Select(ans => new Levenshtein(ans))
+                    .Count(ansLev => _optionalAnswers
+                        .Any(optionalAnswer => ansLev.DistanceFrom(optionalAnswer) <= Math.Round(optionalAnswer.Length * 0.1)));
+
+                if (Answer.StartsWith("(2 of)", StringComparison.Ordinal))
+                    return correct >= 2;
+                if (Answer.StartsWith("(3 of)", StringComparison.Ordinal))
+                    return correct >= 3;
+            }
+
             answer = SanitizeAnswer(answer);
+
             if (_optionalAnswers.Count > 0)
             {
                 var optLev = new Levenshtein(answer);
@@ -90,10 +134,33 @@ namespace Roki.Modules.Games.Common
 
         private static string SanitizeAnswer(string answer)
         {
+            //remove all the?
             answer = answer.ToLowerInvariant();
             answer = Regex.Replace(answer, "^what |whats |where |wheres |who |whos ", "");
             answer = Regex.Replace(answer, "^is |are |was |were", "");
-            return Regex.Replace(answer, "^the |a |an ", "").SanitizeStringFull();
+            return Regex.Replace(answer, "^the |a |an ", "").Replace("and ", "", StringComparison.Ordinal).SanitizeStringFull();
+        }
+
+        private static List<string> SanitizeToList(string answer)
+        {
+            answer = answer.ToLowerInvariant();
+            answer = Regex.Replace(answer, "^what |whats |where |wheres |who |whos ", "");
+            answer = Regex.Replace(answer, "^is |are |was |were", "");
+            string[] guesses;
+            if (answer.Contains(",", StringComparison.Ordinal))
+            {
+                guesses = answer.Split(",");
+            }
+            else if (answer.Contains("and", StringComparison.Ordinal))
+            {
+                guesses = answer.Split("and");
+            }
+            else
+            {
+                return null;
+            }
+
+            return guesses.Select(guess => Regex.Replace(guess.Trim(), "^the |a | an", "").SanitizeStringFull()).ToList();
         }
     }
 }
