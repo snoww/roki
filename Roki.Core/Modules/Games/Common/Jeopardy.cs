@@ -270,8 +270,8 @@ namespace Roki.Modules.Games.Common
             await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithAuthor("Jeopardy!")
                     .WithTitle("Final Jeopardy!")
-                    .WithDescription("Check your DMs to play the Final Jeopardy!")
-                    .WithFooter("You must have a score to play the Final Jeopardy!"))
+                    .WithDescription("Please go to your DMs to play the Final Jeopardy!")
+                    .WithFooter("You must have a score to participate in the Final Jeopardy!"))
                 .ConfigureAwait(false);
                 
             foreach (var (user, amount) in _users)
@@ -356,7 +356,7 @@ namespace Roki.Modules.Games.Common
                             .WithAuthor("Final Jeopardy!")
                             .WithTitle($"{FinalJeopardy.Category}")
                             .WithDescription(FinalJeopardy.Clue)
-                            .WithFooter($"Your wager is ${wager:N0}"))
+                            .WithFooter($"Your wager is ${wager:N0}. Submit your answer now."))
                         .ConfigureAwait(false);
 
                     _finalJeopardyAnswers.Add(user.Id, $"{user.Username}: `${wager}` - `No Answer`");
@@ -374,7 +374,7 @@ namespace Roki.Modules.Games.Common
                     {
                         _client.MessageReceived -= FinalJeopardyGuessHandler;
                         await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
-                                .WithDescription("Please return back to the channel for final results."))
+                                .WithDescription($"Please return back to {Channel.Mention} for final results."))
                             .ConfigureAwait(false);
                     }
                     
