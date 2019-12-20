@@ -31,25 +31,39 @@ namespace Roki.Modules.Games.Common
                 {
                     _optionalAnswers.Add(Regex.Replace(answer.ToLowerInvariant(), "^the |a |an |", "").SanitizeStringFull());
                 }
+                MinAnswer = minAnswer.SanitizeStringFull();
+                return;
             }
-            else if (minAnswer.StartsWith("(2 of)", StringComparison.Ordinal))
+            if (minAnswer.StartsWith("(2 of)", StringComparison.Ordinal))
             {
                 var answers = minAnswer.Replace("(2 of) ", "").Split(", ");
                 foreach (var answer in answers)
                 {
                     _optionalAnswers.Add(Regex.Replace(answer.ToLowerInvariant(), "^the |a |an |", "").SanitizeStringFull());
                 }
+                return;
             }
-            else if (minAnswer.StartsWith("(3 of)", StringComparison.Ordinal))
+            if (minAnswer.StartsWith("(3 of)", StringComparison.Ordinal))
             {
                 var answers = minAnswer.Replace("(3 of) ", "").Split(", ");
                 foreach (var answer in answers)
                 {
                     _optionalAnswers.Add(Regex.Replace(answer.ToLowerInvariant(), "^the |a |an |", "").SanitizeStringFull());
                 }
+                return;
+            }
+
+            if (minAnswer.Contains("/", StringComparison.Ordinal))
+            {
+                var answers = minAnswer.Split("/");
+                foreach (var answer in answers)
+                {
+                    if (answer.Length < 2) continue;
+                    _optionalAnswers.Add(answer.SanitizeStringFull());
+                }
             }
             // if it contains an optional answer
-            else if (Answer.Contains('(', StringComparison.Ordinal) && Answer.Contains(')', StringComparison.Ordinal))
+            if (Answer.Contains('(', StringComparison.Ordinal) && Answer.Contains(')', StringComparison.Ordinal))
             {
                 // currently this wont be correctly split: "termite (in term itemize) (mite accepted)"
                 var optional = minAnswer.Split('(', ')')[1];
