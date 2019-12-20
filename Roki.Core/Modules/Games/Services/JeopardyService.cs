@@ -53,8 +53,8 @@ namespace Roki.Modules.Games.Services
                     Value = clue.Value
                 };
 
-            var guid = Guid.NewGuid();
-            var final = query.OrderBy(c => guid).First();
+            var skip = new Random().Next(0, query.Count());
+            var final = query.Skip(skip).First();
             final.SanitizeAnswer();
             return final;
         }
