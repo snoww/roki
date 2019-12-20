@@ -20,9 +20,7 @@ namespace Roki.Modules.Games.Common
 
         public void SanitizeAnswer()
         {
-            //todo option1/option2
-
-            var minAnswer = Regex.Replace(Answer.ToLowerInvariant(), "^the |a |an ", "").Replace("and ", "", StringComparison.Ordinal);
+            var minAnswer = Regex.Replace(Answer.ToLowerInvariant(), "^the |a |an ", "");
 
             if (minAnswer.StartsWith("(1 of)", StringComparison.Ordinal))
             {
@@ -59,6 +57,15 @@ namespace Roki.Modules.Games.Common
                 foreach (var answer in answers)
                 {
                     if (answer.Length < 2) continue;
+                    _optionalAnswers.Add(answer.SanitizeStringFull());
+                }
+            }
+
+            if (minAnswer.Contains(" and ", StringComparison.Ordinal))
+            {
+                var answers = minAnswer.Split(" and ");
+                foreach (var answer in answers)
+                {
                     _optionalAnswers.Add(answer.SanitizeStringFull());
                 }
             }
@@ -123,11 +130,11 @@ namespace Roki.Modules.Games.Common
                     return correct >= 3;
             }
 
-            answer = SanitizeAnswer(answer);
+            var sanitizedAnswer = SanitizeAnswer(answer);
 
             if (_optionalAnswers.Count > 0)
             {
-                var optLev = new Levenshtein(answer);
+                var optLev = new Levenshtein(sanitizedAnswer);
                 if (_optionalAnswers.Any(optionalAnswer => optLev.DistanceFrom(optionalAnswer) <= Math.Round(optionalAnswer.Length * 0.1)))
                 {
                     return true;
@@ -135,7 +142,7 @@ namespace Roki.Modules.Games.Common
             }
 
             var minLev = new Levenshtein(MinAnswer);
-            var distance = minLev.DistanceFrom(answer);
+            var distance = minLev.DistanceFrom(sanitizedAnswer);
             if (distance == 0)
                 return true;
             if (MinAnswer.Length <= 5)
@@ -152,7 +159,7 @@ namespace Roki.Modules.Games.Common
             answer = answer.ToLowerInvariant();
             answer = Regex.Replace(answer, "^what |whats |where |wheres |who |whos ", "");
             answer = Regex.Replace(answer, "^is |are |was |were", "");
-            return Regex.Replace(answer, "^the |a |an ", "").Replace("and ", "", StringComparison.Ordinal).SanitizeStringFull();
+            return Regex.Replace(answer, "^the |a |an ", "").Replace(" and ", "", StringComparison.Ordinal).SanitizeStringFull();
         }
 
         private static List<string> SanitizeToList(string answer)
@@ -165,9 +172,9 @@ namespace Roki.Modules.Games.Common
             {
                 guesses = answer.Split(",");
             }
-            else if (answer.Contains("and", StringComparison.Ordinal))
+            else if (answer.Contains(" and ", StringComparison.Ordinal))
             {
-                guesses = answer.Split("and");
+                guesses = answer.Split(" and ");
             }
             else
             {
