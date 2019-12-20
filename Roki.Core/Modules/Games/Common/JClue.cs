@@ -16,18 +16,21 @@ namespace Roki.Modules.Games.Common
         public bool Available { get; set; } = true;
 
         private string MinAnswer { get; set; }
-        private readonly List<string> _optionalAnswers = new List<string>();
+        private readonly List<string> _acceptedAnswers = new List<string>();
 
         public void SanitizeAnswer()
         {
-            var minAnswer = Regex.Replace(Answer.ToLowerInvariant(), "^the |a |an ", "");
+            var minAnswer = Regex.Replace(Answer.ToLowerInvariant(), "^the |a |an ", "")
+                .Replace(" the ", "")
+                .Replace(" an ", "")
+                .Replace(" a ", "");
 
             if (minAnswer.StartsWith("(1 of)", StringComparison.Ordinal))
             {
                 var answers = minAnswer.Replace("(1 of) ", "").Split(", ");
                 foreach (var answer in answers)
                 {
-                    _optionalAnswers.Add(Regex.Replace(answer.ToLowerInvariant(), "^the |a |an |", "").SanitizeStringFull());
+                    _acceptedAnswers.Add(answer.ToLowerInvariant().SanitizeStringFull());
                 }
                 MinAnswer = minAnswer.SanitizeStringFull();
                 return;
@@ -37,7 +40,7 @@ namespace Roki.Modules.Games.Common
                 var answers = minAnswer.Replace("(2 of) ", "").Split(", ");
                 foreach (var answer in answers)
                 {
-                    _optionalAnswers.Add(Regex.Replace(answer.ToLowerInvariant(), "^the |a |an |", "").SanitizeStringFull());
+                    _acceptedAnswers.Add(answer.ToLowerInvariant().SanitizeStringFull().SanitizeStringFull());
                 }
                 return;
             }
@@ -46,7 +49,7 @@ namespace Roki.Modules.Games.Common
                 var answers = minAnswer.Replace("(3 of) ", "").Split(", ");
                 foreach (var answer in answers)
                 {
-                    _optionalAnswers.Add(Regex.Replace(answer.ToLowerInvariant(), "^the |a |an |", "").SanitizeStringFull());
+                    _acceptedAnswers.Add(answer.ToLowerInvariant().SanitizeStringFull().SanitizeStringFull());
                 }
                 return;
             }
@@ -57,7 +60,7 @@ namespace Roki.Modules.Games.Common
                 foreach (var answer in answers)
                 {
                     if (answer.Length < 2) continue;
-                    _optionalAnswers.Add(answer.SanitizeStringFull());
+                    _acceptedAnswers.Add(answer.SanitizeStringFull());
                 }
             }
 
@@ -66,9 +69,18 @@ namespace Roki.Modules.Games.Common
                 var answers = minAnswer.Split(" and ");
                 foreach (var answer in answers)
                 {
-                    _optionalAnswers.Add(answer.SanitizeStringFull());
+                    _acceptedAnswers.Add(answer.SanitizeStringFull());
                 }
             }
+            else if (minAnswer.Contains(" & ", StringComparison.Ordinal))
+            {
+                var answers = minAnswer.Split(" & ");
+                foreach (var answer in answers)
+                {
+                    _acceptedAnswers.Add(answer.SanitizeStringFull());
+                }
+            }
+            
             // if it contains an optional answer
             if (Answer.Contains('(', StringComparison.Ordinal) && Answer.Contains(')', StringComparison.Ordinal))
             {
@@ -82,19 +94,19 @@ namespace Roki.Modules.Games.Common
                     foreach (var op in optionals)
                     {
                         // 2nd condition example "mare(s or maria)"
-                        if (string.IsNullOrEmpty(op) || op.SanitizeStringFull().Length < 2) continue;
-                        _optionalAnswers.Add(op.SanitizeStringFull());
+                        if (string.IsNullOrWhiteSpace(op) || op.SanitizeStringFull().Length < 2) continue;
+                        _acceptedAnswers.Add(op.SanitizeStringFull());
                     }
                 }
                 // example: "endurance (durability accepted)"
                 else if (optional.EndsWith("accepted", StringComparison.Ordinal))
                 {
-                    _optionalAnswers.Add(Regex.Replace(optional, "also accepted|accepted$", "").SanitizeStringFull());
+                    _acceptedAnswers.Add(Regex.Replace(optional, "also accepted|accepted$", "").SanitizeStringFull());
                 }
                 // example: "The Daily Planet ("Superman")"
                 else if (optional.Contains('"', StringComparison.Ordinal))
                 {
-                    _optionalAnswers.Add(optional.Split('"', '"')[1].SanitizeStringFull());
+                    _acceptedAnswers.Add(optional.Split('"', '"')[1].SanitizeStringFull());
                 }
                 // this one is kinda hard to do since there are cases where it isn't valid
                 // valid example added: "MoMA (the Museum of Modern Art)"
@@ -102,9 +114,9 @@ namespace Roki.Modules.Games.Common
                 // valid example but not added: "Republic of Korea (South Korea)"
                 else if (optional.SanitizeStringFull().Length > minAnswer.SanitizeStringFull().Length * 1.5)
                 {
-                    _optionalAnswers.Add(optional.SanitizeStringFull());
+                    _acceptedAnswers.Add(optional.SanitizeStringFull());
                 }
-                _optionalAnswers.Add(minAnswer.SanitizeStringFull());
+                _acceptedAnswers.Add(minAnswer.SanitizeStringFull());
 
                 minAnswer = Regex.Replace(minAnswer, "(\\[.*\\])|(\".*\")|('.*')|(\\(.*\\))", "");
             }
@@ -117,12 +129,23 @@ namespace Roki.Modules.Games.Common
             
             if (Answer.StartsWith("(2 of)", StringComparison.Ordinal) || Answer.StartsWith("(3 of)", StringComparison.Ordinal))
             {
-                var answers = SanitizeToList(answer);
+                var answers = SanitizeAnswerToList(answer);
                 if (answers == null) return false;
-                var correct = answers
-                    .Select(ans => new Levenshtein(ans))
-                    .Count(ansLev => _optionalAnswers
-                        .Any(optionalAnswer => ansLev.DistanceFrom(optionalAnswer) <= Math.Round(optionalAnswer.Length * 0.1)));
+                var correct = 0;
+                foreach (var optionalAnswer in _acceptedAnswers)
+                {
+                    var ans = new Levenshtein(optionalAnswer);
+                    var max = answers.Count;
+                    for (int i = 0; i < max; i++)
+                    {
+                        if (ans.DistanceFrom(optionalAnswer) <= Math.Round(optionalAnswer.Length * 0.1))
+                        {
+                            // remove from answers if its correct, so next iteration doesnt loop over confirmed answers
+                            answers.RemoveAt(i);
+                            correct++;
+                        }
+                    }
+                }
 
                 if (Answer.StartsWith("(2 of)", StringComparison.Ordinal))
                     return correct >= 2;
@@ -132,12 +155,34 @@ namespace Roki.Modules.Games.Common
 
             var sanitizedAnswer = SanitizeAnswer(answer);
 
-            if (_optionalAnswers.Count > 0)
+            if (_acceptedAnswers.Count > 0)
             {
-                var optLev = new Levenshtein(sanitizedAnswer);
-                if (_optionalAnswers.Any(optionalAnswer => optLev.DistanceFrom(optionalAnswer) <= Math.Round(optionalAnswer.Length * 0.1)))
+                if (Answer.Contains(" and ", StringComparison.OrdinalIgnoreCase) || Answer.Contains(" & ", StringComparison.OrdinalIgnoreCase))
                 {
-                    return true;
+                    var answers = SanitizeAnswerToList(answer);
+                    foreach (var optionalAnswer in _acceptedAnswers)
+                    {
+                        var ans = new Levenshtein(optionalAnswer);
+                        var max = answers.Count;
+                        for (int i = 0; i < max; i++)
+                        {
+                            if (ans.DistanceFrom(optionalAnswer) <= Math.Round(optionalAnswer.Length * 0.1))
+                            {
+                                // remove from answers if its correct, so next iteration doesnt loop over confirmed answers
+                                answers.RemoveAt(i);
+                            }
+                        }
+                    }
+
+                    // if all answers are removed, then its correct
+                    if (answers.Count == 0) 
+                        return true;
+                }
+                else
+                {
+                    var optLev = new Levenshtein(sanitizedAnswer);
+                    if (_acceptedAnswers.Any(optionalAnswer => optLev.DistanceFrom(optionalAnswer) <= Math.Round(optionalAnswer.Length * 0.1)))
+                        return true;
                 }
             }
 
@@ -159,10 +204,10 @@ namespace Roki.Modules.Games.Common
             answer = answer.ToLowerInvariant();
             answer = Regex.Replace(answer, "^what |whats |where |wheres |who |whos ", "");
             answer = Regex.Replace(answer, "^is |are |was |were", "");
-            return Regex.Replace(answer, "^the |a |an ", "").Replace(" and ", "", StringComparison.Ordinal).SanitizeStringFull();
+            return Regex.Replace(answer, "^the |a |an ", "").Replace(" and ", "", StringComparison.Ordinal).Replace(" the ", "").SanitizeStringFull();
         }
 
-        private static List<string> SanitizeToList(string answer)
+        private static List<string> SanitizeAnswerToList(string answer)
         {
             answer = answer.ToLowerInvariant();
             answer = Regex.Replace(answer, "^what |whats |where |wheres |who |whos ", "");
@@ -181,7 +226,14 @@ namespace Roki.Modules.Games.Common
                 return null;
             }
 
-            return guesses.Select(guess => Regex.Replace(guess.Trim(), "^the |a | an", "").SanitizeStringFull()).ToList();
+            var answers = new List<string>();
+            foreach (var guess in guesses)
+            {
+                if (string.IsNullOrWhiteSpace(guess)) continue;
+                answers.Add(Regex.Replace(guess.Trim(), "^the |a | an", "").SanitizeStringFull());
+            }
+
+            return answers;
         }
     }
 }
