@@ -90,6 +90,7 @@ namespace Roki.Modules.Games.Common
                     else
                     {
                         await Channel.SendErrorAsync("No response received, stopping Jeopardy! game.").ConfigureAwait(false);
+                        await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
                         return;
                     }
                     
