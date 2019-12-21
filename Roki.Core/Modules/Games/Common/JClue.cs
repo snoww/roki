@@ -142,7 +142,11 @@ namespace Roki.Modules.Games.Common
                     foreach (var ans in answers)
                     {
                         if (ansLev.DistanceFrom(ans) <= Math.Round(optionalAnswer.Length * 0.1))
+                        {
                             correct++;
+                            // so they don't get points for submitting the same answer multiple times
+                            break;
+                        }
                     }
                 }
 
@@ -166,7 +170,11 @@ namespace Roki.Modules.Games.Common
                         foreach (var ans in answers)
                         {
                             if (ansLev.DistanceFrom(ans) <= Math.Round(optionalAnswer.Length * 0.1))
+                            {
                                 correct++;
+                                // so they don't get points for submitting the same answer multiple times
+                                break;
+                            }
                         }
                     }
 
