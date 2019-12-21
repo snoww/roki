@@ -98,18 +98,29 @@ namespace Roki.Modules.Games
             {
                 if (_service.ActiveGames.TryGetValue(ctx.Channel.Id, out var jeopardy))
                 {
-                    var success = jeopardy.VoteSkip(ctx.User.Id);
-                    if (success)
+                    var code = jeopardy.VoteSkip(ctx.User.Id);
+                    if (code == 0)
                     {
                         await ctx.Channel.EmbedAsync(new EmbedBuilder().WithColor(jeopardy.Color)
                                 .WithAuthor("Skip Clue")
-                                .WithDescription(jeopardy.Votes.Count != jeopardy.VotesRequired
-                                    ? $"Voted\n`{jeopardy.Votes.Count}/{jeopardy.VotesRequired}` required to skip."
+                                .WithDescription(jeopardy.Votes.Count != jeopardy.Users.Count
+                                    ? $"Voted\n`{jeopardy.Votes.Count}/{jeopardy.Users.Count}` required to skip."
                                     : $"Voted passed."))
                             .ConfigureAwait(false);
                     }
-                    else
-                        await ctx.Channel.SendErrorAsync("You already voted.\n`{jeopardy.Votes.Count}/{jeopardy.VotesRequired}` required to skip.");
+                    else if (code == -1)
+                    {
+                        await ctx.Channel.SendErrorAsync("Cannot vote skip yet.").ConfigureAwait(false);
+                    }
+                    else if (code == -2)
+                    {
+                        await ctx.Channel.SendErrorAsync("You need a score to vote skip.").ConfigureAwait(false);
+                    }
+                    else if (code == -3)
+                    {
+                        await ctx.Channel.SendErrorAsync("You already voted.").ConfigureAwait(false);
+                    }
+                    
                     return;
                 }
                 
