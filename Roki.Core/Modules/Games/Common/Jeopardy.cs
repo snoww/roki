@@ -36,7 +36,7 @@ namespace Roki.Modules.Games.Common
         private JClue FinalJeopardy { get; }
         private readonly Dictionary<ulong, string> _finalJeopardyAnswers = new Dictionary<ulong, string>();
 
-        private readonly ConcurrentDictionary<IUser, int> _users = new ConcurrentDictionary<IUser, int>();
+        public readonly ConcurrentDictionary<IUser, int> Users = new ConcurrentDictionary<IUser, int>();
         private readonly ConcurrentBag<bool> _confirmed = new ConcurrentBag<bool>();
 
         private bool CanGuess { get; set; }
@@ -44,7 +44,6 @@ namespace Roki.Modules.Games.Common
         private int GuessCount { get; set; }
 
         public HashSet<ulong> Votes { get; } = new HashSet<ulong>();
-        public int VotesRequired { get; private set; }
         
         public readonly Color Color = Color.DarkBlue;
         
@@ -106,7 +105,6 @@ namespace Roki.Modules.Games.Common
 
                 try
                 {
-                    VotesRequired = _users.Count;
                     _client.MessageReceived += GuessHandler;
                     CanGuess = true;
                     try
@@ -139,7 +137,7 @@ namespace Roki.Modules.Games.Common
             }
 
             await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
-            if (!StopGame && !_users.IsEmpty)
+            if (!StopGame && !Users.IsEmpty)
             {
                 await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                         .WithAuthor("Jeopardy!")
@@ -160,8 +158,8 @@ namespace Roki.Modules.Games.Common
                     .WithDescription(GetLeaderboard()))
                 .ConfigureAwait(false);
 
-            if (!_users.Any()) return;
-            foreach (var (user, winnings) in _users)
+            if (!Users.Any()) return;
+            foreach (var (user, winnings) in Users)
             {
                 await _currency.ChangeAsync(user.Id, "Jeopardy Winnings", winnings, _client.CurrentUser.Id, user.Id, Guild.Id, Channel.Id, msg.Id)
                     .ConfigureAwait(false);
@@ -226,11 +224,11 @@ namespace Roki.Modules.Games.Common
                 try
                 {
                     if (msg.Author.IsBot || msg.Channel != Channel) return;
-                    if (Votes.Count >= VotesRequired)
+                    if (Votes.Count >= Users.Count)
                     {
                         Votes.Clear();
                         _cancel.Cancel();
-                        await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+                        await Task.Delay(TimeSpan.FromSeconds(3)).ConfigureAwait(false);
                         await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                                 .WithAuthor("Jeopardy!")
                                 .WithTitle($"{CurrentClue.Category} - ${CurrentClue.Value}")
@@ -245,7 +243,7 @@ namespace Roki.Modules.Games.Common
                     {
                         if (CanGuess && CurrentClue.CheckAnswer(msg.Content) && !_cancel.IsCancellationRequested)
                         {
-                            _users.AddOrUpdate(msg.Author, CurrentClue.Value, (u, old) => old + CurrentClue.Value);
+                            Users.AddOrUpdate(msg.Author, CurrentClue.Value, (u, old) => old + CurrentClue.Value);
                             guess = true;
                         }
                     }
@@ -272,7 +270,7 @@ namespace Roki.Modules.Games.Common
                             .WithAuthor("Jeopardy!")
                             .WithTitle($"{CurrentClue.Category} - ${CurrentClue.Value}")
                             .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was:\n`{CurrentClue.Answer}`\n" +
-                                             $"Your total score is: `{_users[msg.Author]:N0}`"))
+                                             $"Your total score is: `{Users[msg.Author]:N0}`"))
                         .ConfigureAwait(false);
                 }
                 catch (Exception e)
@@ -292,7 +290,7 @@ namespace Roki.Modules.Games.Common
                     .WithFooter("You must have a score to participate in the Final Jeopardy!"))
                 .ConfigureAwait(false);
                 
-            foreach (var (user, amount) in _users)
+            foreach (var (user, amount) in Users)
             {
                 _confirmed.Add(true);
                 await DmFinalJeopardy(user, amount).ConfigureAwait(false);
@@ -366,7 +364,7 @@ namespace Roki.Modules.Games.Common
                                 $"You successfully wagered `${wager}`\nPlease wait until all other participants have submitted their wager."))
                         .ConfigureAwait(false);
                     
-                    _users.AddOrUpdate(user, -wager, (u, old) => old - wager);
+                    Users.AddOrUpdate(user, -wager, (u, old) => old - wager);
                     _confirmed.TryTake(out var _);
                     while (!_confirmed.IsEmpty)
                     {
@@ -410,7 +408,7 @@ namespace Roki.Modules.Games.Common
                                 var guess = false;
                                 if (FinalJeopardy.CheckAnswer(msg.Content) && !cancel.IsCancellationRequested)
                                 {
-                                    _users.AddOrUpdate(user, wager * 2, (u, old) => old + wager * 2);
+                                    Users.AddOrUpdate(user, wager * 2, (u, old) => old + wager * 2);
                                     _finalJeopardyAnswers[user.Id] = $"{user.Username}: `${wager}` - {msg.Content}";
                                     guess = true;
                                 }
@@ -426,7 +424,7 @@ namespace Roki.Modules.Games.Common
                                         .WithAuthor("Final Jeopardy!")
                                         .WithTitle($"{FinalJeopardy.Category}")
                                         .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was:\n`{FinalJeopardy.Answer}`\n" +
-                                                         $"Your total score is: `{_users[user]:N0}`"))
+                                                         $"Your total score is: `{Users[user]:N0}`"))
                                     .ConfigureAwait(false);
                             }
                             catch (Exception e)
@@ -481,11 +479,11 @@ namespace Roki.Modules.Games.Common
 
         public string GetLeaderboard()
         {
-            if (_users.Count == 0)
+            if (Users.Count == 0)
                 return "No one is on the leaderboard.";
             
             var lb = new StringBuilder();
-            foreach (var (user, value) in _users.OrderByDescending(k => k.Value))
+            foreach (var (user, value) in Users.OrderByDescending(k => k.Value))
             {
                 lb.AppendLine($"{user.Username} `{value:N0}` {_roki.Properties.CurrencyIcon}");
             }
@@ -493,9 +491,17 @@ namespace Roki.Modules.Games.Common
             return lb.ToString();
         }
 
-        public bool VoteSkip(ulong userId)
+        public int VoteSkip(ulong userId)
         {
-            return Votes.Add(userId);
+            //  0 success
+            // -1 cant vote yet
+            // -2 cant vote
+            // -3 already voted
+            if (!CanGuess) return -1;
+            if (Users.All(u => u.Key.Id != userId)) return -2;
+            if (Votes.Add(userId))
+                return 0;
+            return -3;
         }
 
         private enum CategoryStatus
