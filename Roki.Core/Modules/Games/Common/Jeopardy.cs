@@ -223,7 +223,7 @@ namespace Roki.Modules.Games.Common
             {
                 try
                 {
-                    if (msg.Author.IsBot || msg.Channel != Channel) return;
+                    if (msg.Channel != Channel) return;
                     if (Users.Count != 0 && Votes.Count >= Users.Count)
                     {
                         Votes.Clear();
@@ -236,7 +236,7 @@ namespace Roki.Modules.Games.Common
                             .ConfigureAwait(false);
                         return;
                     }
-                    if (!Regex.IsMatch(msg.Content.ToLowerInvariant(), "^what|where|who")) return;
+                    if (msg.Author.IsBot || !Regex.IsMatch(msg.Content.ToLowerInvariant(), "^what|where|who")) return;
                     var guess = false;
                     await _guess.WaitAsync().ConfigureAwait(false);
                     try
