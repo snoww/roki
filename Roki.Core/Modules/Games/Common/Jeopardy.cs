@@ -300,11 +300,15 @@ namespace Roki.Modules.Games.Common
                     .WithDescription($"The correct answer is:\n`{FinalJeopardy.Answer}`"))
                 .ConfigureAwait(false);
 
+            await Task.Delay(TimeSpan.FromSeconds(3)).ConfigureAwait(false);
+            
             await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithAuthor("Final Jeopardy!")
                     .WithTitle("Results")
                     .WithDescription(_finalJeopardyAnswers.Count > 0 ? string.Join("\n", _finalJeopardyAnswers.Values) : "No wagers."))
                 .ConfigureAwait(false);
+            
+            await Task.Delay(TimeSpan.FromSeconds(3)).ConfigureAwait(false);
         }
 
         private Task DmFinalJeopardy(IUser user, int amount)
