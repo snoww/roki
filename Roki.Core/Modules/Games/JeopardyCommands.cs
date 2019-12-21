@@ -91,6 +91,30 @@ namespace Roki.Modules.Games
                 
                 await ctx.Channel.SendErrorAsync("No active Jeopardy! game.").ConfigureAwait(false);
             }
+            
+            [RokiCommand, Description, Aliases, Usage]
+            [RequireContext(ContextType.Guild)]
+            public async Task JeopardyVote()
+            {
+                if (_service.ActiveGames.TryGetValue(ctx.Channel.Id, out var jeopardy))
+                {
+                    var success = jeopardy.VoteSkip(ctx.User.Id);
+                    if (success)
+                    {
+                        await ctx.Channel.EmbedAsync(new EmbedBuilder().WithColor(jeopardy.Color)
+                                .WithAuthor("Skip Clue")
+                                .WithDescription(jeopardy.Votes.Count != jeopardy.VotesRequired
+                                    ? $"Voted\n`{jeopardy.Votes.Count}/{jeopardy.VotesRequired}` required to skip."
+                                    : $"Voted passed."))
+                            .ConfigureAwait(false);
+                    }
+                    else
+                        await ctx.Channel.SendErrorAsync("You already voted.\n`{jeopardy.Votes.Count}/{jeopardy.VotesRequired}` required to skip.");
+                    return;
+                }
+                
+                await ctx.Channel.SendErrorAsync("No active Jeopardy! game.").ConfigureAwait(false);
+            }
         }
     }
 }

@@ -671,5 +671,12 @@
     "Usage": [
       "{0}js"
     ]
+  },
+  "jeopardyvote": {
+    "Command": "jeopardyvote jvote jv",
+    "Description": "Votes to skip the current question.",
+    "Usage": [
+      "{0}jv"
+    ]
   }
 }
