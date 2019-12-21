@@ -227,7 +227,7 @@ namespace Roki.Modules.Games.Common
             {
                 try
                 {
-                    if (msg.Channel != Channel) return;
+                    if (msg.Channel.Id != Channel.Id) return;
                     if (CanVote && Users.Count != 0 && Votes.Count >= Users.Count)
                     {
                         Votes.Clear();
