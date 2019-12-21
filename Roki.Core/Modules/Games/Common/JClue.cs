@@ -27,7 +27,7 @@ namespace Roki.Modules.Games.Common
             
             var convert = new ConvertASCII();
             convert.FoldToASCII(minAnswer.ToCharArray(), minAnswer.Length);
-            minAnswer = convert.Output.ToString();
+            minAnswer = new string(convert.Output);
 
             if (minAnswer.StartsWith("(1 of)", StringComparison.Ordinal))
             {
