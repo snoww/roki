@@ -45,7 +45,7 @@ namespace Roki.Modules.Games.Common
 
         public HashSet<ulong> Votes { get; } = new HashSet<ulong>();
         private bool CanVote { get; set; }
-        
+
         public readonly Color Color = Color.DarkBlue;
         
         public Jeopardy(DiscordSocketClient client, Dictionary<string, List<JClue>> clues, IGuild guild, ITextChannel channel, Roki roki, 
@@ -227,7 +227,7 @@ namespace Roki.Modules.Games.Common
                 try
                 {
                     if (msg.Channel != Channel) return;
-                    if (Users.Count != 0 && Votes.Count >= Users.Count)
+                    if (CanVote && Users.Count != 0 && Votes.Count >= Users.Count)
                     {
                         Votes.Clear();
                         _cancel.Cancel();
