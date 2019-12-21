@@ -33,7 +33,7 @@ namespace Roki.Modules.Games.Common
         private CancellationTokenSource _cancel;
         
         public JClue CurrentClue { get; private set; }
-        private JClue FinalJeopardy { get; set; }
+        private JClue FinalJeopardy { get; }
         private readonly Dictionary<ulong, string> _finalJeopardyAnswers = new Dictionary<ulong, string>();
 
         private readonly ConcurrentDictionary<IUser, int> _users = new ConcurrentDictionary<IUser, int>();
@@ -41,7 +41,11 @@ namespace Roki.Modules.Games.Common
 
         private bool CanGuess { get; set; }
         private bool StopGame { get; set; }
-        private int GuessCount { get; set; } = 0;
+        private int GuessCount { get; set; }
+
+        public HashSet<ulong> Votes { get; } = new HashSet<ulong>();
+        public int VotesRequired { get; private set; }
+        
         public readonly Color Color = Color.DarkBlue;
         
         public Jeopardy(DiscordSocketClient client, Dictionary<string, List<JClue>> clues, IGuild guild, ITextChannel channel, Roki roki, 
@@ -102,6 +106,7 @@ namespace Roki.Modules.Games.Common
 
                 try
                 {
+                    VotesRequired = _users.Count;
                     _client.MessageReceived += GuessHandler;
                     CanGuess = true;
                     try
@@ -220,7 +225,20 @@ namespace Roki.Modules.Games.Common
             {
                 try
                 {
-                    if (msg.Author.IsBot || msg.Channel != Channel || !Regex.IsMatch(msg.Content.ToLowerInvariant(), "^what|where|who")) return;
+                    if (msg.Author.IsBot || msg.Channel != Channel) return;
+                    if (Votes.Count >= VotesRequired)
+                    {
+                        Votes.Clear();
+                        _cancel.Cancel();
+                        await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+                        await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+                                .WithAuthor("Jeopardy!")
+                                .WithTitle($"{CurrentClue.Category} - ${CurrentClue.Value}")
+                                .WithDescription($"Vote skip passed.\nThe correct answer was:\n`{CurrentClue.Answer}`"))
+                            .ConfigureAwait(false);
+                        return;
+                    }
+                    if (!Regex.IsMatch(msg.Content.ToLowerInvariant(), "^what|where|who")) return;
                     var guess = false;
                     await _guess.WaitAsync().ConfigureAwait(false);
                     try
@@ -473,6 +491,11 @@ namespace Roki.Modules.Games.Common
             }
 
             return lb.ToString();
+        }
+
+        public bool VoteSkip(ulong userId)
+        {
+            return Votes.Add(userId);
         }
 
         private enum CategoryStatus
