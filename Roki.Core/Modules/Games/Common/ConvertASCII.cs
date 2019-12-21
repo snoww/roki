@@ -19,7 +19,7 @@ namespace Roki.Modules.Games.Common
 {
     public class ConvertASCII
     {
-        public char[] Output { get; private set; } = new char[512];
+        public char[] Output { get; private set; } = new char[128];
         public int OutputPos { get; private set; }
         
         /// <summary>
