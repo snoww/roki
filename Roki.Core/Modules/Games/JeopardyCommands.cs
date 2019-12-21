@@ -101,8 +101,9 @@ namespace Roki.Modules.Games
                     var code = jeopardy.VoteSkip(ctx.User.Id);
                     if (code == 0)
                     {
+                        await Task.Delay(250).ConfigureAwait(false);
                         await ctx.Channel.EmbedAsync(new EmbedBuilder().WithColor(jeopardy.Color)
-                                .WithAuthor("Skip Clue")
+                                .WithAuthor("Vote Skip")
                                 .WithDescription(jeopardy.Votes.Count != jeopardy.Users.Count
                                     ? $"Voted\n`{jeopardy.Votes.Count}/{jeopardy.Users.Count}` required to skip."
                                     : $"Voted passed."))
