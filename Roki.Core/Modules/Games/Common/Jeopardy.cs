@@ -44,6 +44,7 @@ namespace Roki.Modules.Games.Common
         private int GuessCount { get; set; }
 
         public HashSet<ulong> Votes { get; } = new HashSet<ulong>();
+        private bool CanVote { get; set; }
         
         public readonly Color Color = Color.DarkBlue;
         
@@ -107,6 +108,7 @@ namespace Roki.Modules.Games.Common
                 {
                     _client.MessageReceived += GuessHandler;
                     CanGuess = true;
+                    await VoteDelay().ConfigureAwait(false);
                     try
                     {
                         await Task.Delay(TimeSpan.FromSeconds(35), _cancel.Token).ConfigureAwait(false);
@@ -119,6 +121,7 @@ namespace Roki.Modules.Games.Common
                 finally
                 {
                     CanGuess = false;
+                    CanVote = false;
                     GuessCount = 0;
                     _client.MessageReceived -= GuessHandler;
                 }
@@ -497,11 +500,22 @@ namespace Roki.Modules.Games.Common
             // -1 cant vote yet
             // -2 cant vote
             // -3 already voted
-            if (!CanGuess) return -1;
+            if (!CanVote) return -1;
             if (Users.All(u => u.Key.Id != userId)) return -2;
             if (Votes.Add(userId))
                 return 0;
             return -3;
+        }
+
+        private Task VoteDelay()
+        {
+            var _ = Task.Run(async () =>
+            {
+                await Task.Delay(TimeSpan.FromSeconds(12)).ConfigureAwait(false);
+                CanVote = true;
+            });
+
+            return Task.CompletedTask;
         }
 
         private enum CategoryStatus
