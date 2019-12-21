@@ -339,7 +339,8 @@ namespace Roki.Modules.Games.Common
                 {
                     var dm = await user.GetOrCreateDMChannelAsync().ConfigureAwait(false);
                     await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
-                            .WithTitle("Final Jeopardy!")
+                            .WithAuthor("Final Jeopardy!")
+                            .WithTitle(FinalJeopardy.Category)
                             .WithDescription($"Please make your wager. You're current score is: `${amount:N0}`"))
                         .ConfigureAwait(false);
 
