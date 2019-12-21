@@ -24,6 +24,10 @@ namespace Roki.Modules.Games.Common
                 .Replace(" the ", "")
                 .Replace(" an ", "")
                 .Replace(" a ", "");
+            
+            var convert = new ConvertASCII();
+            convert.FoldToASCII(minAnswer.ToCharArray(), minAnswer.Length);
+            minAnswer = convert.Output.ToString();
 
             if (minAnswer.StartsWith("(1 of)", StringComparison.Ordinal))
             {
