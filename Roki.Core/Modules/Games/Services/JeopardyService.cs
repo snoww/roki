@@ -65,11 +65,11 @@ namespace Roki.Modules.Games.Services
             try
             {
                 game.Shuffle();
-                validated.Add(game.First(g => g.Value == 200));
-                validated.Add(game.First(g => g.Value == 400));
-                validated.Add(game.First(g => g.Value == 600));
-                validated.Add(game.First(g => g.Value == 800));
-                validated.Add(game.First(g => g.Value == 1000));
+                validated.Add(game.First(g => g.Value == 200 && !string.IsNullOrWhiteSpace(g.Clue.SanitizeStringFull()) && !string.IsNullOrWhiteSpace(g.Answer.SanitizeStringFull())));
+                validated.Add(game.First(g => g.Value == 400 && !string.IsNullOrWhiteSpace(g.Clue.SanitizeStringFull()) && !string.IsNullOrWhiteSpace(g.Answer.SanitizeStringFull())));
+                validated.Add(game.First(g => g.Value == 600 && !string.IsNullOrWhiteSpace(g.Clue.SanitizeStringFull()) && !string.IsNullOrWhiteSpace(g.Answer.SanitizeStringFull())));
+                validated.Add(game.First(g => g.Value == 800 && !string.IsNullOrWhiteSpace(g.Clue.SanitizeStringFull()) && !string.IsNullOrWhiteSpace(g.Answer.SanitizeStringFull())));
+                validated.Add(game.First(g => g.Value == 1000 && !string.IsNullOrWhiteSpace(g.Clue.SanitizeStringFull()) && !string.IsNullOrWhiteSpace(g.Answer.SanitizeStringFull())));
                 
                 validated.ForEach(c => c.SanitizeAnswer());
                 return validated;
