@@ -20,7 +20,7 @@ namespace Roki.Modules.Games.Common
 
         public void SanitizeAnswer()
         {
-            var minAnswer = Regex.Replace(Answer.ToLowerInvariant(), "^the |a |an ", "")
+            var minAnswer = Regex.Replace(Answer.ToLowerInvariant(), "^(the |a |an )", "")
                 .Replace(" the ", "")
                 .Replace(" an ", "")
                 .Replace(" a ", "");
@@ -105,7 +105,7 @@ namespace Roki.Modules.Games.Common
                 // example: "endurance (durability accepted)"
                 else if (optional.EndsWith("accepted", StringComparison.Ordinal))
                 {
-                    _acceptedAnswers.Add(Regex.Replace(optional, "also accepted|accepted$", "").SanitizeStringFull());
+                    _acceptedAnswers.Add(Regex.Replace(optional, " also accepted| accepted$", "").SanitizeStringFull());
                 }
                 // example: "The Daily Planet ("Superman")"
                 else if (optional.Contains('"', StringComparison.Ordinal))
@@ -197,16 +197,16 @@ namespace Roki.Modules.Games.Common
         {
             //remove all the?
             answer = answer.ToLowerInvariant();
-            answer = Regex.Replace(answer, "^what |whats |where |wheres |who |whos ", "");
-            answer = Regex.Replace(answer, "^is |are |was |were", "");
-            return Regex.Replace(answer, "^the |a |an ", "").Replace(" and ", "", StringComparison.Ordinal).Replace(" the ", "").SanitizeStringFull();
+            answer = Regex.Replace(answer, "^(what |whats |where |wheres |who |whos )", "");
+            answer = Regex.Replace(answer, "^(is |are |was |were)", "");
+            return Regex.Replace(answer, "^(the |a |an )", "").Replace(" and ", "", StringComparison.Ordinal).Replace(" the ", "").SanitizeStringFull();
         }
 
         private static List<string> SanitizeAnswerToList(string answer)
         {
             answer = answer.ToLowerInvariant();
-            answer = Regex.Replace(answer, "^what |whats |where |wheres |who |whos ", "");
-            answer = Regex.Replace(answer, "^is |are |was |were", "");
+            answer = Regex.Replace(answer, "^(what |whats |where |wheres |who |whos )", "");
+            answer = Regex.Replace(answer, "^(is |are |was |were)", "");
             string[] guesses;
             if (answer.Contains(",", StringComparison.Ordinal))
             {
@@ -225,7 +225,7 @@ namespace Roki.Modules.Games.Common
             foreach (var guess in guesses)
             {
                 if (string.IsNullOrWhiteSpace(guess)) continue;
-                answers.Add(Regex.Replace(guess.Trim(), "^the |a | an", "").SanitizeStringFull());
+                answers.Add(Regex.Replace(guess.Trim(), "^(the |a | an)", "").SanitizeStringFull());
             }
 
             return answers;
