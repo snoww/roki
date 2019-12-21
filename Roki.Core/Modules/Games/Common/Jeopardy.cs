@@ -224,7 +224,7 @@ namespace Roki.Modules.Games.Common
                 try
                 {
                     if (msg.Author.IsBot || msg.Channel != Channel) return;
-                    if (Votes.Count >= Users.Count)
+                    if (Users.Count != 0 && Votes.Count >= Users.Count)
                     {
                         Votes.Clear();
                         _cancel.Cancel();
