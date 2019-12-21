@@ -138,16 +138,11 @@ namespace Roki.Modules.Games.Common
                 var correct = 0;
                 foreach (var optionalAnswer in _acceptedAnswers)
                 {
-                    var ans = new Levenshtein(optionalAnswer);
-                    var max = answers.Count;
-                    for (int i = 0; i < max; i++)
+                    var ansLev = new Levenshtein(optionalAnswer);
+                    foreach (var ans in answers)
                     {
-                        if (ans.DistanceFrom(optionalAnswer) <= Math.Round(optionalAnswer.Length * 0.1))
-                        {
-                            // remove from answers if its correct, so next iteration doesnt loop over confirmed answers
-                            answers.RemoveAt(i);
+                        if (ansLev.DistanceFrom(ans) <= Math.Round(optionalAnswer.Length * 0.1))
                             correct++;
-                        }
                     }
                 }
 
@@ -164,22 +159,18 @@ namespace Roki.Modules.Games.Common
                 if (Answer.Contains(" and ", StringComparison.OrdinalIgnoreCase) || Answer.Contains(" & ", StringComparison.OrdinalIgnoreCase))
                 {
                     var answers = SanitizeAnswerToList(answer);
+                    var correct = 0;
                     foreach (var optionalAnswer in _acceptedAnswers)
                     {
-                        var ans = new Levenshtein(optionalAnswer);
-                        var max = answers.Count;
-                        for (int i = 0; i < max; i++)
+                        var ansLev = new Levenshtein(optionalAnswer);
+                        foreach (var ans in answers)
                         {
-                            if (ans.DistanceFrom(optionalAnswer) <= Math.Round(optionalAnswer.Length * 0.1))
-                            {
-                                // remove from answers if its correct, so next iteration doesnt loop over confirmed answers
-                                answers.RemoveAt(i);
-                            }
+                            if (ansLev.DistanceFrom(ans) <= Math.Round(optionalAnswer.Length * 0.1))
+                                correct++;
                         }
                     }
 
-                    // if all answers are removed, then its correct
-                    if (answers.Count == 0) 
+                    if (answers.Count == correct) 
                         return true;
                 }
                 else
