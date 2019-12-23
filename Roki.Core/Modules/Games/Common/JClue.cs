@@ -222,6 +222,10 @@ namespace Roki.Modules.Games.Common
             {
                 guesses = answer.Split(" and ");
             }
+            else if (answer.Contains(" & ", StringComparison.Ordinal))
+            {
+                guesses = answer.Split(" & ");
+            }
             else
             {
                 return null;
@@ -231,7 +235,7 @@ namespace Roki.Modules.Games.Common
             foreach (var guess in guesses)
             {
                 if (string.IsNullOrWhiteSpace(guess)) continue;
-                answers.Add(Regex.Replace(guess.Trim(), "^(the |a | an)", "").SanitizeStringFull());
+                answers.Add(Regex.Replace(guess.Trim(), "^(the |a |an )", "").SanitizeStringFull());
             }
 
             return answers;
