@@ -70,8 +70,8 @@ namespace Roki.Modules.Games.Services
                 foreach (var clue in game)
                 {
                     if (values.Count == 0) break;
-                    var value = values.FirstOrDefault(c => c == clue.Value || c == clue.Value - 1000);
-                    if (value == 0) continue;
+                    var value = values.First();
+                    if (clue.Value != value || clue.Value - 1000 != value) continue;
                     if (string.IsNullOrWhiteSpace(clue.Clue.SanitizeStringFull()) ||
                         string.IsNullOrWhiteSpace(clue.Answer.SanitizeStringFull())) continue;
                     clue.Value = value;
@@ -80,7 +80,7 @@ namespace Roki.Modules.Games.Services
                     values.Remove(value);
                 }
 
-                return values.Count == 0 ? validated : null;
+                return values.Count == 0 ? validated.OrderBy(c => c.Value).ToList() : null;
             }
             catch
             {
