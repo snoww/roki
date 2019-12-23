@@ -366,7 +366,7 @@ namespace Roki.Modules.Games.Common
                     await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
                             .WithAuthor("Final Jeopardy!")
                             .WithDescription(
-                                $"You successfully wagered `${wager}`\nPlease wait until all other participants have submitted their wager."))
+                                $"You successfully wagered `${wager:N0}`\nPlease wait until all other participants have submitted their wager."))
                         .ConfigureAwait(false);
                     
                     Users.AddOrUpdate(user, -wager, (u, old) => old - wager);
@@ -384,7 +384,7 @@ namespace Roki.Modules.Games.Common
                             .WithFooter($"Your wager is ${wager:N0}. Submit your answer now."))
                         .ConfigureAwait(false);
 
-                    _finalJeopardyAnswers.Add(user.Id, $"{user.Username}: `${wager}` - `No Answer`");
+                    _finalJeopardyAnswers.Add(user.Id, $"{user.Username}: `${wager:N0}` - `No Answer`");
                     var cancel = new CancellationTokenSource();
                     try
                     {
@@ -414,13 +414,13 @@ namespace Roki.Modules.Games.Common
                                 if (FinalJeopardy.CheckAnswer(msg.Content) && !cancel.IsCancellationRequested)
                                 {
                                     Users.AddOrUpdate(user, wager * 2, (u, old) => old + wager * 2);
-                                    _finalJeopardyAnswers[user.Id] = $"{user.Username}: `${wager}` - {msg.Content}";
+                                    _finalJeopardyAnswers[user.Id] = $"{user.Username}: `${wager:N0}` - {msg.Content}";
                                     guess = true;
                                 }
 
                                 if (!guess)
                                 {
-                                    _finalJeopardyAnswers[user.Id] = $"{user.Username}: `${wager}` - {msg.Content.TrimTo(100)}";
+                                    _finalJeopardyAnswers[user.Id] = $"{user.Username}: `${wager:N0}` - {msg.Content.TrimTo(100)}";
                                     return;
                                 }
                                 cancel.Cancel();
