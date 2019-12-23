@@ -13,7 +13,7 @@ namespace Roki.Modules.Games.Services
     public class JeopardyService : IRService
     {
         private readonly DbService _db;
-        public ConcurrentDictionary<ulong, Jeopardy> ActiveGames = new ConcurrentDictionary<ulong, Jeopardy>();
+        public readonly ConcurrentDictionary<ulong, Jeopardy> ActiveGames = new ConcurrentDictionary<ulong, Jeopardy>();
 
         public JeopardyService(DbService db)
         {
@@ -65,14 +65,22 @@ namespace Roki.Modules.Games.Services
             try
             {
                 game.Shuffle();
-                validated.Add(game.First(g => g.Value == 200 && !string.IsNullOrWhiteSpace(g.Clue.SanitizeStringFull()) && !string.IsNullOrWhiteSpace(g.Answer.SanitizeStringFull())));
-                validated.Add(game.First(g => g.Value == 400 && !string.IsNullOrWhiteSpace(g.Clue.SanitizeStringFull()) && !string.IsNullOrWhiteSpace(g.Answer.SanitizeStringFull())));
-                validated.Add(game.First(g => g.Value == 600 && !string.IsNullOrWhiteSpace(g.Clue.SanitizeStringFull()) && !string.IsNullOrWhiteSpace(g.Answer.SanitizeStringFull())));
-                validated.Add(game.First(g => g.Value == 800 && !string.IsNullOrWhiteSpace(g.Clue.SanitizeStringFull()) && !string.IsNullOrWhiteSpace(g.Answer.SanitizeStringFull())));
-                validated.Add(game.First(g => g.Value == 1000 && !string.IsNullOrWhiteSpace(g.Clue.SanitizeStringFull()) && !string.IsNullOrWhiteSpace(g.Answer.SanitizeStringFull())));
+                var values = new List<int>{200, 400, 600, 800, 1000};
                 
-                validated.ForEach(c => c.SanitizeAnswer());
-                return validated;
+                foreach (var clue in game)
+                {
+                    if (values.Count == 0) break;
+                    var value = values.FirstOrDefault(c => c == clue.Value || c == clue.Value - 1000);
+                    if (value == 0) continue;
+                    if (string.IsNullOrWhiteSpace(clue.Clue.SanitizeStringFull()) ||
+                        string.IsNullOrWhiteSpace(clue.Answer.SanitizeStringFull())) continue;
+                    clue.Value = value;
+                    clue.SanitizeAnswer();
+                    validated.Add(clue);
+                    values.Remove(value);
+                }
+
+                return values.Count == 0 ? validated : null;
             }
             catch
             {
