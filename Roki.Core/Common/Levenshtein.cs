@@ -47,7 +47,7 @@ namespace Roki.Common
             {
                 // cost of the first index
                 var cost = i;
-                var addationCost = i;
+                var additionCost = i;
 
                 // cache value for inner loop to avoid index lookup and bonds checking, profiled this is quicker
                 var value1Char = value[i];
@@ -56,16 +56,16 @@ namespace Roki.Common
                 {
                     var insertionCost = cost;
 
-                    cost = addationCost;
+                    cost = additionCost;
 
                     // assigning this here reduces the array reads we do, improvement of the old version
-                    addationCost = _costs[j];
+                    additionCost = _costs[j];
 
                     if (value1Char != _storedValue[j])
                     {
                         if (insertionCost < cost) cost = insertionCost;
 
-                        if (addationCost < cost) cost = addationCost;
+                        if (additionCost < cost) cost = additionCost;
 
                         ++cost;
                     }
