@@ -122,7 +122,7 @@ namespace Roki.Modules.Games.Common
                 }
                 _acceptedAnswers.Add(minAnswer.SanitizeStringFull());
 
-                minAnswer = Regex.Replace(minAnswer, "(\\[.*\\])|(\".*\")|('.*')|(\\(.*\\))", "");
+                minAnswer = Regex.Replace(minAnswer, @"\(.*?\)", "");
             }
 
             MinAnswer = minAnswer.SanitizeStringFull();
@@ -169,12 +169,10 @@ namespace Roki.Modules.Games.Common
                         var ansLev = new Levenshtein(optionalAnswer);
                         foreach (var ans in answers)
                         {
-                            if (ansLev.DistanceFrom(ans) <= Math.Round(optionalAnswer.Length * 0.1))
-                            {
-                                correct++;
-                                // so they don't get points for submitting the same answer multiple times
-                                break;
-                            }
+                            if (!(ansLev.DistanceFrom(ans) <= Math.Round(optionalAnswer.Length * 0.1))) continue;
+                            correct++;
+                            // so they don't get points for submitting the same answer multiple times
+                            break;
                         }
                     }
 
@@ -206,7 +204,7 @@ namespace Roki.Modules.Games.Common
             //remove all the?
             answer = answer.ToLowerInvariant();
             answer = Regex.Replace(answer, "^(what |whats |where |wheres |who |whos )", "");
-            answer = Regex.Replace(answer, "^(is |are |was |were)", "");
+            answer = Regex.Replace(answer, "^(is |are |was |were )", "");
             return Regex.Replace(answer, "^(the |a |an )", "").Replace(" and ", "", StringComparison.Ordinal).Replace(" the ", "").SanitizeStringFull();
         }
 
@@ -214,7 +212,7 @@ namespace Roki.Modules.Games.Common
         {
             answer = answer.ToLowerInvariant();
             answer = Regex.Replace(answer, "^(what |whats |where |wheres |who |whos )", "");
-            answer = Regex.Replace(answer, "^(is |are |was |were)", "");
+            answer = Regex.Replace(answer, "^(is |are |was |were )", "");
             string[] guesses;
             if (answer.Contains(",", StringComparison.Ordinal))
             {
