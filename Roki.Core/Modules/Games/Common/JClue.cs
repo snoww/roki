@@ -15,7 +15,7 @@ namespace Roki.Modules.Games.Common
         public int Value { get; set; }
         public bool Available { get; set; } = true;
 
-        private string MinAnswer { get; set; }
+        private string _minAnswer;
         private readonly List<string> _acceptedAnswers = new List<string>();
 
         public void SanitizeAnswer()
@@ -36,7 +36,7 @@ namespace Roki.Modules.Games.Common
                 {
                     _acceptedAnswers.Add(answer.ToLowerInvariant().SanitizeStringFull());
                 }
-                MinAnswer = minAnswer.SanitizeStringFull();
+                _minAnswer = minAnswer.SanitizeStringFull();
                 return;
             }
             if (minAnswer.StartsWith("(2 of)", StringComparison.Ordinal))
@@ -125,7 +125,7 @@ namespace Roki.Modules.Games.Common
                 minAnswer = Regex.Replace(minAnswer, @"\(.*?\)", "");
             }
 
-            MinAnswer = minAnswer.SanitizeStringFull();
+            _minAnswer = minAnswer.SanitizeStringFull();
         }
 
         public bool CheckAnswer(string answer)
@@ -187,16 +187,16 @@ namespace Roki.Modules.Games.Common
                 }
             }
 
-            var minLev = new Levenshtein(MinAnswer);
+            var minLev = new Levenshtein(_minAnswer);
             var distance = minLev.DistanceFrom(sanitizedAnswer);
             if (distance == 0)
                 return true;
-            if (MinAnswer.Length <= 5)
+            if (_minAnswer.Length <= 5)
                 return distance == 0;
-            if (MinAnswer.Length <= 9)
+            if (_minAnswer.Length <= 9)
                 return distance <= 1;
 
-            return distance <= Math.Round(MinAnswer.Length * 0.15);
+            return distance <= Math.Round(_minAnswer.Length * 0.15);
         }
 
         private static string SanitizeAnswer(string answer)
