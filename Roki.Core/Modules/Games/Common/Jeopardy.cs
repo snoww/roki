@@ -20,31 +20,31 @@ namespace Roki.Modules.Games.Common
 {
     public class Jeopardy
     {
-        private SemaphoreSlim _guess = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim _guess = new SemaphoreSlim(1, 1);
         private readonly ICurrencyService _currency;
         private readonly Logger _log;
         private readonly DiscordSocketClient _client;
         private readonly Dictionary<string, List<JClue>> _clues;
         private readonly Roki _roki;
 
-        private IGuild Guild { get; }
-        private ITextChannel Channel { get; }
+        private readonly IGuild _guild;
+        private readonly ITextChannel _channel;
 
         private CancellationTokenSource _cancel;
         
         public JClue CurrentClue { get; private set; }
-        private JClue FinalJeopardy { get; }
+        private readonly JClue _finalJeopardy;
         private readonly Dictionary<ulong, string> _finalJeopardyAnswers = new Dictionary<ulong, string>();
 
         public readonly ConcurrentDictionary<IUser, int> Users = new ConcurrentDictionary<IUser, int>();
         private readonly ConcurrentBag<bool> _confirmed = new ConcurrentBag<bool>();
 
-        private bool CanGuess { get; set; }
-        private bool StopGame { get; set; }
-        private int GuessCount { get; set; }
+        private bool _canGuess;
+        private bool _stopGame;
+        private int _guessCount;
 
         public HashSet<ulong> Votes { get; } = new HashSet<ulong>();
-        private bool CanVote { get; set; }
+        private bool _canVote;
 
         public readonly Color Color = Color.DarkBlue;
         
@@ -55,51 +55,51 @@ namespace Roki.Modules.Games.Common
             _client = client;
             _clues = clues;
             
-            Guild = guild;
-            Channel = channel;
+            _guild = guild;
+            _channel = channel;
             _roki = roki;
             _currency = currency;
-            FinalJeopardy = finalJeopardy;
+            _finalJeopardy = finalJeopardy;
         }
 
         public async Task StartGame()
         {
-            await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+            await _channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithTitle("Jeopardy!")
                     .WithDescription("Welcome to Jeopardy!\nGame is starting soon...")
                     .WithFooter("Responses must be in question form"))
                 .ConfigureAwait(false);
-            await Channel.TriggerTypingAsync().ConfigureAwait(false);
+            await _channel.TriggerTypingAsync().ConfigureAwait(false);
             await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
-            while (!StopGame)
+            while (!_stopGame)
             {
                 _cancel = new CancellationTokenSource();
                 
                 await ShowCategories().ConfigureAwait(false);
-                var catResponse = await ReplyHandler(Channel.Id, timeout: TimeSpan.FromMinutes(1)).ConfigureAwait(false);
+                var catResponse = await ReplyHandler(_channel.Id, timeout: TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                 var catStatus = ParseCategoryAndClue(catResponse);
                 while (catStatus != CategoryStatus.Success)
                 {
                     if (catStatus == CategoryStatus.UnavailableClue)
-                        await Channel.SendErrorAsync("That clue is not available.\nPlease try again.").ConfigureAwait(false);
+                        await _channel.SendErrorAsync("That clue is not available.\nPlease try again.").ConfigureAwait(false);
                     else if (catStatus == CategoryStatus.WrongAmount)
-                        await Channel.SendErrorAsync("There are no clues available for that amount.\nPlease try again.")
+                        await _channel.SendErrorAsync("There are no clues available for that amount.\nPlease try again.")
                             .ConfigureAwait(false);
                     else if (catStatus == CategoryStatus.WrongCategory)
-                        await Channel.SendErrorAsync("No such category found.\nPlease try again.").ConfigureAwait(false);
+                        await _channel.SendErrorAsync("No such category found.\nPlease try again.").ConfigureAwait(false);
                     else
                     {
-                        await Channel.SendErrorAsync("No response received, stopping Jeopardy! game.").ConfigureAwait(false);
+                        await _channel.SendErrorAsync("No response received, stopping Jeopardy! game.").ConfigureAwait(false);
                         await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
                         return;
                     }
                     
-                    catResponse = await ReplyHandler(Channel.Id, timeout: TimeSpan.FromMinutes(1)).ConfigureAwait(false);
+                    catResponse = await ReplyHandler(_channel.Id, timeout: TimeSpan.FromMinutes(1)).ConfigureAwait(false);
                     catStatus = ParseCategoryAndClue(catResponse);
                 }
                 
                 // CurrentClue is now the chosen clue
-                await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+                await _channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                         .WithAuthor("Jeopardy!")
                         .WithTitle($"{CurrentClue.Category} - ${CurrentClue.Value}")
                         .WithDescription(CurrentClue.Clue))
@@ -108,7 +108,7 @@ namespace Roki.Modules.Games.Common
                 try
                 {
                     _client.MessageReceived += GuessHandler;
-                    CanGuess = true;
+                    _canGuess = true;
                     await VoteDelay().ConfigureAwait(false);
                     try
                     {
@@ -121,15 +121,15 @@ namespace Roki.Modules.Games.Common
                 }
                 finally
                 {
-                    CanGuess = false;
-                    CanVote = false;
-                    GuessCount = 0;
+                    _canGuess = false;
+                    _canVote = false;
+                    _guessCount = 0;
                     _client.MessageReceived -= GuessHandler;
                 }
 
                 if (!_cancel.IsCancellationRequested)
                 {
-                    await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.Red)
+                    await _channel.EmbedAsync(new EmbedBuilder().WithColor(Color.Red)
                             .WithAuthor("Jeopardy!")
                             .WithTitle("Times Up!")
                             .WithDescription($"The correct answer was:\n`{CurrentClue.Answer}`"))
@@ -141,9 +141,9 @@ namespace Roki.Modules.Games.Common
             }
 
             await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
-            if (!StopGame && !Users.IsEmpty)
+            if (!_stopGame && !Users.IsEmpty)
             {
-                await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+                await _channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                         .WithAuthor("Jeopardy!")
                         .WithTitle("Current Winnings")
                         .WithDescription(GetLeaderboard()))
@@ -155,8 +155,8 @@ namespace Roki.Modules.Games.Common
 
         public async Task EnsureStopped()
         {
-            StopGame = true;
-            var msg = await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+            _stopGame = true;
+            var msg = await _channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithAuthor("Jeopardy!")
                     .WithTitle("Final Winnings")
                     .WithDescription(GetLeaderboard()))
@@ -165,17 +165,17 @@ namespace Roki.Modules.Games.Common
             if (!Users.Any()) return;
             foreach (var (user, winnings) in Users)
             {
-                await _currency.ChangeAsync(user.Id, "Jeopardy Winnings", winnings, _client.CurrentUser.Id, user.Id, Guild.Id, Channel.Id, msg.Id)
+                await _currency.ChangeAsync(user.Id, "Jeopardy Winnings", winnings, _client.CurrentUser.Id, user.Id, _guild.Id, _channel.Id, msg.Id)
                     .ConfigureAwait(false);
             }
         }
 
         public async Task StopJeopardyGame()
         {
-            var old = StopGame;
-            StopGame = true;
+            var old = _stopGame;
+            _stopGame = true;
             if (!old)
-                await Channel.SendErrorAsync("Jeopardy! game stopping after this question.").ConfigureAwait(false);
+                await _channel.SendErrorAsync("Jeopardy! game stopping after this question.").ConfigureAwait(false);
         }
 
         private bool AvailableClues()
@@ -193,7 +193,7 @@ namespace Roki.Modules.Games.Common
                 embed.AddField(category, string.Join("\n", clues.Select(c => $"{(c.Available ? $"`${c.Value}`" : $"~~`${c.Value}`~~")}")), true);
             }
             
-            await Channel.EmbedAsync(embed).ConfigureAwait(false);
+            await _channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         private CategoryStatus ParseCategoryAndClue(IMessage msg)
@@ -227,13 +227,13 @@ namespace Roki.Modules.Games.Common
             {
                 try
                 {
-                    if (msg.Channel.Id != Channel.Id) return;
-                    if (CanVote && Users.Count != 0 && Votes.Count >= Users.Count)
+                    if (msg.Channel.Id != _channel.Id) return;
+                    if (_canVote && Users.Count != 0 && Votes.Count >= Users.Count)
                     {
                         Votes.Clear();
                         _cancel.Cancel();
                         await Task.Delay(TimeSpan.FromSeconds(3)).ConfigureAwait(false);
-                        await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+                        await _channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                                 .WithAuthor("Jeopardy!")
                                 .WithTitle($"{CurrentClue.Category} - ${CurrentClue.Value}")
                                 .WithDescription($"Vote skip passed.\nThe correct answer was:\n`{CurrentClue.Answer}`"))
@@ -245,7 +245,7 @@ namespace Roki.Modules.Games.Common
                     await _guess.WaitAsync().ConfigureAwait(false);
                     try
                     {
-                        if (CanGuess && CurrentClue.CheckAnswer(msg.Content) && !_cancel.IsCancellationRequested)
+                        if (_canGuess && CurrentClue.CheckAnswer(msg.Content) && !_cancel.IsCancellationRequested)
                         {
                             Users.AddOrUpdate(msg.Author, CurrentClue.Value, (u, old) => old + CurrentClue.Value);
                             guess = true;
@@ -258,10 +258,10 @@ namespace Roki.Modules.Games.Common
 
                     if (!guess)
                     {
-                        if (++GuessCount > 6)
+                        if (++_guessCount > 6)
                         {
-                            GuessCount = 0;
-                            await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+                            _guessCount = 0;
+                            await _channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                                     .WithAuthor("Jeopardy!")
                                     .WithTitle($"{CurrentClue.Category} - ${CurrentClue.Value}")
                                     .WithDescription(CurrentClue.Clue))
@@ -270,7 +270,7 @@ namespace Roki.Modules.Games.Common
                         return;
                     }
                     _cancel.Cancel();
-                    await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+                    await _channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                             .WithAuthor("Jeopardy!")
                             .WithTitle($"{CurrentClue.Category} - ${CurrentClue.Value}")
                             .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was:\n`{CurrentClue.Answer}`\n" +
@@ -287,7 +287,7 @@ namespace Roki.Modules.Games.Common
 
         private async Task StartFinalJeopardy()
         {
-            await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+            await _channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithAuthor("Jeopardy!")
                     .WithTitle("Final Jeopardy!")
                     .WithDescription("Please go to your DMs to play the Final Jeopardy!")
@@ -306,23 +306,23 @@ namespace Roki.Modules.Games.Common
             }
             await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
 
-            await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+            await _channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithAuthor("Final Jeopardy!")
-                    .WithTitle($"{FinalJeopardy.Category}")
-                    .WithDescription(FinalJeopardy.Clue)
+                    .WithTitle($"{_finalJeopardy.Category}")
+                    .WithDescription(_finalJeopardy.Clue)
                     .WithFooter("Note: your answers will not be checked here"))
                 .ConfigureAwait(false);
                 
             await Task.Delay(TimeSpan.FromSeconds(35)).ConfigureAwait(false);
                 
-            await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+            await _channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithAuthor("Final Jeopardy!")
-                    .WithDescription($"The correct answer is:\n`{FinalJeopardy.Answer}`"))
+                    .WithDescription($"The correct answer is:\n`{_finalJeopardy.Answer}`"))
                 .ConfigureAwait(false);
 
             await Task.Delay(TimeSpan.FromSeconds(3)).ConfigureAwait(false);
             
-            await Channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
+            await _channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithAuthor("Final Jeopardy!")
                     .WithTitle("Results")
                     .WithDescription(_finalJeopardyAnswers.Count > 0 ? string.Join("\n", _finalJeopardyAnswers.Values) : "No wagers."))
@@ -340,7 +340,7 @@ namespace Roki.Modules.Games.Common
                     var dm = await user.GetOrCreateDMChannelAsync().ConfigureAwait(false);
                     await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
                             .WithAuthor("Final Jeopardy!")
-                            .WithTitle(FinalJeopardy.Category)
+                            .WithTitle(_finalJeopardy.Category)
                             .WithDescription($"Please make your wager. You're current score is: `${amount:N0}`"))
                         .ConfigureAwait(false);
 
@@ -379,8 +379,8 @@ namespace Roki.Modules.Games.Common
                     await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
                     await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
                             .WithAuthor("Final Jeopardy!")
-                            .WithTitle($"{FinalJeopardy.Category}")
-                            .WithDescription(FinalJeopardy.Clue)
+                            .WithTitle($"{_finalJeopardy.Category}")
+                            .WithDescription(_finalJeopardy.Clue)
                             .WithFooter($"Your wager is ${wager:N0}. Submit your answer now."))
                         .ConfigureAwait(false);
 
@@ -399,7 +399,7 @@ namespace Roki.Modules.Games.Common
                     {
                         _client.MessageReceived -= FinalJeopardyGuessHandler;
                         await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
-                                .WithDescription($"Please return back to {Channel.Mention} for final results."))
+                                .WithDescription($"Please return back to {_channel.Mention} for final results."))
                             .ConfigureAwait(false);
                     }
                     
@@ -411,7 +411,7 @@ namespace Roki.Modules.Games.Common
                             {
                                 if (msg.Author.IsBot || msg.Channel.Id != dm.Id || !Regex.IsMatch(msg.Content.ToLowerInvariant(), "^what|where|who")) return;
                                 var guess = false;
-                                if (FinalJeopardy.CheckAnswer(msg.Content) && !cancel.IsCancellationRequested)
+                                if (_finalJeopardy.CheckAnswer(msg.Content) && !cancel.IsCancellationRequested)
                                 {
                                     Users.AddOrUpdate(user, wager * 2, (u, old) => old + wager * 2);
                                     _finalJeopardyAnswers[user.Id] = $"{user.Username}: `${wager:N0}` - {msg.Content}";
@@ -427,8 +427,8 @@ namespace Roki.Modules.Games.Common
 
                                 await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
                                         .WithAuthor("Final Jeopardy!")
-                                        .WithTitle($"{FinalJeopardy.Category}")
-                                        .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was:\n`{FinalJeopardy.Answer}`\n" +
+                                        .WithTitle($"{_finalJeopardy.Category}")
+                                        .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was:\n`{_finalJeopardy.Answer}`\n" +
                                                          $"Your total score is: `{Users[user]:N0}`"))
                                     .ConfigureAwait(false);
                             }
@@ -502,7 +502,7 @@ namespace Roki.Modules.Games.Common
             // -1 cant vote yet
             // -2 cant vote
             // -3 already voted
-            if (!CanVote) return -1;
+            if (!_canVote) return -1;
             if (Users.All(u => u.Key.Id != userId)) return -2;
             if (Votes.Add(userId))
                 return 0;
@@ -514,7 +514,7 @@ namespace Roki.Modules.Games.Common
             var _ = Task.Run(async () =>
             {
                 await Task.Delay(TimeSpan.FromSeconds(12)).ConfigureAwait(false);
-                CanVote = true;
+                _canVote = true;
             });
 
             return Task.CompletedTask;
