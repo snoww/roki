@@ -66,12 +66,12 @@ namespace Roki.Modules.Games.Services
             {
                 game.Shuffle();
                 var values = new List<int>{200, 400, 600, 800, 1000};
-                
+
                 foreach (var clue in game)
                 {
                     if (values.Count == 0) break;
-                    var value = values.First();
-                    if (clue.Value != value || clue.Value - 1000 != value) continue;
+                    var value = values.FirstOrDefault(c => c == clue.Value || c == clue.Value - 1000);
+                    if (value == 0) continue;
                     if (string.IsNullOrWhiteSpace(clue.Clue.SanitizeStringFull()) ||
                         string.IsNullOrWhiteSpace(clue.Answer.SanitizeStringFull())) continue;
                     clue.Value = value;
