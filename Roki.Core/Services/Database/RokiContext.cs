@@ -85,7 +85,7 @@ namespace Roki.Core.Services.Database
 
             modelBuilder.Entity<Listing>(entity =>
             {
-                entity.HasIndex(s => s.ItemName);
+                entity.HasIndex(s => s.Item);
             });
 
             #endregion
