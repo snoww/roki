@@ -674,7 +674,7 @@
   },
   "jeopardyvote": {
     "Command": "jeopardyvote jvote jv",
-    "Description": "Votes to skip the current question.",
+    "Description": "Votes to skip the current question. Can vote if you have a score in the current game. Voting opens 12 seconds after clue is shown.",
     "Usage": [
       "{0}jv"
     ]
