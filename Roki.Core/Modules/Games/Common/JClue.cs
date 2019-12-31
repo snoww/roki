@@ -130,7 +130,6 @@ namespace Roki.Modules.Games.Common
 
         public bool CheckAnswer(string answer)
         {
-            
             if (Answer.StartsWith("(2 of)", StringComparison.Ordinal) || Answer.StartsWith("(3 of)", StringComparison.Ordinal))
             {
                 var answers = SanitizeAnswerToList(answer);

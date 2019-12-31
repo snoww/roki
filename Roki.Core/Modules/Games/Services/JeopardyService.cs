@@ -53,8 +53,17 @@ namespace Roki.Modules.Games.Services
                     Value = clue.Value
                 };
 
-            var skip = new Random().Next(0, query.Count());
-            var final = query.Skip(skip).First();
+            JClue final;
+            do
+            {
+                var skip = new Random().Next(0, query.Count());
+                final = query.Skip(skip).First();
+                if (string.IsNullOrWhiteSpace(final.Clue.SanitizeStringFull()) || string.IsNullOrWhiteSpace(final.Answer.SanitizeStringFull()))
+                {
+                    final = null;
+                }
+            } while (final == null);
+
             final.SanitizeAnswer();
             return final;
         }
