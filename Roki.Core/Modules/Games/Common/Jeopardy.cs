@@ -165,7 +165,7 @@ namespace Roki.Modules.Games.Common
             if (!Users.Any()) return;
             foreach (var (user, winnings) in Users)
             {
-                await _currency.ChangeAsync(user.Id, "Jeopardy Winnings", winnings, _client.CurrentUser.Id, user.Id, _guild.Id, _channel.Id, msg.Id)
+                await _currency.ChangeAsync(_client.CurrentUser.Id, user.Id, "Jeopardy Winnings", winnings, _guild.Id, _channel.Id, msg.Id)
                     .ConfigureAwait(false);
             }
         }

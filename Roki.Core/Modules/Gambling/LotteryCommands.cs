@@ -56,8 +56,9 @@ namespace Roki.Modules.Gambling
                     return;
                 }
                 var user = ctx.User;
-                var removed = await _currency.ChangeAsync(ctx.User.Id, $"Lottery Entry x{tickets}", -tickets * _roki.Properties.LotteryTicketCost, ctx.User.Id, ctx.Client.CurrentUser.Id,
-                    ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id).ConfigureAwait(false);
+                var removed = await _currency.ChangeAsync(ctx.User.Id, ctx.Client.CurrentUser.Id, $"Lottery Entry x{tickets}",
+                        -tickets * _roki.Properties.LotteryTicketCost, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
+                    .ConfigureAwait(false);
                 if (!removed)
                 {
                     await ctx.Channel.SendErrorAsync($"{ctx.User.Mention} you do not have enough {_roki.Properties.CurrencyIcon} to join the lottery.")
@@ -103,8 +104,9 @@ namespace Roki.Modules.Gambling
                     }
                 }
                 var user = ctx.User;
-                var removed = await _currency.ChangeAsync(ctx.User.Id, "Lottery Entry", -_roki.Properties.LotteryTicketCost, ctx.User.Id, ctx.Client.CurrentUser.Id,
-                    ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id).ConfigureAwait(false);
+                var removed = await _currency.ChangeAsync(ctx.User.Id, ctx.Client.CurrentUser.Id, "Lottery Entry",
+                        -_roki.Properties.LotteryTicketCost, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
+                    .ConfigureAwait(false);
                 if (!removed)
                 {
                     await ctx.Channel.SendErrorAsync($"{ctx.User.Mention} you do not have enough {_roki.Properties.CurrencyIcon} to join the lottery.")
