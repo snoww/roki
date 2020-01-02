@@ -21,6 +21,11 @@ namespace Roki.Core.Services.Database
         public DbSet<Event> Events { get; set; }
         public DbSet<Guild> Guilds { get; set; }
         public DbSet<Channel> Channels { get; set; }
+        public DbSet<AirDate> AirDates { get; set; }
+        public DbSet<Categories> Categories { get; set; }
+        public DbSet<Classification> Classifications { get; set; }
+        public DbSet<Clues> Clues { get; set; }
+        public DbSet<Documents> Documents { get; set; }
 
         #region PokemonData
 
@@ -80,7 +85,7 @@ namespace Roki.Core.Services.Database
 
             modelBuilder.Entity<Listing>(entity =>
             {
-                entity.HasIndex(s => s.ItemName);
+                entity.HasIndex(s => s.Item);
             });
 
             #endregion

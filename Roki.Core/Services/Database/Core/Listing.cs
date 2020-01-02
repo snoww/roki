@@ -10,8 +10,8 @@ namespace Roki.Core.Services.Database.Models
         [Key]
         public int Id { get; set; }
         public ulong SellerId { get; set; }
-        public string ItemName { get; set; }
-        public string ItemDetails { get; set; }
+        public string Item { get; set; }
+        public string Details { get; set; }
         public string Description { get; set; } = "-";
         public string Category { get; set; }
         public string Type { get; set; } = "OneTime";

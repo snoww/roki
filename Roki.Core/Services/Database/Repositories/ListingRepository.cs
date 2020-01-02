@@ -27,7 +27,7 @@ namespace Roki.Core.Services.Database.Repositories
 
         public Listing GetListingByName(string name)
         {
-            return Set.FirstOrDefault(l => l.ItemName == name);
+            return Set.FirstOrDefault(l => l.Item == name);
         }
 
         public Listing GetListingById(int id)
