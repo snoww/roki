@@ -57,8 +57,8 @@ namespace Roki.Modules.Currency.Services
             uow.Listing.Add(new Listing
             {
                 SellerId = sellerId,
-                ItemName = itemName,
-                ItemDetails = itemDetails,
+                Item = itemName,
+                Details = itemDetails,
                 Description = itemDescription,
                 Category = category,
                 Cost = cost,

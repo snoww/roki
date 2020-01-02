@@ -2,7 +2,7 @@
 
 namespace Roki.Common
 {
-    public static class OptionParser
+    public static class OptionsParser
     {
         public static (T, bool) ParseFrom<T>(T options, string[] args) where T : ICommandOptions
         {
