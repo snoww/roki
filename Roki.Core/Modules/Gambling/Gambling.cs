@@ -29,7 +29,7 @@ namespace Roki.Modules.Gambling
                 return;
             
             var removed = await _currency
-                .ChangeAsync(ctx.User.Id, "BetRoll Entry", -amount, ctx.User.Id, ctx.Client.CurrentUser.Id, ctx.Guild.Id, ctx.Channel.Id, 
+                .ChangeAsync(ctx.User.Id, ctx.Client.CurrentUser.Id, "BetRoll Entry", -amount, ctx.Guild.Id, ctx.Channel.Id, 
                     ctx.Message.Id)
                 .ConfigureAwait(false);
             if (!removed)
@@ -57,7 +57,7 @@ namespace Roki.Modules.Gambling
             else
                 win = amount * _roki.Properties.BetRoll100Multiplier;
 
-            await _currency.ChangeAsync(ctx.User.Id, "BetRoll Payout", win, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id, ctx.Channel.Id,
+            await _currency.ChangeAsync(ctx.Client.CurrentUser.Id, ctx.User.Id, "BetRoll Payout", win, ctx.Guild.Id, ctx.Channel.Id,
                 ctx.Message.Id);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                 .WithDescription($"{rollStr}\nCongratulations, you won `{win:N0}` {_roki.Properties.CurrencyIcon}" +

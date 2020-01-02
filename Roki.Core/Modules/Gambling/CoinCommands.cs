@@ -49,7 +49,7 @@ namespace Roki.Modules.Gambling
                 }
 
                 var removed = await _currency
-                    .ChangeAsync(ctx.User.Id, "BetFlip Entry", -amount, ctx.User.Id, ctx.Client.CurrentUser.Id, ctx.Guild.Id, ctx.Channel.Id, 
+                    .ChangeAsync(ctx.User.Id, ctx.Client.CurrentUser.Id, "BetFlip Entry", -amount, ctx.Guild.Id, ctx.Channel.Id, 
                         ctx.Message.Id)
                     .ConfigureAwait(false);
 
@@ -74,7 +74,7 @@ namespace Roki.Modules.Gambling
                 if (guess == result)
                 {
                     var won = (long) Math.Ceiling(amount * _roki.Properties.BetFlipMultiplier);
-                    await _currency.ChangeAsync(ctx.User.Id, "BetFlip Payout", won, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id,
+                    await _currency.ChangeAsync(ctx.Client.CurrentUser.Id, ctx.User.Id, "BetFlip Payout", won, ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithDescription(
@@ -110,7 +110,7 @@ namespace Roki.Modules.Gambling
                 }
 
                 var removed = await _currency
-                    .ChangeAsync(ctx.User.Id, "BetFlipMulti Entry", -amount, ctx.User.Id, ctx.Client.CurrentUser.Id, ctx.Guild.Id, ctx.Channel.Id, 
+                    .ChangeAsync(ctx.User.Id, ctx.Client.CurrentUser.Id, "BetFlipMulti Entry", -amount, ctx.Guild.Id, ctx.Channel.Id, 
                         ctx.Message.Id)
                     .ConfigureAwait(false);
 
@@ -132,7 +132,7 @@ namespace Roki.Modules.Gambling
                 if ((float) correct / guesses.Length >= _roki.Properties.BetFlipMMinCorrect)
                 {
                     var won = (long) Math.Ceiling(amount * Math.Pow(correct, _roki.Properties.BetFlipMMultiplier));
-                    await _currency.ChangeAsync(ctx.User.Id, "BetFlipMulti Payout", won, ctx.Client.CurrentUser.Id, ctx.User.Id, ctx.Guild.Id,
+                    await _currency.ChangeAsync(ctx.Client.CurrentUser.Id, ctx.User.Id, "BetFlipMulti Payout", won, ctx.Guild.Id,
                         ctx.Channel.Id, ctx.Message.Id);
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithDescription(
