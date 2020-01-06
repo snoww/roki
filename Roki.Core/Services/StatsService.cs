@@ -22,7 +22,7 @@ namespace Roki.Core.Services
         long VoiceChannels { get; }
 
         TimeSpan GetUptime();
-        string GetUptimeString(string separator = ", ");
+        string GetUptimeString(string separator);
         void Initialize();
     }
     
@@ -162,10 +162,10 @@ namespace Roki.Core.Services
             return DateTime.UtcNow - _started;
         }
 
-        public string GetUptimeString(string separator = ", ")
+        public string GetUptimeString(string separator)
         {
             var time = GetUptime();
-            return $"{time.Days} days{separator}{time.Hours} hours{separator}{time.Minutes} minutes";
+            return time.ToReadableString(separator);
         }
     }
 }
