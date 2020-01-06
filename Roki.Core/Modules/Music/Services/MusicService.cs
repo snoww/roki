@@ -43,7 +43,7 @@ namespace Roki.Modules.Music.Services
             var player = _lavaNode.GetPlayer(ctx.Guild);
             var result = await _lavaNode.SearchYouTubeAsync(query).ConfigureAwait(false);
 
-            if (result.LoadType == LoadType.NoMatches || result.LoadType == LoadType.LoadFailed)
+            if (result.LoadStatus == LoadStatus.NoMatches || result.LoadStatus == LoadStatus.LoadFailed)
             {
                 await ctx.Channel.SendErrorAsync("No matches found.").ConfigureAwait(false);
                 return;
@@ -52,7 +52,7 @@ namespace Roki.Modules.Music.Services
             var track = result.Tracks.FirstOrDefault();
 
             var embed = new EmbedBuilder().WithOkColor();
-            if (player.PlayerState == PlayerState.Playing)
+            if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
             {
                 player.Queue.Enqueue(track);
                 embed.WithAuthor($"Queued: #{player.Queue.Count}", "http://i.imgur.com/nhKS3PT.png")
@@ -79,9 +79,28 @@ namespace Roki.Modules.Music.Services
                 return;
             var player = _lavaNode.GetPlayer(ctx.Guild);
             
+            if (player.PlayerState != PlayerState.Playing)
+                return;
+
             await player.PauseAsync().ConfigureAwait(false);
             var embed = new EmbedBuilder().WithOkColor()
-                .WithDescription("Music playback paused.");
+                .WithDescription("Playback paused.");
+            
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+        }
+
+        public async Task ResumeAsync(ICommandContext ctx)
+        {
+            if (!await IsPlayerActive(ctx))
+                return;
+            var player = _lavaNode.GetPlayer(ctx.Guild);
+            
+            if (player.PlayerState != PlayerState.Paused)
+                return;
+
+            await player.ResumeAsync().ConfigureAwait(false);
+            var embed = new EmbedBuilder().WithOkColor()
+                .WithDescription("Playback resumed.");
             
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }

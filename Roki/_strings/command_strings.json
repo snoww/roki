@@ -226,6 +226,14 @@
       "{0}pause"
     ]
   },
+  "resume": {
+    "Command": "resume unpause",
+    "Description": "Un-pauses the current paused track. Must be in a voice channel.",
+    "Usage": [
+      "{0}resume",
+      "{0}unpause"
+    ]
+  },
   "destroy": {
     "Command": "destroy d",
     "Description": "Stops the bot from playing music. Must be in a voice channel.",
