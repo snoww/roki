@@ -33,7 +33,7 @@ namespace Roki.Modules.Utility
                     StartInfo = new ProcessStartInfo
                     {
                         FileName = "convert",
-                        Arguments = $"-flatten ./temp/{fileName} ./temp/{fileName}",
+                        Arguments = $"-flatten ./temp/{fileName}.png ./temp/{fileName}.png",
                         RedirectStandardOutput = false,
                         UseShellExecute = false,
                         CreateNoWindow = true,
