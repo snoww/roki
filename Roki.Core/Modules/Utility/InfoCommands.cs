@@ -34,13 +34,13 @@ namespace Roki.Modules.Utility
                 if (string.IsNullOrWhiteSpace(guildName))
                     guild = (SocketGuild) channel.Guild;
                 else
-                    guild = _client.Guilds.FirstOrDefault(g => g.Name.ToUpperInvariant() == guildName.ToUpperInvariant());
+                    guild = _client.Guilds.FirstOrDefault(g => string.Equals(g.Name, guildName, StringComparison.InvariantCultureIgnoreCase));
                 if (guild == null)
                     return;
 
                 var ownerName = guild.GetUser(guild.OwnerId);
-                var textChannels = guild.TextChannels.Count();
-                var voiceChannels = guild.VoiceChannels.Count();
+                var textChannels = guild.TextChannels.Count;
+                var voiceChannels = guild.VoiceChannels.Count;
 
                 var createdOn = new DateTime(2015, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(guild.Id >> 22);
                 var features = string.Join("\n", guild.Features);
@@ -51,14 +51,14 @@ namespace Roki.Modules.Utility
                 var embed = new EmbedBuilder().WithOkColor()
                     .WithAuthor("Server Info")
                     .WithTitle(guild.Name)
-                    .AddField("ID", guild.Id.ToString(), true)
+                    .AddField("ID", guild.Id, true)
                     .AddField("Owner", ownerName.ToString(), true)
-                    .AddField("Members", guild.MemberCount.ToString(), true)
-                    .AddField("Text Channels", textChannels.ToString(), true)
-                    .AddField("Voice Channels", voiceChannels.ToString(), true)
+                    .AddField("Members", guild.MemberCount, true)
+                    .AddField("Text Channels", textChannels, true)
+                    .AddField("Voice Channels", voiceChannels, true)
                     .AddField("Created on", $"{createdOn:MM/dd/yyyy HH:mm}", true)
                     .AddField("Region", guild.VoiceRegionId, true)
-                    .AddField("Roles", (guild.Roles.Count - 1).ToString(), true)
+                    .AddField("Roles", guild.Roles.Count - 1, true)
                     .AddField("Features", features, true);
                 if (Uri.IsWellFormedUriString(guild.IconUrl, UriKind.Absolute))
                     embed.WithThumbnailUrl(guild.IconUrl);
@@ -79,9 +79,9 @@ namespace Roki.Modules.Utility
                 var embed = new EmbedBuilder().WithOkColor()
                     .WithTitle(ch.Name)
                     .WithDescription(ch.Topic)
-                    .AddField("ID", ch.Id.ToString(), true)
+                    .AddField("ID", ch.Id, true)
                     .AddField("Created on", $"{createdOn:MM/dd/yyyy HH:mm}", true)
-                    .AddField("Users", userCount.ToString(), true);
+                    .AddField("Users", userCount, true);
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
