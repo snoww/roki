@@ -25,7 +25,7 @@ namespace Roki.Modules.Utility
 
                 using (var client = new WebClient())
                 {
-                    client.DownloadFile($"https://math.now.sh?from={encoded}", $"./temp/{fileName}.png");
+                    client.DownloadFile($"https://math.now.sh?from={encoded}.png", $"./temp/{fileName}.png");
                 }
 
                 using var proc = new Process
