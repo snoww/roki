@@ -1,10 +1,10 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Web;
 using Discord;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
@@ -100,11 +100,10 @@ namespace Roki.Modules.Searches
         [RokiCommand, Description, Usage, Aliases]
         public async Task Image([Leftover] string query = null)
         {
-            // TODO search imgur if google returns no results
             var encode = query?.Trim();
             if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
                 return;
-            query = WebUtility.UrlEncode(encode)?.Replace(" ", "+");
+            query = HttpUtility.UrlEncode(encode);
             var result = await _google.GetImagesAsync(encode).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithOkColor()
                 .WithAuthor("Image search for: " + encode.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
@@ -118,11 +117,10 @@ namespace Roki.Modules.Searches
         [RokiCommand, Description, Usage, Aliases]
         public async Task RandomImage([Leftover] string query = null)
         {
-            // TODO search imgur if google returns no results
             var encode = query?.Trim();
             if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
                 return;
-            query = WebUtility.UrlEncode(encode)?.Replace(" ", "+");
+            query = HttpUtility.UrlEncode(encode);
             var result = await _google.GetImagesAsync(encode, true).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithOkColor()
                 .WithAuthor("Image search for: " + encode.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
