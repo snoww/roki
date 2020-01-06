@@ -1,6 +1,9 @@
+using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
+using System.Web;
 using Discord.Commands;
 using Roki.Common.Attributes;
 
@@ -16,14 +19,21 @@ namespace Roki.Modules.Utility
             {
                 if (string.IsNullOrWhiteSpace(tex))
                     return;
-                var trim = tex.Trim();
 
-                var proc = new Process()
+                var encoded = HttpUtility.UrlEncode(tex.Trim());
+                var fileName = $"{ctx.User.Username}-{Guid.NewGuid().ToString().Substring(0, 7)}";
+
+                using (var client = new WebClient())
+                {
+                    client.DownloadFile($"https://math.now.sh?from={encoded}", $"./temp/{fileName}.png");
+                }
+
+                using var proc = new Process
                 {
                     StartInfo = new ProcessStartInfo
                     {
-                        FileName = "tex2pic",
-                        Arguments = $"-r 150 -o ./temp/tex.png \"{trim}\"",
+                        FileName = "convert",
+                        Arguments = $"-flatten ./temp/{fileName} ./temp/{fileName}",
                         RedirectStandardOutput = false,
                         UseShellExecute = false,
                         CreateNoWindow = true,
@@ -32,8 +42,8 @@ namespace Roki.Modules.Utility
                 proc.Start();
                 proc.WaitForExit();
 
-                await ctx.Channel.SendFileAsync("./temp/tex.png").ConfigureAwait(false);
-                File.Delete("./temp/tex.png");
+                await ctx.Channel.SendFileAsync($"./temp/{fileName}.png").ConfigureAwait(false);
+                File.Delete($"./temp/{fileName}.png");
             }
         }
     }
