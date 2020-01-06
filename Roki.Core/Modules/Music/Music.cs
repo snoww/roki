@@ -16,6 +16,9 @@ namespace Roki.Modules.Music
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
+            if (string.IsNullOrWhiteSpace(query))
+                return;
+            
             var user = ctx.User as SocketGuildUser;
             
             await _service.ConnectAsync(user?.VoiceChannel, ctx.Channel as ITextChannel).ConfigureAwait(false);
@@ -27,7 +30,15 @@ namespace Roki.Modules.Music
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
-            await _service.PauseAsync(ctx);
+            await _service.PauseAsync(ctx).ConfigureAwait(false);
+        }
+        
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task Resume()
+        {
+            if (!await IsUserInVoice().ConfigureAwait(false))
+                return;
+            await _service.ResumeAsync(ctx).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -53,7 +64,7 @@ namespace Roki.Modules.Music
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task ListQueue([Leftover] int page = 0)
+        public async Task ListQueue(int page = 0)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
@@ -62,7 +73,7 @@ namespace Roki.Modules.Music
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task SongRemove([Leftover] int index = 0)
+        public async Task SongRemove(int index = 0)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
@@ -77,7 +88,7 @@ namespace Roki.Modules.Music
         }
         
         [RokiCommand, Description, Usage, Aliases]
-        public async Task Volume([Leftover] int volume)
+        public async Task Volume(int volume)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
@@ -91,7 +102,7 @@ namespace Roki.Modules.Music
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task Seek([Leftover] int seconds = 0)
+        public async Task Seek(int seconds = 0)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
