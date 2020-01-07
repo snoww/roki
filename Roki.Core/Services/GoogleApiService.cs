@@ -19,47 +19,32 @@ namespace Roki.Core.Services
         Task<ImageResult> GetImagesAsync(string query, bool random = false);
     }
 
-    public struct ImageResult
+    public class ImageResult
     {
-        public Result.ImageData Image { get; }
-        public string Link { get; }
-
-        public ImageResult(Result.ImageData image, string link)
-        {
-            Image = image;
-            Link = link;
-        }
+        public Result.ImageData Image { get; set; }
+        public string Link { get; set; }
     }
     
     public class GoogleApiService : IGoogleApiService
     {
-        private const string search_engine_id = "009851753967553605166:ffip6ctnuaq";
+        private const string SearchEngineId = "009851753967553605166:ffip6ctnuaq";
 
-        private readonly IRokiConfig _config;
-        private readonly IHttpClientFactory _httpFactory;
-        private readonly CustomsearchService cs;
+        private readonly CustomsearchService _cs;
 
-        private readonly YouTubeService yt;
+        private readonly YouTubeService _yt;
 
-        public GoogleApiService(IRokiConfig config, IHttpClientFactory httpFactory)
+        public GoogleApiService(IRokiConfig config)
         {
-            _config = config;
-            _httpFactory = httpFactory;
-
             var baseClient = new BaseClientService.Initializer
             {
                 ApplicationName = "Roki",
-                ApiKey = _config.GoogleApi
+                ApiKey = config.GoogleApi
             };
-
-            _log = LogManager.GetCurrentClassLogger();
-
-            yt = new YouTubeService(baseClient);
-            cs = new CustomsearchService(baseClient);
+            
+            _yt = new YouTubeService(baseClient);
+            _cs = new CustomsearchService(baseClient);
         }
-
-        private Logger _log { get; }
-
+        
         public async Task<IEnumerable<string>> GetVideoLinksByKeywordAsync(string keywords, int count = 1)
         {
             await Task.Yield();
@@ -68,7 +53,7 @@ namespace Roki.Core.Services
             if (count <= 0)
                 throw new ArgumentOutOfRangeException(nameof(count));
 
-            var query = yt.Search.List("snippet");
+            var query = _yt.Search.List("snippet");
             query.MaxResults = count;
             query.Q = keywords;
             query.Type = "video";
@@ -82,7 +67,7 @@ namespace Roki.Core.Services
                 throw new ArgumentNullException(nameof(keywords));
             if (count <= 0)
                 throw new ArgumentOutOfRangeException(nameof(count));
-            var query = yt.Search.List("snippet");
+            var query = _yt.Search.List("snippet");
             query.MaxResults = count;
             query.Q = keywords;
             query.Type = "video";
@@ -96,16 +81,16 @@ namespace Roki.Core.Services
             if (string.IsNullOrWhiteSpace(query))
                 throw new ArgumentNullException(nameof(query));
 
-            var request = cs.Cse.List(query);
+            var request = _cs.Cse.List(query);
             var start = random ? new Random().Next(1, 10) : 1;
-            request.Cx = search_engine_id;
+            request.Cx = SearchEngineId;
             request.Fields = "items(image(contextLink,thumbnailLink),link)";
             request.SearchType = CseResource.ListRequest.SearchTypeEnum.Image;
             request.Start = start;
             var search = await request.ExecuteAsync().ConfigureAwait(false);
             return random
-                ? new ImageResult(search.Items[start].Image, search.Items[start].Link)
-                : new ImageResult(search.Items[0].Image, search.Items[0].Link);
+                ? new ImageResult{Image = search.Items[start].Image, Link = search.Items[start].Link}
+                : new ImageResult{Image = search.Items[0].Image, Link = search.Items[0].Link};
         }
     }
 }
