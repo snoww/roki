@@ -10,7 +10,7 @@ using Roki.Modules.Games.Common;
 
 namespace Roki.Modules.Games.Services
 {
-    public class JeopardyService : IRService
+    public class JeopardyService : IRokiService
     {
         private readonly DbService _db;
         public readonly ConcurrentDictionary<ulong, Jeopardy> ActiveGames = new ConcurrentDictionary<ulong, Jeopardy>();

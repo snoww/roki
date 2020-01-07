@@ -12,7 +12,7 @@ using Roki.Modules.Searches.Common;
 
 namespace Roki.Modules.Searches.Services
 {
-    public class SearchService : IRService, IUnloadableService
+    public class SearchService : IRokiService
     {
         private readonly DiscordSocketClient _client;
         private readonly IRokiConfig _config;
@@ -30,11 +30,6 @@ namespace Roki.Modules.Searches.Services
             _log = LogManager.GetCurrentClassLogger();
         }
 
-        public Task Unload()
-        {
-            throw new NotImplementedException();
-        }
-        
         public async Task<string> GetWeatherDataAsync(float lat, float lng)
         {
             try

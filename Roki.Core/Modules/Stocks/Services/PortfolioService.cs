@@ -7,7 +7,7 @@ using Roki.Core.Services.Database.Models;
 
 namespace Roki.Modules.Stocks.Services
 {
-    public class PortfolioService : IRService
+    public class PortfolioService : IRokiService
     {
         private readonly IRokiConfig _config;
         private readonly IHttpClientFactory _httpFactory;

@@ -11,7 +11,7 @@ using Roki.Modules.Games.Common;
 
 namespace Roki.Modules.Games.Services
 {
-    public class TriviaService : IRService
+    public class TriviaService : IRokiService
     {
         private readonly IHttpClientFactory _http;
         private readonly DbService _db;

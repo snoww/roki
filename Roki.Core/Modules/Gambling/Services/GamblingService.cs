@@ -2,7 +2,7 @@ using Roki.Core.Services;
 
 namespace Roki.Modules.Gambling.Services
 {
-    public class GamblingService : IRService
+    public class GamblingService : IRokiService
     {
         private readonly DbService _db;
 

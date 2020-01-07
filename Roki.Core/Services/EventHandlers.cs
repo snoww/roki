@@ -10,7 +10,7 @@ using Roki.Core.Services.Database.Models;
 
 namespace Roki.Core.Services
 {
-    public class EventHandlers : IRService
+    public class EventHandlers : IRokiService
     {
         private readonly DiscordSocketClient _client;
         private readonly DbService _db;

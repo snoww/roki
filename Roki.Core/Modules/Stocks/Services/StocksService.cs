@@ -10,7 +10,7 @@ using Roki.Modules.Stocks.Models;
 
 namespace Roki.Modules.Stocks.Services
 {
-    public class StocksService : IRService
+    public class StocksService : IRokiService
     {
         private readonly IRokiConfig _config;
         private readonly IHttpClientFactory _httpFactory;

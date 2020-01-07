@@ -12,7 +12,7 @@ using Roki.Extensions;
 
 namespace Roki.Modules.Stocks.Services
 {
-    public class TradingService : IRService
+    public class TradingService : IRokiService
     {
         private readonly IRokiConfig _config;
         private readonly IHttpClientFactory _httpFactory;

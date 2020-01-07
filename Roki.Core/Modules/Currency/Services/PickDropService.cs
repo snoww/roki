@@ -12,7 +12,7 @@ using Roki.Extensions;
 
 namespace Roki.Modules.Currency.Services
 {
-    public class PickDropService : IRService
+    public class PickDropService : IRokiService
     {
         private readonly CommandHandler _cmdHandler;
         private readonly DbService _db;

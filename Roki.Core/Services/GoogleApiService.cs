@@ -12,7 +12,7 @@ using Roki.Extensions;
 
 namespace Roki.Core.Services
 {
-    public interface IGoogleApiService : IRService
+    public interface IGoogleApiService : IRokiService
     {
         Task<IEnumerable<string>> GetVideoLinksByKeywordAsync(string keywords, int count = 1);
         Task<IEnumerable<(string Name, string Id, string Url)>> GetVideoInfoByKeywordAsync(string keywords, int count = 1);

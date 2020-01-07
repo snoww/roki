@@ -66,7 +66,7 @@ namespace Roki.Extensions
             // which are supposed to be loaded with this method
             // ignore all interfaces and abstract classes
             var services = new Queue<Type>(allTypes
-                .Where(x => x.GetInterfaces().Contains(typeof(IRService))
+                .Where(x => x.GetInterfaces().Contains(typeof(IRokiService))
                             && !x.GetTypeInfo().IsInterface && !x.GetTypeInfo().IsAbstract
                 )
                 .ToArray());
@@ -78,7 +78,7 @@ namespace Roki.Extensions
             // as we need to also add a service for each one of interfaces
             // so that DI works for them too
             var interfaces = new HashSet<Type>(allTypes
-                .Where(x => x.GetInterfaces().Contains(typeof(IRService))
+                .Where(x => x.GetInterfaces().Contains(typeof(IRokiService))
                             && x.GetTypeInfo().IsInterface));
 
             // keep instantiating until we've instantiated them all

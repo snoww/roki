@@ -14,7 +14,7 @@ using Victoria.EventArgs;
 
 namespace Roki.Modules.Music.Services
 {
-    public class MusicService : IRService
+    public class MusicService : IRokiService
     {
         private readonly LavaNode _lavaNode;
         private readonly DiscordSocketClient _client;

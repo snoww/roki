@@ -10,7 +10,7 @@ using Roki.Extensions;
 
 namespace Roki.Modules.Administration.Services 
 {
-    public class AdministrationService : IRService
+    public class AdministrationService : IRokiService
     {
         private readonly DbService _db;
         private readonly DiscordSocketClient _client;

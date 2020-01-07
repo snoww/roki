@@ -78,7 +78,7 @@ namespace Roki.Modules
         }
     }
 
-    public abstract class RokiTopLevelModule<TService> : RokiTopLevelModule where TService : IRService
+    public abstract class RokiTopLevelModule<TService> : RokiTopLevelModule where TService : IRokiService
     {
         protected RokiTopLevelModule(bool isTopLevel = true) : base(isTopLevel)
         {
@@ -94,7 +94,7 @@ namespace Roki.Modules
         }
     }
 
-    public abstract class RokiSubmodule<TService> : RokiTopLevelModule<TService> where TService : IRService
+    public abstract class RokiSubmodule<TService> : RokiTopLevelModule<TService> where TService : IRokiService
     {
         protected RokiSubmodule() : base(false)
         {
