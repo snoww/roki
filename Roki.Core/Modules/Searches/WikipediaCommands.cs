@@ -55,8 +55,16 @@ namespace Roki.Modules.Searches
                     await SendArticleAsync(article).ConfigureAwait(false);
                     return;
                 }
-                
-                
+
+                var counter = 1;
+                var embed = new EmbedBuilder().WithOkColor()
+                    .WithAuthor("Wikipedia", WikipediaIconUrl)
+                    .WithTitle($"Search results for: `{query}`")
+                    .WithDescription(string.Join("\n", results
+                        .Select(a => $"{counter++}. [{a.Title}]({WikipediaUrl}/{a.Title})\n\t{a.Snippit}")));
+
+                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                // for future allow selecting article and showing it
             }
 
             private async Task SendArticleAsync(WikiSummary article)
