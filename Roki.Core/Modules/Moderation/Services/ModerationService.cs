@@ -4,7 +4,7 @@ using Roki.Core.Services;
 
 namespace Roki.Modules.Moderation.Services
 {
-    public class ModerationService : IRService
+    public class ModerationService : IRokiService
     {
         private readonly DbService _db;
 

@@ -8,7 +8,7 @@ using Roki.Core.Services.Database.Models;
 
 namespace Roki.Services
 {
-    public interface ICurrencyService : IRService
+    public interface ICurrencyService : IRokiService
     {
         Task<bool> ChangeAsync(ulong from, ulong to, string reason, long amount, ulong guildId, ulong channelId, ulong messageId);
         Task<bool> TransferAsync(ulong userIdFrom, ulong userIdTo, string reason, long amount, ulong guildId, ulong channelId, ulong messageId);

@@ -6,7 +6,7 @@ using Roki.Core.Services;
 
 namespace Roki.Modules.Utility.Services
 {
-    public class QuoteService : IRService
+    public class QuoteService : IRokiService
     {
         public bool IsImage(string text)
         {

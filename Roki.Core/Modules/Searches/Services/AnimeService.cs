@@ -9,7 +9,7 @@ using Roki.Extensions;
 
 namespace Roki.Modules.Searches.Services
 {
-    public class AnimeService : IRService
+    public class AnimeService : IRokiService
     {
         private string _queryJson =
             @"{""query"":""query ($search: String) { Page(page:1 perPage:5) { media(search: $search) { title { romaji english native } description averageScore status episodes genres type seasonInt coverImage { large color } } } }"", ""variables"": { ""search"": ""searchString"" } }";

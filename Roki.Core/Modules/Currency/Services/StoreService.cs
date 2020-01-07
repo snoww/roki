@@ -14,7 +14,7 @@ using Roki.Services;
 
 namespace Roki.Modules.Currency.Services
 {
-    public class StoreService : IRService
+    public class StoreService : IRokiService
     {
         private readonly DiscordSocketClient _client;
         private readonly DbService _db;

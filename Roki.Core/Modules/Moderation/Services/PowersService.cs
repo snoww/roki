@@ -10,7 +10,7 @@ using Roki.Extensions;
 
 namespace Roki.Modules.Moderation.Services
 {
-    public class PowersService : IRService
+    public class PowersService : IRokiService
     {
         private readonly DbService _db;
         private readonly ConcurrentDictionary<ulong, DateTime> _muted = new ConcurrentDictionary<ulong, DateTime>();

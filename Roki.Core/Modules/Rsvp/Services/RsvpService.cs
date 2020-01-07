@@ -13,7 +13,7 @@ using Roki.Extensions;
 
 namespace Roki.Modules.Rsvp.Services
 {
-    public class RsvpService : IRService
+    public class RsvpService : IRokiService
     {
         private readonly DbService _db;
         private readonly DiscordSocketClient _client;

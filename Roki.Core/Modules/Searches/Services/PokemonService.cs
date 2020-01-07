@@ -15,7 +15,7 @@ using Roki.Modules.Searches.Common;
 
 namespace Roki.Modules.Searches.Services
 {
-    public class PokemonService : IRService
+    public class PokemonService : IRokiService
     {
         private readonly DbService _db;
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};

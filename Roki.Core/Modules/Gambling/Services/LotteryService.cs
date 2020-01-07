@@ -12,7 +12,7 @@ using Roki.Services;
 
 namespace Roki.Modules.Gambling.Services
 {
-    public class LotteryService : IRService
+    public class LotteryService : IRokiService
     {
         private readonly DiscordSocketClient _client;
         private readonly DbService _db;

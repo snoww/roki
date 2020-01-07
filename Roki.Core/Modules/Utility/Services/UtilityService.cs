@@ -7,7 +7,7 @@ using Roki.Core.Services;
 
 namespace Roki.Modules.Utility.Services
 {
-    public class UtilityService : IRService
+    public class UtilityService : IRokiService
     {
         private readonly DiscordSocketClient _client;
         private Timer _timer;

@@ -13,7 +13,7 @@ using Roki.Modules.Searches.Common;
 
 namespace Roki.Modules.Games.Services
 {
-    public class ShowdownService : IRService
+    public class ShowdownService : IRokiService
     {
         private readonly DbService _db;
         public readonly ConcurrentDictionary<ulong, string> Games = new ConcurrentDictionary<ulong, string>();

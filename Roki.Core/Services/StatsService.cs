@@ -10,7 +10,7 @@ using Roki.Extensions;
 
 namespace Roki.Core.Services
 {
-    public interface IStatsService : IRService
+    public interface IStatsService : IRokiService
     {
         string Author { get; }
         long CommandsRan { get; }

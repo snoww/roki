@@ -30,7 +30,7 @@ namespace Roki.Core.Services
         }
     }
 
-    public class CommandHandler : IRService
+    public class CommandHandler : IRokiService
     {
         private const float OneThousandth = 1.0f / 1000;
         private readonly DiscordSocketClient _client;
