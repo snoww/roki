@@ -39,7 +39,8 @@ namespace Roki.Modules.Searches
 
                 var query = queryBuilder.ToString().Trim();
                 
-                var results = await _service.SearchAsync(query, 1).ConfigureAwait(false);
+                // maybe in future only get 1 article if -q not provided
+                var results = await _service.SearchAsync(query).ConfigureAwait(false);
                 if (results == null || results.Count == 0)
                 {
                     await ctx.Channel.SendErrorAsync($"Cannot find any results for: `{query}`").ConfigureAwait(false);
