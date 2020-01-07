@@ -74,7 +74,8 @@ namespace Roki.Modules.Searches
             {
                 var embed = new EmbedBuilder().WithOkColor()
                     .WithAuthor("Wikipedia", WikipediaIconUrl)
-                    .WithTitle($"[{article.Title}]({WikipediaUrl}/{HttpUtility.UrlPathEncode(article.Title)})")
+                    .WithTitle(article.Title)
+                    .WithUrl($"{WikipediaUrl}/{HttpUtility.UrlPathEncode(article.Title)}")
                     .WithDescription(article.Extract);
                 
                 if (!string.IsNullOrWhiteSpace(article.ImageUrl))
