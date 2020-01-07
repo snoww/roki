@@ -42,11 +42,11 @@ namespace Roki.Modules.Searches.Services
             
                 foreach (var page in enumerator)
                 {
-                    var snip = page.GetProperty("snippit").GetString().Replace("<span class=\\\"searchmatch\\\">", "**").Replace("</span>", "**");
+                    var snippet = page.GetProperty("snippet").GetString().Replace("<span class=\\\"searchmatch\\\">", "**").Replace("</span>", "**");
                     results.Add(new WikiSearch
                     {
                         Title = page.GetProperty("title").GetString(),
-                        Snippit = HttpUtility.HtmlDecode(snip)
+                        Snippet = HttpUtility.HtmlDecode(snippet)
                     });
                 }
             }

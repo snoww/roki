@@ -44,7 +44,7 @@ namespace Roki.Modules.Searches
                     await ctx.Channel.SendErrorAsync($"Cannot find any results for: `{query}`").ConfigureAwait(false);
                     return;
                 }
-                if (string.IsNullOrWhiteSpace(results[0].Snippit))
+                if (string.IsNullOrWhiteSpace(results[0].Snippet))
                 {
                     await ctx.Channel.SendErrorAsync($"Cannot find any results for: `{query}`, did you mean `{results[0].Title}`?");
                     return;
@@ -62,7 +62,7 @@ namespace Roki.Modules.Searches
                     .WithAuthor("Wikipedia", WikipediaIconUrl)
                     .WithTitle($"Search results for: `{query}`")
                     .WithDescription(string.Join("\n", results
-                        .Select(a => $"{counter++}. [{a.Title}]({WikipediaUrl}/{a.Title})\n\t{a.Snippit}")));
+                        .Select(a => $"{counter++}. [{a.Title}]({WikipediaUrl}/{a.Title})\n\t{a.Snippet}")));
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 // for future allow selecting article and showing it

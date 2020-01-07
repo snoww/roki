@@ -3,7 +3,7 @@ namespace Roki.Modules.Searches.Models
     public class WikiSearch
     {
         public string Title { get; set; }
-        public string Snippit { get; set; }
+        public string Snippet { get; set; }
     }
     
     public class WikiSummary
