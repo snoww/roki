@@ -36,7 +36,7 @@ namespace Roki.Modules.Searches
                     queryBuilder.Append(str + " ");
                 }
 
-                var query = queryBuilder.ToString();
+                var query = queryBuilder.ToString().Trim();
                 
                 var results = await _service.SearchAsync(query, 1).ConfigureAwait(false);
                 if (results == null || results.Count == 0)
@@ -73,7 +73,7 @@ namespace Roki.Modules.Searches
                 var embed = new EmbedBuilder().WithOkColor()
                     .WithAuthor("Wikipedia", WikipediaIconUrl, $"{WikipediaUrl}/{article.Title}")
                     .WithTitle(article.Title)
-                    .WithDescription(article.Extract.TrimTo(2048));
+                    .WithDescription(article.Extract);
                 
                 if (!string.IsNullOrWhiteSpace(article.ImageUrl))
                 {

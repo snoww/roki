@@ -64,7 +64,7 @@ namespace Roki.Modules.Searches.Services
         public async Task<WikiSummary> GetSummaryAsync(string title)
         {
             using var http = _http.CreateClient();
-            var result = await http.GetStringAsync($"{ApiUrl}&list=&prop=extracts&explaintext=&exintro=&titles={title}&format=json").ConfigureAwait(false);
+            var result = await http.GetStringAsync($"{ApiUrl}&list=&prop=extracts&explaintext&exsentences=5&exintro=&titles={title}&format=json").ConfigureAwait(false);
 
             var summary = new WikiSummary();
             using (var json = JsonDocument.Parse(result))
