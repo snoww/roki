@@ -10,5 +10,6 @@ namespace Roki.Modules.Searches.Models
     {
         public string Title { get; set; }
         public string Extract { get; set; }
+        public string ImageUrl { get; set; }
     }
 }

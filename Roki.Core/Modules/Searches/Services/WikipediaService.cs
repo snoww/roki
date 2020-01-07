@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -28,16 +29,32 @@ namespace Roki.Modules.Searches.Services
             var result = await http.GetStringAsync($"{ApiUrl}&list=search&srsearch={query}&srlimit={limit}&format=json").ConfigureAwait(false);
 
             using var json = JsonDocument.Parse(result);
-            var enumerator = json.RootElement.GetProperty("query").GetProperty("search").EnumerateArray();
+            var queryElement = json.RootElement.GetProperty("query");
+
+            var searchInfo = queryElement.GetProperty("searchinfo");
+            var hits = searchInfo.GetProperty("totalhits").GetInt32();
+
             var results = new List<WikiSearch>();
-            
-            foreach (var page in enumerator)
+
+            if (hits != 0)
             {
-                var snip = page.GetProperty("snippit").GetString().Replace("<span class=\\\"searchmatch\\\">", "**").Replace("</span>", "**");
+                var enumerator = queryElement.GetProperty("search").EnumerateArray();
+            
+                foreach (var page in enumerator)
+                {
+                    var snip = page.GetProperty("snippit").GetString().Replace("<span class=\\\"searchmatch\\\">", "**").Replace("</span>", "**");
+                    results.Add(new WikiSearch
+                    {
+                        Title = page.GetProperty("title").GetString(),
+                        Snippit = HttpUtility.HtmlDecode(snip)
+                    });
+                }
+            }
+            else if (searchInfo.TryGetProperty("suggestion", out var suggestion))
+            {
                 results.Add(new WikiSearch
                 {
-                    Title = page.GetProperty("title").GetString(),
-                    Snippit = HttpUtility.HtmlDecode(snip)
+                    Title = suggestion.GetString()
                 });
             }
 
@@ -49,15 +66,28 @@ namespace Roki.Modules.Searches.Services
             using var http = _http.CreateClient();
             var result = await http.GetStringAsync($"{ApiUrl}&list=&prop=extracts&explaintext=&exintro=&titles={title}&format=json").ConfigureAwait(false);
 
-            using var json = JsonDocument.Parse(result);
-            var element = json.RootElement.GetProperty("query").GetProperty("pages");
-            var page = element.EnumerateObject().First();
-
-            return new WikiSummary
+            var summary = new WikiSummary();
+            using (var json = JsonDocument.Parse(result))
             {
-                Title = page.Value.GetProperty("title").GetString(),
-                Extract = page.Value.GetProperty("extract").GetString()
-            };
+                var element = json.RootElement.GetProperty("query").GetProperty("pages");
+                var page = element.EnumerateObject().First();
+                summary.Title = page.Value.GetProperty("title").GetString();
+                summary.Extract = page.Value.GetProperty("extract").GetString();
+            }
+            
+            var imageResult = await http.GetStringAsync($"{ApiUrl}&titles={title}&prop=pageimages&pithumbsize=500&format=json").ConfigureAwait(false);
+
+            using (var json = JsonDocument.Parse(imageResult))
+            {
+                var element = json.RootElement.GetProperty("query").GetProperty("pages");
+                var page = element.EnumerateObject().First();
+                if (page.Value.TryGetProperty("thumbnail", out var thumbnail))
+                {
+                    summary.ImageUrl = thumbnail.GetProperty("source").GetString();
+                }
+            }
+            
+            return summary;
         }
     }
 }
