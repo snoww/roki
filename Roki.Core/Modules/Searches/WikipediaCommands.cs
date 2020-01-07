@@ -73,8 +73,8 @@ namespace Roki.Modules.Searches
             private async Task SendArticleAsync(WikiSummary article)
             {
                 var embed = new EmbedBuilder().WithOkColor()
-                    .WithAuthor("Wikipedia", WikipediaIconUrl, $"{WikipediaUrl}/{HttpUtility.UrlPathEncode(article.Title)}")
-                    .WithTitle(article.Title)
+                    .WithAuthor("Wikipedia", WikipediaIconUrl)
+                    .WithTitle($"[{article.Title}]({WikipediaUrl}/{HttpUtility.UrlPathEncode(article.Title)})")
                     .WithDescription(article.Extract);
                 
                 if (!string.IsNullOrWhiteSpace(article.ImageUrl))
