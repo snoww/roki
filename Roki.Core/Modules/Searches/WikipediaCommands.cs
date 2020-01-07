@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
@@ -62,7 +63,7 @@ namespace Roki.Modules.Searches
                     .WithAuthor("Wikipedia", WikipediaIconUrl)
                     .WithTitle($"Search results for: `{query}`")
                     .WithDescription(string.Join("\n", results
-                        .Select(a => $"{counter++}. [{a.Title}]({WikipediaUrl}/{a.Title})\n\t{a.Snippet}")));
+                        .Select(a => $"{counter++}. [{a.Title}]({HttpUtility.UrlEncode($"{WikipediaUrl}/{a.Title}")})\n\t{a.Snippet}")));
 
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 // for future allow selecting article and showing it
@@ -71,7 +72,7 @@ namespace Roki.Modules.Searches
             private async Task SendArticleAsync(WikiSummary article)
             {
                 var embed = new EmbedBuilder().WithOkColor()
-                    .WithAuthor("Wikipedia", WikipediaIconUrl, $"{WikipediaUrl}/{article.Title}")
+                    .WithAuthor("Wikipedia", WikipediaIconUrl, HttpUtility.UrlEncode($"{WikipediaUrl}/{article.Title}"))
                     .WithTitle(article.Title)
                     .WithDescription(article.Extract);
                 
