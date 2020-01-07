@@ -19,6 +19,7 @@ namespace Roki.Modules.Searches
             private const string WikipediaIconUrl = "https://i.imgur.com/UA0wMvt.png";
             private const string WikipediaUrl = "https://en.wikipedia.org/wiki";
             
+            [RokiCommand, Description, Usage, Aliases]
             public async Task Wikipedia([Leftover] string args)
             {
                 var argsSplit = args.Split(' ');
