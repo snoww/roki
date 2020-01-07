@@ -1,6 +1,6 @@
 using System;
 
-namespace Roki.Modules.Searches.Common
+namespace Roki.Modules.Searches.Models
 {
     public class TimeData
     {
