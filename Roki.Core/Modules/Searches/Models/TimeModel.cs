@@ -1,7 +1,7 @@
 
 using System.Text.Json.Serialization;
 
-namespace Roki.Modules.Searches.Common
+namespace Roki.Modules.Searches.Models
 {
     public class TimeZoneResult
     {

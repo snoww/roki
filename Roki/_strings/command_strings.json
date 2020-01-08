@@ -678,5 +678,13 @@
     "Usage": [
       "{0}jv"
     ]
+  },
+  "wikipedia": {
+    "Command": "wikipedia wiki",
+    "Description": "Searches Wikipedia for an article. Shows most relevant article. Can add `-q` to end of command show top 5 results instead.",
+    "Usage": [
+      "{0}wiki apple",
+      "{0}wikipedia alphabet -q"
+    ]
   }
 }

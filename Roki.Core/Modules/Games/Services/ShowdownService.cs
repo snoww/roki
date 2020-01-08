@@ -9,7 +9,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Roki.Core.Services;
-using Roki.Modules.Searches.Common;
+using Roki.Modules.Searches.Models;
 
 namespace Roki.Modules.Games.Services
 {

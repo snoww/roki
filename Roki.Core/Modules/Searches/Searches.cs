@@ -9,7 +9,7 @@ using Discord;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
 using Roki.Extensions;
-using Roki.Modules.Searches.Common;
+using Roki.Modules.Searches.Models;
 using Roki.Modules.Searches.Services;
 
 namespace Roki.Modules.Searches

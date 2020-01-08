@@ -6,7 +6,7 @@ using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Extensions;
-using Roki.Modules.Searches.Common;
+using Roki.Modules.Searches.Models;
 
 namespace Roki.Modules.Searches
 {
