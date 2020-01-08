@@ -8,7 +8,7 @@ using Discord.WebSocket;
 using NLog;
 using Roki.Core.Services;
 using Roki.Extensions;
-using Roki.Modules.Searches.Common;
+using Roki.Modules.Searches.Models;
 
 namespace Roki.Modules.Searches.Services
 {
