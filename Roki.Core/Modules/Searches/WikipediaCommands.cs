@@ -38,7 +38,7 @@ namespace Roki.Modules.Searches
                 }
 
                 var query = queryBuilder.ToString().Trim();
-                
+                using var typing = ctx.Channel.EnterTypingState();
                 // maybe in future only get 1 article if -q not provided
                 var results = await _service.SearchAsync(query).ConfigureAwait(false);
                 if (results == null || results.Count == 0)
