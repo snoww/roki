@@ -869,11 +869,17 @@ namespace Roki.Modules.Rsvp.Services
             var _ = Task.Run(async () =>
             {
                 await Task.Delay(delay).ConfigureAwait(false);
+
+                Event latestEvent;
+                using (var uow = _db.GetDbContext())
+                {
+                    latestEvent = uow.Context.Events.FirstOrDefault(e => e.Id == evn.Id) ?? evn;
+                }
                 
-                if (evn.Participants.Length == 0)
+                if (latestEvent.Participants.Length == 0)
                     return;
 
-                var participants = evn.Participants.Split('\n');
+                var participants = latestEvent.Participants.Split('\n');
                 foreach (var par in participants)
                 {
                     try
@@ -882,20 +888,20 @@ namespace Roki.Modules.Rsvp.Services
                         var username = par.Substring(0, split);
                         var discrim = par.Substring(split + 1);
                         var user = _client.GetUser(username, discrim);
-                        var guild = _client.GetGuild(evn.GuildId);
+                        var guild = _client.GetGuild(latestEvent.GuildId);
                         var dm = await user.GetOrCreateDMChannelAsync().ConfigureAwait(false);
                         var embed = new EmbedBuilder().WithOkColor()
                             .WithFooter($"From server: {guild.Name}");
 
                         if (type == NotificationType.Starting)
                         {
-                            embed.WithTitle($"{evn.Name} starting now!")
-                                .WithDescription($"The event you registered for: {evn.Name} is starting now!");
+                            embed.WithTitle($"{latestEvent.Name} starting now!")
+                                .WithDescription($"The event you registered for: {latestEvent.Name} is starting now!");
                         }
                         else
                         {
-                            embed.WithTitle($"{evn.Name} starting in 30 minutes!")
-                                .WithDescription($"The event you registered for: {evn.Name} is starting in 30 minutes!");
+                            embed.WithTitle($"{latestEvent.Name} starting in 30 minutes!")
+                                .WithDescription($"The event you registered for: {latestEvent.Name} is starting in 30 minutes!");
                         }
                         
                         await dm.EmbedAsync(embed)
