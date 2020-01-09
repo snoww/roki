@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -6,8 +7,9 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using NLog;
+using NLog.Fluent;
 using Roki.Core.Services;
-using Roki.Core.Services.Database;
 using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
 
@@ -17,7 +19,11 @@ namespace Roki.Modules.Rsvp.Services
     {
         private readonly DbService _db;
         private readonly DiscordSocketClient _client;
+        private readonly Logger _log;
+        private readonly ConcurrentDictionary<Event, int> _activeReminders = new ConcurrentDictionary<Event, int>();
         private Timer _timer;
+
+        
         private static readonly IEmote Confirm = new Emoji("✅");
         private static readonly IEmote Cancel = new Emoji("❌");
         private static readonly IEmote Uncertain = new Emoji("❔");
@@ -37,6 +43,7 @@ namespace Roki.Modules.Rsvp.Services
         {
             _db = db;
             _client = client;
+            _log = LogManager.GetCurrentClassLogger();
             _client.ReactionAdded += ReactionHandler;
             EventTimer();
         }
@@ -72,13 +79,19 @@ namespace Roki.Modules.Rsvp.Services
                         .WithTimestamp(e.StartDate)
                         .WithDescription($"Starts in `{(e.StartDate - now).ToReadableString()}`")
                         .WithFooter("Event starts");
+                    if (e.StartDate.AddMinutes(-45) <= now)
+                    {
+                        _log.Info($"Event countdown for {e.Name} has started.");
+                        await StartEventCountdowns(e).ConfigureAwait(false);
+                    }
                     if (e.StartDate <= now)
                     {
                         newEmbed.WithDescription("Event started")
                             .WithFooter("Event started");
                         await message.ModifyAsync(m => m.Embed = newEmbed.Build()).ConfigureAwait(false);
-                        await SendNotification(e);
+                        // await SendNotification(e);
                         uow.Context.Events.Remove(e);
+                        _activeReminders.Remove(e, out _);
                         await message.RemoveAllReactionsAsync().ConfigureAwait(false);
                         continue;
                     }
@@ -88,7 +101,7 @@ namespace Roki.Modules.Rsvp.Services
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                _log.Error(e);
             }
 
             await uow.SaveChangesAsync().ConfigureAwait(false);
@@ -834,14 +847,33 @@ namespace Roki.Modules.Rsvp.Services
             }
         }
 
-        private Task SendNotification(Event evn)
+        private Task StartEventCountdowns(Event e)
         {
-            if (evn.Participants.Length == 0)
+            if (_activeReminders.ContainsKey(e))
+            {
                 return Task.CompletedTask;
+            }
+            _activeReminders.TryAdd(e, 1);
+            
+            var thirtyMinutes = e.StartDate.AddMinutes(-30) - DateTimeOffset.Now;
+            var startTime = e.StartDate - DateTimeOffset.Now;
 
-            var participants = evn.Participants.Split('\n');
+            SendNotification(e, thirtyMinutes, NotificationType.ThirtyMinutes);
+            SendNotification(e, startTime, NotificationType.Starting);
+            
+            return Task.CompletedTask;
+        }
+
+        private void SendNotification(Event evn, TimeSpan delay, NotificationType type)
+        {
             var _ = Task.Run(async () =>
             {
+                await Task.Delay(delay).ConfigureAwait(false);
+                
+                if (evn.Participants.Length == 0)
+                    return;
+
+                var participants = evn.Participants.Split('\n');
                 foreach (var par in participants)
                 {
                     try
@@ -852,10 +884,21 @@ namespace Roki.Modules.Rsvp.Services
                         var user = _client.GetUser(username, discrim);
                         var guild = _client.GetGuild(evn.GuildId);
                         var dm = await user.GetOrCreateDMChannelAsync().ConfigureAwait(false);
-                        await dm.EmbedAsync(new EmbedBuilder().WithOkColor()
-                                .WithTitle($"{evn.Name} starting now!")
-                                .WithDescription($"The event you registered for: {evn.Name} is starting now!")
-                                .WithFooter($"From server: {guild.Name}"))
+                        var embed = new EmbedBuilder().WithOkColor()
+                            .WithFooter($"From server: {guild.Name}");
+
+                        if (type == NotificationType.Starting)
+                        {
+                            embed.WithTitle($"{evn.Name} starting now!")
+                                .WithDescription($"The event you registered for: {evn.Name} is starting now!");
+                        }
+                        else
+                        {
+                            embed.WithTitle($"{evn.Name} starting in 30 minutes!")
+                                .WithDescription($"The event you registered for: {evn.Name} is starting in 30 minutes!");
+                        }
+                        
+                        await dm.EmbedAsync(embed)
                             .ConfigureAwait(false);
                     }
                     catch (Exception e)
@@ -864,8 +907,12 @@ namespace Roki.Modules.Rsvp.Services
                     }
                 }
             });
-
-            return Task.CompletedTask;
+        }
+        
+        private enum NotificationType
+        {
+            ThirtyMinutes,
+            Starting
         }
     }
 }
