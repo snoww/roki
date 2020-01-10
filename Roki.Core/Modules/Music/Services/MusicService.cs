@@ -32,7 +32,14 @@ namespace Roki.Modules.Music.Services
             await _lavaNode.ConnectAsync().ConfigureAwait(false);
 
         public async Task ConnectAsync(SocketVoiceChannel voiceChannel, ITextChannel textChannel)
-            => await _lavaNode.JoinAsync(voiceChannel, textChannel).ConfigureAwait(false);
+        {
+            if (_lavaNode.HasPlayer(textChannel.Guild))
+            {
+                return;
+            }
+            
+            await _lavaNode.JoinAsync(voiceChannel, textChannel).ConfigureAwait(false);
+        }
         
         public async Task LeaveAsync(SocketVoiceChannel voiceChannel)
             => await _lavaNode.LeaveAsync(voiceChannel).ConfigureAwait(false);
