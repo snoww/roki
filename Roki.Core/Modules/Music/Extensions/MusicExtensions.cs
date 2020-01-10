@@ -9,30 +9,30 @@ namespace Roki.Modules.Music.Extensions
 {
     public static class MusicExtensions
     {
-        public static TimeSpan TotalPlaytime(this IEnumerable<RokiRequest> requests)
+        public static TimeSpan TotalPlaytime(this IEnumerable<RokiTrack> queue)
         {
-            return new TimeSpan(requests.Sum(q => q.Track.Duration.Ticks));
+            return new TimeSpan(queue.Sum(q => q.Duration.Ticks));
         }
 
-        public static string PrettyTrack(this RokiRequest request)
+        public static string PrettyTrack(this RokiTrack track)
         {
-            return $"**[{request.Track.Title.TrimTo(65)}]({request.Track.Url})**";
+            return $"**[{track.Title.TrimTo(65)}]({track.Url})**";
         }
 
-        public static string PrettyFullTrack(this RokiRequest request)
+        public static string PrettyFullTrack(this RokiTrack track)
         {
-            return $"{request.PrettyTrack()}\n\t\t`{request.PrettyLength()} | {request.User.Username}`";
+            return $"{track.PrettyTrack()}\n\t\t`{track.PrettyLength()} | {track.User.Username}`";
         }
 
-        public static string PrettyFooter(this RokiRequest request, int volume)
+        public static string PrettyFooter(this RokiTrack track, int volume)
         {
-            return $"🔉 {volume}% | {request.PrettyLength()} | {request.User.Username}";
+            return $"🔉 {volume}% | {track.PrettyLength()} | {track.User.Username}";
         }
 
-        public static string PrettyLength(this RokiRequest request)
+        public static string PrettyLength(this RokiTrack track)
         {
-            var time = request.Track.Duration.ToString(@"mm\:ss");
-            var hrs = (int) request.Track.Duration.TotalHours;
+            var time = track.Duration.ToString(@"mm\:ss");
+            var hrs = (int) track.Duration.TotalHours;
 
             if (hrs > 0)
                 return hrs + ":" + time;
