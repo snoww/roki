@@ -20,7 +20,7 @@ namespace Roki.Modules.Rsvp.Services
         private readonly DbService _db;
         private readonly DiscordSocketClient _client;
         private readonly Logger _log;
-        private readonly ConcurrentDictionary<Event, int> _activeReminders = new ConcurrentDictionary<Event, int>();
+        private readonly ConcurrentDictionary<int, Event> _activeReminders = new ConcurrentDictionary<int, Event>();
         private Timer _timer;
 
         
@@ -89,13 +89,12 @@ namespace Roki.Modules.Rsvp.Services
                         newEmbed.WithDescription("Event started")
                             .WithFooter("Event started");
                         await message.ModifyAsync(m => m.Embed = newEmbed.Build()).ConfigureAwait(false);
-                        // await SendNotification(e);
                         uow.Context.Events.Remove(e);
-                        _activeReminders.Remove(e, out _);
+                        _activeReminders.Remove(e.Id, out _);
                         await message.RemoveAllReactionsAsync().ConfigureAwait(false);
                         continue;
                     }
-                
+                    
                     await message.ModifyAsync(m => m.Embed = newEmbed.Build()).ConfigureAwait(false);
                 }
             }
@@ -849,11 +848,11 @@ namespace Roki.Modules.Rsvp.Services
 
         private Task StartEventCountdowns(Event e)
         {
-            if (_activeReminders.ContainsKey(e))
+            if (_activeReminders.ContainsKey(e.Id))
             {
                 return Task.CompletedTask;
             }
-            _activeReminders.TryAdd(e, 1);
+            _activeReminders.TryAdd(e.Id, e);
             
             var thirtyMinutes = e.StartDate.AddMinutes(-30) - DateTimeOffset.Now;
             var startTime = e.StartDate - DateTimeOffset.Now;
@@ -900,16 +899,15 @@ namespace Roki.Modules.Rsvp.Services
                         }
                         else
                         {
-                            embed.WithTitle($"{latestEvent.Name} starting in 30 minutes!")
+                            embed.WithTitle($"{latestEvent.Name} reminder")
                                 .WithDescription($"The event you registered for: {latestEvent.Name} is starting in 30 minutes!");
                         }
                         
-                        await dm.EmbedAsync(embed)
-                            .ConfigureAwait(false);
+                        await dm.EmbedAsync(embed).ConfigureAwait(false);
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e);
+                        _log.Error(e);
                     }
                 }
             });
