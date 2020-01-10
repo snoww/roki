@@ -1,40 +1,38 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using NLog;
 using Roki.Extensions;
+using Roki.Modules.Music.Common;
 using Victoria;
 
 namespace Roki.Modules.Music.Extensions
 {
     public static class MusicExtensions
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
         public static TimeSpan TotalPlaytime(this IEnumerable<LavaTrack> queue)
         {
-            return new TimeSpan(queue.Sum(t => t.Duration.Ticks));
+            return new TimeSpan(queue.Sum(q => q.Duration.Ticks));
         }
 
-        public static string PrettyTrack(this LavaTrack track)
+        public static string PrettyTrack(this RokiRequest request)
         {
-            return $"**[{track.Title.TrimTo(65)}]({track.Url})**";
+            return $"**[{request.Track.Title.TrimTo(65)}]({request.Track.Url})**";
         }
 
-        public static string PrettyFullTrack(this LavaTrack track)
+        public static string PrettyFullTrack(this RokiRequest request)
         {
-            return $"{track.PrettyTrack()}\n\t\t`{track.PrettyLength()} | {track.Author.ToTitleCase()}`";
+            return $"{request.PrettyTrack()}\n\t\t`{request.PrettyLength()} | {request.User.Username}`";
         }
 
-        public static string PrettyFooter(this LavaTrack track, int volume)
+        public static string PrettyFooter(this RokiRequest request, int volume)
         {
-            return $"🔉 {volume}% | {track.PrettyLength()} | {track.Author.ToTitleCase()}";
+            return $"🔉 {volume}% | {request.PrettyLength()} | {request.User.Username}";
         }
 
-        public static string PrettyLength(this LavaTrack track)
+        public static string PrettyLength(this RokiRequest request)
         {
-            var time = track.Duration.ToString(@"mm\:ss");
-            var hrs = (int) track.Duration.TotalHours;
+            var time = request.Track.Duration.ToString(@"mm\:ss");
+            var hrs = (int) request.Track.Duration.TotalHours;
 
             if (hrs > 0)
                 return hrs + ":" + time;

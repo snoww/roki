@@ -7,6 +7,7 @@ using Discord.WebSocket;
 using NLog;
 using Roki.Core.Services;
 using Roki.Extensions;
+using Roki.Modules.Music.Common;
 using Roki.Modules.Music.Extensions;
 using Victoria;
 using Victoria.Enums;
@@ -17,12 +18,10 @@ namespace Roki.Modules.Music.Services
     public class MusicService : IRService
     {
         private readonly LavaNode _lavaNode;
-        private readonly DiscordSocketClient _client;
         private readonly Logger _log;
 
-        public MusicService(LavaNode lavaNode, DiscordSocketClient client)
+        public MusicService(LavaNode lavaNode)
         {
-            _client = client;
             _lavaNode = lavaNode;
             _log = LogManager.GetCurrentClassLogger();
             OnReadyAsync().Wait();
@@ -49,24 +48,25 @@ namespace Roki.Modules.Music.Services
                 return;
             }
 
-            var track = result.Tracks.FirstOrDefault();
+            var request = result.Tracks.FirstOrDefault() as RokiTrack;
+            request.User = ctx.User as IGuildUser;
 
             var embed = new EmbedBuilder().WithOkColor();
             if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
             {
-                player.Queue.Enqueue(track);
+                player.Queue.Enqueue(request);
                 embed.WithAuthor($"Queued: #{player.Queue.Count}", "http://i.imgur.com/nhKS3PT.png")
-                    .WithDescription($"{track.PrettyTrack()}")
-                    .WithFooter(track.PrettyFooter(player.Volume));
+                    .WithDescription($"{request.PrettyTrack()}")
+                    .WithFooter(request.PrettyFooter(player.Volume));
                 var msg = await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 msg.DeleteAfter(10);
             }
             else
             {
-                await player.PlayAsync(track).ConfigureAwait(false);
+                await player.PlayAsync(request.Track).ConfigureAwait(false);
                 embed.WithAuthor($"Playing song", "http://i.imgur.com/nhKS3PT.png")
-                    .WithDescription($"{track.PrettyTrack()}")
-                    .WithFooter(track.PrettyFooter(player.Volume));
+                    .WithDescription($"{request.PrettyTrack()}")
+                    .WithFooter(request.PrettyFooter(player.Volume));
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
             
