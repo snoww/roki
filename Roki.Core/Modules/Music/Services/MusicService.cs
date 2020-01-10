@@ -55,7 +55,12 @@ namespace Roki.Modules.Music.Services
                 return;
             }
 
-            var request = (RokiTrack) result.Tracks.First();
+            var track = result.Tracks.FirstOrDefault();
+            if (!(track is RokiTrack request))
+            {
+                _log.Error("Error casting");
+                return;
+            }
             request.User = ctx.User as IGuildUser;
 
             var embed = new EmbedBuilder().WithOkColor();
