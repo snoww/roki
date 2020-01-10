@@ -854,11 +854,13 @@ namespace Roki.Modules.Rsvp.Services
 
             if (thirtyMinutes >= TimeSpan.Zero)
             {
+                _log.Info($"Event '{e.Name}': sending 30 minute reminder in {thirtyMinutes.ToString()}");
                 SendNotification(e, thirtyMinutes, NotificationType.ThirtyMinutes);
             }
 
             if (startTime >= TimeSpan.Zero)
             {
+                _log.Info($"Event '{e.Name}': sending start reminder in {startTime.ToString()}");
                 SendNotification(e, startTime, NotificationType.Starting);
             }
             
