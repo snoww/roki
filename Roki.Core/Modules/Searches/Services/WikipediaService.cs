@@ -16,7 +16,6 @@ namespace Roki.Modules.Searches.Services
 
         // allow other languages in future
         private const string ApiUrl = "https://en.wikipedia.org/w/api.php?action=query";
-        private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
 
         public WikipediaService(IHttpClientFactory http)
         {

@@ -5,6 +5,7 @@ using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Extensions;
+using Roki.Modules.Searches.Models;
 using Roki.Modules.Searches.Services;
 
 namespace Roki.Modules.Searches
@@ -48,6 +49,7 @@ namespace Roki.Modules.Searches
             }
         }
     }
+    
     public static class AnimeExtensions
     {
         public static string GetTitle(this AnimeTitle title)

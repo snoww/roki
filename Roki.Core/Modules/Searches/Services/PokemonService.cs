@@ -17,7 +17,6 @@ namespace Roki.Modules.Searches.Services
     public class PokemonService : IRokiService
     {
         private readonly DbService _db;
-        private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
 
         public PokemonService(DbService db)
         {

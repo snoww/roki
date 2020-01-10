@@ -1,15 +1,14 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Text.Json;
 using Roki.Common;
+using Roki.Extensions;
 
 namespace Roki.Core.Services
 {
     public class Localization
     {
-        private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
         private static readonly Dictionary<string, CommandData> CommandData =
-            JsonSerializer.Deserialize<Dictionary<string, CommandData>>(File.ReadAllText("./_strings/command_strings.json"), Options);
+            File.ReadAllText("./_strings/command_strings.json").Deserialize<Dictionary<string, CommandData>>();
 
         public static CommandData LoadCommand(string key)
         {
