@@ -81,7 +81,7 @@ namespace Roki.Modules.Rsvp.Services
                         .WithFooter("Event starts");
                     if (e.StartDate.AddMinutes(-45) <= now)
                     {
-                        _log.Info($"Event countdown for {e.Name} has started.");
+                        _log.Info($"Event '{e.Name}' reminder countdown has started.");
                         await StartEventCountdowns(e).ConfigureAwait(false);
                     }
                     if (e.StartDate <= now)
