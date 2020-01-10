@@ -79,8 +79,9 @@ namespace Roki.Modules.Rsvp.Services
                         .WithTimestamp(e.StartDate)
                         .WithDescription($"Starts in `{(e.StartDate - now).ToReadableString()}`")
                         .WithFooter("Event starts");
-                    if (e.StartDate.AddMinutes(-45) <= now)
+                    if (e.StartDate.AddMinutes(-45) <= now && !_activeReminders.ContainsKey(e.Id))
                     {
+                        _activeReminders.TryAdd(e.Id, e);
                         _log.Info($"Event '{e.Name}' reminder countdown has started.");
                         await StartEventCountdowns(e).ConfigureAwait(false);
                     }
@@ -848,12 +849,6 @@ namespace Roki.Modules.Rsvp.Services
 
         private Task StartEventCountdowns(Event e)
         {
-            if (_activeReminders.ContainsKey(e.Id))
-            {
-                return Task.CompletedTask;
-            }
-            _activeReminders.TryAdd(e.Id, e);
-            
             var thirtyMinutes = e.StartDate.AddMinutes(-30) - DateTimeOffset.Now;
             var startTime = e.StartDate - DateTimeOffset.Now;
 
