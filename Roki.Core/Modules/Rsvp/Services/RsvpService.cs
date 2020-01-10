@@ -852,8 +852,15 @@ namespace Roki.Modules.Rsvp.Services
             var thirtyMinutes = e.StartDate.AddMinutes(-30) - DateTimeOffset.Now;
             var startTime = e.StartDate - DateTimeOffset.Now;
 
-            SendNotification(e, thirtyMinutes, NotificationType.ThirtyMinutes);
-            SendNotification(e, startTime, NotificationType.Starting);
+            if (thirtyMinutes >= TimeSpan.Zero)
+            {
+                SendNotification(e, thirtyMinutes, NotificationType.ThirtyMinutes);
+            }
+
+            if (startTime >= TimeSpan.Zero)
+            {
+                SendNotification(e, startTime, NotificationType.Starting);
+            }
             
             return Task.CompletedTask;
         }
