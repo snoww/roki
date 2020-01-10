@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -106,9 +107,9 @@ namespace Roki.Modules.Music
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
-            if (seconds == 0)
+            if (seconds <= 0)
             {
-                await ctx.Channel.SendErrorAsync("Cannot skip that far.").ConfigureAwait(false);
+                await ctx.Channel.SendErrorAsync("Cannot skip that amount.").ConfigureAwait(false);
                 return;
             }
 
