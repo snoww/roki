@@ -48,8 +48,7 @@ namespace Roki.Modules.Music.Services
                 return;
             }
 
-            var request = result.Tracks.FirstOrDefault() as RokiTrack;
-            request.User = ctx.User as IGuildUser;
+            var request = new RokiRequest {Track = result.Tracks.FirstOrDefault(), User = ctx.User as IGuildUser};
 
             var embed = new EmbedBuilder().WithOkColor();
             if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
@@ -133,7 +132,7 @@ namespace Roki.Modules.Music.Services
                 return;
             var player = _lavaNode.GetPlayer(ctx.Guild);
             
-            var queue = player.Queue.Items.Cast<LavaTrack>().ToArray();
+            var queue = player.Queue.Items.Cast<RokiRequest>().ToArray();
             if (--page < -1)
                 return;
             const int itemsPerPage = 10;
@@ -184,7 +183,7 @@ namespace Roki.Modules.Music.Services
                 return;
             }
 
-            var removedSong = (LavaTrack) player.Queue.Items.ElementAt(index);
+            var removedSong = (RokiRequest) player.Queue.Items.ElementAt(index);
 
             player.Queue.RemoveAt(index);
             var embed = new EmbedBuilder().WithOkColor()
@@ -231,10 +230,11 @@ namespace Roki.Modules.Music.Services
             if (!args.Reason.ShouldPlayNext())
                 return;
 
+            var queue = args.Player.Queue;
             await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithAuthor($"Finished song", "http://i.imgur.com/nhKS3PT.png")
-                .WithDescription(args.Player.Track.PrettyTrack())
-                .WithFooter(args.Player.Track.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
+                .WithAuthor("Finished song", "http://i.imgur.com/nhKS3PT.png")
+                .WithDescription(((RokiRequest) queue.Peek()).PrettyTrack())
+                .WithFooter(((RokiRequest) queue.Peek()).PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
 
             if (!args.Player.Queue.TryDequeue(out _))
             {
@@ -244,8 +244,8 @@ namespace Roki.Modules.Music.Services
 
             await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithOkColor()
                 .WithAuthor($"Playing song", "http://i.imgur.com/nhKS3PT.png")
-                .WithDescription($"{args.Player.Track.PrettyTrack()}")
-                .WithFooter(args.Player.Track.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
+                .WithDescription($"{((RokiRequest) queue.Peek()).PrettyTrack()}")
+                .WithFooter(((RokiRequest) queue.Peek()).PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
             await args.Player.PlayAsync(args.Player.Track).ConfigureAwait(false);
         }
 

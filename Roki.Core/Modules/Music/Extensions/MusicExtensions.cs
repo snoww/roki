@@ -9,9 +9,9 @@ namespace Roki.Modules.Music.Extensions
 {
     public static class MusicExtensions
     {
-        public static TimeSpan TotalPlaytime(this IEnumerable<LavaTrack> queue)
+        public static TimeSpan TotalPlaytime(this IEnumerable<RokiRequest> requests)
         {
-            return new TimeSpan(queue.Sum(q => q.Duration.Ticks));
+            return new TimeSpan(requests.Sum(q => q.Track.Duration.Ticks));
         }
 
         public static string PrettyTrack(this RokiRequest request)
