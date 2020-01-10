@@ -8,19 +8,19 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="CommandLineParser" Version="2.6.0" />
+      <PackageReference Include="CommandLineParser" Version="2.7.82" />
       <PackageReference Include="Discord.Net" Version="2.1.1" />
       <PackageReference Include="EFCore.NamingConventions" Version="1.0.0" />
-      <PackageReference Include="Google.Apis.Customsearch.v1" Version="1.41.1.1369" />
-      <PackageReference Include="Google.Apis.YouTube.v3" Version="1.41.1.1699" />
+      <PackageReference Include="Google.Apis.Customsearch.v1" Version="1.43.0.1369" />
+      <PackageReference Include="Google.Apis.YouTube.v3" Version="1.43.0.1758" />
       <PackageReference Include="linqtotwitter" Version="5.0.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="3.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Http" Version="3.0.0" />
-      <PackageReference Include="NLog" Version="4.6.7" />
-      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.0.1" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="3.1.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.0" />
+      <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.0" />
+      <PackageReference Include="NLog" Version="4.6.8" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.0" />
       <PackageReference Include="PokeApiNet" Version="2.0.0" />
       <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0007" />
       <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0007" />
