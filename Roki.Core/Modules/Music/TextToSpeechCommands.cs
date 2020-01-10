@@ -19,7 +19,6 @@ namespace Roki.Modules.Music
         public class TextToSpeechCommands : RokiSubmodule
         {
             private const string StreamlabsApi = "https://streamlabs.com/polly/speak";
-            private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
             
             [RokiCommand, Description, Usage, Aliases]
             public async Task Tts([Leftover] string query = null)
@@ -50,7 +49,7 @@ namespace Roki.Modules.Music
                     return;
                 }
 
-                var tts = JsonSerializer.Deserialize<TtsModel>(await result.Content.ReadAsStringAsync().ConfigureAwait(false), Options);
+                var tts = (await result.Content.ReadAsStringAsync().ConfigureAwait(false)).Deserialize<TtsModel>();
                 if (tts.Success)
                 {
                     var guid = Guid.NewGuid().ToString().Substring(0, 7);

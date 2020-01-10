@@ -17,7 +17,6 @@ namespace Roki.Modules.Games.Services
         private readonly DbService _db;
         public readonly ConcurrentDictionary<ulong, ulong> TriviaGames = new ConcurrentDictionary<ulong, ulong>();
         private const string OpenTdbUrl = "https://opentdb.com/api.php";
-        private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
 
         public TriviaService(IHttpClientFactory http, DbService db)
         {
@@ -34,7 +33,7 @@ namespace Roki.Modules.Games.Services
             else 
                 result = await http.GetStringAsync($"{OpenTdbUrl}?amount=10&category={category}").ConfigureAwait(false);
                 
-            var questions = JsonSerializer.Deserialize<TriviaModel>(result, Options);
+            var questions = result.Deserialize<TriviaModel>();
             return questions;
         }
 

@@ -152,7 +152,7 @@ namespace Roki.Extensions
 
         public static string RealRemarks(this CommandInfo cmd, string prefix)
         {
-            return string.Join("\n", JsonSerializer.Deserialize<string[]>(cmd.Remarks, Options).Select(x => Format.Code(string.Format(x, prefix))));
+            return string.Join("\n", cmd.Remarks.Deserialize<string[]>().Select(x => Format.Code(string.Format(x, prefix))));
         }
 
         public static double UnixTimestamp(this DateTime dt)
@@ -268,6 +268,11 @@ namespace Roki.Extensions
             if (string.IsNullOrEmpty(formatted)) formatted = "0 seconds";
 
             return formatted;
+        }
+        
+        public static T Deserialize<T>(this string json)
+        {       
+            return JsonSerializer.Deserialize<T>(json, Options);
         }
     }
 }

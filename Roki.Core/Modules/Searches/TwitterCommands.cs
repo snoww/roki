@@ -19,9 +19,9 @@ namespace Roki.Modules.Searches
             
             public TwitterCommands(IRokiConfig config)
             {
-                _twitterCtx = new TwitterContext(new SingleUserAuthorizer()
+                _twitterCtx = new TwitterContext(new SingleUserAuthorizer
                 {
-                    CredentialStore = new SingleUserInMemoryCredentialStore()
+                    CredentialStore = new SingleUserInMemoryCredentialStore
                     {
                         ConsumerKey = config.TwitterConsumer,
                         ConsumerSecret = config.TwitterConsumerSecret,

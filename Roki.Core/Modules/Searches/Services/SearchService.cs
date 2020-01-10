@@ -19,7 +19,6 @@ namespace Roki.Modules.Searches.Services
         private readonly IGoogleApiService _google;
         private readonly IHttpClientFactory _httpFactory;
         private readonly Logger _log;
-        private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
 
         public SearchService(DiscordSocketClient client, IHttpClientFactory httpFactory, IGoogleApiService google, IRokiConfig config)
         {
@@ -61,7 +60,7 @@ namespace Roki.Modules.Searches.Services
                     .GetStringAsync(
                         $"https://maps.googleapis.com/maps/api/timezone/json?location={obj.Results[0].Geometry.Location.Lat},{obj.Results[0].Geometry.Location.Lng}&timestamp={currentSeconds}&key={_config.GoogleApi}")
                     .ConfigureAwait(false);
-                var timeObj = JsonSerializer.Deserialize<TimeZoneResult>(timeResult, Options);
+                var timeObj = timeResult.Deserialize<TimeZoneResult>();
                 var time = DateTime.UtcNow.AddSeconds(timeObj.DstOffset + timeObj.RawOffset);
 
                 var toReturn = new TimeData
@@ -87,7 +86,7 @@ namespace Roki.Modules.Searches.Services
                 .GetStringAsync(
                     $"https://maps.googleapis.com/maps/api/timezone/json?location={lat},{lng}&timestamp={currentSeconds}&key={_config.GoogleApi}")
                 .ConfigureAwait(false);
-            return JsonSerializer.Deserialize<TimeZoneResult>(timeResult, Options);
+            return timeResult.Deserialize<TimeZoneResult>();
 //            return (TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, timeZone.TimeZoneName), timeZone.TimeZoneName);
         }
 
@@ -98,7 +97,7 @@ namespace Roki.Modules.Searches.Services
                 using var http = _httpFactory.CreateClient();
                 var result = await http.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={location}&key={_config.GoogleApi}")
                     .ConfigureAwait(false);
-                var obj = JsonSerializer.Deserialize<GeolocationResult>(result, Options);
+                var obj = result.Deserialize<GeolocationResult>();
                 if (obj?.Results == null || obj.Results.Length == 0)
                 {
                     _log.Warn("Geocode lookup failed for {0}", location);
@@ -124,7 +123,7 @@ namespace Roki.Modules.Searches.Services
         {
             using var http = _httpFactory.CreateClient();
             var result = await http.GetStringAsync($"http://www.omdbapi.com/?t={name.Trim().Replace(' ', '+')}&apikey={_config.OmdbApi}&y=&plot=full&r=json").ConfigureAwait(false);
-            var movie = JsonSerializer.Deserialize<OmdbMovie>(result, Options);
+            var movie = result.Deserialize<OmdbMovie>();
             return movie?.Title == null ? null : movie;
         }
 

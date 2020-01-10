@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Roki.Core.Services;
+using Roki.Extensions;
 using Roki.Modules.Searches.Models;
 
 namespace Roki.Modules.Games.Services
@@ -17,8 +18,7 @@ namespace Roki.Modules.Games.Services
     {
         private readonly DbService _db;
         public readonly ConcurrentDictionary<ulong, string> Games = new ConcurrentDictionary<ulong, string>();
-        private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
-        private static readonly Dictionary<string, PokemonData> Data = JsonSerializer.Deserialize<Dictionary<string, PokemonData>>(File.ReadAllText("./data/pokemon.json"), Options);
+        private static readonly Dictionary<string, PokemonData> Data = File.ReadAllText("./data/pokemon.json").Deserialize<Dictionary<string, PokemonData>>();
         
         public ShowdownService(DbService db)
         {

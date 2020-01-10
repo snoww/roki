@@ -17,7 +17,6 @@ namespace Roki.Modules.Searches
         {
             private const string XkcdUrl = "https://xkcd.com";
             private readonly IHttpClientFactory _httpFactory;
-            private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
 
             public XkcdCommands(IHttpClientFactory httpFactory)
             {
@@ -29,21 +28,19 @@ namespace Roki.Modules.Searches
             {
                 try
                 {
-                    using (var http = _httpFactory.CreateClient())
-                    {
-                        var result = num == 0
-                            ? await http.GetStringAsync($"{XkcdUrl}/info.0.json").ConfigureAwait(false)
-                            : await http.GetStringAsync($"{XkcdUrl}/{num}/info.0.json").ConfigureAwait(false);
+                    using var http = _httpFactory.CreateClient();
+                    var result = num == 0
+                        ? await http.GetStringAsync($"{XkcdUrl}/info.0.json").ConfigureAwait(false)
+                        : await http.GetStringAsync($"{XkcdUrl}/{num}/info.0.json").ConfigureAwait(false);
 
-                        var xkcd = JsonSerializer.Deserialize<XkcdModel>(result, Options);
-                        var embed = new EmbedBuilder().WithOkColor()
-                            .WithAuthor(xkcd.Title, "https://xkcd.com/s/919f27.ico", $"{XkcdUrl}/{xkcd.Num}")
-                            .WithImageUrl(xkcd.Img)
-                            .AddField("Comic #", xkcd.Num, true)
-                            .AddField("Date", $"{xkcd.Month}/{xkcd.Year}", true);
+                    var xkcd = result.Deserialize<XkcdModel>();
+                    var embed = new EmbedBuilder().WithOkColor()
+                        .WithAuthor(xkcd.Title, "https://xkcd.com/s/919f27.ico", $"{XkcdUrl}/{xkcd.Num}")
+                        .WithImageUrl(xkcd.Img)
+                        .AddField("Comic #", xkcd.Num, true)
+                        .AddField("Date", $"{xkcd.Month}/{xkcd.Year}", true);
 
-                        await ctx.Channel.EmbedAsync(embed);
-                    }
+                    await ctx.Channel.EmbedAsync(embed);
                 }
                 catch (HttpRequestException)
                 {

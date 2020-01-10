@@ -5,7 +5,9 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Discord;
+using Microsoft.Extensions.Options;
 using Roki.Core.Services;
+using Roki.Extensions;
 using Roki.Modules.Stocks.Models;
 
 namespace Roki.Modules.Stocks.Services
@@ -14,7 +16,6 @@ namespace Roki.Modules.Stocks.Services
     {
         private readonly IRokiConfig _config;
         private readonly IHttpClientFactory _httpFactory;
-        private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
         private const string IexStocksUrl = "https://cloud.iexapis.com/stable/stock";
 
         public StocksService(IRokiConfig config, IHttpClientFactory httpFactory)
@@ -29,7 +30,7 @@ namespace Roki.Modules.Stocks.Services
             try
             {
                 var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/company?token={_config.IexToken}").ConfigureAwait(false);
-                return JsonSerializer.Deserialize<Company>(result, Options);
+                return result.Deserialize<Company>();
             }
             catch
             {
@@ -43,7 +44,7 @@ namespace Roki.Modules.Stocks.Services
             try
             {
                 var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/stats?token={_config.IexToken}").ConfigureAwait(false);
-                return JsonSerializer.Deserialize<StockStats>(result, Options);
+                return result.Deserialize<StockStats>();
             }
             catch
             {
@@ -57,7 +58,7 @@ namespace Roki.Modules.Stocks.Services
             try
             {
                 var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/news?token={_config.IexToken}").ConfigureAwait(false);
-                return JsonSerializer.Deserialize<StockNews[]>(result, Options);
+                return result.Deserialize<StockNews[]>();
             }
             catch
             {
@@ -71,7 +72,7 @@ namespace Roki.Modules.Stocks.Services
             try
             {
                 var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/quote?token={_config.IexToken}").ConfigureAwait(false);
-                return JsonSerializer.Deserialize<Quote>(result, Options);
+                return result.Deserialize<Quote>();
             }
             catch
             {
