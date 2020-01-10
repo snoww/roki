@@ -130,6 +130,10 @@ namespace Roki.Modules.Games.Common
 
         public bool CheckAnswer(string answer)
         {
+            var convert = new ConvertASCII();
+            convert.FoldToASCII(answer.ToCharArray(), answer.Length);
+            answer = new string(convert.Output).Trim('\0');
+            
             if (Answer.StartsWith("(2 of)", StringComparison.Ordinal) || Answer.StartsWith("(3 of)", StringComparison.Ordinal))
             {
                 var answers = SanitizeAnswerToList(answer);
