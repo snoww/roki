@@ -28,7 +28,6 @@ namespace Roki.Core.Services
     
     public class StatsService : IStatsService
     {
-        public const string BotVersion = "0.5.0";
         private readonly DiscordSocketClient _client;
         private readonly IRokiConfig _config;
         private readonly Logger _log;
@@ -39,6 +38,8 @@ namespace Roki.Core.Services
         private long _textChannels;
         private long _voiceChannels;
 
+        public const string BotVersion = "0.9.1";
+        
 //        private readonly Timer _carbonitexTimer;
 //        private readonly Timer _botlistTimer;
 //        private readonly Timer _dataTimer;
