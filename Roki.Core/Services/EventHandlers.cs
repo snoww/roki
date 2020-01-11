@@ -14,13 +14,11 @@ namespace Roki.Core.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly DbService _db;
-        private readonly Roki _roki;
 
-        public EventHandlers(DbService db, DiscordSocketClient client, Roki roki)
+        public EventHandlers(DbService db, DiscordSocketClient client)
         {
             _db = db;
             _client = client;
-            _roki = roki;
         }
 
         public async Task HandleEvents()
@@ -53,12 +51,12 @@ namespace Roki.Core.Services
                 var fastXp = uow.Subscriptions.FastXpIsActive(message.Author.Id);
                 if (fastXp)
                 {
-                    if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpFastCooldown))
+                    if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpFastCooldown))
                         await uow.Users.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
                 }
                 else
                 {
-                    if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(_roki.Properties.XpCooldown))
+                    if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpCooldown))
                         await uow.Users.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
                 }
 

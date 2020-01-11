@@ -11,20 +11,13 @@ namespace Roki.Modules.Rsvp
 {
     public class Rsvp : RokiTopLevelModule<RsvpService>
     {
-        private readonly Roki _roki;
-
-        public Rsvp(Roki roki)
-        {
-            _roki = roki;
-        }
-
         [RokiCommand, Description, Aliases, Usage]
         [RequireContext(ContextType.Guild)]
         public async Task Events([Leftover] string args = null)
         {
             var err = string.Format("`{0}events new/create`: Create a new event\n" +
                                     "`{0}events edit`: Edits an event\n" +
-                                    "`{0}events list/ls <optional_page>`: Lists events in this server\n", _roki.Properties.Prefix);
+                                    "`{0}events list/ls <optional_page>`: Lists events in this server\n", Roki.Properties.Prefix);
             if (string.IsNullOrWhiteSpace(args))
             {
                 await ctx.Channel.SendErrorAsync(err).ConfigureAwait(false);

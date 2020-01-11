@@ -25,7 +25,7 @@ namespace Roki.Modules.Games
         {
             private readonly DiscordSocketClient _client;
             private readonly ICurrencyService _currency;
-            private readonly Roki _roki;
+            
             private const string Gen7SpriteUrl = "http://play.pokemonshowdown.com/sprites/xydex/";
             private const string Gen6SpriteUrl = "http://play.pokemonshowdown.com/sprites/xy/";
             private const string Gen5SpriteUrl = "http://play.pokemonshowdown.com/sprites/gen5/";
@@ -60,11 +60,10 @@ namespace Roki.Modules.Games
                 {TimesTen, 0},
             };
             
-            public ShowdownCommands(DiscordSocketClient client, ICurrencyService currency, Roki roki)
+            public ShowdownCommands(DiscordSocketClient client, ICurrencyService currency)
             {
                 _client = client;
                 _currency = currency;
-                _roki = roki;
             }
             
             private enum BetPlayer
@@ -189,7 +188,7 @@ namespace Roki.Modules.Games
                                     joinedReactions[user].Amount += _reactionMap[reaction.Emote];
                                 else
                                 {
-                                    var notEnoughMsg = await ctx.Channel.SendErrorAsync($"<@{reaction.User.Value.Id}> You do not have enough {_roki.Properties.CurrencyIcon} to make that bet.")
+                                    var notEnoughMsg = await ctx.Channel.SendErrorAsync($"<@{reaction.User.Value.Id}> You do not have enough {Roki.Properties.CurrencyIcon} to make that bet.")
                                         .ConfigureAwait(false);
                                     await startMsg.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
                                     notEnoughMsg.DeleteAfter(5);
@@ -242,7 +241,7 @@ namespace Roki.Modules.Games
                         var won = value.Amount * value.Multiple * 2;
                         await _currency.ChangeAsync(ctx.Client.CurrentUser.Id, key.Id, "BetShowdown Payout", won, ctx.Guild.Id,
                             ctx.Channel.Id, ctx.Message.Id);
-                        winners += $"{key.Username} won `{won:N0}` {_roki.Properties.CurrencyIcon}\n" +
+                        winners += $"{key.Username} won `{won:N0}` {Roki.Properties.CurrencyIcon}\n" +
                                    $"\t`{before:N0}` ⇒ `{_service.GetCurrency(key.Id):N0}`\n";
                     }
                     

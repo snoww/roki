@@ -25,7 +25,6 @@ namespace Roki.Modules.Games.Common
         private readonly Logger _log;
         private readonly DiscordSocketClient _client;
         private readonly Dictionary<string, List<JClue>> _clues;
-        private readonly Roki _roki;
 
         private readonly IGuild _guild;
         private readonly ITextChannel _channel;
@@ -48,8 +47,7 @@ namespace Roki.Modules.Games.Common
 
         public readonly Color Color = Color.DarkBlue;
         
-        public Jeopardy(DiscordSocketClient client, Dictionary<string, List<JClue>> clues, IGuild guild, ITextChannel channel, Roki roki, 
-            ICurrencyService currency, JClue finalJeopardy)
+        public Jeopardy(DiscordSocketClient client, Dictionary<string, List<JClue>> clues, IGuild guild, ITextChannel channel, ICurrencyService currency, JClue finalJeopardy)
         {
             _log = LogManager.GetCurrentClassLogger();
             _client = client;
@@ -57,7 +55,6 @@ namespace Roki.Modules.Games.Common
             
             _guild = guild;
             _channel = channel;
-            _roki = roki;
             _currency = currency;
             _finalJeopardy = finalJeopardy;
         }
@@ -490,7 +487,7 @@ namespace Roki.Modules.Games.Common
             var lb = new StringBuilder();
             foreach (var (user, value) in Users.OrderByDescending(k => k.Value))
             {
-                lb.AppendLine($"{user.Username} `{value:N0}` {_roki.Properties.CurrencyIcon}");
+                lb.AppendLine($"{user.Username} `{value:N0}` {Roki.Properties.CurrencyIcon}");
             }
 
             return lb.ToString();

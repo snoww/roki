@@ -14,13 +14,6 @@ namespace Roki.Modules.Currency
         [Group]
         public class PickDropCommands : RokiSubmodule<PickDropService>
         {
-            private readonly Roki _roki;
-
-            public PickDropCommands(Roki roki)
-            {
-                _roki = roki;
-            }
-
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
             public async Task Pick()
@@ -32,9 +25,9 @@ namespace Roki.Modules.Currency
                 {
                     IUserMessage msg;
                     if (picked == 1)
-                        msg = await ctx.Channel.SendMessageAsync($"{ctx.User.Username} picked up 1 {_roki.Properties.CurrencyName}.").ConfigureAwait(false);
+                        msg = await ctx.Channel.SendMessageAsync($"{ctx.User.Username} picked up 1 {Roki.Properties.CurrencyName}.").ConfigureAwait(false);
                     else
-                        msg = await ctx.Channel.SendMessageAsync($"{ctx.User.Username} picked up {picked:N0} {_roki.Properties.CurrencyNamePlural}.").ConfigureAwait(false);
+                        msg = await ctx.Channel.SendMessageAsync($"{ctx.User.Username} picked up {picked:N0} {Roki.Properties.CurrencyNamePlural}.").ConfigureAwait(false);
 
                     msg.DeleteAfter(10);
                 }
@@ -51,7 +44,7 @@ namespace Roki.Modules.Currency
                 var success = await _service.DropAsync(ctx, ctx.User, amount).ConfigureAwait(false);
 
                 if (!success)
-                    await ctx.Channel.SendMessageAsync($"You do not have enough {_roki.Properties.CurrencyIcon} to drop.").ConfigureAwait(false);
+                    await ctx.Channel.SendMessageAsync($"You do not have enough {Roki.Properties.CurrencyIcon} to drop.").ConfigureAwait(false);
 
             }
         }

@@ -13,13 +13,6 @@ namespace Roki.Modules.Stocks
         [Group]
         public class PortfolioCommands : RokiSubmodule<PortfolioService>
         {
-            private readonly Roki _roki;
-
-            public PortfolioCommands(Roki roki)
-            {
-                _roki = roki;
-            }
-
             [RokiCommand, Usage, Description, Aliases]
             public async Task Portfolio(IUser optionalUser = null)
             {
@@ -42,7 +35,7 @@ namespace Roki.Modules.Stocks
                         .Take(itemsPP)
                         .Select(i => $"`{i.Symbol.ToUpper()}` `{i.Position}` - `{i.Shares}` shares"));
 
-                    desc = $"Your current portfolio value:\n`{value:N2}` {_roki.Properties.CurrencyIcon}\n" + desc;
+                    desc = $"Your current portfolio value:\n`{value:N2}` {Roki.Properties.CurrencyIcon}\n" + desc;
                     
                     var embed = new EmbedBuilder().WithOkColor()
                         .WithTitle($"{user.Username}'s Portfolio")

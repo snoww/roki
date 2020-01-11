@@ -21,12 +21,10 @@ namespace Roki.Services
     public class CurrencyService : ICurrencyService
     {
         private readonly DbService _db;
-        private readonly Roki _roki;
 
-        public CurrencyService(DbService db, Roki roki)
+        public CurrencyService(DbService db)
         {
             _db = db;
-            _roki = roki;
         }
         
         private static CurrencyTransaction CreateTransaction(string reason, long amount, ulong from, ulong to, ulong guildId, ulong channelId, ulong messageId) =>
@@ -46,11 +44,11 @@ namespace Roki.Services
         {
             using var uow = _db.GetDbContext();
             var success = await uow.Users.UpdateCurrencyAsync(from, amount).ConfigureAwait(false);
-            if (from == _roki.Properties.BotId)
+            if (from == Roki.Properties.BotId)
             {
                 await uow.Users.UpdateBotCurrencyAsync(from, -amount);
             }
-            else if (to == _roki.Properties.BotId)
+            else if (to == Roki.Properties.BotId)
             {
                 await uow.Users.UpdateBotCurrencyAsync(to, -amount);
             }

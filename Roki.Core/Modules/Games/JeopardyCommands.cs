@@ -20,12 +20,10 @@ namespace Roki.Modules.Games
         {
             private readonly ICurrencyService _currency;
             private readonly DiscordSocketClient _client;
-            private readonly Roki _roki;
 
-            public JeopardyCommands(DiscordSocketClient client, Roki roki, ICurrencyService currency)
+            public JeopardyCommands(DiscordSocketClient client, ICurrencyService currency)
             {
                 _client = client;
-                _roki = roki;
                 _currency = currency;
             }
 
@@ -39,7 +37,7 @@ namespace Roki.Modules.Games
                 var channel = (ITextChannel) ctx.Channel;
                 var questions = _service.GenerateGame(opts.NumCategories);
 
-                var jeopardy = new Jeopardy(_client, questions, channel.Guild, channel, _roki, _currency, _service.GetFinalJeopardy());
+                var jeopardy = new Jeopardy(_client, questions, channel.Guild, channel, _currency, _service.GetFinalJeopardy());
 
                 if (_service.ActiveGames.TryAdd(channel.Id, jeopardy))
                 {

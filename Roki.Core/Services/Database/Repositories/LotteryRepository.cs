@@ -83,9 +83,9 @@ namespace Roki.Core.Services.Database.Repositories
         }
 
         public string GetLotteryId() =>
-            Set.OrderByDescending(l => l.Date).First(u => u.UserId == 549644503351296040).LotteryId;
+            Set.OrderByDescending(l => l.Date).First(u => u.UserId == Roki.Properties.BotId).LotteryId;
 
         public DateTimeOffset GetLotteryDate(ulong botId) =>
-            Set.OrderByDescending(l => l.Date).First(u => u.UserId == 549644503351296040).Date;
+            Set.OrderByDescending(l => l.Date).First(u => u.UserId == Roki.Properties.BotId).Date;
     }
 }

@@ -38,6 +38,7 @@ namespace Roki.Core.Services.Database
         private IEventsRepository _events;
         private IGuildRepository _guilds;
         private IChannelRepository _channels;
+        
         public UnitOfWork(RokiContext context)
         {
             Context = context;

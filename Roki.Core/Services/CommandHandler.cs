@@ -62,7 +62,7 @@ namespace Roki.Core.Services
 
             _log = LogManager.GetCurrentClassLogger();
 
-            DefaultPrefix = _roki.Properties.Prefix;
+            DefaultPrefix = Roki.Properties.Prefix;
         }
 
 

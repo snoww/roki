@@ -18,16 +18,14 @@ namespace Roki.Modules.Gambling.Services
         private readonly DbService _db;
         private readonly ICurrencyService _currency;
         private readonly Random _rng = new Random();
-        private readonly Roki _roki;
         private Timer _timer;
         private const ulong ChannelId = 222401767697154048;
 
-        public LotteryService(DiscordSocketClient client, DbService db, ICurrencyService currency, Roki roki)
+        public LotteryService(DiscordSocketClient client, DbService db, ICurrencyService currency)
         {
             _client = client;
             _db = db;
             _currency = currency;
-            _roki = roki;
             LotteryTimer();
         }
 
@@ -39,8 +37,8 @@ namespace Roki.Modules.Gambling.Services
             // dueTime is when it first occurs, period is how long after each occurence
 
             _timer = drawToday - today > TimeSpan.Zero 
-                ? new Timer(LotteryEvent, null, drawToday - today, TimeSpan.FromDays(_roki.Properties.LotteryDraw)) 
-                : new Timer(LotteryEvent, null, drawTmr - today, TimeSpan.FromDays(_roki.Properties.LotteryDraw));
+                ? new Timer(LotteryEvent, null, drawToday - today, TimeSpan.FromDays(Roki.Properties.LotteryDraw)) 
+                : new Timer(LotteryEvent, null, drawTmr - today, TimeSpan.FromDays(Roki.Properties.LotteryDraw));
         }
 
         private async void LotteryEvent(object state)
@@ -48,7 +46,7 @@ namespace Roki.Modules.Gambling.Services
             var channel = _client.GetChannel(ChannelId) as IMessageChannel;
 
             using var uow = _db.GetDbContext();
-            var jackpot = (long) (_currency.GetCurrency(549644503351296040) * 0.9);
+            var jackpot = (long) (_currency.GetCurrency(Roki.Properties.BotId) * 0.9);
             if (jackpot < 1000)
                 return;
             var lottery = uow.Lottery.GetLottery(_client.CurrentUser.Id);
@@ -101,36 +99,36 @@ namespace Roki.Modules.Gambling.Services
             using var uow = _db.GetDbContext();
             if (six.Count > 0)
             {
-                var amount = (long) (_currency.GetCurrency(_client.CurrentUser.Id) * _roki.Properties.LotteryJackpot) / six.Count;
+                var amount = (long) (_currency.GetCurrency(_client.CurrentUser.Id) * Roki.Properties.LotteryJackpot) / six.Count;
                 toReturn += "JACKPOT WINNERS\n";
                 foreach (var winner in six)
                 {
                     await uow.Users.LotteryAwardAsync(winner, amount).ConfigureAwait(false);
                     await uow.Users.UpdateBotCurrencyAsync(_client.CurrentUser.Id, -amount);
-                    toReturn += $"<@{winner}> WON {amount.FormatNumber()} {_roki.Properties.CurrencyIcon}\n";
+                    toReturn += $"<@{winner}> WON {amount.FormatNumber()} {Roki.Properties.CurrencyIcon}\n";
                 }
                 
             }
             if (five.Count > 0)
             {
                 toReturn += "5/6 Winners\n";
-                var amount = (long) (_currency.GetCurrency(_client.CurrentUser.Id) * _roki.Properties.Lottery5) / five.Count;
+                var amount = (long) (_currency.GetCurrency(_client.CurrentUser.Id) * Roki.Properties.Lottery5) / five.Count;
                 foreach (var winner in five)
                 {
                     await uow.Users.LotteryAwardAsync(winner, amount).ConfigureAwait(false);
                     await uow.Users.UpdateBotCurrencyAsync(_client.CurrentUser.Id, -amount);
-                    toReturn += $"<@{winner}> won {amount.FormatNumber()} {_roki.Properties.CurrencyIcon}\n";
+                    toReturn += $"<@{winner}> won {amount.FormatNumber()} {Roki.Properties.CurrencyIcon}\n";
                 }
             }
             if (four.Count > 0)
             {
                 toReturn += "4/6 Winners\n";
-                var amount = (long) (_currency.GetCurrency(_client.CurrentUser.Id) * _roki.Properties.Lottery4) / four.Count;
+                var amount = (long) (_currency.GetCurrency(_client.CurrentUser.Id) * Roki.Properties.Lottery4) / four.Count;
                 foreach (var winner in four)
                 {
                     await uow.Users.LotteryAwardAsync(winner, amount).ConfigureAwait(false);
                     await uow.Users.UpdateBotCurrencyAsync(_client.CurrentUser.Id, -amount);
-                    toReturn += $"<@{winner}> won {amount.FormatNumber()} {_roki.Properties.CurrencyIcon}\n";
+                    toReturn += $"<@{winner}> won {amount.FormatNumber()} {Roki.Properties.CurrencyIcon}\n";
                 }
             }
 
@@ -166,7 +164,7 @@ namespace Roki.Modules.Gambling.Services
             var winners = new List<Tuple<ulong, int>>();
             foreach (var entry in entries)
             {
-                if (entry.UserId == _roki.Properties.BotId)
+                if (entry.UserId == Roki.Properties.BotId)
                     continue;
                 var count = 0;
                 if (winning.Contains(entry.Num1))

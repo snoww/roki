@@ -56,7 +56,7 @@ namespace Roki
         public RokiConfig Config { get; }
         public DiscordSocketClient Client { get; }
         public CommandService CommandService { get; }
-        public Properties Properties { get; }
+        public static Properties Properties { get; set; }
         public static Color OkColor { get; set; }
         public static Color ErrorColor { get; set; }
 

@@ -21,20 +21,18 @@ namespace Roki.Modules.Gambling
         {
             private readonly ICurrencyService _currency;
             private readonly DbService _db;
-            private readonly Roki _roki;
             
-            public LotteryCommands(ICurrencyService currency, DbService db, Roki roki)
+            public LotteryCommands(ICurrencyService currency, DbService db)
             {
                 _currency = currency;
                 _db = db;
-                _roki = roki;
             }
             
             [RokiCommand, Description, Usage, Aliases]
             public async Task Jackpot()
             {
-                var jackpot = (long) (_currency.GetCurrency(ctx.Client.CurrentUser.Id) * _roki.Properties.LotteryJackpot);
-                if (jackpot < _roki.Properties.LotteryMin)
+                var jackpot = (long) (_currency.GetCurrency(ctx.Client.CurrentUser.Id) * Roki.Properties.LotteryJackpot);
+                if (jackpot < Roki.Properties.LotteryMin)
                 {
                     await ctx.Channel.SendErrorAsync("The lottery is currently down. Please check back another time.").ConfigureAwait(false);
                     return;
@@ -42,7 +40,7 @@ namespace Roki.Modules.Gambling
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle("Stone Lottery")
-                        .WithDescription($"Current Jackpot: `{jackpot:N0}` {_roki.Properties.CurrencyIcon}"))
+                        .WithDescription($"Current Jackpot: `{jackpot:N0}` {Roki.Properties.CurrencyIcon}"))
                     .ConfigureAwait(false);
             }
 
@@ -57,11 +55,11 @@ namespace Roki.Modules.Gambling
                 }
                 var user = ctx.User;
                 var removed = await _currency.ChangeAsync(ctx.User.Id, ctx.Client.CurrentUser.Id, $"Lottery Entry x{tickets}",
-                        -tickets * _roki.Properties.LotteryTicketCost, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
+                        -tickets * Roki.Properties.LotteryTicketCost, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
                     .ConfigureAwait(false);
                 if (!removed)
                 {
-                    await ctx.Channel.SendErrorAsync($"{ctx.User.Mention} you do not have enough {_roki.Properties.CurrencyIcon} to join the lottery.")
+                    await ctx.Channel.SendErrorAsync($"{ctx.User.Mention} you do not have enough {Roki.Properties.CurrencyIcon} to join the lottery.")
                         .ConfigureAwait(false);
                     return;
                 }
@@ -105,11 +103,11 @@ namespace Roki.Modules.Gambling
                 }
                 var user = ctx.User;
                 var removed = await _currency.ChangeAsync(ctx.User.Id, ctx.Client.CurrentUser.Id, "Lottery Entry",
-                        -_roki.Properties.LotteryTicketCost, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
+                        -Roki.Properties.LotteryTicketCost, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
                     .ConfigureAwait(false);
                 if (!removed)
                 {
-                    await ctx.Channel.SendErrorAsync($"{ctx.User.Mention} you do not have enough {_roki.Properties.CurrencyIcon} to join the lottery.")
+                    await ctx.Channel.SendErrorAsync($"{ctx.User.Mention} you do not have enough {Roki.Properties.CurrencyIcon} to join the lottery.")
                         .ConfigureAwait(false);
                     return;
                 }
@@ -165,8 +163,8 @@ namespace Roki.Modules.Gambling
             [RequireContext(ContextType.Guild)]
             public async Task NextDraw()
             {
-                var jackpot = (long) (_currency.GetCurrency(ctx.Client.CurrentUser.Id) * _roki.Properties.LotteryJackpot);
-                if (jackpot < _roki.Properties.LotteryMin)
+                var jackpot = (long) (_currency.GetCurrency(ctx.Client.CurrentUser.Id) * Roki.Properties.LotteryJackpot);
+                if (jackpot < Roki.Properties.LotteryMin)
                 {
                     await ctx.Channel.SendErrorAsync("The lottery is currently down. Please check back another time.").ConfigureAwait(false);
                     return;
