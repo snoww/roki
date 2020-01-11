@@ -43,15 +43,22 @@ namespace Roki.Services
             ulong messageId)
         {
             using var uow = _db.GetDbContext();
-            var success = await uow.Users.UpdateCurrencyAsync(from, amount).ConfigureAwait(false);
+            bool success;
             if (from == Roki.Properties.BotId)
             {
                 await uow.Users.UpdateBotCurrencyAsync(from, -amount);
+                success = await uow.Users.UpdateCurrencyAsync(to, amount).ConfigureAwait(false);
             }
             else if (to == Roki.Properties.BotId)
             {
                 await uow.Users.UpdateBotCurrencyAsync(to, -amount);
+                success = await uow.Users.UpdateCurrencyAsync(from, amount).ConfigureAwait(false);
             }
+            else
+            {
+                success = await uow.Users.UpdateCurrencyAsync(from, amount).ConfigureAwait(false);
+            }
+            
             if (success)
             {
                 var transaction = CreateTransaction(reason, amount, from, to, guildId, channelId, messageId);
