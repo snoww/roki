@@ -17,13 +17,11 @@ namespace Roki.Modules.Currency
     {
         private readonly DbService _db;
         private readonly ICurrencyService _currency;
-        private readonly Roki _roki;
 
-        public Currency(DbService db, ICurrencyService currency, Roki roki)
+        public Currency(DbService db, ICurrencyService currency)
         {
             _db = db;
             _currency = currency;
-            _roki = roki;
         }
 
         private long GetCurrency(ulong userId)
@@ -44,8 +42,8 @@ namespace Roki.Modules.Currency
         {
             user ??= ctx.User;
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{user.Mention}'s Accounts\nCash Account: `{GetCurrency(user.Id):N0}` {_roki.Properties.CurrencyIcon}\n" +
-                                 $"Investing Account: `{GetInvAccount(user.Id):N2}` {_roki.Properties.CurrencyIcon}")).ConfigureAwait(false);
+                .WithDescription($"{user.Mention}'s Accounts\nCash Account: `{GetCurrency(user.Id):N0}` {Roki.Properties.CurrencyIcon}\n" +
+                                 $"Investing Account: `{GetInvAccount(user.Id):N2}` {Roki.Properties.CurrencyIcon}")).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -63,7 +61,7 @@ namespace Roki.Modules.Currency
             var i = 9 * page + 1;
             foreach (var user in list)
             {
-                embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"`{user.Currency:N0}` {_roki.Properties.CurrencyIcon}");
+                embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"`{user.Currency:N0}` {Roki.Properties.CurrencyIcon}");
             }
 
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
@@ -75,7 +73,7 @@ namespace Roki.Modules.Currency
         {
             if (amount == 0)
             {
-                await ctx.Channel.SendErrorAsync($"You must transfer at least `1` {_roki.Properties.CurrencyIcon}").ConfigureAwait(false);
+                await ctx.Channel.SendErrorAsync($"You must transfer at least `1` {Roki.Properties.CurrencyIcon}").ConfigureAwait(false);
                 return;
             }
 
@@ -98,7 +96,7 @@ namespace Roki.Modules.Currency
             
             if (!success)
             {
-                await ctx.Channel.SendErrorAsync($"You do not have enough {_roki.Properties.CurrencyIcon} in your `{fromAcc}` to transfer.").ConfigureAwait(false);
+                await ctx.Channel.SendErrorAsync($"You do not have enough {Roki.Properties.CurrencyIcon} in your `{fromAcc}` to transfer.").ConfigureAwait(false);
                 return;
             }
             
@@ -115,7 +113,7 @@ namespace Roki.Modules.Currency
             });
 
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{ctx.User.Mention} You've successfully transferred `{amount:N0}` {_roki.Properties.CurrencyIcon}\nFrom `{fromAcc}` ➡️ `{toAcc}`")).ConfigureAwait(false);
+                .WithDescription($"{ctx.User.Mention} You've successfully transferred `{amount:N0}` {Roki.Properties.CurrencyIcon}\nFrom `{fromAcc}` ➡️ `{toAcc}`")).ConfigureAwait(false);
             await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
@@ -134,12 +132,12 @@ namespace Roki.Modules.Currency
 
             if (!success)
             {
-                await ctx.Channel.SendErrorAsync($"You do not have enough {_roki.Properties.CurrencyNamePlural} to give.").ConfigureAwait(false);
+                await ctx.Channel.SendErrorAsync($"You do not have enough {Roki.Properties.CurrencyNamePlural} to give.").ConfigureAwait(false);
                 return;
             }
 
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{ctx.User.Username} gifted `{amount:N0}` {_roki.Properties.CurrencyNamePlural} to {user.Mention}")).ConfigureAwait(false);
+                .WithDescription($"{ctx.User.Username} gifted `{amount:N0}` {Roki.Properties.CurrencyNamePlural} to {user.Mention}")).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -178,7 +176,7 @@ namespace Roki.Modules.Currency
                     amount = amount.Insert(0, "-");
                 }
                 var date = Format.Code($"{tran.TransactionDate.ToLocalTime():HH:mm yyyy-MM-dd}");
-                desc += $"{type} {tran.Reason?.Trim()} {date}\n\t\t{Format.Code(amount)} {_roki.Properties.CurrencyIcon}\n";
+                desc += $"{type} {tran.Reason?.Trim()} {date}\n\t\t{Format.Code(amount)} {Roki.Properties.CurrencyIcon}\n";
             }
 
             embed.WithDescription(desc)

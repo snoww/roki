@@ -13,19 +13,17 @@ namespace Roki.Modules.Gambling
     {
         private readonly DbService _db;
         private readonly ICurrencyService _currency;
-        private readonly Roki _roki;
 
-        public Gambling(DbService db, ICurrencyService currency, Roki roki)
+        public Gambling(DbService db, ICurrencyService currency)
         {
             _db = db;
             _currency = currency;
-            _roki = roki;
         }
 
         [RokiCommand, Description, Usage, Aliases]
         public async Task BetRoll(long amount)
         {
-            if (amount < _roki.Properties.BetRollMin)
+            if (amount < Roki.Properties.BetRollMin)
                 return;
             
             var removed = await _currency
@@ -34,7 +32,7 @@ namespace Roki.Modules.Gambling
                 .ConfigureAwait(false);
             if (!removed)
             {
-                await ctx.Channel.SendErrorAsync($"Not enough {_roki.Properties.CurrencyIcon}" +
+                await ctx.Channel.SendErrorAsync($"Not enough {Roki.Properties.CurrencyIcon}" +
                                                  $"You have `{_service.GetCurrency(ctx.User.Id):N0}`")
                     .ConfigureAwait(false);
                 return;
@@ -44,24 +42,24 @@ namespace Roki.Modules.Gambling
             if (roll < 70)
             {
                 await ctx.Channel.SendErrorAsync($"{rollStr}\nBetter luck next time." +
-                                                 $"New Balance: `{_service.GetCurrency(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}")
+                                                 $"New Balance: `{_service.GetCurrency(ctx.User.Id):N0}` {Roki.Properties.CurrencyIcon}")
                     .ConfigureAwait(false);
                 return;
             }
             
             long win;
             if (roll < 91)
-                win = (long) Math.Ceiling(amount * _roki.Properties.BetRoll71Multiplier);
+                win = (long) Math.Ceiling(amount * Roki.Properties.BetRoll71Multiplier);
             else if (roll < 100)
-                win = amount * _roki.Properties.BetRoll92Multiplier;
+                win = amount * Roki.Properties.BetRoll92Multiplier;
             else
-                win = amount * _roki.Properties.BetRoll100Multiplier;
+                win = amount * Roki.Properties.BetRoll100Multiplier;
 
             await _currency.ChangeAsync(ctx.Client.CurrentUser.Id, ctx.User.Id, "BetRoll Payout", win, ctx.Guild.Id, ctx.Channel.Id,
                 ctx.Message.Id);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{rollStr}\nCongratulations, you won `{win:N0}` {_roki.Properties.CurrencyIcon}" +
-                                 $"New Balance: `{_service.GetCurrency(ctx.User.Id):N0}` {_roki.Properties.CurrencyIcon}"));
+                .WithDescription($"{rollStr}\nCongratulations, you won `{win:N0}` {Roki.Properties.CurrencyIcon}" +
+                                 $"New Balance: `{_service.GetCurrency(ctx.User.Id):N0}` {Roki.Properties.CurrencyIcon}"));
         }
     }
 }

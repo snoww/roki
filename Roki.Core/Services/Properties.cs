@@ -3,7 +3,7 @@ namespace Roki.Core.Services
     public class Properties
     {
         public string Prefix { get; set; } = ".";
-        public ulong BotId { get; set; } = 549644503351296040;
+        public ulong BotId { get; set; } = 220678903432347650;
         public ulong PrimaryGuildId { get; set; } = 125025699827417095;
 
         #region Currency

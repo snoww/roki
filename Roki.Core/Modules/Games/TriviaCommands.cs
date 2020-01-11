@@ -21,7 +21,7 @@ namespace Roki.Modules.Games
         {
             private readonly ICurrencyService _currency;
             private readonly DiscordSocketClient _client;
-            private readonly Roki _roki;
+            
             private static readonly IEmote LetterA = new Emoji("🇦");
             private static readonly IEmote LetterB = new Emoji("🇧");
             private static readonly IEmote LetterC = new Emoji("🇨");
@@ -87,11 +87,10 @@ namespace Roki.Modules.Games
                 public long Amount { get; set; } = 0;
             }
 
-            public TriviaCommands(ICurrencyService currency, DiscordSocketClient client, Roki roki)
+            public TriviaCommands(ICurrencyService currency, DiscordSocketClient client)
             {
                 _currency = currency;
                 _client = client;
-                _roki = roki;
             }
 
             [RokiCommand, Description, Usage, Aliases]
@@ -120,11 +119,11 @@ namespace Roki.Modules.Games
                     foreach (var question in questions.Results)
                     {
                         if (question.Difficulty == "easy")
-                            prizePool += _roki.Properties.TriviaEasy;
+                            prizePool += Roki.Properties.TriviaEasy;
                         else if (question.Difficulty == "medium")
-                            prizePool += _roki.Properties.TriviaMedium;
+                            prizePool += Roki.Properties.TriviaMedium;
                         else
-                            prizePool += _roki.Properties.TriviaHard;
+                            prizePool += Roki.Properties.TriviaHard;
                     }
                 }
                 catch (Exception e)
@@ -137,7 +136,7 @@ namespace Roki.Modules.Games
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle($"Trivia Game - {category}")
-                        .WithDescription($"Starting new trivia game.\nYou can earn up to `{prizePool:N0}` {_roki.Properties.CurrencyNamePlural}!\nReact with the correct emote to answer questions.\nType `stop` to cancel game early"))
+                        .WithDescription($"Starting new trivia game.\nYou can earn up to `{prizePool:N0}` {Roki.Properties.CurrencyNamePlural}!\nReact with the correct emote to answer questions.\nType `stop` to cancel game early"))
                     .ConfigureAwait(false);
 
                 await Task.Delay(5000).ConfigureAwait(false);
@@ -163,11 +162,11 @@ namespace Roki.Modules.Games
                     var answer = shuffledAnswers.First(s => s.Contains(HttpUtility.HtmlDecode(q.Correct) ?? ""));
                     int difficultyBonus;
                     if (q.Difficulty == "easy")
-                        difficultyBonus = _roki.Properties.TriviaEasy;
+                        difficultyBonus = Roki.Properties.TriviaEasy;
                     else if (q.Difficulty == "medium")
-                        difficultyBonus = _roki.Properties.TriviaMedium;
+                        difficultyBonus = Roki.Properties.TriviaMedium;
                     else
-                        difficultyBonus = _roki.Properties.TriviaHard;
+                        difficultyBonus = Roki.Properties.TriviaHard;
                     IUserMessage msg;
 
                     var embed = new EmbedBuilder().WithOkColor()
@@ -281,7 +280,7 @@ namespace Roki.Modules.Games
                     var before = _service.GetCurrency(user.Id);
                     await _currency.ChangeAsync(ctx.Client.CurrentUser.Id, user.Id, "Trivia Reward", score.Amount, ctx.Guild.Id, ctx.Channel.Id,
                         ctx.Message.Id).ConfigureAwait(false);
-                    winStr += $"{user.Username} won `{score.Amount:N0}` {_roki.Properties.CurrencyIcon}\n" +
+                    winStr += $"{user.Username} won `{score.Amount:N0}` {Roki.Properties.CurrencyIcon}\n" +
                               $"\t`{before:N0}` ⇒ `{_service.GetCurrency(user.Id):N0}`\n";
                     winners = true;
                 }
