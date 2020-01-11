@@ -141,7 +141,7 @@ namespace Roki.Core.Services
 //                platform = "windows";
         }
 
-        public string Author => "Snow#7777";
+        public string Author => "<@!125025504548880384>"; // mentions Snow#7777
         public string Library => "Discord.Net";
 
         public string Heap => Math.Round((double) GC.GetTotalMemory(false) / 1.MiB(), 2).ToString(CultureInfo.InvariantCulture);
