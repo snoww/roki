@@ -33,7 +33,7 @@ namespace Roki.Modules.Utility
 
             await ctx.Channel.EmbedAsync(
                 new EmbedBuilder().WithOkColor()
-                    .WithAuthor(eab => eab.WithName($"Roki v{StatsService.BotVersion}").WithIconUrl("https://i.imgur.com/KmPRRKh.png"))
+                    .WithAuthor(eab => eab.WithName($"Roki v{StatsService.BotVersion}").WithIconUrl(ctx.Client.CurrentUser.GetAvatarUrl()))
                     .AddField("Author", _stats.Author, true)
                     .AddField("Bot ID", _client.CurrentUser.Id.ToString(), true)
                     .AddField("Owner ID", ownerId, true)
