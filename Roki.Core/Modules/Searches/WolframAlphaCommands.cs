@@ -44,7 +44,7 @@ namespace Roki.Modules.Searches
                 }
                 catch (HttpRequestException)
                 {
-                    await ctx.Channel.SendErrorAsync($"Sorry I don't have an answer for that question\n`{query}`").ConfigureAwait(false);
+                    await ctx.Channel.SendErrorAsync($"Sorry, I don't have an answer for that question\n`{query}`").ConfigureAwait(false);
                 }
             }
         }
