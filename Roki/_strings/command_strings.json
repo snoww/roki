@@ -686,5 +686,12 @@
       "{0}wiki apple",
       "{0}wikipedia alphabet -q"
     ]
+  },
+  "ask": {
+    "Command": "ask",
+    "Description": "Asks roki a question. Uses Wolfram|Alpha to get answers.",
+    "Usage": [
+      "{0}ask what is the tallest building in the world"
+    ]
   }
 }
