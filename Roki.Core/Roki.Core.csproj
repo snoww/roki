@@ -22,8 +22,11 @@
       <PackageReference Include="NLog" Version="4.6.8" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.0" />
       <PackageReference Include="PokeApiNet" Version="2.0.0" />
+      <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta0009" />
       <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0007" />
       <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0007" />
+      <PackageReference Include="SixLabors.Shapes" Version="1.0.0-beta0009" />
+      <PackageReference Include="SixLabors.Shapes.Text" Version="1.0.0-beta0009" />
       <PackageReference Include="Socks" Version="1.1.0" />
       <PackageReference Include="Victoria" Version="5.0.3" />
    </ItemGroup>

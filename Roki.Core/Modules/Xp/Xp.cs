@@ -1,33 +1,61 @@
 using System;
+using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Xp.Common;
+using Roki.Modules.Xp.Extensions;
 
 namespace Roki.Modules.Xp
 {
     public partial class Xp : RokiTopLevelModule
     {
         private readonly DbService _db;
+        private readonly IHttpClientFactory _http;
 
-
-        public Xp(DbService db)
+        public Xp(DbService db, IHttpClientFactory http)
         {
             _db = db;
+            _http = http;
         }
         
         [RokiCommand, Description, Usage, Aliases]
         public async Task Experience(IUser user = null)
         {
-            user ??= ctx.User;
+            if (user == null || user.IsBot)
+            {
+                user = ctx.User;
+            }
+            
+            Stream avatar;
+
+            using (var http = _http.CreateClient())
+            {
+                try
+                {
+                    // handle gif avatars in future
+                    var avatarUrl = user.GetAvatarUrl(ImageFormat.Png, 512) ?? user.GetDefaultAvatarUrl();
+                    avatar = await http.GetStreamAsync(avatarUrl).ConfigureAwait(false);
+                }
+                catch (Exception)
+                {
+                    _log.Error("Error downloading avatar");
+                    return;
+                }
+            }
+
             using var uow = _db.GetDbContext();
             var dUser = await uow.Users.GetUserAsync(user.Id).ConfigureAwait(false);
             var xp = new XpLevel(dUser.TotalXp);
-            await ctx.Channel.SendMessageAsync($"{user.Username}\nLevel: `{xp.Level:N0}`\nTotal XP: `{xp.TotalXp:N0}`\nXP Progress: `{xp.LevelXp:N0}`/`{xp.RequiredXp:N0}`");
+
+            // use cache later
+            await using var xpBar = XpDrawExtensions.GenerateXpBar(avatar, xp.LevelXp, xp.RequiredXp, $"{xp.TotalXp}", $"{xp.Level}", "rank", 
+                user.Username, user.Discriminator, dUser.LastLevelUp);
+            await ctx.Channel.SendFileAsync(xpBar, "xp.png").ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
