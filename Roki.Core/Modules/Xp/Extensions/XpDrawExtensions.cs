@@ -56,8 +56,8 @@ namespace Roki.Modules.Xp.Extensions
             }
             
             var fonts = new FontCollection();
-            fonts.Install("DIN_REG.ttf");
-            fonts.Install("DIN_MED.ttf");
+            fonts.Install("./data/xp/DIN_REG.ttf");
+            fonts.Install("./data/xp/DIN_MED.ttf");
             Font usernameFont = fonts.CreateFont("DIN", 60);
             Font discriminatorFont = fonts.CreateFont("DIN", 42);
             Font xpFont = fonts.CreateFont("DIN", 60);
