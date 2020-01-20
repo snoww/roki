@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Discord;
@@ -51,9 +52,11 @@ namespace Roki.Modules.Xp
             using var uow = _db.GetDbContext();
             var dUser = await uow.Users.GetUserAsync(user.Id).ConfigureAwait(false);
             var xp = new XpLevel(dUser.TotalXp);
-
+            var rank = uow.Users.GetUserXpRank(user.Id);
+            
             // use cache later
-            await using var xpImage = XpDrawExtensions.GenerateXpBar(avatar, xp.LevelXp, xp.RequiredXp, $"{xp.TotalXp}", $"{xp.Level}", "rank", 
+            await using var xpImage = XpDrawExtensions.GenerateXpBar(avatar, 
+                xp.LevelXp, xp.RequiredXp, $"{xp.TotalXp}", $"{xp.Level}", $"{rank}", 
                 user.Username, user.Discriminator, dUser.LastLevelUp);
             await ctx.Channel.SendFileAsync(xpImage, "xp.png").ConfigureAwait(false);
         }
