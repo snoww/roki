@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using SixLabors.Fonts;
@@ -150,7 +151,8 @@ namespace Roki.Modules.Xp.Extensions
                 .DrawText(bodyOptions, total, body, Color.DarkSlateGray, new PointF(1116, 340))
                 
                 .DrawText(headerOptions, "Last Level Up", header, Color.HotPink, new PointF(1390, y))
-                .DrawText(bodyOptions, $"{llup:MMM dd yyyy}", body, Color.DarkSlateGray, new PointF(1390, 340));
+                // need to use en-US since en-CA adds a . to month abbreviation (en-US -> Jan, en-CA -> Jan.)
+                .DrawText(bodyOptions, llup.ToString("MMM dd yyyy", new CultureInfo("en-US")), body, Color.DarkSlateGray, new PointF(1390, 340));
 
             return source;
         } 
