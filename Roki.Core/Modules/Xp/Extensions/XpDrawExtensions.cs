@@ -72,7 +72,7 @@ namespace Roki.Modules.Xp.Extensions
             
             var stream = new MemoryStream();
             image.SaveAsPng(stream);
-
+            stream.Position = 0;
             return stream;
         }
         

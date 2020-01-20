@@ -53,9 +53,9 @@ namespace Roki.Modules.Xp
             var xp = new XpLevel(dUser.TotalXp);
 
             // use cache later
-            await using var xpBar = XpDrawExtensions.GenerateXpBar(avatar, xp.LevelXp, xp.RequiredXp, $"{xp.TotalXp}", $"{xp.Level}", "rank", 
+            await using var xpImage = XpDrawExtensions.GenerateXpBar(avatar, xp.LevelXp, xp.RequiredXp, $"{xp.TotalXp}", $"{xp.Level}", "rank", 
                 user.Username, user.Discriminator, dUser.LastLevelUp);
-            await ctx.Channel.SendFileAsync(xpBar, "xp.png").ConfigureAwait(false);
+            await ctx.Channel.SendFileAsync(xpImage, "xp.png").ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
