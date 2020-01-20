@@ -31,6 +31,8 @@ namespace Roki.Modules.Xp
             {
                 user = ctx.User;
             }
+
+            await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
             
             Stream avatar;
 
