@@ -23,6 +23,7 @@ namespace Roki.Core.Services.Database.Repositories
         Task UpdateBotCurrencyAsync(ulong botId, long amount);
         IEnumerable<User> GetCurrencyLeaderboard(ulong botId, int page);
         Task UpdateXp(User user, SocketMessage message, bool boost = false);
+        int GetUserXpRank(ulong userId);
         Task ChangeNotificationLocation(ulong userId, string notify);
         Task<List<Item>> GetUserInventory(ulong userId);
         Task<bool> UpdateUserInventory(ulong userId, string name, int quantity);
@@ -128,6 +129,14 @@ namespace Roki.Core.Services.Database.Repositories
             }
 
             await Context.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public int GetUserXpRank(ulong userId)
+        {
+            return Set.Count(u => u.TotalXp >
+                                  Set.Where(y => y.UserId == userId)
+                                      .Select(y => y.TotalXp)
+                                      .FirstOrDefault()) + 1;
         }
 
         public async Task ChangeNotificationLocation(ulong userId, string notify)
