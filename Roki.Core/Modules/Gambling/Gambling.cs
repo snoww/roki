@@ -32,7 +32,7 @@ namespace Roki.Modules.Gambling
                 .ConfigureAwait(false);
             if (!removed)
             {
-                await ctx.Channel.SendErrorAsync($"Not enough {Roki.Properties.CurrencyIcon}" +
+                await ctx.Channel.SendErrorAsync($"Not enough {Roki.Properties.CurrencyIcon}\n" +
                                                  $"You have `{_service.GetCurrency(ctx.User.Id):N0}`")
                     .ConfigureAwait(false);
                 return;
@@ -41,7 +41,7 @@ namespace Roki.Modules.Gambling
             var rollStr = $"{ctx.User.Mention} rolled `{roll}`.";
             if (roll < 70)
             {
-                await ctx.Channel.SendErrorAsync($"{rollStr}\nBetter luck next time." +
+                await ctx.Channel.SendErrorAsync($"{rollStr}\nBetter luck next time.\n" +
                                                  $"New Balance: `{_service.GetCurrency(ctx.User.Id):N0}` {Roki.Properties.CurrencyIcon}")
                     .ConfigureAwait(false);
                 return;
@@ -58,7 +58,7 @@ namespace Roki.Modules.Gambling
             await _currency.ChangeAsync(ctx.Client.CurrentUser.Id, ctx.User.Id, "BetRoll Payout", win, ctx.Guild.Id, ctx.Channel.Id,
                 ctx.Message.Id);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{rollStr}\nCongratulations, you won `{win:N0}` {Roki.Properties.CurrencyIcon}" +
+                .WithDescription($"{rollStr}\nCongratulations, you won `{win:N0}` {Roki.Properties.CurrencyIcon}\n" +
                                  $"New Balance: `{_service.GetCurrency(ctx.User.Id):N0}` {Roki.Properties.CurrencyIcon}"));
         }
     }
