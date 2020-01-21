@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Discord.WebSocket;
@@ -12,7 +13,7 @@ namespace Roki.Core.Services.Database.Repositories
     {
         Task<Guild> GetOrCreateGuildAsync(SocketGuild guild);
         Task<XpReward> AddXpReward(ulong guildId, int level, string type, string rewardName, string reward);
-        Task RemoveXpReward(ulong guildId, string rewardName);
+        Task<bool> RemoveXpReward(ulong guildId, string rewardName);
     }
     
     public class GuildRepository : Repository<Guild>, IGuildRepository
@@ -84,9 +85,40 @@ namespace Roki.Core.Services.Database.Repositories
             return xpReward;
         }
 
-        public Task RemoveXpReward(ulong guildId, string rewardName)
+        public async Task<bool> RemoveXpReward(ulong guildId, string rewardName)
         {
-            throw new System.NotImplementedException();
+            var guild = await Set.FirstAsync(g => g.GuildId == guildId).ConfigureAwait(false);
+            var rewardsRaw = guild.XpRewards;
+
+            List<XpReward> rewards;
+            int elements;
+            
+            try
+            {
+                rewards = JsonSerializer.Deserialize<List<XpReward>>(rewardsRaw);
+                elements = rewards.Count;
+            }
+            catch (JsonException)
+            {
+                rewards = new List<XpReward>();
+                elements = 0;
+            }
+
+            if (elements == 0 || string.IsNullOrWhiteSpace(rewardsRaw))
+            {
+                return false;
+            }
+
+            var reward = rewards.FirstOrDefault(r => r.RewardName.Equals(rewardName, StringComparison.OrdinalIgnoreCase));
+            if (reward == null)
+            {
+                return false;
+            }
+
+            rewards.Remove(reward);
+            guild.XpRewards = JsonSerializer.Serialize(rewards);
+            await Context.SaveChangesAsync().ConfigureAwait(false);
+            return true;
         }
     }
 }
