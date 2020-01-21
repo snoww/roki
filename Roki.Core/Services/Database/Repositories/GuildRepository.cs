@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +11,8 @@ namespace Roki.Core.Services.Database.Repositories
     public interface IGuildRepository : IRepository<Guild>
     {
         Task<Guild> GetOrCreateGuildAsync(SocketGuild guild);
-        Task<XpReward> AddXpReward(int level, string type, string reward);
+        Task<XpReward> AddXpReward(ulong guildId, int level, string type, string rewardName, string reward);
+        Task RemoveXpReward(ulong guildId, string rewardName);
     }
     
     public class GuildRepository : Repository<Guild>, IGuildRepository
@@ -37,7 +41,50 @@ namespace Roki.Core.Services.Database.Repositories
             return newGuild.Entity;
         }
 
-        public Task<XpReward> AddXpReward(int level, string type, string reward)
+        public async Task<XpReward> AddXpReward(ulong guildId, int level, string type, string rewardName, string reward)
+        {
+            var guild = await Set.FirstAsync(g => g.GuildId == guildId).ConfigureAwait(false);
+            var rewardsRaw = guild.XpRewards;
+
+            List<XpReward> rewards;
+            int elements;
+            
+            try
+            {
+                rewards = JsonSerializer.Deserialize<List<XpReward>>(rewardsRaw);
+                elements = rewards.Count;
+            }
+            catch (JsonException)
+            {
+                rewards = new List<XpReward>();
+                elements = 0;
+            }
+
+            var xpReward = new XpReward
+            {
+                XpLevel = level,
+                Type = type,
+                RewardName = rewardName,
+                Reward = reward
+            };
+            
+            if (elements == 0 || string.IsNullOrWhiteSpace(rewardsRaw))
+            {
+                var rewardJson = JsonSerializer.Serialize(xpReward);
+                guild.XpRewards = $"[{rewardJson}]";
+                await Context.SaveChangesAsync().ConfigureAwait(false);
+            }
+            else
+            {
+                rewards.Add(xpReward);
+                guild.XpRewards = JsonSerializer.Serialize(rewards);
+            }
+            
+            await Context.SaveChangesAsync().ConfigureAwait(false);
+            return xpReward;
+        }
+
+        public Task RemoveXpReward(ulong guildId, string rewardName)
         {
             throw new System.NotImplementedException();
         }
