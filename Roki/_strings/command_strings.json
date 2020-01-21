@@ -701,5 +701,13 @@
       "{0}xpr",
       "{0}xpr 2"
     ]
+  },
+  "xprewardadd": {
+    "Command": "xprewardadd xpradd",
+    "Description": "Adds an XP reward. Must have Administrator permissions.\nParameters: rewardType: `role` or `currency`, level: `number`, reward: `number` if type is `currency`, `roleID` or `@role` if type is `role`, rewardName: `name`",
+    "Usage": [
+      "{0}xpradd currency 25 2500 Level 25 Currency Reward",
+      "{0}xpradd currency 25 @Role Level 25 Role"
+    ]
   }
 }

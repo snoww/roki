@@ -162,5 +162,65 @@ namespace Roki.Modules.Xp
 
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
+
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task XpRewardAdd(RewardType rewardType, int level, string reward, [Leftover] string rewardName)
+        {
+            using var uow = _db.GetDbContext();
+            if (rewardType == RewardType.Currency)
+            {
+                if (!int.TryParse(reward, out var rewardAmount))
+                {
+                    await ctx.Channel.SendErrorAsync("Make sure you enter a valid number for the currency reward.").ConfigureAwait(false);
+                    return;
+                }
+
+                await uow.Guilds.AddXpRewardAsync(ctx.Guild.Id, level, "currency", rewardName, rewardAmount.ToString());
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                        .WithTitle("XP Reward Added")
+                        .WithDescription("Successfully added a new XP reward.\n" +
+                                         $"Reward Name: `{rewardName}`" +
+                                         $"XP Level: `{level}`\n" +
+                                         "Reward Type: currency\n" +
+                                         $"Reward Amount: {rewardAmount:N0}"))
+                    .ConfigureAwait(false);
+            }
+
+            var roleId = ctx.Message.MentionedRoleIds.FirstOrDefault();
+            if (roleId == 0)
+            {
+                if (!ulong.TryParse(reward, out roleId))
+                {
+                    await ctx.Channel.SendErrorAsync("Please specify a role for the XP role reward.\nIf the role is not mentionable, use the role ID instead")
+                        .ConfigureAwait(false);
+                    return;
+                }
+            }
+
+            var role = ctx.Guild.GetRole(roleId);
+            if (role == null)
+            {
+                await ctx.Channel.SendErrorAsync("Could not find that role. Please check the role ID again.").ConfigureAwait(false);
+                return;
+            }
+            
+            await uow.Guilds.AddXpRewardAsync(ctx.Guild.Id, level, "role", rewardName, role.Id.ToString());
+            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    .WithTitle("XP Reward Added")
+                    .WithDescription("Successfully added a new XP reward.\n" +
+                                     $"Reward Name: `{rewardName}`" +
+                                     $"XP Level: `{level}`\n" +
+                                     "Reward Type: role\n" +
+                                     $"Reward Role: <@&{role.Id}>"))
+                .ConfigureAwait(false);
+        }
+        
+        public enum RewardType
+        {
+            Role,
+            Currency,
+        }
     }
 }
