@@ -127,5 +127,40 @@ namespace Roki.Modules.Xp
                     .WithDescription("Successfully changed xp notification preferences."))
                 .ConfigureAwait(false);
         }
+
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
+        public async Task XpRewards(int page = 0)
+        {
+            if (page < 0)
+            {
+                page = 0;
+            }
+            
+            using var uow = _db.GetDbContext();
+            var rewards = await uow.Guilds.GetAllXpRewardsAsync(ctx.Guild.Id).ConfigureAwait(false);
+            if (rewards == null)
+            {
+                await ctx.Channel.SendErrorAsync("There are currently no XP rewards setup for this server.").ConfigureAwait(false);
+                return;
+            }
+
+            var sorted = rewards.OrderByDescending(r => r.XpLevel).ToList();
+            
+            var totalPages = sorted.Count / 9;
+            if (page > totalPages)
+            {
+                page = totalPages;
+            }
+            
+            var embed = new EmbedBuilder().WithOkColor()
+                .WithTitle("XP Rewards")
+                .WithDescription(string.Join("\n", sorted
+                    .Skip(page * 9)
+                    .Take(9)
+                    .Select(r => $"Level `{r.XpLevel}` - {r.RewardName}")));
+
+            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+        }
     }
 }
