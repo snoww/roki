@@ -108,26 +108,30 @@ namespace Roki.Modules.Games
                         t2.Add(GetPokemonImage(teams[1][i], gen));
                     }
 
-                    using var bitmap1 = t1.MergePokemonTeam();
-                    using var bitmap2 = t2.MergePokemonTeam();
-                    using var bitmap = bitmap1.MergeTwoVertical(bitmap2, out var format);
-                    await using var ms = bitmap.ToStream(format);
-                    for (int i = 0; i < t1.Count; i++)
+                    IUserMessage startMsg;
+                    
+                    using var team1 = t1.MergePokemonTeam();
+                    using var team2 = t2.MergePokemonTeam();
+                    using var teamImage = team1.MergeTwoVertical(team2);
+                    await using (var stream = teamImage.ToStream())
                     {
-                        t1[i].Dispose();
-                        t2[i].Dispose();
+                        for (int i = 0; i < t1.Count; i++)
+                        {
+                            t1[i].Dispose();
+                            t2[i].Dispose();
+                        }
+                    
+                        var start = new EmbedBuilder().WithOkColor()
+                            .WithTitle($"[Gen {gen}] Random Battle - ID: `{uid}`")
+                            .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 100` means betting on 110 on P1.")
+                            .WithImageUrl($"attachment://pokemon-{uid}.png")
+                            .AddField("Player 1", string.Join('\n', teams[0]), true)
+                            .AddField("Player 2", string.Join('\n', teams[1]), true);
+
+                        startMsg = await ctx.Channel.SendFileAsync(stream, $"pokemon-{uid}.png", embed: start.Build()).ConfigureAwait(false);
                     }
                     
-                    var start = new EmbedBuilder().WithOkColor()
-                        .WithTitle($"[Gen {gen}] Random Battle - ID: `{uid}`")
-                        .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 100` means betting on 110 on P1.")
-                        .WithImageUrl($"attachment://pokemon.{format.FileExtensions.First()}")
-                        .AddField("Player 1", string.Join('\n', teams[0]), true)
-                        .AddField("Player 2", string.Join('\n', teams[1]), true);
-
-                    var startMsg = await ctx.Channel.SendFileAsync(ms, $"pokemon.{format.FileExtensions.First()}", embed: start.Build()).ConfigureAwait(false);
                     await startMsg.AddReactionsAsync(_reactionMap.Keys.ToArray()).ConfigureAwait(false);
-
                     var joinedReactions = new Dictionary<IUser, PlayerBet>();
                     _client.ReactionAdded += ReactionAddedHandler;
                     Task ReactionAddedHandler(Cacheable<IUserMessage, ulong> cachedMessage, ISocketMessageChannel channel, SocketReaction reaction)
@@ -267,7 +271,7 @@ namespace Roki.Modules.Games
                 {
                     _log.Warn(e);
                     _log.Info(uid);
-                    await ctx.Channel.SendErrorAsync("An error occured, please try again.");
+                    await ctx.Channel.SendErrorAsync("An error occured, please try again.").ConfigureAwait(false);
                     _service.Games.TryRemove(ctx.Channel.Id, out _);
                 }
             }
@@ -314,7 +318,7 @@ namespace Roki.Modules.Games
                 else
                     genUrl = Gen1SpriteUrl;
                 using var stream = new MemoryStream(wc.DownloadData(genUrl + sprite + ".png"));
-                return Image.Load(stream.ToArray());
+                return Image.Load<Rgba32>(stream);
             }
         }
     }

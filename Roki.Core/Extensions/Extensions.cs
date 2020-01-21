@@ -192,9 +192,8 @@ namespace Roki.Extensions
             return output;
         }
 
-        public static Image<Rgba32> MergeTwoVertical(this Image<Rgba32> image1, Image<Rgba32> image2, out IImageFormat format)
+        public static Image<Rgba32> MergeTwoVertical(this Image<Rgba32> image1, Image<Rgba32> image2)
         {
-            format = PngFormat.Instance;
             var output = new Image<Rgba32>(image1.Width, image1.Height + image2.Height);
             output.Mutate(o => o
                 .DrawImage(image1, new Point(0, 0), 1)
