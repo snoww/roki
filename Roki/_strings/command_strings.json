@@ -693,5 +693,13 @@
     "Usage": [
       "{0}ask what is the tallest building in the world"
     ]
+  },
+  "xprewards": {
+    "Command": "xprewards xpr",
+    "Description": "Shows the XP rewards for the current server. Optional: specify page number",
+    "Usage": [
+      "{0}xpr",
+      "{0}xpr 2"
+    ]
   }
 }
