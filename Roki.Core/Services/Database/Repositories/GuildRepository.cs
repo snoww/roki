@@ -12,8 +12,9 @@ namespace Roki.Core.Services.Database.Repositories
     public interface IGuildRepository : IRepository<Guild>
     {
         Task<Guild> GetOrCreateGuildAsync(SocketGuild guild);
-        Task<XpReward> AddXpReward(ulong guildId, int level, string type, string rewardName, string reward);
-        Task<bool> RemoveXpReward(ulong guildId, string rewardName);
+        Task<List<XpReward>> GetAllXpRewardsAsync(ulong guildId);
+        Task<XpReward> AddXpRewardAsync(ulong guildId, int level, string type, string rewardName, string reward);
+        Task<bool> RemoveXpRewardAsync(ulong guildId, string rewardName);
     }
     
     public class GuildRepository : Repository<Guild>, IGuildRepository
@@ -42,7 +43,16 @@ namespace Roki.Core.Services.Database.Repositories
             return newGuild.Entity;
         }
 
-        public async Task<XpReward> AddXpReward(ulong guildId, int level, string type, string rewardName, string reward)
+        public async Task<List<XpReward>> GetAllXpRewardsAsync(ulong guildId)
+        {
+            var guild = await Set.FirstAsync(g => g.GuildId == guildId).ConfigureAwait(false);
+            var rewardsRaw = guild.XpRewards;
+            return string.IsNullOrWhiteSpace(rewardsRaw) 
+                ? null 
+                : JsonSerializer.Deserialize<List<XpReward>>(rewardsRaw);
+        }
+
+        public async Task<XpReward> AddXpRewardAsync(ulong guildId, int level, string type, string rewardName, string reward)
         {
             var guild = await Set.FirstAsync(g => g.GuildId == guildId).ConfigureAwait(false);
             var rewardsRaw = guild.XpRewards;
@@ -85,7 +95,7 @@ namespace Roki.Core.Services.Database.Repositories
             return xpReward;
         }
 
-        public async Task<bool> RemoveXpReward(ulong guildId, string rewardName)
+        public async Task<bool> RemoveXpRewardAsync(ulong guildId, string rewardName)
         {
             var guild = await Set.FirstAsync(g => g.GuildId == guildId).ConfigureAwait(false);
             var rewardsRaw = guild.XpRewards;
