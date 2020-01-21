@@ -8,6 +8,7 @@ namespace Roki.Core.Services.Database.Repositories
     public interface IGuildRepository : IRepository<Guild>
     {
         Task<Guild> GetOrCreateGuildAsync(SocketGuild guild);
+        Task<XpReward> AddXpReward(int level, string type, string reward);
     }
     
     public class GuildRepository : Repository<Guild>, IGuildRepository
@@ -34,6 +35,11 @@ namespace Roki.Core.Services.Database.Repositories
             });
             await Context.SaveChangesAsync().ConfigureAwait(false);
             return newGuild.Entity;
+        }
+
+        public Task<XpReward> AddXpReward(int level, string type, string reward)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
