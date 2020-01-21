@@ -28,7 +28,6 @@ namespace Roki.Core.Services.Database.Models
 
     public class GuildUser
     {
-        public ulong UserId { get; set; }
         public long Currency { get; set; }
         public int TotalXp { get; set; } 
         public string Inventory { get; set; }
@@ -38,6 +37,7 @@ namespace Roki.Core.Services.Database.Models
     {
         public int XpLevel { get; set; }
         public string Type { get; set; }
+        public string RewardName { get; set; }
         public string Reward { get; set; }
     }
 }
