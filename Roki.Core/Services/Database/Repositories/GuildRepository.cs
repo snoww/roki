@@ -72,7 +72,7 @@ namespace Roki.Core.Services.Database.Repositories
                 rewards = JsonSerializer.Deserialize<List<XpReward>>(rewardsRaw);
                 elements = rewards.Count;
             }
-            catch (JsonException)
+            catch (Exception)
             {
                 rewards = new List<XpReward>();
                 elements = 0;
