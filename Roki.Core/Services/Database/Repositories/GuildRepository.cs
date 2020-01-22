@@ -12,6 +12,7 @@ namespace Roki.Core.Services.Database.Repositories
     public interface IGuildRepository : IRepository<Guild>
     {
         Task<Guild> GetOrCreateGuildAsync(SocketGuild guild);
+        Task<List<XpReward>> GetXpRewardsAsync(ulong guildId, int level);
         Task<List<XpReward>> GetAllXpRewardsAsync(ulong guildId);
         Task<XpReward> AddXpRewardAsync(ulong guildId, int level, string type, string rewardName, string reward);
         Task<bool> RemoveXpRewardAsync(ulong guildId, string rewardName);
@@ -41,6 +42,12 @@ namespace Roki.Core.Services.Database.Repositories
             });
             await Context.SaveChangesAsync().ConfigureAwait(false);
             return newGuild.Entity;
+        }
+
+        public async Task<List<XpReward>> GetXpRewardsAsync(ulong guildId, int level)
+        {
+            var rewards = await GetAllXpRewardsAsync(guildId).ConfigureAwait(false);
+            return rewards?.Where(r => r.XpLevel == level).ToList();
         }
 
         public async Task<List<XpReward>> GetAllXpRewardsAsync(ulong guildId)
