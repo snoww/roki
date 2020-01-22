@@ -35,9 +35,9 @@ namespace Roki.Core.Services.Database.Models
 
     public class XpReward
     {
+        public string Id { get; set; }
         public int XpLevel { get; set; }
         public string Type { get; set; }
-        public string RewardName { get; set; }
         public string Reward { get; set; }
     }
 }

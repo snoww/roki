@@ -168,7 +168,7 @@ namespace Roki.Modules.Xp
         [RokiCommand, Description, Usage, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequireUserPermission(GuildPermission.Administrator)]
-        public async Task XpRewardAdd(RewardType rewardType, int level, string reward, [Leftover] string rewardName)
+        public async Task XpRewardAdd(RewardType rewardType, int level, string reward)
         {
             using var uow = _db.GetDbContext();
             if (rewardType == RewardType.Currency)
@@ -179,11 +179,12 @@ namespace Roki.Modules.Xp
                     return;
                 }
 
-                await uow.Guilds.AddXpRewardAsync(ctx.Guild.Id, level, "currency", rewardName, rewardAmount.ToString());
+                
+                var currReward = await uow.Guilds.AddXpRewardAsync(ctx.Guild.Id, level, "currency", rewardAmount.ToString());
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle("XP Reward Added")
                         .WithDescription("Successfully added a new XP reward.\n" +
-                                         $"Reward Name: `{rewardName}`" +
+                                         $"Reward ID: `{currReward.Id}`" +
                                          $"XP Level: `{level}`\n" +
                                          "Reward Type: currency\n" +
                                          $"Reward Amount: `{rewardAmount:N0}`"))
@@ -210,11 +211,11 @@ namespace Roki.Modules.Xp
                 return;
             }
             
-            await uow.Guilds.AddXpRewardAsync(ctx.Guild.Id, level, "role", rewardName, role.Id.ToString());
+            var roleReward = await uow.Guilds.AddXpRewardAsync(ctx.Guild.Id, level, "role", role.Id.ToString());
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithTitle("XP Reward Added")
                     .WithDescription("Successfully added a new XP reward.\n" +
-                                     $"Reward Name: `{rewardName}`" +
+                                     $"Reward Name: `{roleReward.Id}`" +
                                      $"XP Level: `{level}`\n" +
                                      "Reward Type: role\n" +
                                      $"Reward Role: <@&{role.Id}>"))
