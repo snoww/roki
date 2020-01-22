@@ -158,7 +158,9 @@ namespace Roki.Modules.Xp
                 .WithDescription(string.Join("\n", sorted
                     .Skip(page * 9)
                     .Take(9)
-                    .Select(r => $"Level `{r.XpLevel}` - {r.RewardName}")));
+                    .Select(r => r.Type == "currency" 
+                        ? $"Level `{r.XpLevel}` - `{int.Parse(r.Reward):N0}` {Roki.Properties.CurrencyIcon}" 
+                        : $"Level `{r.XpLevel}` - <@&{r.Reward}>")));
 
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
@@ -184,7 +186,7 @@ namespace Roki.Modules.Xp
                                          $"Reward Name: `{rewardName}`" +
                                          $"XP Level: `{level}`\n" +
                                          "Reward Type: currency\n" +
-                                         $"Reward Amount: {rewardAmount:N0}"))
+                                         $"Reward Amount: `{rewardAmount:N0}`"))
                     .ConfigureAwait(false);
                 
                 return;
