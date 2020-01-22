@@ -130,11 +130,16 @@ namespace Roki.Modules.Xp
 
         [RokiCommand, Description, Usage, Aliases]
         [RequireContext(ContextType.Guild)]
-        public async Task XpRewards(int page = 0)
+        public async Task XpRewards(int page = 0, bool id = false)
         {
             if (page < 0)
             {
                 page = 0;
+            }
+
+            if (page > 0)
+            {
+                page--;
             }
             
             using var uow = _db.GetDbContext();
@@ -155,12 +160,26 @@ namespace Roki.Modules.Xp
             
             var embed = new EmbedBuilder().WithOkColor()
                 .WithTitle("XP Rewards")
-                .WithDescription(string.Join("\n", sorted
+                .WithFooter($"Page {page}/{totalPages}");
+
+            if (!id)
+            {
+                embed.WithDescription(string.Join("\n", sorted
                     .Skip(page * 9)
                     .Take(9)
-                    .Select(r => r.Type == "currency" 
-                        ? $"Level `{r.XpLevel}` - `{int.Parse(r.Reward):N0}` {Roki.Properties.CurrencyIcon}" 
+                    .Select(r => r.Type == "currency"
+                        ? $"Level `{r.XpLevel}` - `{int.Parse(r.Reward):N0}` {Roki.Properties.CurrencyIcon}"
                         : $"Level `{r.XpLevel}` - <@&{r.Reward}>")));
+            }
+            else
+            {
+                embed.WithDescription(string.Join("\n", sorted
+                    .Skip(page * 9)
+                    .Take(9)
+                    .Select(r => r.Type == "currency"
+                        ? $"`{r.Id}` Level `{r.XpLevel}` - `{int.Parse(r.Reward):N0}` {Roki.Properties.CurrencyIcon}"
+                        : $"`{r.Id}` Level `{r.XpLevel}` - <@&{r.Reward}>")));
+            }
 
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
@@ -215,7 +234,7 @@ namespace Roki.Modules.Xp
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithTitle("XP Reward Added")
                     .WithDescription("Successfully added a new XP reward.\n" +
-                                     $"Reward Name: `{roleReward.Id}`" +
+                                     $"Reward ID: `{roleReward.Id}`" +
                                      $"XP Level: `{level}`\n" +
                                      "Reward Type: role\n" +
                                      $"Reward Role: <@&{role.Id}>"))
