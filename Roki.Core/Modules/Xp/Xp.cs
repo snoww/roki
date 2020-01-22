@@ -144,7 +144,7 @@ namespace Roki.Modules.Xp
             
             using var uow = _db.GetDbContext();
             var rewards = await uow.Guilds.GetAllXpRewardsAsync(ctx.Guild.Id).ConfigureAwait(false);
-            if (rewards == null)
+            if (rewards == null || rewards.Count == 0)
             {
                 await ctx.Channel.SendErrorAsync("There are currently no XP rewards setup for this server.").ConfigureAwait(false);
                 return;
