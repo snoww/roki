@@ -707,7 +707,7 @@
     "Description": "Adds an XP reward. Must have Administrator permissions.\nParameters: rewardType: `role` or `currency`, level: `number`, reward: `number` if type is `currency`, `roleID` or `@role` if type is `role`",
     "Usage": [
       "{0}xpradd currency 25 2500",
-      "{0}xpradd currency 25 @Role"
+      "{0}xpradd role 25 @Role"
     ]
   },
   "xprewardremove": {
