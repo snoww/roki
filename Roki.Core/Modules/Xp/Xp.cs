@@ -203,7 +203,7 @@ namespace Roki.Modules.Xp
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle("XP Reward Added")
                         .WithDescription("Successfully added a new XP reward.\n" +
-                                         $"Reward ID: `{currReward.Id}`" +
+                                         $"Reward ID: `{currReward.Id}`\n" +
                                          $"XP Level: `{level}`\n" +
                                          "Reward Type: currency\n" +
                                          $"Reward Amount: `{rewardAmount:N0}`"))
@@ -234,7 +234,7 @@ namespace Roki.Modules.Xp
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithTitle("XP Reward Added")
                     .WithDescription("Successfully added a new XP reward.\n" +
-                                     $"Reward ID: `{roleReward.Id}`" +
+                                     $"Reward ID: `{roleReward.Id}`\n" +
                                      $"XP Level: `{level}`\n" +
                                      "Reward Type: role\n" +
                                      $"Reward Role: <@&{role.Id}>"))
