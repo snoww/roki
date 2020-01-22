@@ -14,8 +14,8 @@ namespace Roki.Core.Services.Database.Repositories
         Task<Guild> GetOrCreateGuildAsync(SocketGuild guild);
         Task<List<XpReward>> GetXpRewardsAsync(ulong guildId, int level);
         Task<List<XpReward>> GetAllXpRewardsAsync(ulong guildId);
-        Task<XpReward> AddXpRewardAsync(ulong guildId, int level, string type, string rewardName, string reward);
-        Task<bool> RemoveXpRewardAsync(ulong guildId, string rewardName);
+        Task<XpReward> AddXpRewardAsync(ulong guildId, int level, string type, string reward);
+        Task<bool> RemoveXpRewardAsync(ulong guildId, string rewardId);
     }
     
     public class GuildRepository : Repository<Guild>, IGuildRepository
@@ -59,7 +59,7 @@ namespace Roki.Core.Services.Database.Repositories
                 : JsonSerializer.Deserialize<List<XpReward>>(rewardsRaw);
         }
 
-        public async Task<XpReward> AddXpRewardAsync(ulong guildId, int level, string type, string rewardName, string reward)
+        public async Task<XpReward> AddXpRewardAsync(ulong guildId, int level, string type, string reward)
         {
             var guild = await Set.FirstAsync(g => g.GuildId == guildId).ConfigureAwait(false);
             var rewardsRaw = guild.XpRewards;
@@ -78,11 +78,12 @@ namespace Roki.Core.Services.Database.Repositories
                 elements = 0;
             }
 
+            var uid = Guid.NewGuid().ToString().Substring(0, 7);
             var xpReward = new XpReward
             {
+                Id = uid,
                 XpLevel = level,
                 Type = type,
-                RewardName = rewardName,
                 Reward = reward
             };
             
@@ -102,7 +103,7 @@ namespace Roki.Core.Services.Database.Repositories
             return xpReward;
         }
 
-        public async Task<bool> RemoveXpRewardAsync(ulong guildId, string rewardName)
+        public async Task<bool> RemoveXpRewardAsync(ulong guildId, string rewardId)
         {
             var guild = await Set.FirstAsync(g => g.GuildId == guildId).ConfigureAwait(false);
             var rewardsRaw = guild.XpRewards;
@@ -126,7 +127,7 @@ namespace Roki.Core.Services.Database.Repositories
                 return false;
             }
 
-            var reward = rewards.FirstOrDefault(r => r.RewardName.Equals(rewardName, StringComparison.OrdinalIgnoreCase));
+            var reward = rewards.FirstOrDefault(r => r.Id.Equals(rewardId, StringComparison.OrdinalIgnoreCase));
             if (reward == null)
             {
                 return false;
