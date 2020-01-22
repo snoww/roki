@@ -7,6 +7,7 @@ using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Roki.Core.Services.Database.Models;
+using Roki.Extensions;
 
 namespace Roki.Core.Services
 {
@@ -94,6 +95,24 @@ namespace Roki.Core.Services
                                 var guildUser = (IGuildUser) message.Author;
                                 await guildUser.AddRoleAsync(role).ConfigureAwait(false);
                             }
+                        }
+
+                        var dm = await message.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
+                        try
+                        {
+                            await dm.EmbedAsync(new EmbedBuilder().WithOkColor()
+                                    .WithTitle($"Level `{levelUp}` Rewards")
+                                    .WithDescription("Here are your rewards:\n" + string.Join("\n", rewards
+                                        .Select(r => r.Type == "currency"
+                                            ? $"+ `{int.Parse(r.Reward):N0}` {Roki.Properties.CurrencyIcon}"
+                                            : $"+ <@&{r.Reward}>"))))
+                                .ConfigureAwait(false);
+                            await dm.CloseAsync().ConfigureAwait(false);
+                        }
+                        catch (Exception)
+                        {
+                            // unable to send dm to user
+                            // ignored
                         }
                     }
                 }
