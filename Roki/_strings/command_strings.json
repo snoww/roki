@@ -709,5 +709,12 @@
       "{0}xpradd currency 25 2500",
       "{0}xpradd currency 25 @Role"
     ]
+  },
+  "xprewardremove": {
+    "Command": "xprewardremove xprr",
+    "Description": "Removes an XP reward by ID. Must have Administrator permissions.",
+    "Usage": [
+      "{0}xprr xxxxxxx"
+    ]
   }
 }

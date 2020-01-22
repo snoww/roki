@@ -240,6 +240,35 @@ namespace Roki.Modules.Xp
                                      $"Reward Role: <@&{role.Id}>"))
                 .ConfigureAwait(false);
         }
+
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task XpRewardRemove(string id = null)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                await ctx.Channel.SendErrorAsync("Please specify the XP reward ID. You can obtain the IDs by using `xpr <page_num> true`.")
+                    .ConfigureAwait(false);
+                return;
+            }
+
+            using var uow = _db.GetDbContext();
+            var success = await uow.Guilds.RemoveXpRewardAsync(ctx.Guild.Id, id).ConfigureAwait(false);
+            if (success)
+            {
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                        .WithTitle("XP Reward Removed.")
+                        .WithDescription($"Successfully removed reward with ID: `{id}`"))
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                await ctx.Channel.SendErrorAsync($"Something went wrong when trying to remove the reward with ID: `{id}`\n" +
+                                                 $"Please double check the ID and try again.")
+                    .ConfigureAwait(false);
+            }
+        }
         
         public enum RewardType
         {
