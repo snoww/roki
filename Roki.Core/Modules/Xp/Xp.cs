@@ -160,7 +160,7 @@ namespace Roki.Modules.Xp
             
             var embed = new EmbedBuilder().WithOkColor()
                 .WithTitle("XP Rewards")
-                .WithFooter($"Page {page}/{totalPages}");
+                .WithFooter($"Page {page + 1}/{totalPages + 1}");
 
             if (!id)
             {
