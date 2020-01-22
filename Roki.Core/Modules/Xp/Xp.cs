@@ -186,6 +186,8 @@ namespace Roki.Modules.Xp
                                          "Reward Type: currency\n" +
                                          $"Reward Amount: {rewardAmount:N0}"))
                     .ConfigureAwait(false);
+                
+                return;
             }
 
             var roleId = ctx.Message.MentionedRoleIds.FirstOrDefault();
