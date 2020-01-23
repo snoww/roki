@@ -18,5 +18,26 @@ namespace Roki.Core.Services.Database.Models
         public string RegionId { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
         public bool Available { get; set; } = true;
+        
+        [Column(TypeName = "json")]
+        public string Users { get; set; }
+        
+        [Column(TypeName = "json")]
+        public string XpRewards { get; set; } 
+    }
+
+    public class GuildUser
+    {
+        public long Currency { get; set; }
+        public int TotalXp { get; set; } 
+        public string Inventory { get; set; }
+    }
+
+    public class XpReward
+    {
+        public string Id { get; set; }
+        public int XpLevel { get; set; }
+        public string Type { get; set; }
+        public string Reward { get; set; }
     }
 }

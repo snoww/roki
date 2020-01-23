@@ -22,7 +22,8 @@ namespace Roki.Core.Services.Database.Repositories
         Task LotteryAwardAsync(ulong userId, long amount);
         Task UpdateBotCurrencyAsync(ulong botId, long amount);
         IEnumerable<User> GetCurrencyLeaderboard(ulong botId, int page);
-        Task UpdateXp(User user, SocketMessage message, bool boost = false);
+        Task<int> UpdateXp(User user, SocketMessage message, bool boost = false);
+        int GetUserXpRank(ulong userId);
         Task ChangeNotificationLocation(ulong userId, string notify);
         Task<List<Item>> GetUserInventory(ulong userId);
         Task<bool> UpdateUserInventory(ulong userId, string name, int quantity);
@@ -109,9 +110,9 @@ namespace Roki.Core.Services.Database.Repositories
                 .ToList();
         }
 
-        public async Task UpdateXp(User user, SocketMessage message, bool boost = false)
+        public async Task<int> UpdateXp(User user, SocketMessage message, bool boost = false)
         {
-            if (user == null) return;
+            if (user == null) return -1;
             var level = new XpLevel(user.TotalXp);
             int xp;
             if (boost)
@@ -124,10 +125,21 @@ namespace Roki.Core.Services.Database.Repositories
             if (newLevel.Level > level.Level)
             {
                 user.LastLevelUp = DateTimeOffset.UtcNow;
-                await SendNotification(user, message, new XpLevel(xp).Level).ConfigureAwait(false);
+                await SendNotification(user, message, newLevel.Level).ConfigureAwait(false);
+                await Context.SaveChangesAsync().ConfigureAwait(false);
+                return newLevel.Level;
             }
 
             await Context.SaveChangesAsync().ConfigureAwait(false);
+            return 0;
+        }
+
+        public int GetUserXpRank(ulong userId)
+        {
+            return Set.Count(u => u.TotalXp >
+                                  Set.Where(y => y.UserId == userId)
+                                      .Select(y => y.TotalXp)
+                                      .FirstOrDefault()) + 1;
         }
 
         public async Task ChangeNotificationLocation(ulong userId, string notify)
