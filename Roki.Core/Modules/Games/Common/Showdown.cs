@@ -191,9 +191,9 @@ namespace Roki.Modules.Games.Common
             await _game.RemoveAllReactionsAsync().ConfigureAwait(false); 
         }
 
-        private Task ReactionHandler()
+        private async Task ReactionHandler()
         {
-            _game.AddReactionsAsync(_reactionMap.Keys.ToArray()).ConfigureAwait(false);
+            await _game.AddReactionsAsync(_reactionMap.Keys.ToArray()).ConfigureAwait(false);
             _client.ReactionAdded += ReactionAddedHandler;
 
             Task ReactionAddedHandler(Cacheable<IUserMessage, ulong> cachedMessage, ISocketMessageChannel channel, SocketReaction reaction)
@@ -277,10 +277,8 @@ namespace Roki.Modules.Games.Common
                 return Task.CompletedTask;
             }
 
-            Task.Delay(TimeSpan.FromSeconds(35)).ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromSeconds(35)).ConfigureAwait(false);
             _client.ReactionAdded -= ReactionAddedHandler;
-            
-            return Task.CompletedTask;
         }
         
         private async Task InitializeGame()
