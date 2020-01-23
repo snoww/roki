@@ -58,7 +58,7 @@ namespace Roki.Modules.Xp
             
             // use cache later
             await using var xpImage = XpDrawExtensions.GenerateXpBar(avatar, 
-                xp.LevelXp, xp.RequiredXp, $"{xp.TotalXp}", $"{xp.Level}", $"{rank}", 
+                xp.ProgressXp, xp.RequiredXp, $"{xp.TotalXp}", $"{xp.Level}", $"{rank}", 
                 user.Username, user.Discriminator, dUser.LastLevelUp);
             await ctx.Channel.SendFileAsync(xpImage, $"xp-{user.Id}.png").ConfigureAwait(false);
         }
