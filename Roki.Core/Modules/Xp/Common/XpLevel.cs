@@ -15,8 +15,9 @@ namespace Roki.Modules.Xp.Common
             const double factor = 2.5;
 
             Level = (int) Math.Floor(Math.Sqrt(xp) / factor);
-            ProgressXp = (int) Math.Pow(Level * factor, 2);
-            RequiredXp = (int) Math.Pow((Level + 1) * factor, 2);
+            var levelFloor = (int) Math.Pow(Level * factor, 2);
+            ProgressXp = xp - levelFloor;
+            RequiredXp = (int) Math.Pow((Level + 1) * factor, 2) - levelFloor;
         }
     }
 }
