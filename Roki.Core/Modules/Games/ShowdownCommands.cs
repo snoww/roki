@@ -53,7 +53,7 @@ namespace Roki.Modules.Games
                     }
                     catch (Exception e)
                     {
-                        _log.Warn(e, $"Error during '{showdown.GameId}'");
+                        _log.Warn(e, $"Error during '{showdown.GameId}'\n{e}");
                         await ctx.Channel.SendErrorAsync("Something went wrong with the current game. Please try again later.").ConfigureAwait(false);
                     }
                     finally
