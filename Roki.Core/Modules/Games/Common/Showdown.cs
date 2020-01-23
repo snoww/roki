@@ -95,7 +95,7 @@ namespace Roki.Modules.Games.Common
             }
             catch (Exception e)
             {
-                _log.Error(e, $"Unable to initialize showdown game '{GameId}'");
+                _log.Error(e, $"Unable to initialize showdown game '{GameId}'\n{e}");
                 await _channel.SendErrorAsync("Something went wrong with the current game. Please try again later.").ConfigureAwait(false);
                 return;
             }
