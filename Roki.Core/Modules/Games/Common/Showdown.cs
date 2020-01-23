@@ -182,7 +182,7 @@ namespace Roki.Modules.Games.Common
             var embed = new EmbedBuilder().WithOkColor();
             if (winners.Length > 1)
             {
-                embed.WithDescription($"Player {winner} has won the battle!\nCongratulations!\n{winners}\n");
+                embed.WithDescription($"{winner} has won the battle!\nCongratulations!\n{winners}\n");
                 await _channel.EmbedAsync(embed).ConfigureAwait(false);
             }
             if (losers.Length > 1)
@@ -192,7 +192,7 @@ namespace Roki.Modules.Games.Common
                         .WithDescription($"Better luck next time!\n{losers}\n")).ConfigureAwait(false);
                 else 
                     await _channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                        .WithDescription($"Player {winner} has won the battle!\nBetter luck next time!\n{losers}\n")).ConfigureAwait(false);
+                        .WithDescription($"{winner} has won the battle!\nBetter luck next time!\n{losers}\n")).ConfigureAwait(false);
             }
             
             await _game.RemoveAllReactionsAsync().ConfigureAwait(false); 
