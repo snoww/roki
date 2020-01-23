@@ -11,6 +11,7 @@ using Discord.WebSocket;
 using NLog;
 using Roki.Core.Services;
 using Roki.Extensions;
+using Roki.Modules.Games.Services;
 using Roki.Services;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -132,16 +133,17 @@ namespace Roki.Modules.Games.Common
             }
 
             await ReactionHandler().ConfigureAwait(false);
-            
+            var fullGameId = await ShowdownService.GetBetPokemonGame(GameId).ConfigureAwait(false);
+
             if (_scores.Count == 0)
             {
                 await _channel.SendErrorAsync("Not enough players to start the bet.\nBet is cancelled").ConfigureAwait(false);
                 await _game.RemoveAllReactionsAsync().ConfigureAwait(false);
-                await DeleteLogs().ConfigureAwait(false);
+                await DeleteLogs(fullGameId).ConfigureAwait(false);
                 return;
             }
 
-            var winner = await GetWinnerAsync().ConfigureAwait(false);
+            var winner = await GetWinnerAsync(fullGameId).ConfigureAwait(false);
             
             foreach (var (key, value) in _scores)
             {
@@ -330,26 +332,26 @@ namespace Roki.Modules.Games.Common
             return (player, teamList);
         }
         
-        private async Task<Bet> GetWinnerAsync()
+        private static async Task<Bet> GetWinnerAsync(string gameId)
         {
-            var p1 = await File.ReadAllLinesAsync($@"./logs/1-{GameId}.log").ConfigureAwait(false);
+            var p1 = await File.ReadAllLinesAsync($@"./logs/1-{gameId}.log").ConfigureAwait(false);
             while (!p1[^6..^1].Any(l => l.Contains("W: 1", StringComparison.OrdinalIgnoreCase) || l.Contains("W: 0", StringComparison.OrdinalIgnoreCase)))
             {
                 await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
-                p1 = await File.ReadAllLinesAsync($@"./logs/1-{GameId}.log").ConfigureAwait(false);
+                p1 = await File.ReadAllLinesAsync($@"./logs/1-{gameId}.log").ConfigureAwait(false);
             }
             
             return p1.Any(l => l.Contains("W: 0", StringComparison.OrdinalIgnoreCase)) ? Bet.P2 : Bet.P1;
         }
 
-        private Task DeleteLogs()
+        private Task DeleteLogs(string gameId)
         {
             try
             {
                 var _ = Task.Run(async () =>
                 {
                     await Task.Delay(10000).ConfigureAwait(false);
-                    File.Delete($@"./logs/rokibot-{GameId}.log");
+                    File.Delete($@"./logs/rokibot-{gameId}.log");
                 });
             }
             catch (Exception e)
