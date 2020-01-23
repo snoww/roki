@@ -1,6 +1,7 @@
 **.db-shm
 **.db-wal
 **.db
+**.ttf
 .idea/
 
 Roki/config.json

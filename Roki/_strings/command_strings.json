@@ -693,5 +693,28 @@
     "Usage": [
       "{0}ask what is the tallest building in the world"
     ]
+  },
+  "xprewards": {
+    "Command": "xprewards xpr",
+    "Description": "Shows the XP rewards for the current server. Optional: specify page number, show reward id",
+    "Usage": [
+      "{0}xpr",
+      "{0}xpr 2 true"
+    ]
+  },
+  "xprewardadd": {
+    "Command": "xprewardadd xpradd",
+    "Description": "Adds an XP reward. Must have Administrator permissions.\nParameters: rewardType: `role` or `currency`, level: `number`, reward: `number` if type is `currency`, `roleID` or `@role` if type is `role`",
+    "Usage": [
+      "{0}xpradd currency 25 2500",
+      "{0}xpradd role 25 @Role"
+    ]
+  },
+  "xprewardremove": {
+    "Command": "xprewardremove xprr",
+    "Description": "Removes an XP reward by ID. Must have Administrator permissions.",
+    "Usage": [
+      "{0}xprr xxxxxxx"
+    ]
   }
 }

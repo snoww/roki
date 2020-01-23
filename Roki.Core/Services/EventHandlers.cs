@@ -7,6 +7,7 @@ using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Roki.Core.Services.Database.Models;
+using Roki.Extensions;
 
 namespace Roki.Core.Services
 {
@@ -43,25 +44,80 @@ namespace Roki.Core.Services
         private Task MessageReceived(SocketMessage message)
         {
             if (message.Author.IsBot) return Task.CompletedTask;
+            if (!(message.Channel is SocketTextChannel textChannel)) return Task.CompletedTask;
+            
             var _ =  Task.Run(async () =>
             {
                 using var uow = _db.GetDbContext();
                 var user = await uow.Users.GetOrCreateUserAsync(message.Author).ConfigureAwait(false);
                 var doubleXp = uow.Subscriptions.DoubleXpIsActive(message.Author.Id);
                 var fastXp = uow.Subscriptions.FastXpIsActive(message.Author.Id);
+                var levelUp = 0;
                 if (fastXp)
                 {
                     if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpFastCooldown))
-                        await uow.Users.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
+                        levelUp = await uow.Users.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
                 }
                 else
                 {
                     if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpCooldown))
-                        await uow.Users.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
+                        levelUp = await uow.Users.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
                 }
 
-                if (message.Channel is SocketTextChannel textChannel)
-                    if (!await uow.Channels.IsLoggingEnabled(textChannel)) return;
+                // if levelUp == 0, it means user did not level up,
+                // if levelUp > 0, it means user leveled up and it is the user's new level
+                if (levelUp > 0)
+                {
+                    var rewards = await uow.Guilds.GetXpRewardsAsync(textChannel.Guild.Id, levelUp).ConfigureAwait(false);
+                    if (rewards != null && rewards.Count != 0)
+                    {
+                        foreach (var reward in rewards)
+                        {
+                            if (reward.Type == "currency")
+                            {
+                                var amount = int.Parse(reward.Reward);
+                                await uow.Users.UpdateCurrencyAsync(user.UserId, amount).ConfigureAwait(false);
+                                uow.Transaction.Add(new CurrencyTransaction
+                                {
+                                    Amount = amount,
+                                    Reason = "XP Level Up Reward",
+                                    To = user.UserId,
+                                    From = 0,
+                                    GuildId = textChannel.Guild.Id,
+                                    ChannelId = textChannel.Id,
+                                    MessageId = message.Id
+                                });
+                            }
+                            else
+                            {
+                                var role = textChannel.Guild.GetRole(ulong.Parse(reward.Reward));
+                                if (role == null) continue;
+                                var guildUser = (IGuildUser) message.Author;
+                                await guildUser.AddRoleAsync(role).ConfigureAwait(false);
+                            }
+                        }
+
+                        var dm = await message.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
+                        try
+                        {
+                            await dm.EmbedAsync(new EmbedBuilder().WithOkColor()
+                                    .WithTitle($"Level `{levelUp}` Rewards")
+                                    .WithDescription("Here are your rewards:\n" + string.Join("\n", rewards
+                                        .Select(r => r.Type == "currency"
+                                            ? $"+ `{int.Parse(r.Reward):N0}` {Roki.Properties.CurrencyIcon}"
+                                            : $"+ <@&{r.Reward}>"))))
+                                .ConfigureAwait(false);
+                            await dm.CloseAsync().ConfigureAwait(false);
+                        }
+                        catch (Exception)
+                        {
+                            // unable to send dm to user
+                            // ignored
+                        }
+                    }
+                }
+                
+                if (!await uow.Channels.IsLoggingEnabled(textChannel)) return;
 
                 string content;
                 if (!string.IsNullOrWhiteSpace(message.Content) && message.Attachments.Count == 0)
