@@ -83,7 +83,7 @@ namespace Roki.Modules.Games.Common
         {
             public long Amount { get; set; }
             public int Multiple { get; set; } = 1;
-            public Bet? Bet { get; set; }
+            public Bet? Player { get; set; }
         }
         
         public async Task StartGameAsync()
@@ -158,7 +158,7 @@ namespace Roki.Modules.Games.Common
             foreach (var (key, value) in _scores)
             {
                 var before = GetCurrency(key.Id) + value.Amount * value.Multiple;
-                if (winner != value.Bet)
+                if (winner != value.Player)
                 {
                     losers += $"{key.Username} " +
                               $"`{before:N0}` ⇒ `{GetCurrency(key.Id):N0}`\n";
@@ -207,9 +207,9 @@ namespace Roki.Modules.Games.Common
                     if (!_scores.ContainsKey(user))
                     {
                         if (Equals(reaction.Emote, Player1))
-                            _scores.Add(user, new PlayerBet {Bet = Bet.P1, Amount = 0});
+                            _scores.Add(user, new PlayerBet {Player = Bet.P1, Amount = 0});
                         else if (Equals(reaction.Emote, Player2))
-                            _scores.Add(user, new PlayerBet {Bet = Bet.P2, Amount = 0});
+                            _scores.Add(user, new PlayerBet {Player = Bet.P2, Amount = 0});
                         else
                         {
                             var notEnoughMsg = await _channel.SendErrorAsync($"<@{reaction.UserId}> Please select a player to bet on first.")
@@ -224,7 +224,7 @@ namespace Roki.Modules.Games.Common
                     // If user exists in dictionary and reacted with player1 
                     if (reaction.Emote.Equals(Player1))
                     {
-                        _scores[user].Bet = Bet.P1;
+                        _scores[user].Player = Bet.P1;
                         await _game.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
                         return Task.CompletedTask;
                     }
@@ -232,7 +232,7 @@ namespace Roki.Modules.Games.Common
                     // If user exists in dictionary and reacted with player2 
                     if (reaction.Emote.Equals(Player2))
                     {
-                        _scores[user].Bet = Bet.P2;
+                        _scores[user].Player = Bet.P2;
                         await _game.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
                         return Task.CompletedTask;
                     }

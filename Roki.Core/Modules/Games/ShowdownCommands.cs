@@ -79,7 +79,7 @@ namespace Roki.Modules.Games
                 }
 
                 _service.ActiveGames.TryGetValue(ctx.Channel.Id, out var showdown);
-                if (showdown != null && showdown.GameId == uid)
+                if (showdown != null && showdown.GameId.Equals(uid, StringComparison.OrdinalIgnoreCase))
                 {
                     await ctx.Channel.SendErrorAsync("Please wait for current game to finish first.").ConfigureAwait(false);
                     return;
