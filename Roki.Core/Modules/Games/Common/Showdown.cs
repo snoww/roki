@@ -144,6 +144,11 @@ namespace Roki.Modules.Games.Common
             }
 
             var winner = await GetWinnerAsync(fullGameId).ConfigureAwait(false);
+            if (winner == null)
+            {
+                // return in case failed to get winner to prevent infinite loop
+                throw new Exception($"Failed to get winner for '{GameId}'");
+            }
             
             foreach (var (key, value) in _scores)
             {
@@ -332,13 +337,24 @@ namespace Roki.Modules.Games.Common
             return (player, teamList);
         }
         
-        private static async Task<Bet> GetWinnerAsync(string gameId)
+        private static async Task<Bet?> GetWinnerAsync(string gameId)
         {
             var p1 = await File.ReadAllLinesAsync($@"./logs/1-{gameId}.log").ConfigureAwait(false);
+            int count = 0;
             while (!p1[^6..^1].Any(l => l.Contains("W: 1", StringComparison.OrdinalIgnoreCase) || l.Contains("W: 0", StringComparison.OrdinalIgnoreCase)))
             {
+                if (++count > 30)
+                {
+                    break;
+                }
+                
                 await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
                 p1 = await File.ReadAllLinesAsync($@"./logs/1-{gameId}.log").ConfigureAwait(false);
+            }
+
+            if (count > 30)
+            {
+                return null;
             }
             
             return p1.Any(l => l.Contains("W: 0", StringComparison.OrdinalIgnoreCase)) ? Bet.P2 : Bet.P1;
