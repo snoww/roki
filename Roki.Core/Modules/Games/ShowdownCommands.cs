@@ -20,9 +20,9 @@ namespace Roki.Modules.Games
             private readonly ICurrencyService _currency;
             private readonly DbService _db;
             private readonly DiscordSocketClient _client;
-            private readonly RedisCache _cache;
+            private readonly IRedisCache _cache;
 
-            public ShowdownCommands(ICurrencyService currency, DbService db, DiscordSocketClient client, RedisCache cache)
+            public ShowdownCommands(ICurrencyService currency, DbService db, DiscordSocketClient client, IRedisCache cache)
             {
                 _currency = currency;
                 _db = db;
