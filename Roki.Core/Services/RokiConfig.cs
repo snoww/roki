@@ -24,37 +24,15 @@ namespace Roki.Core.Services
 
         ImmutableArray<ulong> OwnerIds { get; }
 
+        string RedisConfig { get; }
         DbConfig Db { get; }
 
-        bool IsOwner(IUser u);
+        bool IsOwner(IUser user);
     }
-
-//    public class RestartConfig
-//    {
-//        public RestartConfig(string cmd, string args)
-//        {
-//            this.Cmd = cmd;
-//            this.Args = args;
-//        }
-//        
-//        public string Cmd { get; }
-//        public string Args { get; }
-//    }
-
-    public class DbConfig
-    {
-        public DbConfig(string type, string connectionString)
-        {
-            Type = type;
-            ConnectionString = connectionString;
-        }
-
-        public string Type { get; }
-        public string ConnectionString { get; }
-    }
+    
     public class RokiConfig : IRokiConfig
     {
-        private readonly string _credsFileName = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
+        private readonly string _config = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
         private readonly Logger _log;
         
         public ulong ClientId { get; }
@@ -70,32 +48,31 @@ namespace Roki.Core.Services
         public string WolframAlphaApi { get; }
         public ImmutableArray<ulong> OwnerIds { get; }
 
+        public string RedisConfig { get; }
         public DbConfig Db { get; }
 
-        public bool IsOwner(IUser u)
+        public bool IsOwner(IUser user)
         {
-            return OwnerIds.Contains(u.Id);
+            return OwnerIds.Contains(user.Id);
         }
 
         public RokiConfig()
         {
             _log = LogManager.GetCurrentClassLogger();
+            
             try
             {
-//                Console.WriteLine($"The current directory is {_credsFileName}");
                 var configBuilder = new ConfigurationBuilder();
-                configBuilder.AddJsonFile(_credsFileName, true)
-                    .AddEnvironmentVariables("Roki_");
-
+                configBuilder.AddJsonFile(_config, true);
                 var data = configBuilder.Build();
 
                 Token = data[nameof(Token)];
                 if (string.IsNullOrWhiteSpace(Token))
                 {
-                    _log.Error("Token is missing from config.json or Environment varibles. Add it and restart the program.");
+                    _log.Error("Token is missing from config.json.");
                     if (!Console.IsInputRedirected)
                         Console.ReadKey();
-                    Environment.Exit(3);
+                    Environment.Exit(-1);
                 }
 
                 OwnerIds = data.GetSection("OwnerIds").GetChildren().Select(c => ulong.Parse(c.Value)).ToImmutableArray();
@@ -120,6 +97,8 @@ namespace Roki.Core.Services
                     string.IsNullOrWhiteSpace(dbSection["ConnectionString"])
                         ? "Host=localhost;Database=roki;Username=postgres;Password=roki-snow"
                         : dbSection["ConnectionString"]);
+
+                RedisConfig = "localhost";
             }
             catch (Exception e)
             {
@@ -129,4 +108,28 @@ namespace Roki.Core.Services
             }
         }
     }
+    
+    public class DbConfig
+    {
+        public DbConfig(string type, string connectionString)
+        {
+            Type = type;
+            ConnectionString = connectionString;
+        }
+
+        public string Type { get; }
+        public string ConnectionString { get; }
+    }
+        
+    // public class RestartConfig
+    // {
+    //     public RestartConfig(string cmd, string args)
+    //     {
+    //         this.Cmd = cmd;
+    //         this.Args = args;
+    //     }
+    //     
+    //     public string Cmd { get; }
+    //     public string Args { get; }
+    // }
 }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
+using NLog;
 using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
 
@@ -16,13 +17,17 @@ namespace Roki.Core.Services
         private readonly DiscordSocketClient _client;
         private readonly DbService _db;
 
+        private readonly Logger _log;
+
         public EventHandlers(DbService db, DiscordSocketClient client)
         {
             _db = db;
             _client = client;
+
+            _log = LogManager.GetCurrentClassLogger();
         }
 
-        public async Task HandleEvents()
+        public async Task StartHandling()
         {
             _client.MessageReceived += MessageReceived;
             _client.MessageUpdated += MessageUpdated;
@@ -31,6 +36,7 @@ namespace Roki.Core.Services
             _client.UserJoined += UserJoined;
             _client.UserUpdated += UserUpdated;
             _client.JoinedGuild += JoinedGuild;
+            _client.LeftGuild += LeftGuild;
             _client.GuildUpdated += GuildUpdated;
             _client.GuildAvailable += GuildAvailable;
             _client.GuildUnavailable += GuildUnavailable;
@@ -304,6 +310,7 @@ namespace Roki.Core.Services
         {
             var _ = Task.Run(async () =>
             {
+                _log.Info("Joined server: {0} [{1}]", guild?.Name, guild?.Id);
                 using var uow = _db.GetDbContext();
                 await uow.Guilds.GetOrCreateGuildAsync(guild).ConfigureAwait(false);
                 await guild.DownloadUsersAsync().ConfigureAwait(false);
@@ -314,6 +321,12 @@ namespace Roki.Core.Services
                 }
                 await uow.SaveChangesAsync().ConfigureAwait(false);
             });
+            return Task.CompletedTask;
+        }
+
+        private Task LeftGuild(SocketGuild guild)
+        {
+            var _ = Task.Run(() => { _log.Info("Left server: {0} [{1}]", guild?.Name, guild?.Id); });
             return Task.CompletedTask;
         }
 

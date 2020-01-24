@@ -23,24 +23,39 @@ namespace Roki
         private readonly DbService _db;
         private readonly Logger _log;
 
+        private RokiConfig Config { get; }
+        private DiscordSocketClient Client { get; }
+        private CommandService CommandService { get; }
+        private IRedisCache Cache { get; set; }
+        public static Properties Properties { get; private set; }
+        public static Color OkColor { get; private set; }
+        public static Color ErrorColor { get; private set; }
+
+        public TaskCompletionSource<bool> Ready { get; } = new TaskCompletionSource<bool>();
+        private IServiceProvider Services { get; set; }
+
         public Roki()
         {
             LogSetup.SetupLogger();
             _log = LogManager.GetCurrentClassLogger();
 
             Config = new RokiConfig();
+            Cache = new RedisCache(Config.RedisConfig);
+            
             _db = new DbService(Config);
             _db.Setup();
 
+            // global properties
+            // future: guild specific properties
             Properties = File.ReadAllText("./data/properties.json").Deserialize<Properties>();
 
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
-                MessageCacheSize = 500,
-                LogLevel = LogSeverity.Warning,
+                MessageCacheSize = 100,
                 ConnectionTimeout = int.MaxValue,
                 ExclusiveBulkDelete = true
             });
+            
             CommandService = new CommandService(new CommandServiceConfig
             {
                 CaseSensitiveCommands = false,
@@ -50,21 +65,10 @@ namespace Roki
             OkColor = Color.DarkGreen;
             ErrorColor = Color.Red;
 
-            Client.Log += ClientLog;
+            Client.Log += Log;
         }
 
-        public RokiConfig Config { get; }
-        public DiscordSocketClient Client { get; }
-        public CommandService CommandService { get; }
-        public static Properties Properties { get; set; }
-        public static Color OkColor { get; set; }
-        public static Color ErrorColor { get; set; }
-
-
-        public TaskCompletionSource<bool> Ready { get; } = new TaskCompletionSource<bool>();
-        public IServiceProvider Services { get; private set; }
-
-        private Task ClientLog(LogMessage arg)
+        private Task Log(LogMessage arg)
         {
             _log.Warn(arg.Source + " | " + arg.Message);
             if (arg.Exception != null)
@@ -73,30 +77,20 @@ namespace Roki
             return Task.CompletedTask;
         }
 
-
-        private List<ulong> GetCurrentGuildIds()
-        {
-            return Client.Guilds.Select(x => x.Id).ToList();
-        }
-
         private void AddServices()
         {
-//            var startingGuildIdList = GetCurrentGuildIds();
             var sw = Stopwatch.StartNew();
-
-//            var _bot = Client.CurrentUser;
-
+            
             var service = new ServiceCollection()
                 .AddSingleton<IRokiConfig>(Config)
                 .AddSingleton(_db)
+                .AddSingleton(Cache)
                 .AddSingleton(Client)
                 .AddSingleton(CommandService)
                 .AddSingleton<LavaConfig>()
                 .AddSingleton<LavaNode>()
-                .AddSingleton(_db.GetDbContext())
-                .AddSingleton(this);
-
-            service.AddHttpClient();
+                .AddSingleton(this)
+                .AddHttpClient();
 
             service.LoadFrom(Assembly.GetAssembly(typeof(CommandHandler)));
             service.LoadFrom(Assembly.GetAssembly(typeof(EventHandlers)));
@@ -163,6 +157,7 @@ namespace Roki
             await LoginAsync(Config.Token).ConfigureAwait(false);
 
             _log.Info("Loading services");
+            
             try
             {
                 AddServices();
@@ -174,7 +169,7 @@ namespace Roki
             }
 
             sw.Stop();
-            _log.Info($"Roki connected in {sw.Elapsed.TotalSeconds}s");
+            _log.Info($"Roki connected in {sw.Elapsed.TotalSeconds:F2}s");
 
             var stats = Services.GetService<IStatsService>();
             stats.Initialize();
@@ -183,7 +178,7 @@ namespace Roki
             var eventHandlers = Services.GetService<EventHandlers>();
 
             await commandHandler.StartHandling().ConfigureAwait(false);
-            await eventHandlers.HandleEvents().ConfigureAwait(false);
+            await eventHandlers.StartHandling().ConfigureAwait(false);
 
             var _ = await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
             
@@ -193,17 +188,27 @@ namespace Roki
 
         private async Task LoginAsync(string token)
         {
-            var clientReady = new TaskCompletionSource<bool>();
+            var updateStatus = new TaskCompletionSource<bool>();
 
-            Task SetClientReady()
+            _log.Info("Logging in ...");
+            
+            await Client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
+            await Client.StartAsync().ConfigureAwait(false);
+            
+            Client.Ready += UpdateDatabase;
+            await updateStatus.Task.ConfigureAwait(false);
+            Client.Ready -= UpdateDatabase;
+            
+            _log.Info("Logged in as {0}", Client.CurrentUser);
+            
+            // makes sure database contains latest guild/channel info
+            Task UpdateDatabase()
             {
                 var _ = Task.Run(async () =>
                 {
-                    clientReady.TrySetResult(true);
+                    updateStatus.TrySetResult(true);
                     try
                     {
-                        foreach (var channel in await Client.GetDMChannelsAsync().ConfigureAwait(false))
-                            await channel.CloseAsync().ConfigureAwait(false);
                         using var uow = _db.GetDbContext();
                         foreach (var guild in Client.Guilds)
                         {
@@ -224,28 +229,6 @@ namespace Roki
                 });
                 return Task.CompletedTask;
             }
-
-            _log.Info("Logging in ...");
-            await Client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
-            await Client.StartAsync().ConfigureAwait(false);
-            Client.Ready += SetClientReady;
-            await clientReady.Task.ConfigureAwait(false);
-            Client.Ready -= SetClientReady;
-            Client.JoinedGuild += Client_JoinedGuild;
-            Client.LeftGuild += Client_LeftGuild;
-            _log.Info("Logged in as {0}", Client.CurrentUser);
-        }
-
-        private Task Client_LeftGuild(SocketGuild arg)
-        {
-            _log.Info("Left server: {0} [{1}]", arg?.Name, arg?.Id);
-            return Task.CompletedTask;
-        }
-
-        private Task Client_JoinedGuild(SocketGuild arg)
-        {
-            _log.Info("Joined server: {0} [{1}]", arg?.Name, arg?.Id);
-            return Task.CompletedTask;
         }
     }
 }
