@@ -18,6 +18,7 @@ using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.Primitives;
+using StackExchange.Redis;
 using Image = SixLabors.ImageSharp.Image;
 
 namespace Roki.Modules.Games.Common
@@ -26,8 +27,10 @@ namespace Roki.Modules.Games.Common
     {
         private readonly ICurrencyService _currency;
         private readonly DbService _db;
+        private readonly IDatabase _cache;
         private readonly Logger _log;
         private readonly DiscordSocketClient _client;
+        private readonly ShowdownService _service;
         
         private readonly ITextChannel _channel;
 
@@ -66,13 +69,16 @@ namespace Roki.Modules.Games.Common
             {TimesTen, 0},
         };
 
-        public Showdown(ICurrencyService currency, DbService db, DiscordSocketClient client, ITextChannel channel, int generation)
+        public Showdown(ICurrencyService currency, DbService db, DiscordSocketClient client, ITextChannel channel, int generation,
+            ShowdownService service, IRedisCache cache)
         {
             _currency = currency;
             _db = db;
+            _cache = cache.Redis.GetDatabase();
             _client = client;
             _channel = channel;
             _generation = generation;
+            _service = service;
             _log = LogManager.GetCurrentClassLogger();
             GameId = $"{_generation}{Guid.NewGuid().ToString().Substring(0, 7)}";
         }
@@ -134,7 +140,7 @@ namespace Roki.Modules.Games.Common
             }
 
             await ReactionHandler().ConfigureAwait(false);
-            var fullGameId = await ShowdownService.GetBetPokemonGame(GameId).ConfigureAwait(false);
+            var fullGameId = await _service.GetBetPokemonGame(GameId).ConfigureAwait(false);
 
             if (_scores.Count == 0)
             {
@@ -325,6 +331,7 @@ namespace Roki.Modules.Games.Common
                 }
             }
             proc.WaitForExit();
+            await _cache.StringSetAsync(uid, gameId, TimeSpan.FromMinutes(5), flags: CommandFlags.FireAndForget).ConfigureAwait(false);
             File.AppendAllText(@"./data/pokemon-logs/battle-logs", $"{uid}={gameId}\n");
             _teams = teams;
         }
