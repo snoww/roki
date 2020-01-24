@@ -127,7 +127,7 @@ namespace Roki.Modules.Games.Common
                 var start = new EmbedBuilder().WithOkColor()
                     .WithTitle($"[Gen {_generation}] Random Battle - ID: `{GameId}`")
                     .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 100` means betting on 110 on P1.")
-                    .WithImageUrl($"attachment://pokemon-{GameId}.png")
+                    .WithImageUrl($"attachment://pokemon-{GameId}.gif")
                     .AddField("Player 1", string.Join('\n', _teams[0]), true)
                     .AddField("Player 2", string.Join('\n', _teams[1]), true);
 
