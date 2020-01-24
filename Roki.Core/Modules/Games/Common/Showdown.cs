@@ -331,7 +331,7 @@ namespace Roki.Modules.Games.Common
                 }
             }
             proc.WaitForExit();
-            await _cache.StringSetAsync(uid, gameId, TimeSpan.FromMinutes(5), flags: CommandFlags.FireAndForget).ConfigureAwait(false);
+            await _cache.StringSetAsync($"pokemon:{uid}", gameId, TimeSpan.FromMinutes(5), flags: CommandFlags.FireAndForget).ConfigureAwait(false);
             File.AppendAllText(@"./data/pokemon-logs/battle-logs", $"{uid}={gameId}\n");
             _teams = teams;
         }

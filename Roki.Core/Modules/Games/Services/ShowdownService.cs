@@ -22,7 +22,7 @@ namespace Roki.Modules.Games.Services
 
         public async Task<string> GetBetPokemonGame(string uid)
         {
-            var game = await _cache.StringGetAsync(uid).ConfigureAwait(false);
+            var game = await _cache.StringGetAsync($"pokemon:{uid}").ConfigureAwait(false);
             if (game.HasValue)
             {
                 return game.ToString();
