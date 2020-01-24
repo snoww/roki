@@ -1,26 +1,33 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Roki.Core.Services;
-using Roki.Extensions;
 using Roki.Modules.Games.Common;
-using Roki.Modules.Searches.Models;
+using StackExchange.Redis;
 
 namespace Roki.Modules.Games.Services
 {
     public class ShowdownService : IRokiService
     {
-        public readonly ConcurrentDictionary<ulong, Showdown> ActiveGames = new ConcurrentDictionary<ulong, Showdown>();
+        private readonly IDatabase _cache;
         
-        public static async Task<string> GetBetPokemonGame(string uid)
+        public readonly ConcurrentDictionary<ulong, Showdown> ActiveGames = new ConcurrentDictionary<ulong, Showdown>();
+
+        public ShowdownService(IRedisCache cache)
         {
+            _cache = cache.Redis.GetDatabase();
+        }
+
+        public async Task<string> GetBetPokemonGame(string uid)
+        {
+            var game = await _cache.StringGetAsync(uid).ConfigureAwait(false);
+            if (game.HasValue)
+            {
+                return game.ToString();
+            }
+            
             var logs = await File.ReadAllLinesAsync(@"./data/pokemon-logs/battle-logs").ConfigureAwait(false);
             return (from log in logs where log.StartsWith(uid, StringComparison.OrdinalIgnoreCase) select log.Substring(9)).FirstOrDefault();
         }
