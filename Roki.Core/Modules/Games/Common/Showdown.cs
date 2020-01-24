@@ -14,7 +14,10 @@ using Roki.Extensions;
 using Roki.Modules.Games.Services;
 using Roki.Services;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.Primitives;
 using Image = SixLabors.ImageSharp.Image;
 
 namespace Roki.Modules.Games.Common
@@ -109,12 +112,11 @@ namespace Roki.Modules.Games.Common
                 t1.Add(Image.Load<Rgba32>(GetSprite(_teams[0][i])));
                 t2.Add(Image.Load<Rgba32>(GetSprite(_teams[1][i])));
             }
-            
-                    
-            using var team1 = t1.MergePokemonTeam();
-            using var team2 = t2.MergePokemonTeam();
-            using var teamImage = team1.MergeTwoVertical(team2);
-            await using (var stream = teamImage.ToStream())
+
+            // taking extra memory to sort the mons, maybe unnecessary
+            var sortedT1 = t1.OrderBy(x => x.Width).ToList();
+            var sortedT2 = t2.OrderBy(x => x.Width).ToList();
+            await using (var stream = GetTeamGif(sortedT1, sortedT2))
             {
                 for (int i = 0; i < t1.Count; i++)
                 {
@@ -129,7 +131,7 @@ namespace Roki.Modules.Games.Common
                     .AddField("Player 1", string.Join('\n', _teams[0]), true)
                     .AddField("Player 2", string.Join('\n', _teams[1]), true);
 
-                _game = await _channel.SendFileAsync(stream, $"pokemon-{GameId}.png", embed: start.Build()).ConfigureAwait(false);
+                _game = await _channel.SendFileAsync(stream, $"pokemon-{GameId}.gif", embed: start.Build()).ConfigureAwait(false);
             }
 
             await ReactionHandler().ConfigureAwait(false);
@@ -381,6 +383,17 @@ namespace Roki.Modules.Games.Common
         private static string GetSprite(string pokemon)
         {
             pokemon = pokemon.Split(',').First().ToLowerInvariant().SanitizeStringFull();
+            IEnumerable<string> ani = Directory.EnumerateFiles("./data/pokemon/gen5ani", $"{pokemon.Substring(0, 3)}*", SearchOption.AllDirectories);
+
+            foreach (string path in ani)
+            {
+                string sprite = path.Split("/").Last().Replace(".gif", "").SanitizeStringFull();
+                if (sprite.Equals(pokemon, StringComparison.Ordinal))
+                {
+                    return path;
+                }
+            }
+            
             IEnumerable<string> sprites = Directory.EnumerateFiles("./data/pokemon/gen5", $"{pokemon.Substring(0, 3)}*", SearchOption.AllDirectories);
 
             foreach (string path in sprites)
@@ -393,6 +406,111 @@ namespace Roki.Modules.Games.Common
             }
 
             return null;
+        }
+        
+        private static MemoryStream GetTeamGif(List<Image<Rgba32>> sprites, List<Image<Rgba32>> team2)
+        {
+            var width = 0;
+            var width2 = 0;
+            var height = 0;
+            var height2 = 0;
+            var frames = 0;
+
+            for (var i = 0; i < sprites.Count; i++)
+            {
+                Image<Rgba32> sprite = sprites[i];
+                
+                if (i != sprites.Count - 1)
+                    width += (int) Math.Round(sprite.Width * 0.5);
+                else
+                    width += sprite.Width;
+                
+
+                if (sprite.Height > height)
+                {
+                    // gets the max height of all sprites
+                    height = sprite.Height;
+                }
+
+                if (sprite.Frames.Count > frames)
+                {
+                    // gets the longest frame
+                    frames = sprite.Frames.Count;
+                }
+            }
+            
+            for (var i = 0; i < team2.Count; i++)
+            {
+                Image<Rgba32> sprite = team2[i];
+                
+                if (i != team2.Count - 1)
+                    width2 += (int) Math.Round(sprite.Width * 0.6);
+                else
+                    width2 += sprite.Width;
+
+                if (sprite.Height > height2)
+                {
+                    height2 = sprite.Height;
+                }
+
+                if (sprite.Frames.Count > frames)
+                {
+                    frames = sprite.Frames.Count;
+                }
+            }
+
+            // average the width
+            width = (width + width2) / 2;
+
+            // setup canvas
+            using var image = new Image<Rgba32>(width, height + height2);
+            
+            for (int i = 0; i < frames; i++)
+            {
+                using Image<Rgba32> emptyFrame = image.Frames.CloneFrame(0);
+                var currentWidth = 0;
+                // int offset = width / teamSize;
+
+                foreach (var sprite in sprites)
+                {
+                    using Image<Rgba32> frame = sprite.Frames.CloneFrame(i % sprite.Frames.Count);
+                    var y = 0;
+                    if (frame.Height < height)
+                    {
+                        // midpoint of top frame
+                        y = height / 2 - frame.Height / 2;
+                    }
+
+                    emptyFrame.Mutate(x => x.DrawImage(frame, new Point(currentWidth, y), GraphicsOptions.Default));
+                    currentWidth += (int) Math.Round(frame.Width * 0.5);
+                }
+
+                currentWidth = 0;
+                
+                foreach (var sprite in team2)
+                {
+                    using Image<Rgba32> frame = sprite.Frames.CloneFrame(i % sprite.Frames.Count);
+                    var y = 0;
+                    if (frame.Height <= height2)
+                    {
+                        // midpoint of bottom frame
+                        y = height2 / 2 + height - frame.Height / 2;
+                    }
+
+                    emptyFrame.Mutate(x => x.DrawImage(frame, new Point(currentWidth, y), GraphicsOptions.Default));
+                    currentWidth += (int) Math.Round(frame.Width * 0.5);
+                }
+
+                // IMPORTANT: this makes the gif not ghost
+                emptyFrame.Frames.RootFrame.Metadata.GetFormatMetadata(GifFormat.Instance).DisposalMethod = GifDisposalMethod.RestoreToBackground;
+                image.Frames.AddFrame(emptyFrame.Frames.RootFrame);
+            }
+            
+            image.Frames.RemoveFrame(0);
+            var stream = new MemoryStream();
+            image.SaveAsGif(stream, new GifEncoder());
+            stream.Position = 0;
+            return stream;
         }
 
         private long GetCurrency(ulong userId)
