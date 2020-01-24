@@ -112,11 +112,10 @@ namespace Roki.Modules.Games.Common
                 t1.Add(Image.Load<Rgba32>(GetSprite(_teams[0][i])));
                 t2.Add(Image.Load<Rgba32>(GetSprite(_teams[1][i])));
             }
-
-            // taking extra memory to sort the mons, maybe unnecessary
-            var sortedT1 = t1.OrderBy(x => x.Width).ToList();
-            var sortedT2 = t2.OrderBy(x => x.Width).ToList();
-            await using (var stream = GetTeamGif(sortedT1, sortedT2))
+            
+            t1.Sort((x, y) => y.Width.CompareTo(x.Width));
+            t2.Sort((x, y) => y.Width.CompareTo(x.Width));
+            await using (var stream = GetTeamGif(t1, t2))
             {
                 for (int i = 0; i < t1.Count; i++)
                 {
@@ -419,46 +418,36 @@ namespace Roki.Modules.Games.Common
             for (var i = 0; i < sprites.Count; i++)
             {
                 Image<Rgba32> sprite = sprites[i];
-                
+                Image<Rgba32> sprite2 = team2[i];
+
                 if (i != sprites.Count - 1)
+                {
                     width += (int) Math.Round(sprite.Width * 0.5);
+                    width2 += (int) Math.Round(sprite2.Width * 0.6);
+                }
                 else
+                {
                     width += sprite.Width;
-                
+                    width2 += sprite2.Width;
+                }
 
                 if (sprite.Height > height)
                 {
                     // gets the max height of all sprites
                     height = sprite.Height;
                 }
-
-                if (sprite.Frames.Count > frames)
-                {
-                    // gets the longest frame
-                    frames = sprite.Frames.Count;
-                }
-            }
-            
-            for (var i = 0; i < team2.Count; i++)
-            {
-                Image<Rgba32> sprite = team2[i];
                 
-                if (i != team2.Count - 1)
-                    width2 += (int) Math.Round(sprite.Width * 0.6);
-                else
-                    width2 += sprite.Width;
-
-                if (sprite.Height > height2)
+                if (sprite2.Height > height2)
                 {
-                    height2 = sprite.Height;
+                    height2 = sprite2.Height;
                 }
-
-                if (sprite.Frames.Count > frames)
-                {
-                    frames = sprite.Frames.Count;
-                }
+                
+                frames += sprite.Frames.Count + sprite2.Frames.Count;
             }
 
+            // average the number of frames
+            frames /= sprites.Count + team2.Count;
+            
             // average the width
             width = (width + width2) / 2;
 
