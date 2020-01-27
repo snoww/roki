@@ -254,7 +254,7 @@ namespace Roki.Modules.Games.Common
                     // If user exists in dictionary and reacted with any other emote in the reactionMap
                     if (_reactionMap.ContainsKey(reaction.Emote))
                     {
-                        var currency = _currency.GetCurrency(user.Id);
+                        var currency = await _currency.GetCurrency(user.Id, _channel.GuildId).ConfigureAwait(false);
                         if (reaction.Emote.Equals(AllIn))
                         {
                             _scores[user].Amount = currency;
