@@ -157,7 +157,11 @@ namespace Roki.Services
             if (currency.HasValue)
             {
                 await _cache.StringSetAsync($"currency:{guildId}:{Roki.Properties.BotId}", (long) currency + amount).ConfigureAwait(false);
+                return;
             }
+            
+            var currentCurrency = GetDbCurrency(Roki.Properties.BotId);
+            await _cache.StringSetAsync($"currency:{guildId}:{Roki.Properties.BotId}", currentCurrency + amount).ConfigureAwait(false);
         }
     }
 }
