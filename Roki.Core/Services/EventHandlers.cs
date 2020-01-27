@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using NLog;
 using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
+using Roki.Modules.Xp.Common;
+using StackExchange.Redis;
 
 namespace Roki.Core.Services
 {
@@ -16,12 +18,14 @@ namespace Roki.Core.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly DbService _db;
+        private readonly IDatabase _cache;
 
         private readonly Logger _log;
 
-        public EventHandlers(DbService db, DiscordSocketClient client)
+        public EventHandlers(DbService db, DiscordSocketClient client, IRedisCache cache)
         {
             _db = db;
+            _cache = cache.Redis.GetDatabase();
             _client = client;
 
             _log = LogManager.GetCurrentClassLogger();
@@ -51,78 +55,12 @@ namespace Roki.Core.Services
         {
             if (message.Author.IsBot) return Task.CompletedTask;
             if (!(message.Channel is SocketTextChannel textChannel)) return Task.CompletedTask;
-            
+
+            UpdateXp(message).ConfigureAwait(false);
             var _ =  Task.Run(async () =>
             {
                 using var uow = _db.GetDbContext();
-                var user = await uow.Users.GetOrCreateUserAsync(message.Author).ConfigureAwait(false);
-                var doubleXp = uow.Subscriptions.DoubleXpIsActive(message.Author.Id);
-                var fastXp = uow.Subscriptions.FastXpIsActive(message.Author.Id);
-                var levelUp = 0;
-                if (fastXp)
-                {
-                    if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpFastCooldown))
-                        levelUp = await uow.Users.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
-                }
-                else
-                {
-                    if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpCooldown))
-                        levelUp = await uow.Users.UpdateXp(user, message, doubleXp).ConfigureAwait(false);
-                }
 
-                // if levelUp == 0, it means user did not level up,
-                // if levelUp > 0, it means user leveled up and it is the user's new level
-                if (levelUp > 0)
-                {
-                    var rewards = await uow.Guilds.GetXpRewardsAsync(textChannel.Guild.Id, levelUp).ConfigureAwait(false);
-                    if (rewards != null && rewards.Count != 0)
-                    {
-                        foreach (var reward in rewards)
-                        {
-                            if (reward.Type == "currency")
-                            {
-                                var amount = int.Parse(reward.Reward);
-                                await uow.Users.UpdateCurrencyAsync(user.UserId, amount).ConfigureAwait(false);
-                                uow.Transaction.Add(new CurrencyTransaction
-                                {
-                                    Amount = amount,
-                                    Reason = "XP Level Up Reward",
-                                    To = user.UserId,
-                                    From = 0,
-                                    GuildId = textChannel.Guild.Id,
-                                    ChannelId = textChannel.Id,
-                                    MessageId = message.Id
-                                });
-                            }
-                            else
-                            {
-                                var role = textChannel.Guild.GetRole(ulong.Parse(reward.Reward));
-                                if (role == null) continue;
-                                var guildUser = (IGuildUser) message.Author;
-                                await guildUser.AddRoleAsync(role).ConfigureAwait(false);
-                            }
-                        }
-
-                        var dm = await message.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
-                        try
-                        {
-                            await dm.EmbedAsync(new EmbedBuilder().WithOkColor()
-                                    .WithTitle($"Level `{levelUp}` Rewards")
-                                    .WithDescription("Here are your rewards:\n" + string.Join("\n", rewards
-                                        .Select(r => r.Type == "currency"
-                                            ? $"+ `{int.Parse(r.Reward):N0}` {Roki.Properties.CurrencyIcon}"
-                                            : $"+ <@&{r.Reward}>"))))
-                                .ConfigureAwait(false);
-                            await dm.CloseAsync().ConfigureAwait(false);
-                        }
-                        catch (Exception)
-                        {
-                            // unable to send dm to user
-                            // ignored
-                        }
-                    }
-                }
-                
                 if (!await uow.Channels.IsLoggingEnabled(textChannel)) return;
 
                 string content;
@@ -352,6 +290,131 @@ namespace Roki.Core.Services
                 await uow.Users.GetOrCreateUserAsync(user).ConfigureAwait(false);
             });
             return Task.CompletedTask;
+        }
+
+        private Task UpdateXp(SocketMessage message)
+        {
+            var _ = Task.Run(async () =>
+            {
+                using var uow = _db.GetDbContext();
+                var user = await uow.Users.GetOrCreateUserAsync(message.Author).ConfigureAwait(false);
+                var doubleXp = uow.Subscriptions.DoubleXpIsActive(message.Author.Id);
+                var fastXp = uow.Subscriptions.FastXpIsActive(message.Author.Id);
+                var oldLevel = new XpLevel(await GetCachedXp(message.Author.Id));
+                var newXp = 0;
+                if (fastXp)
+                {
+                    if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpFastCooldown))
+                    {
+                        newXp = await UpdateCacheXp(message.Author.Id, Roki.Properties.XpPerMessage, doubleXp).ConfigureAwait(false);
+                        await uow.Users.UpdateXp(user, doubleXp).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpCooldown))
+                    {
+                        newXp = await UpdateCacheXp(message.Author.Id, Roki.Properties.XpPerMessage, doubleXp).ConfigureAwait(false);
+                        await uow.Users.UpdateXp(user, doubleXp).ConfigureAwait(false);
+                    }
+                }
+                
+                if (newXp == 0)
+                    return;
+
+                var newLevel = new XpLevel(newXp);
+                
+                if (newLevel.Level > oldLevel.Level)
+                {
+                    var textChannel = (SocketTextChannel) message.Channel;
+                    var rewards = await uow.Guilds.GetXpRewardsAsync(textChannel.Guild.Id, newLevel.Level).ConfigureAwait(false);
+                    if (rewards != null && rewards.Count != 0)
+                    {
+                        foreach (var reward in rewards)
+                        {
+                            if (reward.Type == "currency")
+                            {
+                                var amount = int.Parse(reward.Reward);
+                                await uow.Users.UpdateCurrencyAsync(user.UserId, amount).ConfigureAwait(false);
+                                uow.Transaction.Add(new CurrencyTransaction
+                                {
+                                    Amount = amount,
+                                    Reason = "XP Level Up Reward",
+                                    To = user.UserId,
+                                    From = 0,
+                                    GuildId = textChannel.Guild.Id,
+                                    ChannelId = textChannel.Id,
+                                    MessageId = message.Id
+                                });
+                            }
+                            else
+                            {
+                                var role = textChannel.Guild.GetRole(ulong.Parse(reward.Reward));
+                                if (role == null) continue;
+                                var guildUser = (IGuildUser) message.Author;
+                                await guildUser.AddRoleAsync(role).ConfigureAwait(false);
+                            }
+                        }
+
+                        var dm = await message.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
+                        try
+                        {
+                            await dm.EmbedAsync(new EmbedBuilder().WithOkColor()
+                                    .WithTitle($"Level `{newLevel.Level}` Rewards")
+                                    .WithDescription("Here are your rewards:\n" + string.Join("\n", rewards
+                                                         .Select(r => r.Type == "currency"
+                                                             ? $"+ `{int.Parse(r.Reward):N0}` {Roki.Properties.CurrencyIcon}"
+                                                             : $"+ <@&{r.Reward}>"))))
+                                .ConfigureAwait(false);
+                            await dm.CloseAsync().ConfigureAwait(false);
+                        }
+                        catch (Exception)
+                        {
+                            // unable to send dm to user
+                            // ignored
+                        }
+                    }
+                }
+            });
+            
+            return Task.CompletedTask;
+        }
+
+        private async Task<int> GetCachedXp(ulong userId)
+        {
+            var xp = await _cache.StringGetAsync($"xp:{userId}").ConfigureAwait(false);
+            if (xp.HasValue)
+                return (int) xp;
+            
+            using var uow = _db.GetDbContext();
+            var user = await uow.Users.GetUserAsync(userId).ConfigureAwait(false);
+            return user.TotalXp;
+        }
+
+        private async Task<int> UpdateCacheXp(ulong userId, int add, bool boost = false)
+        {
+            var xp = await _cache.StringGetAsync($"xp:{userId}").ConfigureAwait(false);
+            if (xp.HasValue)
+            {
+                if (boost)
+                {
+                    return (int) await _cache.StringIncrementAsync($"xp:{userId}", add * 2).ConfigureAwait(false);
+                }
+
+                return (int) await _cache.StringIncrementAsync($"xp:{userId}", add).ConfigureAwait(false);
+            }
+
+            using var uow = _db.GetDbContext();
+            var user = await uow.Users.GetUserAsync(userId).ConfigureAwait(false);
+            var currentXp = user.TotalXp;
+            if (boost)
+            {
+                await _cache.StringSetAsync($"xp:{userId}", currentXp + add * 2).ConfigureAwait(false);
+                return currentXp + add * 2;
+            }
+
+            await _cache.StringSetAsync($"xp:{userId}", currentXp + add).ConfigureAwait(false);
+            return currentXp + add;
         }
     }
 }

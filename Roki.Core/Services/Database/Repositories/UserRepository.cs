@@ -19,10 +19,9 @@ namespace Roki.Core.Services.Database.Repositories
         User[] GetUsersXpLeaderboard(int page);
         long GetUserCurrency(ulong userId);
         Task<bool> UpdateCurrencyAsync(ulong userId, long amount);
-        Task LotteryAwardAsync(ulong userId, long amount);
         Task UpdateBotCurrencyAsync(ulong botId, long amount);
         IEnumerable<User> GetCurrencyLeaderboard(ulong botId, int page);
-        Task<int> UpdateXp(User user, SocketMessage message, bool boost = false);
+        Task UpdateXp(User user, bool boost = false);
         int GetUserXpRank(ulong userId);
         Task ChangeNotificationLocation(ulong userId, string notify);
         Task<List<Item>> GetUserInventory(ulong userId);
@@ -38,11 +37,11 @@ namespace Roki.Core.Services.Database.Repositories
     }
 
     public class UserRepository : Repository<User>, IUserRepository
-    {
-        private readonly Properties _properties = JsonSerializer.Deserialize<Properties>(File.ReadAllText("./data/properties.json"));
+    { 
         public UserRepository(DbContext context) : base(context)
         {
         }
+        
         public async Task<User> GetOrCreateUserAsync(IUser user)
         {
             var existing = await Set.FirstOrDefaultAsync(u => u.UserId == user.Id).ConfigureAwait(false);
@@ -87,13 +86,6 @@ namespace Roki.Core.Services.Database.Repositories
             return true;
         }
 
-        public async Task LotteryAwardAsync(ulong userId, long amount)
-        {
-            var user = Set.First(u => u.UserId == userId);
-            user.Currency += amount;
-            await Context.SaveChangesAsync().ConfigureAwait(false);
-        }
-
         public async Task UpdateBotCurrencyAsync(ulong botId, long amount)
         {
             var bot = Set.First(b => b.UserId == botId);
@@ -110,28 +102,26 @@ namespace Roki.Core.Services.Database.Repositories
                 .ToList();
         }
 
-        public async Task<int> UpdateXp(User user, SocketMessage message, bool boost = false)
+        public async Task UpdateXp(User user, bool boost = false)
         {
-            if (user == null) return -1;
+            if (user == null) return;
+            
             var level = new XpLevel(user.TotalXp);
             int xp;
             if (boost)
-                xp = _properties.XpPerMessage * 2;
+                xp = Roki.Properties.XpPerMessage * 2;
             else 
-                xp = _properties.XpPerMessage;
+                xp = Roki.Properties.XpPerMessage;
             var newLevel = new XpLevel(xp);
             user.TotalXp += xp;
             user.LastXpGain = DateTimeOffset.UtcNow;
             if (newLevel.Level > level.Level)
             {
                 user.LastLevelUp = DateTimeOffset.UtcNow;
-                await SendNotification(user, message, newLevel.Level).ConfigureAwait(false);
-                await Context.SaveChangesAsync().ConfigureAwait(false);
-                return newLevel.Level;
+                // await SendNotification(user, message, newLevel.Level).ConfigureAwait(false);
             }
 
             await Context.SaveChangesAsync().ConfigureAwait(false);
-            return 0;
         }
 
         public int GetUserXpRank(ulong userId)
