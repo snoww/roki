@@ -26,8 +26,7 @@ namespace Roki.Modules.Gambling
                 return;
             
             var removed = await _currency
-                .ChangeAsync(ctx.User.Id, ctx.Client.CurrentUser.Id, "BetRoll Entry", -amount, ctx.Guild.Id, ctx.Channel.Id, 
-                    ctx.Message.Id)
+                .RemoveAsync(ctx.User.Id,"BetRoll Entry", amount, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
                 .ConfigureAwait(false);
             if (!removed)
             {
@@ -54,11 +53,11 @@ namespace Roki.Modules.Gambling
             else
                 win = amount * Roki.Properties.BetRoll100Multiplier;
 
-            await _currency.ChangeAsync(ctx.Client.CurrentUser.Id, ctx.User.Id, "BetRoll Payout", win, ctx.Guild.Id, ctx.Channel.Id,
-                ctx.Message.Id);
+            await _currency.AddAsync(ctx.User.Id, "BetRoll Payout", win, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id).ConfigureAwait(false);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{rollStr}\nCongratulations, you won `{win:N0}` {Roki.Properties.CurrencyIcon}\n" +
-                                 $"New Balance: `{await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}"));
+                    .WithDescription($"{rollStr}\nCongratulations, you won `{win:N0}` {Roki.Properties.CurrencyIcon}\n" +
+                                     $"New Balance: `{await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}"))
+                .ConfigureAwait(false);
         }
     }
 }

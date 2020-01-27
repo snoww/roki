@@ -11,7 +11,6 @@ namespace Roki.Services
 {
     public interface ICurrencyService : IRokiService
     {
-        Task<bool> ChangeAsync(ulong from, ulong to, string reason, long amount, ulong guildId, ulong channelId, ulong messageId);
         Task<bool> RemoveAsync(ulong userId, string reason, long amount, ulong guildId, ulong channelId, ulong messageId);
         Task AddAsync(ulong userId, string reason, long amount, ulong guildId, ulong channelId, ulong messageId);
         Task<bool> TransferAsync(ulong userIdFrom, ulong userIdTo, string reason, long amount, ulong guildId, ulong channelId, ulong messageId);
@@ -27,11 +26,6 @@ namespace Roki.Services
         {
             _db = db;
             _cache = cache.Redis.GetDatabase();
-        }
-        
-        public async Task<bool> ChangeAsync(ulong from, ulong to, string reason, long amount, ulong guildId, ulong channelId, ulong messageId)
-        {
-            return await InternalChangeAsync(from, to, reason, amount, guildId, channelId, messageId).ConfigureAwait(false);
         }
 
         public async Task<bool> RemoveAsync(ulong userId, string reason, long amount, ulong guildId, ulong channelId, ulong messageId)

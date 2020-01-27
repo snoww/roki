@@ -160,8 +160,7 @@ namespace Roki.Modules.Games.Common
             foreach (var (key, value) in _scores)
             {
                 await _currency
-                    .ChangeAsync(key.Id, _client.CurrentUser.Id, "BetShowdown Entry", -value.Amount * value.Multiple,
-                        _channel.Guild.Id, _channel.Id, _game.Id)
+                    .RemoveAsync(key.Id, "BetShowdown Entry", value.Amount * value.Multiple, _channel.Guild.Id, _channel.Id, _game.Id)
                     .ConfigureAwait(false);
             }
             
@@ -180,8 +179,7 @@ namespace Roki.Modules.Games.Common
                 }
                 
                 var won = value.Amount * value.Multiple * 2;
-                await _currency.ChangeAsync(_client.CurrentUser.Id, key.Id, "BetShowdown Payout", won, 
-                    _channel.Guild.Id, _channel.Id, _game.Id);
+                await _currency.AddAsync(key.Id, "BetShowdown Payout", won, _channel.Guild.Id, _channel.Id, _game.Id).ConfigureAwait(false);
                 winners += $"{key.Username} won `{won:N0}` {Roki.Properties.CurrencyIcon}\n" +
                            $"\t`{before:N0}` ⇒ `{GetCurrency(key.Id):N0}`\n";
             }
