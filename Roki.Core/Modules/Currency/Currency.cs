@@ -24,12 +24,6 @@ namespace Roki.Modules.Currency
             _currency = currency;
         }
 
-        private long GetCurrency(ulong userId)
-        {
-            using var uow = _db.GetDbContext();
-            return uow.Users.GetUserCurrency(userId);
-        }
-
         private decimal GetInvAccount(ulong userId)
         {
             using var uow = _db.GetDbContext();
@@ -42,7 +36,7 @@ namespace Roki.Modules.Currency
         {
             user ??= ctx.User;
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{user.Mention}'s Accounts\nCash Account: `{GetCurrency(user.Id):N0}` {Roki.Properties.CurrencyIcon}\n" +
+                .WithDescription($"{user.Mention}'s Accounts\nCash Account: `{await _currency.GetCurrency(user.Id, ctx.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}\n" +
                                  $"Investing Account: `{GetInvAccount(user.Id):N2}` {Roki.Properties.CurrencyIcon}")).ConfigureAwait(false);
         }
 

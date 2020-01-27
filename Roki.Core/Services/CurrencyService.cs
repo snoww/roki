@@ -135,7 +135,7 @@ namespace Roki.Services
                 var cached = (long) currency;
                 if (cached + amount < 0) return false;
                 
-                await _cache.StringSetAsync($"currency:{guildId}:{userId}", cached + amount).ConfigureAwait(false);
+                await _cache.StringIncrementAsync($"currency:{guildId}:{userId}", amount, CommandFlags.FireAndForget).ConfigureAwait(false);
                 return true;
             }
 
@@ -143,11 +143,11 @@ namespace Roki.Services
 
             if (currentCurrency + amount >= 0)
             {
-                await _cache.StringSetAsync($"currency:{guildId}:{userId}", currentCurrency + amount).ConfigureAwait(false);
+                await _cache.StringSetAsync($"currency:{guildId}:{userId}", currentCurrency + amount, flags: CommandFlags.FireAndForget).ConfigureAwait(false);
                 return true;
             }
             
-            await _cache.StringSetAsync($"currency:{guildId}:{userId}", currentCurrency).ConfigureAwait(false);
+            await _cache.StringSetAsync($"currency:{guildId}:{userId}", currentCurrency, flags: CommandFlags.FireAndForget).ConfigureAwait(false);
             return false;
         }
 
@@ -156,12 +156,12 @@ namespace Roki.Services
             var currency = await _cache.StringGetAsync($"currency:{guildId}:{Roki.Properties.BotId}").ConfigureAwait(false);
             if (currency.HasValue)
             {
-                await _cache.StringSetAsync($"currency:{guildId}:{Roki.Properties.BotId}", (long) currency + amount).ConfigureAwait(false);
+                await _cache.StringIncrementAsync($"currency:{guildId}:{Roki.Properties.BotId}", amount, CommandFlags.FireAndForget).ConfigureAwait(false);
                 return;
             }
             
             var currentCurrency = GetDbCurrency(Roki.Properties.BotId);
-            await _cache.StringSetAsync($"currency:{guildId}:{Roki.Properties.BotId}", currentCurrency + amount).ConfigureAwait(false);
+            await _cache.StringSetAsync($"currency:{guildId}:{Roki.Properties.BotId}", currentCurrency + amount, flags: CommandFlags.FireAndForget).ConfigureAwait(false);
         }
     }
 }
