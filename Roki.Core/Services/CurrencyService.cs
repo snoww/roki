@@ -43,7 +43,7 @@ namespace Roki.Services
         {
             await CacheChangeAsync(userId, guildId, amount).ConfigureAwait(false);
             await ChangeBotCacheAsync(guildId, -amount).ConfigureAwait(false);
-            await ChangeDbAsync(userId,Roki.Properties.BotId, reason, amount, guildId, channelId, messageId).ConfigureAwait(false);
+            await ChangeDbAsync(Roki.Properties.BotId, userId, reason, amount, guildId, channelId, messageId).ConfigureAwait(false);
         }
 
         public async Task<bool> TransferAsync(ulong userIdFrom, ulong userIdTo, string reason, long amount, ulong guildId, ulong channelId, ulong messageId)
@@ -62,38 +62,6 @@ namespace Roki.Services
                 ChannelId = channelId,
                 MessageId = messageId
             };
-
-        private async Task<bool> InternalChangeAsync(ulong from, ulong to, string reason, long amount, ulong guildId, ulong channelId, 
-            ulong messageId)
-        {
-            using var uow = _db.GetDbContext();
-            bool success;
-            if (from == Roki.Properties.BotId)
-            {
-                await uow.Users.UpdateBotCurrencyAsync(from, -amount);
-                success = await CacheChangeAsync(to, guildId, amount).ConfigureAwait(false);
-                if (success)
-                    await uow.Users.UpdateCurrencyAsync(to, amount).ConfigureAwait(false);
-            }
-            else if (to == Roki.Properties.BotId)
-            {
-                await uow.Users.UpdateBotCurrencyAsync(to, -amount);
-                success = await uow.Users.UpdateCurrencyAsync(from, amount).ConfigureAwait(false);
-            }
-            else
-            {
-                success = await uow.Users.UpdateCurrencyAsync(from, amount).ConfigureAwait(false);
-            }
-            
-            if (success)
-            {
-                var transaction = CreateTransaction(reason, amount, from, to, guildId, channelId, messageId);
-                uow.Transaction.Add(transaction);
-            }
-
-            await uow.SaveChangesAsync().ConfigureAwait(false);
-            return success;
-        }
 
         private async Task<bool> InternalTransferAsync(ulong userIdFrom, ulong userIdTo, string reason, long amount, ulong guildId, ulong channelId, 
             ulong messageId)
