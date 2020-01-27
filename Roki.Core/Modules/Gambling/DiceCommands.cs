@@ -5,7 +5,6 @@ using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Extensions;
-using Roki.Modules.Gambling.Services;
 using Roki.Services;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -16,7 +15,7 @@ namespace Roki.Modules.Gambling
     public partial class Gambling
     {
         [Group]
-        public class DiceCommands : RokiSubmodule<GamblingService>
+        public class DiceCommands : RokiSubmodule
         {
             private const string Path = "./data/dice/";
             private readonly ICurrencyService _currency;
@@ -39,13 +38,13 @@ namespace Roki.Modules.Gambling
 
 
                 var removed = await _currency
-                    .ChangeAsync(ctx.User.Id, ctx.Client.CurrentUser.Id, "BetDie Entry", -amount, ctx.Guild.Id, ctx.Channel.Id,
-                        ctx.Message.Id)
+                    .RemoveAsync(ctx.User.Id, "BetDie Entry", amount, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
                     .ConfigureAwait(false);
                 if (!removed)
                 {
                     await ctx.Channel.SendErrorAsync($"Not enough {Roki.Properties.CurrencyIcon}\n" +
-                                                     $"You have `{_service.GetCurrency(ctx.User.Id):N0}`").ConfigureAwait(false);
+                                                     $"You have `{await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id):N0}`")
+                        .ConfigureAwait(false);
                     return;
                 }
 
@@ -123,18 +122,17 @@ namespace Roki.Modules.Gambling
 
                 if (won > 0)
                 {
-                    await _currency.ChangeAsync(ctx.Client.CurrentUser.Id, ctx.User.Id, "BetDie Payout", won, ctx.Guild.Id,
-                        ctx.Channel.Id, ctx.Message.Id);
+                    await _currency.AddAsync(ctx.User.Id, "BetDie Payout", won, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id);
                     embed.WithOkColor()
                         .WithDescription(
                             $"{ctx.User.Mention} You rolled a total of `{total}`\nCongratulations! You've won `{won:N0}` {Roki.Properties.CurrencyIcon}\n" +
-                            $"New Balance: `{_service.GetCurrency(ctx.User.Id):N0}` {Roki.Properties.CurrencyIcon}");
+                            $"New Balance: `{await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}");
                 }
                 else
                 {
                     embed.WithErrorColor()
                         .WithDescription($"{ctx.User.Mention} You rolled a total of `{total}`\nBetter luck next time!\n" +
-                                         $"New Balance: `{_service.GetCurrency(ctx.User.Id):N0}` {Roki.Properties.CurrencyIcon}");
+                                         $"New Balance: `{await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}");
                 }
 
                 await ctx.Channel.SendFileAsync(stream, "dice.png", embed: embed.Build()).ConfigureAwait(false);

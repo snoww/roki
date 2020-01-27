@@ -5,9 +5,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
-using Roki.Core.Services;
 using Roki.Extensions;
-using Roki.Modules.Gambling.Services;
 using Roki.Services;
 
 namespace Roki.Modules.Gambling
@@ -15,7 +13,7 @@ namespace Roki.Modules.Gambling
     public partial class Gambling
     {
         [Group]
-        public class CoinCommands : RokiSubmodule<GamblingService>
+        public class CoinCommands : RokiSubmodule
         {
             private readonly ICurrencyService _currency;
             private static readonly Random Rng = new Random();
@@ -47,14 +45,14 @@ namespace Roki.Modules.Gambling
                 }
 
                 var removed = await _currency
-                    .ChangeAsync(ctx.User.Id, ctx.Client.CurrentUser.Id, "BetFlip Entry", -amount, ctx.Guild.Id, ctx.Channel.Id, 
-                        ctx.Message.Id)
+                    .RemoveAsync(ctx.User.Id, "BetFlip Entry", amount, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
                     .ConfigureAwait(false);
 
                 if (!removed)
                 {
                     await ctx.Channel.SendErrorAsync($"Not enough {Roki.Properties.CurrencyIcon}\n" +
-                                                     $"You have `{_service.GetCurrency(ctx.User.Id)}`").ConfigureAwait(false);
+                                                     $"You have `{await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id):N0}`")
+                        .ConfigureAwait(false);
                     return;
                 }
 
@@ -72,19 +70,19 @@ namespace Roki.Modules.Gambling
                 if (guess == result)
                 {
                     var won = (long) Math.Ceiling(amount * Roki.Properties.BetFlipMultiplier);
-                    await _currency.ChangeAsync(ctx.Client.CurrentUser.Id, ctx.User.Id, "BetFlip Payout", won, ctx.Guild.Id,
-                        ctx.Channel.Id, ctx.Message.Id);
+                    await _currency.AddAsync(ctx.User.Id, "BetFlip Payout", won, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id).ConfigureAwait(false);
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithDescription(
                                 $"Result is: {result}\n{ctx.User.Mention} Congratulations! You've won `{won:N0}` {Roki.Properties.CurrencyIcon}\n" +
-                                $"New Balance: `{_service.GetCurrency(ctx.User.Id):N0}` {Roki.Properties.CurrencyIcon}"))
+                                $"New Balance: `{await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}"))
                         .ConfigureAwait(false);
                     return;
                 }
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
                     .WithDescription($"Result is: {result}\n{ctx.User.Mention} Better luck next time!\n" +
-                                     $"New Balance: `{_service.GetCurrency(ctx.User.Id):N0}` {Roki.Properties.CurrencyIcon}")).ConfigureAwait(false);
+                                     $"New Balance: `{await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}"))
+                    .ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Aliases, Usage]
@@ -108,14 +106,14 @@ namespace Roki.Modules.Gambling
                 }
 
                 var removed = await _currency
-                    .ChangeAsync(ctx.User.Id, ctx.Client.CurrentUser.Id, "BetFlipMulti Entry", -amount, ctx.Guild.Id, ctx.Channel.Id, 
-                        ctx.Message.Id)
+                    .RemoveAsync(ctx.User.Id, "BetFlipMulti Entry", amount, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
                     .ConfigureAwait(false);
 
                 if (!removed)
                 {
                     await ctx.Channel.SendErrorAsync($"Not enough {Roki.Properties.CurrencyIcon}\n" +
-                                                     $"You have `{_service.GetCurrency(ctx.User.Id)}`").ConfigureAwait(false);
+                                                     $"You have `{await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id):N0}`")
+                        .ConfigureAwait(false);
                     return;
                 }
 
@@ -130,19 +128,19 @@ namespace Roki.Modules.Gambling
                 if ((float) correct / guesses.Length >= Roki.Properties.BetFlipMMinCorrect)
                 {
                     var won = (long) Math.Ceiling(amount * Math.Pow(correct, Roki.Properties.BetFlipMMultiplier));
-                    await _currency.ChangeAsync(ctx.Client.CurrentUser.Id, ctx.User.Id, "BetFlipMulti Payout", won, ctx.Guild.Id,
-                        ctx.Channel.Id, ctx.Message.Id);
+                    await _currency.AddAsync(ctx.User.Id, "BetFlipMulti Payout", won, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
+                        .ConfigureAwait(false);
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithDescription(
                                 $"Results are: {string.Join(", ", results)}\n{ctx.User.Mention} Congratulations! You got `{correct}/{guesses.Length}` correct. You've won `{won:N0}` {Roki.Properties.CurrencyIcon}" +
-                                $"New Balance: `{_service.GetCurrency(ctx.User.Id):N0}` {Roki.Properties.CurrencyIcon}"))
+                                $"New Balance: `{await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}"))
                         .ConfigureAwait(false);
                     return;
                 }
                 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
                     .WithDescription($"Results are: {string.Join(", ", results)}\n{ctx.User.Mention} You got `{correct}/{guesses.Length}` correct. Better luck next time!\n" +
-                                     $"New Balance: `{_service.GetCurrency(ctx.User.Id):N0}` {Roki.Properties.CurrencyIcon}"))
+                                     $"New Balance: `{await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}"))
                     .ConfigureAwait(false);
             }
         }
