@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using Roki.Core.Services.Database.Repositories;
+using Roki.Services.Database.Repositories;
 
 namespace Roki.Services.Database
 {
@@ -12,7 +12,6 @@ namespace Roki.Services.Database
         IUserRepository Users { get; }
         IMessageRepository Messages { get; }
         ICurrencyTransactionRepository Transaction { get; }
-        ILotteryRepository Lottery { get; }
         IListingRepository Listing { get; }
         ISubscriptionRepository Subscriptions { get; }
         ITradesRepository Trades { get; }
@@ -30,7 +29,6 @@ namespace Roki.Services.Database
         private IUserRepository _users;
         private IMessageRepository _messages;
         private ICurrencyTransactionRepository _transaction;
-        private ILotteryRepository _lottery;
         private IListingRepository _listing;
         private ISubscriptionRepository _subscriptions;
         private ITradesRepository _trades;
@@ -48,7 +46,6 @@ namespace Roki.Services.Database
         public IUserRepository Users => _users ??= new UserRepository(Context);
         public IMessageRepository Messages => _messages ??= new MessageRepository(Context);
         public ICurrencyTransactionRepository Transaction => _transaction ??= new CurrencyTransactionRepository(Context);
-        public ILotteryRepository Lottery => _lottery ??= new LotteryRepository(Context);
         public IListingRepository Listing => _listing ??= new ListingRepository(Context);
         public ISubscriptionRepository Subscriptions => _subscriptions ??= new SubscriptionRepository(Context);
         public ITradesRepository Trades => _trades ??= new TradesRepository(Context);

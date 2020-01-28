@@ -8,8 +8,6 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using NLog;
-using NLog.Fluent;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Services;
 using Roki.Services.Database.Core;

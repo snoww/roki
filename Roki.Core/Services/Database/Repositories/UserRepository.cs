@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Roki.Modules.Xp.Common;
 using Roki.Services.Database.Core;
 
-namespace Roki.Core.Services.Database.Repositories
+namespace Roki.Services.Database.Repositories
 {
     public interface IUserRepository : IRepository<User>
     {
@@ -105,9 +105,9 @@ namespace Roki.Core.Services.Database.Repositories
             var level = new XpLevel(user.TotalXp);
             int xp;
             if (boost)
-                xp = Roki.Services.Roki.Properties.XpPerMessage * 2;
+                xp = Roki.Properties.XpPerMessage * 2;
             else 
-                xp = Roki.Services.Roki.Properties.XpPerMessage;
+                xp = Roki.Properties.XpPerMessage;
             user.TotalXp += xp;
             var newLevel = new XpLevel(user.TotalXp);
             user.LastXpGain = DateTimeOffset.UtcNow;

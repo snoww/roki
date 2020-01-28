@@ -15,10 +15,10 @@ namespace Roki.Modules.Utility
     {
         private readonly DiscordSocketClient _client;
         private readonly IRokiConfig _config;
-        private readonly Roki.Services.Roki _roki;
+        private readonly Roki _roki;
         private readonly IStatsService _stats;
 
-        public Utility(Roki.Services.Roki roki, DiscordSocketClient client, IStatsService stats, IRokiConfig config)
+        public Utility(Roki roki, DiscordSocketClient client, IStatsService stats, IRokiConfig config)
         {
             _client = client;
             _stats = stats;

@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using NLog;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Games.Services;
 using Roki.Services;
@@ -180,7 +179,7 @@ namespace Roki.Modules.Games.Common
                 
                 var won = value.Amount * value.Multiple * 2;
                 await _currency.AddAsync(key.Id, "BetShowdown Payout", won, _channel.Guild.Id, _channel.Id, _game.Id).ConfigureAwait(false);
-                winners += $"{key.Username} won `{won:N0}` {Roki.Services.Roki.Properties.CurrencyIcon}\n" +
+                winners += $"{key.Username} won `{won:N0}` {Roki.Properties.CurrencyIcon}\n" +
                            $"\t`{before:N0}` ⇒ `{GetCurrency(key.Id):N0}`\n";
             }
             
@@ -273,7 +272,7 @@ namespace Roki.Modules.Games.Common
                         {
                             var notEnoughMsg = await _channel
                                 .SendErrorAsync(
-                                    $"<@{reaction.User.Value.Id}> You do not have enough {Roki.Services.Roki.Properties.CurrencyIcon} to make that bet.")
+                                    $"<@{reaction.User.Value.Id}> You do not have enough {Roki.Properties.CurrencyIcon} to make that bet.")
                                 .ConfigureAwait(false);
                             await _game.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
                             notEnoughMsg.DeleteAfter(5);

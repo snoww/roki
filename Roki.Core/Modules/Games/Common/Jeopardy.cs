@@ -7,12 +7,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
-using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.EntityFrameworkCore.Internal;
 using NLog;
-using Roki.Common;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Services;
 
@@ -487,7 +483,7 @@ namespace Roki.Modules.Games.Common
             var lb = new StringBuilder();
             foreach (var (user, value) in Users.OrderByDescending(k => k.Value))
             {
-                lb.AppendLine($"{user.Username} `{value:N0}` {Roki.Services.Roki.Properties.CurrencyIcon}");
+                lb.AppendLine($"{user.Username} `{value:N0}` {Roki.Properties.CurrencyIcon}");
             }
 
             return lb.ToString();
