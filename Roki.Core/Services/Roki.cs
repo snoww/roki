@@ -11,9 +11,12 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
+using NLog.Fluent;
 using Roki.Core.Services;
+using Roki.Core.Services.Database;
 using Roki.Extensions;
 using Roki.Services;
+using StackExchange.Redis;
 using Victoria;
 
 namespace Roki
@@ -211,8 +214,17 @@ namespace Roki
                     try
                     {
                         using var uow = _db.GetDbContext();
+                        var cache = Cache.Redis.GetDatabase();
+                        await Client.DownloadUsersAsync(Client.Guilds).ConfigureAwait(false);
+                        _log.Info("Loading cache");
+                        
                         foreach (var guild in Client.Guilds)
                         {
+                            var botCurrency = uow.Users.GetUserCurrency(Properties.BotId);
+                            await cache.StringSetAsync($"currency:{guild.Id}:{Properties.BotId}", botCurrency, flags: CommandFlags.FireAndForget)
+                                .ConfigureAwait(false);
+                            await UpdateCache(uow, cache, guild.Users).ConfigureAwait(false);
+                            
                             await uow.Guilds.GetOrCreateGuildAsync(guild).ConfigureAwait(false);
                             foreach (var channel in guild.Channels)
                             {
@@ -221,6 +233,7 @@ namespace Roki
                             }
                         }
 
+                        _log.Info("Finished loading cache");
                         await uow.SaveChangesAsync().ConfigureAwait(false);
                     }
                     catch (Exception e)
@@ -228,8 +241,28 @@ namespace Roki
                         _log.Error(e);
                     }
                 });
+
                 return Task.CompletedTask;
             }
+        }
+
+        private static Task UpdateCache(IUnitOfWork uow, IDatabaseAsync cache, IEnumerable<SocketGuildUser> users)
+        {
+            var _ = Task.Run(async () =>
+            {
+                foreach (var guildUser in users)
+                {
+                    if (guildUser.IsBot) continue;
+                    
+                    var user = await uow.Users.GetOrCreateUserAsync(guildUser).ConfigureAwait(false);
+                    await cache.StringSetAsync($"currency:{guildUser.Guild.Id}:{guildUser.Id}", user.Currency, flags: CommandFlags.FireAndForget)
+                        .ConfigureAwait(false);
+                    await cache.StringSetAsync($"xp:{guildUser.Id}", user.TotalXp, flags: CommandFlags.FireAndForget)
+                        .ConfigureAwait(false);
+                }
+            });
+            
+            return Task.CompletedTask;
         }
     }
 }

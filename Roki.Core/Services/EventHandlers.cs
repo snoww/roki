@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -57,6 +58,7 @@ namespace Roki.Core.Services
             if (!(message.Channel is SocketTextChannel textChannel)) return Task.CompletedTask;
 
             UpdateXp(message).ConfigureAwait(false);
+            
             var _ =  Task.Run(async () =>
             {
                 using var uow = _db.GetDbContext();
@@ -255,6 +257,7 @@ namespace Roki.Core.Services
                 var users = guild.Users;
                 foreach (var user in users)
                 {
+                    if (user.IsBot) continue;
                     await uow.Users.GetOrCreateUserAsync(user);
                 }
                 await uow.SaveChangesAsync().ConfigureAwait(false);
@@ -287,7 +290,8 @@ namespace Roki.Core.Services
             var _ = Task.Run(async () =>
             {
                 using var uow = _db.GetDbContext();
-                await uow.Users.GetOrCreateUserAsync(user).ConfigureAwait(false);
+                if (!user.IsBot)
+                    await uow.Users.GetOrCreateUserAsync(user).ConfigureAwait(false);
             });
             return Task.CompletedTask;
         }
@@ -326,6 +330,7 @@ namespace Roki.Core.Services
                 
                 if (newLevel.Level > oldLevel.Level)
                 {
+                    await SendNotification(user, message, newLevel.Level).ConfigureAwait(false);
                     var textChannel = (SocketTextChannel) message.Channel;
                     var rewards = await uow.Guilds.GetXpRewardsAsync(textChannel.Guild.Id, newLevel.Level).ConfigureAwait(false);
                     if (rewards != null && rewards.Count != 0)
@@ -364,7 +369,7 @@ namespace Roki.Core.Services
                                     .WithDescription("Here are your rewards:\n" + string.Join("\n", rewards
                                                          .Select(r => r.Type == "currency"
                                                              ? $"+ `{int.Parse(r.Reward):N0}` {Roki.Properties.CurrencyIcon}"
-                                                             : $"+ <@&{r.Reward}>"))))
+                                                             : $"+ {textChannel.Guild.GetRole(ulong.Parse(r.Reward)).Name ?? "N/A"} Role"))))
                                 .ConfigureAwait(false);
                             await dm.CloseAsync().ConfigureAwait(false);
                         }
@@ -382,39 +387,33 @@ namespace Roki.Core.Services
 
         private async Task<int> GetCachedXp(ulong userId)
         {
-            var xp = await _cache.StringGetAsync($"xp:{userId}").ConfigureAwait(false);
-            if (xp.HasValue)
-                return (int) xp;
-            
-            using var uow = _db.GetDbContext();
-            var user = await uow.Users.GetUserAsync(userId).ConfigureAwait(false);
-            return user.TotalXp;
+            return (int) await _cache.StringGetAsync($"xp:{userId}").ConfigureAwait(false);
         }
 
         private async Task<int> UpdateCacheXp(ulong userId, int add, bool boost = false)
         {
-            var xp = await _cache.StringGetAsync($"xp:{userId}").ConfigureAwait(false);
-            if (xp.HasValue)
-            {
-                if (boost)
-                {
-                    return (int) await _cache.StringIncrementAsync($"xp:{userId}", add * 2).ConfigureAwait(false);
-                }
-
-                return (int) await _cache.StringIncrementAsync($"xp:{userId}", add).ConfigureAwait(false);
-            }
-
-            using var uow = _db.GetDbContext();
-            var user = await uow.Users.GetUserAsync(userId).ConfigureAwait(false);
-            var currentXp = user.TotalXp;
             if (boost)
             {
-                await _cache.StringSetAsync($"xp:{userId}", currentXp + add * 2).ConfigureAwait(false);
-                return currentXp + add * 2;
+                return (int) await _cache.StringIncrementAsync($"xp:{userId}", add * 2).ConfigureAwait(false);
             }
 
-            await _cache.StringSetAsync($"xp:{userId}", currentXp + add).ConfigureAwait(false);
-            return currentXp + add;
+            return (int) await _cache.StringIncrementAsync($"xp:{userId}", add).ConfigureAwait(false);
+        }
+        
+        private static async Task SendNotification(User user, SocketMessage msg, int level)
+        {
+            if (user.NotificationLocation.Equals("none", StringComparison.OrdinalIgnoreCase))
+            {
+            }
+            else if (user.NotificationLocation.Equals("dm", StringComparison.OrdinalIgnoreCase))
+            {
+                var dm = await msg.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
+                await dm.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
+            }
+            else if (user.NotificationLocation.Equals("server", StringComparison.OrdinalIgnoreCase))
+            {
+                await msg.Channel.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
+            }
         }
     }
 }
