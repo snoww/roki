@@ -36,8 +36,20 @@ namespace Roki.Modules.Currency
         {
             user ??= ctx.User;
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{user.Mention}'s Accounts\nCash Account: `{await _currency.GetCurrency(user.Id, ctx.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}\n" +
-                                 $"Investing Account: `{GetInvAccount(user.Id):N2}` {Roki.Properties.CurrencyIcon}")).ConfigureAwait(false);
+                    .WithDescription($"{user.Mention}'s Cash Account:\n`{await _currency.GetCurrency(user.Id, ctx.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}")
+                    .WithFooter(".$$ for Investing Account"))
+                .ConfigureAwait(false);
+        }
+        
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
+        public async Task Investing([Leftover] IUser user = null)
+        {
+            user ??= ctx.User;
+            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    .WithDescription($"{user.Mention}'s Investing Account:\n`{GetInvAccount(user.Id):N2}` {Roki.Properties.CurrencyIcon}")
+                    .WithFooter(".$ for Cash Account"))
+                .ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
