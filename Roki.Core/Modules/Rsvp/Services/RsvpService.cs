@@ -10,8 +10,9 @@ using Discord.WebSocket;
 using NLog;
 using NLog.Fluent;
 using Roki.Core.Services;
-using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
+using Roki.Services;
+using Roki.Services.Database.Core;
 
 namespace Roki.Modules.Rsvp.Services
 {

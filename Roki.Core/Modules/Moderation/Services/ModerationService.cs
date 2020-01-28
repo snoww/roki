@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Roki.Core.Services;
+using Roki.Services;
 
 namespace Roki.Modules.Moderation.Services
 {

@@ -1,19 +1,17 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using NLog;
-using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
 using Roki.Modules.Xp.Common;
+using Roki.Services.Database.Core;
 using StackExchange.Redis;
 
-namespace Roki.Core.Services
+namespace Roki.Services
 {
     public class EventHandlers : IRokiService
     {

@@ -35,7 +35,7 @@ namespace Roki.Modules.Stocks
                         .Take(itemsPP)
                         .Select(i => $"`{i.Symbol.ToUpper()}` `{i.Position}` - `{i.Shares}` shares"));
 
-                    desc = $"Your current portfolio value:\n`{value:N2}` {Roki.Properties.CurrencyIcon}\n" + desc;
+                    desc = $"Your current portfolio value:\n`{value:N2}` {Roki.Services.Roki.Properties.CurrencyIcon}\n" + desc;
                     
                     var embed = new EmbedBuilder().WithOkColor()
                         .WithTitle($"{user.Username}'s Portfolio")

@@ -8,7 +8,7 @@ using Discord.WebSocket;
 using NLog;
 using Roki.Extensions;
 
-namespace Roki.Core.Services
+namespace Roki.Services
 {
     public interface IStatsService : IRokiService
     {

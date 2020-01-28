@@ -10,6 +10,7 @@ using Roki.Common.Attributes;
 using Roki.Common.ModuleBehaviors;
 using Roki.Core.Services;
 using Roki.Extensions;
+using Roki.Services;
 
 namespace Roki.Modules.Help.Services
 {

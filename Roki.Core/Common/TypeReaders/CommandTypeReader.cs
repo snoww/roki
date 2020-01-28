@@ -5,6 +5,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Roki.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Roki.Services;
 
 namespace Roki.Common.TypeReaders
 {

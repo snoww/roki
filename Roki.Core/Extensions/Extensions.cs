@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Common;
 using Roki.Core.Services;
+using Roki.Services;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Gif;
@@ -31,12 +32,12 @@ namespace Roki.Extensions
 
         public static EmbedBuilder WithOkColor(this EmbedBuilder embed)
         {
-            return embed.WithColor(Roki.OkColor);
+            return embed.WithColor(Services.Roki.OkColor);
         }
 
         public static EmbedBuilder WithErrorColor(this EmbedBuilder embed)
         {
-            return embed.WithColor(Roki.ErrorColor);
+            return embed.WithColor(Services.Roki.ErrorColor);
         }
 
         public static ModuleInfo GetTopLevelModule(this ModuleInfo module)

@@ -6,9 +6,10 @@ using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
-using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
 using Roki.Modules.Utility.Services;
+using Roki.Services;
+using Roki.Services.Database.Core;
 
 namespace Roki.Modules.Utility
 {

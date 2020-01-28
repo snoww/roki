@@ -107,10 +107,10 @@ namespace Roki.Modules.Stocks
                     var embed = new EmbedBuilder().WithOkColor();
                     if (amount == 1)
                         embed.WithDescription($"{ctx.User.Mention}\nYou've successfully purchased `1` share of `{symbol.ToUpper()}` at `{price.Value:N2}`\n" +
-                                              $"Total Cost: `{cost:N2}` {Roki.Properties.CurrencyIcon}");
+                                              $"Total Cost: `{cost:N2}` {Roki.Services.Roki.Properties.CurrencyIcon}");
                     else
                         embed.WithDescription($"{ctx.User.Mention}\nYou've successfully purchased `{amount}` shares of `{symbol.ToUpper()}` at `{price.Value:N2}`\n" +
-                                              $"Total Cost: `{cost:N2}` {Roki.Properties.CurrencyIcon}");
+                                              $"Total Cost: `{cost:N2}` {Roki.Services.Roki.Properties.CurrencyIcon}");
 
                     await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 }
@@ -119,7 +119,7 @@ namespace Roki.Modules.Stocks
                     var status = await _service.ShortPositionAsync(ctx.User.Id, symbol, "buy", price.Value, amount).ConfigureAwait(false);
                     if (status == TradingService.Status.TooMuchLeverage)
                     {
-                        await ctx.Channel.SendErrorAsync($"You have leveraged over `{100000:N2}` {Roki.Properties.CurrencyIcon}.\n" +
+                        await ctx.Channel.SendErrorAsync($"You have leveraged over `{100000:N2}` {Roki.Services.Roki.Properties.CurrencyIcon}.\n" +
                                                          "You cannot short any more stocks until they are returned.").ConfigureAwait(false);
                         return;
                     }
@@ -131,10 +131,10 @@ namespace Roki.Modules.Stocks
                     var embed = new EmbedBuilder().WithOkColor();
                     if (amount == 1)
                         embed.WithDescription($"{ctx.User.Mention}\nYou've successfully sold `1` share of `{symbol.ToUpper()}` at `{price.Value}`\n" +
-                                              $"Total sold for: `{cost:N2}` {Roki.Properties.CurrencyIcon}");
+                                              $"Total sold for: `{cost:N2}` {Roki.Services.Roki.Properties.CurrencyIcon}");
                     else
                         embed.WithDescription($"{ctx.User.Mention}\nYou've successfully sold `{amount}` shares of `{symbol.ToUpper()}` at `{price.Value}`\n" +
-                                              $"Total sold for: `{cost:N2}` {Roki.Properties.CurrencyIcon}");
+                                              $"Total sold for: `{cost:N2}` {Roki.Services.Roki.Properties.CurrencyIcon}");
                     embed.WithFooter("Short selling stocks charges a premium weekly");
 
                     await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);

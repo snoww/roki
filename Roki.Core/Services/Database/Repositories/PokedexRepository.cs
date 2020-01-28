@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Roki.Core.Services.Database.Models;
+using Roki.Services.Database.Data;
 
 namespace Roki.Core.Services.Database.Repositories
 {

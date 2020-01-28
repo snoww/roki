@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Discord;
-using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
-using Roki.Core.Services.Database.Models;
 using Roki.Modules.Xp.Common;
+using Roki.Services.Database.Core;
 
 namespace Roki.Core.Services.Database.Repositories
 {
@@ -107,9 +105,9 @@ namespace Roki.Core.Services.Database.Repositories
             var level = new XpLevel(user.TotalXp);
             int xp;
             if (boost)
-                xp = Roki.Properties.XpPerMessage * 2;
+                xp = Roki.Services.Roki.Properties.XpPerMessage * 2;
             else 
-                xp = Roki.Properties.XpPerMessage;
+                xp = Roki.Services.Roki.Properties.XpPerMessage;
             user.TotalXp += xp;
             var newLevel = new XpLevel(user.TotalXp);
             user.LastXpGain = DateTimeOffset.UtcNow;

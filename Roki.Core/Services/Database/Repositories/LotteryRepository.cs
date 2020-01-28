@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Roki.Core.Services.Database.Models;
+using Roki.Services.Database.Core;
 
 namespace Roki.Core.Services.Database.Repositories
 {
@@ -83,9 +83,9 @@ namespace Roki.Core.Services.Database.Repositories
         }
 
         public string GetLotteryId() =>
-            Set.OrderByDescending(l => l.Date).First(u => u.UserId == Roki.Properties.BotId).LotteryId;
+            Set.OrderByDescending(l => l.Date).First(u => u.UserId == Roki.Services.Roki.Properties.BotId).LotteryId;
 
         public DateTimeOffset GetLotteryDate(ulong botId) =>
-            Set.OrderByDescending(l => l.Date).First(u => u.UserId == Roki.Properties.BotId).Date;
+            Set.OrderByDescending(l => l.Date).First(u => u.UserId == Roki.Services.Roki.Properties.BotId).Date;
     }
 }

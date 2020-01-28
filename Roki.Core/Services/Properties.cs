@@ -1,4 +1,4 @@
-namespace Roki.Core.Services
+namespace Roki.Services
 {
     public class Properties
     {

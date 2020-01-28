@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Roki.Core.Services;
-using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
 using Roki.Services;
+using Roki.Services.Database.Core;
 using StackExchange.Redis;
 
 namespace Roki.Modules.Currency.Services
@@ -38,32 +37,32 @@ namespace Roki.Modules.Currency.Services
                 return;
             if (!(message.Channel is ITextChannel channel))
                 return;
-            if (Roki.Properties.CurrencyGenIgnoredChannels.Contains(channel.Id))
+            if (Roki.Services.Roki.Properties.CurrencyGenIgnoredChannels.Contains(channel.Id))
                 return;
 
             var lastGeneration = LastGenerations.GetOrAdd(channel.Id, DateTime.MinValue);
             var rng = new Random();
             
-            if (DateTime.UtcNow - TimeSpan.FromMinutes(Roki.Properties.CurrencyGenerationCooldown) < lastGeneration)
+            if (DateTime.UtcNow - TimeSpan.FromMinutes(Roki.Services.Roki.Properties.CurrencyGenerationCooldown) < lastGeneration)
                 return;
 
-            var num = rng.Next(0, 100) + Roki.Properties.CurrencyGenerationChance * 100;
+            var num = rng.Next(0, 100) + Roki.Services.Roki.Properties.CurrencyGenerationChance * 100;
             if (num > 100 && LastGenerations.TryUpdate(channel.Id, DateTime.UtcNow, lastGeneration))
             {
-                var drop = Roki.Properties.CurrencyDropAmount;
-                var dropMax = Roki.Properties.CurrencyDropAmountMax;
+                var drop = Roki.Services.Roki.Properties.CurrencyDropAmount;
+                var dropMax = Roki.Services.Roki.Properties.CurrencyDropAmountMax;
                 
                 if (dropMax != null && dropMax > drop)
                     drop = new Random().Next(drop, dropMax.Value + 1);
                 if (new Random().Next(0, 101) == 100)
-                    drop = Roki.Properties.CurrencyDropAmountRare ?? 100;
+                    drop = Roki.Services.Roki.Properties.CurrencyDropAmountRare ?? 100;
                 
                 if (drop > 0)
                 {
-                    var prefix = Roki.Properties.Prefix;
+                    var prefix = Roki.Services.Roki.Properties.Prefix;
                     var toSend = drop == 1
-                        ? $"{Roki.Properties.CurrencyIcon} A random {Roki.Properties.CurrencyName} appeared! Type `{prefix}pick` to pick it up."
-                        : $"{Roki.Properties.CurrencyIcon} {drop} random {Roki.Properties.CurrencyNamePlural} appeared! Type `{prefix}pick` to pick them up.";
+                        ? $"{Roki.Services.Roki.Properties.CurrencyIcon} A random {Roki.Services.Roki.Properties.CurrencyName} appeared! Type `{prefix}pick` to pick it up."
+                        : $"{Roki.Services.Roki.Properties.CurrencyIcon} {drop} random {Roki.Services.Roki.Properties.CurrencyNamePlural} appeared! Type `{prefix}pick` to pick them up.";
                     // TODO add images to send with drop
                     var curMessage = await channel.SendMessageAsync(toSend).ConfigureAwait(false);
                     using var uow = _db.GetDbContext();
@@ -71,7 +70,7 @@ namespace Roki.Modules.Currency.Services
                     {
                         Amount = drop,
                         Reason = "GCA",
-                        From = Roki.Properties.BotId,
+                        From = Roki.Services.Roki.Properties.BotId,
                         GuildId = channel.GuildId,
                         ChannelId = channel.Id,
                         MessageId = curMessage.Id
@@ -133,7 +132,7 @@ namespace Roki.Modules.Currency.Services
 
             if (!updated) return false;
                 
-            var msg = await ctx.Channel.SendMessageAsync($"{user.Username} dropped {amount.FormatNumber()} {Roki.Properties.CurrencyIcon}\nType `.pick` to pick it up.");
+            var msg = await ctx.Channel.SendMessageAsync($"{user.Username} dropped {amount.FormatNumber()} {Roki.Services.Roki.Properties.CurrencyIcon}\nType `.pick` to pick it up.");
 
             uow.Transaction.Add(new CurrencyTransaction
             {
