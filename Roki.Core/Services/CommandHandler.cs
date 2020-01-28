@@ -58,23 +58,23 @@ namespace Roki.Services
             return Task.CompletedTask;
         }
 
-        private Task LogSuccess(IMessage usrMsg, IGuildChannel channel, long seconds)
+        private Task LogSuccess(IMessage message, IGuildChannel channel, long seconds)
         {
             _log.Info("Command executed in " + seconds + " ms\n\t" +
                       "User: {0}\n\t" +
                       "Server: {1}\n\t" +
                       "Channel: {2}\n\t" +
                       "Message: {3}",
-                usrMsg.Author + " [" + usrMsg.Author.Id + "]",
+                message.Author + " [" + message.Author.Id + "]",
                 channel == null ? "PRIVATE" : channel.Guild.Name + " [" + channel.Guild.Id + "]",
                 channel == null ? "PRIVATE" : channel.Name + " [" + channel.Id + "]",
-                usrMsg.Content
+                message.Content
             );
             
             return Task.CompletedTask;
         }
 
-        private void LogError(string errorMessage, IMessage usrMsg, IGuildChannel channel, long seconds)
+        private void LogError(string error, IMessage message, IGuildChannel channel, long seconds)
         {
             _log.Warn("Command errored after " + seconds + " ms\n\t" + 
                       "User: {0}\n\t" +
@@ -82,11 +82,11 @@ namespace Roki.Services
                       "Channel: {2}\n\t" +
                       "Message: {3}\n\t" +
                       "Error: {4}",
-                usrMsg.Author + " [" + usrMsg.Author.Id + "]",
+                message.Author + " [" + message.Author.Id + "]",
                 channel == null ? "PRIVATE" : channel.Guild.Name + " [" + channel.Guild.Id + "]",
                 channel == null ? "PRIVATE" : channel.Name + " [" + channel.Id + "]",
-                usrMsg.Content,
-                errorMessage
+                message.Content,
+                error
             );
         }
 
@@ -118,35 +118,35 @@ namespace Roki.Services
             }
         }
 
-        private async Task TryRunCommand(SocketGuild guild, ISocketMessageChannel channel, IUserMessage userMessage)
+        private async Task TryRunCommand(SocketGuild guild, ISocketMessageChannel channel, IUserMessage message)
         {
             var sw = Stopwatch.StartNew();
-            var content = userMessage.Content;
+            var content = message.Content;
 
             if (content.StartsWith(DefaultPrefix, StringComparison.InvariantCulture))
             {
-                var (success, error, info) = await ExecuteCommandAsync(new CommandContext(_client, userMessage),
+                var (success, error, info) = await ExecuteCommandAsync(new CommandContext(_client, message),
                         content.Substring(DefaultPrefix.Length), _services, MultiMatchHandling.Best)
                     .ConfigureAwait(false);
 
                 sw.Stop();
                 if (success)
                 {
-                    await LogSuccess(userMessage, channel as ITextChannel, sw.ElapsedMilliseconds).ConfigureAwait(false);
-                    await CommonOnSuccess(userMessage, info).ConfigureAwait(false);
+                    await LogSuccess(message, channel as ITextChannel, sw.ElapsedMilliseconds).ConfigureAwait(false);
+                    await CommonOnSuccess(message, info).ConfigureAwait(false);
                     return;
                 }
 
                 if (error != null)
                 {
-                    LogError(error, userMessage, channel as ITextChannel, sw.ElapsedMilliseconds);
+                    LogError(error, message, channel as ITextChannel, sw.ElapsedMilliseconds);
                     if (guild != null)
                         await CommonOnError(info, channel as ITextChannel, error).ConfigureAwait(false);
                 }
             }
             else
             {
-                await OnMessageNoTrigger(userMessage).ConfigureAwait(false);
+                await OnMessageNoTrigger(message).ConfigureAwait(false);
             }
         }
 
