@@ -29,7 +29,7 @@ namespace Roki
         private RokiConfig Config { get; }
         private DiscordSocketClient Client { get; }
         private CommandService CommandService { get; }
-        private IRedisCache Cache { get; set; }
+        private IRedisCache Cache { get; }
         public static Properties Properties { get; private set; }
         public static Color OkColor { get; private set; }
         public static Color ErrorColor { get; private set; }
