@@ -277,11 +277,11 @@ namespace Roki.Modules.Games
                 foreach (var (user, score) in playerScore)
                 {
                     scoreStr += $"{user.Username} `{score.Correct}`/`{score.Incorrect + score.Correct}`\n";
-                    var before = _service.GetCurrency(user.Id);
-                    await _currency.ChangeAsync(ctx.Client.CurrentUser.Id, user.Id, "Trivia Reward", score.Amount, ctx.Guild.Id, ctx.Channel.Id,
-                        ctx.Message.Id).ConfigureAwait(false);
+                    var before = await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id);
+                    await _currency.AddAsync(user.Id, "Trivia Reward", score.Amount, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
+                        .ConfigureAwait(false);
                     winStr += $"{user.Username} won `{score.Amount:N0}` {Roki.Properties.CurrencyIcon}\n" +
-                              $"\t`{before:N0}` ⇒ `{_service.GetCurrency(user.Id):N0}`\n";
+                              $"\t`{before:N0}` ⇒ `{await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id):N0:N0}`\n";
                     winners = true;
                 }
 

@@ -11,9 +11,9 @@ namespace Roki.Common.Attributes
     {
         public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
-            var creds = services.GetService<IRokiConfig>();
+            var config = services.GetService<IRokiConfig>();
 
-            return Task.FromResult(creds.IsOwner(context.User) || context.Client.CurrentUser.Id == context.User.Id
+            return Task.FromResult(config.IsOwner(context.User) || context.Client.CurrentUser.Id == context.User.Id
                 ? PreconditionResult.FromSuccess()
                 : PreconditionResult.FromError("Not owner"));
         }

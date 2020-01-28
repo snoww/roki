@@ -1,9 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -14,9 +9,6 @@ using Roki.Extensions;
 using Roki.Modules.Games.Common;
 using Roki.Modules.Games.Services;
 using Roki.Services;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using Image = SixLabors.ImageSharp.Image;
 
 namespace Roki.Modules.Games
 {
@@ -28,12 +20,14 @@ namespace Roki.Modules.Games
             private readonly ICurrencyService _currency;
             private readonly DbService _db;
             private readonly DiscordSocketClient _client;
+            private readonly IRedisCache _cache;
 
-            public ShowdownCommands(ICurrencyService currency, DbService db, DiscordSocketClient client)
+            public ShowdownCommands(ICurrencyService currency, DbService db, DiscordSocketClient client, IRedisCache cache)
             {
                 _currency = currency;
                 _db = db;
                 _client = client;
+                _cache = cache;
             }
 
             [RokiCommand, Description, Aliases, Usage]
@@ -42,7 +36,7 @@ namespace Roki.Modules.Games
             {
                 if (gen > 8 || gen < 4) gen = 8;
                 
-                var showdown = new Showdown(_currency, _db, _client, (ITextChannel)ctx.Channel, gen);
+                var showdown = new Showdown(_currency, _db, _client, (ITextChannel)ctx.Channel, gen, _service, _cache);
                 
                 if (_service.ActiveGames.TryAdd(ctx.Channel.Id, showdown))
                 {
@@ -84,8 +78,8 @@ namespace Roki.Modules.Games
                     await ctx.Channel.SendErrorAsync("Please wait for current game to finish first.").ConfigureAwait(false);
                     return;
                 }
-
-                var url = await ShowdownService.GetBetPokemonGame(uid);
+                
+                var url = await _service.GetBetPokemonGame(uid);
                 if (url == null)
                 {
                     await ctx.Channel.SendErrorAsync("Cannot find replay with that ID.").ConfigureAwait(false);

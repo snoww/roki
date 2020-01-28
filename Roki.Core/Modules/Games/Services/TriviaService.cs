@@ -52,11 +52,5 @@ namespace Roki.Modules.Games.Services
             
             return questions;
         }
-        
-        public long GetCurrency(ulong userId)
-        {
-            using var uow = _db.GetDbContext();
-            return uow.Users.GetUserCurrency(userId);
-        }
     }
 }
