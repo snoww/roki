@@ -108,20 +108,8 @@ namespace Roki.Services
         }
 
         public async Task<long> GetCurrency(ulong userId, ulong guildId)
-        {
-            var currency = await _cache.StringGetAsync($"currency:{guildId}:{userId}").ConfigureAwait(false);
-            if (currency.HasValue)
-            {
-                return (long) currency;
-            }
-
-            return GetDbCurrency(userId);
-        }
-        
-        private long GetDbCurrency(ulong userId)
-        {
-            using var uow = _db.GetDbContext();
-            return uow.Users.GetUserCurrency(userId);
+        { 
+            return (long) await _cache.StringGetAsync($"currency:{guildId}:{userId}").ConfigureAwait(false);
         }
 
         private async Task<bool> CacheChangeAsync(ulong userId, ulong guildId, long amount)
@@ -130,38 +118,16 @@ namespace Roki.Services
                 return false;
             
             var currency = await _cache.StringGetAsync($"currency:{guildId}:{userId}").ConfigureAwait(false);
-            if (currency.HasValue)
-            {
-                var cached = (long) currency;
-                if (cached + amount < 0) return false;
-                
-                await _cache.StringIncrementAsync($"currency:{guildId}:{userId}", amount, CommandFlags.FireAndForget).ConfigureAwait(false);
-                return true;
-            }
-
-            var currentCurrency = GetDbCurrency(userId);
-
-            if (currentCurrency + amount >= 0)
-            {
-                await _cache.StringSetAsync($"currency:{guildId}:{userId}", currentCurrency + amount, flags: CommandFlags.FireAndForget).ConfigureAwait(false);
-                return true;
-            }
+            var cached = (long) currency;
+            if (cached + amount < 0) return false;
             
-            await _cache.StringSetAsync($"currency:{guildId}:{userId}", currentCurrency, flags: CommandFlags.FireAndForget).ConfigureAwait(false);
-            return false;
+            await _cache.StringIncrementAsync($"currency:{guildId}:{userId}", amount, CommandFlags.FireAndForget).ConfigureAwait(false);
+            return true;
         }
 
         private async Task ChangeBotCacheAsync(ulong guildId, long amount)
         {
-            var currency = await _cache.StringGetAsync($"currency:{guildId}:{Roki.Properties.BotId}").ConfigureAwait(false);
-            if (currency.HasValue)
-            {
-                await _cache.StringIncrementAsync($"currency:{guildId}:{Roki.Properties.BotId}", amount, CommandFlags.FireAndForget).ConfigureAwait(false);
-                return;
-            }
-            
-            var currentCurrency = GetDbCurrency(Roki.Properties.BotId);
-            await _cache.StringSetAsync($"currency:{guildId}:{Roki.Properties.BotId}", currentCurrency + amount, flags: CommandFlags.FireAndForget).ConfigureAwait(false);
+            await _cache.StringIncrementAsync($"currency:{guildId}:{Roki.Properties.BotId}", amount, CommandFlags.FireAndForget).ConfigureAwait(false);
         }
     }
 }

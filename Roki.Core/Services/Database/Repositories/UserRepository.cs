@@ -112,13 +112,12 @@ namespace Roki.Core.Services.Database.Repositories
                 xp = Roki.Properties.XpPerMessage * 2;
             else 
                 xp = Roki.Properties.XpPerMessage;
-            var newLevel = new XpLevel(xp);
             user.TotalXp += xp;
+            var newLevel = new XpLevel(user.TotalXp);
             user.LastXpGain = DateTimeOffset.UtcNow;
             if (newLevel.Level > level.Level)
             {
                 user.LastLevelUp = DateTimeOffset.UtcNow;
-                // await SendNotification(user, message, newLevel.Level).ConfigureAwait(false);
             }
 
             await Context.SaveChangesAsync().ConfigureAwait(false);
@@ -284,22 +283,6 @@ namespace Roki.Core.Services.Database.Repositories
                 user.Currency -= (long) amount;
 
             await Context.SaveChangesAsync().ConfigureAwait(false);
-        }
-
-        private static async Task SendNotification(User user, SocketMessage msg, int level)
-        {
-            if (user.NotificationLocation.Equals("none", StringComparison.OrdinalIgnoreCase))
-            {
-            }
-            else if (user.NotificationLocation.Equals("dm", StringComparison.OrdinalIgnoreCase))
-            {
-                var dm = await msg.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
-                await dm.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
-            }
-            else if (user.NotificationLocation.Equals("server", StringComparison.OrdinalIgnoreCase))
-            {
-                await msg.Channel.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
-            }
         }
     }
 }
