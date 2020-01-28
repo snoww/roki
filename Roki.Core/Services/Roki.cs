@@ -92,7 +92,7 @@ namespace Roki.Services
             }
 
             sw.Stop();
-            _log.Info($"Roki connected in {sw.Elapsed.TotalSeconds:F2}s");
+            _log.Info($"Roki connected in {sw.ElapsedMilliseconds} ms");
 
             var stats = Services.GetService<IStatsService>();
             stats.Initialize();
@@ -135,6 +135,7 @@ namespace Roki.Services
                         var cache = Cache.Redis.GetDatabase();
                         await Client.DownloadUsersAsync(Client.Guilds).ConfigureAwait(false);
                         _log.Info("Loading cache");
+                        var sw = Stopwatch.StartNew();
                         
                         foreach (var guild in Client.Guilds)
                         {
@@ -151,7 +152,8 @@ namespace Roki.Services
                             }
                         }
 
-                        _log.Info("Finished loading cache");
+                        sw.Stop();
+                        _log.Info($"Cache loaded in {sw.ElapsedMilliseconds} ms");
                         await uow.SaveChangesAsync().ConfigureAwait(false);
                     }
                     catch (Exception e)
@@ -190,10 +192,10 @@ namespace Roki.Services
             LoadTypeReaders(typeof(Roki).Assembly);
 
             sw.Stop();
-            _log.Info($"All services loaded in {sw.ElapsedMilliseconds}ms");
+            _log.Info($"All services loaded in {sw.ElapsedMilliseconds} ms");
         }
 
-        private IEnumerable<object> LoadTypeReaders(Assembly assembly)
+        private void LoadTypeReaders(Assembly assembly)
         {
             Type[] allTypes;
             try
@@ -203,23 +205,20 @@ namespace Roki.Services
             catch (ReflectionTypeLoadException ex)
             {
                 _log.Warn(ex.LoaderExceptions[0]);
-                return Enumerable.Empty<object>();
+                return;
             }
 
-            var filteredTypes = allTypes
-                .Where(x => x.IsSubclassOf(typeof(TypeReader))
-                            && x.BaseType.GetGenericArguments().Length > 0
-                            && !x.IsAbstract);
-
-            var toReturn = new List<object>();
-            foreach (var filteredType in filteredTypes)
+            var typeReaders = allTypes
+                .Where(x => x.IsSubclassOf(typeof(TypeReader)) && x.BaseType.GetGenericArguments().Length > 0 && !x.IsAbstract);
+            
+            foreach (var reader in typeReaders)
             {
-                var x = (TypeReader) Activator.CreateInstance(filteredType, Client, CommandService);
-                var baseType = filteredType.BaseType;
+                var typeReader = (TypeReader) Activator.CreateInstance(reader, Client, CommandService);
+                var baseType = reader.BaseType;
                 var typeArgs = baseType.GetGenericArguments();
                 try
                 {
-                    CommandService.AddTypeReader(typeArgs[0], x);
+                    CommandService.AddTypeReader(typeArgs[0], typeReader);
                 }
                 catch (Exception e)
                 {
@@ -227,10 +226,7 @@ namespace Roki.Services
                     throw;
                 }
 
-                toReturn.Add(x);
             }
-
-            return toReturn;
         }
         
         private Task Log(LogMessage arg)

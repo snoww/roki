@@ -39,14 +39,8 @@ namespace Roki.Services
         private long _voiceChannels;
 
         public const string BotVersion = "0.9.1";
-        
-//        private readonly Timer _carbonitexTimer;
-//        private readonly Timer _botlistTimer;
-//        private readonly Timer _dataTimer;
-//        private readonly ConnectionMultiplexer _redis;
-//        private readonly IHttpClientFactory _httpFactory;
 
-        public StatsService(DiscordSocketClient client, CommandHandler cmdHandler, IRokiConfig config, Roki roki)
+        public StatsService(DiscordSocketClient client, CommandHandler cmdHandler, IRokiConfig config)
         {
             _log = LogManager.GetCurrentClassLogger();
             _client = client;
