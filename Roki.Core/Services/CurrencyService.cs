@@ -15,6 +15,7 @@ namespace Roki.Services
         Task AddAsync(ulong userId, string reason, long amount, ulong guildId, ulong channelId, ulong messageId);
         Task<bool> TransferAsync(ulong userIdFrom, ulong userIdTo, string reason, long amount, ulong guildId, ulong channelId, ulong messageId);
         Task<long> GetCurrency(ulong userId, ulong guildId);
+        Task<bool> CacheChangeAsync(ulong userId, ulong guildId, long amount);
     }
     
     public class CurrencyService : ICurrencyService
@@ -114,7 +115,7 @@ namespace Roki.Services
             return (long) await _cache.StringGetAsync($"currency:{guildId}:{userId}").ConfigureAwait(false);
         }
 
-        private async Task<bool> CacheChangeAsync(ulong userId, ulong guildId, long amount)
+        public async Task<bool> CacheChangeAsync(ulong userId, ulong guildId, long amount)
         {
             if (amount == 0)
                 return false;
