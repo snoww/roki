@@ -6,7 +6,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Discord.WebSocket;
 using NLog;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Searches.Models;
 using Roki.Services;

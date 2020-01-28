@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Discord.WebSocket;
-using Roki.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Roki.Services;
 

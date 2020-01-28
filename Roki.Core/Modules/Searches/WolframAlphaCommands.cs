@@ -1,10 +1,8 @@
-using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Services;
 

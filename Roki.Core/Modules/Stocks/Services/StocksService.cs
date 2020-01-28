@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Discord;
-using Microsoft.Extensions.Options;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Stocks.Models;
 using Roki.Services;

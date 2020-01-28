@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Searches.Models;
 using Roki.Services;

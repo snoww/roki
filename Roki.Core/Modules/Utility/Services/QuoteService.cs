@@ -1,8 +1,6 @@
 using System;
 using System.Globalization;
 using System.Net;
-using System.Net.Http;
-using Roki.Core.Services;
 using Roki.Services;
 
 namespace Roki.Modules.Utility.Services
