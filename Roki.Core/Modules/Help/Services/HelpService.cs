@@ -7,14 +7,12 @@ using Discord.Commands;
 using Discord.WebSocket;
 using NLog;
 using Roki.Common.Attributes;
-using Roki.Common.ModuleBehaviors;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Services;
 
 namespace Roki.Modules.Help.Services
 {
-    public class HelpService : ILateExecutor, IRokiService
+    public class HelpService : IRokiService
     {
         private readonly CommandHandler _command;
         private readonly Logger _log;
@@ -68,7 +66,7 @@ namespace Roki.Modules.Help.Services
             return embed;
         }
 
-        public static string GetCommandOptionHelp(Type option)
+        private static string GetCommandOptionHelp(Type option)
         {
             var str = option.GetProperties()
                 .Select(x => x.GetCustomAttributes(true).FirstOrDefault(a => a is OptionAttribute))
@@ -87,7 +85,7 @@ namespace Roki.Modules.Help.Services
             return string.Join("\n", str);
         }
 
-        public static string[] GetCommandRequirements(CommandInfo info)
+        private static string[] GetCommandRequirements(CommandInfo info)
         {
             return info.Preconditions
                 // TODO add owner only attribute here
