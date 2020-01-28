@@ -120,16 +120,4 @@ namespace Roki.Services
         public string Type { get; }
         public string ConnectionString { get; }
     }
-        
-    // public class RestartConfig
-    // {
-    //     public RestartConfig(string cmd, string args)
-    //     {
-    //         this.Cmd = cmd;
-    //         this.Args = args;
-    //     }
-    //     
-    //     public string Cmd { get; }
-    //     public string Args { get; }
-    // }
 }

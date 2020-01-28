@@ -40,7 +40,7 @@ namespace Roki.Services
             Config = new RokiConfig();
             Cache = new RedisCache(Config.RedisConfig);
             
-            _db = new DbService(Config);
+            _db = new DbService(Config.Db.ConnectionString);
             _db.Setup();
 
             // global properties
@@ -66,83 +66,7 @@ namespace Roki.Services
 
             Client.Log += Log;
         }
-
-        private Task Log(LogMessage arg)
-        {
-            _log.Warn(arg.Source + " | " + arg.Message);
-            if (arg.Exception != null)
-                _log.Warn(arg.Exception);
-
-            return Task.CompletedTask;
-        }
-
-        private void AddServices()
-        {
-            var sw = Stopwatch.StartNew();
-            
-            var service = new ServiceCollection()
-                .AddSingleton<IRokiConfig>(Config)
-                .AddSingleton(_db)
-                .AddSingleton(Cache)
-                .AddSingleton(Client)
-                .AddSingleton(CommandService)
-                .AddSingleton<LavaConfig>()
-                .AddSingleton<LavaNode>()
-                .AddSingleton(this)
-                .AddHttpClient();
-
-            service.LoadFrom(Assembly.GetAssembly(typeof(CommandHandler)));
-            service.LoadFrom(Assembly.GetAssembly(typeof(EventHandlers)));
-
-            Services = service.BuildServiceProvider();
-            var commandHandler = Services.GetService<CommandHandler>();
-            commandHandler.AddServices(service);
-            LoadTypeReaders(typeof(Roki).Assembly);
-
-            sw.Stop();
-            _log.Info($"All services loaded in {sw.Elapsed.TotalSeconds:F2}s");
-        }
-
-        private IEnumerable<object> LoadTypeReaders(Assembly assembly)
-        {
-            Type[] allTypes;
-            try
-            {
-                allTypes = assembly.GetTypes();
-            }
-            catch (ReflectionTypeLoadException ex)
-            {
-                _log.Warn(ex.LoaderExceptions[0]);
-                return Enumerable.Empty<object>();
-            }
-
-            var filteredTypes = allTypes
-                .Where(x => x.IsSubclassOf(typeof(TypeReader))
-                            && x.BaseType.GetGenericArguments().Length > 0
-                            && !x.IsAbstract);
-
-            var toReturn = new List<object>();
-            foreach (var filteredType in filteredTypes)
-            {
-                var x = (TypeReader) Activator.CreateInstance(filteredType, Client, CommandService);
-                var baseType = filteredType.BaseType;
-                var typeArgs = baseType.GetGenericArguments();
-                try
-                {
-                    CommandService.AddTypeReader(typeArgs[0], x);
-                }
-                catch (Exception e)
-                {
-                    _log.Error(e);
-                    throw;
-                }
-
-                toReturn.Add(x);
-            }
-
-            return toReturn;
-        }
-
+        
         public async Task RunAndBlockAsync()
         {
             await RunAsync().ConfigureAwait(false);
@@ -240,6 +164,82 @@ namespace Roki.Services
 
                 return Task.CompletedTask;
             }
+        }
+
+        private void AddServices()
+        {
+            var sw = Stopwatch.StartNew();
+            
+            var service = new ServiceCollection()
+                .AddSingleton<IRokiConfig>(Config)
+                .AddSingleton(_db)
+                .AddSingleton(Cache)
+                .AddSingleton(Client)
+                .AddSingleton(CommandService)
+                .AddSingleton<LavaConfig>()
+                .AddSingleton<LavaNode>()
+                .AddSingleton(this)
+                .AddHttpClient();
+
+            service.LoadFrom(Assembly.GetAssembly(typeof(CommandHandler)));
+            service.LoadFrom(Assembly.GetAssembly(typeof(EventHandlers)));
+
+            Services = service.BuildServiceProvider();
+            var commandHandler = Services.GetService<CommandHandler>();
+            commandHandler.AddServices(service);
+            LoadTypeReaders(typeof(Roki).Assembly);
+
+            sw.Stop();
+            _log.Info($"All services loaded in {sw.ElapsedMilliseconds}ms");
+        }
+
+        private IEnumerable<object> LoadTypeReaders(Assembly assembly)
+        {
+            Type[] allTypes;
+            try
+            {
+                allTypes = assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                _log.Warn(ex.LoaderExceptions[0]);
+                return Enumerable.Empty<object>();
+            }
+
+            var filteredTypes = allTypes
+                .Where(x => x.IsSubclassOf(typeof(TypeReader))
+                            && x.BaseType.GetGenericArguments().Length > 0
+                            && !x.IsAbstract);
+
+            var toReturn = new List<object>();
+            foreach (var filteredType in filteredTypes)
+            {
+                var x = (TypeReader) Activator.CreateInstance(filteredType, Client, CommandService);
+                var baseType = filteredType.BaseType;
+                var typeArgs = baseType.GetGenericArguments();
+                try
+                {
+                    CommandService.AddTypeReader(typeArgs[0], x);
+                }
+                catch (Exception e)
+                {
+                    _log.Error(e);
+                    throw;
+                }
+
+                toReturn.Add(x);
+            }
+
+            return toReturn;
+        }
+        
+        private Task Log(LogMessage arg)
+        {
+            _log.Warn(arg.Source + " | " + arg.Message);
+            if (arg.Exception != null)
+                _log.Warn(arg.Exception);
+
+            return Task.CompletedTask;
         }
 
         private Task UpdateCache(IDatabaseAsync cache, IEnumerable<SocketGuildUser> users)
