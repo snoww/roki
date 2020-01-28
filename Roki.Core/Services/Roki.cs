@@ -223,7 +223,7 @@ namespace Roki
                             var botCurrency = uow.Users.GetUserCurrency(Properties.BotId);
                             await cache.StringSetAsync($"currency:{guild.Id}:{Properties.BotId}", botCurrency, flags: CommandFlags.FireAndForget)
                                 .ConfigureAwait(false);
-                            await UpdateCache(uow, cache, guild.Users).ConfigureAwait(false);
+                            await UpdateCache(cache, guild.Users).ConfigureAwait(false);
                             
                             await uow.Guilds.GetOrCreateGuildAsync(guild).ConfigureAwait(false);
                             foreach (var channel in guild.Channels)
@@ -246,10 +246,11 @@ namespace Roki
             }
         }
 
-        private static Task UpdateCache(IUnitOfWork uow, IDatabaseAsync cache, IEnumerable<SocketGuildUser> users)
+        private Task UpdateCache(IDatabaseAsync cache, IEnumerable<SocketGuildUser> users)
         {
             var _ = Task.Run(async () =>
             {
+                using var uow = _db.GetDbContext();
                 foreach (var guildUser in users)
                 {
                     if (guildUser.IsBot) continue;
