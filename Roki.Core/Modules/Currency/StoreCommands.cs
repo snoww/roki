@@ -177,7 +177,7 @@ namespace Roki.Modules.Currency
                     return;
                 }
 
-                await Buy(listing.Item).ConfigureAwait(false);
+                await Buy(listing.Item, quantity).ConfigureAwait(false);
             }
         
 //            [RokiCommand, Description, Usage, Aliases]
