@@ -10,7 +10,7 @@ namespace Roki.Common.Attributes
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class AliasesAttribute : AliasAttribute
     {
-        public AliasesAttribute([CallerMemberName] string memberName = "") : base(Localization.LoadCommand(memberName.ToLowerInvariant()).Command
+        public AliasesAttribute([CallerMemberName] string name = "") : base(Localization.GetCommandData(name.ToLowerInvariant()).Command
             .Split(' ').Skip(1).ToArray())
         {
         }

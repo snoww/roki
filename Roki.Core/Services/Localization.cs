@@ -8,13 +8,13 @@ namespace Roki.Services
     public class Localization
     {
         private static readonly Dictionary<string, CommandData> CommandData =
-            File.ReadAllText("./_strings/command_strings.json").Deserialize<Dictionary<string, CommandData>>();
+            File.ReadAllText("./data/command_data.json").Deserialize<Dictionary<string, CommandData>>();
 
-        public static CommandData LoadCommand(string key)
+        public static CommandData GetCommandData(string key)
         {
-            CommandData.TryGetValue(key, out var toReturn);
+            CommandData.TryGetValue(key, out var data);
 
-            if (toReturn == null)
+            if (data == null)
                 return new CommandData
                 {
                     Command = key,
@@ -22,7 +22,7 @@ namespace Roki.Services
                     Usage = new[] {key}
                 };
 
-            return toReturn;
+            return data;
         }
     }
 }
