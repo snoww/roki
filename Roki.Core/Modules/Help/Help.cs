@@ -10,6 +10,7 @@ using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Help.Common;
 using Roki.Modules.Help.Services;
+using Roki.Services;
 
 namespace Roki.Modules.Help
 {
@@ -83,7 +84,7 @@ namespace Roki.Modules.Help
             var groups = cmdsWithGroup.GroupBy(x => i++ / 48).ToArray();
             var embed = new EmbedBuilder().WithOkColor()
                 .WithTitle($"{cmds.First().Module.GetTopLevelModule().Name} Module Commands")
-                .WithFooter($"Use {Roki.Properties.Prefix}h <command> to see the help for that command");
+                .WithFooter($"Use {Roki.Services.Roki.Properties.Prefix}h <command> to see the help for that command");
 
             foreach (var group in groups)
             {
@@ -91,8 +92,8 @@ namespace Roki.Modules.Help
                 for (i = 0; i < last; i++)
                 {
                     var transformed = group.ElementAt(i).Select(x => opts.View == CommandOptions.ViewType.Cross 
-                        ? $"{(success.Contains(x) ? "✅" : "❌")}{Roki.Properties.Prefix + x.Aliases.First(),-18} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}\n" 
-                        : $"{Roki.Properties.Prefix + x.Aliases.First(),-18} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}");
+                        ? $"{(success.Contains(x) ? "✅" : "❌")}{Roki.Services.Roki.Properties.Prefix + x.Aliases.First(),-18} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}\n" 
+                        : $"{Roki.Services.Roki.Properties.Prefix + x.Aliases.First(),-18} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}");
 
                     embed.AddField(group.ElementAt(i).Key, "```css\n" + string.Join("\n", transformed) + "\n```");
                 }
@@ -134,7 +135,7 @@ namespace Roki.Modules.Help
 You can use `{0}modules` command to see a list of all modules.
 You can use `{0}commands <module>` to see a list of all the commands in that module (e.g. `{0}commands Utility`).
 You can use `{0}h <command>` to get help for a specific command (e.g. `{0}h listquotes`).
-", Roki.Properties.Prefix))).ConfigureAwait(false);
+", Roki.Services.Roki.Properties.Prefix))).ConfigureAwait(false);
             }
 
             var embed = _service.GetCommandHelp(cmd, ctx.Guild);

@@ -2,7 +2,7 @@ using NLog;
 using NLog.Config;
 using NLog.Targets;
 
-namespace Roki.Core.Services
+namespace Roki.Services
 {
     public class LogSetup
     {

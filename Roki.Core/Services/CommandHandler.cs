@@ -12,10 +12,9 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Common.ModuleBehaviors;
-using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
 
-namespace Roki.Core.Services
+namespace Roki.Services
 {
     public class GuildUserComparer : IEqualityComparer<IGuildUser>
     {

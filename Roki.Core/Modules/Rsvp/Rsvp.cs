@@ -17,7 +17,7 @@ namespace Roki.Modules.Rsvp
         {
             var err = string.Format("`{0}events new/create`: Create a new event\n" +
                                     "`{0}events edit`: Edits an event\n" +
-                                    "`{0}events list/ls <optional_page>`: Lists events in this server\n", Roki.Properties.Prefix);
+                                    "`{0}events list/ls <optional_page>`: Lists events in this server\n", Roki.Services.Roki.Properties.Prefix);
             if (string.IsNullOrWhiteSpace(args))
             {
                 await ctx.Channel.SendErrorAsync(err).ConfigureAwait(false);

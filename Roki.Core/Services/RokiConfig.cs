@@ -6,7 +6,7 @@ using Discord;
 using Microsoft.Extensions.Configuration;
 using NLog;
 
-namespace Roki.Core.Services
+namespace Roki.Services
 {
     public interface IRokiConfig
     {

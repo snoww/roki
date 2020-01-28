@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Roki.Core.Services;
 using Roki.Modules.Searches.Models;
+using Roki.Services;
 
 namespace Roki.Modules.Searches.Services
 {

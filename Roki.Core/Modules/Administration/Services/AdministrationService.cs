@@ -7,6 +7,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Roki.Core.Services;
 using Roki.Extensions;
+using Roki.Services;
 
 namespace Roki.Modules.Administration.Services 
 {
@@ -14,9 +15,9 @@ namespace Roki.Modules.Administration.Services
     {
         private readonly DbService _db;
         private readonly DiscordSocketClient _client;
-        private readonly Roki _roki;
+        private readonly Roki.Services.Roki _roki;
 
-        public AdministrationService(DbService db, DiscordSocketClient client, Roki roki)
+        public AdministrationService(DbService db, DiscordSocketClient client, Roki.Services.Roki roki)
         {
             _db = db;
             _client = client;

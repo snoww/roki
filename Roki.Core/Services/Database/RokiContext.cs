@@ -1,8 +1,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
-using Roki.Core.Services.Database.Models;
+using Roki.Services.Database.Core;
+using Roki.Services.Database.Data;
 
-namespace Roki.Core.Services.Database
+namespace Roki.Services.Database
 {
     public class RokiContext : DbContext
     {

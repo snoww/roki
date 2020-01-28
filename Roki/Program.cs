@@ -6,7 +6,7 @@ namespace Roki
     {
         public static async Task Main(string[] args)
         {
-            await new Roki().RunAndBlockAsync();
+            await new Services.Roki().RunAndBlockAsync();
         }
     }
 }

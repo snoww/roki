@@ -5,6 +5,7 @@ using Discord.WebSocket;
 using NLog;
 using Roki.Core.Services;
 using Roki.Extensions;
+using Roki.Services;
 
 namespace Roki.Modules
 {

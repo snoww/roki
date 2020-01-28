@@ -4,22 +4,17 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
-using NLog.Fluent;
-using Roki.Core.Services;
-using Roki.Core.Services.Database;
 using Roki.Extensions;
-using Roki.Services;
 using StackExchange.Redis;
 using Victoria;
 
-namespace Roki
+namespace Roki.Services
 {
     public class Roki
     {

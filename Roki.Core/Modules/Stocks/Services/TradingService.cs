@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Roki.Core.Services;
-using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
+using Roki.Services;
+using Roki.Services.Database.Core;
 
 namespace Roki.Modules.Stocks.Services
 {
@@ -58,13 +59,13 @@ namespace Roki.Modules.Stocks.Services
                     {
                        Amount = (long) cost,
                        Reason = "Short position interest charge",
-                       To = Roki.Properties.BotId,
+                       To = Roki.Services.Roki.Properties.BotId,
                        From = userId
                     });
                     total += cost;
-                    embed.AddField($"`{investment.Symbol}` - `{investment.Shares}` Shares", $"`{cost}` {Roki.Properties.CurrencyIcon}", true);
+                    embed.AddField($"`{investment.Symbol}` - `{investment.Shares}` Shares", $"`{cost}` {Roki.Services.Roki.Properties.CurrencyIcon}", true);
                 }
-                embed.WithDescription($"You have been charged a total of `{total}` {Roki.Properties.CurrencyIcon}\n");
+                embed.WithDescription($"You have been charged a total of `{total}` {Roki.Services.Roki.Properties.CurrencyIcon}\n");
                 await dm.EmbedAsync(embed).ConfigureAwait(false);
                 await uow.Users.UpdateUserPortfolio(userId, portfolio).ConfigureAwait(false);
             }

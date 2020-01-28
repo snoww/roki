@@ -11,6 +11,7 @@ using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Searches.Models;
 using Roki.Modules.Searches.Services;
+using Roki.Services;
 
 namespace Roki.Modules.Searches
 {

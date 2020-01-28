@@ -1,9 +1,8 @@
 using System;
 using System.Threading.Tasks;
-using NLog;
 using Roki.Core.Services.Database.Repositories;
 
-namespace Roki.Core.Services.Database
+namespace Roki.Services.Database
 {
     public interface IUnitOfWork : IDisposable
     {

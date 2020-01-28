@@ -3,7 +3,7 @@ using System.IO;
 using Roki.Common;
 using Roki.Extensions;
 
-namespace Roki.Core.Services
+namespace Roki.Services
 {
     public class Localization
     {

@@ -487,7 +487,7 @@ namespace Roki.Modules.Games.Common
             var lb = new StringBuilder();
             foreach (var (user, value) in Users.OrderByDescending(k => k.Value))
             {
-                lb.AppendLine($"{user.Username} `{value:N0}` {Roki.Properties.CurrencyIcon}");
+                lb.AppendLine($"{user.Username} `{value:N0}` {Roki.Services.Roki.Properties.CurrencyIcon}");
             }
 
             return lb.ToString();

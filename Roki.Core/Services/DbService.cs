@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using Roki.Core.Services.Database;
+using Roki.Services.Database;
 
-namespace Roki.Core.Services
+namespace Roki.Services
 {
     public class DbService
     {

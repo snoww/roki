@@ -8,6 +8,7 @@ using System.Web;
 using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Games.Common;
+using Roki.Services;
 
 namespace Roki.Modules.Games.Services
 {

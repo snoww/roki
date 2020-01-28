@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Roki.Core.Services;
-using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
 using Roki.Modules.Games.Common;
+using Roki.Services;
+using Roki.Services.Database.Data;
 
 namespace Roki.Modules.Games.Services
 {

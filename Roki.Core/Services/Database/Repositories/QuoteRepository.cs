@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
+using Roki.Services.Database.Core;
 
 namespace Roki.Core.Services.Database.Repositories
 {

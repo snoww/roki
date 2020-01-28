@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
-using Roki.Core.Services.Database.Models;
+using Roki.Services.Database.Core;
 
 namespace Roki.Core.Services.Database.Repositories
 {

@@ -1,7 +1,7 @@
 using NLog;
 using StackExchange.Redis;
 
-namespace Roki.Core.Services
+namespace Roki.Services
 {
     public interface IRedisCache
     {

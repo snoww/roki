@@ -9,8 +9,10 @@ using Discord;
 using Microsoft.EntityFrameworkCore;
 using Roki.Core.Services;
 using Roki.Core.Services.Database;
-using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
+using Roki.Services;
+using Roki.Services.Database;
+using Roki.Services.Database.Data;
 
 namespace Roki.Modules.Searches.Services
 {

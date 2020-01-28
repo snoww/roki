@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Stocks.Models;
+using Roki.Services;
 
 namespace Roki.Modules.Stocks.Services
 {

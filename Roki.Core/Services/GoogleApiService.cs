@@ -1,16 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Google.Apis.Customsearch.v1;
 using Google.Apis.Customsearch.v1.Data;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
-using NLog;
 using Roki.Extensions;
 
-namespace Roki.Core.Services
+namespace Roki.Services
 {
     public interface IGoogleApiService : IRokiService
     {

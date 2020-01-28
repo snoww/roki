@@ -9,6 +9,7 @@ using NLog;
 using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Searches.Models;
+using Roki.Services;
 
 namespace Roki.Modules.Searches.Services
 {

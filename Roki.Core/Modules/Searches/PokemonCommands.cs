@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
-using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
 using Roki.Modules.Searches.Services;
+using Roki.Services.Database.Data;
 
 namespace Roki.Modules.Searches
 {
