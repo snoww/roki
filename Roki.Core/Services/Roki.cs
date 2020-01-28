@@ -211,10 +211,10 @@ namespace Roki.Services
             var typeReaders = allTypes
                 .Where(x => x.IsSubclassOf(typeof(TypeReader)) && x.BaseType.GetGenericArguments().Length > 0 && !x.IsAbstract);
             
-            foreach (var reader in typeReaders)
+            foreach (var type in typeReaders)
             {
-                var typeReader = (TypeReader) Activator.CreateInstance(reader, Client, CommandService);
-                var baseType = reader.BaseType;
+                var typeReader = (TypeReader) Activator.CreateInstance(type, Client, CommandService);
+                var baseType = type.BaseType;
                 var typeArgs = baseType.GetGenericArguments();
                 try
                 {
