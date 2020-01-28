@@ -187,7 +187,6 @@ namespace Roki
             var _ = await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
             
             Ready.TrySetResult(true);
-            _log.Info("Roki is ready");
         }
 
         private async Task LoginAsync(string token)
@@ -240,6 +239,8 @@ namespace Roki
                     {
                         _log.Error(e);
                     }
+                    
+                    _log.Info("Roki is ready");
                 });
 
                 return Task.CompletedTask;
