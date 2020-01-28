@@ -21,7 +21,7 @@ namespace Roki.Core.Services.Database.Repositories
         Task<bool> UpdateCurrencyAsync(ulong userId, long amount);
         Task UpdateBotCurrencyAsync(ulong botId, long amount);
         IEnumerable<User> GetCurrencyLeaderboard(ulong botId, int page);
-        Task UpdateXp(User user, bool boost = false);
+        Task<int> UpdateXp(User user, bool boost = false);
         int GetUserXpRank(ulong userId);
         Task ChangeNotificationLocation(ulong userId, string notify);
         Task<List<Item>> GetUserInventory(ulong userId);
@@ -102,10 +102,8 @@ namespace Roki.Core.Services.Database.Repositories
                 .ToList();
         }
 
-        public async Task UpdateXp(User user, bool boost = false)
+        public async Task<int> UpdateXp(User user, bool boost = false)
         {
-            if (user == null) return;
-            
             var level = new XpLevel(user.TotalXp);
             int xp;
             if (boost)
@@ -121,6 +119,7 @@ namespace Roki.Core.Services.Database.Repositories
             }
 
             await Context.SaveChangesAsync().ConfigureAwait(false);
+            return user.TotalXp;
         }
 
         public int GetUserXpRank(ulong userId)

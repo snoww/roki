@@ -373,11 +373,19 @@
     ]
   },
   "cash": {
-    "Command": "currency cash $ $$ $$$",
-    "Description": "Shows how much currency the user has.",
+    "Command": "currency cash $",
+    "Description": "Shows how much cash the user has.",
     "Usage": [
       "{0}$",
       "{0}$ @user"
+    ]
+  },
+  "investing": {
+    "Command": "investing $$",
+    "Description": "Shows how much currency in the Investing Account.",
+    "Usage": [
+      "{0}$$",
+      "{0}$$ @user"
     ]
   },
   "betroll": {

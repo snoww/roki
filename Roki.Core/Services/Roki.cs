@@ -257,8 +257,6 @@ namespace Roki
                     var user = await uow.Users.GetOrCreateUserAsync(guildUser).ConfigureAwait(false);
                     await cache.StringSetAsync($"currency:{guildUser.Guild.Id}:{guildUser.Id}", user.Currency, flags: CommandFlags.FireAndForget)
                         .ConfigureAwait(false);
-                    await cache.StringSetAsync($"xp:{guildUser.Id}", user.TotalXp, flags: CommandFlags.FireAndForget)
-                        .ConfigureAwait(false);
                 }
             });
             

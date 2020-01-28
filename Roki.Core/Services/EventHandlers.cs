@@ -304,22 +304,20 @@ namespace Roki.Core.Services
                 var user = await uow.Users.GetOrCreateUserAsync(message.Author).ConfigureAwait(false);
                 var doubleXp = uow.Subscriptions.DoubleXpIsActive(message.Author.Id);
                 var fastXp = uow.Subscriptions.FastXpIsActive(message.Author.Id);
-                var oldLevel = new XpLevel(await GetCachedXp(message.Author.Id));
+                var oldLevel = new XpLevel(user.TotalXp);
                 var newXp = 0;
                 if (fastXp)
                 {
                     if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpFastCooldown))
                     {
-                        newXp = await UpdateCacheXp(message.Author.Id, Roki.Properties.XpPerMessage, doubleXp).ConfigureAwait(false);
-                        await uow.Users.UpdateXp(user, doubleXp).ConfigureAwait(false);
+                        newXp = await uow.Users.UpdateXp(user, doubleXp).ConfigureAwait(false);
                     }
                 }
                 else
                 {
                     if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpCooldown))
                     {
-                        newXp = await UpdateCacheXp(message.Author.Id, Roki.Properties.XpPerMessage, doubleXp).ConfigureAwait(false);
-                        await uow.Users.UpdateXp(user, doubleXp).ConfigureAwait(false);
+                        newXp = await uow.Users.UpdateXp(user, doubleXp).ConfigureAwait(false);
                     }
                 }
                 
@@ -385,21 +383,6 @@ namespace Roki.Core.Services
             return Task.CompletedTask;
         }
 
-        private async Task<int> GetCachedXp(ulong userId)
-        {
-            return (int) await _cache.StringGetAsync($"xp:{userId}").ConfigureAwait(false);
-        }
-
-        private async Task<int> UpdateCacheXp(ulong userId, int add, bool boost = false)
-        {
-            if (boost)
-            {
-                return (int) await _cache.StringIncrementAsync($"xp:{userId}", add * 2).ConfigureAwait(false);
-            }
-
-            return (int) await _cache.StringIncrementAsync($"xp:{userId}", add).ConfigureAwait(false);
-        }
-        
         private static async Task SendNotification(User user, SocketMessage msg, int level)
         {
             if (user.NotificationLocation.Equals("none", StringComparison.OrdinalIgnoreCase))

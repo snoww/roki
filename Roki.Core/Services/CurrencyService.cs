@@ -70,6 +70,8 @@ namespace Roki.Services
             var success = await uow.Users.UpdateCurrencyAsync(userIdFrom, -amount).ConfigureAwait(false);
             if (success)
             {
+                await CacheChangeAsync(userIdFrom, guildId, -amount).ConfigureAwait(false);
+                await CacheChangeAsync(userIdTo, guildId, amount).ConfigureAwait(false);
                 await uow.Users.UpdateCurrencyAsync(userIdTo, amount).ConfigureAwait(false);
                 var _ = CreateTransaction(reason, amount, userIdFrom, userIdTo, guildId, channelId, messageId);
                 uow.Transaction.Add(_);
