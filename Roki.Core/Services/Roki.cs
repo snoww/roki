@@ -187,8 +187,6 @@ namespace Roki.Services
             service.LoadFrom(Assembly.GetAssembly(typeof(EventHandlers)));
 
             Services = service.BuildServiceProvider();
-            var commandHandler = Services.GetService<CommandHandler>();
-            commandHandler.AddServices(service);
             LoadTypeReaders(typeof(Roki).Assembly);
 
             sw.Stop();

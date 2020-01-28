@@ -48,7 +48,7 @@ namespace Roki.Services
 
             _started = DateTime.UtcNow;
             _client.MessageReceived += _ => Task.FromResult(Interlocked.Increment(ref _messageCounter));
-            cmdHandler.CommandExecuted += (_, e) => Task.FromResult(Interlocked.Increment(ref _commandsRan));
+            cmdHandler.CommonOnSuccess += (_, e) => Task.FromResult(Interlocked.Increment(ref _commandsRan));
 
             _client.ChannelCreated += channel =>
             {
