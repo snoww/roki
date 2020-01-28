@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
-using Roki.Core.Services;
 using Roki.Services;
 
 namespace Roki.Common.Attributes

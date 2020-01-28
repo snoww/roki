@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Discord;
 using Roki.Common.Attributes;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Services;
 

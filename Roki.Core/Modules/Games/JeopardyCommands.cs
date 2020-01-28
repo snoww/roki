@@ -1,11 +1,9 @@
-using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Roki.Common;
 using Roki.Common.Attributes;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Games.Common;
 using Roki.Modules.Games.Services;

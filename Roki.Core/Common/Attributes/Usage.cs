@@ -2,7 +2,6 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Discord.Commands;
-using Roki.Core.Services;
 using Roki.Services;
 
 namespace Roki.Common.Attributes
