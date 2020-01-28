@@ -24,12 +24,6 @@ namespace Roki.Modules.Currency
             _currency = currency;
         }
 
-        private long GetCurrency(ulong userId)
-        {
-            using var uow = _db.GetDbContext();
-            return uow.Users.GetUserCurrency(userId);
-        }
-
         private decimal GetInvAccount(ulong userId)
         {
             using var uow = _db.GetDbContext();
@@ -42,8 +36,20 @@ namespace Roki.Modules.Currency
         {
             user ??= ctx.User;
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{user.Mention}'s Accounts\nCash Account: `{GetCurrency(user.Id):N0}` {Roki.Properties.CurrencyIcon}\n" +
-                                 $"Investing Account: `{GetInvAccount(user.Id):N2}` {Roki.Properties.CurrencyIcon}")).ConfigureAwait(false);
+                    .WithDescription($"{user.Mention}'s Cash Account:\n`{await _currency.GetCurrency(user.Id, ctx.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}")
+                    .WithFooter(".$$ for Investing Account"))
+                .ConfigureAwait(false);
+        }
+        
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
+        public async Task Investing([Leftover] IUser user = null)
+        {
+            user ??= ctx.User;
+            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    .WithDescription($"{user.Mention}'s Investing Account:\n`{GetInvAccount(user.Id):N2}` {Roki.Properties.CurrencyIcon}")
+                    .WithFooter(".$ for Cash Account"))
+                .ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -84,14 +90,18 @@ namespace Roki.Modules.Currency
             if ((int) account == 0)
             {
                 success = await uow.Users.TransferToFromInvestingAccountAsync(ctx.User.Id, -amount).ConfigureAwait(false);
+                if (success)
+                    await _currency.CacheChangeAsync(ctx.User.Id, ctx.Guild.Id, amount).ConfigureAwait(false);
                 fromAcc = "Investing Account";
                 toAcc = "Cash Account";
             }
             else if ((int) account == 1)
             {
                 success = await uow.Users.TransferToFromInvestingAccountAsync(ctx.User.Id, amount).ConfigureAwait(false);
-                toAcc = "Investing Account";
+                if (success)
+                    await _currency.CacheChangeAsync(ctx.User.Id, ctx.Guild.Id, -amount).ConfigureAwait(false);
                 fromAcc = "Cash Account";
+                toAcc = "Investing Account";
             }
             
             if (!success)

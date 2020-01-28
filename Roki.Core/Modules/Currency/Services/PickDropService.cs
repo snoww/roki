@@ -9,6 +9,8 @@ using Discord.WebSocket;
 using Roki.Core.Services;
 using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
+using Roki.Services;
+using StackExchange.Redis;
 
 namespace Roki.Modules.Currency.Services
 {
@@ -16,15 +18,17 @@ namespace Roki.Modules.Currency.Services
     {
         private readonly CommandHandler _cmdHandler;
         private readonly DbService _db;
+        private readonly IDatabase _cache;
 
         private ConcurrentDictionary<ulong, DateTime> LastGenerations { get; } = new ConcurrentDictionary<ulong, DateTime>();
         private readonly SemaphoreSlim _pickLock = new SemaphoreSlim(1, 1);
 
 
-        public PickDropService(CommandHandler cmdHandler, DbService db, Roki roki)
+        public PickDropService(CommandHandler cmdHandler, DbService db, IRedisCache cache)
         {
             _cmdHandler = cmdHandler;
             _db = db;
+            _cache = cache.Redis.GetDatabase();
             _cmdHandler.OnMessageNoTrigger += CurrencyGeneration;
         }
         
@@ -89,6 +93,8 @@ namespace Roki.Modules.Currency.Services
                     (amount, ids) = await uow.Transaction.PickCurrency(channel.Id, user.Id).ConfigureAwait(false);
                     if (amount > 0)
                     {
+                        await _cache.StringIncrementAsync($"currency:{channel.Guild.Id}:{user.Id}", amount, CommandFlags.FireAndForget)
+                            .ConfigureAwait(false);
                         await uow.Users.UpdateCurrencyAsync(user.Id, amount).ConfigureAwait(false);
                     }
 
@@ -121,6 +127,8 @@ namespace Roki.Modules.Currency.Services
             if (dUser.Currency < amount)
                 return false;
 
+            await _cache.StringIncrementAsync($"currency:{ctx.Guild.Id}:{user.Id}", -amount, CommandFlags.FireAndForget)
+                .ConfigureAwait(false);
             var updated = await uow.Users.UpdateCurrencyAsync(user.Id, -amount).ConfigureAwait(false);
 
             if (!updated) return false;

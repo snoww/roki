@@ -373,11 +373,19 @@
     ]
   },
   "cash": {
-    "Command": "currency cash $ $$ $$$",
-    "Description": "Shows how much currency the user has.",
+    "Command": "currency cash $",
+    "Description": "Shows how much cash the user has.",
     "Usage": [
       "{0}$",
       "{0}$ @user"
+    ]
+  },
+  "investing": {
+    "Command": "investing $$",
+    "Description": "Shows how much currency in the Investing Account.",
+    "Usage": [
+      "{0}$$",
+      "{0}$$ @user"
     ]
   },
   "betroll": {
@@ -437,43 +445,6 @@
     "Description": "Lists all the trivia categories.",
     "Usage": [
       "{0}tc"
-    ]
-  },
-  "jackpot": {
-    "Command": "jackpot",
-    "Description": "Shows the current jackpot for the lottery.",
-    "Usage": [
-      "{0}jackpot"
-    ]
-  },
-  "joinlottery": {
-    "Command": "joinlottery jl",
-    "Description": "Purchases a lottery ticket for 10 currency. Can choose own numbers or one will be automatically generated. (Choose from 1-40, no duplicates)",
-    "Usage": [
-      "{0}jl",
-      "{0}jl 2 5 6 12 25"
-    ]
-  },
-  "joinlotterymulti": {
-    "Command": "joinlotterymulti jlm",
-    "Description": "Purchases multiple lottery tickets for 10 currency each. Numbers will be automatically generated. Minimum purchase is 2.",
-    "Usage": [
-      "{0}jlm 15"
-    ]
-  },
-  "tickets": {
-    "Command": "tickets",
-    "Description": "Shows the tickets you have for the current lottery. If a page is specified, you can see your ticket numbers. (9 per page).",
-    "Usage": [
-      "{0}tickets",
-      "{0}tickets 2"
-    ]
-  },
-  "nextdraw": {
-    "Command": "nextdraw",
-    "Description": "Shows when the next lottery draw will be.",
-    "Usage": [
-      "{0}nextdraw"
     ]
   },
   "store": {

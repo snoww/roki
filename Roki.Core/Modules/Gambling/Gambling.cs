@@ -4,12 +4,11 @@ using Discord;
 using Roki.Common.Attributes;
 using Roki.Core.Services;
 using Roki.Extensions;
-using Roki.Modules.Gambling.Services;
 using Roki.Services;
 
 namespace Roki.Modules.Gambling
 {
-    public partial class Gambling : RokiTopLevelModule<GamblingService>
+    public partial class Gambling : RokiTopLevelModule
     {
         private readonly DbService _db;
         private readonly ICurrencyService _currency;
@@ -27,13 +26,12 @@ namespace Roki.Modules.Gambling
                 return;
             
             var removed = await _currency
-                .ChangeAsync(ctx.User.Id, ctx.Client.CurrentUser.Id, "BetRoll Entry", -amount, ctx.Guild.Id, ctx.Channel.Id, 
-                    ctx.Message.Id)
+                .RemoveAsync(ctx.User.Id,"BetRoll Entry", amount, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
                 .ConfigureAwait(false);
             if (!removed)
             {
                 await ctx.Channel.SendErrorAsync($"Not enough {Roki.Properties.CurrencyIcon}\n" +
-                                                 $"You have `{_service.GetCurrency(ctx.User.Id):N0}`")
+                                                 $"You have `{await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id):N0}`")
                     .ConfigureAwait(false);
                 return;
             }
@@ -42,7 +40,7 @@ namespace Roki.Modules.Gambling
             if (roll < 70)
             {
                 await ctx.Channel.SendErrorAsync($"{rollStr}\nBetter luck next time.\n" +
-                                                 $"New Balance: `{_service.GetCurrency(ctx.User.Id):N0}` {Roki.Properties.CurrencyIcon}")
+                                                 $"New Balance: `{await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}")
                     .ConfigureAwait(false);
                 return;
             }
@@ -55,11 +53,11 @@ namespace Roki.Modules.Gambling
             else
                 win = amount * Roki.Properties.BetRoll100Multiplier;
 
-            await _currency.ChangeAsync(ctx.Client.CurrentUser.Id, ctx.User.Id, "BetRoll Payout", win, ctx.Guild.Id, ctx.Channel.Id,
-                ctx.Message.Id);
+            await _currency.AddAsync(ctx.User.Id, "BetRoll Payout", win, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id).ConfigureAwait(false);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithDescription($"{rollStr}\nCongratulations, you won `{win:N0}` {Roki.Properties.CurrencyIcon}\n" +
-                                 $"New Balance: `{_service.GetCurrency(ctx.User.Id):N0}` {Roki.Properties.CurrencyIcon}"));
+                    .WithDescription($"{rollStr}\nCongratulations, you won `{win:N0}` {Roki.Properties.CurrencyIcon}\n" +
+                                     $"New Balance: `{await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}"))
+                .ConfigureAwait(false);
         }
     }
 }

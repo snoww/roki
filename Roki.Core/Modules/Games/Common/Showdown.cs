@@ -18,6 +18,7 @@ using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.Primitives;
+using StackExchange.Redis;
 using Image = SixLabors.ImageSharp.Image;
 
 namespace Roki.Modules.Games.Common
@@ -26,8 +27,10 @@ namespace Roki.Modules.Games.Common
     {
         private readonly ICurrencyService _currency;
         private readonly DbService _db;
+        private readonly IDatabase _cache;
         private readonly Logger _log;
         private readonly DiscordSocketClient _client;
+        private readonly ShowdownService _service;
         
         private readonly ITextChannel _channel;
 
@@ -66,13 +69,16 @@ namespace Roki.Modules.Games.Common
             {TimesTen, 0},
         };
 
-        public Showdown(ICurrencyService currency, DbService db, DiscordSocketClient client, ITextChannel channel, int generation)
+        public Showdown(ICurrencyService currency, DbService db, DiscordSocketClient client, ITextChannel channel, int generation,
+            ShowdownService service, IRedisCache cache)
         {
             _currency = currency;
             _db = db;
+            _cache = cache.Redis.GetDatabase();
             _client = client;
             _channel = channel;
             _generation = generation;
+            _service = service;
             _log = LogManager.GetCurrentClassLogger();
             GameId = $"{_generation}{Guid.NewGuid().ToString().Substring(0, 7)}";
         }
@@ -134,7 +140,7 @@ namespace Roki.Modules.Games.Common
             }
 
             await ReactionHandler().ConfigureAwait(false);
-            var fullGameId = await ShowdownService.GetBetPokemonGame(GameId).ConfigureAwait(false);
+            var fullGameId = await _service.GetBetPokemonGame(GameId).ConfigureAwait(false);
 
             if (_scores.Count == 0)
             {
@@ -154,8 +160,7 @@ namespace Roki.Modules.Games.Common
             foreach (var (key, value) in _scores)
             {
                 await _currency
-                    .ChangeAsync(key.Id, _client.CurrentUser.Id, "BetShowdown Entry", -value.Amount * value.Multiple,
-                        _channel.Guild.Id, _channel.Id, _game.Id)
+                    .RemoveAsync(key.Id, "BetShowdown Entry", value.Amount * value.Multiple, _channel.Guild.Id, _channel.Id, _game.Id)
                     .ConfigureAwait(false);
             }
             
@@ -174,8 +179,7 @@ namespace Roki.Modules.Games.Common
                 }
                 
                 var won = value.Amount * value.Multiple * 2;
-                await _currency.ChangeAsync(_client.CurrentUser.Id, key.Id, "BetShowdown Payout", won, 
-                    _channel.Guild.Id, _channel.Id, _game.Id);
+                await _currency.AddAsync(key.Id, "BetShowdown Payout", won, _channel.Guild.Id, _channel.Id, _game.Id).ConfigureAwait(false);
                 winners += $"{key.Username} won `{won:N0}` {Roki.Properties.CurrencyIcon}\n" +
                            $"\t`{before:N0}` ⇒ `{GetCurrency(key.Id):N0}`\n";
             }
@@ -248,7 +252,7 @@ namespace Roki.Modules.Games.Common
                     // If user exists in dictionary and reacted with any other emote in the reactionMap
                     if (_reactionMap.ContainsKey(reaction.Emote))
                     {
-                        var currency = _currency.GetCurrency(user.Id);
+                        var currency = await _currency.GetCurrency(user.Id, _channel.GuildId).ConfigureAwait(false);
                         if (reaction.Emote.Equals(AllIn))
                         {
                             _scores[user].Amount = currency;
@@ -325,6 +329,7 @@ namespace Roki.Modules.Games.Common
                 }
             }
             proc.WaitForExit();
+            await _cache.StringSetAsync($"pokemon:{uid}", gameId, TimeSpan.FromMinutes(5), flags: CommandFlags.FireAndForget).ConfigureAwait(false);
             File.AppendAllText(@"./data/pokemon-logs/battle-logs", $"{uid}={gameId}\n");
             _teams = teams;
         }
