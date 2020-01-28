@@ -10,14 +10,8 @@ namespace Roki.Common.Attributes
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class UsageAttribute : RemarksAttribute
     {
-        public UsageAttribute([CallerMemberName] string memberName = "") : base(GetUsage(memberName))
+        public UsageAttribute([CallerMemberName] string name = "") : base(JsonSerializer.Serialize(Localization.GetCommandData(name.ToLowerInvariant()).Usage))
         {
-        }
-
-        public static string GetUsage(string memberName)
-        {
-            var usage = Localization.LoadCommand(memberName.ToLowerInvariant()).Usage;
-            return JsonSerializer.Serialize(usage);
         }
     }
 }

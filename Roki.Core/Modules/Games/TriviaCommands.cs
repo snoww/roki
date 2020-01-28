@@ -119,11 +119,11 @@ namespace Roki.Modules.Games
                     foreach (var question in questions.Results)
                     {
                         if (question.Difficulty == "easy")
-                            prizePool += Roki.Services.Roki.Properties.TriviaEasy;
+                            prizePool += Roki.Properties.TriviaEasy;
                         else if (question.Difficulty == "medium")
-                            prizePool += Roki.Services.Roki.Properties.TriviaMedium;
+                            prizePool += Roki.Properties.TriviaMedium;
                         else
-                            prizePool += Roki.Services.Roki.Properties.TriviaHard;
+                            prizePool += Roki.Properties.TriviaHard;
                     }
                 }
                 catch (Exception e)
@@ -136,7 +136,7 @@ namespace Roki.Modules.Games
 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle($"Trivia Game - {category}")
-                        .WithDescription($"Starting new trivia game.\nYou can earn up to `{prizePool:N0}` {Roki.Services.Roki.Properties.CurrencyNamePlural}!\nReact with the correct emote to answer questions.\nType `stop` to cancel game early"))
+                        .WithDescription($"Starting new trivia game.\nYou can earn up to `{prizePool:N0}` {Roki.Properties.CurrencyNamePlural}!\nReact with the correct emote to answer questions.\nType `stop` to cancel game early"))
                     .ConfigureAwait(false);
 
                 await Task.Delay(5000).ConfigureAwait(false);
@@ -162,11 +162,11 @@ namespace Roki.Modules.Games
                     var answer = shuffledAnswers.First(s => s.Contains(HttpUtility.HtmlDecode(q.Correct) ?? ""));
                     int difficultyBonus;
                     if (q.Difficulty == "easy")
-                        difficultyBonus = Roki.Services.Roki.Properties.TriviaEasy;
+                        difficultyBonus = Roki.Properties.TriviaEasy;
                     else if (q.Difficulty == "medium")
-                        difficultyBonus = Roki.Services.Roki.Properties.TriviaMedium;
+                        difficultyBonus = Roki.Properties.TriviaMedium;
                     else
-                        difficultyBonus = Roki.Services.Roki.Properties.TriviaHard;
+                        difficultyBonus = Roki.Properties.TriviaHard;
                     IUserMessage msg;
 
                     var embed = new EmbedBuilder().WithOkColor()
@@ -280,7 +280,7 @@ namespace Roki.Modules.Games
                     var before = await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id);
                     await _currency.AddAsync(user.Id, "Trivia Reward", score.Amount, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
                         .ConfigureAwait(false);
-                    winStr += $"{user.Username} won `{score.Amount:N0}` {Roki.Services.Roki.Properties.CurrencyIcon}\n" +
+                    winStr += $"{user.Username} won `{score.Amount:N0}` {Roki.Properties.CurrencyIcon}\n" +
                               $"\t`{before:N0}` ⇒ `{await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id):N0:N0}`\n";
                     winners = true;
                 }

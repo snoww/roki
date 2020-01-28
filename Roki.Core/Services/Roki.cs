@@ -11,10 +11,11 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Extensions;
+using Roki.Services;
 using StackExchange.Redis;
 using Victoria;
 
-namespace Roki.Services
+namespace Roki
 {
     public class Roki
     {

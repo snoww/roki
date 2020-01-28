@@ -4,7 +4,7 @@ using Discord;
 using Microsoft.EntityFrameworkCore;
 using Roki.Services.Database.Core;
 
-namespace Roki.Core.Services.Database.Repositories
+namespace Roki.Services.Database.Repositories
 {
     public interface IMessageRepository: IRepository<Message>
     {

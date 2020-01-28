@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Xp.Common;
 using Roki.Modules.Xp.Extensions;
@@ -168,7 +167,7 @@ namespace Roki.Modules.Xp
                     .Skip(page * 9)
                     .Take(9)
                     .Select(r => r.Type == "currency"
-                        ? $"Level `{r.XpLevel}` - `{int.Parse(r.Reward):N0}` {Services.Roki.Properties.CurrencyIcon}"
+                        ? $"Level `{r.XpLevel}` - `{int.Parse(r.Reward):N0}` {Roki.Properties.CurrencyIcon}"
                         : $"Level `{r.XpLevel}` - <@&{r.Reward}>")));
             }
             else
@@ -177,7 +176,7 @@ namespace Roki.Modules.Xp
                     .Skip(page * 9)
                     .Take(9)
                     .Select(r => r.Type == "currency"
-                        ? $"`{r.Id}` Level `{r.XpLevel}` - `{int.Parse(r.Reward):N0}` {Services.Roki.Properties.CurrencyIcon}"
+                        ? $"`{r.Id}` Level `{r.XpLevel}` - `{int.Parse(r.Reward):N0}` {Roki.Properties.CurrencyIcon}"
                         : $"`{r.Id}` Level `{r.XpLevel}` - <@&{r.Reward}>")));
             }
 

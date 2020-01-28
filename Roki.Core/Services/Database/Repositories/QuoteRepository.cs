@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Roki.Extensions;
 using Roki.Services.Database.Core;
 
-namespace Roki.Core.Services.Database.Repositories
+namespace Roki.Services.Database.Repositories
 {
     public interface IQuoteRepository : IRepository<Quote>
     {

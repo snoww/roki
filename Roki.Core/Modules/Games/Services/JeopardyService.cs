@@ -2,8 +2,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Games.Common;
 using Roki.Services;

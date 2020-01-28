@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Roki.Services.Database;
 
-namespace Roki.Core.Services.Database.Repositories
+namespace Roki.Services.Database.Repositories
 {
     public interface IRepository<T> where T : DbEntity
     {
