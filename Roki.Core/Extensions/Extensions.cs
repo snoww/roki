@@ -124,19 +124,19 @@ namespace Roki.Extensions
             return user.RoleIds.Select(r => user.Guild.GetRole(r)).Where(r => r != null);
         }
 
-        public static string RealSummary(this CommandInfo info, string prefix)
+        public static string FormatSummary(this CommandInfo command, string prefix)
         {
-            return string.Format(info.Summary, prefix);
+            return string.Format(command.Summary, prefix);
         }
 
-        public static string RealRemarks(this CommandInfo cmd, string prefix)
+        public static string FormatRemarks(this CommandInfo command, string prefix)
         {
-            return string.Join("\n", cmd.Remarks.Deserialize<string[]>().Select(x => Format.Code(string.Format(x, prefix))));
+            return string.Join("\n", command.Remarks.Deserialize<string[]>().Select(x => Format.Code(string.Format(x, prefix))));
         }
 
-        public static double UnixTimestamp(this DateTime dt)
+        public static double UnixTimestamp(this DateTime date)
         {
-            return dt.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
+            return date.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
         }
         
         public static Stream ToStream(this Image<Rgba32> img, IImageFormat format = null)

@@ -16,12 +16,10 @@ namespace Roki.Modules.Help
     public class Help : RokiTopLevelModule<HelpService>
     {
         private readonly CommandService _command;
-        private readonly IRokiConfig _config;
         private readonly IServiceProvider _services;
 
-        public Help(IRokiConfig config, CommandService command, IServiceProvider services)
+        public Help(CommandService command, IServiceProvider services)
         {
-            _config = config;
             _command = command;
             _services = services;
         }
@@ -118,11 +116,13 @@ namespace Roki.Modules.Help
             await ctx.Channel.SendErrorAsync("Command not found.\nTry `.modules` to find the correct module, then `.commands <module>` to find the specific command.").ConfigureAwait(false);
         }
 
-        private async Task H([Leftover] CommandInfo cmd = null)
+        [RokiCommand, Description, Usage, Aliases]
+        [Priority(1)]
+        private async Task H(CommandInfo command = null)
         {
             var channel = ctx.Channel;
 
-            if (cmd == null)
+            if (command == null)
             {
                 var helpEmbed = new EmbedBuilder().WithOkColor()
                     .WithTitle("Roki Help")
@@ -150,7 +150,7 @@ You can use `{0}h <command>` to get help for a specific command (e.g. `{0}h list
                 }
             }
 
-            var embed = _service.GetCommandHelp(cmd, ctx.Guild);
+            var embed = _service.GetCommandInfo(command);
             await channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 

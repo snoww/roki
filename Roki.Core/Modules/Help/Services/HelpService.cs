@@ -23,84 +23,74 @@ namespace Roki.Modules.Help.Services
             _log = LogManager.GetCurrentClassLogger();
         }
 
-        public Task LateExecute(DiscordSocketClient client, IGuild guild, IUserMessage msg)
-        {
-            try
-            {
-                if (guild == null)
-                {
-                }
-            }
-            catch (Exception e)
-            {
-                _log.Warn(e);
-            }
-
-            return Task.CompletedTask;
-        }
-
-        public EmbedBuilder GetCommandHelp(CommandInfo info, IGuild guild)
+        public EmbedBuilder GetCommandInfo(CommandInfo command)
         {
             var prefix = _command.DefaultPrefix;
 
-            var str = $"**`{prefix + info.Aliases.First()}`**";
-            var aliases = string.Join("/", info.Aliases.Skip(1).Select(a => $"`{a}`"));
-            if (!string.IsNullOrWhiteSpace(aliases)) str += $"/{aliases}";
-            var embed = new EmbedBuilder().AddField(str, info.RealSummary(prefix), true);
+            var str = $"**`{prefix + command.Aliases.First()}`**";
+            var aliases = string.Join("/", command.Aliases.Skip(1).Select(a => $"`{a}`"));
+            if (!string.IsNullOrWhiteSpace(aliases)) 
+                str += $"/{aliases}";
+            
+            var embed = new EmbedBuilder().WithOkColor().AddField(str, command.FormatSummary(prefix), true)
+                .AddField("Usage", command.FormatRemarks(prefix), true)
+                .WithFooter($"Module: {command.Module.GetTopLevelModule().Name}");;
 
-            var reqs = GetCommandRequirements(info);
-            if (reqs.Any()) embed.AddField("Requires", string.Join("\n", reqs));
+            var requirements = GetCommandRequirements(command);
+            if (!string.IsNullOrWhiteSpace(requirements)) 
+                embed.AddField("Requires", requirements);
 
-            embed.WithOkColor()
-                .AddField("Usage", info.RealRemarks(prefix), true)
-                .WithFooter($"Module: {info.Module.GetTopLevelModule().Name}");
-
-            var options = ((RokiOptions) info.Attributes.FirstOrDefault(x => x is RokiOptions))?.OptionType;
+            var options = ((RokiOptions) command.Attributes.FirstOrDefault(x => x is RokiOptions))?.OptionType;
             if (options != null)
             {
-                var helpString = GetCommandOptionHelp(options);
-                if (!string.IsNullOrWhiteSpace(helpString))
-                    embed.AddField("Options", helpString);
+                var optionsHelp = GetCommandOptions(options);
+                if (!string.IsNullOrWhiteSpace(optionsHelp))
+                    embed.AddField("Options", optionsHelp);
             }
 
             return embed;
         }
 
-        private static string GetCommandOptionHelp(Type option)
+        private static string GetCommandOptions(Type option)
         {
-            var str = option.GetProperties()
+            var options = option.GetProperties()
                 .Select(x => x.GetCustomAttributes(true).FirstOrDefault(a => a is OptionAttribute))
                 .Where(x => x != null)
                 .Cast<OptionAttribute>()
                 .Select(x =>
                 {
-                    var toReturn = $"`--{x.LongName}`";
+                    var optionString = string.Empty; 
+                        
 
                     if (!string.IsNullOrWhiteSpace(x.ShortName))
-                        toReturn += $" (`-{x.ShortName}`)";
-
-                    toReturn += $"   {x.HelpText}  ";
-                    return toReturn;
+                        optionString += $" `-{x.ShortName}`, `--{x.LongName}`";
+                    else
+                        optionString += $"`--{x.LongName}`";
+                    
+                    optionString += $"\t{x.HelpText}";
+                    return optionString;
                 });
-            return string.Join("\n", str);
+            return string.Join("\n", options);
         }
 
-        private static string[] GetCommandRequirements(CommandInfo info)
+        private static string GetCommandRequirements(CommandInfo command)
         {
-            return info.Preconditions
-                // TODO add owner only attribute here
-                .Where(att => att is RequireUserPermissionAttribute)
-                .Select(att =>
+            var requirements = command.Preconditions
+                .Where(a => a is RequireUserPermissionAttribute || a is OwnerOnly)
+                .Select(a =>
                 {
-                    var perm = (RequireUserPermissionAttribute) att;
-                    if (perm.GuildPermission != null)
-                        return (perm.GuildPermission + " Server Permission")
-                            .Replace("Guild", "Server", StringComparison.InvariantCulture);
+                    if (a is OwnerOnly)
+                    {
+                        return "Bot Owner";
+                    }
 
-                    return (perm.ChannelPermission + " Channel Permission")
-                        .Replace("Guild", "Server", StringComparison.InvariantCulture);
-                })
-                .ToArray();
+                    var perm = (RequireUserPermissionAttribute) a;
+                    return perm.GuildPermission != null
+                        ? $"{perm.GuildPermission} Server Permission".Replace("Guild", "Server", StringComparison.Ordinal)
+                        : $"{perm.ChannelPermission} Channel Permission";
+                });
+            
+            return string.Join("\n", requirements);
         }
     }
 }
