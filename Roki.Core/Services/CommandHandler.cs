@@ -120,11 +120,11 @@ namespace Roki.Services
 
         private async Task TryRunCommand(SocketGuild guild, ISocketMessageChannel channel, IUserMessage message)
         {
-            var sw = Stopwatch.StartNew();
             var content = message.Content;
 
             if (content.StartsWith(DefaultPrefix, StringComparison.InvariantCulture))
             {
+                var sw = Stopwatch.StartNew();
                 var (success, error, info) = await ExecuteCommandAsync(new CommandContext(_client, message),
                         content.Substring(DefaultPrefix.Length), _services, MultiMatchHandling.Best)
                     .ConfigureAwait(false);
@@ -167,9 +167,7 @@ namespace Roki.Services
 
             if (successes.Length == 0)
             {
-                var bestMatch = preconditions
-                    .OrderByDescending(x => x.Key.Command.Priority)
-                    .FirstOrDefault(x => !x.Value.IsSuccess);
+                var bestMatch = preconditions.OrderByDescending(x => x.Key.Command.Priority).FirstOrDefault(x => !x.Value.IsSuccess);
                 return (false, bestMatch.Value.ErrorReason, commands[0].Command);
             }
 
@@ -212,13 +210,8 @@ namespace Roki.Services
                 return match.Command.Priority + totalArgsScore * 0.99f;
             }
 
-            var orderedResults = parseResultDict
-                .OrderByDescending(x => CalculateScore(x.Key, x.Value))
-                .ToArray();
-
-            var successfulParses = orderedResults
-                .Where(x => x.Value.IsSuccess)
-                .ToArray();
+            var orderedResults = parseResultDict.OrderByDescending(x => CalculateScore(x.Key, x.Value)).ToArray();
+            var successfulParses = orderedResults.Where(x => x.Value.IsSuccess).ToArray();
 
             if (successfulParses.Length == 0)
             {
