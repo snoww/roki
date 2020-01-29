@@ -25,13 +25,11 @@ namespace Roki.Modules.Searches
             _google = google;
             _httpFactory = httpFactory;
         }
-
-        // TODO sanitize inputs!!
         
         [RokiCommand, Usage, Description, Aliases]
         public async Task Weather([Leftover] string query = "Toronto")
         {
-            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+            if (!await ValidateQuery(query).ConfigureAwait(false))
                 return;
             try
             {
@@ -62,7 +60,7 @@ namespace Roki.Modules.Searches
         [RokiCommand, Description, Usage, Aliases]
         public async Task Time([Leftover] string query)
         {
-            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+            if (!await ValidateQuery(query).ConfigureAwait(false))
                 return;
             if (string.IsNullOrWhiteSpace(_config.GoogleApi))
             {
@@ -82,7 +80,7 @@ namespace Roki.Modules.Searches
         [RokiCommand, Description, Usage, Aliases]
         public async Task Youtube([Leftover] string query = null)
         {
-            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+            if (!await ValidateQuery(query).ConfigureAwait(false))
                 return;
 
             var result = (await _google.GetVideoLinksByKeywordAsync(query).ConfigureAwait(false)).FirstOrDefault();
@@ -98,14 +96,12 @@ namespace Roki.Modules.Searches
         [RokiCommand, Description, Usage, Aliases]
         public async Task Image([Leftover] string query = null)
         {
-            var encode = query?.Trim();
-            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+            if (!await ValidateQuery(query).ConfigureAwait(false))
                 return;
-            query = HttpUtility.UrlEncode(encode);
-            var result = await _google.GetImagesAsync(encode).ConfigureAwait(false);
+            var result = await _google.GetImagesAsync(query).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithOkColor()
-                .WithAuthor("Image search for: " + encode.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
-                    "https://www.google.com/search?q=" + query + "&source=lnms&tbm=isch")
+                .WithAuthor("Image search for: " + query.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
+                    $"https://www.google.com/search?q={HttpUtility.UrlEncode(query)}&source=lnms&tbm=isch")
                 .WithDescription(result.Link)
                 .WithImageUrl(result.Link)
                 .WithTitle(ctx.User.ToString());
@@ -115,14 +111,12 @@ namespace Roki.Modules.Searches
         [RokiCommand, Description, Usage, Aliases]
         public async Task RandomImage([Leftover] string query = null)
         {
-            var encode = query?.Trim();
-            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+            if (!await ValidateQuery(query).ConfigureAwait(false))
                 return;
-            query = HttpUtility.UrlEncode(encode);
-            var result = await _google.GetImagesAsync(encode, true).ConfigureAwait(false);
+            var result = await _google.GetImagesAsync(query, true).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithOkColor()
-                .WithAuthor("Image search for: " + encode.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
-                    "https://www.google.com/search?q=" + query + "&source=lnms&tbm=isch")
+                .WithAuthor("Image search for: " + query.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
+                    $"https://www.google.com/search?q={HttpUtility.UrlEncode(query)}&source=lnms&tbm=isch")
                 .WithDescription(result.Link)
                 .WithImageUrl(result.Link)
                 .WithTitle(ctx.User.ToString());
@@ -132,7 +126,7 @@ namespace Roki.Modules.Searches
         [RokiCommand, Description, Usage, Aliases]
         public async Task Movie([Leftover] string query = null)
         {
-            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+            if (!await ValidateQuery(query).ConfigureAwait(false))
                 return;
 
             await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
@@ -159,12 +153,13 @@ namespace Roki.Modules.Searches
         [RokiCommand, Description, Usage, Aliases]
         public async Task UrbanDict([Leftover] string query = null)
         {
-            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+            if (!await ValidateQuery(query).ConfigureAwait(false))
                 return;
 
             await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+            query = HttpUtility.UrlEncode(query);
             using var http = _httpFactory.CreateClient();
-            var response = await http.GetStringAsync($"http://api.urbandictionary.com/v0/define?term={Uri.EscapeUriString(query)}")
+            var response = await http.GetStringAsync($"http://api.urbandictionary.com/v0/define?term={query}")
                 .ConfigureAwait(false);
             try
             {
@@ -190,9 +185,9 @@ namespace Roki.Modules.Searches
         {
             try
             {
-                var file = await _service.GetRandomCatAsync().ConfigureAwait(false);
-                await ctx.Channel.SendFileAsync(file).ConfigureAwait(false);
-                File.Delete(file);
+                var path = await _service.GetRandomCatAsync().ConfigureAwait(false);
+                await ctx.Channel.SendFileAsync(path).ConfigureAwait(false);
+                File.Delete(path);
             }
             catch
             {
@@ -205,9 +200,9 @@ namespace Roki.Modules.Searches
         {
             try
             {
-                var file = await _service.GetRandomDogAsync().ConfigureAwait(false);
-                await ctx.Channel.SendFileAsync(file).ConfigureAwait(false);
-                File.Delete(file);
+                var path = await _service.GetRandomDogAsync().ConfigureAwait(false);
+                await ctx.Channel.SendFileAsync(path).ConfigureAwait(false);
+                File.Delete(path);
             }
             catch
             {
@@ -231,7 +226,7 @@ namespace Roki.Modules.Searches
             }
         }
 
-        public async Task<bool> ValidateQuery(IMessageChannel channel, string query)
+        public async Task<bool> ValidateQuery(string query)
         {
             if (!string.IsNullOrWhiteSpace(query))
                 return true;
