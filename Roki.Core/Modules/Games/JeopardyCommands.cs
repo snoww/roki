@@ -27,10 +27,10 @@ namespace Roki.Modules.Games
 
             [RokiCommand, Description, Aliases, Usage]
             [RequireContext(ContextType.Guild)]
-            [RokiOptions(typeof(JeopardyOptions))]
+            [RokiOptions(typeof(JeopardyArgs))]
             public async Task Jeopardy(params string[] args)
             {
-                var (opts, _) = OptionsParser.ParseFrom(new JeopardyOptions(), args);
+                var (opts, _) = OptionsParser.ParseFrom(new JeopardyArgs(), args);
                 
                 var channel = (ITextChannel) ctx.Channel;
                 var questions = _service.GenerateGame(opts.NumCategories);

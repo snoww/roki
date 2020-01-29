@@ -24,8 +24,8 @@ namespace Roki.Extensions
 {
     public static class Extensions
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-        private static readonly Random rng = new Random();  
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        private static readonly Random Rng = new Random();  
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
 
 
@@ -45,51 +45,33 @@ namespace Roki.Extensions
             return module;
         }
 
-        public static IEnumerable<Type> LoadFrom(this IServiceCollection collection, Assembly assembly)
+        public static void LoadFrom(this IServiceCollection collection, Assembly assembly)
         {
-            // list of all the types which are added with this method
             var addedTypes = new List<Type>();
 
             Type[] allTypes;
             try
             {
-                // first, get all types in te assembly
                 allTypes = assembly.GetTypes();
             }
             catch (ReflectionTypeLoadException ex)
             {
-                _log.Warn(ex);
-                return Enumerable.Empty<Type>();
+                Log.Warn(ex);
+                return;
             }
 
-            // all types which have INService implementation are services
-            // which are supposed to be loaded with this method
-            // ignore all interfaces and abstract classes
-            var services = new Queue<Type>(allTypes
-                .Where(x => x.GetInterfaces().Contains(typeof(IRokiService))
-                            && !x.GetTypeInfo().IsInterface && !x.GetTypeInfo().IsAbstract
-                )
-                .ToArray());
+            var services = new Queue<Type>(allTypes.Where(x => 
+                    x.GetInterfaces().Contains(typeof(IRokiService)) && !x.GetTypeInfo().IsInterface && !x.GetTypeInfo().IsAbstract).ToArray());
 
-            // we will just return those types when we're done instantiating them
             addedTypes.AddRange(services);
-
-            // get all interfaces which inherit from INService
-            // as we need to also add a service for each one of interfaces
-            // so that DI works for them too
-            var interfaces = new HashSet<Type>(allTypes
-                .Where(x => x.GetInterfaces().Contains(typeof(IRokiService))
-                            && x.GetTypeInfo().IsInterface));
-
-            // keep instantiating until we've instantiated them all
+            var interfaces = new HashSet<Type>(allTypes.Where(x => x.GetInterfaces().Contains(typeof(IRokiService)) && x.GetTypeInfo().IsInterface));
             while (services.Count > 0)
             {
-                var serviceType = services.Dequeue(); //get a type i need to add
+                var serviceType = services.Dequeue();
 
-                if (collection.FirstOrDefault(x => x.ServiceType == serviceType) != null) // if that type is already added, skip
+                if (collection.FirstOrDefault(x => x.ServiceType == serviceType) != null)
                     continue;
 
-                //also add the same type 
                 var interfaceType = interfaces.FirstOrDefault(x => serviceType.GetInterfaces().Contains(x));
                 if (interfaceType != null)
                 {
@@ -101,11 +83,9 @@ namespace Roki.Extensions
                     collection.AddSingleton(serviceType, serviceType);
                 }
             }
-
-            return addedTypes;
         }
 
-        public static IMessage DeleteAfter(this IUserMessage msg, int seconds)
+        public static void DeleteAfter(this IUserMessage msg, int seconds)
         {
             Task.Run(async () =>
             {
@@ -119,7 +99,6 @@ namespace Roki.Extensions
                     //
                 }
             });
-            return msg;
         }
 
         public static ReactionEventWrapper OnReaction(this IUserMessage msg, DiscordSocketClient client, Func<SocketReaction, Task> reactionAdded,
@@ -251,7 +230,7 @@ namespace Roki.Extensions
             var n = list.Count;  
             while (n > 1) {  
                 n--;  
-                var k = rng.Next(n + 1);
+                var k = Rng.Next(n + 1);
                 var value = list[k];  
                 list[k] = list[n];  
                 list[n] = value;  

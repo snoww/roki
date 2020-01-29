@@ -39,10 +39,10 @@ namespace Roki.Modules.Help
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
-        [RokiCommand, Description, Usage, Aliases, RokiOptions(typeof(CommandOptions))]
+        [RokiCommand, Description, Usage, Aliases, RokiOptions(typeof(CommandArgs))]
         public async Task Commands(string module = null, params string[] args)
         {
-            var (opts, _) = OptionsParser.ParseFrom(new CommandOptions(), args);
+            var (opts, _) = OptionsParser.ParseFrom(new CommandArgs(), args);
 
             module = module?.Trim().ToUpperInvariant();
             if (string.IsNullOrWhiteSpace(module))
@@ -54,7 +54,7 @@ namespace Roki.Modules.Help
                 .Distinct(new CommandTextEqualityComparer());
 
             var success = new HashSet<CommandInfo>();
-            if (opts.View != CommandOptions.ViewType.All)
+            if (opts.View != CommandArgs.ViewType.All)
             {
                 success = new HashSet<CommandInfo>((await Task.WhenAll(cmds.Select(async x =>
                     {
@@ -64,7 +64,7 @@ namespace Roki.Modules.Help
                     .Where(x => x.Success)
                     .Select(x => x.Command));
 
-                if (opts.View == CommandOptions.ViewType.Hide) cmds = cmds.Where(x => success.Contains(x));
+                if (opts.View == CommandArgs.ViewType.Hide) cmds = cmds.Where(x => success.Contains(x));
             }
 
             var cmdsWithGroup = cmds.GroupBy(cmd => cmd.Module.Name.Replace("Commands", "", StringComparison.InvariantCulture))
@@ -72,7 +72,7 @@ namespace Roki.Modules.Help
 
             if (!cmds.Any())
             {
-                if (opts.View != CommandOptions.ViewType.Hide)
+                if (opts.View != CommandArgs.ViewType.Hide)
                     await ctx.Channel.SendErrorAsync("Module not found, use `.modules` to see the list of modules.").ConfigureAwait(false);
                 else
                     await ctx.Channel.SendErrorAsync("Module not found or can't execute");
@@ -90,7 +90,7 @@ namespace Roki.Modules.Help
                 var last = group.Count();
                 for (i = 0; i < last; i++)
                 {
-                    var transformed = group.ElementAt(i).Select(x => opts.View == CommandOptions.ViewType.Cross 
+                    var transformed = group.ElementAt(i).Select(x => opts.View == CommandArgs.ViewType.Cross 
                         ? $"{(success.Contains(x) ? "✅" : "❌")}{Roki.Properties.Prefix + x.Aliases.First(),-18} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}\n" 
                         : $"{Roki.Properties.Prefix + x.Aliases.First(),-18} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}");
 
@@ -103,38 +103,48 @@ namespace Roki.Modules.Help
 
         [RokiCommand, Description, Usage, Aliases]
         [Priority(0)]
-        public async Task H([Leftover] string fail)
+        public async Task H([Leftover] string command)
         {
-            var prefixless = _command.Commands.FirstOrDefault(x => x.Aliases.Any(cmdName => cmdName.ToLowerInvariant() == fail));
-            if (prefixless != null)
+            var cmd = _command.Commands.FirstOrDefault(x => x.Aliases.Any(name => name.ToLowerInvariant() == command));
+            if (cmd != null)
             {
-                await H(prefixless).ConfigureAwait(false);
+                await H(cmd).ConfigureAwait(false);
                 return;
             }
             
             await ctx.Channel.SendErrorAsync("Command not found.\nTry `.modules` to find the correct module, then `.commands <module>` to find the specific command.").ConfigureAwait(false);
         }
 
-        [RokiCommand, Description, Usage, Aliases]
-        [Priority(1)]
-        public async Task H([Leftover] CommandInfo cmd = null)
+        private async Task H([Leftover] CommandInfo cmd = null)
         {
             var channel = ctx.Channel;
 
             if (cmd == null)
             {
-                var ch = channel is ITextChannel
-                    ? await ((IGuildUser) ctx.User).GetOrCreateDMChannelAsync().ConfigureAwait(false)
-                    : channel;
-
-                await ch.EmbedAsync(new EmbedBuilder().WithOkColor()
+                var helpEmbed = new EmbedBuilder().WithOkColor()
                     .WithTitle("Roki Help")
-                    // TODO add this in botconfig
                     .WithDescription(string.Format(@"
 You can use `{0}modules` command to see a list of all modules.
 You can use `{0}commands <module>` to see a list of all the commands in that module (e.g. `{0}commands Utility`).
 You can use `{0}h <command>` to get help for a specific command (e.g. `{0}h listquotes`).
-", Roki.Properties.Prefix))).ConfigureAwait(false);
+", Roki.Properties.Prefix));
+                
+                if (channel is IDMChannel)
+                {
+                    await channel.EmbedAsync(helpEmbed).ConfigureAwait(false);
+                }
+                else
+                {
+                    try
+                    {
+                        var dm = await ((IGuildUser) ctx.User).GetOrCreateDMChannelAsync().ConfigureAwait(false);
+                        await dm.EmbedAsync(helpEmbed).ConfigureAwait(false);
+                    }
+                    catch (Exception)
+                    {
+                        await channel.EmbedAsync(helpEmbed).ConfigureAwait(false);
+                    }
+                }
             }
 
             var embed = _service.GetCommandHelp(cmd, ctx.Guild);
