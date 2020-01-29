@@ -36,7 +36,7 @@ namespace Roki.Services.Database.Repositories
         public Task<Quote> SearchQuoteKeywordTextAsync(ulong guildId, string keyword, string text)
         {
             var rand = new Random();
-            return Set.Where(q => q.Text.ContainsNoCase(text, StringComparison.OrdinalIgnoreCase) && q.GuildId == guildId && q.Keyword == keyword)
+            return Set.Where(q => q.Text.Contains(text, StringComparison.OrdinalIgnoreCase) && q.GuildId == guildId && q.Keyword == keyword)
                 .OrderBy(q => rand.Next())
                 .FirstOrDefaultAsync();
         }

@@ -177,7 +177,7 @@ namespace Roki.Modules.Currency
             foreach (var tran in trans)
             {
                 var type = tran.Amount > 0 ? "🔵" : "🔴";
-                var amount = tran.Amount.FormatNumber();
+                var amount = tran.Amount.ToString("N0");
                 if (tran.Reason.StartsWith("Gift from") && tran.From == userId)
                 {
                     type = "🔴";

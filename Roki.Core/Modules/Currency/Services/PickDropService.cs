@@ -132,7 +132,7 @@ namespace Roki.Modules.Currency.Services
 
             if (!updated) return false;
                 
-            var msg = await ctx.Channel.SendMessageAsync($"{user.Username} dropped {amount.FormatNumber()} {Roki.Properties.CurrencyIcon}\nType `.pick` to pick it up.");
+            var msg = await ctx.Channel.SendMessageAsync($"{user.Username} dropped {amount:N0} {Roki.Properties.CurrencyIcon}\nType `.pick` to pick it up.");
 
             uow.Transaction.Add(new CurrencyTransaction
             {

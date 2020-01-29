@@ -85,7 +85,7 @@ namespace Roki.Modules.Stocks
                     .WithAuthor(article.Source, article.Url)
                     .WithDescription(article.Summary + $"\nSource: [{article.Source}]({article.Url})")
                     .WithImageUrl(article.Image)
-                    .WithFooter($"{article.DateTime.UnixTimeStampToDateTime():yyyy-MM-dd HH:mm}");
+                    .WithFooter($"{DateTimeOffset.FromUnixTimeMilliseconds((long) article.DateTime):yyyy-MM-dd HH:mm}");
                 if (article.HasPayWall)
                     embed.WithDescription("Has Pay Wall\n" + article.Summary);
                 return embed;
@@ -108,7 +108,7 @@ namespace Roki.Modules.Stocks
                 .WithTitle(quote.CompanyName)
                 .AddField("Primary Exchange", quote.PrimaryExchange, true)
                 .AddField("Latest Price", quote.LatestPrice.ToString("N2"), true)
-                .AddField("Latest Time", quote.LatestUpdate.UnixTimeStampToDateTime().ToString("yyyy-MM-dd HH:mm"), true);
+                .AddField("Latest Time", DateTimeOffset.FromUnixTimeMilliseconds((long) quote.LatestUpdate).ToString("yyyy-MM-dd HH:mm"), true);
             if (quote.Open != null)
                 embed.AddField("Open", quote.Open.Value.ToString("N2"), true);
             if (quote.Close != null)
