@@ -8,8 +8,7 @@ namespace Roki.Common.Attributes
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class DescriptionAttribute : SummaryAttribute
     {
-        public DescriptionAttribute([CallerMemberName] string name = "") : base(Localization.GetCommandData(name.ToLowerInvariant())
-            .Description)
+        public DescriptionAttribute([CallerMemberName] string name = "") : base(Localization.GetCommandData(name.ToLowerInvariant()).Value.Description)
         {
         }
     }
