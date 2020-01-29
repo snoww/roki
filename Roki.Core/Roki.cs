@@ -99,12 +99,11 @@ namespace Roki
             stats.Initialize();
             var commandHandler = Services.GetService<CommandHandler>();
             var commandService = Services.GetService<CommandService>();
-            var eventHandlers = Services.GetService<EventHandlers>();
-
+            
             await commandHandler.StartHandling().ConfigureAwait(false);
-            await eventHandlers.StartHandling().ConfigureAwait(false);
+            await new EventHandlers(_db, Client, Cache).StartHandling().ConfigureAwait(false);
 
-            var _ = await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
+            await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
             
             Ready.TrySetResult(true);
         }
@@ -185,7 +184,6 @@ namespace Roki
                 .AddHttpClient();
 
             service.LoadFrom(Assembly.GetAssembly(typeof(CommandHandler)));
-            service.LoadFrom(Assembly.GetAssembly(typeof(EventHandlers)));
 
             Services = service.BuildServiceProvider();
             LoadTypeReaders(typeof(Roki).Assembly);
