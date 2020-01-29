@@ -39,6 +39,7 @@ namespace Roki.Services
         private long _voiceChannels;
 
         public const string BotVersion = "0.9.1";
+        private const long Megabyte = 1000000;
 
         public StatsService(DiscordSocketClient client, CommandHandler cmdHandler, IRokiConfig config)
         {
@@ -138,7 +139,7 @@ namespace Roki.Services
         public string Author => "<@!125025504548880384>"; // mentions Snow#7777
         public string Library => "Discord.Net";
 
-        public string Heap => Math.Round((double) GC.GetTotalMemory(false) / 1.MiB(), 2).ToString(CultureInfo.InvariantCulture);
+        public string Heap => Math.Round((double) GC.GetTotalMemory(false) / Megabyte, 2).ToString(CultureInfo.InvariantCulture);
         public double MessagesPerSecond => MessageCounter / GetUptime().TotalSeconds;
         public long TextChannels => Interlocked.Read(ref _textChannels);
         public long VoiceChannels => Interlocked.Read(ref _voiceChannels);
