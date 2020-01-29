@@ -26,12 +26,11 @@ namespace Roki
         private DiscordSocketClient Client { get; }
         private CommandService CommandService { get; }
         private IRedisCache Cache { get; }
+        private IServiceProvider Services { get; set; }
+        
         public static Properties Properties { get; private set; }
         public static Color OkColor { get; private set; }
         public static Color ErrorColor { get; private set; }
-
-        public TaskCompletionSource<bool> Ready { get; } = new TaskCompletionSource<bool>();
-        private IServiceProvider Services { get; set; }
 
         public Roki()
         {
@@ -104,13 +103,11 @@ namespace Roki
             await new EventHandlers(_db, Client, Cache).StartHandling().ConfigureAwait(false);
 
             await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
-            
-            Ready.TrySetResult(true);
         }
 
         private async Task LoginAsync(string token)
         {
-            var updateStatus = new TaskCompletionSource<bool>();
+            var ready = new TaskCompletionSource<bool>();
 
             _log.Info("Logging in ...");
             
@@ -118,7 +115,7 @@ namespace Roki
             await Client.StartAsync().ConfigureAwait(false);
             
             Client.Ready += UpdateDatabase;
-            await updateStatus.Task.ConfigureAwait(false);
+            await ready.Task.ConfigureAwait(false);
             Client.Ready -= UpdateDatabase;
             
             _log.Info("Logged in as {0}", Client.CurrentUser);
@@ -126,9 +123,10 @@ namespace Roki
             // makes sure database contains latest guild/channel info
             Task UpdateDatabase()
             {
+                ready.TrySetResult(true);
+
                 var _ = Task.Run(async () =>
                 {
-                    updateStatus.TrySetResult(true);
                     try
                     {
                         using var uow = _db.GetDbContext();

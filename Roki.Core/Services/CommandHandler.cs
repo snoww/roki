@@ -94,9 +94,7 @@ namespace Roki.Services
         {
             try
             {
-                if (message.Author.IsBot || !_roki.Ready.Task.IsCompleted)
-                    return;
-                if (!(message is SocketUserMessage userMessage))
+                if (message.Author.IsBot || !(message is SocketUserMessage userMessage))
                     return;
 
                 UserMessagesSent.AddOrUpdate(userMessage.Author.Id, 1, (key, old) => ++old);
