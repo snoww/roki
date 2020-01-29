@@ -134,11 +134,6 @@ namespace Roki.Extensions
             return string.Join("\n", command.Remarks.Deserialize<string[]>().Select(x => Format.Code(string.Format(x, prefix))));
         }
 
-        public static double UnixTimestamp(this DateTime date)
-        {
-            return date.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
-        }
-        
         public static Stream ToStream(this Image<Rgba32> img, IImageFormat format = null)
         {
             var imageStream = new MemoryStream();
@@ -154,31 +149,6 @@ namespace Roki.Extensions
             
             imageStream.Position = 0;
             return imageStream;
-        }
-
-        public static Image<Rgba32> MergePokemonTeam(this IEnumerable<Image<Rgba32>> images)
-        {
-            var width = (int) images.Sum(image => image.Width * 0.6);
-            var output = new Image<Rgba32>(width, images.First().Height);
-            var curWidth = 0;
-
-            foreach (var image in images)
-            {
-                output.Mutate(o => o.DrawImage(image, new Point((int) (curWidth * 0.5), 0), 1));
-                curWidth += image.Width;
-            }
-
-            return output;
-        }
-
-        public static Image<Rgba32> MergeTwoVertical(this Image<Rgba32> image1, Image<Rgba32> image2)
-        {
-            var output = new Image<Rgba32>(image1.Width, image1.Height + image2.Height);
-            output.Mutate(o => o
-                .DrawImage(image1, new Point(0, 0), 1)
-                .DrawImage(image2, new Point(0, image1.Height), 1));
-
-            return output;
         }
         
         public static Image<Rgba32> Merge(this IEnumerable<Image<Rgba32>> images)
@@ -201,8 +171,8 @@ namespace Roki.Extensions
             }
 
             var imgs = images.ToArray();
-            int frames = images.Max(x => x.Frames.Count);
-
+            
+            var frames = imgs.Max(x => x.Frames.Count);
             var width = imgs.Sum(img => img.Width);
             var height = imgs.Max(img => img.Height);
             var canvas = new Image<Rgba32>(width, height);

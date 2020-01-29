@@ -55,7 +55,7 @@ namespace Roki.Modules.Searches.Services
             {
                 using var http = _httpFactory.CreateClient();
                 var obj = await GetLocationDataAsync(arg);
-                var currentSeconds = DateTime.UtcNow.UnixTimestamp();
+                var currentSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
                 var timeResult = await http
                     .GetStringAsync(
                         $"https://maps.googleapis.com/maps/api/timezone/json?location={obj.Results[0].Geometry.Location.Lat},{obj.Results[0].Geometry.Location.Lng}&timestamp={currentSeconds}&key={_config.GoogleApi}")
@@ -81,7 +81,7 @@ namespace Roki.Modules.Searches.Services
         public async Task<TimeZoneResult> GetLocalDateTime(float lat, float lng)
         {
             using var http = _httpFactory.CreateClient();
-            var currentSeconds = DateTime.UtcNow.UnixTimestamp();
+            var currentSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var timeResult = await http
                 .GetStringAsync(
                     $"https://maps.googleapis.com/maps/api/timezone/json?location={lat},{lng}&timestamp={currentSeconds}&key={_config.GoogleApi}")
