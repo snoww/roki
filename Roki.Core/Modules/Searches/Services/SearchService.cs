@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Web;
 using Discord.WebSocket;
 using NLog;
 using Roki.Extensions;
@@ -16,15 +17,13 @@ namespace Roki.Modules.Searches.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly IRokiConfig _config;
-        private readonly IGoogleApiService _google;
         private readonly IHttpClientFactory _httpFactory;
         private readonly Logger _log;
 
-        public SearchService(DiscordSocketClient client, IHttpClientFactory httpFactory, IGoogleApiService google, IRokiConfig config)
+        public SearchService(DiscordSocketClient client, IHttpClientFactory httpFactory, IRokiConfig config)
         {
             _client = client;
             _httpFactory = httpFactory;
-            _google = google;
             _config = config;
             _log = LogManager.GetCurrentClassLogger();
         }
@@ -44,12 +43,7 @@ namespace Roki.Modules.Searches.Services
             }
         }
 
-        public Task<TimeData> GetTimeDataAsync(string arg)
-        {
-            return GetTimeDataFactory(arg);
-        }
-        
-        private async Task<TimeData> GetTimeDataFactory(string arg)
+        public async Task<TimeData> GetTimeDataAsync(string arg)
         {
             try
             {
@@ -63,13 +57,13 @@ namespace Roki.Modules.Searches.Services
                 var timeObj = timeResult.Deserialize<TimeZoneResult>();
                 var time = DateTime.UtcNow.AddSeconds(timeObj.DstOffset + timeObj.RawOffset);
 
-                var toReturn = new TimeData
+                var timeData = new TimeData
                 {
                     Address = obj.Results[0].FormattedAddress,
                     Time = time,
                     TimeZoneName = timeObj.TimeZoneName
                 };
-                return toReturn;
+                return timeData;
             }
             catch (Exception e)
             {
@@ -87,7 +81,6 @@ namespace Roki.Modules.Searches.Services
                     $"https://maps.googleapis.com/maps/api/timezone/json?location={lat},{lng}&timestamp={currentSeconds}&key={_config.GoogleApi}")
                 .ConfigureAwait(false);
             return timeResult.Deserialize<TimeZoneResult>();
-//            return (TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTime.UtcNow, timeZone.TimeZoneName), timeZone.TimeZoneName);
         }
 
         public async Task<GeolocationResult> GetLocationDataAsync(string location)
@@ -97,14 +90,14 @@ namespace Roki.Modules.Searches.Services
                 using var http = _httpFactory.CreateClient();
                 var result = await http.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={location}&key={_config.GoogleApi}")
                     .ConfigureAwait(false);
-                var obj = result.Deserialize<GeolocationResult>();
-                if (obj?.Results == null || obj.Results.Length == 0)
+                var geo = result.Deserialize<GeolocationResult>();
+                if (geo?.Results == null || geo.Results.Length == 0)
                 {
                     _log.Warn("Geocode lookup failed for {0}", location);
                     return null;
                 }
 
-                return obj;
+                return geo;
             }
             catch (Exception e)
             {
@@ -113,16 +106,11 @@ namespace Roki.Modules.Searches.Services
             }
         }
 
-        public Task<OmdbMovie> GetMovieDataAsync(string name)
+        public async Task<OmdbMovie> GetMovieDataAsync(string name)
         {
-            name = name.Trim().ToLowerInvariant();
-            return GetMovieDataFactory(name);
-        }
-
-        private async Task<OmdbMovie> GetMovieDataFactory(string name)
-        {
+            name = HttpUtility.UrlEncode(name.ToLowerInvariant());
             using var http = _httpFactory.CreateClient();
-            var result = await http.GetStringAsync($"http://www.omdbapi.com/?t={name.Trim().Replace(' ', '+')}&apikey={_config.OmdbApi}&y=&plot=full&r=json").ConfigureAwait(false);
+            var result = await http.GetStringAsync($"http://www.omdbapi.com/?t={name}&apikey={_config.OmdbApi}&y=&plot=full&r=json").ConfigureAwait(false);
             var movie = result.Deserialize<OmdbMovie>();
             return movie?.Title == null ? null : movie;
         }
@@ -134,9 +122,9 @@ namespace Roki.Modules.Searches.Services
             using var cat = JsonDocument.Parse(result);
             using var client = new WebClient();
             var uri = new Uri(cat.RootElement.GetProperty("file").GetString());
-            var fileName = "./temp/" + Path.GetFileName(uri.LocalPath);
-            await client.DownloadFileTaskAsync(uri, fileName).ConfigureAwait(false);
-            return fileName;
+            var path = "./temp/" + Path.GetFileName(uri.LocalPath);
+            await client.DownloadFileTaskAsync(uri, path).ConfigureAwait(false);
+            return path;
         }
         
         public async Task<string> GetRandomDogAsync()
@@ -146,9 +134,9 @@ namespace Roki.Modules.Searches.Services
             using var dog = JsonDocument.Parse(result);
             using var client = new WebClient();
             var uri = new Uri(dog.RootElement.GetProperty("url").GetString());
-            var fileName = "./temp/" + Path.GetFileName(uri.LocalPath);
-            await client.DownloadFileTaskAsync(uri, fileName).ConfigureAwait(false);
-            return fileName;
+            var path = "./temp/" + Path.GetFileName(uri.LocalPath);
+            await client.DownloadFileTaskAsync(uri, path).ConfigureAwait(false);
+            return path;
         }
 
         public async Task<string> GetCatFactAsync()
