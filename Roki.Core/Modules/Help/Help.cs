@@ -50,7 +50,7 @@ namespace Roki.Modules.Help
 
             var commands = _command.Commands.Where(c =>
                     c.Module.GetTopLevelModule().Name.ToUpperInvariant().StartsWith(module, StringComparison.InvariantCulture))
-                .OrderBy(c => c.Name)
+                .OrderBy(c => c.Aliases[0])
                 .Distinct(new CommandTextEqualityComparer())
                 .ToList();
 
@@ -94,8 +94,8 @@ namespace Roki.Modules.Help
                 for (i = 0; i < last; i++)
                 {
                     var transformed = group.ElementAt(i).Select(x => opts.View == CommandArgs.ViewType.Cross 
-                        ? $"{(success.Contains(x) ? "✅" : "❌")}{Roki.Properties.Prefix + x.Name,-18} {"[" + string.Join("/", x.Aliases) + "]",10}\n" 
-                        : $"{Roki.Properties.Prefix + x.Name,-18} {"[" + string.Join("/", x.Aliases) + "]",10}");
+                        ? $"{(success.Contains(x) ? "✅" : "❌")}{Roki.Properties.Prefix + x.Aliases.First(),-18} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}\n" 
+                        : $"{Roki.Properties.Prefix + x.Aliases.First(),-18} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}");
 
                     embed.AddField(group.ElementAt(i).Key, $"```css\n{string.Join("\n", transformed)}\n```");
                 }
@@ -158,7 +158,7 @@ You can use `{0}h <command>` to get help for a specific command (e.g. `{0}h list
         {
             public bool Equals(CommandInfo x, CommandInfo y)
             {
-                return x?.Name == y?.Name;
+                return x?.Aliases[0] == y?.Aliases[0];
             }
 
             public int GetHashCode(CommandInfo obj)
