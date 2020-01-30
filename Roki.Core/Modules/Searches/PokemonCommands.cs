@@ -24,13 +24,13 @@ namespace Roki.Modules.Searches
 
                 Pokemon pokemon;
                 if (int.TryParse(query, out var num))
-                    pokemon = await _service.GetPokemonByIdAsync(num).ConfigureAwait(false);
+                    pokemon = await Service.GetPokemonByIdAsync(num).ConfigureAwait(false);
                 else
-                    pokemon = await _service.GetPokemonByNameAsync(query).ConfigureAwait(false);
+                    pokemon = await Service.GetPokemonByNameAsync(query).ConfigureAwait(false);
 
                 if (pokemon == null)
                 {
-                    await ctx.Channel.SendErrorAsync("No Pokémon of that name/id found.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("No Pokémon of that name/id found.").ConfigureAwait(false);
                     return;
                 }
 
@@ -40,14 +40,14 @@ namespace Roki.Modules.Searches
                 var baseStats = $"`HP:  {pokemon.Hp}|Atk: {pokemon.Attack}|Def: {pokemon.Defence}\nSpa: {pokemon.SpecialAttack}" +
                                 $"|Spd: {pokemon.SpecialDefense}|Spe: {pokemon.Speed}`";
                 
-                var embed = new EmbedBuilder().WithColor(_service.GetColorOfPokemon(pokemon.Color))
+                var embed = new EmbedBuilder().WithColor(Service.GetColorOfPokemon(pokemon.Color))
                     .WithTitle($"#{pokemon.Number:D3} {pokemon.Species}")
                     .AddField("Types", types, true)
                     .AddField("Abilities", abilities, true)
                     .AddField("Base Stats", baseStats, true)
                     .AddField("Height", $"{pokemon.Height:N1} m", true)
                     .AddField("Weight", $"{pokemon.Weight} kg", true)
-                    .AddField("Evolution", Format.Code(_service.GetEvolution(pokemon)))
+                    .AddField("Evolution", Format.Code(Service.GetEvolution(pokemon)))
                     .AddField("Egg Groups", string.Join(", ", pokemon.EggGroups), true);
 
                 if (pokemon.MaleRatio.HasValue)
@@ -56,7 +56,7 @@ namespace Roki.Modules.Searches
                 var sprite = PokemonService.GetSprite(pokemon.Name, pokemon.Number);
                 embed.WithThumbnailUrl($"attachment://{sprite.Split("/").Last()}");
 
-                await ctx.Channel.SendFileAsync(sprite, embed: embed.Build()).ConfigureAwait(false);
+                await Context.Channel.SendFileAsync(sprite, embed: embed.Build()).ConfigureAwait(false);
             }
 
             [RokiCommand, Usage, Description, Aliases]
@@ -64,16 +64,16 @@ namespace Roki.Modules.Searches
             {
                 if (string.IsNullOrWhiteSpace(query))
                     return;
-                await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+                await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
 
-                var ability = await _service.GetAbilityAsync(query).ConfigureAwait(false);
+                var ability = await Service.GetAbilityAsync(query).ConfigureAwait(false);
                 if (ability == null)
                 {
-                    await ctx.Channel.SendErrorAsync("No ability of that name found.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("No ability of that name found.").ConfigureAwait(false);
                     return;
                 }
 
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle(ability.Name)
                         .WithDescription((ability.Description ?? ability.ShortDescription).TrimTo(2048))
                         .AddField("Rating", $"{ability.Rating:N1}"))
@@ -85,14 +85,14 @@ namespace Roki.Modules.Searches
             {
                 if (string.IsNullOrWhiteSpace(query))
                     return;
-                await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
-                var move = await _service.GetMoveAsync(query).ConfigureAwait(false);
+                await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
+                var move = await Service.GetMoveAsync(query).ConfigureAwait(false);
                 if (move == null)
                 {
-                    await ctx.Channel.SendErrorAsync("No move of that name found.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("No move of that name found.").ConfigureAwait(false);
                     return;
                 }
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle(move.Name)
                         .WithDescription((move.Description ?? move.ShortDescription).TrimTo(2048))
                         .AddField("Type", move.Type, true)

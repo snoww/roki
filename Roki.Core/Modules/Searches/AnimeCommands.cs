@@ -21,18 +21,18 @@ namespace Roki.Modules.Searches
             {
                 if (string.IsNullOrWhiteSpace(query))
                 {
-                    await ctx.Channel.SendErrorAsync("No query provided.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("No query provided.").ConfigureAwait(false);
                     return;
                 }
 
-                var media = await _service.GetAnimeDataAsync(query).ConfigureAwait(false);
+                var media = await Service.GetAnimeDataAsync(query).ConfigureAwait(false);
                 if (media.Count < 1)
                 {
-                    await ctx.Channel.SendErrorAsync("Couldn't find that anime :(").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("Couldn't find that anime :(").ConfigureAwait(false);
                     return;
                 }
 
-                await ctx.SendPaginatedConfirmAsync( 0, p =>
+                await Context.SendPaginatedConfirmAsync( 0, p =>
                 {
                     var anime = media[p];
                     var embed = new EmbedBuilder().WithOkColor()

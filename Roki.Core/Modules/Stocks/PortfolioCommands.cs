@@ -16,18 +16,18 @@ namespace Roki.Modules.Stocks
             [RokiCommand, Usage, Description, Aliases]
             public async Task Portfolio(IUser optionalUser = null)
             {
-                var user = optionalUser ?? ctx.User;
-                var portfolio = await _service.GetUserPortfolio(user.Id).ConfigureAwait(false);
+                var user = optionalUser ?? Context.User;
+                var portfolio = await Service.GetUserPortfolio(user.Id).ConfigureAwait(false);
                 if (portfolio == null || portfolio.Count < 1)
                 {
-                    await ctx.Channel.SendErrorAsync($"{user.Mention} You do not currently have a portfolio. Invest in some companies to create your portfolio.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync($"{user.Mention} You do not currently have a portfolio. Invest in some companies to create your portfolio.").ConfigureAwait(false);
                     return;
                 }
 
-                var value = await _service.GetPortfolioValue(portfolio).ConfigureAwait(false);
+                var value = await Service.GetPortfolioValue(portfolio).ConfigureAwait(false);
 
                 var itemsPP = 10;
-                await ctx.SendPaginatedConfirmAsync(0, p =>
+                await Context.SendPaginatedConfirmAsync(0, p =>
                 {
                     var startAt = itemsPP * p;
                     var desc = string.Join("\n", portfolio

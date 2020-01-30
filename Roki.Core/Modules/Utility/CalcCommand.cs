@@ -21,7 +21,7 @@ namespace Roki.Modules.Utility
                     return;
 
                 var encoded = HttpUtility.UrlEncode(tex.Trim());
-                var fileName = $"{ctx.User.Username}-{Guid.NewGuid().ToString().Substring(0, 7)}";
+                var fileName = $"{Context.User.Username}-{Guid.NewGuid().ToString().Substring(0, 7)}";
 
                 using (var client = new WebClient())
                 {
@@ -42,7 +42,7 @@ namespace Roki.Modules.Utility
                 proc.Start();
                 proc.WaitForExit();
 
-                await ctx.Channel.SendFileAsync($"./temp/{fileName}.png").ConfigureAwait(false);
+                await Context.Channel.SendFileAsync($"./temp/{fileName}.png").ConfigureAwait(false);
                 File.Delete($"./temp/{fileName}.png");
             }
         }

@@ -16,10 +16,10 @@ namespace Roki.Modules.Music
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
-            var user = ctx.User as SocketGuildUser;
+            var user = Context.User as SocketGuildUser;
             
-            await _service.ConnectAsync(user?.VoiceChannel, ctx.Channel as ITextChannel).ConfigureAwait(false);
-            await _service.QueueAsync(ctx, query).ConfigureAwait(false);
+            await Service.ConnectAsync(user?.VoiceChannel, Context.Channel as ITextChannel).ConfigureAwait(false);
+            await Service.QueueAsync(Context, query).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -27,7 +27,7 @@ namespace Roki.Modules.Music
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
-            await _service.PauseAsync(ctx);
+            await Service.PauseAsync(Context);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -35,13 +35,13 @@ namespace Roki.Modules.Music
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
-            var user = ctx.User as SocketGuildUser;
+            var user = Context.User as SocketGuildUser;
             
-            await _service.LeaveAsync(user.VoiceChannel).ConfigureAwait(false);
+            await Service.LeaveAsync(user.VoiceChannel).ConfigureAwait(false);
             
             var embed = new EmbedBuilder().WithOkColor()
                 .WithDescription($"Disconnected from {user.VoiceChannel.Name}");
-            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -49,7 +49,7 @@ namespace Roki.Modules.Music
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
-            await _service.SkipAsync(ctx).ConfigureAwait(false);
+            await Service.SkipAsync(Context).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -58,7 +58,7 @@ namespace Roki.Modules.Music
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
             
-            await _service.ListQueueAsync(ctx, page).ConfigureAwait(false);
+            await Service.ListQueueAsync(Context, page).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -69,11 +69,11 @@ namespace Roki.Modules.Music
 
             if (index == 0)
             {
-                await ctx.Channel.SendErrorAsync("Please provide the index of the song in the queue.").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("Please provide the index of the song in the queue.").ConfigureAwait(false);
                 return;
             }
 
-            await _service.RemoveSongAsync(ctx, index).ConfigureAwait(false);
+            await Service.RemoveSongAsync(Context, index).ConfigureAwait(false);
         }
         
         [RokiCommand, Description, Usage, Aliases]
@@ -83,11 +83,11 @@ namespace Roki.Modules.Music
                 return;
             if (volume < 0 || volume > 100)
             {
-                await ctx.Channel.SendErrorAsync("Volume must be from 0-100.").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("Volume must be from 0-100.").ConfigureAwait(false);
                 return;
             }
             
-            await _service.SetVolumeAsync(ctx, (ushort) volume).ConfigureAwait(false);
+            await Service.SetVolumeAsync(Context, (ushort) volume).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -97,18 +97,18 @@ namespace Roki.Modules.Music
                 return;
             if (seconds == 0)
             {
-                await ctx.Channel.SendErrorAsync("Cannot skip that far.").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("Cannot skip that far.").ConfigureAwait(false);
                 return;
             }
 
-            await _service.SeekAsync(ctx, seconds).ConfigureAwait(false);
+            await Service.SeekAsync(Context, seconds).ConfigureAwait(false);
         }
 
         private async Task<bool> IsUserInVoice()
         {
-            var user = ctx.User as SocketGuildUser;
+            var user = Context.User as SocketGuildUser;
             if (user?.VoiceChannel != null) return true;
-            await ctx.Channel.SendErrorAsync("You must be connected to a voice channel.").ConfigureAwait(false);
+            await Context.Channel.SendErrorAsync("You must be connected to a voice channel.").ConfigureAwait(false);
             return false;
         }
     }

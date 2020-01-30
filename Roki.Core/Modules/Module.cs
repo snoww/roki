@@ -10,30 +10,26 @@ namespace Roki.Modules
 {
     public abstract class RokiTopLevelModule : ModuleBase
     {
+        private string ModuleTypeName { get; }
+        private string LowerModuleTypeName { get; }
+        protected Logger Log { get; }
+        
         protected RokiTopLevelModule(bool isTopLevelModule = true)
         {
-            ModuleTypeName = isTopLevelModule ? GetType().Name : GetType().DeclaringType.Name;
-            LowerModuleTypeName = ModuleTypeName.ToLowerInvariant();
-            _log = LogManager.GetCurrentClassLogger();
+            ModuleTypeName = isTopLevelModule ? GetType().Name : GetType().DeclaringType?.Name;
+            LowerModuleTypeName = ModuleTypeName?.ToLowerInvariant();
+            Log = LogManager.GetCurrentClassLogger();
         }
-
-        protected Logger _log { get; }
-
-        public string ModuleTypeName { get; }
-        public string LowerModuleTypeName { get; }
-        
-        protected ICommandContext ctx => Context;
-
 
         public async Task<bool> PromptUserConfirmAsync(EmbedBuilder embed)
         {
             embed.WithOkColor()
                 .WithFooter("yes/no");
 
-            var msg = await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            var msg = await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
             try
             {
-                var input = await GetUserInputAsync(ctx.User.Id, ctx.Channel.Id).ConfigureAwait(false);
+                var input = await GetUserInputAsync(Context.User.Id, Context.Channel.Id).ConfigureAwait(false);
                 input = input?.ToUpperInvariant();
 
                 if (input != "YES" && input != "Y") return false;
@@ -49,7 +45,7 @@ namespace Roki.Modules
         public async Task<string> GetUserInputAsync(ulong userId, ulong channelId)
         {
             var userInputTask = new TaskCompletionSource<string>();
-            var client = (DiscordSocketClient) ctx.Client;
+            var client = (DiscordSocketClient) Context.Client;
             try
             {
                 client.MessageReceived += MessageReceived;
@@ -84,7 +80,7 @@ namespace Roki.Modules
         {
         }
 
-        public TService _service { get; set; }
+        protected TService Service { get; set; }
     }
 
     public abstract class RokiSubmodule : RokiTopLevelModule

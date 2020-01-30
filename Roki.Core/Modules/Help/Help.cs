@@ -34,7 +34,7 @@ namespace Roki.Modules.Help
                         .Select(module => "• " + module.Key.Name)
                         .OrderBy(s => s)))
                 .WithFooter("Use .commands <module> to see commands of that module");
-            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases, RokiOptions(typeof(CommandArgs))]
@@ -74,9 +74,9 @@ namespace Roki.Modules.Help
             if (!commands.Any())
             {
                 if (opts.View != CommandArgs.ViewType.Hide)
-                    await ctx.Channel.SendErrorAsync("Module not found, use `.modules` to see the list of modules.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("Module not found, use `.modules` to see the list of modules.").ConfigureAwait(false);
                 else
-                    await ctx.Channel.SendErrorAsync("Module not found or you do not have permission to execute commands in that module.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("Module not found or you do not have permission to execute commands in that module.").ConfigureAwait(false);
                 return;
             }
 
@@ -108,7 +108,7 @@ namespace Roki.Modules.Help
                 embed.AddField(submodule.Key, $"```css\n{string.Join("\n", formatted)}\n```");
             }
             
-            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -128,12 +128,12 @@ namespace Roki.Modules.Help
                 return;
             }
             
-            await ctx.Channel.SendErrorAsync("Command not found.\nTry `.modules` to find the correct module, then `.commands <module>` to find the specific command.").ConfigureAwait(false);
+            await Context.Channel.SendErrorAsync("Command not found.\nTry `.modules` to find the correct module, then `.commands <module>` to find the specific command.").ConfigureAwait(false);
         }
         
         private async Task H(CommandInfo command)
         {
-            var channel = ctx.Channel;
+            var channel = Context.Channel;
 
             if (command == null)
             {
@@ -153,7 +153,7 @@ You can use `{0}h <command>` to get help for a specific command (e.g. `{0}h list
                 {
                     try
                     {
-                        var dm = await ((IGuildUser) ctx.User).GetOrCreateDMChannelAsync().ConfigureAwait(false);
+                        var dm = await ((IGuildUser) Context.User).GetOrCreateDMChannelAsync().ConfigureAwait(false);
                         await dm.EmbedAsync(helpEmbed).ConfigureAwait(false);
                     }
                     catch (Exception)
@@ -163,7 +163,7 @@ You can use `{0}h <command>` to get help for a specific command (e.g. `{0}h list
                 }
             }
 
-            var embed = _service.GetCommandInfo(command);
+            var embed = Service.GetCommandInfo(command);
             await channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 

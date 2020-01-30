@@ -16,9 +16,9 @@ namespace Roki.Modules.Administration
         public async Task Fill(ulong afterMessage = 657601009455071232)
         {
             var sw = Stopwatch.StartNew();
-            await _service.FillMissingMessagesAsync(afterMessage).ConfigureAwait(false);
+            await Service.FillMissingMessagesAsync(afterMessage).ConfigureAwait(false);
             sw.Stop();
-            await ctx.Channel.SendMessageAsync($"Finished adding missing messages, took {Format.Code(sw.Elapsed.ToReadableString())}");
+            await Context.Channel.SendMessageAsync($"Finished adding missing messages, took {Format.Code(sw.Elapsed.ToReadableString())}");
         }
     }
 }
