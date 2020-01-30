@@ -11,8 +11,8 @@ namespace Roki.Modules.Help.Common
             Cross,
             All
         }
-
-        [Option('v', "view", Required = false, Default = ViewType.Hide, HelpText = "Specifies how to output the list of commands. 0 - Hide commands which you can't use, 1 - Cross out commands which you can't use, 2 - Show all.")]
+        
+        [Option('v', "view", Required = false, Default = ViewType.Hide, HelpText = "Specifies how to output the list of commands. `hide` - Hide commands which you can't use. `cross` - Cross out commands which you can't use. `all` - Show all. Default is `hide`")]
         public ViewType View { get; set; } = ViewType.Hide;
 
         public void NormalizeArgs()
