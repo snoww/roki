@@ -38,23 +38,23 @@ namespace Roki.Modules.Searches
                 }
 
                 var query = queryBuilder.ToString().Trim();
-                using var typing = ctx.Channel.EnterTypingState();
+                using var typing = Context.Channel.EnterTypingState();
                 // maybe in future only get 1 article if -q not provided
-                var results = await _service.SearchAsync(query).ConfigureAwait(false);
+                var results = await Service.SearchAsync(query).ConfigureAwait(false);
                 if (results == null || results.Count == 0)
                 {
-                    await ctx.Channel.SendErrorAsync($"Cannot find any results for: `{query}`").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync($"Cannot find any results for: `{query}`").ConfigureAwait(false);
                     return;
                 }
                 if (string.IsNullOrWhiteSpace(results[0].Snippet))
                 {
-                    await ctx.Channel.SendErrorAsync($"Cannot find any results for: `{query}`, did you mean `{results[0].Title}`?");
+                    await Context.Channel.SendErrorAsync($"Cannot find any results for: `{query}`, did you mean `{results[0].Title}`?");
                     return;
                 }
                 
                 if (!showResults)
                 {
-                    var article = await _service.GetSummaryAsync(results[0].Title).ConfigureAwait(false);
+                    var article = await Service.GetSummaryAsync(results[0].Title).ConfigureAwait(false);
                     await SendArticleAsync(article).ConfigureAwait(false);
                     return;
                 }
@@ -66,7 +66,7 @@ namespace Roki.Modules.Searches
                     .WithDescription(string.Join("\n", results
                         .Select(a => $"{counter++}. [{a.Title}]({WikipediaUrl}/{HttpUtility.UrlPathEncode(a.Title)})\n\t{a.Snippet}")));
 
-                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 // for future allow selecting article and showing it
             }
 
@@ -83,7 +83,7 @@ namespace Roki.Modules.Searches
                     embed.WithImageUrl(article.ImageUrl);
                 }
 
-                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
         }
     }

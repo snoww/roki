@@ -16,16 +16,16 @@ namespace Roki.Modules.Currency
             [RequireContext(ContextType.Guild)]
             public async Task Pick()
             {
-                await ctx.Message.DeleteAsync().ConfigureAwait(false);
-                var picked = await _service.PickAsync((ITextChannel) ctx.Channel, ctx.User).ConfigureAwait(false);
+                await Context.Message.DeleteAsync().ConfigureAwait(false);
+                var picked = await Service.PickAsync((ITextChannel) Context.Channel, Context.User).ConfigureAwait(false);
 
                 if (picked > 0)
                 {
                     IUserMessage msg;
                     if (picked == 1)
-                        msg = await ctx.Channel.SendMessageAsync($"{ctx.User.Username} picked up 1 {Roki.Properties.CurrencyName}.").ConfigureAwait(false);
+                        msg = await Context.Channel.SendMessageAsync($"{Context.User.Username} picked up 1 {Roki.Properties.CurrencyName}.").ConfigureAwait(false);
                     else
-                        msg = await ctx.Channel.SendMessageAsync($"{ctx.User.Username} picked up {picked:N0} {Roki.Properties.CurrencyNamePlural}.").ConfigureAwait(false);
+                        msg = await Context.Channel.SendMessageAsync($"{Context.User.Username} picked up {picked:N0} {Roki.Properties.CurrencyNamePlural}.").ConfigureAwait(false);
 
                     msg.DeleteAfter(10);
                 }
@@ -35,14 +35,14 @@ namespace Roki.Modules.Currency
             [RequireContext(ContextType.Guild)]
             public async Task Drop([Leftover] long amount = 1)
             {
-                ctx.Message.DeleteAfter(10);
+                Context.Message.DeleteAfter(10);
                 if (amount < 0)
                     return;
                 
-                var success = await _service.DropAsync(ctx, ctx.User, amount).ConfigureAwait(false);
+                var success = await Service.DropAsync(Context, Context.User, amount).ConfigureAwait(false);
 
                 if (!success)
-                    await ctx.Channel.SendMessageAsync($"You do not have enough {Roki.Properties.CurrencyIcon} to drop.").ConfigureAwait(false);
+                    await Context.Channel.SendMessageAsync($"You do not have enough {Roki.Properties.CurrencyIcon} to drop.").ConfigureAwait(false);
 
             }
         }

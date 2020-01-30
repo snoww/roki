@@ -33,15 +33,15 @@ namespace Roki.Modules.Utility
                 IEnumerable<Quote> quotes;
                 using (var uow = _db.GetDbContext())
                 {
-                    quotes = uow.Quotes.GetGroup(ctx.Guild.Id, page, order);
+                    quotes = uow.Quotes.GetGroup(Context.Guild.Id, page, order);
                 }
 
                 if (quotes.Any())
-                    await ctx.Channel.SendConfirmAsync($"Quotes page {page + 1}",
+                    await Context.Channel.SendConfirmAsync($"Quotes page {page + 1}",
                             string.Join("\n", quotes.Select(q => $"`#{q.Id}` {Format.Bold(q.Keyword),-20} by {q.AuthorName}")))
                         .ConfigureAwait(false);
                 else
-                    await ctx.Channel.SendErrorAsync("No quotes found on that page.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("No quotes found on that page.").ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
@@ -55,17 +55,17 @@ namespace Roki.Modules.Utility
                 Quote quote;
                 using (var uow = _db.GetDbContext())
                 {
-                    quote = await uow.Quotes.GetRandomQuoteByKeywordAsync(ctx.Guild.Id, keyword).ConfigureAwait(false);
+                    quote = await uow.Quotes.GetRandomQuoteByKeywordAsync(Context.Guild.Id, keyword).ConfigureAwait(false);
                     if (quote == null)
                         return;
                 }
-                var author = await ctx.Guild.GetUserAsync(quote.AuthorId).ConfigureAwait(false);
+                var author = await Context.Guild.GetUserAsync(quote.AuthorId).ConfigureAwait(false);
                 if (context)
                 {
-                    await ctx.Channel.SendMessageAsync($"`#{quote.Id}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}\nContext: {quote.Context}").ConfigureAwait(false);
+                    await Context.Channel.SendMessageAsync($"`#{quote.Id}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}\nContext: {quote.Context}").ConfigureAwait(false);
                     return;
                 }
-                await ctx.Channel.SendMessageAsync($"`#{quote.Id}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}").ConfigureAwait(false);
+                await Context.Channel.SendMessageAsync($"`#{quote.Id}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}").ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
@@ -80,23 +80,23 @@ namespace Roki.Modules.Utility
                 {
                     uow.Quotes.Add(new Quote
                     {
-                        AuthorId = ctx.Message.Author.Id,
-                        AuthorName = ctx.Message.Author.Username,
-                        GuildId = ctx.Guild.Id,
+                        AuthorId = Context.Message.Author.Id,
+                        AuthorName = Context.Message.Author.Username,
+                        GuildId = Context.Guild.Id,
                         Keyword = keyword,
-                        Context = $"https://discordapp.com/channels/{ctx.Guild.Id}/{ctx.Channel.Id}/{ctx.Message.Id}",
+                        Context = $"https://discordapp.com/channels/{Context.Guild.Id}/{Context.Channel.Id}/{Context.Message.Id}",
                         Text = text
                     });
                     await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
 
-                await ctx.Channel.SendMessageAsync("Quote added.").ConfigureAwait(false);
+                await Context.Channel.SendMessageAsync("Quote added.").ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
             public async Task QuoteDelete(int id)
             {
-                var isAdmin = ((IGuildUser) ctx.Message.Author).GuildPermissions.Administrator;
+                var isAdmin = ((IGuildUser) Context.Message.Author).GuildPermissions.Administrator;
                 var success = false;
                 string response;
 
@@ -104,7 +104,7 @@ namespace Roki.Modules.Utility
                 {
                     var quote = uow.Context.Quotes.First(q => q.Id == id);
 
-                    if (quote.GuildId != ctx.Guild.Id || !isAdmin && quote.AuthorId != ctx.Message.Author.Id)
+                    if (quote.GuildId != Context.Guild.Id || !isAdmin && quote.AuthorId != Context.Message.Author.Id)
                     {
                         response = "No quotes found which you can remove.";
                     }
@@ -118,9 +118,9 @@ namespace Roki.Modules.Utility
                 }
 
                 if (success)
-                    await ctx.Channel.SendConfirmAsync(response).ConfigureAwait(false);
+                    await Context.Channel.SendConfirmAsync(response).ConfigureAwait(false);
                 else
-                    await ctx.Channel.SendErrorAsync(response).ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync(response).ConfigureAwait(false);
             }
 
             /*[RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
@@ -153,19 +153,19 @@ namespace Roki.Modules.Utility
                 using (var uow = _db.GetDbContext())
                 {
                     quote = uow.Context.Quotes.First(q => q.Id == id);
-                    if (quote.GuildId != ctx.Guild.Id)
+                    if (quote.GuildId != Context.Guild.Id)
                         quote = null;
                     await uow.Quotes.IncrementUseCount(id).ConfigureAwait(false);
                 }
 
                 if (quote == null)
                 {
-                    await ctx.Channel.SendErrorAsync("Quote not found.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("Quote not found.").ConfigureAwait(false);
                     return;
                 }
 
                 var info = $"`#{quote.Id} added by {quote.AuthorName} 🗯️ " + quote.Keyword.ToLowerInvariant() + "\n";
-                await ctx.Channel.SendMessageAsync(info).ConfigureAwait(false);
+                await Context.Channel.SendMessageAsync(info).ConfigureAwait(false);
             }
         }
     }

@@ -40,11 +40,11 @@ namespace Roki.Modules.Searches
                         .AddField("Comic #", xkcd.Num, true)
                         .AddField("Date", $"{xkcd.Month}/{xkcd.Year}", true);
 
-                    await ctx.Channel.EmbedAsync(embed);
+                    await Context.Channel.EmbedAsync(embed);
                 }
                 catch (HttpRequestException)
                 {
-                    await ctx.Channel.SendErrorAsync("Comic not found").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("Comic not found").ConfigureAwait(false);
                 }
             }
         }

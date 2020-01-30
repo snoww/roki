@@ -25,7 +25,7 @@ namespace Roki.Modules.Utility
             [RokiCommand, Usage, Description, Aliases, RequireContext(ContextType.Guild)]
             public async Task ServerInfo(string guildName = null)
             {
-                var channel = (ITextChannel) ctx.Channel;
+                var channel = (ITextChannel) Context.Channel;
                 guildName = guildName?.ToUpperInvariant();
                 SocketGuild guild;
                 if (string.IsNullOrWhiteSpace(guildName))
@@ -59,13 +59,13 @@ namespace Roki.Modules.Utility
                 if (Uri.IsWellFormedUriString(guild.IconUrl, UriKind.Absolute))
                     embed.WithThumbnailUrl(guild.IconUrl);
 
-                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
             public async Task ChannelInfo(ITextChannel channel = null)
             {
-                channel ??= (ITextChannel) ctx.Channel;
+                channel ??= (ITextChannel) Context.Channel;
                 if (channel == null)
                     return;
 
@@ -78,13 +78,13 @@ namespace Roki.Modules.Utility
                     .AddField("Created on", $"{channel.CreatedAt:MM/dd/yyyy HH:mm}", true)
                     .AddField("Users", userCount, true);
 
-                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
             public async Task UserInfo(IGuildUser user = null)
             {
-                var usr = user ?? ctx.User as IGuildUser;
+                var usr = user ?? Context.User as IGuildUser;
                 if (usr == null)
                     return;
 
@@ -103,7 +103,7 @@ namespace Roki.Modules.Utility
                 if (avatar != null)
                     embed.WithThumbnailUrl(avatar);
 
-                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
@@ -114,7 +114,7 @@ namespace Roki.Modules.Utility
                 var user = await client.GetUserAsync(usr[0], usr[1]).ConfigureAwait(false);
                 if (user == null)
                 {
-                    await ctx.Channel.SendErrorAsync("No such user found").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("No such user found").ConfigureAwait(false);
                     return;
                 }
 
@@ -126,20 +126,20 @@ namespace Roki.Modules.Utility
                 if (avatar != null)
                     embed.WithThumbnailUrl(avatar);
 
-                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
             public async Task Avatar([Leftover] IGuildUser user = null)
             {
                 if (user == null)
-                    user = (IGuildUser) ctx.User;
+                    user = (IGuildUser) Context.User;
 
                 var avatarUrl = user.GetAvatarUrl();
 
                 if (avatarUrl == null)
                 {
-                    await ctx.Channel.SendErrorAsync($"{user} does not have an avatar set").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync($"{user} does not have an avatar set").ConfigureAwait(false);
                     return;
                 }
 
@@ -149,14 +149,14 @@ namespace Roki.Modules.Utility
                     .AddField("Username", user.ToString(), true)
                     .AddField("Avatar Url", avatarUrl, true);
 
-                await ctx.Channel.EmbedAsync(embed, ctx.User.Mention).ConfigureAwait(false);
+                await Context.Channel.EmbedAsync(embed, Context.User.Mention).ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]
             public async Task Ping()
             {
                 var sw = Stopwatch.StartNew();
-                var msg = await ctx.Channel.SendMessageAsync("🏓").ConfigureAwait(false);
+                var msg = await Context.Channel.SendMessageAsync("🏓").ConfigureAwait(false);
                 sw.Stop();
                 await msg.DeleteAsync().ConfigureAwait(false);
 
@@ -165,7 +165,7 @@ namespace Roki.Modules.Utility
                     .WithAuthor("Pong! 🏓")
                     .WithDescription($"Currently {(int) sw.Elapsed.TotalMilliseconds}ms");
 
-                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
         }
     }

@@ -36,7 +36,7 @@ namespace Roki.Modules.Searches
             {
                 if (string.IsNullOrWhiteSpace(query))
                 {
-                    await ctx.Channel.SendErrorAsync("Please provide a Twitter user.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("Please provide a Twitter user.").ConfigureAwait(false);
                     return;
                 }
                 
@@ -53,11 +53,11 @@ namespace Roki.Modules.Searches
 
                 if (tweets == null)
                 {
-                    await ctx.Channel.SendErrorAsync("No tweets found.");
+                    await Context.Channel.SendErrorAsync("No tweets found.");
                     return;
                 }
 
-                await ctx.SendPaginatedConfirmAsync(0, p =>
+                await Context.SendPaginatedConfirmAsync(0, p =>
                 {
                     var tweet = tweets[p];
 
@@ -87,7 +87,7 @@ namespace Roki.Modules.Searches
             {
                 if (string.IsNullOrWhiteSpace(query))
                 {
-                    await ctx.Channel.SendErrorAsync("Please provide a search query.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("Please provide a search query.").ConfigureAwait(false);
                     return;
                 }
                 
@@ -108,13 +108,13 @@ namespace Roki.Modules.Searches
 
                 if (searchResponse == null)
                 {
-                    await ctx.Channel.SendErrorAsync("No results found.");
+                    await Context.Channel.SendErrorAsync("No results found.");
                     return;
                 }
                 
                 combinedSearch.AddRange(searchResponse);
                 
-                await ctx.SendPaginatedConfirmAsync(0, p =>
+                await Context.SendPaginatedConfirmAsync(0, p =>
                 {
                     var tweet = combinedSearch[p];
 

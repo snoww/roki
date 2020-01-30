@@ -17,11 +17,11 @@ namespace Roki.Modules.Stocks
         [RokiCommand, Usage, Description, Aliases]
         public async Task StockStats(string symbol, [Leftover] string all = "false")
         {
-            var stats = await _service.GetStockStatsAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
-            var logo = await _service.GetLogoAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
+            var stats = await Service.GetStockStatsAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
+            var logo = await Service.GetLogoAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
             if (stats == null)
             {
-                await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
                 return;
             }
 
@@ -37,7 +37,7 @@ namespace Roki.Modules.Stocks
                        $"5 Day Change:\t`{stats.Day5ChangePercent:P}`\n30 Day Change:\t`{stats.Day30ChangePercent:P}`\n1 Month Change:\t`{stats.Month1ChangePercent:P}`\n3 Month Change:\t`{stats.Month3ChangePercent:P}`\n6 Month Change:\t`{stats.Month6ChangePercent:P}`\nYTD Change:\t`{stats.YtdChangePercent:P}`\n1 year Change:\t`{stats.Year1ChangePercent:P}`\n1 Year Change:\t`{stats.Year1ChangePercent:P}`\n2 Year Change:\t`{stats.Year2ChangePercent:P}`\n5 Year Change:\t`{stats.Year1ChangePercent:P}`\nMax Change:\t`{stats.MaxChangePercent:P}`";
             }
             
-            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithAuthor(symbol.ToUpper(), logo)
                     .WithTitle(stats.CompanyName)
                     .WithDescription(desc))
@@ -47,15 +47,15 @@ namespace Roki.Modules.Stocks
         [RokiCommand, Usage, Description, Aliases]
         public async Task Company(string symbol)
         {
-            var company = await _service.GetCompanyAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
-            var logo = await _service.GetLogoAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
+            var company = await Service.GetCompanyAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
+            var logo = await Service.GetLogoAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
             if (company == null)
             {
-                await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
                 return;
             }
 
-            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithTitle(company.Symbol)
                     .WithAuthor(company.CompanyName, logo, company.Website)
                     .WithDescription(company.Description)
@@ -70,14 +70,14 @@ namespace Roki.Modules.Stocks
         [RokiCommand, Usage, Description, Aliases]
         public async Task News(string symbol)
         {
-            var news = await _service.GetNewsAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
+            var news = await Service.GetNewsAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
             if (news == null)
             {
-                await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
                 return;
             }
 
-            await ctx.SendPaginatedConfirmAsync(0, p =>
+            await Context.SendPaginatedConfirmAsync(0, p =>
             {
                 var article = news[p];
                 var embed = new EmbedBuilder().WithOkColor()
@@ -95,11 +95,11 @@ namespace Roki.Modules.Stocks
         [RokiCommand, Usage, Description, Aliases]
         public async Task StockQuote(string symbol)
         {
-            var quote = await _service.GetQuoteAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
-            var logo = await _service.GetLogoAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
+            var quote = await Service.GetQuoteAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
+            var logo = await Service.GetLogoAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
             if (quote == null)
             {
-                await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
                 return;
             }
 
@@ -118,20 +118,20 @@ namespace Roki.Modules.Stocks
             if (quote.Low != null)
                 embed.AddField("Low", quote.Low.Value.ToString("N2"), true);
             
-            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         [RokiCommand, Usage, Description, Aliases]
         public async Task StockPrice(string symbol)
         {
-            var price = await _service.GetQuoteAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
+            var price = await Service.GetQuoteAsync(symbol.ParseStockTicker()).ConfigureAwait(false);
             if (price == null)
             {
-                await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
                 return;
             }
 
-            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithTitle($"Latest Price for {symbol.ToUpperInvariant()}\n`{price.LatestPrice:N2}`")
                     .WithFooter($"Last Updated: {price.LatestTime}"))
                 .ConfigureAwait(false);
@@ -140,7 +140,7 @@ namespace Roki.Modules.Stocks
         [RokiCommand, Usage, Description, Aliases]
         public async Task StockChart(string symbol, string period = "1m")
         {
-            await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+            await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
             var options = new Dictionary<string, string>
             {
                 {"max", "Max"},
@@ -156,24 +156,24 @@ namespace Roki.Modules.Stocks
                 {"today", "Today's"},
             };
             symbol = symbol.ParseStockTicker();
-            var quote = await _service.GetQuoteAsync(symbol).ConfigureAwait(false);
+            var quote = await Service.GetQuoteAsync(symbol).ConfigureAwait(false);
             period = period.Trim().ToLower();
             if (quote == null || !options.ContainsKey(period))
             {
-                await ctx.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false); 
+                await Context.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false); 
                 return;
             }
 
             if (period.Equals("5d", StringComparison.OrdinalIgnoreCase))
                 period = "5dm";
             
-            _service.GenerateChartAsync(symbol, period);
+            Service.GenerateChartAsync(symbol, period);
             var embed = new EmbedBuilder().WithOkColor()
                 .WithTitle($"{quote.CompanyName}")
                 .WithAuthor(quote.Symbol.ToUpper())
                 .WithDescription($"{options[period]} Price")
                 .WithImageUrl("attachment://image.png");
-            await ctx.Channel.SendFileAsync("./temp/image.png", embed: embed.Build()).ConfigureAwait(false);
+            await Context.Channel.SendFileAsync("./temp/image.png", embed: embed.Build()).ConfigureAwait(false);
             File.Delete("./temp/image.png");
         }
     }

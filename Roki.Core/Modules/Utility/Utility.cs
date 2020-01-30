@@ -31,9 +31,9 @@ namespace Roki.Modules.Utility
             var ownerId = string.Join("\n", _config.OwnerIds);
             if (string.IsNullOrWhiteSpace(ownerId)) ownerId = "-";
 
-            await ctx.Channel.EmbedAsync(
+            await Context.Channel.EmbedAsync(
                 new EmbedBuilder().WithOkColor()
-                    .WithAuthor(eab => eab.WithName($"Roki v{StatsService.BotVersion}").WithIconUrl(ctx.Client.CurrentUser.GetAvatarUrl()))
+                    .WithAuthor(eab => eab.WithName($"Roki v{StatsService.BotVersion}").WithIconUrl(Context.Client.CurrentUser.GetAvatarUrl()))
                     .AddField("Author", _stats.Author, true)
                     .AddField("Bot ID", _client.CurrentUser.Id.ToString(), true)
                     .AddField("Owner ID", ownerId, true)
@@ -47,10 +47,10 @@ namespace Roki.Modules.Utility
         [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
         public async Task Pins()
         {
-            var pins = await ctx.Channel.GetPinnedMessagesAsync().ConfigureAwait(false);
+            var pins = await Context.Channel.GetPinnedMessagesAsync().ConfigureAwait(false);
             if (pins.Count < 1)
             {
-                await ctx.Channel.SendErrorAsync("No pins in this channel");
+                await Context.Channel.SendErrorAsync("No pins in this channel");
                 return;
             }
             var pin = pins.First();
@@ -60,7 +60,7 @@ namespace Roki.Modules.Utility
                 .WithDescription(pin.Content)
                 .WithFooter($"{pin.Timestamp.ToLocalTime():hh:mm tt MM/dd/yyyy}");
             
-            await ctx.Channel.EmbedAsync(embed);
+            await Context.Channel.EmbedAsync(embed);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -68,19 +68,19 @@ namespace Roki.Modules.Utility
         {
             if (message == null)
             {
-                var msgs = await ctx.Channel.GetMessagesAsync(ctx.Message, Direction.Before, 5).FlattenAsync();
+                var msgs = await Context.Channel.GetMessagesAsync(Context.Message, Direction.Before, 5).FlattenAsync();
                 var userMsg = msgs.FirstOrDefault(m => !string.IsNullOrWhiteSpace(m.Content));
                 if (userMsg == null)
                 {
-                    await ctx.Channel.SendErrorAsync("nyothing to uwufy uwu").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("nyothing to uwufy uwu").ConfigureAwait(false);
                     return;
                 }
 
                 message = userMsg.Content;
             }
 
-            var uwuize = _service.Uwulate(message);
-            await ctx.Channel.SendMessageAsync(uwuize).ConfigureAwait(false);
+            var uwuize = Service.Uwulate(message);
+            await Context.Channel.SendMessageAsync(uwuize).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -91,7 +91,7 @@ namespace Roki.Modules.Utility
             if (string.IsNullOrWhiteSpace(message))
                 return;
 
-            await ctx.Channel.SendMessageAsync(message).ConfigureAwait(false);
+            await Context.Channel.SendMessageAsync(message).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -102,7 +102,7 @@ namespace Roki.Modules.Utility
             if (string.IsNullOrWhiteSpace(message))
                 return;
             
-            await ctx.Channel.SendMessageAsync(ctx.Message.Content).ConfigureAwait(false);
+            await Context.Channel.SendMessageAsync(Context.Message.Content).ConfigureAwait(false);
         }
     }
 }

@@ -34,16 +34,16 @@ namespace Roki.Modules.Searches
                 using var http = _http.CreateClient();
                 try
                 {
-                    await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+                    await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
                     var result = await http.GetStringAsync($"{WolframUrl}{query}&appid={_config.WolframAlphaApi}").ConfigureAwait(false);
-                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithTitle("Ask Roki")
                             .WithDescription(result))
                         .ConfigureAwait(false);
                 }
                 catch (HttpRequestException)
                 {
-                    await ctx.Channel.SendErrorAsync($"Sorry, I don't have an answer for that question\n`{query}`").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync($"Sorry, I don't have an answer for that question\n`{query}`").ConfigureAwait(false);
                 }
             }
         }
