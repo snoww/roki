@@ -15,7 +15,7 @@ namespace Roki.Modules.Currency.Services
 {
     public class PickDropService : IRokiService
     {
-        private readonly CommandHandler _cmdHandler;
+        private readonly CommandHandler _handler;
         private readonly DbService _db;
         private readonly IDatabase _cache;
 
@@ -23,12 +23,12 @@ namespace Roki.Modules.Currency.Services
         private readonly SemaphoreSlim _pickLock = new SemaphoreSlim(1, 1);
 
 
-        public PickDropService(CommandHandler cmdHandler, DbService db, IRedisCache cache)
+        public PickDropService(CommandHandler handler, DbService db, IRedisCache cache)
         {
-            _cmdHandler = cmdHandler;
+            _handler = handler;
             _db = db;
             _cache = cache.Redis.GetDatabase();
-            _cmdHandler.OnMessageNoTrigger += CurrencyGeneration;
+            _handler.OnMessageNoTrigger += CurrencyGeneration;
         }
         
         private async Task CurrencyGeneration(IUserMessage message)

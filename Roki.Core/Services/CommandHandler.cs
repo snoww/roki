@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -18,28 +17,22 @@ namespace Roki.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commandService;
-        private readonly DbService _db;
         private readonly object _errorLock = new object();
 
         private readonly Logger _log;
 
-        private readonly Roki _roki;
         private readonly IServiceProvider _services;
         
         public string DefaultPrefix { get; }
-
-        public ConcurrentDictionary<ulong, uint> UserMessagesSent { get; } = new ConcurrentDictionary<ulong, uint>();
-
+        
         public event Func<IUserMessage, CommandInfo, Task> CommonOnSuccess = delegate { return Task.CompletedTask; };
         public event Func<CommandInfo, ITextChannel, string, Task> CommonOnError = delegate { return Task.CompletedTask; };
         public event Func<IUserMessage, Task> OnMessageNoTrigger = delegate { return Task.CompletedTask; };
 
-        public CommandHandler(DiscordSocketClient client, CommandService commandService, DbService db, Roki roki, IServiceProvider services)
+        public CommandHandler(DiscordSocketClient client, CommandService commandService, IServiceProvider services)
         {
             _client = client;
             _commandService = commandService;
-            _db = db;
-            _roki = roki;
             _services = services;
 
             _log = LogManager.GetCurrentClassLogger();
@@ -96,9 +89,7 @@ namespace Roki.Services
             {
                 if (message.Author.IsBot || !(message is SocketUserMessage userMessage))
                     return;
-
-                UserMessagesSent.AddOrUpdate(userMessage.Author.Id, 1, (key, old) => ++old);
-
+                
                 var channel = message.Channel;
                 var guild = (message.Channel as SocketTextChannel)?.Guild;
 
