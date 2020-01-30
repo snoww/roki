@@ -88,7 +88,7 @@ namespace Roki.Modules.Help
             {
                 var formatted = new StringBuilder();
                 var maxNameLength = submodule.Max(x => x.Aliases.First().Length) + Roki.Properties.Prefix.Length;
-                var maxAliasesLength = Math.Max(10, submodule.Max(x => string.Join("/", x.Aliases.Skip(1)).Length));
+                var maxAliasesLength = Math.Max(12, submodule.Max(x => string.Join("/", x.Aliases.Skip(1)).Length));
                 
                 foreach (var command in submodule)
                 {
