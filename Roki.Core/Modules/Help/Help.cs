@@ -76,7 +76,7 @@ namespace Roki.Modules.Help
                 if (opts.View != CommandArgs.ViewType.Hide)
                     await ctx.Channel.SendErrorAsync("Module not found, use `.modules` to see the list of modules.").ConfigureAwait(false);
                 else
-                    await ctx.Channel.SendErrorAsync("Module not found or you do not have permission to execute commands in that module.");
+                    await ctx.Channel.SendErrorAsync("Module not found or you do not have permission to execute commands in that module.").ConfigureAwait(false);
                 return;
             }
 
@@ -87,15 +87,21 @@ namespace Roki.Modules.Help
             foreach (var submodule in module)
             {
                 var formatted = new StringBuilder();
+                var maxNameLength = submodule.Max(x => x.Aliases.First()).Length;
+                var maxAliasesLength = submodule.Max(x => string.Join("/", x.Aliases.Skip(1))).Length;
+                
                 foreach (var command in submodule)
                 {
                     if (opts.View == CommandArgs.ViewType.Cross)
                     {
-                        formatted.AppendLine($"{(success.Contains(command) ? "✅" : "❌")}{Roki.Properties.Prefix + command.Aliases.First(),-18} {"[" + string.Join("/", command.Aliases.Skip(1)) + "]",10}");
+                        formatted.AppendLine($"{(success.Contains(command) ? "✅" : "❌")}" +
+                                             $"{(Roki.Properties.Prefix + command.Aliases.First()).PadRight(maxAliasesLength, ' ')}" +
+                                             $"{("[" + string.Join("/", command.Aliases.Skip(1)) + "]").PadLeft(maxAliasesLength, ' ')}");
                     }
                     else
                     {
-                        formatted.AppendLine($"{Roki.Properties.Prefix + command.Aliases.First(),-18} {"[" + string.Join("/", command.Aliases.Skip(1)) + "]",10}");
+                        formatted.AppendLine($"{(Roki.Properties.Prefix + command.Aliases.First()).PadRight(maxAliasesLength, ' ')}" +
+                                             $"{("[" + string.Join("/", command.Aliases.Skip(1)) + "]").PadLeft(maxAliasesLength, ' ')}");
                     }
                 }
                 
