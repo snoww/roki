@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -21,56 +22,30 @@ namespace Roki.Modules
             Log = LogManager.GetCurrentClassLogger();
         }
 
-        public async Task<bool> PromptUserConfirmAsync(EmbedBuilder embed)
+        public async Task<SocketMessage> GetUserReply(TimeSpan? timeout = null)
         {
-            embed.WithOkColor()
-                .WithFooter("yes/no");
+            timeout ??= TimeSpan.FromMinutes(5);
+            var eventTrigger = new TaskCompletionSource<SocketMessage>();
 
-            var msg = await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
-            try
+            Task Handler(SocketMessage message)
             {
-                var input = await GetUserInputAsync(Context.User.Id, Context.Channel.Id).ConfigureAwait(false);
-                input = input?.ToUpperInvariant();
-
-                if (input != "YES" && input != "Y") return false;
-
-                return true;
-            }
-            finally
-            {
-                var _ = Task.Run(() => msg.DeleteAsync());
-            }
-        }
-
-        public async Task<string> GetUserInputAsync(ulong userId, ulong channelId)
-        {
-            var userInputTask = new TaskCompletionSource<string>();
-            var client = (DiscordSocketClient) Context.Client;
-            try
-            {
-                client.MessageReceived += MessageReceived;
-                if (await Task.WhenAny(userInputTask.Task, Task.Delay(10000)).ConfigureAwait(false) != userInputTask.Task) return null;
-
-                return await userInputTask.Task.ConfigureAwait(false);
-            }
-            finally
-            {
-                client.MessageReceived -= MessageReceived;
-            }
-
-            Task MessageReceived(SocketMessage arg)
-            {
-                var _ = Task.Run(() =>
-                {
-                    if (!(arg is SocketUserMessage userMessage) || !(userMessage.Channel is ITextChannel channel) ||
-                        userMessage.Author.Id != userId || userMessage.Channel.Id != channelId) return Task.CompletedTask;
-
-                    if (userInputTask.TrySetResult(arg.Content)) userMessage.DeleteAfter(1);
-
-                    return Task.CompletedTask;
-                });
+                if (message.Channel.Id != Context.Channel.Id || message.Author.Id != Context.User.Id) return Task.CompletedTask;
+                eventTrigger.SetResult(message);
                 return Task.CompletedTask;
             }
+
+            var client = (DiscordSocketClient) Context.Client;
+            client.MessageReceived += Handler;
+
+            var trigger = eventTrigger.Task;
+            var delay = Task.Delay(timeout.Value);
+            var task = await Task.WhenAny(trigger, delay).ConfigureAwait(false);
+
+            client.MessageReceived -= Handler;
+
+            if (task == trigger)
+                return await trigger.ConfigureAwait(false);
+            return null;
         }
     }
 
