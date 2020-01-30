@@ -104,8 +104,14 @@ namespace Roki.Modules.Help
 
         [RokiCommand, Description, Usage, Aliases]
         [Priority(0)]
-        public async Task H([Leftover] string command)
+        public async Task H([Leftover] string command = null)
         {
+            if (string.IsNullOrWhiteSpace(command))
+            {
+                await H((CommandInfo) null).ConfigureAwait(false);
+                return;
+            }
+            
             var cmd = _command.Commands.FirstOrDefault(x => x.Aliases.Any(name => name.ToLowerInvariant() == command));
             if (cmd != null)
             {
@@ -115,10 +121,8 @@ namespace Roki.Modules.Help
             
             await ctx.Channel.SendErrorAsync("Command not found.\nTry `.modules` to find the correct module, then `.commands <module>` to find the specific command.").ConfigureAwait(false);
         }
-
-        [RokiCommand, Description, Usage, Aliases]
-        [Priority(1)]
-        private async Task H(CommandInfo command = null)
+        
+        private async Task H(CommandInfo command)
         {
             var channel = ctx.Channel;
 
