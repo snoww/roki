@@ -15,7 +15,7 @@ namespace Roki.Common.Attributes
 
             return Task.FromResult(config.IsOwner(context.User) || context.Client.CurrentUser.Id == context.User.Id
                 ? PreconditionResult.FromSuccess()
-                : PreconditionResult.FromError("Not owner"));
+                : PreconditionResult.FromError("Command can only be run by the owner of the bot."));
         }
     }
 }
