@@ -88,19 +88,19 @@ namespace Roki.Modules.Help
             {
                 var formatted = new StringBuilder();
                 var maxNameLength = submodule.Max(x => x.Aliases.First()).Length;
-                var maxAliasesLength = submodule.Max(x => string.Join("/", x.Aliases.Skip(1))).Length;
+                var maxAliasesLength = Math.Max(10, submodule.Max(x => string.Join("/", x.Aliases.Skip(1))).Length);
                 
                 foreach (var command in submodule)
                 {
                     if (opts.View == CommandArgs.ViewType.Cross)
                     {
                         formatted.AppendLine($"{(success.Contains(command) ? "✅" : "❌")}" +
-                                             $"{(Roki.Properties.Prefix + command.Aliases.First()).PadRight(maxAliasesLength, ' ')}" +
+                                             $"{(Roki.Properties.Prefix + command.Aliases.First()).PadRight(maxNameLength, ' ')}" +
                                              $"{("[" + string.Join("/", command.Aliases.Skip(1)) + "]").PadLeft(maxAliasesLength, ' ')}");
                     }
                     else
                     {
-                        formatted.AppendLine($"{(Roki.Properties.Prefix + command.Aliases.First()).PadRight(maxAliasesLength, ' ')}" +
+                        formatted.AppendLine($"{(Roki.Properties.Prefix + command.Aliases.First()).PadRight(maxNameLength, ' ')}" +
                                              $"{("[" + string.Join("/", command.Aliases.Skip(1)) + "]").PadLeft(maxAliasesLength, ' ')}");
                     }
                 }
