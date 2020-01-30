@@ -91,11 +91,11 @@ namespace Roki.Modules.Help
                 {
                     if (opts.View == CommandArgs.ViewType.Cross)
                     {
-                        formatted.Append($"{(success.Contains(command) ? "✅" : "❌")}{Roki.Properties.Prefix + command.Aliases.First(),-18} {"[" + string.Join("/", command.Aliases.Skip(1)) + "]",10}\n");
+                        formatted.AppendLine($"{(success.Contains(command) ? "✅" : "❌")}{Roki.Properties.Prefix + command.Aliases.First(),-18} {"[" + string.Join("/", command.Aliases.Skip(1)) + "]",10}");
                     }
                     else
                     {
-                        formatted.Append($"{Roki.Properties.Prefix + command.Aliases.First(),-18} {"[" + string.Join("/", command.Aliases.Skip(1)) + "]",10}");
+                        formatted.AppendLine($"{Roki.Properties.Prefix + command.Aliases.First(),-18} {"[" + string.Join("/", command.Aliases.Skip(1)) + "]",10}");
                     }
                 }
                 
