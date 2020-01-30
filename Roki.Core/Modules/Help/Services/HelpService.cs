@@ -63,11 +63,11 @@ namespace Roki.Modules.Help.Services
                         
 
                     if (!string.IsNullOrWhiteSpace(x.ShortName))
-                        optionString += $" `-{x.ShortName}`, `--{x.LongName}`";
+                        optionString += $"`-{x.ShortName}`, `--{x.LongName}`";
                     else
                         optionString += $"`--{x.LongName}`";
                     
-                    optionString += $"\t{x.HelpText}";
+                    optionString += $" {x.HelpText}";
                     return optionString;
                 });
             return string.Join("\n", options);
