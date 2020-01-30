@@ -29,7 +29,6 @@ namespace Roki.Services
     public class StatsService : IStatsService
     {
         private readonly DiscordSocketClient _client;
-        private readonly IRokiConfig _config;
         private readonly Logger _log;
         private readonly DateTime _started;
         private long _commandsRan;
@@ -38,18 +37,28 @@ namespace Roki.Services
         private long _textChannels;
         private long _voiceChannels;
 
-        public const string BotVersion = "0.9.1";
         private const long Megabyte = 1000000;
+        
+        public const string BotVersion = "0.9.2";
+        public string Author => "<@!125025504548880384>"; // mentions Snow#7777
+        public string Library => "Discord.Net";
 
-        public StatsService(DiscordSocketClient client, CommandHandler cmdHandler, IRokiConfig config)
+        public string Heap => Math.Round((double) GC.GetTotalMemory(false) / Megabyte, 2).ToString(CultureInfo.InvariantCulture);
+        public double MessagesPerSecond => MessageCounter / GetUptime().TotalSeconds;
+        public long TextChannels => Interlocked.Read(ref _textChannels);
+        public long VoiceChannels => Interlocked.Read(ref _voiceChannels);
+        public long MessageCounter => Interlocked.Read(ref _messageCounter);
+        public long CommandsRan => Interlocked.Read(ref _commandsRan);
+
+
+        public StatsService(DiscordSocketClient client, CommandHandler handler)
         {
             _log = LogManager.GetCurrentClassLogger();
             _client = client;
-            _config = config;
 
             _started = DateTime.UtcNow;
             _client.MessageReceived += _ => Task.FromResult(Interlocked.Increment(ref _messageCounter));
-            cmdHandler.CommonOnSuccess += (_, e) => Task.FromResult(Interlocked.Increment(ref _commandsRan));
+            handler.CommonOnSuccess += (_, e) => Task.FromResult(Interlocked.Increment(ref _commandsRan));
 
             _client.ChannelCreated += channel =>
             {
@@ -126,25 +135,7 @@ namespace Roki.Services
 
                 return Task.CompletedTask;
             };
-
-//            var platform = "other";
-//            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-//                platform = "linux";
-//            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-//                platform = "osx";
-//            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-//                platform = "windows";
         }
-
-        public string Author => "<@!125025504548880384>"; // mentions Snow#7777
-        public string Library => "Discord.Net";
-
-        public string Heap => Math.Round((double) GC.GetTotalMemory(false) / Megabyte, 2).ToString(CultureInfo.InvariantCulture);
-        public double MessagesPerSecond => MessageCounter / GetUptime().TotalSeconds;
-        public long TextChannels => Interlocked.Read(ref _textChannels);
-        public long VoiceChannels => Interlocked.Read(ref _voiceChannels);
-        public long MessageCounter => Interlocked.Read(ref _messageCounter);
-        public long CommandsRan => Interlocked.Read(ref _commandsRan);
 
         public void Initialize()
         {

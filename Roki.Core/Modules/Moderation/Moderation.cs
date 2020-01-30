@@ -24,9 +24,19 @@ namespace Roki.Modules.Moderation
         public async Task Logging(bool enable = true)
         {
             await Service.LoggingChannel(Context.Channel.Id, enable);
-            await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            
+            if (enable)
+            {
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithDescription("This channel's messages will now be logged.\nUse `.logging false` to disable logging"))
                 .ConfigureAwait(false);
+            }
+            else
+            {
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                        .WithDescription("Logging is disabled in this channel.\nUse `.logging false` to enable logging"))
+                    .ConfigureAwait(false);
+            }
         }
     }
 }

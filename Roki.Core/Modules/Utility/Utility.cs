@@ -14,15 +14,13 @@ namespace Roki.Modules.Utility
     {
         private readonly DiscordSocketClient _client;
         private readonly IRokiConfig _config;
-        private readonly Roki _roki;
         private readonly IStatsService _stats;
 
-        public Utility(Roki roki, DiscordSocketClient client, IStatsService stats, IRokiConfig config)
+        public Utility(DiscordSocketClient client, IStatsService stats, IRokiConfig config)
         {
             _client = client;
             _stats = stats;
             _config = config;
-            _roki = roki;
         }
 
         [RokiCommand, Description, Usage, Aliases]
