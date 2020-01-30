@@ -55,7 +55,7 @@ namespace Roki.Modules
         {
         }
 
-        protected TService Service { get; set; }
+        public TService Service { get; set; }
     }
 
     public abstract class RokiSubmodule : RokiTopLevelModule
