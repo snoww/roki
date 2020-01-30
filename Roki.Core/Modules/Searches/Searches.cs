@@ -27,10 +27,8 @@ namespace Roki.Modules.Searches
         }
         
         [RokiCommand, Usage, Description, Aliases]
-        public async Task Weather([Leftover] string query = "Toronto")
+        public async Task Weather([Leftover] string query = "toronto")
         {
-            if (!await ValidateQuery(query).ConfigureAwait(false))
-                return;
             try
             {
                 using var _ = Context.Channel.EnterTypingState();
@@ -58,10 +56,8 @@ namespace Roki.Modules.Searches
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task Time([Leftover] string query)
+        public async Task Time([Leftover] string query = "toronto")
         {
-            if (!await ValidateQuery(query).ConfigureAwait(false))
-                return;
             if (string.IsNullOrWhiteSpace(_config.GoogleApi))
             {
                 await Context.Channel.SendErrorAsync("No Google Api key provided.").ConfigureAwait(false);
@@ -71,8 +67,9 @@ namespace Roki.Modules.Searches
             var data = await Service.GetTimeDataAsync(query).ConfigureAwait(false);
 
             var embed = new EmbedBuilder().WithOkColor()
-                .WithTitle($"**{data.Address}**")
-                .WithDescription($"```{data.Time:HH:mm} {data.TimeZoneName}```");
+                .WithTitle(data.Address)
+                .WithDescription($"Current Date Time at: {data.Address}\n" +
+                                 $"{data.Time:HH:mm MMMM dd yyyy}, {data.TimeZoneName}, UTC{data.Time:zz}");
 
             await Context.Channel.EmbedAsync(embed);
         }

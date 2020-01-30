@@ -55,12 +55,11 @@ namespace Roki.Modules.Searches.Services
                         $"https://maps.googleapis.com/maps/api/timezone/json?location={obj.Results[0].Geometry.Location.Lat},{obj.Results[0].Geometry.Location.Lng}&timestamp={currentSeconds}&key={_config.GoogleApi}")
                     .ConfigureAwait(false);
                 var timeObj = timeResult.Deserialize<TimeZoneResult>();
-                var time = DateTime.UtcNow.AddSeconds(timeObj.DstOffset + timeObj.RawOffset);
 
                 var timeData = new TimeData
                 {
                     Address = obj.Results[0].FormattedAddress,
-                    Time = time,
+                    Time = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTimeOffset.UtcNow, timeObj.TimeZoneId),
                     TimeZoneName = timeObj.TimeZoneName
                 };
                 return timeData;
