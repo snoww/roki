@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -9,7 +10,6 @@ using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Help.Common;
 using Roki.Modules.Help.Services;
-using Roki.Services;
 
 namespace Roki.Modules.Help
 {
@@ -38,16 +38,16 @@ namespace Roki.Modules.Help
         }
 
         [RokiCommand, Description, Usage, Aliases, RokiOptions(typeof(CommandArgs))]
-        public async Task Commands(string module = null, params string[] args)
+        public async Task Commands(string moduleName = null, params string[] args)
         {
             var opts = OptionsParser.ParseFrom(new CommandArgs(), args);
 
-            module = module?.Trim().ToUpperInvariant();
-            if (string.IsNullOrWhiteSpace(module))
+            moduleName = moduleName?.Trim().ToUpperInvariant();
+            if (string.IsNullOrWhiteSpace(moduleName))
                 return;
 
             var commands = _command.Commands.Where(c =>
-                    c.Module.GetTopLevelModule().Name.ToUpperInvariant().StartsWith(module, StringComparison.InvariantCulture))
+                    c.Module.GetTopLevelModule().Name.ToUpperInvariant().StartsWith(moduleName, StringComparison.InvariantCulture))
                 .OrderBy(c => c.Aliases[0])
                 .Distinct(new CommandTextEqualityComparer())
                 .ToList();
@@ -67,7 +67,7 @@ namespace Roki.Modules.Help
                     commands = commands.Where(x => success.Contains(x)).ToList();
             }
 
-            var commandsGroup = commands.GroupBy(c => c.Module.Name.Replace("Commands", "", StringComparison.Ordinal))
+            var module = commands.GroupBy(c => c.Module.Name.Replace("Commands", "", StringComparison.Ordinal))
                 .OrderBy(x => x.Key == x.First().Module.Name ? int.MaxValue : x.Count())
                 .ToList();
 
@@ -80,23 +80,26 @@ namespace Roki.Modules.Help
                 return;
             }
 
-            var i = 0;
-            var groups = commandsGroup.GroupBy(x => i++ / 48).ToArray();
             var embed = new EmbedBuilder().WithOkColor()
                 .WithTitle($"{commands.First().Module.GetTopLevelModule().Name} Module Commands")
                 .WithFooter($"Use {Roki.Properties.Prefix}h <command> to see the help for that command");
 
-            foreach (var group in groups)
+            foreach (var submodule in module)
             {
-                var last = group.Count();
-                for (i = 0; i < last; i++)
+                var formatted = new StringBuilder();
+                foreach (var command in submodule)
                 {
-                    var transformed = group.ElementAt(i).Select(x => opts.View == CommandArgs.ViewType.Cross 
-                        ? $"{(success.Contains(x) ? "✅" : "❌")}{Roki.Properties.Prefix + x.Aliases.First(),-18} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}\n" 
-                        : $"{Roki.Properties.Prefix + x.Aliases.First(),-18} {"[" + string.Join("/", x.Aliases.Skip(1)) + "]",10}");
-
-                    embed.AddField(group.ElementAt(i).Key, $"```css\n{string.Join("\n", transformed)}\n```");
+                    if (opts.View == CommandArgs.ViewType.Cross)
+                    {
+                        formatted.Append($"{(success.Contains(command) ? "✅" : "❌")}{Roki.Properties.Prefix + command.Aliases.First(),-18} {"[" + string.Join("/", command.Aliases.Skip(1)) + "]",10}\n");
+                    }
+                    else
+                    {
+                        formatted.Append($"{Roki.Properties.Prefix + command.Aliases.First(),-18} {"[" + string.Join("/", command.Aliases.Skip(1)) + "]",10}");
+                    }
                 }
+                
+                embed.AddField(submodule.Key, $"```css\n{string.Join("\n", formatted)}\n```");
             }
             
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
