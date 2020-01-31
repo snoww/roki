@@ -25,7 +25,7 @@ namespace Roki.Modules.Xp.Extensions
         private const int MaxUsernameLength = 965;
         
         public static Stream GenerateXpBar(Stream avatar, int currentXp, int xpCap, string totalXp, string level, string rank, 
-            string username, string discrim, DateTimeOffset date)
+            string username, string discrim, DateTimeOffset date, bool doubleXp, bool fastXp)
         {
             using Image image = Image.Load("./data/xp/roki_xp.png");
 
@@ -69,7 +69,8 @@ namespace Roki.Modules.Xp.Extensions
                 .DrawUsername(usernameFont, discriminatorFont, username, $"#{discrim}", new PointF(XpBarX, 100)) // username + discrim
                 .DrawText(new TextGraphicsOptions(true) {HorizontalAlignment = HorizontalAlignment.Center},
                     $"XP: {currentXp} / {xpCap}", xpFont, Color.DarkSlateGray, new PointF(XpBarX + XpBarLength / 2, 139)) // xp progress
-                .DrawStats(headerFont, bodyFont, $"#{rank}", level, totalXp, date));
+                .DrawStats(headerFont, bodyFont, $"#{rank}", level, totalXp, date)
+                .DrawBoosts(doubleXp, fastXp));
             
             var stream = new MemoryStream();
             image.SaveAsPng(stream);
@@ -119,13 +120,13 @@ namespace Roki.Modules.Xp.Extensions
 
             return source;
         }
-        
-        private static IImageProcessingContext DrawStats(this IImageProcessingContext source, Font header, Font body, 
+
+        private static IImageProcessingContext DrawStats(this IImageProcessingContext source, Font header, Font body,
             string rank, string level, string total, DateTimeOffset llup)
         {
             const float spacing = XpBarLength / 4f;
             const int y = 235;
-            
+
             source.DrawLines(Color.HotPink, 5, new PointF(XpBarX + spacing, y), new PointF(XpBarX + spacing, y + 105))
                 .DrawLines(Color.HotPink, 5, new PointF(XpBarX + spacing * 2, y), new PointF(XpBarX + spacing * 2, y + 105))
                 .DrawLines(Color.HotPink, 5, new PointF(XpBarX + spacing * 3, y), new PointF(XpBarX + spacing * 3, y + 105));
@@ -143,18 +144,42 @@ namespace Roki.Modules.Xp.Extensions
 
             source.DrawText(headerOptions, "Rank", header, Color.HotPink, new PointF(603, y)) // (XpBarX + spacing) / 2
                 .DrawText(bodyOptions, rank, body, Color.DarkSlateGray, new PointF(603, 340))
-                
+
                 .DrawText(headerOptions, "Level", header, Color.HotPink, new PointF(859, y)) // ((XpBarX + spacing) / 2 + (XpBarX + spacing * 2)) / 2
                 .DrawText(bodyOptions, level, body, Color.DarkSlateGray, new PointF(859, 340))
-                
+
                 .DrawText(headerOptions, "Total XP", header, Color.HotPink, new PointF(1116, y))
                 .DrawText(bodyOptions, total, body, Color.DarkSlateGray, new PointF(1116, 340))
-                
+
                 .DrawText(headerOptions, "Last Level Up", header, Color.HotPink, new PointF(1390, y))
                 // need to use en-US since en-CA adds a . to month abbreviation (en-US -> Jan, en-CA -> Jan.)
                 .DrawText(bodyOptions, llup.ToString("MMM dd yyyy", new CultureInfo("en-US")), body, Color.DarkSlateGray, new PointF(1390, 340));
 
             return source;
-        } 
+        }
+        
+        private static IImageProcessingContext DrawBoosts(this IImageProcessingContext source, bool doubleXp, bool fastXp)
+        {
+            Image<Rgba32> image;
+
+            if (doubleXp && fastXp)
+            {
+                image = Image.Load<Rgba32>("./data/xp/boost_both.png");
+                source.DrawImage(image, new Point(1335, XpBarY), 1); // 1500 - 10 - width of boost_both.png
+            }
+            else if (doubleXp)
+            {
+                image = Image.Load<Rgba32>("./data/xp/boost_double.png");
+                source.DrawImage(image, new Point(1420, XpBarY), 1);
+            }
+            else
+            {
+                image = Image.Load<Rgba32>("./data/xp/boost_fast.png");
+                source.DrawImage(image, new Point(1420, XpBarY + 5), 1);
+            }
+            
+            image.Dispose();
+            return source;
+        }
     }
 }
