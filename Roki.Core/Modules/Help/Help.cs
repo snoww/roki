@@ -87,8 +87,8 @@ namespace Roki.Modules.Help
             foreach (var submodule in module)
             {
                 var formatted = new StringBuilder();
-                var maxNameLength = Math.Max(10, submodule.Max(x => x.Aliases.First().Length) + Roki.Properties.Prefix.Length);
-                var maxAliasesLength = Math.Max(10, submodule.Max(x => string.Join("/", x.Aliases.Skip(1)).Length) + 2);
+                var maxNameLength = Math.Max(15, submodule.Max(x => x.Aliases.First().Length) + Roki.Properties.Prefix.Length);
+                var maxAliasesLength = Math.Max(15, submodule.Max(x => string.Join("/", x.Aliases.Skip(1)).Length) + 2);
                 
                 foreach (var command in submodule)
                 {
@@ -139,11 +139,10 @@ namespace Roki.Modules.Help
             {
                 var helpEmbed = new EmbedBuilder().WithOkColor()
                     .WithTitle("Roki Help")
-                    .WithDescription(string.Format(@"
-You can use `{0}modules` command to see a list of all modules.
-You can use `{0}commands <module>` to see a list of all the commands in that module (e.g. `{0}commands Utility`).
-You can use `{0}h <command>` to get help for a specific command (e.g. `{0}h listquotes`).
-", Roki.Properties.Prefix));
+                    .WithDescription(string.Format(@"Simple guide to find a command:
+Use `{0}modules` command to see a list of all modules.
+Then use `{0}commands <module>` to see a list of all the commands in that module (e.g. `{0}commands searches`).
+After seeing the commands available in that module, you can use `{0}h <command>` to get help for a specific command (e.g. `{0}h weather`).", Roki.Properties.Prefix));
                 
                 if (channel is IDMChannel)
                 {
