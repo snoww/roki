@@ -687,5 +687,61 @@
     "Usage": [
       "{0}xprr xxxxxxx"
     ]
+  },
+  "notsafeforwork": {
+    "Aliases": "nsfw porn",
+    "Description": "Sends random NSFW/Porn image. Requires NSFW Channel.",
+    "Usage": [
+      "{0}nsfw"
+    ]
+  },
+  "ass": {
+    "Aliases": "butt butts",
+    "Description": "Sends random image of asses. Requires NSFW Channel.",
+    "Usage": [
+      "{0}nsfw"
+    ]
+  },
+  "boobs": {
+    "Aliases": "boob boobies tits titty",
+    "Description": "Sends random image of boobs. Requires NSFW Channel.",
+    "Usage": [
+      "{0}nsfw"
+    ]
+  },
+  "cosplay": {
+    "Aliases": "cosplay costume",
+    "Description": "Sends random image of cosplays. Requires NSFW Channel.",
+    "Usage": [
+      "{0}nsfw"
+    ]
+  },
+  "hentai": {
+    "Aliases": "r34",
+    "Description": "Sends random image of hentai. Requires NSFW Channel.",
+    "Usage": [
+      "{0}nsfw"
+    ]
+  },
+  "mild": {
+    "Aliases": "sfw",
+    "Description": "Sends random mild nsfw/sfw image. Requires NSFW Channel.",
+    "Usage": [
+      "{0}nsfw"
+    ]
+  },
+  "nsfwgifs": {
+    "Aliases": "nsfwgif nsfwg porngifs",
+    "Description": "Sends random NSFW/Porn gif. Requires NSFW Channel.",
+    "Usage": [
+      "{0}nsfw"
+    ]
+  },
+  "trans": {
+    "Aliases": "traps",
+    "Description": "Sends random image of trans/traps. Requires NSFW Channel.",
+    "Usage": [
+      "{0}nsfw"
+    ]
   }
 }
