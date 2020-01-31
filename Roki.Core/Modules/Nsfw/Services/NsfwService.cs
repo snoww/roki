@@ -18,6 +18,7 @@ namespace Roki.Modules.Nsfw.Services
         
         private static readonly Dictionary<string, string> Sources = File.ReadAllText("./data/nsfw.json").Deserialize<Dictionary<string, string>>();
         private const string BaseUrl = "https://www.reddit.com/r/{0}/random.json";
+        private const string GfycatUrl = "https://thumbs.gfycat/{0}-mobile.mp4";
 
         public NsfwService(IHttpClientFactory http)
         {
@@ -37,7 +38,18 @@ namespace Roki.Modules.Nsfw.Services
                 using var json = JsonDocument.Parse(result);
                 // maybe return source as well?
                 var url = json.RootElement[0].GetProperty("data").GetProperty("children")[0].GetProperty("data").GetProperty("url").GetString();
-                var path = $"./temp/{Path.GetFileName(url)}";
+                string path;
+
+                if (url.Contains("gfycat", StringComparison.OrdinalIgnoreCase))
+                {
+                    url = string.Format(GfycatUrl, Path.GetFileName(url));
+                    path = $"./temp/{Path.GetFileName(url)}";
+                }
+                else
+                {
+                    path = $"./temp/{Path.GetFileName(url)}";
+                }
+                
                 using var client = new WebClient();
                 await client.DownloadFileTaskAsync(url, path).ConfigureAwait(false);
                 return path;
