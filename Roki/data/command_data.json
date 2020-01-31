@@ -60,8 +60,8 @@
     ]
   },
   "time": {
-    "Aliases": "",
-    "Description": "Shows the current time and timezone for the specified location.",
+    "Aliases": "date",
+    "Description": "Shows the current date and time for the specified location. Also includes date in local culture if exists.",
     "Usage": [
       "{0}time Tokyo, JP"
     ]

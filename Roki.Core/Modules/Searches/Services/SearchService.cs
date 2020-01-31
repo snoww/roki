@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
@@ -15,14 +18,12 @@ namespace Roki.Modules.Searches.Services
 {
     public class SearchService : IRokiService
     {
-        private readonly DiscordSocketClient _client;
         private readonly IRokiConfig _config;
         private readonly IHttpClientFactory _httpFactory;
         private readonly Logger _log;
 
-        public SearchService(DiscordSocketClient client, IHttpClientFactory httpFactory, IRokiConfig config)
+        public SearchService(IHttpClientFactory httpFactory, IRokiConfig config)
         {
-            _client = client;
             _httpFactory = httpFactory;
             _config = config;
             _log = LogManager.GetCurrentClassLogger();
@@ -49,6 +50,8 @@ namespace Roki.Modules.Searches.Services
             {
                 using var http = _httpFactory.CreateClient();
                 var obj = await GetLocationDataAsync(arg);
+                var culture = GetLocalCulture(obj.Results[0].AddressComponents);
+
                 var currentSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
                 var timeResult = await http
                     .GetStringAsync(
@@ -60,13 +63,36 @@ namespace Roki.Modules.Searches.Services
                 {
                     Address = obj.Results[0].FormattedAddress,
                     Time = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTimeOffset.UtcNow, timeObj.TimeZoneId),
-                    TimeZoneName = timeObj.TimeZoneName
+                    TimeZoneName = timeObj.TimeZoneName,
+                    Culture = culture
                 };
+                
                 return timeData;
             }
             catch (Exception e)
             {
                 _log.Warn(e);
+                return null;
+            }
+        }
+
+        private CultureInfo GetLocalCulture(IEnumerable<AddressComponent> components)
+        {
+            var country = components.FirstOrDefault(c => c.Types.Contains("country", StringComparer.Ordinal));
+            if (country == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                using var json = JsonDocument.Parse(File.ReadAllText("./data/countries.json"));
+                var lang = json.RootElement.GetProperty(country.ShortName).GetProperty("languages")[0].GetString();
+                return new CultureInfo(lang);
+            }
+            catch (Exception)
+            {
+                _log.Warn("Could not find culture for: '{0}'", country.LongName);
                 return null;
             }
         }
