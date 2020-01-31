@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using NLog;
@@ -18,7 +19,6 @@ namespace Roki.Modules.Nsfw.Services
         
         private static readonly Dictionary<string, string> Sources = File.ReadAllText("./data/nsfw.json").Deserialize<Dictionary<string, string>>();
         private const string BaseUrl = "https://www.reddit.com/r/{0}/random.json";
-        private const string GfycatUrl = "https://thumbs.gfycat/{0}-mobile.mp4";
 
         public NsfwService(IHttpClientFactory http)
         {
@@ -42,7 +42,22 @@ namespace Roki.Modules.Nsfw.Services
 
                 if (url.Contains("gfycat", StringComparison.OrdinalIgnoreCase))
                 {
-                    url = string.Format(GfycatUrl, Path.GetFileName(url));
+                    var gfycat = await http.GetStringAsync(url).ConfigureAwait(false);
+                    const string search = "\"mp4Url\":\"";
+                    var index = gfycat.IndexOf(search, StringComparison.Ordinal);
+                    var gfycatPath = new StringBuilder();
+                    for (int i = index + search.Length; i < 30; i++)
+                    {
+                        if (gfycat[i] == '4')
+                        {
+                            gfycatPath.Append(4);
+                            break;
+                        }
+
+                        gfycatPath.Append(gfycat[i]);
+                    }
+
+                    url = gfycatPath.ToString();
                     path = $"./temp/{Path.GetFileName(url)}";
                 }
                 else
@@ -52,6 +67,7 @@ namespace Roki.Modules.Nsfw.Services
                 
                 using var client = new WebClient();
                 await client.DownloadFileTaskAsync(url, path).ConfigureAwait(false);
+                
                 return path;
             }
             catch (Exception e)
