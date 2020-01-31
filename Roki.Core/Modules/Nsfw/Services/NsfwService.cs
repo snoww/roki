@@ -46,7 +46,7 @@ namespace Roki.Modules.Nsfw.Services
                     const string search = "\"mp4Url\":\"";
                     var index = gfycat.IndexOf(search, StringComparison.Ordinal);
                     var gfycatPath = new StringBuilder();
-                    for (int i = index + search.Length; i < 30; i++)
+                    for (int i = index + search.Length; i < gfycat.Length; i++)
                     {
                         if (gfycat[i] == '4')
                         {
