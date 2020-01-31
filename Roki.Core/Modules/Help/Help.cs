@@ -87,20 +87,23 @@ namespace Roki.Modules.Help
             foreach (var submodule in module)
             {
                 var formatted = new StringBuilder();
-                const int padding = 15;
                 
                 foreach (var command in submodule)
                 {
+                    var commandName = Roki.Properties.Prefix + command.Aliases.First();
+                    var aliases = "[" + string.Join("/", command.Aliases.Skip(1)) + "]";
+                    
+                    var padRight = 30 - commandName.Length;
+                    var padLeft = 30 - aliases.Length;
+                    
                     if (opts.View == CommandArgs.ViewType.Cross)
                     {
                         formatted.AppendLine($"{(success.Contains(command) ? "✅" : "❌")}" +
-                                             (Roki.Properties.Prefix + command.Aliases.First()).PadRight(padding, ' ') +
-                                             ("[" + string.Join("/", command.Aliases.Skip(1)) + "]").PadLeft(padding, ' '));
+                                             commandName.PadRight(padRight + 1, ' ') + aliases.PadLeft(padLeft - 1, ' '));
                     }
                     else
                     {
-                        formatted.AppendLine((Roki.Properties.Prefix + command.Aliases.First()).PadRight(padding, ' ') +
-                                             ("[" + string.Join("/", command.Aliases.Skip(1)) + "]").PadLeft(padding, ' '));
+                        formatted.AppendLine(commandName.PadRight(padRight, ' ') + aliases.PadLeft(padLeft, ' '));
                     }
                 }
                 
