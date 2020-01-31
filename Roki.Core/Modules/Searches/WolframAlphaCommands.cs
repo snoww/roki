@@ -8,7 +8,7 @@ using Roki.Services;
 
 namespace Roki.Modules.Searches
 {
-    public partial class Utility
+    public partial class Searches
     {
         [Group]
         public class WolframAlphaCommands : RokiSubmodule
