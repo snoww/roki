@@ -199,10 +199,11 @@ namespace Roki.Modules.Currency
                     return;
                 }
                 var desc = "";
+                var now = DateTime.UtcNow;
                 foreach (var sub in subs)
                 {
                     var listing = Service.GetListingById(sub.ItemId);
-                    desc += $"{listing.Item} - Expires in `{(sub.EndDate - sub.StartDate).ToReadableString()}`\n";
+                    desc += $"{listing.Item} - Expires in `{(sub.EndDate - now).ToReadableString()}`\n";
                 }
 
                 await Context.Channel.EmbedAsync(embed.WithDescription(desc)).ConfigureAwait(false);
