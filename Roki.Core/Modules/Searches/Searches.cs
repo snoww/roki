@@ -68,7 +68,13 @@ namespace Roki.Modules.Searches
 
             var embed = new EmbedBuilder().WithOkColor()
                 .WithTitle(data.Address)
-                .WithDescription($"`{data.Time:HH:mm MMMM dd yyyy}, {data.TimeZoneName}, UTC{data.Time:zz}`");
+                .WithDescription($"`{data.Time:f}, {data.TimeZoneName}, UTC{data.Time:zz}`");
+
+            if (data.Culture != null && data.Culture.EnglishName != "English")
+            {
+                embed.WithDescription($"`{data.Time:f}, {data.TimeZoneName}, UTC{data.Time:zz}`\n" +
+                                      $"Local: `{data.Time.ToString("f", data.Culture)}`");
+            }
 
             await Context.Channel.EmbedAsync(embed);
         }
