@@ -87,21 +87,20 @@ namespace Roki.Modules.Help
             foreach (var submodule in module)
             {
                 var formatted = new StringBuilder();
-                var maxNameLength = Math.Max(15, submodule.Max(x => x.Aliases.First().Length) + Roki.Properties.Prefix.Length);
-                var maxAliasesLength = Math.Max(15, submodule.Max(x => string.Join("/", x.Aliases.Skip(1)).Length) + 2);
+                const int padding = 15;
                 
                 foreach (var command in submodule)
                 {
                     if (opts.View == CommandArgs.ViewType.Cross)
                     {
                         formatted.AppendLine($"{(success.Contains(command) ? "✅" : "❌")}" +
-                                             (Roki.Properties.Prefix + command.Aliases.First()).PadRight(maxNameLength + 1, ' ') +
-                                             ("[" + string.Join("/", command.Aliases.Skip(1)) + "]").PadLeft(maxAliasesLength, ' '));
+                                             (Roki.Properties.Prefix + command.Aliases.First()).PadRight(padding, ' ') +
+                                             ("[" + string.Join("/", command.Aliases.Skip(1)) + "]").PadLeft(padding, ' '));
                     }
                     else
                     {
-                        formatted.AppendLine((Roki.Properties.Prefix + command.Aliases.First()).PadRight(maxNameLength, ' ') +
-                                             ("[" + string.Join("/", command.Aliases.Skip(1)) + "]").PadLeft(maxAliasesLength, ' '));
+                        formatted.AppendLine((Roki.Properties.Prefix + command.Aliases.First()).PadRight(padding, ' ') +
+                                             ("[" + string.Join("/", command.Aliases.Skip(1)) + "]").PadLeft(padding, ' '));
                     }
                 }
                 
