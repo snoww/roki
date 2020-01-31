@@ -55,10 +55,12 @@ namespace Roki.Modules.Xp
             var dUser = await uow.Users.GetUserAsync(user.Id).ConfigureAwait(false);
             var xp = new XpLevel(dUser.TotalXp);
             var rank = uow.Users.GetUserXpRank(user.Id);
+            var doubleXp = uow.Subscriptions.DoubleXpIsActive(user.Id);
+            var fastXp = uow.Subscriptions.FastXpIsActive(user.Id);
 
             await using var xpImage = XpDrawExtensions.GenerateXpBar(avatar, 
                 xp.ProgressXp, xp.RequiredXp, $"{xp.TotalXp}", $"{xp.Level}", $"{rank}", 
-                user.Username, user.Discriminator, dUser.LastLevelUp);
+                user.Username, user.Discriminator, dUser.LastLevelUp, doubleXp, fastXp);
             await Context.Channel.SendFileAsync(xpImage, $"xp-{user.Id}.png").ConfigureAwait(false);
         }
 
