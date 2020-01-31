@@ -202,7 +202,7 @@ namespace Roki.Modules.Currency
                 foreach (var sub in subs)
                 {
                     var listing = Service.GetListingById(sub.ItemId);
-                    desc += $"{listing.Item} - Expires: `{(sub.StartDate - sub.EndDate).ToReadableString()}`\n";
+                    desc += $"{listing.Item} - Expires in `{(sub.EndDate - sub.StartDate).ToReadableString()}`\n";
                 }
 
                 await Context.Channel.EmbedAsync(embed.WithDescription(desc)).ConfigureAwait(false);
