@@ -52,7 +52,7 @@
     ]
   },
   "h": {
-    "Aliases": "h",
+    "Aliases": "help",
     "Description": "Either shows a help for a single Aliases, or DMs you help link if no parameters are specified.",
     "Usage": [
       "{0}help {0}weather",
@@ -312,7 +312,7 @@
   },
   "experience": {
     "Aliases": "xp",
-    "Description": "Shows the current level and xp of the specified user, if none provided, shows the message author's level and xp",
+    "Description": "Shows the current XP and Level of the current user. Optional: mention another user to see their XP and Level.",
     "Usage": [
       "{0}xp",
       "{0}xp @snow"
