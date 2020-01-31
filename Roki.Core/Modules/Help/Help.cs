@@ -92,17 +92,17 @@ namespace Roki.Modules.Help
                 {
                     var commandName = Roki.Properties.Prefix + command.Aliases.First();
                     var aliases = "[" + string.Join("/", command.Aliases.Skip(1)) + "]";
-                    
-                    var padding = 30 - commandName.Length;
-                    
+                    // command names should be less than 30 characters
+                    var padding = Math.Abs(30 - commandName.Length);
+
                     if (opts.View == CommandArgs.ViewType.Cross)
                     {
                         formatted.AppendLine($"{(success.Contains(command) ? "✅" : "❌")}" +
-                                             commandName.PadRight(commandName.Length + 1, ' ') + aliases.PadLeft(padding - 1, ' '));
+                                             commandName + aliases.PadLeft(padding - 1, ' '));
                     }
                     else
                     {
-                        formatted.AppendLine(commandName.PadRight(commandName.Length, ' ') + aliases.PadLeft(padding, ' '));
+                        formatted.AppendLine(commandName + aliases.PadLeft(padding, ' '));
                     }
                 }
                 
