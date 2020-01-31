@@ -1,6 +1,13 @@
 {
+  "about": {
+  "Aliases": "info",
+  "Description": "Basic information about Roki.",
+  "Usage": [
+    "{0}about"
+  ]
+},
   "stats": {
-    "Aliases": "stats",
+    "Aliases": "",
     "Description": "Basic stats for Roki.",
     "Usage": [
       "{0}stats"
@@ -44,11 +51,11 @@
       "{0}modules"
     ]
   },
-  "aliases": {
-    "Aliases": "cmds",
-    "Description": "List all of the bot's aliases from a certain module. You can either specify the full name or only the first few letters of the module name.",
+  "commands": {
+    "Aliases": "cmds aliases",
+    "Description": "List all of the bot's commands and their aliases from a module. You can either specify the full or the first few letters of the module name.",
     "Usage": [
-      "{0}aliases stocks"
+      "{0}commands stocks"
     ]
   },
   "h": {
@@ -61,7 +68,7 @@
   },
   "time": {
     "Aliases": "date",
-    "Description": "Shows the current date and time for the specified location. Also includes date in local culture if exists.",
+    "Description": "Shows the current date and time for the specified location. Also includes date and time in local culture if exists.",
     "Usage": [
       "{0}time Tokyo, JP"
     ]
@@ -105,7 +112,7 @@
     ]
   },
   "urbandict": {
-    "Aliases": "ud",
+    "Aliases": "urban ud",
     "Description": "Searches urban dictionary for with the specified query.",
     "Usage": [
       "{0}urban malding"
