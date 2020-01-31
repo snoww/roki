@@ -57,7 +57,7 @@ namespace Roki.Modules.Nsfw.Services
                         gfycatPath.Append(gfycat[i]);
                     }
 
-                    url = gfycatPath.ToString();
+                    url = gfycatPath.ToString().Replace("\\u002F", "/");
                     path = $"./temp/{Path.GetFileName(url)}";
                 }
                 else
