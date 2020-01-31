@@ -30,13 +30,13 @@ namespace Roki.Modules.Utility
             public async Task About()
             {
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                        .WithAuthor(_stats.Author)
+                        .WithAuthor("Snow#7777")
                         .WithTitle($"Roki v{StatsService.BotVersion}")
                         .WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl())
-                        .WithDescription($"Roki is an general purpose discord bot, made by {_stats.Author}. Project is open source on [GitHub](https://github.com/snoww/roki)\n" +
-                                         $"Written in C# using Discord.Net v{DiscordConfig.Version}. Inspired by NadekoBot and yagpdb." +
-                                         "Roki has many features, including but not limited to: XP system, Currency system, Event system, Jeopardy!, and many more." +
-                                         "If you have any questions/issues feel free to DM Snow#7777"))
+                        .WithDescription($"Roki is an general purpose discord bot, made by {_stats.Author}. The bot is open source on [GitHub](https://github.com/snoww/roki). " +
+                                         $"Written in C# using Discord.Net v{DiscordConfig.Version} and inspired by NadekoBot and yagpdb. " +
+                                         "Roki has many features, including but not limited to: XP system, Currency system, Event system, Jeopardy!, and many more. " +
+                                         $"If you have any questions/issues, feel free to send a DM {_stats.Author}"))
                     .ConfigureAwait(false);
 
             }
