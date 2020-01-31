@@ -68,8 +68,7 @@ namespace Roki.Modules.Searches
 
             var embed = new EmbedBuilder().WithOkColor()
                 .WithTitle(data.Address)
-                .WithDescription($"Current Date Time at: {data.Address}\n" +
-                                 $"{data.Time:HH:mm MMMM dd yyyy}, {data.TimeZoneName}, UTC{data.Time:zz}");
+                .WithDescription($"`{data.Time:HH:mm MMMM dd yyyy}, {data.TimeZoneName}, UTC{data.Time:zz}`");
 
             await Context.Channel.EmbedAsync(embed);
         }
