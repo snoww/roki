@@ -160,25 +160,22 @@ namespace Roki.Modules.Xp.Extensions
         
         private static IImageProcessingContext DrawBoosts(this IImageProcessingContext source, bool doubleXp, bool fastXp)
         {
-            Image<Rgba32> image;
-
             if (doubleXp && fastXp)
             {
-                image = Image.Load<Rgba32>("./data/xp/boost_both.png");
+                using var image = Image.Load<Rgba32>("./data/xp/boost_both.png");
                 source.DrawImage(image, new Point(1335, XpBarY), 1); // 1500 - 10 - width of boost_both.png
             }
             else if (doubleXp)
             {
-                image = Image.Load<Rgba32>("./data/xp/boost_double.png");
+                using var image = Image.Load<Rgba32>("./data/xp/boost_double.png");
                 source.DrawImage(image, new Point(1420, XpBarY), 1);
             }
-            else
+            else if (fastXp)
             {
-                image = Image.Load<Rgba32>("./data/xp/boost_fast.png");
+                using var image = Image.Load<Rgba32>("./data/xp/boost_fast.png");
                 source.DrawImage(image, new Point(1420, XpBarY + 5), 1);
             }
             
-            image.Dispose();
             return source;
         }
     }
