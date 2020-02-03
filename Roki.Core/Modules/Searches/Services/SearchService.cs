@@ -20,13 +20,12 @@ namespace Roki.Modules.Searches.Services
     {
         private readonly IRokiConfig _config;
         private readonly IHttpClientFactory _httpFactory;
-        private readonly Logger _log;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public SearchService(IHttpClientFactory httpFactory, IRokiConfig config)
         {
             _httpFactory = httpFactory;
             _config = config;
-            _log = LogManager.GetCurrentClassLogger();
         }
 
         public async Task<string> GetWeatherDataAsync(float lat, float lng)
@@ -39,7 +38,7 @@ namespace Roki.Modules.Searches.Services
             }
             catch (Exception e)
             {
-                _log.Warn(e);
+                Logger.Warn(e);
                 return null;
             }
         }
@@ -71,7 +70,7 @@ namespace Roki.Modules.Searches.Services
             }
             catch (Exception e)
             {
-                _log.Warn(e);
+                Logger.Warn(e);
                 return null;
             }
         }
@@ -92,7 +91,7 @@ namespace Roki.Modules.Searches.Services
             }
             catch (Exception)
             {
-                _log.Warn("Could not find culture for: '{0}'", country.LongName);
+                Logger.Warn("Could not find culture for: '{culture}'", country.LongName);
                 return null;
             }
         }
@@ -118,7 +117,7 @@ namespace Roki.Modules.Searches.Services
                 var geo = result.Deserialize<GeolocationResult>();
                 if (geo?.Results == null || geo.Results.Length == 0)
                 {
-                    _log.Warn("Geocode lookup failed for {0}", location);
+                    Logger.Warn("Geocode lookup failed for {location}", location);
                     return null;
                 }
 
@@ -126,7 +125,7 @@ namespace Roki.Modules.Searches.Services
             }
             catch (Exception e)
             {
-                _log.Warn(e);
+                Logger.Warn(e);
                 return null;
             }
         }

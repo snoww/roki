@@ -18,13 +18,11 @@ namespace Roki.Modules.Music.Services
     {
         private readonly LavaNode _lavaNode;
         private readonly DiscordSocketClient _client;
-        private readonly Logger _log;
 
         public MusicService(LavaNode lavaNode, DiscordSocketClient client)
         {
             _client = client;
             _lavaNode = lavaNode;
-            _log = LogManager.GetCurrentClassLogger();
             OnReadyAsync().Wait();
             _lavaNode.OnTrackEnded += TrackFinished;
         }

@@ -13,13 +13,12 @@ namespace Roki.Modules.Administration.Services
     {
         private readonly DbService _db;
         private readonly DiscordSocketClient _client;
-        private readonly Logger _log;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public AdministrationService(DbService db, DiscordSocketClient client)
         {
             _db = db;
             _client = client;
-            _log = LogManager.GetCurrentClassLogger();
         }
 
         public async Task FillMissingMessagesAsync(ulong messageId)
@@ -32,10 +31,10 @@ namespace Roki.Modules.Administration.Services
                 
                 try
                 {
-                    _log.Info("Downloading messages from {0}", channel.Name);
+                    Logger.Info("Downloading messages from {channel}", channel.Name);
                     var messages = await channel.GetMessagesAsync(messageId, Direction.After, int.MaxValue).FlattenAsync().ConfigureAwait(false);
                     var messageList = messages.ToArray();
-                    _log.Info("{0}: {1} messages total", channel.Name, messageList.Length);
+                    Logger.Info("{channel}: {amount} messages total", channel.Name, messageList.Length);
                     if (!messageList.Any()) continue;
                 
                     var count = 0;
@@ -47,11 +46,11 @@ namespace Roki.Modules.Administration.Services
                         count++;
                     }
 
-                    _log.Info("{0} total messages added", count);
+                    Logger.Info("{amount} total messages added", count);
                 }
                 catch (Exception e)
                 {
-                    _log.Error(e);
+                    Logger.Error(e);
                 }
             }
         }

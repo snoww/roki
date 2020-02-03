@@ -17,12 +17,12 @@ namespace Roki.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly CommandService _commandService;
+        private readonly IServiceProvider _services;
+
         private readonly object _errorLock = new object();
 
-        private readonly Logger _log;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        private readonly IServiceProvider _services;
-        
         public string DefaultPrefix { get; }
         
         public event Func<IUserMessage, CommandInfo, Task> CommonOnSuccess = delegate { return Task.CompletedTask; };
@@ -34,8 +34,6 @@ namespace Roki.Services
             _client = client;
             _commandService = commandService;
             _services = services;
-
-            _log = LogManager.GetCurrentClassLogger();
 
             DefaultPrefix = Roki.Properties.Prefix;
         }
@@ -53,7 +51,7 @@ namespace Roki.Services
 
         private Task LogSuccess(IMessage message, IGuildChannel channel, long seconds)
         {
-            _log.Info("Command executed in " + seconds + " ms\n\t" +
+            Logger.Info("Command executed in " + seconds + " ms\n\t" +
                       "User: {0}\n\t" +
                       "Server: {1}\n\t" +
                       "Channel: {2}\n\t" +
@@ -69,7 +67,7 @@ namespace Roki.Services
 
         private void LogError(string error, IMessage message, IGuildChannel channel, long seconds)
         {
-            _log.Warn("Command errored after " + seconds + " ms\n\t" + 
+            Logger.Warn("Command errored after " + seconds + " ms\n\t" + 
                       "User: {0}\n\t" +
                       "Server: {1}\n\t" +
                       "Channel: {2}\n\t" +
@@ -97,12 +95,12 @@ namespace Roki.Services
             }
             catch (Exception e)
             {
-                _log.Warn("Error in Command Handler");
-                _log.Warn(e);
+                Logger.Warn("Error in Command Handler");
+                Logger.Warn(e);
                 if (e.InnerException != null)
                 {
-                    _log.Warn("Inner Exception");
-                    _log.Warn(e.InnerException);
+                    Logger.Warn("Inner Exception");
+                    Logger.Warn(e.InnerException);
                 }
             }
         }

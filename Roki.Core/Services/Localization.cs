@@ -7,8 +7,7 @@ namespace Roki.Services
 {
     public class Localization
     {
-        private static readonly Dictionary<string, CommandData> CommandData =
-            File.ReadAllText("./data/command_data.json").Deserialize<Dictionary<string, CommandData>>();
+        private static readonly Dictionary<string, CommandData> CommandData = File.ReadAllText("./data/command_data.json").Deserialize<Dictionary<string, CommandData>>();
 
         public static KeyValuePair<string, CommandData> GetCommandData(string key)
         {

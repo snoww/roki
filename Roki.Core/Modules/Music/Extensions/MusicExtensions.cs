@@ -9,8 +9,6 @@ namespace Roki.Modules.Music.Extensions
 {
     public static class MusicExtensions
     {
-        private static readonly Logger _log = LogManager.GetCurrentClassLogger();
-
         public static TimeSpan TotalPlaytime(this IEnumerable<LavaTrack> queue)
         {
             return new TimeSpan(queue.Sum(t => t.Duration.Ticks));

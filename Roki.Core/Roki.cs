@@ -20,7 +20,7 @@ namespace Roki
     public class Roki
     {
         private readonly DbService _db;
-        private readonly Logger _log;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private RokiConfig Config { get; }
         private DiscordSocketClient Client { get; }
@@ -35,7 +35,6 @@ namespace Roki
         public Roki()
         {
             LogSetup.SetupLogger();
-            _log = LogManager.GetCurrentClassLogger();
 
             Config = new RokiConfig();
             Cache = new RedisCache(Config.RedisConfig);
@@ -79,7 +78,7 @@ namespace Roki
 
             await LoginAsync(Config.Token).ConfigureAwait(false);
 
-            _log.Info("Loading services");
+            Logger.Info("Loading services");
             
             try
             {
@@ -87,12 +86,12 @@ namespace Roki
             }
             catch (Exception e)
             {
-                _log.Error(e);
+                Logger.Error(e);
                 throw;
             }
 
             sw.Stop();
-            _log.Info($"Roki connected in {sw.ElapsedMilliseconds} ms");
+            Logger.Info($"Roki connected in {sw.ElapsedMilliseconds} ms");
 
             var stats = Services.GetService<IStatsService>();
             stats.Initialize();
@@ -100,7 +99,7 @@ namespace Roki
             var commandService = Services.GetService<CommandService>();
             
             await commandHandler.StartHandling().ConfigureAwait(false);
-            await new EventHandlers(_db, Client, Cache).StartHandling().ConfigureAwait(false);
+            await new EventHandlers(_db, Client).StartHandling().ConfigureAwait(false);
 
             await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
         }
@@ -109,7 +108,7 @@ namespace Roki
         {
             var ready = new TaskCompletionSource<bool>();
 
-            _log.Info("Logging in ...");
+            Logger.Info("Logging in ...");
             
             await Client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
             await Client.StartAsync().ConfigureAwait(false);
@@ -118,7 +117,7 @@ namespace Roki
             await ready.Task.ConfigureAwait(false);
             Client.Ready -= UpdateDatabase;
             
-            _log.Info("Logged in as {0}", Client.CurrentUser);
+            Logger.Info("Logged in as {0}", Client.CurrentUser);
             
             // makes sure database contains latest guild/channel info
             Task UpdateDatabase()
@@ -132,7 +131,7 @@ namespace Roki
                         using var uow = _db.GetDbContext();
                         var cache = Cache.Redis.GetDatabase();
                         await Client.DownloadUsersAsync(Client.Guilds).ConfigureAwait(false);
-                        _log.Info("Loading cache");
+                        Logger.Info("Loading cache");
                         var sw = Stopwatch.StartNew();
                         
                         foreach (var guild in Client.Guilds)
@@ -151,15 +150,15 @@ namespace Roki
                         }
 
                         sw.Stop();
-                        _log.Info($"Cache loaded in {sw.ElapsedMilliseconds} ms");
+                        Logger.Info($"Cache loaded in {sw.ElapsedMilliseconds} ms");
                         await uow.SaveChangesAsync().ConfigureAwait(false);
                     }
                     catch (Exception e)
                     {
-                        _log.Error(e);
+                        Logger.Error(e);
                     }
                     
-                    _log.Info("Roki is ready");
+                    Logger.Info("Roki is ready");
                 });
 
                 return Task.CompletedTask;
@@ -187,7 +186,7 @@ namespace Roki
             LoadTypeReaders(typeof(Roki).Assembly);
 
             sw.Stop();
-            _log.Info($"All services loaded in {sw.ElapsedMilliseconds} ms");
+            Logger.Info($"All services loaded in {sw.ElapsedMilliseconds} ms");
         }
 
         private void LoadTypeReaders(Assembly assembly)
@@ -199,7 +198,7 @@ namespace Roki
             }
             catch (ReflectionTypeLoadException ex)
             {
-                _log.Warn(ex.LoaderExceptions[0]);
+                Logger.Warn(ex.LoaderExceptions[0]);
                 return;
             }
 
@@ -217,18 +216,17 @@ namespace Roki
                 }
                 catch (Exception e)
                 {
-                    _log.Error(e);
+                    Logger.Error(e);
                     throw;
                 }
-
             }
         }
         
-        private Task Log(LogMessage arg)
+        private static Task Log(LogMessage arg)
         {
-            _log.Warn(arg.Source + " | " + arg.Message);
+            Logger.Warn(arg.Source + "|" + arg.Message);
             if (arg.Exception != null)
-                _log.Warn(arg.Exception);
+                Logger.Warn(arg.Exception);
 
             return Task.CompletedTask;
         }
