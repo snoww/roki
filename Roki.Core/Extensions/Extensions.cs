@@ -41,30 +41,30 @@ namespace Roki.Extensions
 
         public static ModuleInfo GetTopLevelModule(this ModuleInfo module)
         {
-            while (module.Parent != null) module = module.Parent;
+            while (module.Parent != null) 
+                module = module.Parent;
             return module;
         }
 
         public static void LoadFrom(this IServiceCollection collection, Assembly assembly)
         {
-            var addedTypes = new List<Type>();
-
             Type[] allTypes;
             try
             {
                 allTypes = assembly.GetTypes();
             }
-            catch (ReflectionTypeLoadException ex)
+            catch (ReflectionTypeLoadException e)
             {
-                Log.Warn(ex);
+                Log.Warn(e);
                 return;
             }
-
+            
             var services = new Queue<Type>(allTypes.Where(x => 
-                    x.GetInterfaces().Contains(typeof(IRokiService)) && !x.GetTypeInfo().IsInterface && !x.GetTypeInfo().IsAbstract).ToArray());
+                x.GetInterfaces().Contains(typeof(IRokiService)) && !x.GetTypeInfo().IsInterface && !x.GetTypeInfo().IsAbstract));
 
-            addedTypes.AddRange(services);
-            var interfaces = new HashSet<Type>(allTypes.Where(x => x.GetInterfaces().Contains(typeof(IRokiService)) && x.GetTypeInfo().IsInterface));
+            var interfaces = new HashSet<Type>(allTypes.Where(x => 
+                x.GetInterfaces().Contains(typeof(IRokiService)) && x.GetTypeInfo().IsInterface));
+            
             while (services.Count > 0)
             {
                 var serviceType = services.Dequeue();
@@ -73,15 +73,7 @@ namespace Roki.Extensions
                     continue;
 
                 var interfaceType = interfaces.FirstOrDefault(x => serviceType.GetInterfaces().Contains(x));
-                if (interfaceType != null)
-                {
-                    addedTypes.Add(interfaceType);
-                    collection.AddSingleton(interfaceType, serviceType);
-                }
-                else
-                {
-                    collection.AddSingleton(serviceType, serviceType);
-                }
+                collection.AddSingleton(interfaceType != null ? interfaceType : serviceType, serviceType);
             }
         }
 
