@@ -328,7 +328,7 @@ namespace Roki.Modules.Games.Common
             }
             proc.WaitForExit();
             await _cache.StringSetAsync($"pokemon:{uid}", gameId, TimeSpan.FromMinutes(5), flags: CommandFlags.FireAndForget).ConfigureAwait(false);
-            File.AppendAllText(@"./data/pokemon-logs/battle-logs", $"{uid}={gameId}\n");
+            File.AppendAllText(@"./data/pokemon_betshowdown_logs.txt", $"{uid}={gameId}\n");
             _teams = teams;
         }
         
@@ -366,19 +366,19 @@ namespace Roki.Modules.Games.Common
 
         private Task DeleteLogs(string gameId)
         {
-            try
+            var _ = Task.Run(async () =>
             {
-                var _ = Task.Run(async () =>
+                try
                 {
                     await Task.Delay(10000).ConfigureAwait(false);
                     File.Delete($@"./logs/rokibot-{gameId}.log");
-                });
-            }
-            catch (Exception e)
-            {
-                Logger.Error(e, "Could not delete log file for: {gameId}", GameId);
-            }
-            
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e, "Could not delete log file for: {gameId}", GameId);
+                }
+            });
+
             return Task.CompletedTask;
         }
         
