@@ -49,13 +49,13 @@ namespace Roki.Services
             return Task.CompletedTask;
         }
 
-        private Task LogSuccess(IMessage message, IGuildChannel channel, long seconds)
+        private static Task LogSuccess(IMessage message, IGuildChannel channel, long seconds)
         {
-            Logger.Info("Command executed in " + seconds + " ms\n\t" +
-                      "User: {0}\n\t" +
-                      "Server: {1}\n\t" +
-                      "Channel: {2}\n\t" +
-                      "Message: {3}",
+            Logger.Info("Command parsed in " + seconds + " ms\n\t" +
+                      "User: {user}\n\t" +
+                      "Server: {guild}\n\t" +
+                      "Channel: {chanel}\n\t" +
+                      "Message: {message}",
                 message.Author + " [" + message.Author.Id + "]",
                 channel == null ? "PRIVATE" : channel.Guild.Name + " [" + channel.Guild.Id + "]",
                 channel == null ? "PRIVATE" : channel.Name + " [" + channel.Id + "]",
@@ -65,14 +65,14 @@ namespace Roki.Services
             return Task.CompletedTask;
         }
 
-        private void LogError(string error, IMessage message, IGuildChannel channel, long seconds)
+        private static void LogError(string error, IMessage message, IGuildChannel channel, long seconds)
         {
-            Logger.Warn("Command errored after " + seconds + " ms\n\t" + 
-                      "User: {0}\n\t" +
-                      "Server: {1}\n\t" +
-                      "Channel: {2}\n\t" +
-                      "Message: {3}\n\t" +
-                      "Error: {4}",
+            Logger.Warn("Command parsed after " + seconds + " ms\n\t" + 
+                      "User: {user}\n\t" +
+                      "Server: {guild}\n\t" +
+                      "Channel: {channel}\n\t" +
+                      "Message: {message}\n\t" +
+                      "Error: {error}",
                 message.Author + " [" + message.Author.Id + "]",
                 channel == null ? "PRIVATE" : channel.Guild.Name + " [" + channel.Guild.Id + "]",
                 channel == null ? "PRIVATE" : channel.Name + " [" + channel.Id + "]",
