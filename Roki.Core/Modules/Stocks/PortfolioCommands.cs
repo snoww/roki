@@ -27,7 +27,7 @@ namespace Roki.Modules.Stocks
                 var value = await Service.GetPortfolioValue(portfolio).ConfigureAwait(false);
 
                 var itemsPP = 10;
-                await Context.SendPaginatedConfirmAsync(0, p =>
+                await Context.SendPaginatedMessageAsync(0, p =>
                 {
                     var startAt = itemsPP * p;
                     var desc = string.Join("\n", portfolio

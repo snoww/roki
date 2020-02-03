@@ -148,7 +148,7 @@ namespace Roki.Modules.Music.Services
                 return embed;
             }
 
-            await ctx.SendPaginatedConfirmAsync(page, QueueEmbed, queue.Length, itemsPerPage, false).ConfigureAwait(false);
+            await ctx.SendPaginatedMessageAsync(page, QueueEmbed, queue.Length, itemsPerPage, false).ConfigureAwait(false);
         }
 
         public async Task RemoveSongAsync(ICommandContext ctx, int index)

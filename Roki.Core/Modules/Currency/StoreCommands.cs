@@ -52,7 +52,7 @@ namespace Roki.Modules.Currency
                             .WithFooter($"Page {page + 1}/{Math.Ceiling((double) cat.Count / itemsPerPage)} Use .buy to purchase items");
                     }
                                                 
-                    await Context.SendPaginatedConfirmAsync(0, Catalog, cat.Count, 9).ConfigureAwait(false);
+                    await Context.SendPaginatedMessageAsync(0, Catalog, cat.Count, 9).ConfigureAwait(false);
                     return;
                 }
 

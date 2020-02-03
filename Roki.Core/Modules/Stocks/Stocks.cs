@@ -77,7 +77,7 @@ namespace Roki.Modules.Stocks
                 return;
             }
 
-            await Context.SendPaginatedConfirmAsync(0, p =>
+            await Context.SendPaginatedMessageAsync(0, p =>
             {
                 var article = news[p];
                 var embed = new EmbedBuilder().WithOkColor()

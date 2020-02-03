@@ -32,7 +32,7 @@ namespace Roki.Modules.Searches
                     return;
                 }
 
-                await Context.SendPaginatedConfirmAsync( 0, p =>
+                await Context.SendPaginatedMessageAsync( 0, p =>
                 {
                     var anime = media[p];
                     var embed = new EmbedBuilder().WithOkColor()
