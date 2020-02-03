@@ -202,17 +202,17 @@ namespace Roki
                 return;
             }
 
-            var typeReaders = allTypes
-                .Where(x => x.IsSubclassOf(typeof(TypeReader)) && x.BaseType.GetGenericArguments().Length > 0 && !x.IsAbstract);
-            
-            foreach (var type in typeReaders)
+            foreach (var type in allTypes)
             {
+                if (type.BaseType != null && (!type.IsSubclassOf(typeof(TypeReader)) || type.BaseType.GetGenericArguments().Length <= 0 || type.IsAbstract)) 
+                    continue;
+                
                 var typeReader = (TypeReader) Activator.CreateInstance(type, Client, CommandService);
                 var baseType = type.BaseType;
-                var typeArgs = baseType.GetGenericArguments();
+                var typeArgs = baseType?.GetGenericArguments();
                 try
                 {
-                    CommandService.AddTypeReader(typeArgs[0], typeReader);
+                    CommandService.AddTypeReader(typeArgs?[0], typeReader);
                 }
                 catch (Exception e)
                 {
