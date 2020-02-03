@@ -204,7 +204,9 @@ namespace Roki
 
             foreach (var type in allTypes)
             {
-                if (type.BaseType != null && (!type.IsSubclassOf(typeof(TypeReader)) || type.BaseType.GetGenericArguments().Length <= 0 || type.IsAbstract)) 
+                if (type.BaseType == null) 
+                    continue;
+                if (!type.IsSubclassOf(typeof(TypeReader)) || type.BaseType.GetGenericArguments().Length <= 0 || type.IsAbstract)
                     continue;
                 
                 var typeReader = (TypeReader) Activator.CreateInstance(type, Client, CommandService);
@@ -212,11 +214,11 @@ namespace Roki
                 var typeArgs = baseType?.GetGenericArguments();
                 try
                 {
-                    CommandService.AddTypeReader(typeArgs?[0], typeReader);
+                    CommandService.AddTypeReader(typeArgs[0], typeReader);
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e);
+                    Logger.Error(e, "Unable to load TypeReaders");
                     throw;
                 }
             }

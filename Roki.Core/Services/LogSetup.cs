@@ -12,7 +12,7 @@ namespace Roki.Services
             
             var console = new ColoredConsoleTarget
             {
-                Layout = @"${longdate}|{level:uppercase=true}|${logger:shortName=True}|${message}"
+                Layout = @"${longdate}|${level:uppercase=true}|${logger:shortName=True}|${message}"
             };
             
             config.AddTarget("Console", console);
