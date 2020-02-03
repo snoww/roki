@@ -4,16 +4,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
-using NLog.Fluent;
-using Roki.Core.Services;
-using Roki.Core.Services.Database;
 using Roki.Extensions;
 using Roki.Services;
 using StackExchange.Redis;
@@ -24,28 +20,26 @@ namespace Roki
     public class Roki
     {
         private readonly DbService _db;
-        private readonly Logger _log;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private RokiConfig Config { get; }
         private DiscordSocketClient Client { get; }
         private CommandService CommandService { get; }
         private IRedisCache Cache { get; }
+        private IServiceProvider Services { get; set; }
+        
         public static Properties Properties { get; private set; }
         public static Color OkColor { get; private set; }
         public static Color ErrorColor { get; private set; }
 
-        public TaskCompletionSource<bool> Ready { get; } = new TaskCompletionSource<bool>();
-        private IServiceProvider Services { get; set; }
-
         public Roki()
         {
             LogSetup.SetupLogger();
-            _log = LogManager.GetCurrentClassLogger();
 
             Config = new RokiConfig();
             Cache = new RedisCache(Config.RedisConfig);
             
-            _db = new DbService(Config);
+            _db = new DbService(Config.Db.ConnectionString);
             _db.Setup();
 
             // global properties
@@ -71,14 +65,104 @@ namespace Roki
 
             Client.Log += Log;
         }
-
-        private Task Log(LogMessage arg)
+        
+        public async Task RunAndBlockAsync()
         {
-            _log.Warn(arg.Source + " | " + arg.Message);
-            if (arg.Exception != null)
-                _log.Warn(arg.Exception);
+            await RunAsync().ConfigureAwait(false);
+            await Task.Delay(-1).ConfigureAwait(false);
+        }
 
-            return Task.CompletedTask;
+        private async Task RunAsync()
+        {
+            var sw = Stopwatch.StartNew();
+
+            await LoginAsync(Config.Token).ConfigureAwait(false);
+
+            Logger.Info("Loading services");
+            
+            try
+            {
+                AddServices();
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e);
+                throw;
+            }
+
+            sw.Stop();
+            Logger.Info($"Roki connected in {sw.ElapsedMilliseconds} ms");
+
+            var stats = Services.GetService<IStatsService>();
+            stats.Initialize();
+            var commandHandler = Services.GetService<CommandHandler>();
+            var commandService = Services.GetService<CommandService>();
+            
+            await commandHandler.StartHandling().ConfigureAwait(false);
+            await new EventHandlers(_db, Client).StartHandling().ConfigureAwait(false);
+
+            await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
+        }
+
+        private async Task LoginAsync(string token)
+        {
+            var ready = new TaskCompletionSource<bool>();
+
+            Logger.Info("Logging in ...");
+            
+            await Client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
+            await Client.StartAsync().ConfigureAwait(false);
+            
+            Client.Ready += UpdateDatabase;
+            await ready.Task.ConfigureAwait(false);
+            Client.Ready -= UpdateDatabase;
+            
+            Logger.Info("Logged in as {0}", Client.CurrentUser);
+            
+            // makes sure database contains latest guild/channel info
+            Task UpdateDatabase()
+            {
+                ready.TrySetResult(true);
+
+                var _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        using var uow = _db.GetDbContext();
+                        var cache = Cache.Redis.GetDatabase();
+                        await Client.DownloadUsersAsync(Client.Guilds).ConfigureAwait(false);
+                        Logger.Info("Loading cache");
+                        var sw = Stopwatch.StartNew();
+                        
+                        foreach (var guild in Client.Guilds)
+                        {
+                            var botCurrency = uow.Users.GetUserCurrency(Properties.BotId);
+                            await cache.StringSetAsync($"currency:{guild.Id}:{Properties.BotId}", botCurrency, flags: CommandFlags.FireAndForget)
+                                .ConfigureAwait(false);
+                            await UpdateCache(cache, guild.Users).ConfigureAwait(false);
+                            
+                            await uow.Guilds.GetOrCreateGuildAsync(guild).ConfigureAwait(false);
+                            foreach (var channel in guild.Channels)
+                            {
+                                if (channel is SocketTextChannel textChannel)
+                                    await uow.Channels.GetOrCreateChannelAsync(textChannel).ConfigureAwait(false);
+                            }
+                        }
+
+                        sw.Stop();
+                        Logger.Info($"Cache loaded in {sw.ElapsedMilliseconds} ms");
+                        await uow.SaveChangesAsync().ConfigureAwait(false);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error(e);
+                    }
+                    
+                    Logger.Info("Roki is ready");
+                });
+
+                return Task.CompletedTask;
+            }
         }
 
         private void AddServices()
@@ -97,18 +181,15 @@ namespace Roki
                 .AddHttpClient();
 
             service.LoadFrom(Assembly.GetAssembly(typeof(CommandHandler)));
-            service.LoadFrom(Assembly.GetAssembly(typeof(EventHandlers)));
 
             Services = service.BuildServiceProvider();
-            var commandHandler = Services.GetService<CommandHandler>();
-            commandHandler.AddServices(service);
             LoadTypeReaders(typeof(Roki).Assembly);
 
             sw.Stop();
-            _log.Info($"All services loaded in {sw.Elapsed.TotalSeconds:F2}s");
+            Logger.Info($"All services loaded in {sw.ElapsedMilliseconds} ms");
         }
 
-        private IEnumerable<object> LoadTypeReaders(Assembly assembly)
+        private void LoadTypeReaders(Assembly assembly)
         {
             Type[] allTypes;
             try
@@ -117,134 +198,39 @@ namespace Roki
             }
             catch (ReflectionTypeLoadException ex)
             {
-                _log.Warn(ex.LoaderExceptions[0]);
-                return Enumerable.Empty<object>();
+                Logger.Warn(ex.LoaderExceptions[0]);
+                return;
             }
 
-            var filteredTypes = allTypes
-                .Where(x => x.IsSubclassOf(typeof(TypeReader))
-                            && x.BaseType.GetGenericArguments().Length > 0
-                            && !x.IsAbstract);
-
-            var toReturn = new List<object>();
-            foreach (var filteredType in filteredTypes)
+            foreach (var type in allTypes)
             {
-                var x = (TypeReader) Activator.CreateInstance(filteredType, Client, CommandService);
-                var baseType = filteredType.BaseType;
-                var typeArgs = baseType.GetGenericArguments();
+                if (type.BaseType == null) 
+                    continue;
+                if (!type.IsSubclassOf(typeof(TypeReader)) || type.BaseType.GetGenericArguments().Length <= 0 || type.IsAbstract)
+                    continue;
+                
+                var typeReader = (TypeReader) Activator.CreateInstance(type, Client, CommandService);
+                var baseType = type.BaseType;
+                var typeArgs = baseType?.GetGenericArguments();
                 try
                 {
-                    CommandService.AddTypeReader(typeArgs[0], x);
+                    CommandService.AddTypeReader(typeArgs[0], typeReader);
                 }
                 catch (Exception e)
                 {
-                    _log.Error(e);
+                    Logger.Error(e, "Unable to load TypeReaders");
                     throw;
                 }
-
-                toReturn.Add(x);
             }
-
-            return toReturn;
         }
-
-        public async Task RunAndBlockAsync()
+        
+        private static Task Log(LogMessage arg)
         {
-            await RunAsync().ConfigureAwait(false);
-            await Task.Delay(-1).ConfigureAwait(false);
-        }
+            Logger.Warn(arg.Source + "|" + arg.Message);
+            if (arg.Exception != null)
+                Logger.Warn(arg.Exception);
 
-        private async Task RunAsync()
-        {
-            var sw = Stopwatch.StartNew();
-
-            await LoginAsync(Config.Token).ConfigureAwait(false);
-
-            _log.Info("Loading services");
-            
-            try
-            {
-                AddServices();
-            }
-            catch (Exception e)
-            {
-                _log.Error(e);
-                throw;
-            }
-
-            sw.Stop();
-            _log.Info($"Roki connected in {sw.Elapsed.TotalSeconds:F2}s");
-
-            var stats = Services.GetService<IStatsService>();
-            stats.Initialize();
-            var commandHandler = Services.GetService<CommandHandler>();
-            var commandService = Services.GetService<CommandService>();
-            var eventHandlers = Services.GetService<EventHandlers>();
-
-            await commandHandler.StartHandling().ConfigureAwait(false);
-            await eventHandlers.StartHandling().ConfigureAwait(false);
-
-            var _ = await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
-            
-            Ready.TrySetResult(true);
-        }
-
-        private async Task LoginAsync(string token)
-        {
-            var updateStatus = new TaskCompletionSource<bool>();
-
-            _log.Info("Logging in ...");
-            
-            await Client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
-            await Client.StartAsync().ConfigureAwait(false);
-            
-            Client.Ready += UpdateDatabase;
-            await updateStatus.Task.ConfigureAwait(false);
-            Client.Ready -= UpdateDatabase;
-            
-            _log.Info("Logged in as {0}", Client.CurrentUser);
-            
-            // makes sure database contains latest guild/channel info
-            Task UpdateDatabase()
-            {
-                var _ = Task.Run(async () =>
-                {
-                    updateStatus.TrySetResult(true);
-                    try
-                    {
-                        using var uow = _db.GetDbContext();
-                        var cache = Cache.Redis.GetDatabase();
-                        await Client.DownloadUsersAsync(Client.Guilds).ConfigureAwait(false);
-                        _log.Info("Loading cache");
-                        
-                        foreach (var guild in Client.Guilds)
-                        {
-                            var botCurrency = uow.Users.GetUserCurrency(Properties.BotId);
-                            await cache.StringSetAsync($"currency:{guild.Id}:{Properties.BotId}", botCurrency, flags: CommandFlags.FireAndForget)
-                                .ConfigureAwait(false);
-                            await UpdateCache(cache, guild.Users).ConfigureAwait(false);
-                            
-                            await uow.Guilds.GetOrCreateGuildAsync(guild).ConfigureAwait(false);
-                            foreach (var channel in guild.Channels)
-                            {
-                                if (channel is SocketTextChannel textChannel)
-                                    await uow.Channels.GetOrCreateChannelAsync(textChannel).ConfigureAwait(false);
-                            }
-                        }
-
-                        _log.Info("Finished loading cache");
-                        await uow.SaveChangesAsync().ConfigureAwait(false);
-                    }
-                    catch (Exception e)
-                    {
-                        _log.Error(e);
-                    }
-                    
-                    _log.Info("Roki is ready");
-                });
-
-                return Task.CompletedTask;
-            }
+            return Task.CompletedTask;
         }
 
         private Task UpdateCache(IDatabaseAsync cache, IEnumerable<SocketGuildUser> users)

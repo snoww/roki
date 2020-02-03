@@ -2,15 +2,14 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
 using Discord;
 using Roki.Common.Attributes;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Searches.Models;
 using Roki.Modules.Searches.Services;
+using Roki.Services;
 
 namespace Roki.Modules.Searches
 {
@@ -26,29 +25,25 @@ namespace Roki.Modules.Searches
             _google = google;
             _httpFactory = httpFactory;
         }
-
-        // TODO sanitize inputs!!
         
         [RokiCommand, Usage, Description, Aliases]
-        public async Task Weather([Leftover] string query = "Toronto")
+        public async Task Weather([Leftover] string query = "toronto")
         {
-            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
-                return;
             try
             {
-                using var _ = ctx.Channel.EnterTypingState();
-                var location = await _service.GetLocationDataAsync(query).ConfigureAwait(false);
+                using var _ = Context.Channel.EnterTypingState();
+                var location = await Service.GetLocationDataAsync(query).ConfigureAwait(false);
                 if (location == null)
                 {
-                    await ctx.Channel.SendErrorAsync("Cannot find specified location. Please try again.");
+                    await Context.Channel.SendErrorAsync("Cannot find specified location. Please try again.");
                     return;
                 }
 
                 var addr = location.Results[0];
-                var result = await _service.GetWeatherDataAsync(addr.Geometry.Location.Lat, addr.Geometry.Location.Lng).ConfigureAwait(false);
-                var tz = await _service.GetLocalDateTime(addr.Geometry.Location.Lat, addr.Geometry.Location.Lng).ConfigureAwait(false);
+                var result = await Service.GetWeatherDataAsync(addr.Geometry.Location.Lat, addr.Geometry.Location.Lng).ConfigureAwait(false);
+                var tz = await Service.GetLocalDateTime(addr.Geometry.Location.Lat, addr.Geometry.Location.Lng).ConfigureAwait(false);
                 var localDt = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTimeOffset.UtcNow, tz.TimeZoneId);
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithAuthor("Weather Report")
                         .WithDescription(addr.FormattedAddress + "\n" + Format.Code(result))
                         .WithFooter($"{localDt:HH:mm, MMM dd, yyyy}, {tz.TimeZoneName}, UTC{localDt:zz}"))
@@ -56,92 +51,92 @@ namespace Roki.Modules.Searches
             }
             catch
             {
-                await ctx.Channel.SendErrorAsync("Failed to get weather.");
+                await Context.Channel.SendErrorAsync("Failed to get weather.");
             }
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task Time([Leftover] string query)
+        public async Task Time([Leftover] string query = "toronto")
         {
-            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
-                return;
             if (string.IsNullOrWhiteSpace(_config.GoogleApi))
             {
-                await ctx.Channel.SendErrorAsync("No Google Api key provided.").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("No Google Api key provided.").ConfigureAwait(false);
                 return;
             }
             
-            var data = await _service.GetTimeDataAsync(query).ConfigureAwait(false);
+            var data = await Service.GetTimeDataAsync(query).ConfigureAwait(false);
 
             var embed = new EmbedBuilder().WithOkColor()
-                .WithTitle($"**{data.Address}**")
-                .WithDescription($"```{data.Time:HH:mm} {data.TimeZoneName}```");
+                .WithTitle(data.Address)
+                .WithDescription($"`{data.Time:f}, {data.TimeZoneName}, UTC{data.Time:zz}`");
 
-            await ctx.Channel.EmbedAsync(embed);
+            if (data.Culture != null && data.Culture.EnglishName != "English")
+            {
+                embed.WithDescription($"`{data.Time:f}, {data.TimeZoneName}, UTC{data.Time:zz}`\n" +
+                                      $"Local: `{data.Time.ToString("f", data.Culture)}`");
+            }
+
+            await Context.Channel.EmbedAsync(embed);
         }
 
         [RokiCommand, Description, Usage, Aliases]
         public async Task Youtube([Leftover] string query = null)
         {
-            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+            if (!await ValidateQuery(query).ConfigureAwait(false))
                 return;
 
             var result = (await _google.GetVideoLinksByKeywordAsync(query).ConfigureAwait(false)).FirstOrDefault();
             if (string.IsNullOrWhiteSpace(result))
             {
-                await ctx.Channel.SendErrorAsync("No results.").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("No results.").ConfigureAwait(false);
                 return;
             }
 
-            await ctx.Channel.SendMessageAsync(result).ConfigureAwait(false);
+            await Context.Channel.SendMessageAsync(result).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
         public async Task Image([Leftover] string query = null)
         {
-            var encode = query?.Trim();
-            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+            if (!await ValidateQuery(query).ConfigureAwait(false))
                 return;
-            query = HttpUtility.UrlEncode(encode);
-            var result = await _google.GetImagesAsync(encode).ConfigureAwait(false);
+            var result = await _google.GetImagesAsync(query).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithOkColor()
-                .WithAuthor("Image search for: " + encode.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
-                    "https://www.google.com/search?q=" + query + "&source=lnms&tbm=isch")
+                .WithAuthor("Image search for: " + query.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
+                    $"https://www.google.com/search?q={HttpUtility.UrlEncode(query)}&source=lnms&tbm=isch")
                 .WithDescription(result.Link)
                 .WithImageUrl(result.Link)
-                .WithTitle(ctx.User.ToString());
-            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                .WithTitle(Context.User.ToString());
+            await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
         public async Task RandomImage([Leftover] string query = null)
         {
-            var encode = query?.Trim();
-            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+            if (!await ValidateQuery(query).ConfigureAwait(false))
                 return;
-            query = HttpUtility.UrlEncode(encode);
-            var result = await _google.GetImagesAsync(encode, true).ConfigureAwait(false);
+            var result = await _google.GetImagesAsync(query, true).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithOkColor()
-                .WithAuthor("Image search for: " + encode.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
-                    "https://www.google.com/search?q=" + query + "&source=lnms&tbm=isch")
+                .WithAuthor("Image search for: " + query.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
+                    $"https://www.google.com/search?q={HttpUtility.UrlEncode(query)}&source=lnms&tbm=isch")
                 .WithDescription(result.Link)
                 .WithImageUrl(result.Link)
-                .WithTitle(ctx.User.ToString());
-            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                .WithTitle(Context.User.ToString());
+            await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
         public async Task Movie([Leftover] string query = null)
         {
-            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+            if (!await ValidateQuery(query).ConfigureAwait(false))
                 return;
 
-            await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+            await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
 
-            var movie = await _service.GetMovieDataAsync(query).ConfigureAwait(false);
+            var movie = await Service.GetMovieDataAsync(query).ConfigureAwait(false);
             if (movie == null)
             {
-                await ctx.Channel.SendErrorAsync("No results found.").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("No results found.").ConfigureAwait(false);
                 return;
             }
 
@@ -154,24 +149,25 @@ namespace Roki.Modules.Searches
                 .AddField("Year", movie.Year, true)
                 .WithImageUrl(movie.Poster);
 
-            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
         public async Task UrbanDict([Leftover] string query = null)
         {
-            if (!await ValidateQuery(ctx.Channel, query).ConfigureAwait(false))
+            if (!await ValidateQuery(query).ConfigureAwait(false))
                 return;
 
-            await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+            await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
+            query = HttpUtility.UrlEncode(query);
             using var http = _httpFactory.CreateClient();
-            var response = await http.GetStringAsync($"http://api.urbandictionary.com/v0/define?term={Uri.EscapeUriString(query)}")
+            var response = await http.GetStringAsync($"http://api.urbandictionary.com/v0/define?term={query}")
                 .ConfigureAwait(false);
             try
             {
                 var items = response.Deserialize<UrbanResponse>().List;
                 if (items.Any())
-                    await ctx.SendPaginatedConfirmAsync(0, p =>
+                    await Context.SendPaginatedMessageAsync(0, p =>
                     {
                         var item = items[p];
                         return new EmbedBuilder().WithOkColor()
@@ -182,7 +178,7 @@ namespace Roki.Modules.Searches
             }
             catch (Exception e)
             {
-                _log.Warn(e.Message);
+                Log.Warn(e.Message);
             }
         }
 
@@ -191,13 +187,13 @@ namespace Roki.Modules.Searches
         {
             try
             {
-                var file = await _service.GetRandomCatAsync().ConfigureAwait(false);
-                await ctx.Channel.SendFileAsync(file).ConfigureAwait(false);
-                File.Delete(file);
+                var path = await Service.GetRandomCatAsync().ConfigureAwait(false);
+                await Context.Channel.SendFileAsync(path).ConfigureAwait(false);
+                File.Delete(path);
             }
             catch
             {
-                await ctx.Channel.SendErrorAsync("Something went wrong :(").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("Something went wrong :(").ConfigureAwait(false);
             }
         }
         
@@ -206,13 +202,13 @@ namespace Roki.Modules.Searches
         {
             try
             {
-                var file = await _service.GetRandomDogAsync().ConfigureAwait(false);
-                await ctx.Channel.SendFileAsync(file).ConfigureAwait(false);
-                File.Delete(file);
+                var path = await Service.GetRandomDogAsync().ConfigureAwait(false);
+                await Context.Channel.SendFileAsync(path).ConfigureAwait(false);
+                File.Delete(path);
             }
             catch
             {
-                await ctx.Channel.SendErrorAsync("Something went wrong :(").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("Something went wrong :(").ConfigureAwait(false);
             }
         }
 
@@ -221,23 +217,23 @@ namespace Roki.Modules.Searches
         {
             try
             {
-                var fact = await _service.GetCatFactAsync().ConfigureAwait(false);
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                var fact = await Service.GetCatFactAsync().ConfigureAwait(false);
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithTitle("Random Cat Fact")
                     .WithDescription(fact));
             }
             catch
             {
-                await ctx.Channel.SendErrorAsync("Something went wrong :(").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("Something went wrong :(").ConfigureAwait(false);
             }
         }
 
-        public async Task<bool> ValidateQuery(IMessageChannel channel, string query)
+        public async Task<bool> ValidateQuery(string query)
         {
             if (!string.IsNullOrWhiteSpace(query))
                 return true;
 
-            await ctx.Channel.SendErrorAsync("No search query provided.").ConfigureAwait(false);
+            await Context.Channel.SendErrorAsync("No search query provided.").ConfigureAwait(false);
             return false;
         }
     }

@@ -8,10 +8,9 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using NLog;
-using NLog.Fluent;
-using Roki.Core.Services;
-using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
+using Roki.Services;
+using Roki.Services.Database.Core;
 
 namespace Roki.Modules.Rsvp.Services
 {
@@ -19,11 +18,10 @@ namespace Roki.Modules.Rsvp.Services
     {
         private readonly DbService _db;
         private readonly DiscordSocketClient _client;
-        private readonly Logger _log;
         private readonly ConcurrentDictionary<int, Event> _activeReminders = new ConcurrentDictionary<int, Event>();
         private Timer _timer;
 
-        
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private static readonly IEmote Confirm = new Emoji("✅");
         private static readonly IEmote Cancel = new Emoji("❌");
         private static readonly IEmote Uncertain = new Emoji("❔");
@@ -43,7 +41,6 @@ namespace Roki.Modules.Rsvp.Services
         {
             _db = db;
             _client = client;
-            _log = LogManager.GetCurrentClassLogger();
             _client.ReactionAdded += ReactionHandler;
             EventTimer();
         }
@@ -82,7 +79,7 @@ namespace Roki.Modules.Rsvp.Services
                     if (e.StartDate.AddMinutes(-45) <= now && !_activeReminders.ContainsKey(e.Id))
                     {
                         _activeReminders.TryAdd(e.Id, e);
-                        _log.Info($"Event '{e.Name}' reminder countdown has started.");
+                        Logger.Info("Event '{name}' reminder countdown has started", e.Name);
                         await StartEventCountdowns(e).ConfigureAwait(false);
                     }
                     if (e.StartDate <= now)
@@ -101,7 +98,7 @@ namespace Roki.Modules.Rsvp.Services
             }
             catch (Exception e)
             {
-                _log.Error(e);
+                Logger.Error(e);
             }
 
             await uow.SaveChangesAsync().ConfigureAwait(false);
@@ -854,13 +851,13 @@ namespace Roki.Modules.Rsvp.Services
 
             if (thirtyMinutes >= TimeSpan.Zero)
             {
-                _log.Info($"Event '{e.Name}': sending 30 minute reminder in {thirtyMinutes.ToString()}");
+                Logger.Info($"Event '{e.Name}': sending 30 minute reminder in {thirtyMinutes.ToString()}");
                 SendNotification(e, thirtyMinutes, NotificationType.ThirtyMinutes);
             }
 
             if (startTime >= TimeSpan.Zero)
             {
-                _log.Info($"Event '{e.Name}': sending start reminder in {startTime.ToString()}");
+                Logger.Info("Event '{name}': sending start reminder in {startTime}", e.Name, startTime);
                 SendNotification(e, startTime, NotificationType.Starting);
             }
             
@@ -911,7 +908,7 @@ namespace Roki.Modules.Rsvp.Services
                     }
                     catch (Exception e)
                     {
-                        _log.Error(e);
+                        Logger.Error(e);
                     }
                 }
             });

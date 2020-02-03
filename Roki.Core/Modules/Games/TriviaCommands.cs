@@ -96,26 +96,26 @@ namespace Roki.Modules.Games
             [RokiCommand, Description, Usage, Aliases]
             public async Task Trivia([Leftover] string category = "All")
             {
-                if (_service.TriviaGames.ContainsKey(ctx.Channel.Id))
+                if (Service.TriviaGames.ContainsKey(Context.Channel.Id))
                 {
-                    await ctx.Channel.SendErrorAsync("Game already in progress in current channel.");
+                    await Context.Channel.SendErrorAsync("Game already in progress in current channel.");
                     return;
                 }
 
                 category = category.Trim().ToTitleCase();
                 if (!Categories.ContainsKey(category))
                 {
-                    await ctx.Channel.SendErrorAsync("Unknown Category, use `.tc` to checkout the trivia categories.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("Unknown Category, use `.tc` to checkout the trivia categories.").ConfigureAwait(false);
                     return;
                 }
 
-                _service.TriviaGames.TryAdd(ctx.Channel.Id, ctx.User.Id);
+                Service.TriviaGames.TryAdd(Context.Channel.Id, Context.User.Id);
                 TriviaModel questions;
                 var prizePool = 0;
                 try
                 {
-                    await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
-                    questions = await _service.GetTriviaQuestionsAsync(Categories[category]).ConfigureAwait(false);
+                    await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
+                    questions = await Service.GetTriviaQuestionsAsync(Categories[category]).ConfigureAwait(false);
                     foreach (var question in questions.Results)
                     {
                         if (question.Difficulty == "easy")
@@ -128,13 +128,13 @@ namespace Roki.Modules.Games
                 }
                 catch (Exception e)
                 {
-                    _log.Warn(e);
-                    await ctx.Channel.SendErrorAsync("Unable to start game, please try again.");
-                    _service.TriviaGames.TryRemove(ctx.Channel.Id, out _);
+                    Log.Warn(e);
+                    await Context.Channel.SendErrorAsync("Unable to start game, please try again.");
+                    Service.TriviaGames.TryRemove(Context.Channel.Id, out _);
                     return;
                 }
 
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle($"Trivia Game - {category}")
                         .WithDescription($"Starting new trivia game.\nYou can earn up to `{prizePool:N0}` {Roki.Properties.CurrencyNamePlural}!\nReact with the correct emote to answer questions.\nType `stop` to cancel game early"))
                     .ConfigureAwait(false);
@@ -146,7 +146,7 @@ namespace Roki.Modules.Games
                 _client.MessageReceived += StopReceived;
                 Task StopReceived(SocketMessage message)
                 {
-                    if (message.Channel.Id != ctx.Channel.Id || message.Author.IsBot || !message.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+                    if (message.Channel.Id != Context.Channel.Id || message.Author.IsBot || !message.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
                         return Task.CompletedTask;
                     exit = true;
                     return Task.CompletedTask;
@@ -157,7 +157,7 @@ namespace Roki.Modules.Games
                 foreach (var q in questions.Results)
                 {
                     var playerChoice = new Dictionary<IUser, string>();
-                    var shuffledAnswers = _service.RandomizeAnswersOrder(q.Correct, q.Incorrect);
+                    var shuffledAnswers = Service.RandomizeAnswersOrder(q.Correct, q.Incorrect);
                     var question = HttpUtility.HtmlDecode(q.Question);
                     var answer = shuffledAnswers.First(s => s.Contains(HttpUtility.HtmlDecode(q.Correct) ?? ""));
                     int difficultyBonus;
@@ -175,13 +175,13 @@ namespace Roki.Modules.Games
                     if (q.Type == "multiple")
                     {
                         embed.WithDescription($"**Multiple Choice**\n{question}\n{string.Join('\n', shuffledAnswers)}");
-                        msg = await ctx.Channel.EmbedAsync(embed);
+                        msg = await Context.Channel.EmbedAsync(embed);
                         await msg.AddReactionsAsync(MultipleChoice).ConfigureAwait(false);
                     }
                     else
                     {
                         embed.WithDescription($"**True or False**\n{question}");
-                        msg = await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                        msg = await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
                         await msg.AddReactionsAsync(TrueFalse).ConfigureAwait(false);
                     }
                     toDelete.Add(msg);
@@ -195,11 +195,11 @@ namespace Roki.Modules.Games
                     {
                         _client.MessageReceived -= StopReceived;
                         if (!answers)
-                            await ctx.Channel.SendErrorAsync("Trivia stopped due to inactivity.").ConfigureAwait(false);
+                            await Context.Channel.SendErrorAsync("Trivia stopped due to inactivity.").ConfigureAwait(false);
                         else
-                            await ctx.Channel.SendErrorAsync("Current trivia game stopped.").ConfigureAwait(false);
-                        _service.TriviaGames.TryRemove(ctx.Channel.Id, out _);
-                        await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+                            await Context.Channel.SendErrorAsync("Current trivia game stopped.").ConfigureAwait(false);
+                        Service.TriviaGames.TryRemove(Context.Channel.Id, out _);
+                        await ((ITextChannel) Context.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                         return;
                     }
 
@@ -235,7 +235,7 @@ namespace Roki.Modules.Games
                         corrStr += user.Username + '\n';
                     }
                     
-                    var ans = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    var ans = await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithTitle("Answer")
                             .WithDescription($"{answer}")
                             .AddField("Correct", !string.IsNullOrWhiteSpace(corrStr) ? corrStr : "None", true)
@@ -247,7 +247,7 @@ namespace Roki.Modules.Games
                     async Task AnswerAdded(SocketReaction r)
                     {
                         var mc = MultipleChoice.ToList();
-                        if (r.Channel != ctx.Channel || r.User.Value.IsBot || r.Message.Value.Id != msg.Id)
+                        if (r.Channel != Context.Channel || r.User.Value.IsBot || r.Message.Value.Id != msg.Id)
                             return;
                         if (mc.Contains(r.Emote))
                         {
@@ -277,29 +277,29 @@ namespace Roki.Modules.Games
                 foreach (var (user, score) in playerScore)
                 {
                     scoreStr += $"{user.Username} `{score.Correct}`/`{score.Incorrect + score.Correct}`\n";
-                    var before = await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id);
-                    await _currency.AddAsync(user.Id, "Trivia Reward", score.Amount, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id)
+                    var before = await _currency.GetCurrency(Context.User.Id, Context.Guild.Id);
+                    await _currency.AddAsync(user.Id, "Trivia Reward", score.Amount, Context.Guild.Id, Context.Channel.Id, Context.Message.Id)
                         .ConfigureAwait(false);
                     winStr += $"{user.Username} won `{score.Amount:N0}` {Roki.Properties.CurrencyIcon}\n" +
-                              $"\t`{before:N0}` ⇒ `{await _currency.GetCurrency(ctx.User.Id, ctx.Guild.Id):N0:N0}`\n";
+                              $"\t`{before:N0}` ⇒ `{await _currency.GetCurrency(Context.User.Id, Context.Guild.Id):N0:N0}`\n";
                     winners = true;
                 }
 
                 if (winners)
-                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithDescription($"Congratulations!\n{winStr}\n{scoreStr}")).ConfigureAwait(false);
                 else
-                    await ctx.Channel.SendErrorAsync($"Better luck next time!\n{scoreStr}").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync($"Better luck next time!\n{scoreStr}").ConfigureAwait(false);
                 
-                _service.TriviaGames.TryRemove(ctx.Channel.Id, out _);
+                Service.TriviaGames.TryRemove(Context.Channel.Id, out _);
                 await Task.Delay(5000).ConfigureAwait(false);
-                await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
+                await ((ITextChannel) Context.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]
             public async Task TriviaCategories()
             {
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle("Trivia Categories")
                         .WithDescription(string.Join(", ", Categories.Keys)))
                     .ConfigureAwait(false);

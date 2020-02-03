@@ -20,17 +20,17 @@ namespace Roki.Modules.Rsvp
                                     "`{0}events list/ls <optional_page>`: Lists events in this server\n", Roki.Properties.Prefix);
             if (string.IsNullOrWhiteSpace(args))
             {
-                await ctx.Channel.SendErrorAsync(err).ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync(err).ConfigureAwait(false);
                 return;
             }
 
             if (args.Equals("new", StringComparison.OrdinalIgnoreCase) || args.Equals("create", StringComparison.OrdinalIgnoreCase))
             {
-                await _service.CreateEvent(ctx).ConfigureAwait(false);
+                await Service.CreateEvent(Context).ConfigureAwait(false);
             }
             else if (args.Equals("edit", StringComparison.OrdinalIgnoreCase) || args.Equals("e", StringComparison.OrdinalIgnoreCase))
             {
-                await _service.EditEvent(ctx).ConfigureAwait(false);
+                await Service.EditEvent(Context).ConfigureAwait(false);
             }
             else if (args.StartsWith("list", StringComparison.OrdinalIgnoreCase) || args.Equals("ls", StringComparison.OrdinalIgnoreCase))
             {
@@ -40,19 +40,19 @@ namespace Roki.Modules.Rsvp
                 {
                     if (!int.TryParse(split[1], out page))
                     {
-                        await ctx.Channel.SendErrorAsync("Could not parse page number. Please try again.").ConfigureAwait(false);
+                        await Context.Channel.SendErrorAsync("Could not parse page number. Please try again.").ConfigureAwait(false);
                         return;
                     }
                 }
-                var events = _service.ListEvents(ctx.Guild.Id, page);
+                var events = Service.ListEvents(Context.Guild.Id, page);
                 var embed = new EmbedBuilder().WithOkColor().WithTitle("List of Events")
                     .WithDescription($"{string.Join("\n", events.Select(e => $"`#{e.Id}` **{e.Name}** in `{(e.StartDate - DateTimeOffset.UtcNow).ToReadableString()}` https://discordapp.com/channels/{e.GuildId}/{e.ChannelId}/{e.MessageId}"))}");
 
-                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
             else
             {
-                await ctx.Channel.SendErrorAsync(err).ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync(err).ConfigureAwait(false);
             }
         }
     }

@@ -6,17 +6,16 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Roki.Core.Services;
-using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
 using Roki.Services;
+using Roki.Services.Database.Core;
 using StackExchange.Redis;
 
 namespace Roki.Modules.Currency.Services
 {
     public class PickDropService : IRokiService
     {
-        private readonly CommandHandler _cmdHandler;
+        private readonly CommandHandler _handler;
         private readonly DbService _db;
         private readonly IDatabase _cache;
 
@@ -24,12 +23,12 @@ namespace Roki.Modules.Currency.Services
         private readonly SemaphoreSlim _pickLock = new SemaphoreSlim(1, 1);
 
 
-        public PickDropService(CommandHandler cmdHandler, DbService db, IRedisCache cache)
+        public PickDropService(CommandHandler handler, DbService db, IRedisCache cache)
         {
-            _cmdHandler = cmdHandler;
+            _handler = handler;
             _db = db;
             _cache = cache.Redis.GetDatabase();
-            _cmdHandler.OnMessageNoTrigger += CurrencyGeneration;
+            _handler.OnMessageNoTrigger += CurrencyGeneration;
         }
         
         private async Task CurrencyGeneration(IUserMessage message)
@@ -133,7 +132,7 @@ namespace Roki.Modules.Currency.Services
 
             if (!updated) return false;
                 
-            var msg = await ctx.Channel.SendMessageAsync($"{user.Username} dropped {amount.FormatNumber()} {Roki.Properties.CurrencyIcon}\nType `.pick` to pick it up.");
+            var msg = await ctx.Channel.SendMessageAsync($"{user.Username} dropped {amount:N0} {Roki.Properties.CurrencyIcon}\nType `.pick` to pick it up.");
 
             uow.Transaction.Add(new CurrencyTransaction
             {

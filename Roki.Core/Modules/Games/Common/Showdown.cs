@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using NLog;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Games.Services;
 using Roki.Services;
@@ -28,7 +27,7 @@ namespace Roki.Modules.Games.Common
         private readonly ICurrencyService _currency;
         private readonly DbService _db;
         private readonly IDatabase _cache;
-        private readonly Logger _log;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly DiscordSocketClient _client;
         private readonly ShowdownService _service;
         
@@ -79,7 +78,6 @@ namespace Roki.Modules.Games.Common
             _channel = channel;
             _generation = generation;
             _service = service;
-            _log = LogManager.GetCurrentClassLogger();
             GameId = $"{_generation}{Guid.NewGuid().ToString().Substring(0, 7)}";
         }
 
@@ -105,7 +103,7 @@ namespace Roki.Modules.Games.Common
             }
             catch (Exception e)
             {
-                _log.Error(e, $"Unable to initialize showdown game '{GameId}'\n{e}");
+                Logger.Error(e, $"Unable to initialize showdown game '{GameId}'\n{e}");
                 await _channel.SendErrorAsync("Something went wrong with the current game. Please try again later.").ConfigureAwait(false);
                 return;
             }
@@ -330,7 +328,7 @@ namespace Roki.Modules.Games.Common
             }
             proc.WaitForExit();
             await _cache.StringSetAsync($"pokemon:{uid}", gameId, TimeSpan.FromMinutes(5), flags: CommandFlags.FireAndForget).ConfigureAwait(false);
-            File.AppendAllText(@"./data/pokemon-logs/battle-logs", $"{uid}={gameId}\n");
+            File.AppendAllText(@"./data/pokemon_betshowdown_logs.txt", $"{uid}={gameId}\n");
             _teams = teams;
         }
         
@@ -368,19 +366,19 @@ namespace Roki.Modules.Games.Common
 
         private Task DeleteLogs(string gameId)
         {
-            try
+            var _ = Task.Run(async () =>
             {
-                var _ = Task.Run(async () =>
+                try
                 {
                     await Task.Delay(10000).ConfigureAwait(false);
                     File.Delete($@"./logs/rokibot-{gameId}.log");
-                });
-            }
-            catch (Exception e)
-            {
-                _log.Error(e, $"Could not delete log file for: '{GameId}'");
-            }
-            
+                }
+                catch (Exception e)
+                {
+                    Logger.Error(e, "Could not delete log file for: {gameId}", GameId);
+                }
+            });
+
             return Task.CompletedTask;
         }
         

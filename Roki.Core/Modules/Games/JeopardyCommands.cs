@@ -1,11 +1,9 @@
-using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Roki.Common;
 using Roki.Common.Attributes;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Games.Common;
 using Roki.Modules.Games.Services;
@@ -29,17 +27,17 @@ namespace Roki.Modules.Games
 
             [RokiCommand, Description, Aliases, Usage]
             [RequireContext(ContextType.Guild)]
-            [RokiOptions(typeof(JeopardyOptions))]
+            [RokiOptions(typeof(JeopardyArgs))]
             public async Task Jeopardy(params string[] args)
             {
-                var (opts, _) = OptionsParser.ParseFrom(new JeopardyOptions(), args);
+                var opts = OptionsParser.ParseFrom(new JeopardyArgs(), args);
                 
-                var channel = (ITextChannel) ctx.Channel;
-                var questions = _service.GenerateGame(opts.NumCategories);
+                var channel = (ITextChannel) Context.Channel;
+                var questions = Service.GenerateGame(opts.NumCategories);
 
-                var jeopardy = new Jeopardy(_client, questions, channel.Guild, channel, _currency, _service.GetFinalJeopardy());
+                var jeopardy = new Jeopardy(_client, questions, channel.Guild, channel, _currency, Service.GetFinalJeopardy());
 
-                if (_service.ActiveGames.TryAdd(channel.Id, jeopardy))
+                if (Service.ActiveGames.TryAdd(channel.Id, jeopardy))
                 {
                     try
                     {
@@ -47,14 +45,14 @@ namespace Roki.Modules.Games
                     }
                     finally
                     {
-                        _service.ActiveGames.TryRemove(channel.Id, out jeopardy);
+                        Service.ActiveGames.TryRemove(channel.Id, out jeopardy);
                         await jeopardy.EnsureStopped().ConfigureAwait(false);
                     }
                     return;
                 }
 
-                await ctx.Channel.SendErrorAsync($"Jeopardy game is already in progress.").ConfigureAwait(false);
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithColor(jeopardy.Color)
+                await Context.Channel.SendErrorAsync($"Jeopardy game is already in progress.").ConfigureAwait(false);
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithColor(jeopardy.Color)
                         .WithAuthor("Jeopardy!")
                         .WithTitle($"{jeopardy.CurrentClue.Category} - ${jeopardy.CurrentClue.Value}")
                         .WithDescription(jeopardy.CurrentClue.Clue))
@@ -65,42 +63,42 @@ namespace Roki.Modules.Games
             [RequireContext(ContextType.Guild)]
             public async Task JeopardyLeaderboard()
             {
-                if (_service.ActiveGames.TryGetValue(ctx.Channel.Id, out var jeopardy))
+                if (Service.ActiveGames.TryGetValue(Context.Channel.Id, out var jeopardy))
                 {
-                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.Blue)
+                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithColor(Color.Blue)
                             .WithTitle("Jeopardy! Scores")
                             .WithDescription(jeopardy.GetLeaderboard()))
                         .ConfigureAwait(false);
                     return;
                 }
 
-                await ctx.Channel.SendErrorAsync("No active Jeopardy! game.").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("No active Jeopardy! game.").ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Aliases, Usage]
             [RequireContext(ContextType.Guild)]
             public async Task JeopardyStop()
             {
-                if (_service.ActiveGames.TryGetValue(ctx.Channel.Id, out var jeopardy))
+                if (Service.ActiveGames.TryGetValue(Context.Channel.Id, out var jeopardy))
                 {
                     await jeopardy.StopJeopardyGame().ConfigureAwait(false);
                     return;
                 }
                 
-                await ctx.Channel.SendErrorAsync("No active Jeopardy! game.").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("No active Jeopardy! game.").ConfigureAwait(false);
             }
             
             [RokiCommand, Description, Aliases, Usage]
             [RequireContext(ContextType.Guild)]
             public async Task JeopardyVote()
             {
-                if (_service.ActiveGames.TryGetValue(ctx.Channel.Id, out var jeopardy))
+                if (Service.ActiveGames.TryGetValue(Context.Channel.Id, out var jeopardy))
                 {
-                    var code = jeopardy.VoteSkip(ctx.User.Id);
+                    var code = jeopardy.VoteSkip(Context.User.Id);
                     if (code == 0)
                     {
                         await Task.Delay(250).ConfigureAwait(false);
-                        await ctx.Channel.EmbedAsync(new EmbedBuilder().WithColor(jeopardy.Color)
+                        await Context.Channel.EmbedAsync(new EmbedBuilder().WithColor(jeopardy.Color)
                                 .WithAuthor("Vote Skip")
                                 .WithDescription(jeopardy.Votes.Count != jeopardy.Users.Count
                                     ? $"Voted\n`{jeopardy.Votes.Count}/{jeopardy.Users.Count}` required to skip."
@@ -109,21 +107,21 @@ namespace Roki.Modules.Games
                     }
                     else if (code == -1)
                     {
-                        await ctx.Channel.SendErrorAsync("Cannot vote skip yet.").ConfigureAwait(false);
+                        await Context.Channel.SendErrorAsync("Cannot vote skip yet.").ConfigureAwait(false);
                     }
                     else if (code == -2)
                     {
-                        await ctx.Channel.SendErrorAsync("You need a score to vote skip.").ConfigureAwait(false);
+                        await Context.Channel.SendErrorAsync("You need a score to vote skip.").ConfigureAwait(false);
                     }
                     else if (code == -3)
                     {
-                        await ctx.Channel.SendErrorAsync("You already voted.").ConfigureAwait(false);
+                        await Context.Channel.SendErrorAsync("You already voted.").ConfigureAwait(false);
                     }
                     
                     return;
                 }
                 
-                await ctx.Channel.SendErrorAsync("No active Jeopardy! game.").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("No active Jeopardy! game.").ConfigureAwait(false);
             }
         }
     }

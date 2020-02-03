@@ -1,6 +1,4 @@
-using System.Threading.Tasks;
-
-namespace Roki.Core.Services
+namespace Roki.Services
 {
     public interface IRokiService
     {

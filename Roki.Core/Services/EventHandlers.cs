@@ -1,35 +1,29 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using NLog;
-using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
 using Roki.Modules.Xp.Common;
+using Roki.Services.Database.Core;
 using StackExchange.Redis;
 
-namespace Roki.Core.Services
+namespace Roki.Services
 {
     public class EventHandlers : IRokiService
     {
         private readonly DiscordSocketClient _client;
         private readonly DbService _db;
-        private readonly IDatabase _cache;
 
-        private readonly Logger _log;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public EventHandlers(DbService db, DiscordSocketClient client, IRedisCache cache)
+        public EventHandlers(DbService db, DiscordSocketClient client)
         {
             _db = db;
-            _cache = cache.Redis.GetDatabase();
             _client = client;
-
-            _log = LogManager.GetCurrentClassLogger();
         }
 
         public async Task StartHandling()
@@ -250,7 +244,7 @@ namespace Roki.Core.Services
         {
             var _ = Task.Run(async () =>
             {
-                _log.Info("Joined server: {0} [{1}]", guild?.Name, guild?.Id);
+                Logger.Info("Joined server: {0} [{1}]", guild?.Name, guild?.Id);
                 using var uow = _db.GetDbContext();
                 await uow.Guilds.GetOrCreateGuildAsync(guild).ConfigureAwait(false);
                 await guild.DownloadUsersAsync().ConfigureAwait(false);
@@ -267,7 +261,7 @@ namespace Roki.Core.Services
 
         private Task LeftGuild(SocketGuild guild)
         {
-            var _ = Task.Run(() => { _log.Info("Left server: {0} [{1}]", guild?.Name, guild?.Id); });
+            var _ = Task.Run(() => { Logger.Info("Left server: {0} [{1}]", guild?.Name, guild?.Id); });
             return Task.CompletedTask;
         }
 

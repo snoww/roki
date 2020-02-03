@@ -1,10 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using Roki.Core.Services.Database.Models;
+using Roki.Services.Database.Core;
 
-namespace Roki.Core.Services.Database.Repositories
+namespace Roki.Services.Database.Repositories
 {
     public interface IEventsRepository : IRepository<Event>
     {

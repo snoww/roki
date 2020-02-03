@@ -1,16 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using Roki.Core.Services.Database;
+using Roki.Services.Database;
 
-namespace Roki.Core.Services
+namespace Roki.Services
 {
     public class DbService
     {
         private readonly DbContextOptions<RokiContext> _options;
 
-        public DbService(IRokiConfig config)
+        public DbService(string config)
         {
-            var builder = new NpgsqlConnectionStringBuilder(config.Db.ConnectionString);
+            var builder = new NpgsqlConnectionStringBuilder(config);
             var optionsBuilder = new DbContextOptionsBuilder<RokiContext>();
             optionsBuilder.UseNpgsql(builder.ToString())
                 .UseSnakeCaseNamingConvention();

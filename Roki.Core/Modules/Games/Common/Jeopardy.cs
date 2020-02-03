@@ -7,12 +7,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
-using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.EntityFrameworkCore.Internal;
 using NLog;
-using Roki.Common;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Services;
 
@@ -22,9 +18,10 @@ namespace Roki.Modules.Games.Common
     {
         private readonly SemaphoreSlim _guess = new SemaphoreSlim(1, 1);
         private readonly ICurrencyService _currency;
-        private readonly Logger _log;
         private readonly DiscordSocketClient _client;
         private readonly Dictionary<string, List<JClue>> _clues;
+        
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private readonly IGuild _guild;
         private readonly ITextChannel _channel;
@@ -49,7 +46,6 @@ namespace Roki.Modules.Games.Common
         
         public Jeopardy(DiscordSocketClient client, Dictionary<string, List<JClue>> clues, IGuild guild, ITextChannel channel, ICurrencyService currency, JClue finalJeopardy)
         {
-            _log = LogManager.GetCurrentClassLogger();
             _client = client;
             _clues = clues;
             
@@ -276,7 +272,7 @@ namespace Roki.Modules.Games.Common
                 }
                 catch (Exception e)
                 {
-                    _log.Warn(e);
+                    Logger.Warn(e);
                 }
             });
             return Task.CompletedTask;
@@ -431,7 +427,7 @@ namespace Roki.Modules.Games.Common
                             }
                             catch (Exception e)
                             {
-                                _log.Warn(e);
+                                Logger.Warn(e);
                             }
                         });
 
@@ -440,7 +436,7 @@ namespace Roki.Modules.Games.Common
                 }
                 catch (Exception e)
                 {
-                    _log.Warn(e);
+                    Logger.Warn(e);
                 }
             });
             

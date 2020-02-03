@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
+using Roki.Services.Database.Core;
 
-namespace Roki.Core.Services.Database.Repositories
+namespace Roki.Services.Database.Repositories
 {
     public interface IQuoteRepository : IRepository<Quote>
     {
@@ -36,7 +36,7 @@ namespace Roki.Core.Services.Database.Repositories
         public Task<Quote> SearchQuoteKeywordTextAsync(ulong guildId, string keyword, string text)
         {
             var rand = new Random();
-            return Set.Where(q => q.Text.ContainsNoCase(text, StringComparison.OrdinalIgnoreCase) && q.GuildId == guildId && q.Keyword == keyword)
+            return Set.Where(q => q.Text.Contains(text, StringComparison.OrdinalIgnoreCase) && q.GuildId == guildId && q.Keyword == keyword)
                 .OrderBy(q => rand.Next())
                 .FirstOrDefaultAsync();
         }
@@ -46,7 +46,7 @@ namespace Roki.Core.Services.Database.Repositories
             var q = Set.Where(x => x.GuildId == guildId);
             q = order == OrderType.Keyword ? q.OrderBy(x => x.Keyword) : q.OrderBy(x => x.Id);
 
-            return q.Skip(15 * page).Take(15).ToArray();
+            return q.Skip(15 * page).Take(15);
         }
 
         public async Task IncrementUseCount(int id)

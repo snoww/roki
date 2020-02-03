@@ -1,8 +1,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
-using Roki.Core.Services.Database.Models;
+using Roki.Services.Database.Core;
+using Roki.Services.Database.Data;
 
-namespace Roki.Core.Services.Database
+namespace Roki.Services.Database
 {
     public class RokiContext : DbContext
     {
@@ -16,7 +17,6 @@ namespace Roki.Core.Services.Database
         public DbSet<CurrencyTransaction> Transactions { get; set; }
         public DbSet<Listing> Listings { get; set; }
         public DbSet<Subscriptions> Subscriptions { get; set; }
-        public DbSet<Lottery> Lotteries { get; set; }
         public DbSet<Trades> Trades { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<Guild> Guilds { get; set; }
@@ -72,12 +72,6 @@ namespace Roki.Core.Services.Database
             #region CurrencyTransaction
 
             modelBuilder.Entity<CurrencyTransaction>();
-
-            #endregion
-
-            #region Lottery
-
-            modelBuilder.Entity<Lottery>();
 
             #endregion
 

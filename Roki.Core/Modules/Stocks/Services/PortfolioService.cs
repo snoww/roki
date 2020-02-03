@@ -1,9 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Roki.Core.Services;
-using Roki.Core.Services.Database.Models;
+using Roki.Services;
+using Roki.Services.Database.Core;
 
 namespace Roki.Modules.Stocks.Services
 {
