@@ -57,7 +57,7 @@ namespace Roki.Modules.Searches
                     return;
                 }
 
-                await Context.SendPaginatedConfirmAsync(0, p =>
+                await Context.SendPaginatedMessageAsync(0, p =>
                 {
                     var tweet = tweets[p];
 
@@ -114,7 +114,7 @@ namespace Roki.Modules.Searches
                 
                 combinedSearch.AddRange(searchResponse);
                 
-                await Context.SendPaginatedConfirmAsync(0, p =>
+                await Context.SendPaginatedMessageAsync(0, p =>
                 {
                     var tweet = combinedSearch[p];
 

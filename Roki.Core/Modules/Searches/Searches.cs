@@ -167,7 +167,7 @@ namespace Roki.Modules.Searches
             {
                 var items = response.Deserialize<UrbanResponse>().List;
                 if (items.Any())
-                    await Context.SendPaginatedConfirmAsync(0, p =>
+                    await Context.SendPaginatedMessageAsync(0, p =>
                     {
                         var item = items[p];
                         return new EmbedBuilder().WithOkColor()

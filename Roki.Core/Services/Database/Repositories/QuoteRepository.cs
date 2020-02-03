@@ -46,7 +46,7 @@ namespace Roki.Services.Database.Repositories
             var q = Set.Where(x => x.GuildId == guildId);
             q = order == OrderType.Keyword ? q.OrderBy(x => x.Keyword) : q.OrderBy(x => x.Id);
 
-            return q.Skip(15 * page).Take(15).ToArray();
+            return q.Skip(15 * page).Take(15);
         }
 
         public async Task IncrementUseCount(int id)
