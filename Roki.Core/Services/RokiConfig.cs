@@ -33,8 +33,8 @@ namespace Roki.Services
     public class RokiConfig : IRokiConfig
     {
         private readonly string _config = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
-        private readonly Logger _log;
-        
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
         public ulong ClientId { get; }
         public string Token { get; }
         public string GoogleApi { get; }
@@ -58,8 +58,6 @@ namespace Roki.Services
 
         public RokiConfig()
         {
-            _log = LogManager.GetCurrentClassLogger();
-            
             try
             {
                 var configBuilder = new ConfigurationBuilder();
@@ -69,7 +67,7 @@ namespace Roki.Services
                 Token = data[nameof(Token)];
                 if (string.IsNullOrWhiteSpace(Token))
                 {
-                    _log.Error("Token is missing from config.json.");
+                    Logger.Error("Token is missing from config.json.");
                     if (!Console.IsInputRedirected)
                         Console.ReadKey();
                     Environment.Exit(-1);
@@ -102,8 +100,7 @@ namespace Roki.Services
             }
             catch (Exception e)
             {
-                _log.Fatal(e.Message);
-                _log.Fatal(e);
+                Logger.Fatal(e, "Unable to load configuration.");
                 throw;
             }
         }

@@ -4,20 +4,21 @@ using NLog.Targets;
 
 namespace Roki.Services
 {
-    public class LogSetup
+    public static class LogSetup
     {
         public static void SetupLogger()
         {
-            var logConfig = new LoggingConfiguration();
-            var consoleTarget = new ColoredConsoleTarget
+            var config = new LoggingConfiguration();
+            
+            var console = new ColoredConsoleTarget
             {
-                Layout = @"${date:format=HH\:mm\:ss} ${logger:shortName=True} | ${message}"
+                Layout = @"${longdate}|{level:uppercase=true}|${logger:shortName=True}|${message}"
             };
-            logConfig.AddTarget("Console", consoleTarget);
-
-            logConfig.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, consoleTarget));
-
-            LogManager.Configuration = logConfig;
+            
+            config.AddTarget("Console", console);
+            config.AddRule(LogLevel.Debug, LogLevel.Fatal, console);
+            
+            LogManager.Configuration = config;
         }
     }
 }

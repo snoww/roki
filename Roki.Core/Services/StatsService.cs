@@ -29,7 +29,6 @@ namespace Roki.Services
     public class StatsService : IStatsService
     {
         private readonly DiscordSocketClient _client;
-        private readonly Logger _log;
         private readonly DateTime _started;
         private long _commandsRan;
         private long _messageCounter;
@@ -53,7 +52,6 @@ namespace Roki.Services
 
         public StatsService(DiscordSocketClient client, CommandHandler handler)
         {
-            _log = LogManager.GetCurrentClassLogger();
             _client = client;
 
             _started = DateTime.UtcNow;

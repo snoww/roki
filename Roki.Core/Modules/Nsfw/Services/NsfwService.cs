@@ -15,7 +15,7 @@ namespace Roki.Modules.Nsfw.Services
     public class NsfwService : IRokiService
     {
         private readonly IHttpClientFactory _http;
-        private readonly Logger _log;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         
         private static readonly Dictionary<string, string> Sources = File.ReadAllText("./data/nsfw.json").Deserialize<Dictionary<string, string>>();
         private const string BaseUrl = "https://www.reddit.com/r/{0}/random.json";
@@ -23,7 +23,6 @@ namespace Roki.Modules.Nsfw.Services
         public NsfwService(IHttpClientFactory http)
         {
             _http = http;
-            _log = LogManager.GetCurrentClassLogger();
         }
 
         public async Task<string> GetRandomNsfw(NsfwCategory category)
@@ -41,7 +40,7 @@ namespace Roki.Modules.Nsfw.Services
             }
             catch (Exception e)
             {
-                _log.Warn(e, "Failed to get random image from: 'r/{0}'", options[rng]);
+                Logger.Warn(e, "Failed to get random image from: 'r/{subreddit}'", options[rng]);
                 return null;
             }
         }

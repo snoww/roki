@@ -10,13 +10,10 @@ namespace Roki.Services
 
     public class RedisCache : IRedisCache
     {
-        private readonly Logger _log;
         public ConnectionMultiplexer Redis { get; }
         
         public RedisCache(string credentials)
         {
-            _log = LogManager.GetCurrentClassLogger();
-
             var config = ConfigurationOptions.Parse(credentials);
             
             Redis = ConnectionMultiplexer.Connect(config);

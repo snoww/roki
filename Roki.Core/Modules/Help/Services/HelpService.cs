@@ -15,12 +15,10 @@ namespace Roki.Modules.Help.Services
     public class HelpService : IRokiService
     {
         private readonly CommandHandler _command;
-        private readonly Logger _log;
 
         public HelpService(CommandHandler command)
         {
             _command = command;
-            _log = LogManager.GetCurrentClassLogger();
         }
 
         public EmbedBuilder GetCommandInfo(CommandInfo command)
