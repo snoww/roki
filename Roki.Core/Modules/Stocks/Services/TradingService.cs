@@ -6,9 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using Roki.Core.Services;
-using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
+using Roki.Services;
+using Roki.Services.Database.Core;
 
 namespace Roki.Modules.Stocks.Services
 {

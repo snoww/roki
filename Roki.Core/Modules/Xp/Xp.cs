@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Xp.Common;
 using Roki.Modules.Xp.Extensions;
+using Roki.Services;
 
 namespace Roki.Modules.Xp
 {
@@ -29,10 +29,10 @@ namespace Roki.Modules.Xp
         {
             if (user == null || user.IsBot)
             {
-                user = ctx.User;
+                user = Context.User;
             }
 
-            await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+            await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
             
             Stream avatar;
 
@@ -46,7 +46,7 @@ namespace Roki.Modules.Xp
                 }
                 catch (Exception)
                 {
-                    _log.Error("Error downloading avatar");
+                    Log.Error("Error downloading avatar");
                     return;
                 }
             }
@@ -55,11 +55,13 @@ namespace Roki.Modules.Xp
             var dUser = await uow.Users.GetUserAsync(user.Id).ConfigureAwait(false);
             var xp = new XpLevel(dUser.TotalXp);
             var rank = uow.Users.GetUserXpRank(user.Id);
+            var doubleXp = uow.Subscriptions.DoubleXpIsActive(user.Id);
+            var fastXp = uow.Subscriptions.FastXpIsActive(user.Id);
 
             await using var xpImage = XpDrawExtensions.GenerateXpBar(avatar, 
                 xp.ProgressXp, xp.RequiredXp, $"{xp.TotalXp}", $"{xp.Level}", $"{rank}", 
-                user.Username, user.Discriminator, dUser.LastLevelUp);
-            await ctx.Channel.SendFileAsync(xpImage, $"xp-{user.Id}.png").ConfigureAwait(false);
+                user.Username, user.Discriminator, dUser.LastLevelUp, doubleXp, fastXp);
+            await Context.Channel.SendFileAsync(xpImage, $"xp-{user.Id}.png").ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -79,14 +81,14 @@ namespace Roki.Modules.Xp
                 embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"Level `{new XpLevel(user.TotalXp).Level:N0}` - `{user.TotalXp:N0}` xp");
             }
 
-            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
         [RequireContext(ContextType.Guild)]
         public async Task XpNotification(string notify = null, IUser user = null)
         {
-            var caller = (IGuildUser) ctx.User;
+            var caller = (IGuildUser) Context.User;
             var isAdmin = false;
             if (user != null)
             {
@@ -98,7 +100,7 @@ namespace Roki.Modules.Xp
 
             if (string.IsNullOrWhiteSpace(notify))
             {
-                await ctx.Channel.SendErrorAsync("Please provide notification location for xp: none, dm, server.")
+                await Context.Channel.SendErrorAsync("Please provide notification location for xp: none, dm, server.")
                     .ConfigureAwait(false);
                 return;
             }
@@ -107,7 +109,7 @@ namespace Roki.Modules.Xp
                 !notify.Equals("dm", StringComparison.OrdinalIgnoreCase) ||
                 !notify.Equals("server", StringComparison.OrdinalIgnoreCase))
             {
-                await ctx.Channel.SendErrorAsync("Not a valid option. Options are none, dm, or server.")
+                await Context.Channel.SendErrorAsync("Not a valid option. Options are none, dm, or server.")
                     .ConfigureAwait(false);
                 return;
             }
@@ -115,14 +117,14 @@ namespace Roki.Modules.Xp
             using var uow = _db.GetDbContext();
             if (!isAdmin)
             {
-                await uow.Users.ChangeNotificationLocation(ctx.User.Id, notify).ConfigureAwait(false);
+                await uow.Users.ChangeNotificationLocation(Context.User.Id, notify).ConfigureAwait(false);
             }
             else
             {
                 await uow.Users.ChangeNotificationLocation(user.Id, notify).ConfigureAwait(false);
             }
             
-            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithDescription("Successfully changed xp notification preferences."))
                 .ConfigureAwait(false);
         }
@@ -142,10 +144,10 @@ namespace Roki.Modules.Xp
             }
             
             using var uow = _db.GetDbContext();
-            var rewards = await uow.Guilds.GetAllXpRewardsAsync(ctx.Guild.Id).ConfigureAwait(false);
+            var rewards = await uow.Guilds.GetAllXpRewardsAsync(Context.Guild.Id).ConfigureAwait(false);
             if (rewards == null || rewards.Count == 0)
             {
-                await ctx.Channel.SendErrorAsync("There are currently no XP rewards setup for this server.").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("There are currently no XP rewards setup for this server.").ConfigureAwait(false);
                 return;
             }
 
@@ -180,7 +182,7 @@ namespace Roki.Modules.Xp
                         : $"`{r.Id}` Level `{r.XpLevel}` - <@&{r.Reward}>")));
             }
 
-            await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -193,13 +195,13 @@ namespace Roki.Modules.Xp
             {
                 if (!int.TryParse(reward, out var rewardAmount))
                 {
-                    await ctx.Channel.SendErrorAsync("Make sure you enter a valid number for the currency reward.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("Make sure you enter a valid number for the currency reward.").ConfigureAwait(false);
                     return;
                 }
 
                 
-                var currReward = await uow.Guilds.AddXpRewardAsync(ctx.Guild.Id, level, "currency", rewardAmount.ToString());
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                var currReward = await uow.Guilds.AddXpRewardAsync(Context.Guild.Id, level, "currency", rewardAmount.ToString());
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle("XP Reward Added")
                         .WithDescription("Successfully added a new XP reward.\n" +
                                          $"Reward ID: `{currReward.Id}`\n" +
@@ -211,26 +213,26 @@ namespace Roki.Modules.Xp
                 return;
             }
 
-            var roleId = ctx.Message.MentionedRoleIds.FirstOrDefault();
+            var roleId = Context.Message.MentionedRoleIds.FirstOrDefault();
             if (roleId == 0)
             {
                 if (!ulong.TryParse(reward, out roleId))
                 {
-                    await ctx.Channel.SendErrorAsync("Please specify a role for the XP role reward.\nIf the role is not mentionable, use the role ID instead")
+                    await Context.Channel.SendErrorAsync("Please specify a role for the XP role reward.\nIf the role is not mentionable, use the role ID instead")
                         .ConfigureAwait(false);
                     return;
                 }
             }
 
-            var role = ctx.Guild.GetRole(roleId);
+            var role = Context.Guild.GetRole(roleId);
             if (role == null)
             {
-                await ctx.Channel.SendErrorAsync("Could not find that role. Please check the role ID again.").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("Could not find that role. Please check the role ID again.").ConfigureAwait(false);
                 return;
             }
             
-            var roleReward = await uow.Guilds.AddXpRewardAsync(ctx.Guild.Id, level, "role", role.Id.ToString());
-            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            var roleReward = await uow.Guilds.AddXpRewardAsync(Context.Guild.Id, level, "role", role.Id.ToString());
+            await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithTitle("XP Reward Added")
                     .WithDescription("Successfully added a new XP reward.\n" +
                                      $"Reward ID: `{roleReward.Id}`\n" +
@@ -247,23 +249,23 @@ namespace Roki.Modules.Xp
         {
             if (string.IsNullOrWhiteSpace(id))
             {
-                await ctx.Channel.SendErrorAsync("Please specify the XP reward ID. You can obtain the IDs by using `xpr <page_num> true`.")
+                await Context.Channel.SendErrorAsync("Please specify the XP reward ID. You can obtain the IDs by using `xpr <page_num> true`.")
                     .ConfigureAwait(false);
                 return;
             }
 
             using var uow = _db.GetDbContext();
-            var success = await uow.Guilds.RemoveXpRewardAsync(ctx.Guild.Id, id).ConfigureAwait(false);
+            var success = await uow.Guilds.RemoveXpRewardAsync(Context.Guild.Id, id).ConfigureAwait(false);
             if (success)
             {
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                         .WithTitle("XP Reward Removed.")
                         .WithDescription($"Successfully removed reward with ID: `{id}`"))
                     .ConfigureAwait(false);
             }
             else
             {
-                await ctx.Channel.SendErrorAsync($"Something went wrong when trying to remove the reward with ID: `{id}`\n" +
+                await Context.Channel.SendErrorAsync($"Something went wrong when trying to remove the reward with ID: `{id}`\n" +
                                                  $"Please double check the ID and try again.")
                     .ConfigureAwait(false);
             }

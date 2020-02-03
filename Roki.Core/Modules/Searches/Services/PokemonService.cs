@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -7,10 +6,10 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
 using Microsoft.EntityFrameworkCore;
-using Roki.Core.Services;
-using Roki.Core.Services.Database;
-using Roki.Core.Services.Database.Models;
 using Roki.Extensions;
+using Roki.Services;
+using Roki.Services.Database;
+using Roki.Services.Database.Data;
 
 namespace Roki.Modules.Searches.Services
 {

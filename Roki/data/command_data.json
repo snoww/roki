@@ -1,13 +1,20 @@
 {
+  "about": {
+  "Aliases": "info",
+  "Description": "Basic information about Roki.",
+  "Usage": [
+    "{0}about"
+  ]
+},
   "stats": {
-    "Command": "stats",
+    "Aliases": "",
     "Description": "Basic stats for Roki.",
     "Usage": [
       "{0}stats"
     ]
   },
   "serverinfo": {
-    "Command": "serverinfo server",
+    "Aliases": "server",
     "Description": "Shows information about current server.",
     "Usage": [
       "{0}serverinfo",
@@ -15,7 +22,7 @@
     ]
   },
   "channelinfo": {
-    "Command": "channelinfo channel",
+    "Aliases": "channel",
     "Description": "Shows information about the current channel or mentioned channel.",
     "Usage": [
       "{0}channelinfo",
@@ -23,7 +30,7 @@
     ]
   },
   "userinfo": {
-    "Command": "userinfo user",
+    "Aliases": "user",
     "Description": "Shows information about yourself or another user.",
     "Usage": [
       "{0}userinfo",
@@ -31,43 +38,43 @@
     ]
   },
   "ping": {
-    "Command": "ping",
+    "Aliases": "",
     "Description": "Gets current ping to Discord's servers",
     "Usage": [
       "{0}ping"
     ]
   },
   "modules": {
-    "Command": "modules",
+    "Aliases": "",
     "Description": "Lists all bot modules.",
     "Usage": [
       "{0}modules"
     ]
   },
   "commands": {
-    "Command": "commands cmds",
-    "Description": "List all of the bot's commands from a certain module. You can either specify the full name or only the first few letters of the module name.",
+    "Aliases": "cmds aliases",
+    "Description": "List all of the bot's commands and their aliases from a module. You can either specify the full or the first few letters of the module name.",
     "Usage": [
-      "{0}Commands stocks"
+      "{0}commands stocks"
     ]
   },
   "h": {
-    "Command": "help h",
-    "Description": "Either shows a help for a single command, or DMs you help link if no parameters are specified.",
+    "Aliases": "help",
+    "Description": "Either shows a help for a single Aliases, or DMs you help link if no parameters are specified.",
     "Usage": [
-      "{0}help {0}Commands",
+      "{0}help {0}weather",
       "{0}h"
     ]
   },
   "time": {
-    "Command": "time",
-    "Description": "Shows the current time and timezone for the specified location.",
+    "Aliases": "date",
+    "Description": "Shows the current date and time for the specified location. Also includes date and time in local culture if exists.",
     "Usage": [
       "{0}time Tokyo, JP"
     ]
   },
   "youtube": {
-    "Command": "youtube yt",
+    "Aliases": "yt",
     "Description": "Searches Youtube with specified query.",
     "Usage": [
       "{0}youtube Jebaited",
@@ -75,7 +82,7 @@
     ]
   },
   "image": {
-    "Command": "image img",
+    "Aliases": "img",
     "Description": "Searches Google Images with the specified query, returns first result.",
     "Usage": [
       "{0}image cats",
@@ -83,7 +90,7 @@
     ]
   },
   "randomimage": {
-    "Command": "randomimage rimg",
+    "Aliases": "rimg",
     "Description": "Searches Google Images with the specified query, returns a random result.",
     "Usage": [
       "{0}randomimage cats",
@@ -91,63 +98,63 @@
     ]
   },
   "movie": {
-    "Command": "movie imdb omdb",
+    "Aliases": "imdb omdb",
     "Description": "Searches omdb with the specified query, returns first result.",
     "Usage": [
       "{0}imdb avengers endgame"
     ]
   },
   "weather": {
-    "Command": "weather w",
+    "Aliases": "w",
     "Description": "Looks up weather of specified city using Dark Sky's api.",
     "Usage": [
       "{0}weather toronto"
     ]
   },
   "urbandict": {
-    "Command": "urban ud",
+    "Aliases": "urban ud",
     "Description": "Searches urban dictionary for with the specified query.",
     "Usage": [
       "{0}urban malding"
     ]
   },
   "addquote": {
-    "Command": ". addquote",
+    "Aliases": ".",
     "Description": "Adds a new quote with the specified name and message.",
     "Usage": [
       "{0}. sayhi Hi"
     ]
   },
   "showquote": {
-    "Command": ".. showquote",
+    "Aliases": "..",
     "Description": "Shows a random quote with a specified name.",
     "Usage": [
       "{0}.. abc"
     ]
   },
   "quotesearch": {
-    "Command": "qsearch",
+    "Aliases": "qsearch",
     "Description": "Shows a random quote for a keyword that contains any text specified in the search.",
     "Usage": [
       "{0}qsearch keyword text"
     ]
   },
   "quoteid": {
-    "Command": "quoteid qid",
+    "Aliases": "qid",
     "Description": "Displays the quote with the specified ID number. Quote ID numbers can be found by typing `{0}liqu [num]` where `[num]` is a number of a page which contains 15 quotes.",
     "Usage": [
       "{0}qid 123456"
     ]
   },
   "quotedelete": {
-    "Command": "quotedel qdel",
+    "Aliases": "quotedel qdel",
     "Description": "Deletes a quote with the specified ID. You have to be either server Administrator or the creator of the quote to delete it.",
     "Usage": [
       "{0}qdel 123456"
     ]
   },
   "listquotes": {
-    "Command": "listquotes liqu",
+    "Aliases": "liqu",
     "Description": "Lists all quotes on the server ordered alphabetically or by ID. 15 Per page.",
     "Usage": [
       "{0}liqu 3",
@@ -155,56 +162,56 @@
     ]
   },
   "textoimage": {
-    "Command": "latex tex",
+    "Aliases": "latex tex",
     "Description": "Returns an image showing the specified mathematical formula, using the TeX language.",
     "Usage": [
       "{0}tex y=mx+b"
     ]
   },
   "pokedex": {
-    "Command": "pokemon pokedex dex",
+    "Aliases": "pokemon dex",
     "Description": "Returns a short summary of the specified Pokémon.",
     "Usage": [
       "{0}pokedex decidueye"
     ]
   },
   "ability": {
-    "Command": "ability ab",
+    "Aliases": "ab",
     "Description": "Returns the description of the specified ability.",
     "Usage": [
       "{0}ability moxie"
     ]
   },
   "move": {
-    "Command": "move",
+    "Aliases": "",
     "Description": "Returns the description of the specified move.",
     "Usage": [
       "{0}move bubble"
     ]
   },
   "nature": {
-    "Command": "nature",
+    "Aliases": "",
     "Description": "Returns the modifiers of the specified nature.",
     "Usage": [
       "{0}nature jolly"
     ]
   },
   "item": {
-    "Command": "item",
+    "Aliases": "",
     "Description": "Returns the description of the specified item.",
     "Usage": [
       "{0}item master ball"
     ]
   },
   "pins": {
-    "Command": "pins pin",
+    "Aliases": "pin",
     "Description": "Returns the latest pin in the current channel.",
     "Usage": [
       "{0}pin"
     ]
   },
   "xkcd": {
-    "Command": "xkcd",
+    "Aliases": "",
     "Description": "Returns the specified xkcd comic, if no comic is specified, latest comic is shown.",
     "Usage": [
       "{0}xkcd",
@@ -212,7 +219,7 @@
     ]
   },
   "queue": {
-    "Command": "queue q",
+    "Aliases": "q",
     "Description": "Searches and plays the query for the specified song, or plays the url provided. Must be in a voice channel.",
     "Usage": [
       "{0}q hello",
@@ -220,106 +227,106 @@
     ]
   },
   "pause": {
-    "Command": "pause",
+    "Aliases": "",
     "Description": "Pauses the current track playing. Must be in a voice channel.",
     "Usage": [
       "{0}pause"
     ]
   },
   "destroy": {
-    "Command": "destroy d",
+    "Aliases": "d",
     "Description": "Stops the bot from playing music. Must be in a voice channel.",
     "Usage": [
       "{0}d"
     ]
   },
   "volume": {
-    "Command": "volume vol",
+    "Aliases": "vol",
     "Description": "Sets the volume for the music player. Between 0-100. Must be in a voice channel",
     "Usage": [
       "{0}vol 50"
     ]
   },
   "listqueue": {
-    "Command": "listqueue lq",
+    "Aliases": "lq",
     "Description": "Shows the current track queue (10 tracks per page).",
     "Usage": [
       "{0}liqu 2"
     ]
   },
   "next": {
-    "Command": "next n",
+    "Aliases": "n",
     "Description": "Skips current track.",
     "Usage": [
       "{0}n"
     ]
   },
   "songremove": {
-    "Command": "songremove srm",
+    "Aliases": "srm",
     "Description": "Removes the specified track in the queue.",
     "Usage": [
       "{0}srm 5"
     ]
   },
   "songseek": {
-    "Command": "songseek seek",
+    "Aliases": "seek",
     "Description": "Seeks the given number of seconds forward in the current track.",
     "Usage": [
       "{0}seek 15"
     ]
   },
   "twitter": {
-    "Command": "twitter tweet",
+    "Aliases": "tweet",
     "Description": "Returns the latest tweets by the specified user.",
     "Usage": [
       "{0}twitter xqc"
     ]
   },
   "twittersearch": {
-    "Command": "twittersearch tsearch",
+    "Aliases": "tsearch",
     "Description": "Searches twitter with the specified query, and returns the top 5 results.",
     "Usage": [
       "{0}tsearch pokemon sword shield"
     ]
   },
   "randomcat": {
-    "Command": "cat",
+    "Aliases": "cat",
     "Description": "Returns a random cat pic.",
     "Usage": [
       "{0}cat"
     ]
   },
   "randomdog": {
-    "Command": "dog",
+    "Aliases": "dog",
     "Description": "Returns a random dog pic.",
     "Usage": [
       "{0}dog"
     ]
   },
   "catfact": {
-    "Command": "catfact",
+    "Aliases": "",
     "Description": "Returns a random cat fact.",
     "Usage": [
       "{0}catfact"
     ]
   },
   "anime": {
-    "Command": "anime",
+    "Aliases": "",
     "Description": "Returns top 5 anime results provided from the query.",
     "Usage": [
       "{0}anime sao"
     ]
   },
   "experience": {
-    "Command": "xp",
-    "Description": "Shows the current level and xp of the specified user, if none provided, shows the message author's level and xp",
+    "Aliases": "xp",
+    "Description": "Shows the current XP and Level of the current user. Optional: mention another user to see their XP and Level.",
     "Usage": [
       "{0}xp",
       "{0}xp @snow"
     ]
   },
   "xpleaderboard": {
-    "Command": "xplb",
+    "Aliases": "xplb",
     "Description": "Shows the current xp leaderboard, you can specify the page, default is the top 9.",
     "Usage": [
       "{0}xplb",
@@ -327,21 +334,21 @@
     ]
   },
   "xpnotification": {
-    "Command": "xpnotification xpnotif",
+    "Aliases": "xpnotif",
     "Description": "Sets the preferred location of xp level up notifications (Server, Dm, or None).",
     "Usage": [
       "{0}xpnotif server"
     ]
   },
   "pick": {
-    "Command": "pick",
+    "Aliases": "",
     "Description": "Picks up all the currency dropped in the current channel.",
     "Usage": [
       "{0}pick"
     ]
   },
   "leaderboard": {
-    "Command": "leaderboard lb",
+    "Aliases": "lb",
     "Description": "Shows the current currency leaderboard. you can specify the page, default is the top 9.",
     "Usage": [
       "{0}lb",
@@ -349,7 +356,7 @@
     ]
   },
   "drop": {
-    "Command": "drop",
+    "Aliases": "",
     "Description": "Drops the specified number of currency, default is 1. Must have enough in your balance to drop.",
     "Usage": [
       "{0}drop",
@@ -357,7 +364,7 @@
     ]
   },
   "betflip": {
-    "Command": "betflip bf",
+    "Aliases": "bf",
     "Description": "Bet to guess result if heads or tails. Guessing correctly awards you currency.",
     "Usage": [
       "{0}bf 10 h",
@@ -365,7 +372,7 @@
     ]
   },
   "give": {
-    "Command": "give",
+    "Aliases": "",
     "Description": "Transfers currency to the specified user, optionally with a message. Must have sufficient balance.",
     "Usage": [
       "{0}give 5 @snow",
@@ -373,7 +380,7 @@
     ]
   },
   "cash": {
-    "Command": "currency cash $",
+    "Aliases": "currency $",
     "Description": "Shows how much cash the user has.",
     "Usage": [
       "{0}$",
@@ -381,7 +388,7 @@
     ]
   },
   "investing": {
-    "Command": "investing $$",
+    "Aliases": "$$",
     "Description": "Shows how much currency in the Investing Account.",
     "Usage": [
       "{0}$$",
@@ -389,28 +396,28 @@
     ]
   },
   "betroll": {
-    "Command": "betroll br",
+    "Aliases": "br",
     "Description": "Bet to roll a dice. Rolling over 70 yields x2.5, over 90 yields x4, and 100 yields x10.",
     "Usage": [
       "{0}br 10"
     ]
   },
   "currencytransactions": {
-    "Command": "transactions trs",
+    "Aliases": "transactions trs",
     "Description": "Shows your currency transactions on the specified page.",
     "Usage": [
       "{0}trs 2"
     ]
   },
   "betdie": {
-    "Command": "betdie bd",
+    "Aliases": "bd",
     "Description": "Bet an amount to roll 6 die. Rolling 17/25 yields x1.25 stones, 16/26 x1.5, 15/27 x2, 14/28 x2.5, 13/29 x3, 12/30 x5, 11/31 x7, 10/32 x10, 9/33 x17, 8/34 x25, 7/35 x50, 6/36 x100",
     "Usage": [
       "{0}bd 10"
     ]
   },
   "betflipmulti": {
-    "Command": "betflipmulti bfm",
+    "Aliases": "bfm",
     "Description": "Bet to guess multiple coin flips. You need to bet at least twice the amount of guesses in stones. Needs 3/4 to be correct. The more correct guess rewards more currency. (amount * correct ^ 1.1)",
     "Usage": [
       "{0}bfm 10 h h t h t",
@@ -418,21 +425,21 @@
     ]
   },
   "betpokemongame": {
-    "Command": "betpokemon bp",
+    "Aliases": "betpokemon bp",
     "Description": "Bet on an AI vs AI game of pokemon. Default is Generation 8 (Available Generations: 4-8). If guessed winner correctly, win stones.",
     "Usage": [
       "{0}bp"
     ]
   },
   "betpokemonreplay": {
-    "Command": "betpokemonreplay replay",
+    "Aliases": "replay",
     "Description": "Gets the replay of a bet pokemon game.",
     "Usage": [
       "{0}replay xxxxxxx"
     ]
   },
   "trivia": {
-    "Command": "trivia t",
+    "Aliases": "t",
     "Description": "Starts a new 10 question trivia game with optional category (use `.tc` to check categories). Default is all categories. Awards currency based on difficulty. Needs at least 60% to get rewards.",
     "Usage": [
       "{0}trivia optional_category",
@@ -441,14 +448,14 @@
     ]
   },
   "triviacategories": {
-    "Command": "triviacategories tc",
+    "Aliases": "tc",
     "Description": "Lists all the trivia categories.",
     "Usage": [
       "{0}tc"
     ]
   },
   "store": {
-    "Command": "store",
+    "Aliases": "",
     "Description": "Shows the Stone store. 9 items per page. Or specify specific name or id to see that item.",
     "Usage": [
       "{0}store",
@@ -456,7 +463,7 @@
     ]
   },
   "buy": {
-    "Command": "buy",
+    "Aliases": "",
     "Description": "Buy an item from the store using its name or id, with an optional amount or all (default is 1).",
     "Usage": [
       "{0}buy 123 1",
@@ -464,7 +471,7 @@
     ]
   },
   "subscriptions": {
-    "Command": "subscriptions subs",
+    "Aliases": "subs",
     "Description": "Shows your active subscriptions.",
     "Usage": [
       "{0}subscriptions",
@@ -472,35 +479,35 @@
     ]
   },
   "mute": {
-    "Command": "mute",
+    "Aliases": "",
     "Description": "Mutes the specified user (Prevents them from speaking in voice). Must be a moderator or have an available power (Consumes the power).",
     "Usage": [
       "{0}mute @snow"
     ]
   },
   "block": {
-    "Command": "block",
+    "Aliases": "",
     "Description": "Blocks the specified user (Prevents them from typing in chat). Must be a moderator or have an available power (Consumes the power).",
     "Usage": [
       "{0}block @snow"
     ]
   },
   "timeout": {
-    "Command": "timeout",
+    "Aliases": "",
     "Description": "Times out the specified user (Prevents them from typing and speaking). Must be a moderator or have an available power (Consumes the power). Does not stack with `.mute` and `.block`.",
     "Usage": [
       "{0}timeout @snow"
     ]
   },
   "inventory": {
-    "Command": "inventory inv",
+    "Aliases": "inv",
     "Description": "Shows the items in your inventory",
     "Usage": [
       "{0}inventory"
     ]
   },
   "stockstats": {
-    "Command": "stockstats sst",
+    "Aliases": "sst",
     "Description": "Shows the statistics of the specified stock, optional all details",
     "Usage": [
       "{0}stockstats AAPL",
@@ -508,35 +515,35 @@
     ]
   },
   "stockquote": {
-    "Command": "stockquote sq",
+    "Aliases": "sq",
     "Description": "Shows current quote of the specified stock",
     "Usage": [
       "{0}stockquote AAPL"
     ]
   },
   "stocknews": {
-    "Command": "stocknews sn",
+    "Aliases": "sn",
     "Description": "Shows the current news about the specified company",
     "Usage": [
       "{0}stocknews AAPL"
     ]
   },
   "stockcompany": {
-    "Command": "stockcompany sc",
+    "Aliases": "sc",
     "Description": "Shows details about the specified company",
     "Usage": [
       "{0}stockcompany AAPL"
     ]
   },
   "stockprice": {
-    "Command": "stockprice price sp",
+    "Aliases": "price sp",
     "Description": "Shows the current price of the stock for the specified company",
     "Usage": [
       "{0}stockprice AAPL"
     ]
   },
   "stockposition": {
-    "Command": "stockbuy position sb",
+    "Aliases": "position sb",
     "Description": "Long or short shares of a company. Shorted shares will be charged a premium every week.",
     "Usage": [
       "{0}stockbuy long AAPL 50",
@@ -544,7 +551,7 @@
     ]
   },
   "stocksell": {
-    "Command": "stocksell ss",
+    "Aliases": "ss",
     "Description": "Sell a specified amount of shares.",
     "Usage": [
       "{0}stocksell AAPL 50",
@@ -552,7 +559,7 @@
     ]
   },
   "transfer": {
-    "Command": "transfer",
+    "Aliases": "",
     "Description": "Transfers stones to/from your investing account and cash account. Note: you will lose your cents on your transfer (rounded up)",
     "Usage": [
       "{0}transfer cash 5000",
@@ -560,7 +567,7 @@
     ]
   },
   "portfolio": {
-    "Command": "portfolio",
+    "Aliases": "",
     "Description": "Shows your or the specified user's portfolio.",
     "Usage": [
       "{0}portfolio",
@@ -568,7 +575,7 @@
     ]
   },
   "stockchart": {
-    "Command": "stockchart chart sc",
+    "Aliases": "chart sc",
     "Description": "Shows the chart for the specified company, default is 1m. Options are `5y` `2y` `1y` `ytd` `6m` `3m` `1m` `5d` `today`",
     "Usage": [
       "{0}chart aapl",
@@ -576,14 +583,14 @@
     ]
   },
   "userdetails": {
-    "Command": "userdetails",
+    "Aliases": "",
     "Description": "Shows the users userid, username, discriminator, and avatarid/",
     "Usage": [
       "{0}userdetails @snow"
     ]
   },
   "events": {
-    "Command": "events event",
+    "Aliases": "event",
     "Description": "Create, edit, show events in the current server.",
     "Usage": [
       "{0}events new",
@@ -592,7 +599,7 @@
     ]
   },
   "logging": {
-    "Command": "logging log",
+    "Aliases": "log",
     "Description": "Enables or disables logging of a channel. Logging is disabled by default in channels.",
     "Usage": [
       "{0}log",
@@ -601,14 +608,14 @@
     ]
   },
   "stalk": {
-    "Command": "stalk",
+    "Aliases": "",
     "Description": "**BROKEN** Searches all of discord for a user by their username and discriminator.",
     "Usage": [
       "{0}stalk Snow#7777"
     ]
   },
   "uwu": {
-    "Command": "uwu",
+    "Aliases": "",
     "Description": "UwUizes the message. If no message is provided, UwUizes the previous message in the channel.",
     "Usage": [
       "{0}uwu hey how are you",
@@ -616,57 +623,57 @@
     ]
   },
   "nickname": {
-    "Command": "nickname nick",
+    "Aliases": "nick",
     "Description": "Changes the target users nickname. Lasts forever or until user changes back. Must be a moderator or have an available power (Consumes the power).",
     "Usage": [
       "{0}nick @snow snowww"
     ]
   },
   "jeopardy": {
-    "Command": "jeopardy jp",
+    "Aliases": "jp",
     "Description": "Starts a Jeopardy! game in the current channel. Choose a price from the categories, and give the correct answer to win.\nIf a game is active in the current channel, the current question will be sent again.",
     "Usage": [
       "{0}jp"
     ]
   },
   "jeopardyleaderboard": {
-    "Command": "jeopardyleaderboard jl",
+    "Aliases": "jl",
     "Description": "Shows the score leaderboard for the current Jeopardy! game.",
     "Usage": [
       "{0}jl"
     ]
   },
   "jeopardystop": {
-    "Command": "jeopardystop js jq",
+    "Aliases": "js jq",
     "Description": "Stops current Jeopardy! game after the current question.",
     "Usage": [
       "{0}js"
     ]
   },
   "jeopardyvote": {
-    "Command": "jeopardyvote jvote jv",
+    "Aliases": "jvote jv",
     "Description": "Votes to skip the current question. Can vote if you have a score in the current game. Voting opens 12 seconds after clue is shown.",
     "Usage": [
       "{0}jv"
     ]
   },
   "wikipedia": {
-    "Command": "wikipedia wiki",
-    "Description": "Searches Wikipedia for an article. Shows most relevant article. Can add `-q` to end of command show top 5 results instead.",
+    "Aliases": "wiki",
+    "Description": "Searches Wikipedia for an article. Shows most relevant article. Can add `-q` to end of Aliases show top 5 results instead.",
     "Usage": [
       "{0}wiki apple",
       "{0}wikipedia alphabet -q"
     ]
   },
   "ask": {
-    "Command": "ask",
+    "Aliases": "",
     "Description": "Asks roki a question. Uses Wolfram|Alpha to get answers.",
     "Usage": [
       "{0}ask what is the tallest building in the world"
     ]
   },
   "xprewards": {
-    "Command": "xprewards xpr",
+    "Aliases": "xpr",
     "Description": "Shows the XP rewards for the current server. Optional: specify page number, show reward id",
     "Usage": [
       "{0}xpr",
@@ -674,7 +681,7 @@
     ]
   },
   "xprewardadd": {
-    "Command": "xprewardadd xpradd",
+    "Aliases": "xpradd",
     "Description": "Adds an XP reward. Must have Administrator permissions.\nParameters: rewardType: `role` or `currency`, level: `number`, reward: `number` if type is `currency`, `roleID` or `@role` if type is `role`",
     "Usage": [
       "{0}xpradd currency 25 2500",
@@ -682,10 +689,66 @@
     ]
   },
   "xprewardremove": {
-    "Command": "xprewardremove xprr",
+    "Aliases": "xprr",
     "Description": "Removes an XP reward by ID. Must have Administrator permissions.",
     "Usage": [
       "{0}xprr xxxxxxx"
+    ]
+  },
+  "notsafeforwork": {
+    "Aliases": "nsfw porn",
+    "Description": "Sends random NSFW/Porn image. Requires NSFW Channel.",
+    "Usage": [
+      "{0}nsfw"
+    ]
+  },
+  "ass": {
+    "Aliases": "butt butts",
+    "Description": "Sends random image of asses. Requires NSFW Channel.",
+    "Usage": [
+      "{0}nsfw"
+    ]
+  },
+  "boobs": {
+    "Aliases": "boob boobies tits titty",
+    "Description": "Sends random image of boobs. Requires NSFW Channel.",
+    "Usage": [
+      "{0}nsfw"
+    ]
+  },
+  "cosplay": {
+    "Aliases": "cosplay costume",
+    "Description": "Sends random image of cosplays. Requires NSFW Channel.",
+    "Usage": [
+      "{0}nsfw"
+    ]
+  },
+  "hentai": {
+    "Aliases": "r34",
+    "Description": "Sends random image of hentai. Requires NSFW Channel.",
+    "Usage": [
+      "{0}nsfw"
+    ]
+  },
+  "mild": {
+    "Aliases": "sfw",
+    "Description": "Sends random mild nsfw/sfw image. Requires NSFW Channel.",
+    "Usage": [
+      "{0}nsfw"
+    ]
+  },
+  "nsfwgifs": {
+    "Aliases": "nsfwgif nsfwg porngifs",
+    "Description": "Sends random NSFW/Porn gif. Requires NSFW Channel.",
+    "Usage": [
+      "{0}nsfw"
+    ]
+  },
+  "trans": {
+    "Aliases": "traps",
+    "Description": "Sends random image of trans/traps. Requires NSFW Channel.",
+    "Usage": [
+      "{0}nsfw"
     ]
   }
 }

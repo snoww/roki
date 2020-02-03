@@ -1,80 +1,51 @@
+using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using NLog;
-using Roki.Core.Services;
 using Roki.Extensions;
+using Roki.Services;
 
 namespace Roki.Modules
 {
     public abstract class RokiTopLevelModule : ModuleBase
     {
+        private string ModuleTypeName { get; }
+        private string LowerModuleTypeName { get; }
+        protected Logger Log { get; }
+        
         protected RokiTopLevelModule(bool isTopLevelModule = true)
         {
-            ModuleTypeName = isTopLevelModule ? GetType().Name : GetType().DeclaringType.Name;
-            LowerModuleTypeName = ModuleTypeName.ToLowerInvariant();
-            _log = LogManager.GetCurrentClassLogger();
+            ModuleTypeName = isTopLevelModule ? GetType().Name : GetType().DeclaringType?.Name;
+            LowerModuleTypeName = ModuleTypeName?.ToLowerInvariant();
+            Log = LogManager.GetCurrentClassLogger();
         }
 
-        protected Logger _log { get; }
-
-        public string ModuleTypeName { get; }
-        public string LowerModuleTypeName { get; }
-        
-        protected ICommandContext ctx => Context;
-
-
-        public async Task<bool> PromptUserConfirmAsync(EmbedBuilder embed)
+        public async Task<SocketMessage> GetUserReply(TimeSpan? timeout = null)
         {
-            embed.WithOkColor()
-                .WithFooter("yes/no");
+            timeout ??= TimeSpan.FromMinutes(5);
+            var eventTrigger = new TaskCompletionSource<SocketMessage>();
 
-            var msg = await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
-            try
+            Task Handler(SocketMessage message)
             {
-                var input = await GetUserInputAsync(ctx.User.Id, ctx.Channel.Id).ConfigureAwait(false);
-                input = input?.ToUpperInvariant();
-
-                if (input != "YES" && input != "Y") return false;
-
-                return true;
-            }
-            finally
-            {
-                var _ = Task.Run(() => msg.DeleteAsync());
-            }
-        }
-
-        public async Task<string> GetUserInputAsync(ulong userId, ulong channelId)
-        {
-            var userInputTask = new TaskCompletionSource<string>();
-            var client = (DiscordSocketClient) ctx.Client;
-            try
-            {
-                client.MessageReceived += MessageReceived;
-                if (await Task.WhenAny(userInputTask.Task, Task.Delay(10000)).ConfigureAwait(false) != userInputTask.Task) return null;
-
-                return await userInputTask.Task.ConfigureAwait(false);
-            }
-            finally
-            {
-                client.MessageReceived -= MessageReceived;
-            }
-
-            Task MessageReceived(SocketMessage arg)
-            {
-                var _ = Task.Run(() =>
-                {
-                    if (!(arg is SocketUserMessage userMessage) || !(userMessage.Channel is ITextChannel channel) ||
-                        userMessage.Author.Id != userId || userMessage.Channel.Id != channelId) return Task.CompletedTask;
-
-                    if (userInputTask.TrySetResult(arg.Content)) userMessage.DeleteAfter(1);
-
-                    return Task.CompletedTask;
-                });
+                if (message.Channel.Id != Context.Channel.Id || message.Author.Id != Context.User.Id) return Task.CompletedTask;
+                eventTrigger.SetResult(message);
                 return Task.CompletedTask;
             }
+
+            var client = (DiscordSocketClient) Context.Client;
+            client.MessageReceived += Handler;
+
+            var trigger = eventTrigger.Task;
+            var delay = Task.Delay(timeout.Value);
+            var task = await Task.WhenAny(trigger, delay).ConfigureAwait(false);
+
+            client.MessageReceived -= Handler;
+
+            if (task == trigger)
+                return await trigger.ConfigureAwait(false);
+            return null;
         }
     }
 
@@ -84,7 +55,7 @@ namespace Roki.Modules
         {
         }
 
-        public TService _service { get; set; }
+        public TService Service { get; set; }
     }
 
     public abstract class RokiSubmodule : RokiTopLevelModule

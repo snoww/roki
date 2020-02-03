@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
-using Roki.Core.Services;
+using Roki.Services;
 
 namespace Roki.Common.Attributes
 {
@@ -15,7 +15,7 @@ namespace Roki.Common.Attributes
 
             return Task.FromResult(config.IsOwner(context.User) || context.Client.CurrentUser.Id == context.User.Id
                 ? PreconditionResult.FromSuccess()
-                : PreconditionResult.FromError("Not owner"));
+                : PreconditionResult.FromError("Command can only be run by the owner of the bot."));
         }
     }
 }

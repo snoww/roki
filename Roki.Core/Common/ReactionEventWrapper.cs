@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -9,10 +10,12 @@ namespace Roki.Common
     {
         private readonly DiscordSocketClient _client;
         private bool _disposing;
+        
+        public IUserMessage Message { get; }
 
-        public ReactionEventWrapper(DiscordSocketClient client, IUserMessage message)
+        public ReactionEventWrapper(DiscordSocketClient client, [NotNull] IUserMessage message)
         {
-            Message = message ?? throw new ArgumentNullException(nameof(message));
+            Message = message;
             _client = client;
 
             _client.ReactionAdded += ReactionAdded;
@@ -20,14 +23,12 @@ namespace Roki.Common
             _client.ReactionsCleared += ReactionsCleared;
         }
 
-        public IUserMessage Message { get; }
-
         public void Dispose()
         {
             if (_disposing)
                 return;
             _disposing = true;
-            UnsubAll();
+            UnsubscribeAll();
         }
 
         public event Action<SocketReaction> OnReactionAdded = delegate { };
@@ -88,7 +89,7 @@ namespace Roki.Common
             return Task.CompletedTask;
         }
 
-        public void UnsubAll()
+        public void UnsubscribeAll()
         {
             _client.ReactionAdded -= ReactionAdded;
             _client.ReactionRemoved -= ReactionRemoved;

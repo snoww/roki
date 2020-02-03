@@ -5,9 +5,9 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using NLog;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Music.Extensions;
+using Roki.Services;
 using Victoria;
 using Victoria.Enums;
 using Victoria.EventArgs;
@@ -18,13 +18,11 @@ namespace Roki.Modules.Music.Services
     {
         private readonly LavaNode _lavaNode;
         private readonly DiscordSocketClient _client;
-        private readonly Logger _log;
 
         public MusicService(LavaNode lavaNode, DiscordSocketClient client)
         {
             _client = client;
             _lavaNode = lavaNode;
-            _log = LogManager.GetCurrentClassLogger();
             OnReadyAsync().Wait();
             _lavaNode.OnTrackEnded += TrackFinished;
         }
@@ -150,7 +148,7 @@ namespace Roki.Modules.Music.Services
                 return embed;
             }
 
-            await ctx.SendPaginatedConfirmAsync(page, QueueEmbed, queue.Length, itemsPerPage, false).ConfigureAwait(false);
+            await ctx.SendPaginatedMessageAsync(page, QueueEmbed, queue.Length, itemsPerPage, false).ConfigureAwait(false);
         }
 
         public async Task RemoveSongAsync(ICommandContext ctx, int index)

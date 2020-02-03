@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Discord;
-using Roki.Core.Services;
-using Roki.Core.Services.Database.Models;
+using Roki.Services.Database.Core;
 using StackExchange.Redis;
 
 namespace Roki.Services

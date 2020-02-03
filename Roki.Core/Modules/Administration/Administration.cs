@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -11,13 +12,13 @@ namespace Roki.Modules.Administration
     public class Administration : RokiTopLevelModule<AdministrationService>
     {
         [RokiCommand, Description, Usage, Aliases]
-        [RequireUserPermission(GuildPermission.Administrator)]
+        [OwnerOnly]
         public async Task Fill(ulong afterMessage = 657601009455071232)
         {
-            var start = DateTime.UtcNow;
-            await _service.FillMissingMessagesAsync(afterMessage).ConfigureAwait(false);
-            var end = DateTime.UtcNow - start;
-            await ctx.Channel.SendMessageAsync($"Took {Format.Code(end.ToReadableString())}");
+            var sw = Stopwatch.StartNew();
+            await Service.FillMissingMessagesAsync(afterMessage).ConfigureAwait(false);
+            sw.Stop();
+            await Context.Channel.SendMessageAsync($"Finished adding missing messages, took {Format.Code(sw.Elapsed.ToReadableString())}");
         }
     }
 }

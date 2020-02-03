@@ -4,7 +4,6 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Roki.Common.Attributes;
-using Roki.Core.Services;
 using Roki.Extensions;
 using Roki.Modules.Games.Common;
 using Roki.Modules.Games.Services;
@@ -36,29 +35,29 @@ namespace Roki.Modules.Games
             {
                 if (gen > 8 || gen < 4) gen = 8;
                 
-                var showdown = new Showdown(_currency, _db, _client, (ITextChannel)ctx.Channel, gen, _service, _cache);
+                var showdown = new Showdown(_currency, _db, _client, (ITextChannel)Context.Channel, gen, Service, _cache);
                 
-                if (_service.ActiveGames.TryAdd(ctx.Channel.Id, showdown))
+                if (Service.ActiveGames.TryAdd(Context.Channel.Id, showdown))
                 {
-                    await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
+                    await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
                     try
                     {
                         await showdown.StartGameAsync().ConfigureAwait(false);
                     }
                     catch (Exception e)
                     {
-                        _log.Warn(e, $"Error during '{showdown.GameId}'\n{e}");
-                        await ctx.Channel.SendErrorAsync("Something went wrong with the current game. Please try again later.").ConfigureAwait(false);
+                        Log.Warn(e, $"Error during '{showdown.GameId}'\n{e}");
+                        await Context.Channel.SendErrorAsync("Something went wrong with the current game. Please try again later.").ConfigureAwait(false);
                     }
                     finally
                     {
-                        _service.ActiveGames.TryRemove(ctx.Channel.Id, out _);
+                        Service.ActiveGames.TryRemove(Context.Channel.Id, out _);
                     }
                     
                     return;
                 }
 
-                await ctx.Channel.SendErrorAsync("Game already in progress in current channel.");
+                await Context.Channel.SendErrorAsync("Game already in progress in current channel.");
             }
 
             [RokiCommand, Description, Aliases, Usage]
@@ -68,25 +67,25 @@ namespace Roki.Modules.Games
                 uid = uid.SanitizeStringFull();
                 if (uid.Length != 8)
                 {
-                    await ctx.Channel.SendErrorAsync("Invalid Game ID").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("Invalid Game ID").ConfigureAwait(false);
                     return;
                 }
 
-                _service.ActiveGames.TryGetValue(ctx.Channel.Id, out var showdown);
+                Service.ActiveGames.TryGetValue(Context.Channel.Id, out var showdown);
                 if (showdown != null && showdown.GameId.Equals(uid, StringComparison.OrdinalIgnoreCase))
                 {
-                    await ctx.Channel.SendErrorAsync("Please wait for current game to finish first.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("Please wait for current game to finish first.").ConfigureAwait(false);
                     return;
                 }
                 
-                var url = await _service.GetBetPokemonGame(uid);
+                var url = await Service.GetBetPokemonGame(uid);
                 if (url == null)
                 {
-                    await ctx.Channel.SendErrorAsync("Cannot find replay with that ID.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("Cannot find replay with that ID.").ConfigureAwait(false);
                     return;
                 }
 
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"{ctx.User.Mention} Here is the replay url:\nhttps://replay.pokemonshowdown.com/{url}"))
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"{Context.User.Mention} Here is the replay url:\nhttps://replay.pokemonshowdown.com/{url}"))
                     .ConfigureAwait(false);
             }
         }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Web;
 using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
@@ -20,24 +21,24 @@ namespace Roki.Modules.Searches
             {
                 if (string.IsNullOrWhiteSpace(query))
                 {
-                    await ctx.Channel.SendErrorAsync("No query provided.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("No query provided.").ConfigureAwait(false);
                     return;
                 }
 
-                var media = await _service.GetAnimeDataAsync(query).ConfigureAwait(false);
+                var media = await Service.GetAnimeDataAsync(query).ConfigureAwait(false);
                 if (media.Count < 1)
                 {
-                    await ctx.Channel.SendErrorAsync("Couldn't find that anime :(").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("Couldn't find that anime :(").ConfigureAwait(false);
                     return;
                 }
 
-                await ctx.SendPaginatedConfirmAsync( 0, p =>
+                await Context.SendPaginatedMessageAsync( 0, p =>
                 {
                     var anime = media[p];
                     var embed = new EmbedBuilder().WithOkColor()
                         .WithTitle(anime.Title.GetTitle())
                         .WithImageUrl(anime.CoverImage.Large)
-                        .WithDescription(anime.Description.StripHtml().TrimTo(2048))
+                        .WithDescription(HttpUtility.HtmlDecode(anime.Description).TrimTo(2048))
                         .AddField("Type", anime.Type.ToTitleCase(), true)
                         .AddField("Status", anime.Status.ToTitleCase(), true)
                         .AddField("Episodes", anime.Episodes != null ? anime.Episodes.ToString() : "N/A", true)

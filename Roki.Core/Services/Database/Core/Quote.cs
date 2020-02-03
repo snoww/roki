@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Roki.Core.Services.Database.Models
+namespace Roki.Services.Database.Core
 {
     [Table("quotes")]
     public class Quote : DbEntity

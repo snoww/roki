@@ -28,13 +28,13 @@ namespace Roki.Modules.Music
 
                 if (string.IsNullOrWhiteSpace(query))
                 {
-                    await ctx.Channel.SendErrorAsync("No text provided.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("No text provided.").ConfigureAwait(false);
                     return;
                 }
 
                 if (query.Length > 300)
                 {
-                    await ctx.Channel.SendErrorAsync("TTS message too long. Max 300 characters.");
+                    await Context.Channel.SendErrorAsync("TTS message too long. Max 300 characters.");
                     return;
                 }
 
@@ -45,7 +45,7 @@ namespace Roki.Modules.Music
 
                 if (!result.IsSuccessStatusCode)
                 {
-                    await ctx.Channel.SendErrorAsync("Streamlabs TTS error. Please try again later.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("Streamlabs TTS error. Please try again later.").ConfigureAwait(false);
                     return;
                 }
 
@@ -53,7 +53,7 @@ namespace Roki.Modules.Music
                 if (tts.Success)
                 {
                     var guid = Guid.NewGuid().ToString().Substring(0, 7);
-                    var fileName = $"{ctx.User.Username}-{guid}";
+                    var fileName = $"{Context.User.Username}-{guid}";
                     using (var client = new WebClient())
                     {
                         await client.DownloadFileTaskAsync(tts.SpeakUrl, $"./temp/{fileName}.ogg").ConfigureAwait(false);
@@ -73,13 +73,13 @@ namespace Roki.Modules.Music
                         proc.WaitForExit();
                     }
 
-                    await ctx.Channel.SendFileAsync($"./temp/{fileName}.mp3").ConfigureAwait(false);
+                    await Context.Channel.SendFileAsync($"./temp/{fileName}.mp3").ConfigureAwait(false);
                     File.Delete($"./temp/{fileName}.ogg");
                     File.Delete($"./temp/{fileName}.mp3");
                 }
                 else
                 {
-                    await ctx.Channel.SendErrorAsync("Streamlabs TTS error. Please try again later.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("Streamlabs TTS error. Please try again later.").ConfigureAwait(false);
                 }
             }
         }
