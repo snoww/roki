@@ -19,16 +19,23 @@ using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.Primitives;
+using StackExchange.Redis;
 
 namespace Roki.Extensions
 {
     public static class Extensions
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        private static readonly Random Rng = new Random();  
+        private static readonly Random Rng = new Random();
+        private static readonly IDatabase Cache = new RedisCache().Redis.GetDatabase();
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
 
-
+        public static EmbedBuilder WithDynamicColor(this EmbedBuilder embed, ICommandContext context)
+        {
+            var color = (uint) Cache.StringGet($"color:{context.Guild.Id}");
+            return embed.WithColor(new Discord.Color(color));
+        }
+        
         public static EmbedBuilder WithOkColor(this EmbedBuilder embed)
         {
             return embed.WithColor(Roki.OkColor);
