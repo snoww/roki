@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -162,24 +163,22 @@ namespace Roki.Modules.Games.Common
                     .ConfigureAwait(false);
             }
             
-            var winners = "";
-            var losers = "";
-            
+            var winners = new StringBuilder();
+            var losers = new StringBuilder();
+
             // doing this in two loops instead of one to create two transactions (bet entry and bet payout)
             foreach (var (key, value) in _scores)
             {
                 var before = GetCurrency(key.Id) + value.Amount * value.Multiple;
                 if (winner != value.Player)
                 {
-                    losers += $"{key.Username} " +
-                              $"`{before:N0}` ⇒ `{GetCurrency(key.Id):N0}`\n";
+                    losers.AppendLine($"{key.Username} `{before:N0} > {GetCurrency(key.Id):N0}`");
                     continue;
                 }
                 
                 var won = value.Amount * value.Multiple * 2;
                 await _currency.AddAsync(key.Id, "BetShowdown Payout", won, _channel.Guild.Id, _channel.Id, _game.Id).ConfigureAwait(false);
-                winners += $"{key.Username} won `{won:N0}` {Roki.Properties.CurrencyIcon}\n" +
-                           $"\t`{before:N0}` ⇒ `{GetCurrency(key.Id):N0}`\n";
+                winners.AppendLine($"{key.Username} won `{won:N0}` {Roki.Properties.CurrencyIcon}\n\t`{before:N0} > {GetCurrency(key.Id):N0}`");
             }
             
             var embed = new EmbedBuilder().WithDynamicColor(_channel.GuildId);
