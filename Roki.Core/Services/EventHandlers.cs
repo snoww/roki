@@ -244,7 +244,10 @@ namespace Roki.Services
         {
             var _ = Task.Run(async () =>
             {
-                Logger.Info("Joined server: {0} [{1}]", guild?.Name, guild?.Id);
+                if (guild == null) 
+                    return;
+                
+                Logger.Info("Joined server: {guild} [{guildid}]", guild.Name, guild.Id);
                 using var uow = _db.GetDbContext();
                 await uow.Guilds.GetOrCreateGuildAsync(guild).ConfigureAwait(false);
                 await guild.DownloadUsersAsync().ConfigureAwait(false);
@@ -261,7 +264,17 @@ namespace Roki.Services
 
         private Task LeftGuild(SocketGuild guild)
         {
-            var _ = Task.Run(() => { Logger.Info("Left server: {0} [{1}]", guild?.Name, guild?.Id); });
+            var _ = Task.Run(async () =>
+            {
+                if (guild == null) 
+                    return;
+                
+                Logger.Info("Left server: {guild} [{guildid}]", guild.Name, guild.Id);
+                using var uow = _db.GetDbContext();
+                var g = await uow.Guilds.GetOrCreateGuildAsync(guild).ConfigureAwait(false);
+                g.Available = false;
+                await uow.SaveChangesAsync().ConfigureAwait(false);
+            });
             return Task.CompletedTask;
         }
 

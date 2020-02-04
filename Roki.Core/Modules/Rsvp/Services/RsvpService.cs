@@ -79,7 +79,7 @@ namespace Roki.Modules.Rsvp.Services
                     if (e.StartDate.AddMinutes(-45) <= now && !_activeReminders.ContainsKey(e.Id))
                     {
                         _activeReminders.TryAdd(e.Id, e);
-                        Logger.Info("Event '{name}' reminder countdown has started", e.Name);
+                        Logger.Info("Event {name} reminder countdown has started", e.Name);
                         await StartEventCountdowns(e).ConfigureAwait(false);
                     }
                     if (e.StartDate <= now)
@@ -851,13 +851,13 @@ namespace Roki.Modules.Rsvp.Services
 
             if (thirtyMinutes >= TimeSpan.Zero)
             {
-                Logger.Info($"Event '{e.Name}': sending 30 minute reminder in {thirtyMinutes.ToString()}");
+                Logger.Info("Event {name}: sending 30 minute reminder in {thirtymin}", e.Name, startTime);
                 SendNotification(e, thirtyMinutes, NotificationType.ThirtyMinutes);
             }
 
             if (startTime >= TimeSpan.Zero)
             {
-                Logger.Info("Event '{name}': sending start reminder in {startTime}", e.Name, startTime);
+                Logger.Info("Event {name}: sending start reminder in {starttime}", e.Name, startTime);
                 SendNotification(e, startTime, NotificationType.Starting);
             }
             

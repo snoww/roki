@@ -91,7 +91,7 @@ namespace Roki
             }
 
             sw.Stop();
-            Logger.Info($"Roki connected in {sw.ElapsedMilliseconds} ms");
+            Logger.Info("Roki connected in {elapsed} ms", sw.ElapsedMilliseconds);
 
             var stats = Services.GetService<IStatsService>();
             stats.Initialize();
@@ -117,7 +117,7 @@ namespace Roki
             await ready.Task.ConfigureAwait(false);
             Client.Ready -= UpdateDatabase;
             
-            Logger.Info("Logged in as {0}", Client.CurrentUser);
+            Logger.Info("Logged in as {currentuser}", Client.CurrentUser);
             
             // makes sure database contains latest guild/channel info
             Task UpdateDatabase()
@@ -150,7 +150,7 @@ namespace Roki
                         }
 
                         sw.Stop();
-                        Logger.Info($"Cache loaded in {sw.ElapsedMilliseconds} ms");
+                        Logger.Info("Cache loaded in {elapsed} ms", sw.ElapsedMilliseconds);
                         await uow.SaveChangesAsync().ConfigureAwait(false);
                     }
                     catch (Exception e)
@@ -186,7 +186,7 @@ namespace Roki
             LoadTypeReaders(typeof(Roki).Assembly);
 
             sw.Stop();
-            Logger.Info($"All services loaded in {sw.ElapsedMilliseconds} ms");
+            Logger.Info("All services loaded in {elapsed} ms", sw.ElapsedMilliseconds);
         }
 
         private void LoadTypeReaders(Assembly assembly)

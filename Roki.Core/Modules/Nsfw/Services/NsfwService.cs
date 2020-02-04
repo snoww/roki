@@ -40,7 +40,7 @@ namespace Roki.Modules.Nsfw.Services
             }
             catch (Exception e)
             {
-                Logger.Warn(e, "Failed to get random image from: 'r/{subreddit}'", options[rng]);
+                Logger.Warn(e, "Failed to get random image from: r/{subreddit:l}", options[rng]);
                 return null;
             }
         }

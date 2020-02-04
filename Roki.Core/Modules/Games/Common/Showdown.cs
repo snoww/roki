@@ -103,7 +103,7 @@ namespace Roki.Modules.Games.Common
             }
             catch (Exception e)
             {
-                Logger.Error(e, $"Unable to initialize showdown game '{GameId}'\n{e}");
+                Logger.Warn(e, "Unable to initialize showdown game {gameid}", GameId);
                 await _channel.SendErrorAsync("Something went wrong with the current game. Please try again later.").ConfigureAwait(false);
                 return;
             }
@@ -375,7 +375,7 @@ namespace Roki.Modules.Games.Common
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e, "Could not delete log file for: {gameId}", GameId);
+                    Logger.Error(e, "Could not delete log file for: {gameid}", GameId);
                 }
             });
 
