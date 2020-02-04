@@ -4,7 +4,6 @@ namespace Roki.Services
     {
         public string Prefix { get; set; } = ".";
         public ulong BotId { get; set; } = 220678903432347650;
-        public ulong PrimaryGuildId { get; set; } = 125025699827417095;
 
         #region Currency
 
@@ -17,17 +16,6 @@ namespace Roki.Services
         public int CurrencyDropAmount { get; set; } = 1;
         public int? CurrencyDropAmountMax { get; set; } = 5;
         public int? CurrencyDropAmountRare { get; set; } = 100;
-
-        #endregion
-
-        #region Lottery
-
-        public double Lottery4 { get; set; } = 0.055;
-        public double Lottery5 { get; set; } = 0.045;
-        public double LotteryJackpot { get; set; } = 0.9;
-        public int LotteryDraw { get; set; } = 7;
-        public int LotteryTicketCost { get; set; } = 5;
-        public long LotteryMin {get; set;} = 1000;
 
         #endregion
 
