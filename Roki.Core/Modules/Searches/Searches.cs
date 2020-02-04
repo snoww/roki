@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using Discord;
@@ -17,13 +18,18 @@ namespace Roki.Modules.Searches
     {
         private readonly IRokiConfig _config;
         private readonly IGoogleApiService _google;
-        private readonly IHttpClientFactory _httpFactory;
+        private readonly IHttpClientFactory _http;
+        
+        private const string WikipediaIconUrl = "https://i.imgur.com/UA0wMvt.png";
+        private const string WikipediaUrl = "https://en.wikipedia.org/wiki";
+        private const string XkcdUrl = "https://xkcd.com";
+        private const string WolframUrl = "https://api.wolframalpha.com/v1/result?i=";
 
-        public Searches(IRokiConfig config, IGoogleApiService google, IHttpClientFactory httpFactory)
+        public Searches(IRokiConfig config, IGoogleApiService google, IHttpClientFactory http)
         {
             _config = config;
             _google = google;
-            _httpFactory = httpFactory;
+            _http = http;
         }
         
         [RokiCommand, Usage, Description, Aliases]
@@ -80,11 +86,8 @@ namespace Roki.Modules.Searches
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task Youtube([Leftover] string query = null)
+        public async Task Youtube([Leftover] string query)
         {
-            if (!await ValidateQuery(query).ConfigureAwait(false))
-                return;
-
             var result = (await _google.GetVideoLinksByKeywordAsync(query).ConfigureAwait(false)).FirstOrDefault();
             if (string.IsNullOrWhiteSpace(result))
             {
@@ -96,10 +99,8 @@ namespace Roki.Modules.Searches
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task Image([Leftover] string query = null)
+        public async Task Image([Leftover] string query)
         {
-            if (!await ValidateQuery(query).ConfigureAwait(false))
-                return;
             var result = await _google.GetImagesAsync(query).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithAuthor("Image search for: " + query.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
@@ -111,10 +112,8 @@ namespace Roki.Modules.Searches
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task RandomImage([Leftover] string query = null)
+        public async Task RandomImage([Leftover] string query)
         {
-            if (!await ValidateQuery(query).ConfigureAwait(false))
-                return;
             var result = await _google.GetImagesAsync(query, true).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithAuthor("Image search for: " + query.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
@@ -126,11 +125,8 @@ namespace Roki.Modules.Searches
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task Movie([Leftover] string query = null)
+        public async Task Movie([Leftover] string query)
         {
-            if (!await ValidateQuery(query).ConfigureAwait(false))
-                return;
-
             await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
 
             var movie = await Service.GetMovieDataAsync(query).ConfigureAwait(false);
@@ -153,14 +149,11 @@ namespace Roki.Modules.Searches
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task UrbanDict([Leftover] string query = null)
+        public async Task UrbanDict([Leftover] string query)
         {
-            if (!await ValidateQuery(query).ConfigureAwait(false))
-                return;
-
             await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
             query = HttpUtility.UrlEncode(query);
-            using var http = _httpFactory.CreateClient();
+            using var http = _http.CreateClient();
             var response = await http.GetStringAsync($"http://api.urbandictionary.com/v0/define?term={query}")
                 .ConfigureAwait(false);
             try
@@ -227,14 +220,120 @@ namespace Roki.Modules.Searches
                 await Context.Channel.SendErrorAsync("Something went wrong :(").ConfigureAwait(false);
             }
         }
-
-        public async Task<bool> ValidateQuery(string query)
+        
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task Wikipedia([Leftover] string args)
         {
-            if (!string.IsNullOrWhiteSpace(query))
-                return true;
+            var argsSplit = args.Split(' ');
+            var queryBuilder = new StringBuilder();
+            var showResults = false;
+            foreach (var str in argsSplit)
+            {
+                if (!showResults && str.Equals("-q", StringComparison.OrdinalIgnoreCase))
+                {
+                    showResults = true;
+                    continue;
+                }
 
-            await Context.Channel.SendErrorAsync("No search query provided.").ConfigureAwait(false);
-            return false;
+                queryBuilder.Append(str + " ");
+            }
+
+            var query = queryBuilder.ToString().Trim();
+            using var typing = Context.Channel.EnterTypingState();
+            // maybe in future only get 1 article if -q not provided
+            var results = await Service.SearchAsync(query).ConfigureAwait(false);
+            if (results == null || results.Count == 0)
+            {
+                await Context.Channel.SendErrorAsync($"Cannot find any results for: `{query}`").ConfigureAwait(false);
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(results[0].Snippet))
+            {
+                await Context.Channel.SendErrorAsync($"Cannot find any results for: `{query}`, did you mean `{results[0].Title}`?");
+                return;
+            }
+            
+            if (!showResults)
+            {
+                var article = await Service.GetSummaryAsync(results[0].Title).ConfigureAwait(false);
+                await SendArticleAsync(article).ConfigureAwait(false);
+                return;
+            }
+
+            var counter = 1;
+            var embed = new EmbedBuilder().WithDynamicColor(Context)
+                .WithAuthor("Wikipedia", WikipediaIconUrl)
+                .WithTitle($"Search results for: `{query}`")
+                .WithDescription(string.Join("\n", results
+                    .Select(a => $"{counter++}. [{a.Title}]({WikipediaUrl}/{HttpUtility.UrlPathEncode(a.Title)})\n\t{a.Snippet}")));
+
+            await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            // for future allow selecting article and showing it
+        }
+        
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task Xkcd(int num = 0)
+        {
+            try
+            {
+                using var http = _http.CreateClient();
+                var result = num == 0
+                    ? await http.GetStringAsync($"{XkcdUrl}/info.0.json").ConfigureAwait(false)
+                    : await http.GetStringAsync($"{XkcdUrl}/{num}/info.0.json").ConfigureAwait(false);
+
+                var xkcd = result.Deserialize<XkcdModel>();
+                var embed = new EmbedBuilder().WithDynamicColor(Context)
+                    .WithAuthor(xkcd.Title, "https://xkcd.com/s/919f27.ico", $"{XkcdUrl}/{xkcd.Num}")
+                    .WithImageUrl(xkcd.Img)
+                    .AddField("Comic #", xkcd.Num, true)
+                    .AddField("Date", $"{xkcd.Month}/{xkcd.Year}", true);
+
+                await Context.Channel.EmbedAsync(embed);
+            }
+            catch (HttpRequestException)
+            {
+                await Context.Channel.SendErrorAsync("Comic not found").ConfigureAwait(false);
+            }
+        }
+        
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task Ask([Leftover] string query = null)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return;
+            }
+
+            using var http = _http.CreateClient();
+            try
+            {
+                await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
+                var result = await http.GetStringAsync($"{WolframUrl}{query}&appid={_config.WolframAlphaApi}").ConfigureAwait(false);
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
+                        .WithTitle("Ask Roki")
+                        .WithDescription(result))
+                    .ConfigureAwait(false);
+            }
+            catch (HttpRequestException)
+            {
+                await Context.Channel.SendErrorAsync($"Sorry, I don't have an answer for that question\n`{query}`").ConfigureAwait(false);
+            }
+        }
+        
+        private async Task SendArticleAsync(WikiSummary article)
+        {
+            var embed = new EmbedBuilder().WithDynamicColor(Context)
+                .WithAuthor("Wikipedia", WikipediaIconUrl)
+                .WithTitle(article.Title)
+                .WithUrl($"{WikipediaUrl}/{HttpUtility.UrlPathEncode(article.Title)}")
+                .WithDescription(article.Extract);
+            
+            if (!string.IsNullOrWhiteSpace(article.ImageUrl))
+            {
+                embed.WithImageUrl(article.ImageUrl);
+            }
+
+            await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
     }
 }

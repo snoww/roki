@@ -19,12 +19,14 @@ namespace Roki.Modules.Searches.Services
     public class SearchService : IRokiService
     {
         private readonly IRokiConfig _config;
-        private readonly IHttpClientFactory _httpFactory;
+        private readonly IHttpClientFactory _http;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        
+        private const string ApiUrl = "https://en.wikipedia.org/w/api.php?action=query";
 
-        public SearchService(IHttpClientFactory httpFactory, IRokiConfig config)
+        public SearchService(IHttpClientFactory http, IRokiConfig config)
         {
-            _httpFactory = httpFactory;
+            _http = http;
             _config = config;
         }
 
@@ -32,7 +34,7 @@ namespace Roki.Modules.Searches.Services
         {
             try
             {
-                using var http = _httpFactory.CreateClient();
+                using var http = _http.CreateClient();
                 var result = await http.GetStringAsync($"https://wttr.in/{lat},{lng}?0ATQ").ConfigureAwait(false);
                 return result;
             }
@@ -47,7 +49,7 @@ namespace Roki.Modules.Searches.Services
         {
             try
             {
-                using var http = _httpFactory.CreateClient();
+                using var http = _http.CreateClient();
                 var obj = await GetLocationDataAsync(arg);
                 var culture = GetLocalCulture(obj.Results[0].AddressComponents);
 
@@ -98,7 +100,7 @@ namespace Roki.Modules.Searches.Services
 
         public async Task<TimeZoneResult> GetLocalDateTime(float lat, float lng)
         {
-            using var http = _httpFactory.CreateClient();
+            using var http = _http.CreateClient();
             var currentSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var timeResult = await http
                 .GetStringAsync(
@@ -111,7 +113,7 @@ namespace Roki.Modules.Searches.Services
         {
             try
             {
-                using var http = _httpFactory.CreateClient();
+                using var http = _http.CreateClient();
                 var result = await http.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={location}&key={_config.GoogleApi}")
                     .ConfigureAwait(false);
                 var geo = result.Deserialize<GeolocationResult>();
@@ -133,7 +135,7 @@ namespace Roki.Modules.Searches.Services
         public async Task<OmdbMovie> GetMovieDataAsync(string name)
         {
             name = HttpUtility.UrlEncode(name.ToLowerInvariant());
-            using var http = _httpFactory.CreateClient();
+            using var http = _http.CreateClient();
             var result = await http.GetStringAsync($"http://www.omdbapi.com/?t={name}&apikey={_config.OmdbApi}&y=&plot=full&r=json").ConfigureAwait(false);
             var movie = result.Deserialize<OmdbMovie>();
             return movie?.Title == null ? null : movie;
@@ -141,7 +143,7 @@ namespace Roki.Modules.Searches.Services
 
         public async Task<string> GetRandomCatAsync()
         {
-            using var http = _httpFactory.CreateClient();
+            using var http = _http.CreateClient();
             var result = await http.GetStringAsync("https://aws.random.cat/meow").ConfigureAwait(false);
             using var cat = JsonDocument.Parse(result);
             using var client = new WebClient();
@@ -153,7 +155,7 @@ namespace Roki.Modules.Searches.Services
         
         public async Task<string> GetRandomDogAsync()
         {
-            using var http = _httpFactory.CreateClient();
+            using var http = _http.CreateClient();
             var result = await http.GetStringAsync("https://random.dog/woof.json").ConfigureAwait(false);
             using var dog = JsonDocument.Parse(result);
             using var client = new WebClient();
@@ -165,11 +167,78 @@ namespace Roki.Modules.Searches.Services
 
         public async Task<string> GetCatFactAsync()
         {
-            using var http = _httpFactory.CreateClient();
+            using var http = _http.CreateClient();
             var result = await http.GetStringAsync("https://catfact.ninja/fact").ConfigureAwait(false);
             using var fact = JsonDocument.Parse(result);
 
             return fact.RootElement.GetProperty("fact").GetString();
+        }
+        
+        public async Task<List<WikiSearch>> SearchAsync(string query, int limit = 5)
+        {
+            using var http = _http.CreateClient();
+            var result = await http.GetStringAsync($"{ApiUrl}&list=search&srsearch={query}&srlimit={limit}&format=json").ConfigureAwait(false);
+
+            using var json = JsonDocument.Parse(result);
+            var queryElement = json.RootElement.GetProperty("query");
+
+            var searchInfo = queryElement.GetProperty("searchinfo");
+            var hits = searchInfo.GetProperty("totalhits").GetInt32();
+
+            var results = new List<WikiSearch>();
+
+            if (hits != 0)
+            {
+                var enumerator = queryElement.GetProperty("search").EnumerateArray();
+            
+                foreach (var page in enumerator)
+                {
+                    var snippet = page.GetProperty("snippet").GetString().Replace(@"<span class=""searchmatch"">", "**").Replace("</span>", "**");
+                    results.Add(new WikiSearch
+                    {
+                        Title = page.GetProperty("title").GetString(),
+                        Snippet = HttpUtility.HtmlDecode(snippet)
+                    });
+                }
+            }
+            else if (searchInfo.TryGetProperty("suggestion", out var suggestion))
+            {
+                results.Add(new WikiSearch
+                {
+                    Title = suggestion.GetString()
+                });
+            }
+
+            return results;
+        }
+
+        public async Task<WikiSummary> GetSummaryAsync(string title)
+        {
+            using var http = _http.CreateClient();
+            var result = await http.GetStringAsync($"{ApiUrl}&list=&prop=extracts&explaintext&exsentences=3&exintro=&titles={title}&format=json").ConfigureAwait(false);
+
+            var summary = new WikiSummary();
+            using (var json = JsonDocument.Parse(result))
+            {
+                var element = json.RootElement.GetProperty("query").GetProperty("pages");
+                var page = element.EnumerateObject().First();
+                summary.Title = page.Value.GetProperty("title").GetString();
+                summary.Extract = page.Value.GetProperty("extract").GetString();
+            }
+            
+            var imageResult = await http.GetStringAsync($"{ApiUrl}&titles={title}&prop=pageimages&pithumbsize=500&format=json").ConfigureAwait(false);
+
+            using (var json = JsonDocument.Parse(imageResult))
+            {
+                var element = json.RootElement.GetProperty("query").GetProperty("pages");
+                var page = element.EnumerateObject().First();
+                if (page.Value.TryGetProperty("thumbnail", out var thumbnail))
+                {
+                    summary.ImageUrl = thumbnail.GetProperty("source").GetString();
+                }
+            }
+            
+            return summary;
         }
     }
 }
