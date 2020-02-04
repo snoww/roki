@@ -44,6 +44,8 @@ namespace Roki.Services
             _client.ChannelCreated += ChannelCreated;
             _client.ChannelUpdated += ChannelUpdated;
             _client.ChannelDestroyed += ChannelDestroyed;
+            _client.RoleUpdated += UpdateColor;
+            _client.GuildMemberUpdated += UpdateColor;
             
             await Task.CompletedTask;
         }
@@ -285,7 +287,9 @@ namespace Roki.Services
             var _ = Task.Run(async () =>
             {
                 using var uow = _db.GetDbContext();
-                var user = await uow.Context.Users.FirstAsync(u => u.UserId == before.Id).ConfigureAwait(false);
+                var user = await uow.Context.Users.FirstOrDefaultAsync(u => u.UserId == before.Id).ConfigureAwait(false);
+                if (user == null)
+                    return;
                 user.Username = after.Username;
                 user.Discriminator = after.Discriminator;
                 user.AvatarId = after.AvatarId;
@@ -305,14 +309,33 @@ namespace Roki.Services
             return Task.CompletedTask;
         }
 
+        private Task UpdateColor(SocketGuildUser before, SocketGuildUser after)
+        {
+            var _ = Task.Run(async () =>
+            {
+                if (after.Id != _client.CurrentUser.Id)
+                    return;
+
+                var currentTopRole = after.Roles.OrderByDescending(r => r.Position).FirstOrDefault();
+                if (currentTopRole == null)
+                    return;
+
+                await _cache.StringSetAsync($"color:{after.Guild.Id}", currentTopRole.Color.RawValue);
+            });
+
+            return Task.CompletedTask;
+        }
+
         private Task UpdateColor(SocketRole before, SocketRole after)
         {
             var _ = Task.Run(async () =>
             {
                 var guild = after.Guild;
                 var currentGuildUser = guild.CurrentUser;
+                if (!currentGuildUser.Roles.Contains(after)) 
+                    return;
                 var currentTopRole = currentGuildUser.Roles.OrderByDescending(r => r.Position).FirstOrDefault();
-                if (currentTopRole == null)
+                if (currentTopRole == null || currentTopRole != after)
                     return;
 
                 await _cache.StringSetAsync($"color:{guild.Id}", currentTopRole.Color.RawValue);
