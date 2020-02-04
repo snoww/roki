@@ -54,7 +54,7 @@ namespace Roki.Modules.Stocks
                         return;
                     }
 
-                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithDescription($"{Context.User.Mention}\nYou've successfully sold `{amount}` share{(amount == 1 ? string.Empty : "s")} of `{symbol}` at `{price.Value:N2}`\n" +
                                              $"Total Revenue: `{price.Value * amount:N2}`"))
                         .ConfigureAwait(false);
@@ -67,7 +67,7 @@ namespace Roki.Modules.Stocks
                         await Context.Channel.SendErrorAsync("You do not have enough in your Investing Account sell these shares").ConfigureAwait(false);
                         return;
                     }
-                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithDescription($"{Context.User.Mention}\nYou've returned `{amount}` share{(amount == 1 ? string.Empty : "s")} of `{symbol}` back to the bank, at `{price.Value:N2}`\n" +
                                              $"Total Cost: `{price.Value * amount:N2}`"))
                         .ConfigureAwait(false);
@@ -104,7 +104,7 @@ namespace Roki.Modules.Stocks
                         await Context.Channel.SendErrorAsync("You already own shorted shares of this company.").ConfigureAwait(false);
                         return;
                     }
-                    var embed = new EmbedBuilder().WithOkColor();
+                    var embed = new EmbedBuilder().WithDynamicColor(Context);
                     if (amount == 1)
                         embed.WithDescription($"{Context.User.Mention}\nYou've successfully purchased `1` share of `{symbol.ToUpper()}` at `{price.Value:N2}`\n" +
                                               $"Total Cost: `{cost:N2}` {Roki.Properties.CurrencyIcon}");
@@ -128,7 +128,7 @@ namespace Roki.Modules.Stocks
                         await Context.Channel.SendErrorAsync("You already own long shares of this company.").ConfigureAwait(false);
                         return;
                     }
-                    var embed = new EmbedBuilder().WithOkColor();
+                    var embed = new EmbedBuilder().WithDynamicColor(Context);
                     if (amount == 1)
                         embed.WithDescription($"{Context.User.Mention}\nYou've successfully sold `1` share of `{symbol.ToUpper()}` at `{price.Value}`\n" +
                                               $"Total sold for: `{cost:N2}` {Roki.Properties.CurrencyIcon}");

@@ -29,7 +29,7 @@ namespace Roki.Modules.Utility
             [RokiCommand, Description, Usage, Aliases]
             public async Task About()
             {
-                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithAuthor("Snow#7777")
                         .WithTitle($"Roki v{StatsService.BotVersion}")
                         .WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl())
@@ -48,7 +48,7 @@ namespace Roki.Modules.Utility
                 if (string.IsNullOrWhiteSpace(ownerId)) ownerId = "-";
 
                 await Context.Channel.EmbedAsync(
-                    new EmbedBuilder().WithOkColor()
+                    new EmbedBuilder().WithDynamicColor(Context)
                         .WithAuthor($"Roki v{StatsService.BotVersion}", Context.Client.CurrentUser.GetAvatarUrl())
                         .AddField("Bot ID", _client.CurrentUser.Id, true)
                         .AddField("Owner ID", ownerId, true)
@@ -81,7 +81,7 @@ namespace Roki.Modules.Utility
                 if (string.IsNullOrWhiteSpace(features))
                     features = "-";
 
-                var embed = new EmbedBuilder().WithOkColor()
+                var embed = new EmbedBuilder().WithDynamicColor(Context)
                     .WithAuthor("Server Information")
                     .WithTitle(guild.Name)
                     .AddField("Server ID", guild.Id, true)
@@ -108,7 +108,7 @@ namespace Roki.Modules.Utility
 
                 var userCount = (await channel.GetUsersAsync().FlattenAsync().ConfigureAwait(false)).Count();
 
-                var embed = new EmbedBuilder().WithOkColor()
+                var embed = new EmbedBuilder().WithDynamicColor(Context)
                     .WithTitle(channel.Name)
                     .WithDescription(channel.Topic)
                     .AddField("ID", channel.Id, true)
@@ -125,7 +125,7 @@ namespace Roki.Modules.Utility
                 if (usr == null)
                     return;
 
-                var embed = new EmbedBuilder().WithOkColor()
+                var embed = new EmbedBuilder().WithDynamicColor(Context)
                     .AddField("Name", $"**{usr.Username}**#{usr.Discriminator}", true);
 
                 if (!string.IsNullOrWhiteSpace(usr.Nickname))
@@ -155,7 +155,7 @@ namespace Roki.Modules.Utility
                     return;
                 }
 
-                var embed = new EmbedBuilder().WithOkColor()
+                var embed = new EmbedBuilder().WithDynamicColor(Context)
                     .AddField("Name", $"**{user.Username}**#{user.Discriminator}", true)
                     .AddField("Joined Discord", $"{user.CreatedAt:MM/dd/yyyy HH:mm}", true);
 
@@ -180,7 +180,7 @@ namespace Roki.Modules.Utility
                     return;
                 }
 
-                var embed = new EmbedBuilder().WithOkColor()
+                var embed = new EmbedBuilder().WithDynamicColor(Context)
                     .WithThumbnailUrl(avatarUrl)
                     .WithImageUrl(avatarUrl)
                     .AddField("Username", user.ToString(), true)

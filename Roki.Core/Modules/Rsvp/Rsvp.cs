@@ -45,7 +45,7 @@ namespace Roki.Modules.Rsvp
                     }
                 }
                 var events = Service.ListEvents(Context.Guild.Id, page);
-                var embed = new EmbedBuilder().WithOkColor().WithTitle("List of Events")
+                var embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle("List of Events")
                     .WithDescription($"{string.Join("\n", events.Select(e => $"`#{e.Id}` **{e.Name}** in `{(e.StartDate - DateTimeOffset.UtcNow).ToReadableString()}` https://discordapp.com/channels/{e.GuildId}/{e.ChannelId}/{e.MessageId}"))}");
 
                 await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);

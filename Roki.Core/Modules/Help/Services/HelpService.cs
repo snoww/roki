@@ -21,7 +21,7 @@ namespace Roki.Modules.Help.Services
             _command = command;
         }
 
-        public EmbedBuilder GetCommandInfo(CommandInfo command)
+        public async Task SendCommandInfo(CommandInfo command, ICommandContext context)
         {
             var prefix = _command.DefaultPrefix;
 
@@ -30,7 +30,7 @@ namespace Roki.Modules.Help.Services
             if (!string.IsNullOrWhiteSpace(aliases)) 
                 str += $"/{aliases}";
             
-            var embed = new EmbedBuilder().WithOkColor().AddField(str, command.FormatSummary(prefix), true)
+            var embed = new EmbedBuilder().WithDynamicColor(context).AddField(str, command.FormatSummary(prefix), true)
                 .AddField("Usage", command.FormatRemarks(prefix), true)
                 .WithFooter($"Module: {command.Module.GetTopLevelModule().Name}");;
 
@@ -46,7 +46,7 @@ namespace Roki.Modules.Help.Services
                     embed.AddField("Options", optionsHelp);
             }
 
-            return embed;
+            await context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         private static string GetCommandOptions(Type option)

@@ -134,7 +134,7 @@ namespace Roki.Modules.Games
                     return;
                 }
 
-                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle($"Trivia Game - {category}")
                         .WithDescription($"Starting new trivia game.\nYou can earn up to `{prizePool:N0}` {Roki.Properties.CurrencyNamePlural}!\nReact with the correct emote to answer questions.\nType `stop` to cancel game early"))
                     .ConfigureAwait(false);
@@ -169,7 +169,7 @@ namespace Roki.Modules.Games
                         difficultyBonus = Roki.Properties.TriviaHard;
                     IUserMessage msg;
 
-                    var embed = new EmbedBuilder().WithOkColor()
+                    var embed = new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle($"Question {count++}: {q.Category.ToTitleCase()} - {q.Difficulty.ToTitleCase()}")
                         .WithFooter("Type stop to stop trivia game.");
                     if (q.Type == "multiple")
@@ -235,7 +235,7 @@ namespace Roki.Modules.Games
                         corrStr += user.Username + '\n';
                     }
                     
-                    var ans = await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    var ans = await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithTitle("Answer")
                             .WithDescription($"{answer}")
                             .AddField("Correct", !string.IsNullOrWhiteSpace(corrStr) ? corrStr : "None", true)
@@ -286,7 +286,7 @@ namespace Roki.Modules.Games
                 }
 
                 if (winners)
-                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithDescription($"Congratulations!\n{winStr}\n{scoreStr}")).ConfigureAwait(false);
                 else
                     await Context.Channel.SendErrorAsync($"Better luck next time!\n{scoreStr}").ConfigureAwait(false);
@@ -299,7 +299,7 @@ namespace Roki.Modules.Games
             [RokiCommand, Description, Usage, Aliases]
             public async Task TriviaCategories()
             {
-                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle("Trivia Categories")
                         .WithDescription(string.Join(", ", Categories.Keys)))
                     .ConfigureAwait(false);

@@ -36,7 +36,7 @@ namespace Roki.Modules.Utility
                     var quotes = uow.Quotes.GetGroup(Context.Guild.Id, page, order).ToList();
                     if (quotes.Count > 0)
                     {
-                        await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                        await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                                 .WithTitle("Quote List")
                                 .WithDescription(string.Join("\n", quotes.Select(q => $"`#{q.Id}` {Format.Bold(q.Keyword),-20} by {q.AuthorName}"))))
                             .ConfigureAwait(false);
@@ -115,7 +115,7 @@ namespace Roki.Modules.Utility
                     {
                         uow.Quotes.Remove(quote);
                         await uow.SaveChangesAsync().ConfigureAwait(false);
-                        await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                        await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                                 .WithDescription($"Quote #{id} deleted"))
                             .ConfigureAwait(false);
                     }

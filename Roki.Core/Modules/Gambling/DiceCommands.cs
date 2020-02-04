@@ -123,7 +123,7 @@ namespace Roki.Modules.Gambling
                 if (won > 0)
                 {
                     await _currency.AddAsync(Context.User.Id, "BetDie Payout", won, Context.Guild.Id, Context.Channel.Id, Context.Message.Id);
-                    embed.WithOkColor()
+                    embed.WithDynamicColor(Context)
                         .WithDescription(
                             $"{Context.User.Mention} You rolled a total of `{total}`\nCongratulations! You've won `{won:N0}` {Roki.Properties.CurrencyIcon}\n" +
                             $"New Balance: `{await _currency.GetCurrency(Context.User.Id, Context.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}");

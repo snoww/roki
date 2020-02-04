@@ -85,7 +85,7 @@ namespace Roki.Modules.Games
                     return;
                 }
 
-                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"{Context.User.Mention} Here is the replay url:\nhttps://replay.pokemonshowdown.com/{url}"))
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context).WithDescription($"{Context.User.Mention} Here is the replay url:\nhttps://replay.pokemonshowdown.com/{url}"))
                     .ConfigureAwait(false);
             }
         }

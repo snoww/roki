@@ -22,7 +22,7 @@ namespace Roki.Modules.Utility
             }
             var pin = pins.First();
 // TODO handle pinned embeds?
-            var embed = new EmbedBuilder().WithOkColor()
+            var embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle(pin.Author.Username)
                 .WithDescription(pin.Content)
                 .WithFooter($"{pin.Timestamp.ToLocalTime():hh:mm tt MM/dd/yyyy}");
@@ -59,7 +59,7 @@ namespace Roki.Modules.Utility
             await msg.DeleteAsync().ConfigureAwait(false);
 
             var embed = new EmbedBuilder();
-            embed.WithOkColor()
+            embed.WithDynamicColor(Context)
                 .WithAuthor("Pong! 🏓")
                 .WithDescription($"Currently {(int) sw.Elapsed.TotalMilliseconds} ms");
 

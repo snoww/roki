@@ -78,7 +78,7 @@ namespace Roki.Modules.Moderation
                 {
                     await ((IGuildUser) user).ModifyAsync(u => u.Nickname = nickname.TrimTo(32, true)).ConfigureAwait(false);
                     await Service.ConsumePower(Context.User.Id, "Nickname").ConfigureAwait(false);
-                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithTitle($"{Context.User.Username} used a Nickname Power on {user.Username}")
                             .WithDescription($"Successfully changed {user.Username}'s nickname to `{nickname.TrimTo(32, true)}`"))
                         .ConfigureAwait(false);

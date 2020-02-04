@@ -37,7 +37,7 @@ namespace Roki.Modules.Stocks
                        $"5 Day Change:\t`{stats.Day5ChangePercent:P}`\n30 Day Change:\t`{stats.Day30ChangePercent:P}`\n1 Month Change:\t`{stats.Month1ChangePercent:P}`\n3 Month Change:\t`{stats.Month3ChangePercent:P}`\n6 Month Change:\t`{stats.Month6ChangePercent:P}`\nYTD Change:\t`{stats.YtdChangePercent:P}`\n1 year Change:\t`{stats.Year1ChangePercent:P}`\n1 Year Change:\t`{stats.Year1ChangePercent:P}`\n2 Year Change:\t`{stats.Year2ChangePercent:P}`\n5 Year Change:\t`{stats.Year1ChangePercent:P}`\nMax Change:\t`{stats.MaxChangePercent:P}`";
             }
             
-            await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                     .WithAuthor(symbol.ToUpper(), logo)
                     .WithTitle(stats.CompanyName)
                     .WithDescription(desc))
@@ -55,7 +55,7 @@ namespace Roki.Modules.Stocks
                 return;
             }
 
-            await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                     .WithTitle(company.Symbol)
                     .WithAuthor(company.CompanyName, logo, company.Website)
                     .WithDescription(company.Description)
@@ -80,7 +80,7 @@ namespace Roki.Modules.Stocks
             await Context.SendPaginatedMessageAsync(0, p =>
             {
                 var article = news[p];
-                var embed = new EmbedBuilder().WithOkColor()
+                var embed = new EmbedBuilder().WithDynamicColor(Context)
                     .WithTitle(article.Headline)
                     .WithAuthor(article.Source, article.Url)
                     .WithDescription(article.Summary + $"\nSource: [{article.Source}]({article.Url})")
@@ -103,7 +103,7 @@ namespace Roki.Modules.Stocks
                 return;
             }
 
-            var embed = new EmbedBuilder().WithOkColor()
+            var embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithAuthor(quote.Symbol, logo)
                 .WithTitle(quote.CompanyName)
                 .AddField("Primary Exchange", quote.PrimaryExchange, true)
@@ -131,7 +131,7 @@ namespace Roki.Modules.Stocks
                 return;
             }
 
-            await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                     .WithTitle($"Latest Price for {symbol.ToUpperInvariant()}\n`{price.LatestPrice:N2}`")
                     .WithFooter($"Last Updated: {price.LatestTime}"))
                 .ConfigureAwait(false);
@@ -168,7 +168,7 @@ namespace Roki.Modules.Stocks
                 period = "5dm";
             
             Service.GenerateChartAsync(symbol, period);
-            var embed = new EmbedBuilder().WithOkColor()
+            var embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle($"{quote.CompanyName}")
                 .WithAuthor(quote.Symbol.ToUpper())
                 .WithDescription($"{options[period]} Price")

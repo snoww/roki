@@ -71,7 +71,7 @@ namespace Roki.Modules.Gambling
                 {
                     var won = (long) Math.Ceiling(amount * Roki.Properties.BetFlipMultiplier);
                     await _currency.AddAsync(Context.User.Id, "BetFlip Payout", won, Context.Guild.Id, Context.Channel.Id, Context.Message.Id).ConfigureAwait(false);
-                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithDescription(
                                 $"Result is: {result}\n{Context.User.Mention} Congratulations! You've won `{won:N0}` {Roki.Properties.CurrencyIcon}\n" +
                                 $"New Balance: `{await _currency.GetCurrency(Context.User.Id, Context.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}"))
@@ -130,7 +130,7 @@ namespace Roki.Modules.Gambling
                     var won = (long) Math.Ceiling(amount * Math.Pow(correct, Roki.Properties.BetFlipMMultiplier));
                     await _currency.AddAsync(Context.User.Id, "BetFlipMulti Payout", won, Context.Guild.Id, Context.Channel.Id, Context.Message.Id)
                         .ConfigureAwait(false);
-                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithDescription(
                                 $"Results are: {string.Join(", ", results)}\n{Context.User.Mention} Congratulations! You got `{correct}/{guesses.Length}` correct. You've won `{won:N0}` {Roki.Properties.CurrencyIcon}" +
                                 $"New Balance: `{await _currency.GetCurrency(Context.User.Id, Context.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}"))

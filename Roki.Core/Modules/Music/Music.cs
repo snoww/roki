@@ -39,7 +39,7 @@ namespace Roki.Modules.Music
             
             await Service.LeaveAsync(user.VoiceChannel).ConfigureAwait(false);
             
-            var embed = new EmbedBuilder().WithOkColor()
+            var embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithDescription($"Disconnected from {user.VoiceChannel.Name}");
             await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }

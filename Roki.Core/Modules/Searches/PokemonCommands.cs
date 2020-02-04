@@ -73,7 +73,7 @@ namespace Roki.Modules.Searches
                     return;
                 }
 
-                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle(ability.Name)
                         .WithDescription((ability.Description ?? ability.ShortDescription).TrimTo(2048))
                         .AddField("Rating", $"{ability.Rating:N1}"))
@@ -92,7 +92,7 @@ namespace Roki.Modules.Searches
                     await Context.Channel.SendErrorAsync("No move of that name found.").ConfigureAwait(false);
                     return;
                 }
-                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle(move.Name)
                         .WithDescription((move.Description ?? move.ShortDescription).TrimTo(2048))
                         .AddField("Type", move.Type, true)
@@ -114,7 +114,7 @@ namespace Roki.Modules.Searches
                 {
                     var nature = await _pokeClient.GetResourceAsync<Nature>(query).ConfigureAwait(false);
                     
-                    var embed = new EmbedBuilder().WithOkColor()
+                    var embed = new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle(nature.Name.ToTitleCase());
                     
                     // checks if nature is not neutral
@@ -147,7 +147,7 @@ namespace Roki.Modules.Searches
                 {
                     var item = await _pokeClient.GetResourceAsync<Item>(query).ConfigureAwait(false);
 
-                    var embed = new EmbedBuilder().WithOkColor()
+                    var embed = new EmbedBuilder().WithDynamicColor(Context)
                         .WithAuthor(item.Name.ToTitleCase().Replace('-', ' '))
                         .WithDescription(item.EffectEntries[0].Effect)
                         .WithThumbnailUrl(item.Sprites.Default)

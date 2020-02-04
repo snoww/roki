@@ -127,7 +127,7 @@ namespace Roki.Modules.Games.Common
                     t2[i].Dispose();
                 }
                     
-                var start = new EmbedBuilder().WithOkColor()
+                var start = new EmbedBuilder().WithDynamicColor(_channel.GuildId)
                     .WithTitle($"[Gen {_generation}] Random Battle - ID: `{GameId}`")
                     .WithDescription("A Pokemon battle is about to start!\nAdd reactions below to select your bet. You cannot undo your bets.\ni.e. Adding reactions `P1 10 100` means betting on 110 on P1.")
                     .WithImageUrl($"attachment://pokemon-{GameId}.gif")
@@ -182,7 +182,7 @@ namespace Roki.Modules.Games.Common
                            $"\t`{before:N0}` ⇒ `{GetCurrency(key.Id):N0}`\n";
             }
             
-            var embed = new EmbedBuilder().WithOkColor();
+            var embed = new EmbedBuilder().WithDynamicColor(_channel.GuildId);
             if (winners.Length > 1)
             {
                 embed.WithDescription($"{winner} has won the battle!\nCongratulations!\n{winners}\n");

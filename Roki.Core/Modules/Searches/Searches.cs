@@ -43,7 +43,7 @@ namespace Roki.Modules.Searches
                 var result = await Service.GetWeatherDataAsync(addr.Geometry.Location.Lat, addr.Geometry.Location.Lng).ConfigureAwait(false);
                 var tz = await Service.GetLocalDateTime(addr.Geometry.Location.Lat, addr.Geometry.Location.Lng).ConfigureAwait(false);
                 var localDt = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTimeOffset.UtcNow, tz.TimeZoneId);
-                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithAuthor("Weather Report")
                         .WithDescription(addr.FormattedAddress + "\n" + Format.Code(result))
                         .WithFooter($"{localDt:HH:mm, MMM dd, yyyy}, {tz.TimeZoneName}, UTC{localDt:zz}"))
@@ -66,7 +66,7 @@ namespace Roki.Modules.Searches
             
             var data = await Service.GetTimeDataAsync(query).ConfigureAwait(false);
 
-            var embed = new EmbedBuilder().WithOkColor()
+            var embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle(data.Address)
                 .WithDescription($"`{data.Time:f}, {data.TimeZoneName}, UTC{data.Time:zz}`");
 
@@ -101,7 +101,7 @@ namespace Roki.Modules.Searches
             if (!await ValidateQuery(query).ConfigureAwait(false))
                 return;
             var result = await _google.GetImagesAsync(query).ConfigureAwait(false);
-            var embed = new EmbedBuilder().WithOkColor()
+            var embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithAuthor("Image search for: " + query.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
                     $"https://www.google.com/search?q={HttpUtility.UrlEncode(query)}&source=lnms&tbm=isch")
                 .WithDescription(result.Link)
@@ -116,7 +116,7 @@ namespace Roki.Modules.Searches
             if (!await ValidateQuery(query).ConfigureAwait(false))
                 return;
             var result = await _google.GetImagesAsync(query, true).ConfigureAwait(false);
-            var embed = new EmbedBuilder().WithOkColor()
+            var embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithAuthor("Image search for: " + query.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
                     $"https://www.google.com/search?q={HttpUtility.UrlEncode(query)}&source=lnms&tbm=isch")
                 .WithDescription(result.Link)
@@ -140,7 +140,7 @@ namespace Roki.Modules.Searches
                 return;
             }
 
-            var embed = new EmbedBuilder().WithOkColor()
+            var embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle(movie.Title)
                 .WithUrl($"http://www.imdb.com/title/{movie.ImdbId}/")
                 .WithDescription(movie.Plot.TrimTo(1000))
@@ -170,7 +170,7 @@ namespace Roki.Modules.Searches
                     await Context.SendPaginatedMessageAsync(0, p =>
                     {
                         var item = items[p];
-                        return new EmbedBuilder().WithOkColor()
+                        return new EmbedBuilder().WithDynamicColor(Context)
                             .WithUrl(item.Permalink)
                             .WithAuthor(item.Word, "https://i.imgur.com/p1NqHdf.jpg")
                             .WithDescription(item.Definition);
@@ -218,7 +218,7 @@ namespace Roki.Modules.Searches
             try
             {
                 var fact = await Service.GetCatFactAsync().ConfigureAwait(false);
-                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                     .WithTitle("Random Cat Fact")
                     .WithDescription(fact));
             }
