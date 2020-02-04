@@ -91,7 +91,7 @@ namespace Roki.Modules.Searches.Services
             }
             catch (Exception)
             {
-                Logger.Warn("Could not find culture for: '{culture}'", country.LongName);
+                Logger.Warn("Could not find culture for {culture}", country.LongName);
                 return null;
             }
         }

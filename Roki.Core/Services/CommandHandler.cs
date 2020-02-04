@@ -49,38 +49,6 @@ namespace Roki.Services
             return Task.CompletedTask;
         }
 
-        private static Task LogSuccess(IMessage message, IGuildChannel channel, long seconds)
-        {
-            Logger.Info("Command parsed in " + seconds + " ms\n\t" +
-                      "User: {user}\n\t" +
-                      "Server: {guild}\n\t" +
-                      "Channel: {chanel}\n\t" +
-                      "Message: {message}",
-                message.Author + " [" + message.Author.Id + "]",
-                channel == null ? "PRIVATE" : channel.Guild.Name + " [" + channel.Guild.Id + "]",
-                channel == null ? "PRIVATE" : channel.Name + " [" + channel.Id + "]",
-                message.Content
-            );
-            
-            return Task.CompletedTask;
-        }
-
-        private static void LogError(string error, IMessage message, IGuildChannel channel, long seconds)
-        {
-            Logger.Warn("Command parsed after " + seconds + " ms\n\t" + 
-                      "User: {user}\n\t" +
-                      "Server: {guild}\n\t" +
-                      "Channel: {channel}\n\t" +
-                      "Message: {message}\n\t" +
-                      "Error: {error}",
-                message.Author + " [" + message.Author.Id + "]",
-                channel == null ? "PRIVATE" : channel.Guild.Name + " [" + channel.Guild.Id + "]",
-                channel == null ? "PRIVATE" : channel.Name + " [" + channel.Id + "]",
-                message.Content,
-                error
-            );
-        }
-
         private async Task MessageReceived(SocketMessage message)
         {
             try
@@ -220,6 +188,67 @@ namespace Roki.Services
                 }
 
             return (true, null, command);
+        }
+        
+        private static Task LogSuccess(IMessage message, IGuildChannel channel, long seconds)
+        {
+            if (channel != null)
+            {
+                Logger.Info("Command parsed after " + seconds + " ms\n\t" +
+                            "User: {user} [{userid}]\n\t" +
+                            "Server: {guild} [{guildid}]\n\t" +
+                            "Channel: {channel} [{channelid}]\n\t" +
+                            "Message: {message}",
+                    message.Author, message.Author.Id,
+                    channel.Guild.Name, channel.Guild.Id,
+                    channel.Name, channel.Id,
+                    message.Content
+                );
+            }
+            else
+            {
+                Logger.Info("Command parsed after " + seconds + " ms\n\t" +
+                            "User: {user} [{userid}]\n\t" +
+                            "Server: PRIVATE\n\t" +
+                            "Channel: PRIVATE\n\t" +
+                            "Message: {message}",
+                    message.Author, message.Author.Id, message.Content
+                );
+            }
+            
+            return Task.CompletedTask;
+        }
+
+        private static void LogError(string error, IMessage message, IGuildChannel channel, long seconds)
+        {
+            if (channel != null)
+            {
+                Logger.Warn("Command parsed after " + seconds + " ms\n\t" +
+                            "User: {user} [{userid}]\n\t" +
+                            "Server: {guild} [{guildid}]\n\t" +
+                            "Channel: {channel} [{channelid}]\n\t" +
+                            "Message: {message}\n\t" +
+                            "Error: {error}",
+                    message.Author, message.Author.Id, 
+                    channel.Guild.Name, channel.Guild.Id,
+                    channel.Name, channel.Id,
+                    message.Content,
+                    error
+                );
+            }
+            else
+            {
+                Logger.Warn("Command parsed after " + seconds + " ms\n\t" +
+                            "User: {user} [{userid}]\n\t" +
+                            "Server: PRIVATE\n\t" +
+                            "Channel: PRIVATE\n\t" +
+                            "Message: {message}\n\t" +
+                            "Error: {error}",
+                    message.Author, message.Author.Id,
+                    message.Content,
+                    error
+                );
+            }
         }
     }
 }
