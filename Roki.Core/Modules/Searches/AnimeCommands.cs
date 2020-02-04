@@ -35,7 +35,7 @@ namespace Roki.Modules.Searches
                 await Context.SendPaginatedMessageAsync( 0, p =>
                 {
                     var anime = media[p];
-                    var embed = new EmbedBuilder().WithOkColor()
+                    var embed = new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle(anime.Title.GetTitle())
                         .WithImageUrl(anime.CoverImage.Large)
                         .WithDescription(HttpUtility.HtmlDecode(anime.Description).TrimTo(2048))

@@ -55,7 +55,7 @@ namespace Roki.Modules.Moderation.Services
             {
                 _muted.TryRemove(user.Id, out _);
                 await user.RemoveRoleAsync(muted).ConfigureAwait(false);
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithTitle("🔈 Unmute").WithDescription($"{user.Mention} has been unmuted from voice"))
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithTitle("🔈 Unmute").WithDescription($"{user.Mention} has been unmuted from voice"))
                     .ConfigureAwait(false);
             }
         }
@@ -79,7 +79,7 @@ namespace Roki.Modules.Moderation.Services
             {
                 _blocked.TryRemove(user.Id, out _);
                 await user.RemoveRoleAsync(blocked).ConfigureAwait(false);
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithTitle("🔈 Unblock").WithDescription($"{user.Mention} has been unblocked from chat"))
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithTitle("🔈 Unblock").WithDescription($"{user.Mention} has been unblocked from chat"))
                     .ConfigureAwait(false);
             }
         }
@@ -103,7 +103,7 @@ namespace Roki.Modules.Moderation.Services
             {
                 _timeout.TryRemove(user.Id, out _);
                 await user.RemoveRoleAsync(timeout).ConfigureAwait(false);
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithTitle("🔈 Unban").WithDescription($"{user.Mention} has been unbanned from voice and chat"))
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithTitle("🔈 Unban").WithDescription($"{user.Mention} has been unbanned from voice and chat"))
                     .ConfigureAwait(false);
             }
         }

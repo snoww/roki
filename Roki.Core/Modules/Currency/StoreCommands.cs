@@ -46,7 +46,7 @@ namespace Roki.Modules.Currency
                                 var desc = $"{Format.Bold(c.Item)} | {type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remaining" : "**Sold Out**")} | `{c.Cost:N0}` {Roki.Properties.CurrencyIcon}";
                                 return $"`{c.Id}:` {desc}\n\t{c.Description.TrimTo(120)}";
                             }));
-                        return new EmbedBuilder().WithOkColor()
+                        return new EmbedBuilder().WithDynamicColor(Context)
                             .WithTitle("Stone Shop")
                             .WithDescription(catalogStr)
                             .WithFooter($"Page {page + 1}/{Math.Ceiling((double) cat.Count / itemsPerPage)} Use .buy to purchase items");
@@ -63,7 +63,7 @@ namespace Roki.Modules.Currency
                     return;
                 }
 
-                var embed = new EmbedBuilder().WithOkColor()
+                var embed = new EmbedBuilder().WithDynamicColor(Context)
                     .WithTitle($"`{item.Id}:` | {item.Item} | `{item.Cost:N0}` {Roki.Properties.CurrencyIcon}")
                     .WithDescription(item.Description)
                     .AddField("Category", $"{item.Category}", true)
@@ -160,7 +160,7 @@ namespace Roki.Modules.Currency
                         break;
                 }
 
-                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithDescription($"{buyer.Mention} Purchase Successful!\nYou bought `{amount}x` {listing.Item}\n`{cost}` {Roki.Properties.CurrencyIcon} has been billed to your account"))
                     .ConfigureAwait(false);
             }
@@ -192,7 +192,7 @@ namespace Roki.Modules.Currency
             public async Task Subscriptions()
             {
                 var subs = Service.GetUserSubscriptions(Context.User.Id);
-                var embed = new EmbedBuilder().WithOkColor().WithTitle($"{Context.User.Username}'s Active Subscriptions");
+                var embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle($"{Context.User.Username}'s Active Subscriptions");
                 if (subs.Count == 0)
                 {
                     await Context.Channel.EmbedAsync(embed.WithDescription("No active subscriptions.")).ConfigureAwait(false);
@@ -214,7 +214,7 @@ namespace Roki.Modules.Currency
             public async Task Inventory()
             {
                 var inv = await Service.GetOrCreateInventoryAsync(Context.User.Id).ConfigureAwait(false);
-                var embed = new EmbedBuilder().WithOkColor().WithTitle($"{Context.User.Username}'s Inventory");
+                var embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle($"{Context.User.Username}'s Inventory");
                 string desc;
                 if (inv.Count == 0)
                     desc = "Your inventory is empty";

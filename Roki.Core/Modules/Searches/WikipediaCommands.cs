@@ -60,7 +60,7 @@ namespace Roki.Modules.Searches
                 }
 
                 var counter = 1;
-                var embed = new EmbedBuilder().WithOkColor()
+                var embed = new EmbedBuilder().WithDynamicColor(Context)
                     .WithAuthor("Wikipedia", WikipediaIconUrl)
                     .WithTitle($"Search results for: `{query}`")
                     .WithDescription(string.Join("\n", results
@@ -72,7 +72,7 @@ namespace Roki.Modules.Searches
 
             private async Task SendArticleAsync(WikiSummary article)
             {
-                var embed = new EmbedBuilder().WithOkColor()
+                var embed = new EmbedBuilder().WithDynamicColor(Context)
                     .WithAuthor("Wikipedia", WikipediaIconUrl)
                     .WithTitle(article.Title)
                     .WithUrl($"{WikipediaUrl}/{HttpUtility.UrlPathEncode(article.Title)}")

@@ -66,7 +66,7 @@ namespace Roki.Modules.Rsvp.Services
                     if (old == null) continue;
                     var part = old.Fields.First(f => f.Name.Contains("part", StringComparison.OrdinalIgnoreCase));
                     var und = old.Fields.First(f => f.Name.Contains("unde", StringComparison.OrdinalIgnoreCase));
-                    var newEmbed = new EmbedBuilder().WithOkColor()
+                    var newEmbed = new EmbedBuilder().WithDynamicColor(e.GuildId)
                         .WithAuthor(old.Author?.Name, old.Author?.IconUrl)
                         .WithTitle(old.Title)
                         .AddField("Description", e.Description)
@@ -107,7 +107,7 @@ namespace Roki.Modules.Rsvp.Services
         public async Task CreateEvent(ICommandContext ctx)
         {
             var toDelete = new List<IUserMessage> {ctx.Message};
-            var q1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            var q1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                 .WithTitle("RSVP Event Setup - Step 1")
                 .WithDescription("Which **channel** should the event be in?\n`this`, `current` or `here` for current channel, `default` for default channel\n(default is <#217668245644247041>)")
                 .WithFooter("Type stop to cancel event setup")
@@ -162,7 +162,7 @@ namespace Roki.Modules.Rsvp.Services
                     eventChannel = _client.GetChannel(217668245644247041) as IMessageChannel;
             }
 
-            var q2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            var q2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                     .WithTitle("RSVP Event Setup - Step 2")
                     .WithDescription($"Using <#{eventChannel.Id}> for the event.\nNow enter a **title** for the event.")
                     .WithFooter("Type stop to cancel event setup"))
@@ -183,7 +183,7 @@ namespace Roki.Modules.Rsvp.Services
             }
             var eventTitle = replyMessage.Content.TrimTo(250, true);
             
-            var q3 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            var q3 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                     .WithTitle("RSVP Event Setup - Step 3")
                     .WithDescription($"The title of the event has been set to: {Format.Bold(eventTitle)}\n" +
                                      $"Please enter a **description** for the event.\n")
@@ -205,7 +205,7 @@ namespace Roki.Modules.Rsvp.Services
                 return;
             }
             
-            var q4 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            var q4 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                     .WithTitle("RSVP Event Setup - Step 4")
                     .WithDescription($"Now please enter the date and time when this event starts.\nDefault timezone is `{TimeZoneInfo.Local.StandardName}` or you can specify `UTC`\n" +
                                      "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`")
@@ -248,7 +248,7 @@ namespace Roki.Modules.Rsvp.Services
             var dateStr = eventDate.Value.ToString("f");
             if (eventDate.Value.Offset == TimeSpan.Zero)
                 dateStr += "UTC";
-            var q4Confirm = new EmbedBuilder().WithOkColor()
+            var q4Confirm = new EmbedBuilder().WithDynamicColor(ctx)
                 .WithTitle("RSVP Event Setup - Step 4")
                 .WithDescription($"Is the date correct? `yes`/`no`\n`{dateStr}`")
                 .WithFooter("Type stop to cancel event setup");
@@ -269,7 +269,7 @@ namespace Roki.Modules.Rsvp.Services
             }
             while (!confirm.Content.Contains("yes", StringComparison.OrdinalIgnoreCase) || !confirm.Content.Contains("y", StringComparison.OrdinalIgnoreCase))
             {
-                var err = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithTitle("RSVP Event Setup - Step 4")
+                var err = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithTitle("RSVP Event Setup - Step 4")
                         .WithDescription($"Please enter the date this event starts. Default timezone is `{TimeZoneInfo.Local.StandardName}` or you can specify `UTC`" +
                                          "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`")
                         .WithFooter("Type stop to cancel event setup"))
@@ -313,7 +313,7 @@ namespace Roki.Modules.Rsvp.Services
                 if (eventDate.Value.Offset == TimeSpan.Zero)
                     dateStr += "UTC";
                 
-                q4Confirm = new EmbedBuilder().WithOkColor()
+                q4Confirm = new EmbedBuilder().WithDynamicColor(ctx)
                     .WithTitle("RSVP Event Setup - Step 4")
                     .WithDescription($"Is the date correct? `yes`/`no`\n`{dateStr}`")
                     .WithFooter("Type stop to cancel event setup");
@@ -347,7 +347,7 @@ namespace Roki.Modules.Rsvp.Services
             await uow.SaveChangesAsync().ConfigureAwait(false);
 
             var startsIn = eventDate.Value - DateTimeOffset.Now;
-            var eventEmbed = new EmbedBuilder().WithOkColor()
+            var eventEmbed = new EmbedBuilder().WithDynamicColor(ctx)
                 .WithTitle($"`#{ev.Entity.Id}` {eventTitle}")
                 .WithAuthor(ctx.User.Username, ctx.User.GetAvatarUrl())
                 .WithDescription($"Starts in `{startsIn.ToReadableString()}`")
@@ -393,7 +393,7 @@ namespace Roki.Modules.Rsvp.Services
             var ev = events.First();
             if (events.Count > 1)
             {
-                var q1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                var q1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                     .WithTitle("RSVP Event Editor")
                     .WithDescription($"Which Event would you like to edit? Type in the # to select.\n{string.Join("\n", formattedEvents)}")
                     .WithFooter("Type stop to cancel event edit")
@@ -435,7 +435,7 @@ namespace Roki.Modules.Rsvp.Services
                 }
             }
             
-            var q2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            var q2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                 .WithTitle("RSVP Event Editor")
                 .WithDescription($"What do you want to change for: `#{ev.Id}` **{ev.Name}**\n`1.` Edit Title\n`2.` Edit Description\n`3.` Edit Event Date\n`4.` Delete Event")
                 .WithFooter("Type stop to finish editing")
@@ -455,7 +455,7 @@ namespace Roki.Modules.Rsvp.Services
                 SocketMessage editReply;
                 if (replyMessage.Content.StartsWith("1", StringComparison.OrdinalIgnoreCase))
                 {
-                    var e1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    var e1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                             .WithTitle("RSVP Event Editor - Edit Title")
                             .WithDescription("What should the new **title** be?"))
                         .ConfigureAwait(false);
@@ -474,7 +474,7 @@ namespace Roki.Modules.Rsvp.Services
                     }
 
                     ev.Name = editReply.Content.TrimTo(250, true);
-                    var er1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    var er1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                             .WithTitle("RSVP Event Editor - Edit Title")
                             .WithDescription($"The event title has been set to: **{ev.Name}**"))
                         .ConfigureAwait(false);
@@ -484,7 +484,7 @@ namespace Roki.Modules.Rsvp.Services
                 // Edit Description
                 else if (replyMessage.Content.StartsWith("2", StringComparison.OrdinalIgnoreCase))
                 {
-                    var e2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    var e2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                             .WithTitle("RSVP Event Editor - Edit Description")
                             .WithDescription("What should the new **description** be?"))
                         .ConfigureAwait(false);
@@ -503,7 +503,7 @@ namespace Roki.Modules.Rsvp.Services
                     }
 
                     ev.Description = editReply.Content.TrimTo(1000, true);
-                    var er2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    var er2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                             .WithTitle("RSVP Event Editor - Edit Description")
                             .WithDescription($"The event description has been changed to:\n{ev.Description}"))
                         .ConfigureAwait(false);
@@ -513,7 +513,7 @@ namespace Roki.Modules.Rsvp.Services
                 // Edit Event Date
                 else if (replyMessage.Content.StartsWith("3", StringComparison.OrdinalIgnoreCase))
                 {
-                    var e3 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    var e3 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                             .WithTitle("RSVP Event Editor - Edit Event Date")
                             .WithDescription("What should the new event date be?" +
                                              $"Default timezone is `{TimeZoneInfo.Local.StandardName}` or you can specify `UTC`" +
@@ -557,7 +557,7 @@ namespace Roki.Modules.Rsvp.Services
                     if (newDate.Value.Offset == TimeSpan.Zero)
                         dateStr += "UTC";
 
-                    var econ3 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    var econ3 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                             .WithTitle("RSVP Event Editor - Edit Event Date")
                             .WithDescription($"Is the date correct? `yes`/`no`\n`{dateStr}`"))
                         .ConfigureAwait(false);
@@ -577,7 +577,7 @@ namespace Roki.Modules.Rsvp.Services
 
                     while (!con.Content.Contains("yes", StringComparison.OrdinalIgnoreCase) || !con.Content.Contains("y", StringComparison.OrdinalIgnoreCase))
                     {
-                        var err = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithTitle("RSVP Event Editor - Edit Event Date")
+                        var err = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithTitle("RSVP Event Editor - Edit Event Date")
                                 .WithDescription(
                                     $"Please enter the correct date. Default timezone is `{TimeZoneInfo.Local.StandardName}` or you can specify `UTC`" +
                                     "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`"))
@@ -621,7 +621,7 @@ namespace Roki.Modules.Rsvp.Services
                         if (newDate.Value.Offset == TimeSpan.Zero)
                             dateStr += "UTC";
 
-                        var con2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                        var con2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                                 .WithTitle("RSVP Event Editor - Edit Event Date")
                                 .WithDescription($"Is the date correct? `yes`/`no`\n`{dateStr}`"))
                             .ConfigureAwait(false);
@@ -641,7 +641,7 @@ namespace Roki.Modules.Rsvp.Services
                     }
                     if (stop) continue;
                     ev.StartDate = newDate.Value;
-                    var er2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    var er2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                             .WithTitle("RSVP Event Editor - Edit Event Date")
                             .WithDescription($"The event date has been changed to:\n`{ev.StartDate:f}`"))
                         .ConfigureAwait(false);
@@ -651,7 +651,7 @@ namespace Roki.Modules.Rsvp.Services
                 // Delete
                 else if (replyMessage.Content.StartsWith("4", StringComparison.OrdinalIgnoreCase))
                 {
-                    var e4 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    var e4 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                             .WithTitle("RSVP Event Editor - Delete Event")
                             .WithDescription($"Are you sure you want to delete the event? `yes`/`no`\n`#{ev.Id}` **{ev.Name}**\n**You cannot undo this process.**"))
                         .ConfigureAwait(false);
@@ -678,7 +678,7 @@ namespace Roki.Modules.Rsvp.Services
                             // ignored
                         }
 
-                        await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                        await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                                 .WithTitle("RSVP Event Editor - Event Deleted")
                                 .WithDescription($"`#{ev.Id}` **{ev.Name}** has been deleted"))
                             .ConfigureAwait(false);
@@ -690,7 +690,7 @@ namespace Roki.Modules.Rsvp.Services
                     var err = await ctx.Channel.SendErrorAsync("Unknown Option, please select a valid option.").ConfigureAwait(false);
                     toDelete.Add(err);
                 }
-                var q2Repeat = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                var q2Repeat = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                     .WithTitle("RSVP Event Editor")
                     .WithDescription($"What else do you want to change for: `#{ev.Id}` **{ev.Name}**\n1. Edit Title\n2. Edit Description\n3. Edit Start Date\n4. Delete Event")
                     .WithFooter("Type stop to finish editing")
@@ -706,7 +706,7 @@ namespace Roki.Modules.Rsvp.Services
             }
             await ctx.Channel.SendErrorAsync(StopEdit).ConfigureAwait(false);
             await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
-            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                     .WithTitle("RSVP Event Editor")
                     .WithDescription("The event editor has been stopped. Any changes you've made have been saved."))
                 .ConfigureAwait(false);
@@ -766,7 +766,7 @@ namespace Roki.Modules.Rsvp.Services
 
             var ev = events.First(e => e.MessageId == r.MessageId);
 
-            var newEmbed = new EmbedBuilder().WithOkColor()
+            var newEmbed = new EmbedBuilder().WithDynamicColor(((IGuildChannel) channel).GuildId)
                 .WithAuthor(old.Author?.Name, old.Author?.IconUrl)
                 .WithTitle(old.Title)
                 .AddField("Description", ev.Description)

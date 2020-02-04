@@ -34,7 +34,7 @@ namespace Roki.Modules.Searches
                         : await http.GetStringAsync($"{XkcdUrl}/{num}/info.0.json").ConfigureAwait(false);
 
                     var xkcd = result.Deserialize<XkcdModel>();
-                    var embed = new EmbedBuilder().WithOkColor()
+                    var embed = new EmbedBuilder().WithDynamicColor(Context)
                         .WithAuthor(xkcd.Title, "https://xkcd.com/s/919f27.ico", $"{XkcdUrl}/{xkcd.Num}")
                         .WithImageUrl(xkcd.Img)
                         .AddField("Comic #", xkcd.Num, true)

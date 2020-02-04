@@ -36,7 +36,7 @@ namespace Roki.Modules.Searches
                 {
                     await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
                     var result = await http.GetStringAsync($"{WolframUrl}{query}&appid={_config.WolframAlphaApi}").ConfigureAwait(false);
-                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithTitle("Ask Roki")
                             .WithDescription(result))
                         .ConfigureAwait(false);

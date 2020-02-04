@@ -63,7 +63,7 @@ namespace Roki.Modules.Searches
 
                     if (tweet.Entities.MediaEntities.Count > 0)
                     {
-                        return new EmbedBuilder().WithOkColor()
+                        return new EmbedBuilder().WithDynamicColor(Context)
                             .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
                             .WithDescription(tweet.Text ?? tweet.FullText)
                             .AddField("Retweets", tweet.RetweetCount, true)
@@ -72,7 +72,7 @@ namespace Roki.Modules.Searches
                             .WithFooter($"{tweet.CreatedAt:g}");
                     }
                     
-                    return new EmbedBuilder().WithOkColor()
+                    return new EmbedBuilder().WithDynamicColor(Context)
                     .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
                     .WithDescription(tweet.Text ?? tweet.FullText)
                     .AddField("Retweets", tweet.RetweetCount, true)
@@ -120,7 +120,7 @@ namespace Roki.Modules.Searches
 
                     if (tweet.Entities.MediaEntities.Count > 0)
                     {
-                        return new EmbedBuilder().WithOkColor()
+                        return new EmbedBuilder().WithDynamicColor(Context)
                             .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
                             .WithDescription(tweet.Text ?? tweet.FullText)
                             .AddField("Retweets", tweet.RetweetCount, true)
@@ -129,7 +129,7 @@ namespace Roki.Modules.Searches
                             .WithFooter($"{tweet.CreatedAt:g}");
                     }
                     
-                    return new EmbedBuilder().WithOkColor()
+                    return new EmbedBuilder().WithDynamicColor(Context)
                         .WithAuthor($"{tweet.User.Name} (@{tweet.User.ScreenNameResponse})", tweet.User.ProfileImageUrl)
                         .WithDescription(tweet.Text ?? tweet.FullText)
                         .AddField("Retweets", tweet.RetweetCount, true)

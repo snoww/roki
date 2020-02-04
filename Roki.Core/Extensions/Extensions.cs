@@ -36,6 +36,12 @@ namespace Roki.Extensions
             return embed.WithColor(new Discord.Color(color));
         }
         
+        public static EmbedBuilder WithDynamicColor(this EmbedBuilder embed, ulong guildId)
+        {
+            var color = (uint) Cache.StringGet($"color:{guildId}");
+            return embed.WithColor(new Discord.Color(color));
+        }
+        
         public static EmbedBuilder WithOkColor(this EmbedBuilder embed)
         {
             return embed.WithColor(Roki.OkColor);

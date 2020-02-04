@@ -73,7 +73,7 @@ namespace Roki.Modules.Xp
                 page -= 1;
             using var uow = _db.GetDbContext();
             var list = uow.Users.GetUsersXpLeaderboard(page);
-            var embed = new EmbedBuilder().WithOkColor()
+            var embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle("XP Leaderboard");
             var i = 9 * page + 1;
             foreach (var user in list)
@@ -124,7 +124,7 @@ namespace Roki.Modules.Xp
                 await uow.Users.ChangeNotificationLocation(user.Id, notify).ConfigureAwait(false);
             }
             
-            await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                     .WithDescription("Successfully changed xp notification preferences."))
                 .ConfigureAwait(false);
         }
@@ -159,7 +159,7 @@ namespace Roki.Modules.Xp
                 page = totalPages;
             }
             
-            var embed = new EmbedBuilder().WithOkColor()
+            var embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle("XP Rewards")
                 .WithFooter($"Page {page + 1}/{totalPages + 1}");
 
@@ -201,7 +201,7 @@ namespace Roki.Modules.Xp
 
                 
                 var currReward = await uow.Guilds.AddXpRewardAsync(Context.Guild.Id, level, "currency", rewardAmount.ToString());
-                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle("XP Reward Added")
                         .WithDescription("Successfully added a new XP reward.\n" +
                                          $"Reward ID: `{currReward.Id}`\n" +
@@ -232,7 +232,7 @@ namespace Roki.Modules.Xp
             }
             
             var roleReward = await uow.Guilds.AddXpRewardAsync(Context.Guild.Id, level, "role", role.Id.ToString());
-            await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                     .WithTitle("XP Reward Added")
                     .WithDescription("Successfully added a new XP reward.\n" +
                                      $"Reward ID: `{roleReward.Id}`\n" +
@@ -258,7 +258,7 @@ namespace Roki.Modules.Xp
             var success = await uow.Guilds.RemoveXpRewardAsync(Context.Guild.Id, id).ConfigureAwait(false);
             if (success)
             {
-                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle("XP Reward Removed.")
                         .WithDescription($"Successfully removed reward with ID: `{id}`"))
                     .ConfigureAwait(false);

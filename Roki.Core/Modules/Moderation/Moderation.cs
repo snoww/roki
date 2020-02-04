@@ -27,13 +27,13 @@ namespace Roki.Modules.Moderation
             
             if (enable)
             {
-                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                     .WithDescription("This channel's messages will now be logged.\nUse `.logging false` to disable logging"))
                 .ConfigureAwait(false);
             }
             else
             {
-                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithDescription("Logging is disabled in this channel.\nUse `.logging false` to enable logging"))
                     .ConfigureAwait(false);
             }

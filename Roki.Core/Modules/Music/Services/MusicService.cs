@@ -49,7 +49,7 @@ namespace Roki.Modules.Music.Services
 
             var track = result.Tracks.FirstOrDefault();
 
-            var embed = new EmbedBuilder().WithOkColor();
+            var embed = new EmbedBuilder().WithDynamicColor(ctx);
             if (player.PlayerState == PlayerState.Playing)
             {
                 player.Queue.Enqueue(track);
@@ -78,7 +78,7 @@ namespace Roki.Modules.Music.Services
             var player = _lavaNode.GetPlayer(ctx.Guild);
             
             await player.PauseAsync().ConfigureAwait(false);
-            var embed = new EmbedBuilder().WithOkColor()
+            var embed = new EmbedBuilder().WithDynamicColor(ctx)
                 .WithDescription("Music playback paused.");
             
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
@@ -94,7 +94,7 @@ namespace Roki.Modules.Music.Services
             {
                 var currTrack = player.Track;
                 await player.SkipAsync().ConfigureAwait(false);
-                var embed = new EmbedBuilder().WithOkColor()
+                var embed = new EmbedBuilder().WithDynamicColor(ctx)
                     .WithAuthor("Skipped song")
                     .WithDescription(currTrack.PrettyFullTrack());
 
@@ -141,7 +141,7 @@ namespace Roki.Modules.Music.Services
                 if (!string.IsNullOrWhiteSpace(pStatus))
                     desc = pStatus + "\n" + desc;
                 
-                var embed = new EmbedBuilder().WithOkColor()
+                var embed = new EmbedBuilder().WithDynamicColor(ctx)
                     .WithAuthor($"Player queue - Page {curPage + 1}/{Math.Ceiling((double) queue.Length / itemsPerPage)}", "http://i.imgur.com/nhKS3PT.png")
                     .WithDescription(desc)
                     .WithFooter($"🔉 {player.Volume}% | {queue.Length} tracks | {totalStr}");
@@ -166,7 +166,7 @@ namespace Roki.Modules.Music.Services
             var removedSong = (LavaTrack) player.Queue.Items.ElementAt(index);
 
             player.Queue.RemoveAt(index);
-            var embed = new EmbedBuilder().WithOkColor()
+            var embed = new EmbedBuilder().WithDynamicColor(ctx)
                 .WithAuthor("Removed song")
                 .WithDescription(removedSong.PrettyFullTrack());
 
@@ -180,7 +180,7 @@ namespace Roki.Modules.Music.Services
             var player = _lavaNode.GetPlayer(ctx.Guild);
 
             await player.UpdateVolumeAsync(volume).ConfigureAwait(false);
-            var embed = new EmbedBuilder().WithOkColor()
+            var embed = new EmbedBuilder().WithDynamicColor(ctx)
                 .WithDescription($"Volume set to {player.Volume}.");
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
@@ -201,7 +201,7 @@ namespace Roki.Modules.Music.Services
             }
 
             await player.SeekAsync(addedTime).ConfigureAwait(false);
-            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                 .WithDescription($"Skipped {seconds} seconds.")).ConfigureAwait(false);
         }
 
@@ -210,7 +210,7 @@ namespace Roki.Modules.Music.Services
             if (!args.Reason.ShouldPlayNext())
                 return;
 
-            await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithDynamicColor(args.Player.TextChannel.GuildId)
                 .WithAuthor($"Finished song", "http://i.imgur.com/nhKS3PT.png")
                 .WithDescription(args.Player.Track.PrettyTrack())
                 .WithFooter(args.Player.Track.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
@@ -221,7 +221,7 @@ namespace Roki.Modules.Music.Services
                 return;
             }
 
-            await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithDynamicColor(args.Player.TextChannel.GuildId)
                 .WithAuthor($"Playing song", "http://i.imgur.com/nhKS3PT.png")
                 .WithDescription($"{args.Player.Track.PrettyTrack()}")
                 .WithFooter(args.Player.Track.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);

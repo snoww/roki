@@ -27,7 +27,7 @@ namespace Roki.Modules.Help
         [RokiCommand, Description, Usage, Aliases]
         public async Task Modules()
         {
-            var embed = new EmbedBuilder().WithOkColor()
+            var embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle("List of Modules")
                 .WithDescription(string.Join("\n",
                     _command.Modules.GroupBy(module => module.GetTopLevelModule())
@@ -80,7 +80,7 @@ namespace Roki.Modules.Help
                 return;
             }
 
-            var embed = new EmbedBuilder().WithOkColor()
+            var embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle($"{commands.First().Module.GetTopLevelModule().Name} Module Commands")
                 .WithFooter($"Use {Roki.Properties.Prefix}h <command> to see the help for that command");
 
@@ -138,7 +138,7 @@ namespace Roki.Modules.Help
 
             if (command == null)
             {
-                var helpEmbed = new EmbedBuilder().WithOkColor()
+                var helpEmbed = new EmbedBuilder().WithDynamicColor(Context)
                     .WithTitle("Roki Help")
                     .WithDescription(string.Format(@"Simple guide to find a command:
 Use `{0}modules` command to see a list of all modules.
@@ -163,8 +163,7 @@ After seeing the commands available in that module, you can use `{0}h <command>`
                 }
             }
 
-            var embed = Service.GetCommandInfo(command);
-            await channel.EmbedAsync(embed).ConfigureAwait(false);
+            await Service.SendCommandInfo(command, Context);
         }
 
         private class CommandTextEqualityComparer : IEqualityComparer<CommandInfo>

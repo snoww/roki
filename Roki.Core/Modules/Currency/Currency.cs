@@ -33,7 +33,7 @@ namespace Roki.Modules.Currency
         public async Task Cash([Leftover] IUser user = null)
         {
             user ??= Context.User;
-            await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                     .WithDescription($"{user.Mention}'s Cash Account:\n`{await _currency.GetCurrency(user.Id, Context.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}")
                     .WithFooter(".$$ for Investing Account"))
                 .ConfigureAwait(false);
@@ -44,7 +44,7 @@ namespace Roki.Modules.Currency
         public async Task Investing([Leftover] IUser user = null)
         {
             user ??= Context.User;
-            await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                     .WithDescription($"{user.Mention}'s Investing Account:\n`{GetInvAccount(user.Id):N2}` {Roki.Properties.CurrencyIcon}")
                     .WithFooter(".$ for Cash Account"))
                 .ConfigureAwait(false);
@@ -60,7 +60,7 @@ namespace Roki.Modules.Currency
                 page -= 1;
             using var uow = _db.GetDbContext();
             var list = uow.Users.GetCurrencyLeaderboard(Context.Client.CurrentUser.Id, page);
-            var embed = new EmbedBuilder().WithOkColor()
+            var embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle("Currency Leaderboard");
             var i = 9 * page + 1;
             foreach (var user in list)
@@ -120,7 +120,7 @@ namespace Roki.Modules.Currency
                 TransactionDate = DateTimeOffset.UtcNow
             });
 
-            await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                 .WithDescription($"{Context.User.Mention} You've successfully transferred `{amount:N0}` {Roki.Properties.CurrencyIcon}\nFrom `{fromAcc}` ➡️ `{toAcc}`")).ConfigureAwait(false);
             await uow.SaveChangesAsync().ConfigureAwait(false);
         }
@@ -144,7 +144,7 @@ namespace Roki.Modules.Currency
                 return;
             }
 
-            await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+            await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                 .WithDescription($"{Context.User.Username} gifted `{amount:N0}` {Roki.Properties.CurrencyNamePlural} to {user.Mention}")).ConfigureAwait(false);
         }
 
@@ -170,7 +170,7 @@ namespace Roki.Modules.Currency
                 trans = uow.Transaction.GetTransactions(userId, page);
             }
             
-            var embed = new EmbedBuilder().WithOkColor()
+            var embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle($"{((SocketGuild) Context.Guild)?.GetUser(userId)?.Username ?? userId.ToString()}'s Transactions History");
 
             var desc = "";
