@@ -1,7 +1,7 @@
 {
   "Prefix": ".",
   "BotId": 549644503351296040,
-  "CurrencyGenerationChance": 0.005,
+  "CurrencyGenerationChance": 0.01,
   "CurrencyGenerationCooldown": 10,
   "CurrencyGenIgnoredChannels": [
     233696207350923266,
