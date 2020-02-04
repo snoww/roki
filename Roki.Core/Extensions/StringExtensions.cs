@@ -21,13 +21,13 @@ namespace Roki.Extensions
             if (maxLength == 0)
                 return string.Empty;
             if (maxLength <= 3)
-                return string.Concat(str.Select(c => '.'));
+                return "...";
             if (str.Length < maxLength)
                 return str;
 
             if (hideDots)
-                return string.Concat(str.Take(maxLength));
-            return string.Concat(str.Take(maxLength - 3)) + "...";
+                return str.Substring(0, maxLength);
+            return str.Substring(0, maxLength - 3) + "...";
         }
 
         public static string SanitizeStringFull(this string dirtyString)

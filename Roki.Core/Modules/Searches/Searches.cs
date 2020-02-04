@@ -24,6 +24,7 @@ namespace Roki.Modules.Searches
         private const string WikipediaUrl = "https://en.wikipedia.org/wiki";
         private const string XkcdUrl = "https://xkcd.com";
         private const string WolframUrl = "https://api.wolframalpha.com/v1/result?i=";
+        private const string UrbanDictUrl = "http://api.urbandictionary.com/v0/define?term=";
 
         public Searches(IRokiConfig config, IGoogleApiService google, IHttpClientFactory http)
         {
@@ -154,7 +155,7 @@ namespace Roki.Modules.Searches
             await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
             query = HttpUtility.UrlEncode(query);
             using var http = _http.CreateClient();
-            var response = await http.GetStringAsync($"http://api.urbandictionary.com/v0/define?term={query}")
+            var response = await http.GetStringAsync(UrbanDictUrl + query)
                 .ConfigureAwait(false);
             try
             {
@@ -168,6 +169,10 @@ namespace Roki.Modules.Searches
                             .WithAuthor(item.Word, "https://i.imgur.com/p1NqHdf.jpg")
                             .WithDescription(item.Definition);
                     }, items.Length, 1).ConfigureAwait(false);
+                else
+                {
+                    await Context.Channel.SendErrorAsync($"No results for `{query}`");
+                }
             }
             catch (Exception e)
             {
