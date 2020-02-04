@@ -17,13 +17,15 @@ namespace Roki.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly DbService _db;
+        private readonly IDatabase _cache;
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public EventHandlers(DbService db, DiscordSocketClient client)
+        public EventHandlers(DbService db, DiscordSocketClient client, IRedisCache cache)
         {
             _db = db;
             _client = client;
+            _cache = cache.Redis.GetDatabase();
         }
 
         public async Task StartHandling()
@@ -300,6 +302,22 @@ namespace Roki.Services
                 if (!user.IsBot)
                     await uow.Users.GetOrCreateUserAsync(user).ConfigureAwait(false);
             });
+            return Task.CompletedTask;
+        }
+
+        private Task UpdateColor(SocketRole before, SocketRole after)
+        {
+            var _ = Task.Run(async () =>
+            {
+                var guild = after.Guild;
+                var currentGuildUser = guild.CurrentUser;
+                var currentTopRole = currentGuildUser.Roles.OrderByDescending(r => r.Position).FirstOrDefault();
+                if (currentTopRole == null)
+                    return;
+
+                await _cache.StringSetAsync($"color:{guild.Id}", currentTopRole.Color.RawValue);
+            });
+
             return Task.CompletedTask;
         }
 

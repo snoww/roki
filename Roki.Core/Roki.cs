@@ -99,7 +99,7 @@ namespace Roki
             var commandService = Services.GetService<CommandService>();
             
             await commandHandler.StartHandling().ConfigureAwait(false);
-            await new EventHandlers(_db, Client).StartHandling().ConfigureAwait(false);
+            await new EventHandlers(_db, Client, Cache).StartHandling().ConfigureAwait(false);
 
             await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
         }
@@ -240,7 +240,21 @@ namespace Roki
                 using var uow = _db.GetDbContext();
                 foreach (var guildUser in users)
                 {
-                    if (guildUser.IsBot) continue;
+                    if (guildUser.IsBot)
+                    {
+                        var role = guildUser.Roles.OrderByDescending(r => r.Position).FirstOrDefault();
+
+                        if (role == null)
+                        {
+                            await cache.StringSetAsync($"color:{guildUser.Guild.Id}", Color.Green.RawValue).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            await cache.StringSetAsync($"color:{guildUser.Guild.Id}", role.Color.RawValue).ConfigureAwait(false);
+                        }
+                        
+                        continue;
+                    }
                     
                     var user = await uow.Users.GetOrCreateUserAsync(guildUser).ConfigureAwait(false);
                     await cache.StringSetAsync($"currency:{guildUser.Guild.Id}:{guildUser.Id}", user.Currency, flags: CommandFlags.FireAndForget)

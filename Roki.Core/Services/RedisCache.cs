@@ -18,5 +18,11 @@ namespace Roki.Services
             
             Redis = ConnectionMultiplexer.Connect(config);
         }
+
+        // temp solution for static instantiation
+        public RedisCache()
+        {
+            Redis = ConnectionMultiplexer.Connect("localhost");
+        }
     }
 }
