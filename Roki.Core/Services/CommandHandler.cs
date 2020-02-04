@@ -196,8 +196,8 @@ namespace Roki.Services
             {
                 Logger.Info("Command parsed after " + seconds + " ms\n\t" +
                             "User: {user} [{userid}]\n\t" +
-                            "Server: {guild} [{guildid}]\n\t" +
-                            "Channel: {channel} [{channelid}]\n\t" +
+                            "Server: {guild:l} [{guildid}]\n\t" +
+                            "Channel: {channel:l} [{channelid}]\n\t" +
                             "Message: {message}",
                     message.Author, message.Author.Id,
                     channel.Guild.Name, channel.Guild.Id,
@@ -225,10 +225,10 @@ namespace Roki.Services
             {
                 Logger.Warn("Command parsed after " + seconds + " ms\n\t" +
                             "User: {user} [{userid}]\n\t" +
-                            "Server: {guild} [{guildid}]\n\t" +
-                            "Channel: {channel} [{channelid}]\n\t" +
+                            "Server: {guild:l} [{guildid}]\n\t" +
+                            "Channel: {channel:l} [{channelid}]\n\t" +
                             "Message: {message}\n\t" +
-                            "Error: {error}",
+                            "Error: {error:l}",
                     message.Author, message.Author.Id, 
                     channel.Guild.Name, channel.Guild.Id,
                     channel.Name, channel.Id,
@@ -243,7 +243,7 @@ namespace Roki.Services
                             "Server: PRIVATE\n\t" +
                             "Channel: PRIVATE\n\t" +
                             "Message: {message}\n\t" +
-                            "Error: {error}",
+                            "Error: {error:l}",
                     message.Author, message.Author.Id,
                     message.Content,
                     error
