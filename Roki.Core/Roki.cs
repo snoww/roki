@@ -240,7 +240,7 @@ namespace Roki
                 using var uow = _db.GetDbContext();
                 foreach (var guildUser in users)
                 {
-                    if (guildUser.IsBot)
+                    if (guildUser.Id == Client.CurrentUser.Id)
                     {
                         var role = guildUser.Roles.OrderByDescending(r => r.Position).FirstOrDefault();
 
@@ -255,6 +255,9 @@ namespace Roki
                         
                         continue;
                     }
+                    
+                    if (guildUser.IsBot)
+                        continue;
                     
                     var user = await uow.Users.GetOrCreateUserAsync(guildUser).ConfigureAwait(false);
                     await cache.StringSetAsync($"currency:{guildUser.Guild.Id}:{guildUser.Id}", user.Currency, flags: CommandFlags.FireAndForget)
