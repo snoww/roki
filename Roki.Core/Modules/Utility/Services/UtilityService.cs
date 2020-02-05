@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using Discord;
 using Discord.WebSocket;
@@ -44,7 +45,7 @@ namespace Roki.Modules.Utility.Services
 
         public string Uwulate(string message)
         {
-            var result = string.Empty;
+            var result = new StringBuilder();
             for (int i = 0; i < message.Length; i++)
             {
                 var currChar = message[i];
@@ -56,11 +57,11 @@ namespace Roki.Modules.Utility.Services
                 {
                     case 'L':
                     case 'R':
-                        result += "W";
+                        result.Append("W");
                         break;
                     case 'l':
                     case 'r':
-                        result += "w";
+                        result.Append("w");
                         break;
                     // special case
                     case 'o':
@@ -71,21 +72,21 @@ namespace Roki.Modules.Utility.Services
                             case 'N':
                             case 'm':
                             case 'M':
-                                result += "yo";
+                                result.Append("yo");
                                 break;
                             default:
-                                result += currChar;
+                                result.Append(currChar);
                                 break;
                         }
                         break;
                     default:
-                        result += currChar;
+                        result.Append(currChar);
                         break;
                 }
             }
 
-            result += " uwu";
-            return result;
+            result.Append(" uwu");
+            return result.ToString();
         }
     }
 }
