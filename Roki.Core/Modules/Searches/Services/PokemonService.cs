@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -121,22 +123,32 @@ namespace Roki.Modules.Searches.Services
                 return pokemon.Species;
             }
 
-            var chain = string.Empty;
-            
-            chain += $"{pokemon.Species} > {GetEvolutionChain(uow, uow.Context.Pokedex.First(p => p.Name == pokemon.Evolutions.First()))}";
-            if (pokemon.Evolutions.Length <= 1) return chain;
+            var chain = new StringBuilder();
+
+            chain.Append($"{pokemon.Species} > {GetEvolutionChain(uow, uow.Context.Pokedex.First(p => p.Name == pokemon.Evolutions.First()))}");
+            if (pokemon.Evolutions.Length <= 1) return chain.ToString();
             
             foreach (var ev in pokemon.Evolutions.Skip(1))
             {
-                var pad = string.Empty;
+                var pad = new StringBuilder();
                 if (pokemon.PreEvolution != null)
-                    pad += $"{Regex.Replace(pokemon.PreEvolution + pokemon.Species, ".", " ")}   ";
+                    pad.Append($"{Regex.Replace(pokemon.PreEvolution + pokemon.Species, ".", " ")}   ");
                 else
-                    pad += Regex.Replace(pokemon.Species, ".", " ");
-                chain += $"\n{pad} > {GetEvolutionChain(uow, uow.Context.Pokedex.First(p => p.Name == ev))}";
+                    pad.Append(Regex.Replace(pokemon.Species, ".", " "));
+                chain.Append($"\n{pad} > {GetEvolutionChain(uow, uow.Context.Pokedex.First(p => p.Name == ev))}");
             }
             
-            return chain;
+            return chain.ToString();
+        }
+
+        public static string FormatStats(Pokemon pokemon)
+        {
+            var stats = new[] {pokemon.Hp, pokemon.Attack, pokemon.Defence, pokemon.SpecialAttack, pokemon.SpecialDefense, pokemon.Speed};
+            var max = (int) Math.Ceiling(Math.Log10(stats.Max()));
+
+            return max == 2 
+                ? $"```css\nHP: {stats[0],2}|Atk: {stats[1],2}|Def: {stats[2],2}\nSpA: {stats[3],2}|SpD: {stats[4],2}|Spd: {stats[5],2}```" 
+                : $"```css\nHP: {stats[0],3}|Atk: {stats[1],3}|Def: {stats[2],3}\nSpA: {stats[3],3}|SpD: {stats[4],3}|Spd: {stats[5],3}```";
         }
 
         public async Task<Ability> GetAbilityAsync(string query)

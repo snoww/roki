@@ -37,17 +37,15 @@ namespace Roki.Modules.Searches
                 var types = pokemon.Type0 + (string.IsNullOrEmpty(pokemon.Type1) ? string.Empty : $", {pokemon.Type1}");
                 var abilities = pokemon.Ability0 + (string.IsNullOrEmpty(pokemon.Ability1) ? string.Empty : $", {pokemon.Ability1}") +
                                 (string.IsNullOrEmpty(pokemon.AbilityH) ? string.Empty : $", {Format.Italics(pokemon.AbilityH)}");
-                var baseStats = $"`HP:  {pokemon.Hp}|Atk: {pokemon.Attack}|Def: {pokemon.Defence}\nSpa: {pokemon.SpecialAttack}" +
-                                $"|Spd: {pokemon.SpecialDefense}|Spe: {pokemon.Speed}`";
-                
+
                 var embed = new EmbedBuilder().WithColor(Service.GetColorOfPokemon(pokemon.Color))
                     .WithTitle($"#{pokemon.Number:D3} {pokemon.Species}")
                     .AddField("Types", types, true)
                     .AddField("Abilities", abilities, true)
-                    .AddField("Base Stats", baseStats, true)
+                    .AddField("Base Stats", PokemonService.FormatStats(pokemon), true)
                     .AddField("Height", $"{pokemon.Height:N1} m", true)
                     .AddField("Weight", $"{pokemon.Weight} kg", true)
-                    .AddField("Evolution", Format.Code(Service.GetEvolution(pokemon)))
+                    .AddField("Evolution", $"```php\n{Service.GetEvolution(pokemon)}```")
                     .AddField("Egg Groups", string.Join(", ", pokemon.EggGroups), true);
 
                 if (pokemon.MaleRatio.HasValue)
