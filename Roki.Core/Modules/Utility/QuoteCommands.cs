@@ -14,7 +14,7 @@ namespace Roki.Modules.Utility
     public partial class Utility
     {
         [Group]
-        public class QuoteCommands : RokiSubmodule<QuoteService>
+        public class QuoteCommands : RokiSubmodule
         {
             private readonly DbService _db;
 
