@@ -54,5 +54,35 @@ namespace Roki.Services.Database
 
             return Task.CompletedTask;
         }
+
+        public Task MigrateQuotes()
+        {
+            var _ = Task.Run(async () =>
+            {
+                Logger.Info("Starting quotes migration");
+                using var uow = _db.GetDbContext();
+                var quotes = uow.Context.Quotes.OrderBy(x => x.Id);
+                var collection = Mongo.GetCollection<Quote>("quotes");
+
+                foreach (var quote in quotes)
+                {
+                    Logger.Info("Adding quote {number}", quote.Id);
+                    var mongoQuote = new Quote
+                    {
+                        AuthorId = quote.AuthorId,
+                        Context = quote.Context,
+                        DateAdded = quote.DateAdded,
+                        GuildId = quote.GuildId,
+                        Keyword = quote.Keyword,
+                        Text = quote.Text,
+                        UseCount = quote.UseCount
+                    };
+                    
+                    await collection.InsertOneAsync(mongoQuote).ConfigureAwait(false);
+                }
+            });
+
+            return Task.CompletedTask;
+        }
     }
 }
