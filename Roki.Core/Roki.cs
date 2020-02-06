@@ -164,8 +164,7 @@ namespace Roki
                     
                     var migration = new Migration(_db);
                     await migration.MigrateStore();
-                    
-
+                    await migration.MigrateTransactions();
                 });
 
                 return Task.CompletedTask;

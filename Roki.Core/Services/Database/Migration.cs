@@ -117,5 +117,36 @@ namespace Roki.Services.Database
 
             return Task.CompletedTask;
         }
+        
+        public Task MigrateTransactions()
+        {
+            var _ = Task.Run(async () =>
+            {
+                Logger.Info("Starting transaction history migration");
+                using var uow = _db.GetDbContext();
+                var transactions = uow.Context.Transactions.OrderBy(x => x.Id);
+                var collection = Mongo.GetCollection<Transaction>("transactions");
+
+                foreach (var transaction in transactions)
+                {
+                    Logger.Info("Adding transaction {number}", transaction.Id);
+                    var mongoTransaction = new Transaction
+                    {
+                        Amount = transaction.Amount,
+                        ChannelId = transaction.ChannelId,
+                        From = transaction.From,
+                        GuildId = transaction.GuildId,
+                        MessageId = transaction.MessageId,
+                        Reason = transaction.Reason,
+                        To = transaction.To,
+                        Date = transaction.TransactionDate
+                    };
+                    
+                    await collection.InsertOneAsync(mongoTransaction).ConfigureAwait(false);
+                }
+            });
+
+            return Task.CompletedTask;
+        }
     }
 }
