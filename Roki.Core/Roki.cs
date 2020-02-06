@@ -9,6 +9,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 using NLog;
 using Roki.Extensions;
 using Roki.Services;
@@ -20,6 +21,8 @@ namespace Roki
     public class Roki
     {
         private readonly DbService _db;
+        private readonly IMongoDatabase _database = MongoService.Instance.Database;
+
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private RokiConfig Config { get; }
@@ -27,7 +30,7 @@ namespace Roki
         private CommandService CommandService { get; }
         private IRedisCache Cache { get; }
         private IServiceProvider Services { get; set; }
-        
+
         public static Properties Properties { get; private set; }
         public static Color OkColor { get; private set; }
         public static Color ErrorColor { get; private set; }
