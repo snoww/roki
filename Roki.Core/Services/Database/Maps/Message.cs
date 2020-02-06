@@ -13,7 +13,7 @@ namespace Roki.Services.Database.Maps
         public ulong ChannelId { get; set; }
         public ulong? GuildId { get; set; }
         public string Content { get; set; }
-        public List<Edit> Edits { get; set; }
+        public List<Edit> Edits { get; set; } = new List<Edit>();
         public DateTimeOffset Timestamp { get; set; }
         public bool IsDeleted { get; set; }
     }
