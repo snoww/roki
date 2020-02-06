@@ -17,15 +17,14 @@ namespace Roki.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly DbService _db;
-        private readonly IDatabase _cache;
-
+        
+        private static readonly IDatabase Cache = RedisCache.Instance.Cache;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public EventHandlers(DbService db, DiscordSocketClient client, IRedisCache cache)
+        public EventHandlers(DbService db, DiscordSocketClient client)
         {
             _db = db;
             _client = client;
-            _cache = cache.Redis.GetDatabase();
         }
 
         public async Task StartHandling()
@@ -320,7 +319,7 @@ namespace Roki.Services
                 if (currentTopRole == null)
                     return;
 
-                await _cache.StringSetAsync($"color:{after.Guild.Id}", currentTopRole.Color.RawValue);
+                await Cache.StringSetAsync($"color:{after.Guild.Id}", currentTopRole.Color.RawValue);
             });
 
             return Task.CompletedTask;
@@ -338,7 +337,7 @@ namespace Roki.Services
                 if (currentTopRole == null || currentTopRole != after)
                     return;
 
-                await _cache.StringSetAsync($"color:{guild.Id}", currentTopRole.Color.RawValue);
+                await Cache.StringSetAsync($"color:{guild.Id}", currentTopRole.Color.RawValue);
             });
 
             return Task.CompletedTask;
