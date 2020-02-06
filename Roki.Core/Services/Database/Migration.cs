@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -143,6 +144,53 @@ namespace Roki.Services.Database
                     };
                     
                     await collection.InsertOneAsync(mongoTransaction).ConfigureAwait(false);
+                }
+            });
+
+            return Task.CompletedTask;
+        }
+        
+        public Task MigrateMessages()
+        {
+            var _ = Task.Run(async () =>
+            {
+                Logger.Info("Starting messages migration");
+                using var uow = _db.GetDbContext();
+                var messages = uow.Context.Messages.OrderBy(x => x.Timestamp);
+                var collection = Mongo.GetCollection<Message>("messages");
+
+                foreach (var message in messages)
+                {
+                    Logger.Info("Adding messageid [{number}]", message.MessageId);
+                    var findMessage = await collection.Find(m => m.MessageId == message.MessageId).FirstOrDefaultAsync();
+                    if (findMessage != null)
+                    {
+                        findMessage.Edits.Add(new Edit
+                        {
+                            Content = message.Content,
+                            EditedTimestamp = message.EditedTimestamp ?? message.Timestamp
+                        });
+                        
+                        continue;
+                    }
+                    
+                    var mongoMessage = new Message
+                    {
+                        AuthorId = message.AuthorId,
+                        ChannelId = message.ChannelId,
+                        Content = message.Content,
+                        GuildId = message.GuildId,
+                        IsDeleted = message.IsDeleted,
+                        MessageId = message.MessageId,
+                        Timestamp = message.Timestamp
+                    };
+
+                    if (message.EditedTimestamp != null)
+                    {
+                        mongoMessage.Edits.Add(new Edit{Content = message.Content, EditedTimestamp = message.EditedTimestamp ?? message.Timestamp});
+                    }
+
+                    await collection.InsertOneAsync(mongoMessage).ConfigureAwait(false);
                 }
             });
 
