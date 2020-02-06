@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using MongoDB.Driver;
@@ -154,6 +155,7 @@ namespace Roki.Services.Database
         {
             var _ = Task.Run(async () =>
             {
+                var sw = Stopwatch.StartNew();
                 Logger.Info("Starting messages migration");
                 using var uow = _db.GetDbContext();
                 var messages = uow.Context.Messages.OrderBy(x => x.Timestamp);
@@ -192,6 +194,9 @@ namespace Roki.Services.Database
 
                     await collection.InsertOneAsync(mongoMessage).ConfigureAwait(false);
                 }
+                
+                sw.Stop();
+                Logger.Info("Took {time:l}", sw.Elapsed.ToReadableString());
             });
 
             return Task.CompletedTask;
