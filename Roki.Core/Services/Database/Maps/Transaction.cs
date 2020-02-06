@@ -8,12 +8,12 @@ namespace Roki.Services.Database.Maps
     {
         [BsonId(IdGenerator = typeof(CombGuidGenerator))]
         public Guid Id { get; set; }
-        public ulong From { get; set; }
-        public ulong To { get; set; }
+        public ulong? From { get; set; }
+        public ulong? To { get; set; }
         public long Amount { get; set; }
         public string Reason { get; set; }
-        public ulong GuildId { get; set; }
-        public ulong ChannelId { get; set; }
+        public ulong? GuildId { get; set; }
+        public ulong? ChannelId { get; set; }
         public ulong MessageId { get; set; }
         public DateTimeOffset Date { get; set; } = DateTimeOffset.UtcNow;
     }
