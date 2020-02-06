@@ -27,7 +27,7 @@ namespace Roki.Extensions
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static readonly Random Rng = new Random();
-        private static readonly IDatabase Cache = new RedisCache().Redis.GetDatabase();
+        private static readonly IDatabase Cache = RedisCache.Instance.Cache;
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
 
         public static EmbedBuilder WithDynamicColor(this EmbedBuilder embed, ICommandContext context)
