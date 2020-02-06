@@ -9,14 +9,14 @@ namespace Roki.Services
     {
         public static MongoService Instance { get; } = new MongoService();
         
-        public MongoClient Client { get; }
+        public IMongoDatabase Database { get; }
 
         private MongoService()
         {
             var conventions = new ConventionPack {new LowerCaseElementNameConvention()};
             ConventionRegistry.Register("LowerCaseElementName", conventions, t => true);
 
-            Client = new MongoClient();
+            Database = new MongoClient().GetDatabase("roki");
         }
     }
     
