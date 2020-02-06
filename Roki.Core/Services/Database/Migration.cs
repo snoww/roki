@@ -39,6 +39,7 @@ namespace Roki.Services.Database
                         Currency = user.Currency,
                         Discriminator = user.Discriminator,
                         Id = user.UserId,
+                        Xp = user.TotalXp,
                         Inventory = user.Inventory?.Deserialize<List<Item>>(),
                         InvestingAccount = user.InvestingAccount,
                         LastLevelUp = user.LastLevelUp,
