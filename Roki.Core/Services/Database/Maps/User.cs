@@ -15,6 +15,7 @@ namespace Roki.Services.Database.Maps
         public string Notification { get; set; } = "dm";
         public long Currency { get; set; }
         public List<Item> Inventory { get; set; }
+        public List<Subscription> Subscriptions { get; set; }
         public decimal InvestingAccount { get; set; } = 50000;
         public List<Investment> Portfolio { get; set; }
     }
@@ -31,5 +32,12 @@ namespace Roki.Services.Database.Maps
         public string Position { get; set; }
         public long Shares { get; set; }
         public DateTimeOffset? InterestDate { get; set; }
+    }
+
+    public class Subscription
+    {
+        public ulong GuildId { get; set; }
+        public DateTimeOffset StartDate { get; set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset EndDate { get; set; }
     }
 }
