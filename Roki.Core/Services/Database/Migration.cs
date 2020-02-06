@@ -84,5 +84,38 @@ namespace Roki.Services.Database
 
             return Task.CompletedTask;
         }
+        
+        public Task MigrateStore()
+        {
+            var _ = Task.Run(async () =>
+            {
+                Logger.Info("Starting store migration");
+                using var uow = _db.GetDbContext();
+                var listings = uow.Context.Listings.OrderBy(x => x.Id);
+                var collection = Mongo.GetCollection<Listing>("store");
+
+                foreach (var listing in listings)
+                {
+                    Logger.Info("Adding store item {number}", listing.Id);
+                    var mongoListing = new Listing
+                    {
+                        Category = listing.Category,
+                        Cost = listing.Cost,
+                        Description = listing.Description,
+                        Details = listing.Details,
+                        Item = listing.Item,
+                        ListDate = listing.ListDate,
+                        Quantity = listing.Quantity,
+                        SellerId = listing.SellerId,
+                        SubscriptionDays = listing.SubscriptionDays,
+                        Type = listing.Type
+                    };
+                    
+                    await collection.InsertOneAsync(mongoListing).ConfigureAwait(false);
+                }
+            });
+
+            return Task.CompletedTask;
+        }
     }
 }
