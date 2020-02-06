@@ -11,18 +11,17 @@ namespace Roki.Modules.Games.Services
 {
     public class ShowdownService : IRokiService
     {
-        private readonly IDatabase _cache;
+        private static readonly IDatabase Cache = RedisCache.Instance.Cache;
         
         public readonly ConcurrentDictionary<ulong, Showdown> ActiveGames = new ConcurrentDictionary<ulong, Showdown>();
 
-        public ShowdownService(IRedisCache cache)
+        public ShowdownService()
         {
-            _cache = cache.Redis.GetDatabase();
         }
 
         public async Task<string> GetBetPokemonGame(string uid)
         {
-            var game = await _cache.StringGetAsync($"pokemon:{uid}").ConfigureAwait(false);
+            var game = await Cache.StringGetAsync($"pokemon:{uid}").ConfigureAwait(false);
             if (game.HasValue)
             {
                 return game.ToString();

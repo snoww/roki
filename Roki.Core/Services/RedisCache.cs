@@ -3,26 +3,14 @@ using StackExchange.Redis;
 
 namespace Roki.Services
 {
-    public interface IRedisCache
+    public sealed class RedisCache
     {
-        public ConnectionMultiplexer Redis { get; }
-    }
+        public static RedisCache Instance { get; } = new RedisCache();
+        public IDatabase Cache { get; }
 
-    public class RedisCache : IRedisCache
-    {
-        public ConnectionMultiplexer Redis { get; }
-        
-        public RedisCache(string credentials)
+        private RedisCache()
         {
-            var config = ConfigurationOptions.Parse(credentials);
-            
-            Redis = ConnectionMultiplexer.Connect(config);
-        }
-
-        // temp solution for static instantiation
-        public RedisCache()
-        {
-            Redis = ConnectionMultiplexer.Connect("localhost");
+            Cache = ConnectionMultiplexer.Connect("localhost").GetDatabase();
         }
     }
 }
