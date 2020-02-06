@@ -13,6 +13,7 @@ using MongoDB.Driver;
 using NLog;
 using Roki.Extensions;
 using Roki.Services;
+using Roki.Services.Database;
 using StackExchange.Redis;
 using Victoria;
 
@@ -160,6 +161,9 @@ namespace Roki
                     }
                     
                     Logger.Info("Roki is ready");
+                    
+                    var migration = new Migration(_db);
+                    await migration.MigrateUsers();
                 });
 
                 return Task.CompletedTask;
