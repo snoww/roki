@@ -37,7 +37,7 @@ namespace Roki.Services.Database
                         Username = user.Username,
                         AvatarId = user.AvatarId,
                         Currency = user.Currency,
-                        Discriminator = user.Discriminator,
+                        Discriminator = int.Parse(user.Discriminator),
                         Id = user.UserId,
                         Xp = user.TotalXp,
                         Inventory = user.Inventory?.Deserialize<List<Item>>(),
