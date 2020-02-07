@@ -161,9 +161,6 @@ namespace Roki
                     }
                     
                     Logger.Info("Roki is ready");
-                    
-                    var migration = new Migration(_db);
-                    await migration.MigrateMessages();
                 });
 
                 return Task.CompletedTask;
