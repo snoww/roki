@@ -13,12 +13,13 @@ namespace Roki.Services.Database
     public class Migration
     {
         private readonly DbService _db;
-        private static readonly IMongoDatabase Mongo = MongoService.Instance.Database;
+        private readonly IMongoDatabase _mongo;
         private static Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public Migration(DbService db)
+        public Migration(DbService db, IMongoDatabase mongo)
         {
             _db = db;
+            _mongo = mongo;
         }
 
         public Task MigrateUsers()
@@ -28,7 +29,7 @@ namespace Roki.Services.Database
                 Logger.Info("Starting users migration");
                 using var uow = _db.GetDbContext();
                 var users = uow.Context.Users.OrderBy(x => x.Id);
-                var collection = Mongo.GetCollection<User>("users");
+                var collection = _mongo.GetCollection<User>("users");
 
                 var count = 0;
                 foreach (var user in users)
@@ -64,7 +65,7 @@ namespace Roki.Services.Database
                 Logger.Info("Starting quotes migration");
                 using var uow = _db.GetDbContext();
                 var quotes = uow.Context.Quotes.OrderBy(x => x.Id);
-                var collection = Mongo.GetCollection<Quote>("quotes");
+                var collection = _mongo.GetCollection<Quote>("quotes");
 
                 foreach (var quote in quotes)
                 {
@@ -94,7 +95,7 @@ namespace Roki.Services.Database
                 Logger.Info("Starting store migration");
                 using var uow = _db.GetDbContext();
                 var listings = uow.Context.Listings.OrderBy(x => x.Id);
-                var collection = Mongo.GetCollection<Listing>("store");
+                var collection = _mongo.GetCollection<Listing>("store");
 
                 foreach (var listing in listings)
                 {
@@ -127,7 +128,7 @@ namespace Roki.Services.Database
                 Logger.Info("Starting transaction history migration");
                 using var uow = _db.GetDbContext();
                 var transactions = uow.Context.Transactions.OrderBy(x => x.Id);
-                var collection = Mongo.GetCollection<Transaction>("transactions");
+                var collection = _mongo.GetCollection<Transaction>("transactions");
 
                 foreach (var transaction in transactions)
                 {
@@ -159,7 +160,7 @@ namespace Roki.Services.Database
                 Logger.Info("Starting messages migration");
                 using var uow = _db.GetDbContext();
                 var messages = uow.Context.Messages.OrderBy(x => x.Timestamp);
-                var collection = Mongo.GetCollection<Message>("messages");
+                var collection = _mongo.GetCollection<Message>("messages");
 
                 foreach (var message in messages)
                 {

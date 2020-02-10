@@ -5,13 +5,16 @@ using Roki.Services.Database.Core;
 
 namespace Roki.Services
 {
-    public sealed class MongoService
+    public interface IMongoService
     {
-        public static MongoService Instance { get; } = new MongoService();
-        
+        public IMongoDatabase Database { get; }
+    }
+    
+    public sealed class MongoService : IMongoService
+    {
         public IMongoDatabase Database { get; }
 
-        private MongoService()
+        public MongoService()
         {
             var conventions = new ConventionPack {new LowerCaseElementNameConvention()};
             ConventionRegistry.Register("LowerCaseElementName", conventions, t => true);
