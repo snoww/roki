@@ -175,7 +175,6 @@ namespace Roki
                                         ChannelId = textChannel.Id,
                                         Name = textChannel.Name,
                                         GuildId = textChannel.Guild.Id,
-                                        GuildName = textChannel.Guild.Name,
                                         IsNsfw = textChannel.IsNsfw
                                     });
                                 }
