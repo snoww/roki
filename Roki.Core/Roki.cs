@@ -22,13 +22,13 @@ namespace Roki
     public class Roki
     {
         private readonly DbService _db;
-        private readonly IMongoDatabase _database = MongoService.Instance.Database;
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private RokiConfig Config { get; }
         private DiscordSocketClient Client { get; }
         private CommandService CommandService { get; }
+        private IMongoDatabase Database { get; }
         private IRedisCache Cache { get; }
         private IServiceProvider Services { get; set; }
 
@@ -41,10 +41,11 @@ namespace Roki
             LogSetup.SetupLogger();
 
             Config = new RokiConfig();
+            Database = new MongoService().Database;
             Cache = new RedisCache(Config.RedisConfig);
             
             _db = new DbService(Config.Db.ConnectionString);
-            _db.Setup();
+            _db.Setup(); ;
 
             // global properties
             // future: guild specific properties
@@ -176,6 +177,7 @@ namespace Roki
             var service = new ServiceCollection()
                 .AddSingleton<IRokiConfig>(Config)
                 .AddSingleton(_db)
+                .AddSingleton(Database)
                 .AddSingleton(Cache)
                 .AddSingleton(Client)
                 .AddSingleton(CommandService)
