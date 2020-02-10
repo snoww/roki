@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MongoDB.Driver;
 using NLog;
 using Roki.Extensions;
+using Roki.Services.Database.Data;
 using Roki.Services.Database.Maps;
 
 namespace Roki.Services.Database
@@ -200,6 +201,41 @@ namespace Roki.Services.Database
                 Logger.Info("Took {time:l}", sw.Elapsed.ToReadableString());
             });
 
+            return Task.CompletedTask;
+        }
+
+        public Task MigrateJeopardy()
+        {
+            var _ = Task.Run(async () =>
+            {
+                var sw = Stopwatch.StartNew();
+                Logger.Info("Starting jeopardy migration");
+
+                var collection = _mongo.GetCollection<JClue>("jeopardy");
+                using var uow = _db.GetDbContext();
+                var query = from clue in uow.Context.Set<Clues>()
+                            join document in uow.Context.Set<Documents>() on clue.Id equals document.Id
+                            join classification in uow.Context.Set<Classification>() on clue.Id equals classification.ClueId
+                            join categories in uow.Context.Set<Categories>() on classification.CategoryId equals categories.Id
+                            select new JClue
+                            {
+                                Category = categories.Category,
+                                Clue = document.Clue,
+                                Answer = document.Answer,
+                                Value = clue.Value
+                            };
+
+                var count = 0;
+                foreach (var clue in query)
+                {
+                    Logger.Info("Adding clue {counter}", count++);
+                    await collection.InsertOneAsync(clue).ConfigureAwait(false);
+                }
+                
+                sw.Stop();
+                Logger.Info("Took {time:l}", sw.Elapsed.ToReadableString());
+            });
+            
             return Task.CompletedTask;
         }
     }
