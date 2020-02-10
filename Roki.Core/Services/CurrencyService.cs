@@ -16,11 +16,12 @@ namespace Roki.Services
     public class CurrencyService : ICurrencyService
     {
         private readonly DbService _db;
-        private static readonly IDatabase Cache = RedisCache.Instance.Cache;
+        private readonly IDatabase _cache;
 
-        public CurrencyService(DbService db)
+        public CurrencyService(DbService db, IRedisCache cache)
         {
             _db = db;
+            _cache = cache.Redis.GetDatabase();
         }
 
         public async Task<bool> RemoveAsync(ulong userId, string reason, long amount, ulong guildId, ulong channelId, ulong messageId)
@@ -106,7 +107,7 @@ namespace Roki.Services
 
         public async Task<long> GetCurrency(ulong userId, ulong guildId)
         { 
-            return (long) await Cache.StringGetAsync($"currency:{guildId}:{userId}").ConfigureAwait(false);
+            return (long) await _cache.StringGetAsync($"currency:{guildId}:{userId}").ConfigureAwait(false);
         }
 
         public async Task<bool> CacheChangeAsync(ulong userId, ulong guildId, long amount)
@@ -114,17 +115,17 @@ namespace Roki.Services
             if (amount == 0)
                 return false;
             
-            var currency = await Cache.StringGetAsync($"currency:{guildId}:{userId}").ConfigureAwait(false);
+            var currency = await _cache.StringGetAsync($"currency:{guildId}:{userId}").ConfigureAwait(false);
             var cached = (long) currency;
             if (cached + amount < 0) return false;
             
-            await Cache.StringIncrementAsync($"currency:{guildId}:{userId}", amount, CommandFlags.FireAndForget).ConfigureAwait(false);
+            await _cache.StringIncrementAsync($"currency:{guildId}:{userId}", amount, CommandFlags.FireAndForget).ConfigureAwait(false);
             return true;
         }
 
         private async Task ChangeBotCacheAsync(ulong guildId, long amount)
         {
-            await Cache.StringIncrementAsync($"currency:{guildId}:{Roki.Properties.BotId}", amount, CommandFlags.FireAndForget).ConfigureAwait(false);
+            await _cache.StringIncrementAsync($"currency:{guildId}:{Roki.Properties.BotId}", amount, CommandFlags.FireAndForget).ConfigureAwait(false);
         }
     }
 }
