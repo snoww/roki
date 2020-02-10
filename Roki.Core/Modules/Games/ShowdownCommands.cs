@@ -8,7 +8,6 @@ using Roki.Extensions;
 using Roki.Modules.Games.Common;
 using Roki.Modules.Games.Services;
 using Roki.Services;
-using StackExchange.Redis;
 
 namespace Roki.Modules.Games
 {
@@ -20,12 +19,14 @@ namespace Roki.Modules.Games
             private readonly ICurrencyService _currency;
             private readonly DbService _db;
             private readonly DiscordSocketClient _client;
+            private readonly IRedisCache _cache;
 
-            public ShowdownCommands(ICurrencyService currency, DbService db, DiscordSocketClient client)
+            public ShowdownCommands(ICurrencyService currency, DbService db, DiscordSocketClient client, IRedisCache cache)
             {
                 _currency = currency;
                 _db = db;
                 _client = client;
+                _cache = cache;
             }
 
             [RokiCommand, Description, Aliases, Usage]
@@ -34,7 +35,7 @@ namespace Roki.Modules.Games
             {
                 if (gen > 8 || gen < 4) gen = 8;
                 
-                var showdown = new Showdown(_currency, _db, _client, (ITextChannel)Context.Channel, gen, Service);
+                var showdown = new Showdown(_currency, _db, _client, (ITextChannel)Context.Channel, gen, Service, _cache);
                 
                 if (Service.ActiveGames.TryAdd(Context.Channel.Id, showdown))
                 {
