@@ -36,6 +36,7 @@ namespace Roki.Services.Database.Maps
 
     public class Subscription
     {
+        public Guid Id { get; set; }
         public ulong GuildId { get; set; }
         public DateTimeOffset StartDate { get; set; } = DateTimeOffset.UtcNow;
         public DateTimeOffset EndDate { get; set; }
