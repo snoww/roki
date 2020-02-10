@@ -1,13 +1,12 @@
 using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
+using MongoDB.Bson.Serialization.Attributes;
 
-namespace Roki.Services.Database.Core
+namespace Roki.Services.Database.Maps
 {
-    [Table("guilds")]
-    public class Guild : DbEntity
+    public class Guild
     {
-        [Key]
+        [BsonId]
         public ulong GuildId { get; set; }
         public string Name { get; set; }
         public string IconId { get; set; }
@@ -18,14 +17,9 @@ namespace Roki.Services.Database.Core
         public string RegionId { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
         public bool Available { get; set; } = true;
-        
-        [Column(TypeName = "json")]
-        public string Users { get; set; }
-        
-        [Column(TypeName = "json")]
-        public string XpRewards { get; set; } 
+        public List<XpReward> XpRewards { get; set; } = new List<XpReward>();
     }
-
+    
     public class XpReward
     {
         public string Id { get; set; }
