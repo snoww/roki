@@ -269,10 +269,6 @@ namespace Roki
                     await cache.StringSetAsync($"currency:{guildUser.Guild.Id}:{guildUser.Id}", user.Currency, flags: CommandFlags.FireAndForget)
                         .ConfigureAwait(false);
                 }
-                
-                var migration = new Migration(_db, Database);
-                await migration.MigrateMessages().ConfigureAwait(false);
-                // await migration.MigrateJeopardy().ConfigureAwait(false);
             });
             
             return Task.CompletedTask;
