@@ -104,7 +104,7 @@ namespace Roki
             var commandService = Services.GetService<CommandService>();
             
             await commandHandler.StartHandling().ConfigureAwait(false);
-            await new EventHandlers(_db, Database, Client, Cache).StartHandling().ConfigureAwait(false);
+            await new EventHandlers(Database, Client, Cache).StartHandling().ConfigureAwait(false);
 
             await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
         }
@@ -133,9 +133,10 @@ namespace Roki
                 {
                     try
                     {
-                        var guildsCollection = Database.GetCollection<Guild>("guilds");
-                        var channelsCollection = Database.GetCollection<Channel>("channels");
+                        var guildCollection = Database.GetCollection<Guild>("guilds");
+                        var channelCollection = Database.GetCollection<Channel>("channels");
                         var botCurrency = Database.GetCollection<User>("users").Find(u => u.Id == Properties.BotId).First().Currency;
+                        
                         var cache = Cache.Redis.GetDatabase();
                         await Client.DownloadUsersAsync(Client.Guilds).ConfigureAwait(false);
                         Logger.Info("Loading cache");
@@ -147,37 +148,31 @@ namespace Roki
                                 .ConfigureAwait(false);
                             await UpdateCache(cache, guild.Users).ConfigureAwait(false);
 
-                            var gld = await guildsCollection.Find(g => g.GuildId == guild.Id).FirstOrDefaultAsync();
-                            if (gld == null)
-                            {
-                                await guildsCollection.InsertOneAsync(new Guild
-                                {
-                                    GuildId = guild.Id,
-                                    Name = guild.Name,
-                                    IconId = guild.IconId,
-                                    ChannelCount = guild.Channels.Count,
-                                    MemberCount = guild.MemberCount,
-                                    EmoteCount = guild.Emotes.Count,
-                                    OwnerId = guild.OwnerId,
-                                    RegionId = guild.VoiceRegionId,
-                                    CreatedAt = guild.CreatedAt
-                                });
-                            }
-                            
+                            var updateGuild = Builders<Guild>.Update.Set(g => g.GuildId, guild.Id)
+                                .Set(g => g.Name, guild.Name)
+                                .Set(g => g.IconId, guild.IconId)
+                                .Set(g => g.ChannelCount, guild.Channels.Count)
+                                .Set(g => g.MemberCount, guild.MemberCount)
+                                .Set(g => g.EmoteCount, guild.Emotes.Count)
+                                .Set(g => g.OwnerId, guild.OwnerId)
+                                .Set(g => g.RegionId, guild.VoiceRegionId)
+                                .Set(g => g.CreatedAt, guild.CreatedAt);
+
+                            await guildCollection.FindOneAndUpdateAsync<Guild>(g => g.GuildId == guild.Id, updateGuild,
+                                new FindOneAndUpdateOptions<Guild> {IsUpsert = true});
+
                             foreach (var channel in guild.Channels)
                             {
-                                if (!(channel is SocketTextChannel textChannel)) continue;
-                                var chl = await channelsCollection.Find(c => c.ChannelId == textChannel.Id).FirstOrDefaultAsync();
-                                if (chl == null)
-                                {
-                                    await channelsCollection.InsertOneAsync(new Channel
-                                    {
-                                        ChannelId = textChannel.Id,
-                                        Name = textChannel.Name,
-                                        GuildId = textChannel.Guild.Id,
-                                        IsNsfw = textChannel.IsNsfw
-                                    });
-                                }
+                                if (!(channel is SocketTextChannel textChannel)) 
+                                    continue;
+
+                                var updateChannel = Builders<Channel>.Update.Set(c => c.ChannelId, textChannel.Id)
+                                    .Set(c => c.Name, textChannel.Name)
+                                    .Set(c => c.GuildId, textChannel.Guild.Id)
+                                    .Set(c => c.IsNsfw, textChannel.IsNsfw);
+
+                                await channelCollection.FindOneAndUpdateAsync<Channel>(c => c.ChannelId == textChannel.Id, updateChannel,
+                                    new FindOneAndUpdateOptions<Channel> {IsUpsert = true});
                             }
                         }
 
@@ -291,19 +286,13 @@ namespace Roki
                     if (guildUser.IsBot)
                         continue;
 
-                    var user = await collection.Find(u => u.Id == guildUser.Id).FirstOrDefaultAsync();
-                    if (user == null)
-                    {
-                        user = new User
-                        {
-                            Username = guildUser.Username,
-                            AvatarId = guildUser.AvatarId,
-                            Discriminator = int.Parse(guildUser.Discriminator),
-                            Id = guildUser.Id
-                        };
-                        
-                        await collection.InsertOneAsync(user).ConfigureAwait(false);
-                    }
+                    var userUpdate = Builders<User>.Update.Set(u => u.Id, guildUser.Id)
+                        .Set(u => u.Username, guildUser.Username)
+                        .Set(u => u.Discriminator, int.Parse(guildUser.Discriminator))
+                        .Set(u => u.AvatarId, guildUser.AvatarId);
+
+                    var user = await collection.FindOneAndUpdateAsync<User>(u => u.Id == guildUser.Id, userUpdate, 
+                        new FindOneAndUpdateOptions<User>{ReturnDocument = ReturnDocument.After, IsUpsert = true}).ConfigureAwait(false);
                     
                     await cache.StringSetAsync($"currency:{guildUser.Guild.Id}:{guildUser.Id}", user.Currency, flags: CommandFlags.FireAndForget)
                         .ConfigureAwait(false);

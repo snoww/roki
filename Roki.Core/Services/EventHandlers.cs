@@ -4,38 +4,36 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 using NLog;
 using Roki.Extensions;
 using Roki.Modules.Xp.Common;
-using Roki.Services.Database.Core;
 using Roki.Services.Database.Maps;
 using StackExchange.Redis;
-using Message = Roki.Services.Database.Core.Message;
-using User = Roki.Services.Database.Core.User;
 
 namespace Roki.Services
 {
     public class EventHandlers : IRokiService
     {
         private readonly DiscordSocketClient _client;
-        private readonly DbService _db;
-        private readonly IMongoDatabase _database;
         private readonly IDatabase _cache;
 
-        private readonly IMongoCollection<Services.Database.Maps.Message> _messagesCollection;
+        private readonly IMongoCollection<Message> _messageCollection;
+        private readonly IMongoCollection<Channel> _channelCollection;
+        private readonly IMongoCollection<Guild> _guildCollection;
+        private readonly IMongoCollection<User> _userCollection;
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public EventHandlers(DbService db, IMongoDatabase database, DiscordSocketClient client, IRedisCache cache)
+        public EventHandlers(IMongoDatabase database, DiscordSocketClient client, IRedisCache cache)
         {
-            _db = db;
-            _database = database;
             _client = client;
             _cache = cache.Redis.GetDatabase();
 
-            _messagesCollection = database.GetCollection<Services.Database.Maps.Message>("messages");
+            _messageCollection = database.GetCollection<Message>("messages");
+            _channelCollection = database.GetCollection<Channel>("channels");
+            _guildCollection = database.GetCollection<Guild>("guilds");
+            _userCollection = database.GetCollection<User>("users");
         }
 
         public async Task StartHandling()
@@ -62,17 +60,17 @@ namespace Roki.Services
 
         private Task MessageReceived(SocketMessage message)
         {
-            if (message.Author.IsBot) return Task.CompletedTask;
-            if (!(message.Channel is SocketTextChannel textChannel)) return Task.CompletedTask;
+            if (message.Author.IsBot) 
+                return Task.CompletedTask;
 
             UpdateXp(message).ConfigureAwait(false);
             
             var _ =  Task.Run(async () =>
             {
-                using var uow = _db.GetDbContext();
-                if (!await uow.Channels.IsLoggingEnabled(textChannel)) return;
-
-                var msg = new Services.Database.Maps.Message
+                if (!(await _channelCollection.Find(x => x.ChannelId == message.Channel.Id).FirstAsync()).Logging) 
+                    return;
+                
+                await _messageCollection.InsertOneAsync(new Message
                 {
                     MessageId = message.Id,
                     AuthorId = message.Author.Id,
@@ -81,9 +79,7 @@ namespace Roki.Services
                     Content = message.Content,
                     Attachments = message.Attachments?.Select(a => a.Url).ToList(),
                     Timestamp = message.Timestamp
-                };
-
-                await _messagesCollection.InsertOneAsync(msg).ConfigureAwait(false);
+                }).ConfigureAwait(false);
             });
 
             return Task.CompletedTask;
@@ -96,18 +92,18 @@ namespace Roki.Services
             if (after.EditedTimestamp == null) return Task.CompletedTask;
             var _ = Task.Run(async () =>
             {
-                using var uow = _db.GetDbContext();
                 if (after.Channel is SocketTextChannel textChannel)
-                    if (!await uow.Channels.IsLoggingEnabled(textChannel)) return;
+                    if (!(await _channelCollection.Find(x => x.ChannelId == textChannel.Id).FirstAsync()).Logging) 
+                        return;
                 
-                var update = Builders<Services.Database.Maps.Message>.Update.Push(m => m.Edits, new Edit
+                var update = Builders<Message>.Update.Push(m => m.Edits, new Edit
                 {
                     Content = after.Content,
                     Attachments = after.Attachments.Select(m => m.Url).ToList(),
                     EditedTimestamp = after.EditedTimestamp ?? after.Timestamp
                 });
 
-                await _messagesCollection.FindOneAndUpdateAsync(m => m.MessageId == after.Id, update).ConfigureAwait(false);
+                await _messageCollection.FindOneAndUpdateAsync(m => m.MessageId == after.Id, update).ConfigureAwait(false);
             });
                 
             return Task.CompletedTask;
@@ -118,13 +114,13 @@ namespace Roki.Services
             if (cache.HasValue && cache.Value.Author.IsBot) return Task.CompletedTask;
             var _ = Task.Run(async () =>
             {
-                using var uow = _db.GetDbContext();
                 if (channel is SocketTextChannel textChannel)
-                    if (!await uow.Channels.IsLoggingEnabled(textChannel).ConfigureAwait(false)) return;
+                    if (!(await _channelCollection.Find(x => x.ChannelId == textChannel.Id).FirstAsync()).Logging) 
+                        return;
 
-                var update = Builders<Services.Database.Maps.Message>.Update.Set(m => m.IsDeleted, true);
+                var update = Builders<Message>.Update.Set(m => m.IsDeleted, true);
 
-                await _messagesCollection.FindOneAndUpdateAsync(m => m.MessageId == cache.Id, update).ConfigureAwait(false);
+                await _messageCollection.FindOneAndUpdateAsync(m => m.MessageId == cache.Id, update).ConfigureAwait(false);
             });
             return Task.CompletedTask;
         }
@@ -133,15 +129,17 @@ namespace Roki.Services
         {
             var _ = Task.Run(async () =>
             {
-                using var uow = _db.GetDbContext();
                 if (channel is SocketTextChannel textChannel)
-                    if (!await uow.Channels.IsLoggingEnabled(textChannel).ConfigureAwait(false)) return;
+                    if (!(await _channelCollection.Find(x => x.ChannelId == textChannel.Id).FirstAsync()).Logging) 
+                        return;
+                
                 foreach (var cache in caches)
                 {
                     if (cache.HasValue && cache.Value.Author.IsBot) continue;
                     
-                    var update = Builders<Services.Database.Maps.Message>.Update.Set(m => m.IsDeleted, true);
-                    await _messagesCollection.FindOneAndUpdateAsync(m => m.MessageId == cache.Id, update).ConfigureAwait(false);
+                    var update = Builders<Message>.Update.Set(m => m.IsDeleted, true);
+                    
+                    await _messageCollection.FindOneAndUpdateAsync(m => m.MessageId == cache.Id, update).ConfigureAwait(false);
                 }
             });
             
@@ -152,11 +150,11 @@ namespace Roki.Services
         {
             var _ = Task.Run(async () =>
             {
-                using var uow = _db.GetDbContext();
-                var g = await uow.Guilds.GetOrCreateGuildAsync(guild).ConfigureAwait(false);
-                g.Available = true;
-                await uow.SaveChangesAsync().ConfigureAwait(false);
+                var update = Builders<Guild>.Update.Set(x => x.Available, true);
+                
+                await _guildCollection.FindOneAndUpdateAsync(x => x.GuildId == guild.Id, update).ConfigureAwait(false);
             });
+            
             return Task.CompletedTask;
         }
 
@@ -164,10 +162,9 @@ namespace Roki.Services
         {
             var _ = Task.Run(async () =>
             {
-                using var uow = _db.GetDbContext();
-                var g = await uow.Guilds.GetOrCreateGuildAsync(guild).ConfigureAwait(false);
-                g.Available = false;
-                await uow.SaveChangesAsync().ConfigureAwait(false);
+                var update = Builders<Guild>.Update.Set(x => x.Available, false);
+                
+                await _guildCollection.FindOneAndUpdateAsync(x => x.GuildId == guild.Id, update).ConfigureAwait(false);
             });
             return Task.CompletedTask;
         }
@@ -176,15 +173,15 @@ namespace Roki.Services
         {
             var _ = Task.Run(async () =>
             {
-                using var uow = _db.GetDbContext();
-                var guild = await uow.Guilds.GetOrCreateGuildAsync(before).ConfigureAwait(false);
-                guild.Name = after.Name;
-                guild.ChannelCount = after.Channels.Count;
-                guild.EmoteCount = after.Emotes.Count;
-                guild.IconId = after.IconId;
-                guild.MemberCount = after.MemberCount;
-                guild.RegionId = after.VoiceRegionId;
-                await uow.SaveChangesAsync().ConfigureAwait(false);
+                var updateGuild = Builders<Guild>.Update.Set(g => g.Name, after.Name)
+                    .Set(g => g.IconId, after.IconId)
+                    .Set(g => g.ChannelCount, after.Channels.Count)
+                    .Set(g => g.MemberCount, after.MemberCount)
+                    .Set(g => g.EmoteCount, after.Emotes.Count)
+                    .Set(g => g.OwnerId, after.OwnerId)
+                    .Set(g => g.RegionId, after.VoiceRegionId);
+
+                await _guildCollection.FindOneAndUpdateAsync(g => g.GuildId == after.Id, updateGuild).ConfigureAwait(false);
             });
             return Task.CompletedTask;
         }
@@ -194,10 +191,9 @@ namespace Roki.Services
             if (!(channel is SocketTextChannel textChannel)) return Task.CompletedTask;
             var _ = Task.Run(async () =>
             {
-                using var uow = _db.GetDbContext();
-                var ch = await uow.Channels.GetOrCreateChannelAsync(textChannel).ConfigureAwait(false);
-                ch.Deleted = true;
-                await uow.SaveChangesAsync().ConfigureAwait(false);
+                var updateChannel = Builders<Channel>.Update.Set(c => c.IsDeleted, true);
+                
+                await _channelCollection.FindOneAndUpdateAsync(c => c.ChannelId == textChannel.Id, updateChannel).ConfigureAwait(false);
             });
 
             return Task.CompletedTask;
@@ -208,14 +204,13 @@ namespace Roki.Services
             if (!(before is SocketTextChannel textChannel)) return Task.CompletedTask;
             var _ = Task.Run(async () =>
             {
-                using var uow = _db.GetDbContext();
-                var channel = await uow.Channels.GetOrCreateChannelAsync(textChannel).ConfigureAwait(false);
-                channel.Name = textChannel.Name;
-                channel.GuildName = textChannel.Guild.Name;
-                channel.UserCount = textChannel.Users.Count;
-                channel.IsNsfw = textChannel.IsNsfw;
-                await uow.SaveChangesAsync().ConfigureAwait(false);
+                var updateChannel = Builders<Channel>.Update.Set(c => c.Name, textChannel.Name)
+                    .Set(c => c.GuildId, textChannel.Guild.Id)
+                    .Set(c => c.IsNsfw, textChannel.IsNsfw);
+                
+                await _channelCollection.FindOneAndUpdateAsync(c => c.ChannelId == textChannel.Id, updateChannel).ConfigureAwait(false);
             });
+            
             return Task.CompletedTask;
         }
 
@@ -224,9 +219,15 @@ namespace Roki.Services
             if (!(channel is SocketTextChannel textChannel)) return Task.CompletedTask;
             var _ = Task.Run(async () =>
             {
-                using var uow = _db.GetDbContext();
-                await uow.Channels.GetOrCreateChannelAsync(textChannel).ConfigureAwait(false);
+                await _channelCollection.InsertOneAsync(new Channel
+                {
+                    ChannelId = textChannel.Id,
+                    Name = textChannel.Name,
+                    GuildId = textChannel.Guild.Id,
+                    IsNsfw = textChannel.IsNsfw
+                }).ConfigureAwait(false);
             });
+            
             return Task.CompletedTask;
         }
 
@@ -238,17 +239,34 @@ namespace Roki.Services
                     return;
                 
                 Logger.Info("Joined server: {guild} [{guildid}]", guild.Name, guild.Id);
-                using var uow = _db.GetDbContext();
-                await uow.Guilds.GetOrCreateGuildAsync(guild).ConfigureAwait(false);
                 await guild.DownloadUsersAsync().ConfigureAwait(false);
+                
+                var updateGuild = Builders<Guild>.Update.Set(g => g.GuildId, guild.Id)
+                    .Set(g => g.Name, guild.Name)
+                    .Set(g => g.IconId, guild.IconId)
+                    .Set(g => g.ChannelCount, guild.Channels.Count)
+                    .Set(g => g.MemberCount, guild.MemberCount)
+                    .Set(g => g.EmoteCount, guild.Emotes.Count)
+                    .Set(g => g.OwnerId, guild.OwnerId)
+                    .Set(g => g.RegionId, guild.VoiceRegionId)
+                    .Set(g => g.CreatedAt, guild.CreatedAt);
+
+                await _guildCollection.FindOneAndUpdateAsync<Guild>(g => g.GuildId == guild.Id, updateGuild,
+                    new FindOneAndUpdateOptions<Guild> {IsUpsert = true});
+                
                 var users = guild.Users;
                 foreach (var user in users)
                 {
-                    if (user.IsBot) continue;
-                    await uow.Users.GetOrCreateUserAsync(user);
+                    var updateUser = Builders<User>.Update.Set(u => u.Id, user.Id)
+                        .Set(u => u.Username, user.Username)
+                        .Set(u => u.Discriminator, int.Parse(user.Discriminator))
+                        .Set(u => u.AvatarId, user.AvatarId);
+
+                    await _userCollection.FindOneAndUpdateAsync<User>(u => u.Id == user.Id, updateUser,
+                        new FindOneAndUpdateOptions<User> {IsUpsert = true}).ConfigureAwait(false);
                 }
-                await uow.SaveChangesAsync().ConfigureAwait(false);
             });
+            
             return Task.CompletedTask;
         }
 
@@ -260,10 +278,9 @@ namespace Roki.Services
                     return;
                 
                 Logger.Info("Left server: {guild} [{guildid}]", guild.Name, guild.Id);
-                using var uow = _db.GetDbContext();
-                var g = await uow.Guilds.GetOrCreateGuildAsync(guild).ConfigureAwait(false);
-                g.Available = false;
-                await uow.SaveChangesAsync().ConfigureAwait(false);
+                var updateGuild = Builders<Guild>.Update.Set(c => c.Available, false);
+                
+                await _guildCollection.FindOneAndUpdateAsync(g => g.GuildId == guild.Id, updateGuild).ConfigureAwait(false);
             });
             return Task.CompletedTask;
         }
@@ -272,15 +289,14 @@ namespace Roki.Services
         {
             var _ = Task.Run(async () =>
             {
-                using var uow = _db.GetDbContext();
-                var user = await uow.Context.Users.FirstOrDefaultAsync(u => u.UserId == before.Id).ConfigureAwait(false);
-                if (user == null)
-                    return;
-                user.Username = after.Username;
-                user.Discriminator = after.Discriminator;
-                user.AvatarId = after.AvatarId;
-                await uow.SaveChangesAsync().ConfigureAwait(false);
+                var updateUser = Builders<User>.Update.Set(u => u.Id, after.Id)
+                    .Set(u => u.Username, after.Username)
+                    .Set(u => u.Discriminator, int.Parse(after.Discriminator))
+                    .Set(u => u.AvatarId, after.AvatarId);
+
+                await _userCollection.FindOneAndUpdateAsync(u => u.Id == after.Id, updateUser).ConfigureAwait(false);
             });
+            
             return Task.CompletedTask;
         }
 
@@ -288,10 +304,16 @@ namespace Roki.Services
         {
             var _ = Task.Run(async () =>
             {
-                using var uow = _db.GetDbContext();
-                if (!user.IsBot)
-                    await uow.Users.GetOrCreateUserAsync(user).ConfigureAwait(false);
+                var updateUser = Builders<User>.Update.Set(u => u.Id, user.Id)
+                    .Set(u => u.Username, user.Username)
+                    .Set(u => u.Discriminator, int.Parse(user.Discriminator))
+                    .Set(u => u.AvatarId, user.AvatarId);
+
+                await _userCollection.FindOneAndUpdateAsync<User>(u => u.Id == user.Id, updateUser,
+                    new FindOneAndUpdateOptions<User>{ReturnDocument = ReturnDocument.After, IsUpsert = true}).ConfigureAwait(false);
+
             });
+            
             return Task.CompletedTask;
         }
 
@@ -334,11 +356,11 @@ namespace Roki.Services
         {
             var _ = Task.Run(async () =>
             {
-                using var uow = _db.GetDbContext();
-                var user = await uow.Users.GetOrCreateUserAsync(message.Author).ConfigureAwait(false);
-                var doubleXp = uow.Subscriptions.DoubleXpIsActive(message.Author.Id);
-                var fastXp = uow.Subscriptions.FastXpIsActive(message.Author.Id);
-                var oldLevel = new XpLevel(user.TotalXp);
+                var user = await _userCollection.Find(x => x.Id == message.Author.Id).FirstOrDefaultAsync().ConfigureAwait(false);
+                // temp
+                var doubleXp = user.Subscriptions.Any(u => u.Id.Equals(Guid.Parse("44ccdd38-98d3-3312-8e22-4c0159ab028f")));
+                var fastXp = user.Subscriptions.Any(u => u.Id.Equals(Guid.Parse("4ae529bc-7205-70b9-8e22-4c0159ab2c80")));
+                var oldLevel = new XpLevel(user.Xp);
                 var newXp = 0;
                 if (fastXp)
                 {
@@ -419,15 +441,15 @@ namespace Roki.Services
 
         private static async Task SendNotification(User user, SocketMessage msg, int level)
         {
-            if (user.NotificationLocation.Equals("none", StringComparison.OrdinalIgnoreCase))
+            if (user.Notification.Equals("none", StringComparison.OrdinalIgnoreCase))
             {
             }
-            else if (user.NotificationLocation.Equals("dm", StringComparison.OrdinalIgnoreCase))
+            else if (user.Notification.Equals("dm", StringComparison.OrdinalIgnoreCase))
             {
                 var dm = await msg.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
                 await dm.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
             }
-            else if (user.NotificationLocation.Equals("server", StringComparison.OrdinalIgnoreCase))
+            else if (user.Notification.Equals("server", StringComparison.OrdinalIgnoreCase))
             {
                 await msg.Channel.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
             }
