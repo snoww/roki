@@ -13,7 +13,7 @@ using MongoDB.Driver;
 using NLog;
 using Roki.Extensions;
 using Roki.Services;
-using Roki.Services.Database;
+using Roki.Services.Database.Maps;
 using StackExchange.Redis;
 using Victoria;
 
@@ -133,7 +133,9 @@ namespace Roki
                 {
                     try
                     {
-                        using var uow = _db.GetDbContext();
+                        var guildsCollection = Database.GetCollection<Guild>("guilds");
+                        var channelsCollection = Database.GetCollection<Channel>("channels");
+                        var botCurrency = Database.GetCollection<User>("users").Find(u => u.Id == Properties.BotId).First().Currency;
                         var cache = Cache.Redis.GetDatabase();
                         await Client.DownloadUsersAsync(Client.Guilds).ConfigureAwait(false);
                         Logger.Info("Loading cache");
@@ -141,22 +143,47 @@ namespace Roki
                         
                         foreach (var guild in Client.Guilds)
                         {
-                            var botCurrency = uow.Users.GetUserCurrency(Properties.BotId);
                             await cache.StringSetAsync($"currency:{guild.Id}:{Properties.BotId}", botCurrency, flags: CommandFlags.FireAndForget)
                                 .ConfigureAwait(false);
                             await UpdateCache(cache, guild.Users).ConfigureAwait(false);
+
+                            var gld = await guildsCollection.Find(g => g.GuildId == guild.Id).FirstOrDefaultAsync();
+                            if (gld == null)
+                            {
+                                await guildsCollection.InsertOneAsync(new Guild
+                                {
+                                    GuildId = guild.Id,
+                                    Name = guild.Name,
+                                    IconId = guild.IconId,
+                                    ChannelCount = guild.Channels.Count,
+                                    MemberCount = guild.MemberCount,
+                                    EmoteCount = guild.Emotes.Count,
+                                    OwnerId = guild.OwnerId,
+                                    RegionId = guild.VoiceRegionId,
+                                    CreatedAt = guild.CreatedAt
+                                });
+                            }
                             
-                            await uow.Guilds.GetOrCreateGuildAsync(guild).ConfigureAwait(false);
                             foreach (var channel in guild.Channels)
                             {
-                                if (channel is SocketTextChannel textChannel)
-                                    await uow.Channels.GetOrCreateChannelAsync(textChannel).ConfigureAwait(false);
+                                if (!(channel is SocketTextChannel textChannel)) continue;
+                                var chl = await channelsCollection.Find(c => c.ChannelId == textChannel.Id).FirstOrDefaultAsync();
+                                if (chl == null)
+                                {
+                                    await channelsCollection.InsertOneAsync(new Channel
+                                    {
+                                        ChannelId = textChannel.Id,
+                                        Name = textChannel.Name,
+                                        GuildId = textChannel.Guild.Id,
+                                        GuildName = textChannel.Guild.Name,
+                                        IsNsfw = textChannel.IsNsfw
+                                    });
+                                }
                             }
                         }
 
                         sw.Stop();
                         Logger.Info("Cache loaded in {elapsed} ms", sw.ElapsedMilliseconds);
-                        await uow.SaveChangesAsync().ConfigureAwait(false);
                     }
                     catch (Exception e)
                     {
@@ -243,7 +270,7 @@ namespace Roki
         {
             var _ = Task.Run(async () =>
             {
-                using var uow = _db.GetDbContext();
+                var collection = Database.GetCollection<User>("users");
                 foreach (var guildUser in users)
                 {
                     if (guildUser.Id == Client.CurrentUser.Id)
@@ -264,8 +291,21 @@ namespace Roki
                     
                     if (guildUser.IsBot)
                         continue;
+
+                    var user = await collection.Find(u => u.Id == guildUser.Id).FirstOrDefaultAsync();
+                    if (user == null)
+                    {
+                        user = new User
+                        {
+                            Username = guildUser.Username,
+                            AvatarId = guildUser.AvatarId,
+                            Discriminator = int.Parse(guildUser.Discriminator),
+                            Id = guildUser.Id
+                        };
+                        
+                        await collection.InsertOneAsync(user).ConfigureAwait(false);
+                    }
                     
-                    var user = await uow.Users.GetOrCreateUserAsync(guildUser).ConfigureAwait(false);
                     await cache.StringSetAsync($"currency:{guildUser.Guild.Id}:{guildUser.Id}", user.Currency, flags: CommandFlags.FireAndForget)
                         .ConfigureAwait(false);
                 }
