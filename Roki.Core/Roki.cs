@@ -104,7 +104,7 @@ namespace Roki
             var commandService = Services.GetService<CommandService>();
             
             await commandHandler.StartHandling().ConfigureAwait(false);
-            await new EventHandlers(_db, Client, Cache).StartHandling().ConfigureAwait(false);
+            await new EventHandlers(_db, Database, Client, Cache).StartHandling().ConfigureAwait(false);
 
             await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
         }

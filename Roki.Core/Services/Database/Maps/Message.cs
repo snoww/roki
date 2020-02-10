@@ -14,6 +14,7 @@ namespace Roki.Services.Database.Maps
         public ulong? GuildId { get; set; }
         public string Content { get; set; }
         public List<Edit> Edits { get; set; } = new List<Edit>();
+        public List<string> Attachments { get; set; } = new List<string>();
         public DateTimeOffset Timestamp { get; set; }
         public bool IsDeleted { get; set; }
     }
@@ -21,6 +22,7 @@ namespace Roki.Services.Database.Maps
     public class Edit
     {
         public string Content { get; set; }
+        public List<string> Attachments { get; set; } = new List<string>();
         public DateTimeOffset EditedTimestamp { get; set; }
     }
 }

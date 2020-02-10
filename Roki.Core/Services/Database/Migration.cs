@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using NLog;
 using Roki.Extensions;
@@ -169,12 +170,13 @@ namespace Roki.Services.Database
                     var findMessage = await collection.Find(m => m.MessageId == message.MessageId).FirstOrDefaultAsync();
                     if (findMessage != null)
                     {
-                        findMessage.Edits.Add(new Edit
+                        var update = Builders<Message>.Update.Push(x => x.Edits, new Edit
                         {
                             Content = message.Content,
                             EditedTimestamp = message.EditedTimestamp ?? message.Timestamp
                         });
                         
+                        await collection.UpdateOneAsync(m => m.MessageId == message.MessageId, update).ConfigureAwait(false);
                         continue;
                     }
                     

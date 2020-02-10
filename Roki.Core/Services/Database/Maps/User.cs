@@ -9,15 +9,15 @@ namespace Roki.Services.Database.Maps
         public string Username { get; set; }
         public int Discriminator { get; set; }
         public string AvatarId { get; set; }
-        public int Xp { get; set; }
+        public int Xp { get; set; } = 0;
         public DateTimeOffset LastLevelUp { get; set; } = DateTimeOffset.MinValue;
         public DateTimeOffset LastXpGain { get; set; } = DateTimeOffset.MinValue;
         public string Notification { get; set; } = "dm";
-        public long Currency { get; set; }
-        public List<Item> Inventory { get; set; }
-        public List<Subscription> Subscriptions { get; set; }
+        public long Currency { get; set; } = 0;
+        public List<Item> Inventory { get; set; } = new List<Item>();
+        public List<Subscription> Subscriptions { get; set; } = new List<Subscription>();
         public decimal InvestingAccount { get; set; } = 50000;
-        public List<Investment> Portfolio { get; set; }
+        public List<Investment> Portfolio { get; set; } = new List<Investment>();
     }
     
     public class Item

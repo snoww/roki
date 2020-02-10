@@ -5,11 +5,15 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using NLog;
 using Roki.Extensions;
 using Roki.Modules.Xp.Common;
 using Roki.Services.Database.Core;
+using Roki.Services.Database.Maps;
 using StackExchange.Redis;
+using Message = Roki.Services.Database.Core.Message;
+using User = Roki.Services.Database.Core.User;
 
 namespace Roki.Services
 {
@@ -17,15 +21,21 @@ namespace Roki.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly DbService _db;
+        private readonly IMongoDatabase _database;
         private readonly IDatabase _cache;
+
+        private readonly IMongoCollection<Services.Database.Maps.Message> _messagesCollection;
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public EventHandlers(DbService db, DiscordSocketClient client, IRedisCache cache)
+        public EventHandlers(DbService db, IMongoDatabase database, DiscordSocketClient client, IRedisCache cache)
         {
             _db = db;
+            _database = database;
             _client = client;
             _cache = cache.Redis.GetDatabase();
+
+            _messagesCollection = database.GetCollection<Services.Database.Maps.Message>("messages");
         }
 
         public async Task StartHandling()
@@ -60,34 +70,20 @@ namespace Roki.Services
             var _ =  Task.Run(async () =>
             {
                 using var uow = _db.GetDbContext();
-
                 if (!await uow.Channels.IsLoggingEnabled(textChannel)) return;
 
-                string content;
-                if (!string.IsNullOrWhiteSpace(message.Content) && message.Attachments.Count == 0)
-                    content = message.Content;
-                else if (!string.IsNullOrWhiteSpace(message.Content) && message.Attachments.Count > 0)
-                    content = message.Content + "\n" + string.Join("\n", message.Attachments.Select(a => a.Url));
-                else if (message.Attachments.Count > 0)
-                    content = string.Join("\n", message.Attachments.Select(a => a.Url));
-                else
-                    content = "";
-                
-                uow.Context.Messages.Add(new Message
+                var msg = new Services.Database.Maps.Message
                 {
-                    AuthorId = message.Author.Id,
-                    Author = message.Author.Username,
-                    ChannelId = message.Channel.Id,
-                    Channel = message.Channel.Name,
-                    GuildId = message.Channel is ITextChannel chId ? chId.GuildId : (ulong?) null,
-                    Guild = message.Channel is ITextChannel ch ? ch.Guild.Name : null,
                     MessageId = message.Id,
-                    Content = content,
-                    EditedTimestamp = message.EditedTimestamp?.ToUniversalTime(),
-                    Timestamp = message.Timestamp.ToUniversalTime()
-                });
+                    AuthorId = message.Author.Id,
+                    ChannelId = message.Channel.Id,
+                    GuildId = message.Channel is ITextChannel channelId ? channelId.GuildId : (ulong?) null,
+                    Content = message.Content,
+                    Attachments = message.Attachments?.Select(a => a.Url).ToList(),
+                    Timestamp = message.Timestamp
+                };
 
-                await uow.SaveChangesAsync().ConfigureAwait(false);
+                await _messagesCollection.InsertOneAsync(msg).ConfigureAwait(false);
             });
 
             return Task.CompletedTask;
@@ -103,30 +99,15 @@ namespace Roki.Services
                 using var uow = _db.GetDbContext();
                 if (after.Channel is SocketTextChannel textChannel)
                     if (!await uow.Channels.IsLoggingEnabled(textChannel)) return;
-                string content;
-                if (!string.IsNullOrWhiteSpace(after.Content) && after.Attachments.Count == 0)
-                    content = after.Content;
-                else if (!string.IsNullOrWhiteSpace(after.Content) && after.Attachments.Count > 0)
-                    content = after.Content + "\n" + string.Join("\n", after.Attachments.Select(a => a.Url));
-                else if (after.Attachments.Count > 0)
-                    content = string.Join("\n", after.Attachments.Select(a => a.Url));
-                else
-                    content = "";
-                uow.Context.Messages.Add(new Message
+                
+                var update = Builders<Services.Database.Maps.Message>.Update.Push(m => m.Edits, new Edit
                 {
-                    AuthorId = after.Author.Id,
-                    Author = after.Author.Username,
-                    ChannelId = after.Channel.Id,
-                    Channel = after.Channel.Name,
-                    GuildId = after.Channel is ITextChannel chId ? chId.GuildId : (ulong?) null,
-                    Guild = after.Channel is ITextChannel ch ? ch.Guild.Name : null,
-                    MessageId = after.Id,
-                    Content = content,
-                    EditedTimestamp = after.EditedTimestamp?.ToUniversalTime(),
-                    Timestamp = after.Timestamp.ToUniversalTime()
+                    Content = after.Content,
+                    Attachments = after.Attachments.Select(m => m.Url).ToList(),
+                    EditedTimestamp = after.EditedTimestamp ?? after.Timestamp
                 });
 
-                await uow.SaveChangesAsync().ConfigureAwait(false);
+                await _messagesCollection.FindOneAndUpdateAsync(m => m.MessageId == after.Id, update).ConfigureAwait(false);
             });
                 
             return Task.CompletedTask;
@@ -140,7 +121,10 @@ namespace Roki.Services
                 using var uow = _db.GetDbContext();
                 if (channel is SocketTextChannel textChannel)
                     if (!await uow.Channels.IsLoggingEnabled(textChannel).ConfigureAwait(false)) return;
-                await uow.Messages.MessageDeleted(cache.Id).ConfigureAwait(false);
+
+                var update = Builders<Services.Database.Maps.Message>.Update.Set(m => m.IsDeleted, true);
+
+                await _messagesCollection.FindOneAndUpdateAsync(m => m.MessageId == cache.Id, update).ConfigureAwait(false);
             });
             return Task.CompletedTask;
         }
@@ -155,7 +139,9 @@ namespace Roki.Services
                 foreach (var cache in caches)
                 {
                     if (cache.HasValue && cache.Value.Author.IsBot) continue;
-                    await uow.Messages.MessageDeleted(cache.Id).ConfigureAwait(false);
+                    
+                    var update = Builders<Services.Database.Maps.Message>.Update.Set(m => m.IsDeleted, true);
+                    await _messagesCollection.FindOneAndUpdateAsync(m => m.MessageId == cache.Id, update).ConfigureAwait(false);
                 }
             });
             
