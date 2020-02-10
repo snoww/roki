@@ -22,6 +22,7 @@ namespace Roki.Services
         private readonly IMongoCollection<Channel> _channelCollection;
         private readonly IMongoCollection<Guild> _guildCollection;
         private readonly IMongoCollection<User> _userCollection;
+        private readonly IMongoCollection<Transaction> _transactionCollection;
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -34,6 +35,7 @@ namespace Roki.Services
             _channelCollection = database.GetCollection<Channel>("channels");
             _guildCollection = database.GetCollection<Guild>("guilds");
             _userCollection = database.GetCollection<User>("users");
+            _transactionCollection = database.GetCollection<Transaction>("transactions");
         }
 
         public async Task StartHandling()
@@ -360,20 +362,28 @@ namespace Roki.Services
                 // temp
                 var doubleXp = user.Subscriptions.Any(u => u.Id.Equals(Guid.Parse("44ccdd38-98d3-3312-8e22-4c0159ab028f")));
                 var fastXp = user.Subscriptions.Any(u => u.Id.Equals(Guid.Parse("4ae529bc-7205-70b9-8e22-4c0159ab2c80")));
+                
+                var updateXp = Builders<User>.Update.Inc(u => u.Xp,
+                    doubleXp ? Roki.Properties.XpPerMessage * 2 : Roki.Properties.XpPerMessage);
+                
                 var oldLevel = new XpLevel(user.Xp);
                 var newXp = 0;
                 if (fastXp)
                 {
                     if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpFastCooldown))
                     {
-                        newXp = await uow.Users.UpdateXp(user, doubleXp).ConfigureAwait(false);
+                        newXp = await _userCollection.FindOneAndUpdateAsync(u => u.Id == user.Id, updateXp,
+                                new FindOneAndUpdateOptions<User, int> {ReturnDocument = ReturnDocument.After})
+                            .ConfigureAwait(false);
                     }
                 }
                 else
                 {
                     if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpCooldown))
                     {
-                        newXp = await uow.Users.UpdateXp(user, doubleXp).ConfigureAwait(false);
+                        newXp = await _userCollection.FindOneAndUpdateAsync(u => u.Id == user.Id, updateXp,
+                                new FindOneAndUpdateOptions<User, int> {ReturnDocument = ReturnDocument.After})
+                            .ConfigureAwait(false);
                     }
                 }
                 
@@ -386,7 +396,7 @@ namespace Roki.Services
                 {
                     await SendNotification(user, message, newLevel.Level).ConfigureAwait(false);
                     var textChannel = (SocketTextChannel) message.Channel;
-                    var rewards = await uow.Guilds.GetXpRewardsAsync(textChannel.Guild.Id, newLevel.Level).ConfigureAwait(false);
+                    var rewards = (await _guildCollection.Find(g => g.GuildId == textChannel.Guild.Id).FirstAsync()).XpRewards;
                     if (rewards != null && rewards.Count != 0)
                     {
                         foreach (var reward in rewards)
@@ -394,12 +404,13 @@ namespace Roki.Services
                             if (reward.Type == "currency")
                             {
                                 var amount = int.Parse(reward.Reward);
-                                await uow.Users.UpdateCurrencyAsync(user.UserId, amount).ConfigureAwait(false);
-                                uow.Transaction.Add(new CurrencyTransaction
+                                var updateCurrency = Builders<User>.Update.Inc(u => u.Currency, amount);
+                                await _userCollection.UpdateOneAsync(u => u.Id == user.Id, updateCurrency).ConfigureAwait(false);
+                                await _transactionCollection.InsertOneAsync(new Transaction
                                 {
                                     Amount = amount,
                                     Reason = "XP Level Up Reward",
-                                    To = user.UserId,
+                                    To = user.Id,
                                     From = 0,
                                     GuildId = textChannel.Guild.Id,
                                     ChannelId = textChannel.Id,
