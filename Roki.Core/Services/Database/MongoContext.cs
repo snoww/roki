@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,6 +30,8 @@ namespace Roki.Services
         decimal GetUserInvesting(ulong userId);
         IEnumerable<User> GetCurrencyLeaderboard(int page);
         Task<bool> TransferCurrencyAsync(ulong userId, decimal amount);
+        Task<bool> AddOrUpdateUserSubscriptionAsync(ulong userId, ulong guildId, Guid subId, int days);
+        Task<bool> AddOrUpdateUserInventoryAsync(ulong userId, ulong guildId, Guid itemId, int quantity);
 
         Task<Channel> GetOrAddChannelAsync(ITextChannel channel);
         Task DeleteChannelAsync(ITextChannel channel);
@@ -36,15 +39,20 @@ namespace Roki.Services
         bool IsLoggingEnabled(ITextChannel channel);
         
         Task<Guild> GetOrAddGuildAsync(SocketGuild guild);
+        Task<Guild> GetGuildAsync(ulong guildId);
         Task ChangeGuildAvailabilityAsync(SocketGuild guild, bool available);
         Task UpdateGuildAsync(SocketGuild after);
-        
+        Task AddStoreItemAsync(ulong guildId, Listing item);
+        Task<Listing> GetStoreItemByNameAsync(ulong guildId, string name);
+        Task<List<Listing>> GetStoreCatalogueAsync(ulong guildId);
+        Task UpdateStoreItemAsync(ulong guildId, string name, int amount);
+
         Task AddMessageAsync(SocketMessage message);
         Task AddMessageEditAsync(SocketMessage after);
         Task MessageDeletedAsync(ulong messageId);
 
         Task AddTransaction(Transaction transaction);
-        List<Transaction> GetTransactions(ulong userId, int page);
+        IEnumerable<Transaction> GetTransactions(ulong userId, int page);
 
     }
 
@@ -172,6 +180,51 @@ namespace Roki.Services
             return true;
         }
 
+        public async Task<bool> AddOrUpdateUserSubscriptionAsync(ulong userId, ulong guildId, Guid subId, int days)
+        {
+            var user = await GetUserAsync(userId).ConfigureAwait(false);
+            // if exists update then return true
+            if (user.Subscriptions.Any(x => x.Id == subId))
+            {
+                var update = Builders<User>.Update.Set(x => x.Subscriptions[-1].Length, days);
+                await UserCollection.UpdateOneAsync(x => x.Id == userId, update).ConfigureAwait(false);
+                return true;
+            }
+            
+            var newSub = Builders<User>.Update.Push(x => x.Subscriptions, new Subscription
+            {
+                Id = subId,
+                GuildId = guildId,
+                StartDate = DateTimeOffset.UtcNow,
+                Length = days
+            });
+            
+            await UserCollection.UpdateOneAsync(x => x.Id == userId, newSub).ConfigureAwait(false);
+            return false;
+        }
+
+        public async Task<bool> AddOrUpdateUserInventoryAsync(ulong userId, ulong guildId, Guid itemId, int quantity)
+        {
+            var user = await GetUserAsync(userId).ConfigureAwait(false);
+            // if exists update then return true
+            if (user.Inventory.Any(x => x.Id == itemId))
+            {
+                var update = Builders<User>.Update.Set(x => x.Inventory[-1].Quantity, quantity);
+                await UserCollection.UpdateOneAsync(x => x.Id == userId, update).ConfigureAwait(false);
+                return true;
+            }
+
+            var newItem = Builders<User>.Update.Push(x => x.Inventory, new Item
+            {
+                Id = itemId,
+                GuildId = guildId,
+                Quantity = quantity
+            });
+
+            await UserCollection.UpdateOneAsync(x => x.Id == userId, newItem).ConfigureAwait(false);
+            return false;
+        }
+
         public async Task<Channel> GetOrAddChannelAsync(ITextChannel channel)
         {
             var dbChannel = await ChannelCollection.Find(c => c.Id == channel.Id).FirstOrDefaultAsync().ConfigureAwait(false);
@@ -242,6 +295,11 @@ namespace Roki.Services
             return dbGuild;
         }
 
+        public async Task<Guild> GetGuildAsync(ulong guildId)
+        {
+            return await GuildCollection.Find(g => g.Id == guildId).FirstAsync().ConfigureAwait(false);
+        }
+
         public async Task ChangeGuildAvailabilityAsync(SocketGuild guild, bool available)
         {
             var update = Builders<Guild>.Update.Set(x => x.Available, available);
@@ -260,6 +318,30 @@ namespace Roki.Services
                 .Set(g => g.RegionId, after.VoiceRegionId);
 
             await GuildCollection.FindOneAndUpdateAsync(g => g.Id == after.Id, updateGuild).ConfigureAwait(false);
+        }
+
+        public async Task AddStoreItemAsync(ulong guildId, Listing item)
+        {
+            var update = Builders<Guild>.Update.Push(g => g.Store, item);
+            await GuildCollection.FindOneAndUpdateAsync(g => g.Id == guildId, update).ConfigureAwait(false);
+        }
+
+        public async Task<Listing> GetStoreItemByNameAsync(ulong guildId, string name)
+        {
+            var guild = await GetGuildAsync(guildId).ConfigureAwait(false);
+            return guild.Store.FirstOrDefault(l => l.Name == name);
+        }
+
+        public async Task<List<Listing>> GetStoreCatalogueAsync(ulong guildId)
+        {
+            var guild = await GetGuildAsync(guildId).ConfigureAwait(false);
+            return guild.Store;
+        }
+
+        public async Task UpdateStoreItemAsync(ulong guildId, string name, int amount)
+        {
+            var update = Builders<Guild>.Update.Inc(g => g.Store[-1].Quantity, amount);
+            await GuildCollection.FindOneAndUpdateAsync(g => g.Id == guildId && g.Store.Any(l => l.Name == name), update).ConfigureAwait(false);
         }
 
         public async Task AddMessageAsync(SocketMessage message)
@@ -300,7 +382,7 @@ namespace Roki.Services
             await TransactionCollection.InsertOneAsync(transaction).ConfigureAwait(false);
         }
 
-        public List<Transaction> GetTransactions(ulong userId, int page)
+        public IEnumerable<Transaction> GetTransactions(ulong userId, int page)
         {
             return TransactionCollection.AsQueryable().Where(t => t.From == userId || t.To == userId)
                 .OrderByDescending(t => t.Date)
