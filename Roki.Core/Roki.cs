@@ -133,9 +133,7 @@ namespace Roki
                 {
                     try
                     {
-                        var guildCollection = DbService.Database.GetCollection<Guild>("guilds");
-                        var channelCollection = DbService.Database.GetCollection<Channel>("channels");
-                        var botCurrency = DbService.Database.GetCollection<User>("users").Find(u => u.Id == Properties.BotId).First().Currency;
+                        var botCurrency = await DbService.Context.GetBotCurrencyAsync().ConfigureAwait(false);
                         
                         var cache = Cache.Redis.GetDatabase();
                         await Client.DownloadUsersAsync(Client.Guilds).ConfigureAwait(false);
@@ -148,31 +146,14 @@ namespace Roki
                                 .ConfigureAwait(false);
                             await UpdateCache(cache, guild.Users).ConfigureAwait(false);
 
-                            var updateGuild = Builders<Guild>.Update.Set(g => g.Id, guild.Id)
-                                .Set(g => g.Name, guild.Name)
-                                .Set(g => g.IconId, guild.IconId)
-                                .Set(g => g.ChannelCount, guild.Channels.Count)
-                                .Set(g => g.MemberCount, guild.MemberCount)
-                                .Set(g => g.EmoteCount, guild.Emotes.Count)
-                                .Set(g => g.OwnerId, guild.OwnerId)
-                                .Set(g => g.RegionId, guild.VoiceRegionId)
-                                .Set(g => g.CreatedAt, guild.CreatedAt);
-
-                            await guildCollection.FindOneAndUpdateAsync<Guild>(g => g.Id == guild.Id, updateGuild,
-                                new FindOneAndUpdateOptions<Guild> {IsUpsert = true});
+                            await DbService.Context.GetOrAddGuildAsync(guild).ConfigureAwait(false);
 
                             foreach (var channel in guild.Channels)
                             {
                                 if (!(channel is SocketTextChannel textChannel)) 
                                     continue;
 
-                                var updateChannel = Builders<Channel>.Update.Set(c => c.Id, textChannel.Id)
-                                    .Set(c => c.Name, textChannel.Name)
-                                    .Set(c => c.GuildId, textChannel.Guild.Id)
-                                    .Set(c => c.IsNsfw, textChannel.IsNsfw);
-
-                                await channelCollection.FindOneAndUpdateAsync<Channel>(c => c.Id == textChannel.Id, updateChannel,
-                                    new FindOneAndUpdateOptions<Channel> {IsUpsert = true});
+                                await DbService.Context.GetOrAddChannelAsync(textChannel).ConfigureAwait(false);
                             }
                         }
 
