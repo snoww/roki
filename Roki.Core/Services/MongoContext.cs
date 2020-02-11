@@ -20,6 +20,7 @@ namespace Roki.Services
         Task<User> UpdateUserAsync(IUser after);
         Task<int> UpdateUserXp(User user, bool doubleXp);
         Task<bool> UpdateUserCurrency(User user, long amount);
+        Task<long> GetBotCurrencyAsync();
         
         Task<Channel> GetOrAddChannelAsync(ITextChannel channel);
         Task DeleteChannelAsync(ITextChannel channel);
@@ -102,6 +103,11 @@ namespace Roki.Services
             var updateCurrency = Builders<User>.Update.Inc(u => u.Currency, amount);
             await UserCollection.UpdateOneAsync(u => u.Id == user.Id, updateCurrency).ConfigureAwait(false);
             return true;
+        }
+
+        public async Task<long> GetBotCurrencyAsync()
+        {
+            return (await UserCollection.Find(u => u.Id == Roki.Properties.BotId).FirstAsync()).Currency;
         }
 
         public async Task<Channel> GetOrAddChannelAsync(ITextChannel channel)
