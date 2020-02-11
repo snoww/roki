@@ -250,14 +250,14 @@ namespace Roki.Services
                 {
                     if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpFastCooldown))
                     {
-                        newXp = await _context.UpdateUserXp(user, doubleXp).ConfigureAwait(false);
+                        newXp = await _context.UpdateUserXpAsync(user, doubleXp).ConfigureAwait(false);
                     }
                 }
                 else
                 {
                     if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpCooldown))
                     {
-                        newXp = await _context.UpdateUserXp(user, doubleXp).ConfigureAwait(false);
+                        newXp = await _context.UpdateUserXpAsync(user, doubleXp).ConfigureAwait(false);
                     }
                 }
                 
@@ -278,7 +278,7 @@ namespace Roki.Services
                             if (reward.Type == "currency")
                             {
                                 var amount = int.Parse(reward.Reward);
-                                await _context.UpdateUserCurrency(user, amount).ConfigureAwait(false);
+                                await _context.UpdateUserCurrencyAsync(user, amount).ConfigureAwait(false);
                                 await _context.AddTransaction(new Transaction
                                 {
                                     Amount = amount,

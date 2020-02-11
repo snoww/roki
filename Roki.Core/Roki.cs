@@ -28,7 +28,7 @@ namespace Roki
         private RokiConfig Config { get; }
         private DiscordSocketClient Client { get; }
         private CommandService CommandService { get; }
-        private IMongoService DbService { get; }
+        private IMongoService Mongo { get; }
         private IRedisCache Cache { get; }
         private IServiceProvider Services { get; set; }
 
@@ -41,7 +41,7 @@ namespace Roki
             LogSetup.SetupLogger();
 
             Config = new RokiConfig();
-            DbService = new MongoService();
+            Mongo = new MongoService();
             Cache = new RedisCache(Config.RedisConfig);
             
             _db = new DbService(Config.Db.ConnectionString);
@@ -104,7 +104,7 @@ namespace Roki
             var commandService = Services.GetService<CommandService>();
             
             await commandHandler.StartHandling().ConfigureAwait(false);
-            await new EventHandlers(DbService, Client, Cache).StartHandling().ConfigureAwait(false);
+            await new EventHandlers(Mongo, Client, Cache).StartHandling().ConfigureAwait(false);
 
             await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
         }
@@ -133,7 +133,7 @@ namespace Roki
                 {
                     try
                     {
-                        var botCurrency = await DbService.Context.GetBotCurrencyAsync().ConfigureAwait(false);
+                        var botCurrency = await Mongo.Context.GetBotCurrencyAsync().ConfigureAwait(false);
                         
                         var cache = Cache.Redis.GetDatabase();
                         await Client.DownloadUsersAsync(Client.Guilds).ConfigureAwait(false);
@@ -146,14 +146,14 @@ namespace Roki
                                 .ConfigureAwait(false);
                             await UpdateCache(cache, guild.Users).ConfigureAwait(false);
 
-                            await DbService.Context.GetOrAddGuildAsync(guild).ConfigureAwait(false);
+                            await Mongo.Context.GetOrAddGuildAsync(guild).ConfigureAwait(false);
 
                             foreach (var channel in guild.Channels)
                             {
                                 if (!(channel is SocketTextChannel textChannel)) 
                                     continue;
 
-                                await DbService.Context.GetOrAddChannelAsync(textChannel).ConfigureAwait(false);
+                                await Mongo.Context.GetOrAddChannelAsync(textChannel).ConfigureAwait(false);
                             }
                         }
 
@@ -179,7 +179,7 @@ namespace Roki
             var service = new ServiceCollection()
                 .AddSingleton<IRokiConfig>(Config)
                 .AddSingleton(_db)
-                .AddSingleton(DbService)
+                .AddSingleton(Mongo)
                 .AddSingleton(Cache)
                 .AddSingleton(Client)
                 .AddSingleton(CommandService)
@@ -245,7 +245,7 @@ namespace Roki
         {
             var _ = Task.Run(async () =>
             {
-                var collection = DbService.Database.GetCollection<User>("users");
+                var collection = Mongo.Database.GetCollection<User>("users");
                 foreach (var guildUser in users)
                 {
                     if (guildUser.Id == Client.CurrentUser.Id)
