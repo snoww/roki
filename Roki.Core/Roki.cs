@@ -133,7 +133,7 @@ namespace Roki
                 {
                     try
                     {
-                        var botCurrency = await Mongo.Context.GetBotCurrencyAsync().ConfigureAwait(false);
+                        var botCurrency = Mongo.Context.GetBotCurrencyAsync();
                         
                         var cache = Cache.Redis.GetDatabase();
                         await Client.DownloadUsersAsync(Client.Guilds).ConfigureAwait(false);
