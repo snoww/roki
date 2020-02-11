@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -173,8 +174,9 @@ namespace Roki.Modules.Currency
             [RequireContext(ContextType.Guild)]
             public async Task Subscriptions()
             {
+                var guildId = Context.Guild.Id;
                 var subs = (await _mongo.Context.GetUserAsync(Context.User.Id).ConfigureAwait(false)).Subscriptions
-                    .Where(s => s.GuildId == Context.Guild.Id)
+                    .Where(s => s.GuildId == guildId)
                     .ToList();
                 
                 var embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle($"{Context.User.Username}'s Active Subscriptions");
@@ -183,29 +185,33 @@ namespace Roki.Modules.Currency
                     await Context.Channel.EmbedAsync(embed.WithDescription("No active subscriptions.")).ConfigureAwait(false);
                     return;
                 }
-                var desc = "";
+                var desc = new StringBuilder();
                 var now = DateTime.UtcNow;
                 foreach (var sub in subs)
                 {
-                    var listing = await _mongo.Context.getstore
-                    desc += $"{listing.Name} - Expires in `{(sub.EndDate - now).ToReadableString()}`\n";
+                    var listing = await _mongo.Context.GetStoreItemByIdAsync(guildId, sub.Id);
+                    desc.AppendLine($"{listing.Name} - Expires in `{(sub.StartDate.AddDays(sub.Length) - now).ToReadableString()}`");
                 }
 
-                await Context.Channel.EmbedAsync(embed.WithDescription(desc)).ConfigureAwait(false);
+                await Context.Channel.EmbedAsync(embed.WithDescription(desc.ToString())).ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
             public async Task Inventory()
             {
-                var inv = await Service.GetOrCreateInventoryAsync(Context.User.Id).ConfigureAwait(false);
+                var guildId = Context.Guild.Id;
+                var inv = (await _mongo.Context.GetUserAsync(Context.User.Id).ConfigureAwait(false)).Inventory
+                    .Where(x => x.GuildId == guildId)
+                    .ToList();
+                
                 var embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle($"{Context.User.Username}'s Inventory");
                 string desc;
                 if (inv.Count == 0)
                     desc = "Your inventory is empty";
                 else
                     desc = string.Join("\n", inv
-                        .Select(i => $"{i.Name.ToTitleCase()}: {i.Quantity}"));
+                        .Select(async i => $"{(await _mongo.Context.GetStoreItemByIdAsync(guildId, i.Id)).Name.ToTitleCase()}: {i.Quantity}"));
 
                 embed.WithDescription(desc);
 

@@ -44,6 +44,7 @@ namespace Roki.Services
         Task UpdateGuildAsync(SocketGuild after);
         Task AddStoreItemAsync(ulong guildId, Listing item);
         Task<Listing> GetStoreItemByNameAsync(ulong guildId, string name);
+        Task<Listing> GetStoreItemByIdAsync(ulong guildId, Guid id);
         Task<List<Listing>> GetStoreCatalogueAsync(ulong guildId);
         Task UpdateStoreItemAsync(ulong guildId, string name, int amount);
 
@@ -330,6 +331,12 @@ namespace Roki.Services
         {
             var guild = await GetGuildAsync(guildId).ConfigureAwait(false);
             return guild.Store.FirstOrDefault(l => l.Name == name);
+        }
+
+        public async Task<Listing> GetStoreItemByIdAsync(ulong guildId, Guid id)
+        {
+            var guild = await GetGuildAsync(guildId).ConfigureAwait(false);
+            return guild.Store.FirstOrDefault(l => l.Id == id);
         }
 
         public async Task<List<Listing>> GetStoreCatalogueAsync(ulong guildId)
