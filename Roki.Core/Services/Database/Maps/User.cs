@@ -22,7 +22,8 @@ namespace Roki.Services.Database.Maps
     
     public class Item
     {
-        public string Name { get; set; }
+        public Guid Id { get; set; }
+        public ulong GuildId { get; set; }
         public int Quantity { get; set; }
     }
 
@@ -39,6 +40,6 @@ namespace Roki.Services.Database.Maps
         public Guid Id { get; set; }
         public ulong GuildId { get; set; }
         public DateTimeOffset StartDate { get; set; } = DateTimeOffset.UtcNow;
-        public DateTimeOffset EndDate { get; set; }
+        public int Length { get; set; }
     }
 }
