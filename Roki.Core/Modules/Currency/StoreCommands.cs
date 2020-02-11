@@ -137,13 +137,13 @@ namespace Roki.Modules.Currency
                     case Category.Role:
                         if (type == Type.OneTime)
                         {
-                            await ((IGuildUser) buyer).AddRoleAsync(await Service.GetRoleAsync(Context, listing.Details).ConfigureAwait(false));
+                            await ((IGuildUser) buyer).AddRoleAsync(await GetRoleAsync(listing.Details).ConfigureAwait(false));
                             break;
                         }
 
                         if (await _mongo.Context.AddOrUpdateUserSubscriptionAsync(buyer.Id, Context.Guild.Id, listing.Id, listing.SubscriptionDays ?? 7)) 
                             break;
-                        await ((IGuildUser) buyer).AddRoleAsync(await Service.GetRoleAsync(Context, listing.Details).ConfigureAwait(false));
+                        await ((IGuildUser) buyer).AddRoleAsync(await GetRoleAsync(listing.Details).ConfigureAwait(false));
                         break;
                     case Category.Power:
                         Enum.TryParse<Power>(listing.Details, out _);
@@ -216,6 +216,27 @@ namespace Roki.Modules.Currency
                 embed.WithDescription(desc);
 
                 await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            }
+            
+            private async Task<IRole> GetRoleAsync(string roleName)
+            {
+                if (!roleName.Contains("rainbow", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Context.Guild.Roles.First(r => r.Name == roleName);
+                }
+            
+                var rRoles = Context.Guild.Roles.Where(r => r.Name.Contains("rainbow", StringComparison.OrdinalIgnoreCase)).ToList();
+                var first = rRoles.First();
+                var users = await Context.Guild.GetUsersAsync().ConfigureAwait(false);
+
+                foreach (var user in users)
+                {
+                    var rRole = user.GetRoles().FirstOrDefault(r => r.Name.Contains("rainbow", StringComparison.OrdinalIgnoreCase));
+                    if (rRole == null) continue;
+                    rRoles.Remove(rRole);
+                }
+
+                return rRoles.First() ?? first;
             }
 
             private enum Category

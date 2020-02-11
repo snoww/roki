@@ -47,25 +47,5 @@ namespace Roki.Modules.Currency.Services
 
             await uow.SaveChangesAsync().ConfigureAwait(false);
         }
-        
-        public async Task<IRole> GetRoleAsync(ICommandContext ctx, string roleName)
-        {
-            if (!roleName.Contains("rainbow", StringComparison.OrdinalIgnoreCase))
-            {
-                return ctx.Guild.Roles.First(r => r.Name == roleName);
-            }
-            var rRoles = ctx.Guild.Roles.Where(r => r.Name.Contains("rainbow", StringComparison.OrdinalIgnoreCase)).ToList();
-            var first = rRoles.First();
-            var users = await ctx.Guild.GetUsersAsync().ConfigureAwait(false);
-
-            foreach (var user in users)
-            {
-                var rRole = user.GetRoles().FirstOrDefault(r => r.Name.Contains("rainbow", StringComparison.OrdinalIgnoreCase));
-                if (rRole == null) continue;
-                rRoles.Remove(rRole);
-            }
-
-            return rRoles.First() ?? first;
-        }
     }
 }
