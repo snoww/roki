@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -17,13 +18,18 @@ namespace Roki.Services
 
         
         Task<User> GetOrAddUserAsync(IUser user);
+        Task<User> GetUserAsync(ulong userId);
         Task<User> UpdateUserAsync(IUser after);
         Task<int> UpdateUserXpAsync(User user, bool doubleXp);
         Task<bool> UpdateUserCurrencyAsync(User user, long amount);
         Task<bool> UpdateUserCurrencyAsync(IUser user, long amount);
         Task UpdateBotCurrencyAsync(long amount);
-        Task<long> GetBotCurrencyAsync();
-        
+        long GetBotCurrencyAsync();
+        long GetUserCurrency(ulong userId);
+        decimal GetUserInvesting(ulong userId);
+        IEnumerable<User> GetCurrencyLeaderboard(int page);
+        Task<bool> TransferCurrencyAsync(ulong userId, decimal amount);
+
         Task<Channel> GetOrAddChannelAsync(ITextChannel channel);
         Task DeleteChannelAsync(ITextChannel channel);
         Task UpdateChannelAsync(ITextChannel after);
@@ -38,6 +44,7 @@ namespace Roki.Services
         Task MessageDeletedAsync(ulong messageId);
 
         Task AddTransaction(Transaction transaction);
+        List<Transaction> GetTransactions(ulong userId, int page);
 
     }
 
@@ -75,6 +82,11 @@ namespace Roki.Services
 
             await UserCollection.InsertOneAsync(dbUser);
             return dbUser;
+        }
+
+        public async Task<User> GetUserAsync(ulong userId)
+        {
+            return await UserCollection.Find(u => u.Id == userId).FirstAsync();
         }
 
         public async Task<User> UpdateUserAsync(IUser after)
@@ -119,9 +131,45 @@ namespace Roki.Services
             await UserCollection.UpdateOneAsync(u => u.Id == Roki.Properties.BotId, updateCurrency).ConfigureAwait(false);
         }
 
-        public async Task<long> GetBotCurrencyAsync()
+        public long GetBotCurrencyAsync()
         {
-            return (await UserCollection.Find(u => u.Id == Roki.Properties.BotId).FirstAsync()).Currency;
+            return UserCollection.Find(u => u.Id == Roki.Properties.BotId).First().Currency;
+        }
+
+        public long GetUserCurrency(ulong userId)
+        {
+            return UserCollection.Find(u => u.Id == userId).First().Currency;
+        }
+
+        public decimal GetUserInvesting(ulong userId)
+        {
+            return UserCollection.Find(u => u.Id == userId).First().InvestingAccount;
+        }
+
+        public IEnumerable<User> GetCurrencyLeaderboard(int page)
+        {
+            return UserCollection.AsQueryable()
+                .Where(u => u.Currency > 0 && u.Id != Roki.Properties.BotId)
+                .OrderByDescending(u => u.Currency)
+                .Skip(page * 9)
+                .Take(9)
+                .ToList();
+        }
+
+        public async Task<bool> TransferCurrencyAsync(ulong userId, decimal amount)
+        {
+            var user = await GetUserAsync(userId).ConfigureAwait(false);
+            var cash = user.Currency;
+            var invest = user.InvestingAccount;
+            
+            if ((amount <= 0 || cash - amount < 0) && (amount >= 0 || invest + amount < 0)) 
+                return false;
+
+            var update = Builders<User>.Update.Inc(u => u.Currency, -(long) amount)
+                .Inc(u => u.InvestingAccount, amount);
+
+            await UserCollection.UpdateOneAsync(u => u.Id == userId, update).ConfigureAwait(false);
+            return true;
         }
 
         public async Task<Channel> GetOrAddChannelAsync(ITextChannel channel)
@@ -250,6 +298,15 @@ namespace Roki.Services
         public async Task AddTransaction(Transaction transaction)
         {
             await TransactionCollection.InsertOneAsync(transaction).ConfigureAwait(false);
+        }
+
+        public List<Transaction> GetTransactions(ulong userId, int page)
+        {
+            return TransactionCollection.AsQueryable().Where(t => t.From == userId || t.To == userId)
+                .OrderByDescending(t => t.Date)
+                .Skip(15 * page)
+                .Take(15)
+                .ToList();
         }
     }
 }
