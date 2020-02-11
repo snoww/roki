@@ -18,8 +18,10 @@ namespace Roki.Services
         
         Task<User> GetOrAddUserAsync(IUser user);
         Task<User> UpdateUserAsync(IUser after);
-        Task<int> UpdateUserXp(User user, bool doubleXp);
-        Task<bool> UpdateUserCurrency(User user, long amount);
+        Task<int> UpdateUserXpAsync(User user, bool doubleXp);
+        Task<bool> UpdateUserCurrencyAsync(User user, long amount);
+        Task<bool> UpdateUserCurrencyAsync(IUser user, long amount);
+        Task UpdateBotCurrencyAsync(long amount);
         Task<long> GetBotCurrencyAsync();
         
         Task<Channel> GetOrAddChannelAsync(ITextChannel channel);
@@ -86,7 +88,7 @@ namespace Roki.Services
                 new FindOneAndUpdateOptions<User>{ReturnDocument = ReturnDocument.After, IsUpsert = true}).ConfigureAwait(false);
         }
 
-        public async Task<int> UpdateUserXp(User user, bool doubleXp)
+        public async Task<int> UpdateUserXpAsync(User user, bool doubleXp)
         {
             var updateXp = Builders<User>.Update.Inc(u => u.Xp,
                 doubleXp ? Roki.Properties.XpPerMessage * 2 : Roki.Properties.XpPerMessage);
@@ -96,13 +98,25 @@ namespace Roki.Services
                 .ConfigureAwait(false);
         }
 
-        public async Task<bool> UpdateUserCurrency(User user, long amount)
+        public async Task<bool> UpdateUserCurrencyAsync(User user, long amount)
         {
             if (user.Currency + amount < 0)
                 return false;
             var updateCurrency = Builders<User>.Update.Inc(u => u.Currency, amount);
             await UserCollection.UpdateOneAsync(u => u.Id == user.Id, updateCurrency).ConfigureAwait(false);
             return true;
+        }
+
+        public async Task<bool> UpdateUserCurrencyAsync(IUser user, long amount)
+        {
+            var dbUser = await GetOrAddUserAsync(user).ConfigureAwait(false);
+            return await UpdateUserCurrencyAsync(dbUser, amount).ConfigureAwait(false);
+        }
+
+        public async Task UpdateBotCurrencyAsync(long amount)
+        {
+            var updateCurrency = Builders<User>.Update.Inc(u => u.Currency, amount);
+            await UserCollection.UpdateOneAsync(u => u.Id == Roki.Properties.BotId, updateCurrency).ConfigureAwait(false);
         }
 
         public async Task<long> GetBotCurrencyAsync()
