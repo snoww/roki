@@ -8,11 +8,13 @@ namespace Roki.Services
     public interface IMongoService
     {
         public IMongoDatabase Database { get; }
+        public IMongoContext Context { get; }
     }
     
     public sealed class MongoService : IMongoService
     {
         public IMongoDatabase Database { get; }
+        public IMongoContext Context { get; }
 
         public MongoService()
         {
@@ -20,6 +22,7 @@ namespace Roki.Services
             ConventionRegistry.Register("LowerCaseElementName", conventions, t => true);
 
             Database = new MongoClient().GetDatabase("roki");
+            Context = new MongoContext(Database);
         }
     }
     
