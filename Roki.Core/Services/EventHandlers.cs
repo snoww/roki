@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using MongoDB.Driver;
 using NLog;
 using Roki.Extensions;
 using Roki.Modules.Xp.Common;
@@ -17,25 +16,15 @@ namespace Roki.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly IDatabase _cache;
-
-        private readonly IMongoCollection<Message> _messageCollection;
-        private readonly IMongoCollection<Channel> _channelCollection;
-        private readonly IMongoCollection<Guild> _guildCollection;
-        private readonly IMongoCollection<User> _userCollection;
-        private readonly IMongoCollection<Transaction> _transactionCollection;
+        private readonly IMongoContext _context;
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public EventHandlers(IMongoDatabase database, DiscordSocketClient client, IRedisCache cache)
+        public EventHandlers(IMongoService service, DiscordSocketClient client, IRedisCache cache)
         {
+            _context = service.Context;
             _client = client;
             _cache = cache.Redis.GetDatabase();
-
-            _messageCollection = database.GetCollection<Message>("messages");
-            _channelCollection = database.GetCollection<Channel>("channels");
-            _guildCollection = database.GetCollection<Guild>("guilds");
-            _userCollection = database.GetCollection<User>("users");
-            _transactionCollection = database.GetCollection<Transaction>("transactions");
         }
 
         public async Task StartHandling()
@@ -69,19 +58,10 @@ namespace Roki.Services
             
             var _ =  Task.Run(async () =>
             {
-                if (!(await _channelCollection.Find(x => x.ChannelId == message.Channel.Id).FirstAsync()).Logging) 
+                if (!_context.IsLoggingEnabled(message.Channel as ITextChannel)) 
                     return;
-                
-                await _messageCollection.InsertOneAsync(new Message
-                {
-                    MessageId = message.Id,
-                    AuthorId = message.Author.Id,
-                    ChannelId = message.Channel.Id,
-                    GuildId = message.Channel is ITextChannel channelId ? channelId.GuildId : (ulong?) null,
-                    Content = message.Content,
-                    Attachments = message.Attachments?.Select(a => a.Url).ToList(),
-                    Timestamp = message.Timestamp
-                }).ConfigureAwait(false);
+
+                await _context.AddMessageAsync(message).ConfigureAwait(false);
             });
 
             return Task.CompletedTask;
@@ -94,18 +74,10 @@ namespace Roki.Services
             if (after.EditedTimestamp == null) return Task.CompletedTask;
             var _ = Task.Run(async () =>
             {
-                if (after.Channel is SocketTextChannel textChannel)
-                    if (!(await _channelCollection.Find(x => x.ChannelId == textChannel.Id).FirstAsync()).Logging) 
-                        return;
-                
-                var update = Builders<Message>.Update.Push(m => m.Edits, new Edit
-                {
-                    Content = after.Content,
-                    Attachments = after.Attachments.Select(m => m.Url).ToList(),
-                    EditedTimestamp = after.EditedTimestamp ?? after.Timestamp
-                });
+                if (!_context.IsLoggingEnabled(after.Channel as ITextChannel)) 
+                    return;
 
-                await _messageCollection.FindOneAndUpdateAsync(m => m.MessageId == after.Id, update).ConfigureAwait(false);
+                await _context.AddMessageEditAsync(after).ConfigureAwait(false);
             });
                 
             return Task.CompletedTask;
@@ -116,13 +88,10 @@ namespace Roki.Services
             if (cache.HasValue && cache.Value.Author.IsBot) return Task.CompletedTask;
             var _ = Task.Run(async () =>
             {
-                if (channel is SocketTextChannel textChannel)
-                    if (!(await _channelCollection.Find(x => x.ChannelId == textChannel.Id).FirstAsync()).Logging) 
-                        return;
+                if (!_context.IsLoggingEnabled(channel as ITextChannel)) 
+                    return;
 
-                var update = Builders<Message>.Update.Set(m => m.IsDeleted, true);
-
-                await _messageCollection.FindOneAndUpdateAsync(m => m.MessageId == cache.Id, update).ConfigureAwait(false);
+                await _context.MessageDeletedAsync(cache.Id).ConfigureAwait(false);
             });
             return Task.CompletedTask;
         }
@@ -131,17 +100,14 @@ namespace Roki.Services
         {
             var _ = Task.Run(async () =>
             {
-                if (channel is SocketTextChannel textChannel)
-                    if (!(await _channelCollection.Find(x => x.ChannelId == textChannel.Id).FirstAsync()).Logging) 
-                        return;
+                if (!_context.IsLoggingEnabled(channel as ITextChannel)) 
+                    return;
                 
                 foreach (var cache in caches)
                 {
                     if (cache.HasValue && cache.Value.Author.IsBot) continue;
                     
-                    var update = Builders<Message>.Update.Set(m => m.IsDeleted, true);
-                    
-                    await _messageCollection.FindOneAndUpdateAsync(m => m.MessageId == cache.Id, update).ConfigureAwait(false);
+                    await _context.MessageDeletedAsync(cache.Id).ConfigureAwait(false);
                 }
             });
             
@@ -150,68 +116,33 @@ namespace Roki.Services
         
         private Task GuildAvailable(SocketGuild guild)
         {
-            var _ = Task.Run(async () =>
-            {
-                var update = Builders<Guild>.Update.Set(x => x.Available, true);
-                
-                await _guildCollection.FindOneAndUpdateAsync(x => x.GuildId == guild.Id, update).ConfigureAwait(false);
-            });
-            
+            var _ = Task.Run(async () => { await _context.ChangeGuildAvailabilityAsync(guild, true).ConfigureAwait(false); });
             return Task.CompletedTask;
         }
 
         private Task GuildUnavailable(SocketGuild guild)
         {
-            var _ = Task.Run(async () =>
-            {
-                var update = Builders<Guild>.Update.Set(x => x.Available, false);
-                
-                await _guildCollection.FindOneAndUpdateAsync(x => x.GuildId == guild.Id, update).ConfigureAwait(false);
-            });
+            var _ = Task.Run(async () => { await _context.ChangeGuildAvailabilityAsync(guild, false).ConfigureAwait(false); });
             return Task.CompletedTask;
         }
 
         private Task GuildUpdated(SocketGuild before, SocketGuild after)
         {
-            var _ = Task.Run(async () =>
-            {
-                var updateGuild = Builders<Guild>.Update.Set(g => g.Name, after.Name)
-                    .Set(g => g.IconId, after.IconId)
-                    .Set(g => g.ChannelCount, after.Channels.Count)
-                    .Set(g => g.MemberCount, after.MemberCount)
-                    .Set(g => g.EmoteCount, after.Emotes.Count)
-                    .Set(g => g.OwnerId, after.OwnerId)
-                    .Set(g => g.RegionId, after.VoiceRegionId);
-
-                await _guildCollection.FindOneAndUpdateAsync(g => g.GuildId == after.Id, updateGuild).ConfigureAwait(false);
-            });
+            var _ = Task.Run(async () => { await _context.UpdateGuildAsync(after).ConfigureAwait(false); });
             return Task.CompletedTask;
         }
 
         private Task ChannelDestroyed(SocketChannel channel)
         {
             if (!(channel is SocketTextChannel textChannel)) return Task.CompletedTask;
-            var _ = Task.Run(async () =>
-            {
-                var updateChannel = Builders<Channel>.Update.Set(c => c.IsDeleted, true);
-                
-                await _channelCollection.FindOneAndUpdateAsync(c => c.ChannelId == textChannel.Id, updateChannel).ConfigureAwait(false);
-            });
-
+            var _ = Task.Run(async () => { await _context.DeleteChannelAsync(textChannel).ConfigureAwait(false); });
             return Task.CompletedTask;
         }
 
         private Task ChannelUpdated(SocketChannel before, SocketChannel after)
         {
             if (!(before is SocketTextChannel textChannel)) return Task.CompletedTask;
-            var _ = Task.Run(async () =>
-            {
-                var updateChannel = Builders<Channel>.Update.Set(c => c.Name, textChannel.Name)
-                    .Set(c => c.GuildId, textChannel.Guild.Id)
-                    .Set(c => c.IsNsfw, textChannel.IsNsfw);
-                
-                await _channelCollection.FindOneAndUpdateAsync(c => c.ChannelId == textChannel.Id, updateChannel).ConfigureAwait(false);
-            });
+            var _ = Task.Run(async () => { await _context.UpdateChannelAsync(textChannel).ConfigureAwait(false); });
             
             return Task.CompletedTask;
         }
@@ -219,17 +150,7 @@ namespace Roki.Services
         private Task ChannelCreated(SocketChannel channel)
         {
             if (!(channel is SocketTextChannel textChannel)) return Task.CompletedTask;
-            var _ = Task.Run(async () =>
-            {
-                await _channelCollection.InsertOneAsync(new Channel
-                {
-                    ChannelId = textChannel.Id,
-                    Name = textChannel.Name,
-                    GuildId = textChannel.Guild.Id,
-                    IsNsfw = textChannel.IsNsfw
-                }).ConfigureAwait(false);
-            });
-            
+            var _ = Task.Run(async () => { await _context.GetOrAddChannelAsync(textChannel).ConfigureAwait(false); });
             return Task.CompletedTask;
         }
 
@@ -241,31 +162,12 @@ namespace Roki.Services
                     return;
                 
                 Logger.Info("Joined server: {guild} [{guildid}]", guild.Name, guild.Id);
-                await guild.DownloadUsersAsync().ConfigureAwait(false);
-                
-                var updateGuild = Builders<Guild>.Update.Set(g => g.GuildId, guild.Id)
-                    .Set(g => g.Name, guild.Name)
-                    .Set(g => g.IconId, guild.IconId)
-                    .Set(g => g.ChannelCount, guild.Channels.Count)
-                    .Set(g => g.MemberCount, guild.MemberCount)
-                    .Set(g => g.EmoteCount, guild.Emotes.Count)
-                    .Set(g => g.OwnerId, guild.OwnerId)
-                    .Set(g => g.RegionId, guild.VoiceRegionId)
-                    .Set(g => g.CreatedAt, guild.CreatedAt);
 
-                await _guildCollection.FindOneAndUpdateAsync<Guild>(g => g.GuildId == guild.Id, updateGuild,
-                    new FindOneAndUpdateOptions<Guild> {IsUpsert = true});
+                await _context.GetOrAddGuildAsync(guild).ConfigureAwait(false);
                 
-                var users = guild.Users;
-                foreach (var user in users)
+                foreach (var user in guild.Users)
                 {
-                    var updateUser = Builders<User>.Update.Set(u => u.Id, user.Id)
-                        .Set(u => u.Username, user.Username)
-                        .Set(u => u.Discriminator, int.Parse(user.Discriminator))
-                        .Set(u => u.AvatarId, user.AvatarId);
-
-                    await _userCollection.FindOneAndUpdateAsync<User>(u => u.Id == user.Id, updateUser,
-                        new FindOneAndUpdateOptions<User> {IsUpsert = true}).ConfigureAwait(false);
+                    await _context.GetOrAddUserAsync(user).ConfigureAwait(false);
                 }
             });
             
@@ -280,42 +182,21 @@ namespace Roki.Services
                     return;
                 
                 Logger.Info("Left server: {guild} [{guildid}]", guild.Name, guild.Id);
-                var updateGuild = Builders<Guild>.Update.Set(c => c.Available, false);
-                
-                await _guildCollection.FindOneAndUpdateAsync(g => g.GuildId == guild.Id, updateGuild).ConfigureAwait(false);
+
+                await _context.ChangeGuildAvailabilityAsync(guild, false);
             });
             return Task.CompletedTask;
         }
 
         private Task UserUpdated(SocketUser before, SocketUser after)
         {
-            var _ = Task.Run(async () =>
-            {
-                var updateUser = Builders<User>.Update.Set(u => u.Id, after.Id)
-                    .Set(u => u.Username, after.Username)
-                    .Set(u => u.Discriminator, int.Parse(after.Discriminator))
-                    .Set(u => u.AvatarId, after.AvatarId);
-
-                await _userCollection.FindOneAndUpdateAsync(u => u.Id == after.Id, updateUser).ConfigureAwait(false);
-            });
-            
+            var _ = Task.Run(async () => { await _context.UpdateUserAsync(after).ConfigureAwait(false); });
             return Task.CompletedTask;
         }
 
         private Task UserJoined(SocketGuildUser user)
         {
-            var _ = Task.Run(async () =>
-            {
-                var updateUser = Builders<User>.Update.Set(u => u.Id, user.Id)
-                    .Set(u => u.Username, user.Username)
-                    .Set(u => u.Discriminator, int.Parse(user.Discriminator))
-                    .Set(u => u.AvatarId, user.AvatarId);
-
-                await _userCollection.FindOneAndUpdateAsync<User>(u => u.Id == user.Id, updateUser,
-                    new FindOneAndUpdateOptions<User>{ReturnDocument = ReturnDocument.After, IsUpsert = true}).ConfigureAwait(false);
-
-            });
-            
+            var _ = Task.Run(async () => { await _context.GetOrAddUserAsync(user); });
             return Task.CompletedTask;
         }
 
@@ -358,32 +239,25 @@ namespace Roki.Services
         {
             var _ = Task.Run(async () =>
             {
-                var user = await _userCollection.Find(x => x.Id == message.Author.Id).FirstOrDefaultAsync().ConfigureAwait(false);
+                var user = await _context.GetOrAddUserAsync(message.Author).ConfigureAwait(false);
                 // temp
                 var doubleXp = user.Subscriptions.Any(u => u.Id.Equals(Guid.Parse("44ccdd38-98d3-3312-8e22-4c0159ab028f")));
                 var fastXp = user.Subscriptions.Any(u => u.Id.Equals(Guid.Parse("4ae529bc-7205-70b9-8e22-4c0159ab2c80")));
-                
-                var updateXp = Builders<User>.Update.Inc(u => u.Xp,
-                    doubleXp ? Roki.Properties.XpPerMessage * 2 : Roki.Properties.XpPerMessage);
-                
+
                 var oldLevel = new XpLevel(user.Xp);
                 var newXp = 0;
                 if (fastXp)
                 {
                     if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpFastCooldown))
                     {
-                        newXp = await _userCollection.FindOneAndUpdateAsync(u => u.Id == user.Id, updateXp,
-                                new FindOneAndUpdateOptions<User, int> {ReturnDocument = ReturnDocument.After})
-                            .ConfigureAwait(false);
+                        newXp = await _context.UpdateUserXp(user, doubleXp).ConfigureAwait(false);
                     }
                 }
                 else
                 {
                     if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpCooldown))
                     {
-                        newXp = await _userCollection.FindOneAndUpdateAsync(u => u.Id == user.Id, updateXp,
-                                new FindOneAndUpdateOptions<User, int> {ReturnDocument = ReturnDocument.After})
-                            .ConfigureAwait(false);
+                        newXp = await _context.UpdateUserXp(user, doubleXp).ConfigureAwait(false);
                     }
                 }
                 
@@ -396,7 +270,7 @@ namespace Roki.Services
                 {
                     await SendNotification(user, message, newLevel.Level).ConfigureAwait(false);
                     var textChannel = (SocketTextChannel) message.Channel;
-                    var rewards = (await _guildCollection.Find(g => g.GuildId == textChannel.Guild.Id).FirstAsync()).XpRewards;
+                    var rewards = (await _context.GetOrAddGuildAsync(textChannel.Guild).ConfigureAwait(false)).XpRewards;
                     if (rewards != null && rewards.Count != 0)
                     {
                         foreach (var reward in rewards)
@@ -404,9 +278,8 @@ namespace Roki.Services
                             if (reward.Type == "currency")
                             {
                                 var amount = int.Parse(reward.Reward);
-                                var updateCurrency = Builders<User>.Update.Inc(u => u.Currency, amount);
-                                await _userCollection.UpdateOneAsync(u => u.Id == user.Id, updateCurrency).ConfigureAwait(false);
-                                await _transactionCollection.InsertOneAsync(new Transaction
+                                await _context.UpdateUserCurrency(user, amount).ConfigureAwait(false);
+                                await _context.AddTransaction(new Transaction
                                 {
                                     Amount = amount,
                                     Reason = "XP Level Up Reward",

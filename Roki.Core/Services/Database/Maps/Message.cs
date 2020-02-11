@@ -8,7 +8,7 @@ namespace Roki.Services.Database.Maps
     public class Message
     {
         [BsonId]
-        public ulong MessageId { get; set; }
+        public ulong Id { get; set; }
         public ulong AuthorId { get; set; }
         public ulong ChannelId { get; set; }
         public ulong? GuildId { get; set; }

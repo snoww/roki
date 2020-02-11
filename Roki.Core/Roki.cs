@@ -28,7 +28,7 @@ namespace Roki
         private RokiConfig Config { get; }
         private DiscordSocketClient Client { get; }
         private CommandService CommandService { get; }
-        private IMongoDatabase Database { get; }
+        private IMongoService DbService { get; }
         private IRedisCache Cache { get; }
         private IServiceProvider Services { get; set; }
 
@@ -41,7 +41,7 @@ namespace Roki
             LogSetup.SetupLogger();
 
             Config = new RokiConfig();
-            Database = new MongoService().Database;
+            DbService = new MongoService();
             Cache = new RedisCache(Config.RedisConfig);
             
             _db = new DbService(Config.Db.ConnectionString);
@@ -104,7 +104,7 @@ namespace Roki
             var commandService = Services.GetService<CommandService>();
             
             await commandHandler.StartHandling().ConfigureAwait(false);
-            await new EventHandlers(Database, Client, Cache).StartHandling().ConfigureAwait(false);
+            await new EventHandlers(DbService, Client, Cache).StartHandling().ConfigureAwait(false);
 
             await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
         }
@@ -133,9 +133,9 @@ namespace Roki
                 {
                     try
                     {
-                        var guildCollection = Database.GetCollection<Guild>("guilds");
-                        var channelCollection = Database.GetCollection<Channel>("channels");
-                        var botCurrency = Database.GetCollection<User>("users").Find(u => u.Id == Properties.BotId).First().Currency;
+                        var guildCollection = DbService.Database.GetCollection<Guild>("guilds");
+                        var channelCollection = DbService.Database.GetCollection<Channel>("channels");
+                        var botCurrency = DbService.Database.GetCollection<User>("users").Find(u => u.Id == Properties.BotId).First().Currency;
                         
                         var cache = Cache.Redis.GetDatabase();
                         await Client.DownloadUsersAsync(Client.Guilds).ConfigureAwait(false);
@@ -148,7 +148,7 @@ namespace Roki
                                 .ConfigureAwait(false);
                             await UpdateCache(cache, guild.Users).ConfigureAwait(false);
 
-                            var updateGuild = Builders<Guild>.Update.Set(g => g.GuildId, guild.Id)
+                            var updateGuild = Builders<Guild>.Update.Set(g => g.Id, guild.Id)
                                 .Set(g => g.Name, guild.Name)
                                 .Set(g => g.IconId, guild.IconId)
                                 .Set(g => g.ChannelCount, guild.Channels.Count)
@@ -158,7 +158,7 @@ namespace Roki
                                 .Set(g => g.RegionId, guild.VoiceRegionId)
                                 .Set(g => g.CreatedAt, guild.CreatedAt);
 
-                            await guildCollection.FindOneAndUpdateAsync<Guild>(g => g.GuildId == guild.Id, updateGuild,
+                            await guildCollection.FindOneAndUpdateAsync<Guild>(g => g.Id == guild.Id, updateGuild,
                                 new FindOneAndUpdateOptions<Guild> {IsUpsert = true});
 
                             foreach (var channel in guild.Channels)
@@ -166,12 +166,12 @@ namespace Roki
                                 if (!(channel is SocketTextChannel textChannel)) 
                                     continue;
 
-                                var updateChannel = Builders<Channel>.Update.Set(c => c.ChannelId, textChannel.Id)
+                                var updateChannel = Builders<Channel>.Update.Set(c => c.Id, textChannel.Id)
                                     .Set(c => c.Name, textChannel.Name)
                                     .Set(c => c.GuildId, textChannel.Guild.Id)
                                     .Set(c => c.IsNsfw, textChannel.IsNsfw);
 
-                                await channelCollection.FindOneAndUpdateAsync<Channel>(c => c.ChannelId == textChannel.Id, updateChannel,
+                                await channelCollection.FindOneAndUpdateAsync<Channel>(c => c.Id == textChannel.Id, updateChannel,
                                     new FindOneAndUpdateOptions<Channel> {IsUpsert = true});
                             }
                         }
@@ -198,7 +198,7 @@ namespace Roki
             var service = new ServiceCollection()
                 .AddSingleton<IRokiConfig>(Config)
                 .AddSingleton(_db)
-                .AddSingleton(Database)
+                .AddSingleton(DbService)
                 .AddSingleton(Cache)
                 .AddSingleton(Client)
                 .AddSingleton(CommandService)
@@ -264,7 +264,7 @@ namespace Roki
         {
             var _ = Task.Run(async () =>
             {
-                var collection = Database.GetCollection<User>("users");
+                var collection = DbService.Database.GetCollection<User>("users");
                 foreach (var guildUser in users)
                 {
                     if (guildUser.Id == Client.CurrentUser.Id)
