@@ -18,6 +18,7 @@ namespace Roki.Services.Database.Maps
         public DateTimeOffset CreatedAt { get; set; }
         public bool Available { get; set; } = true;
         public List<XpReward> XpRewards { get; set; } = new List<XpReward>();
+        public List<Listing> Store { get; set; } = new List<Listing>();
     }
     
     public class XpReward
@@ -26,5 +27,19 @@ namespace Roki.Services.Database.Maps
         public int XpLevel { get; set; }
         public string Type { get; set; }
         public string Reward { get; set; }
+    }
+
+    public class Listing
+    {
+        public Guid Id { get; set; }
+        public ulong SellerId { get; set; }
+        public string Name { get; set; }
+        public string Details { get; set; }
+        public string Description { get; set; } = "-";
+        public string Category { get; set; }
+        public string Type { get; set; } = "OneTime";
+        public int? SubscriptionDays { get; set; }
+        public long Cost { get; set; }
+        public int Quantity { get; set; } = 1;
     }
 }

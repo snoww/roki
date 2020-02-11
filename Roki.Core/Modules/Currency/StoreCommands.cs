@@ -16,20 +16,22 @@ namespace Roki.Modules.Currency
         [Group]
         public class StoreCommands : RokiSubmodule<StoreService>
         {
+            private readonly IMongoService _mongo;
             private readonly DiscordSocketClient _client;
             private readonly ICurrencyService _currency;
 
-            private StoreCommands(DiscordSocketClient client, ICurrencyService currency)
+            private StoreCommands(DiscordSocketClient client, ICurrencyService currency, IMongoService mongo)
             {
                 _client = client;
                 _currency = currency;
+                _mongo = mongo;
             }
             
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
             public async Task Store([Leftover] string itemName = null)
             {
-                var cat = Service.GetStoreCatalog();
+                var cat = await _mongo.Context.GetStoreCatalogueAsync(Context.Guild.Id).ConfigureAwait(false);
 
                 if (itemName == null)
                 {
@@ -43,7 +45,7 @@ namespace Roki.Modules.Currency
                             .Select(c =>
                             {
                                 var type = c.Type == "Subscription" ? $"**{c.SubscriptionDays}** Day {c.Type}" : c.Type;
-                                var desc = $"{Format.Bold(c.Item)} | {type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remaining" : "**Sold Out**")} | `{c.Cost:N0}` {Roki.Properties.CurrencyIcon}";
+                                var desc = $"{Format.Bold(c.Name)} | {type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remaining" : "**Sold Out**")} | `{c.Cost:N0}` {Roki.Properties.CurrencyIcon}";
                                 return $"`{c.Id}:` {desc}\n\t{c.Description.TrimTo(120)}";
                             }));
                         return new EmbedBuilder().WithDynamicColor(Context)
@@ -56,7 +58,7 @@ namespace Roki.Modules.Currency
                     return;
                 }
 
-                var item = int.TryParse(itemName, out var id) ? cat.FirstOrDefault(i => i.Id == id) : cat.FirstOrDefault(i => i.Item == itemName);
+                var item = cat.FirstOrDefault(i => i.Name == itemName);
                 if (item == null)
                 {
                     await Context.Channel.SendErrorAsync("Cannot find the specified item.").ConfigureAwait(false);
@@ -64,7 +66,7 @@ namespace Roki.Modules.Currency
                 }
 
                 var embed = new EmbedBuilder().WithDynamicColor(Context)
-                    .WithTitle($"`{item.Id}:` | {item.Item} | `{item.Cost:N0}` {Roki.Properties.CurrencyIcon}")
+                    .WithTitle($"`{item.Id}:` | {item.Name} | `{item.Cost:N0}` {Roki.Properties.CurrencyIcon}")
                     .WithDescription(item.Description)
                     .AddField("Category", $"{item.Category}", true)
                     .AddField("Quantity", $"{(item.Quantity > 0 ? $"**{item.Quantity}** Remaining" : "**Sold Out**")}")
@@ -86,7 +88,7 @@ namespace Roki.Modules.Currency
             [Priority(0)]
             public async Task Buy(string name, string quantity = "1")
             {
-                var listing = Service.GetListingByName(name);
+                var listing = await _mongo.Context.GetStoreItemByNameAsync(Context.Guild.Id, name).ConfigureAwait(false);
                 if (listing == null)
                 {
                     await Context.Channel.SendErrorAsync("Cannot find this item. Make sure the name matches exactly, or use ID").ConfigureAwait(false);
@@ -126,7 +128,7 @@ namespace Roki.Modules.Currency
                     return;
                 }
 
-                await Service.UpdateListingAsync(listing.Id, amount).ConfigureAwait(false);
+                await _mongo.Context.UpdateStoreItemAsync(Context.Guild.Id, name, amount);
                 Enum.TryParse<Category>(listing.Category, out var category); 
                 Enum.TryParse<Type>(listing.Type, out var type); 
                 switch (category)
@@ -138,21 +140,16 @@ namespace Roki.Modules.Currency
                             break;
                         }
 
-                        if (await Service.GetOrUpdateSubAsync(buyer.Id, listing.Id, listing.SubscriptionDays * amount ?? 7)) break;
+                        if (await _mongo.Context.AddOrUpdateUserSubscriptionAsync(buyer.Id, Context.Guild.Id, listing.Id, listing.SubscriptionDays ?? 7)) 
+                            break;
                         await ((IGuildUser) buyer).AddRoleAsync(await Service.GetRoleAsync(Context, listing.Details).ConfigureAwait(false));
-                        await Service.AddNewSubscriptionAsync(buyer.Id, Context.Guild.Id, listing.Id, listing.Category.ToUpperInvariant(),listing.Details, DateTime.UtcNow, 
-                                DateTime.UtcNow + new TimeSpan(listing.SubscriptionDays * amount ?? 7, 0, 0, 0)
-                            ).ConfigureAwait(false);
                         break;
                     case Category.Power:
                         Enum.TryParse<Power>(listing.Details, out _);
-                        await Service.UpdateInventoryAsync(buyer.Id, listing.Details, amount).ConfigureAwait(false);
+                        await _mongo.Context.AddOrUpdateUserInventoryAsync(buyer.Id, Context.Guild.Id, listing.Id, amount).ConfigureAwait(false);
                         break;
                     case Category.Boost:
-                        if (await Service.GetOrUpdateSubAsync(buyer.Id, listing.Id, listing.SubscriptionDays * amount ?? 7)) break;
-                        await Service.AddNewSubscriptionAsync(buyer.Id, Context.Guild.Id, listing.Id, listing.Category.ToUpperInvariant(), listing.Details, DateTime.UtcNow, 
-                            DateTime.UtcNow + new TimeSpan(listing.SubscriptionDays * amount ?? 7, 0, 0, 0)
-                        ).ConfigureAwait(false);
+                        await _mongo.Context.AddOrUpdateUserSubscriptionAsync(buyer.Id, Context.Guild.Id, listing.Id, listing.SubscriptionDays ?? 7);
                         break;
                     case Category.Digital:
                     case Category.Virtual:
@@ -161,25 +158,10 @@ namespace Roki.Modules.Currency
                 }
 
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                        .WithDescription($"{buyer.Mention} Purchase Successful!\nYou bought `{amount}x` {listing.Item}\n`{cost}` {Roki.Properties.CurrencyIcon} has been billed to your account"))
+                        .WithDescription($"{buyer.Mention} Purchase Successful!\nYou bought `{amount}x` {listing.Name}\n`{cost}` {Roki.Properties.CurrencyIcon} has been billed to your account"))
                     .ConfigureAwait(false);
             }
-            
-            [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
-            [Priority(1)]
-            public async Task Buy(int id, string quantity = "1")
-            {
-                var listing = Service.GetListingById(id);
-                if (listing == null)
-                {
-                    await Context.Channel.SendErrorAsync("Cannot find this item with this ID.").ConfigureAwait(false);
-                    return;
-                }
 
-                await Buy(listing.Item, quantity).ConfigureAwait(false);
-            }
-        
 //            [RokiCommand, Description, Usage, Aliases]
 //            [RequireContext(ContextType.Guild)]
 //            public async Task Modify()
@@ -191,7 +173,10 @@ namespace Roki.Modules.Currency
             [RequireContext(ContextType.Guild)]
             public async Task Subscriptions()
             {
-                var subs = Service.GetUserSubscriptions(Context.User.Id);
+                var subs = (await _mongo.Context.GetUserAsync(Context.User.Id).ConfigureAwait(false)).Subscriptions
+                    .Where(s => s.GuildId == Context.Guild.Id)
+                    .ToList();
+                
                 var embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle($"{Context.User.Username}'s Active Subscriptions");
                 if (subs.Count == 0)
                 {
@@ -202,8 +187,8 @@ namespace Roki.Modules.Currency
                 var now = DateTime.UtcNow;
                 foreach (var sub in subs)
                 {
-                    var listing = Service.GetListingById(sub.ItemId);
-                    desc += $"{listing.Item} - Expires in `{(sub.EndDate - now).ToReadableString()}`\n";
+                    var listing = await _mongo.Context.getstore
+                    desc += $"{listing.Name} - Expires in `{(sub.EndDate - now).ToReadableString()}`\n";
                 }
 
                 await Context.Channel.EmbedAsync(embed.WithDescription(desc)).ConfigureAwait(false);
