@@ -394,8 +394,7 @@ namespace Roki.Services
             return TransactionCollection.AsQueryable().Where(t => t.From == userId || t.To == userId)
                 .OrderByDescending(t => t.Id)
                 .Skip(15 * page)
-                .Take(15)
-                .ToList();
+                .Take(15);
         }
     }
 }

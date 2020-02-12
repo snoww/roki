@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -109,7 +110,6 @@ namespace Roki.Modules.Currency
                 GuildId = Context.Guild.Id,
                 MessageId = Context.Message.Id,
                 Reason = $"Transfer from {fromAcc} to {toAcc}",
-                Date = DateTimeOffset.UtcNow
             });
 
             await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
@@ -142,40 +142,45 @@ namespace Roki.Modules.Currency
         [RokiCommand, Description, Usage, Aliases]
         [Priority(1)]
         public async Task CurrencyTransactions(int page = 1) =>
-            await InternalCurrencyTransaction(Context.User.Id, page);
+            await InternalCurrencyTransaction(Context.User, page);
         
         [RokiCommand, Description, Usage, Aliases]
         [OwnerOnly]
         [Priority(0)]
         public async Task CurrencyTransactions(IUser user, int page = 1) =>
-            await InternalCurrencyTransaction(user.Id, page);
+            await InternalCurrencyTransaction(user, page);
 
-        private async Task InternalCurrencyTransaction(ulong userId, int page)
+        private async Task InternalCurrencyTransaction(IUser user, int page)
         {
             if (--page < 0)
                 return;
 
-            var trans = _mongo.Context.GetTransactions(userId, page);
-            
-            var embed = new EmbedBuilder().WithDynamicColor(Context)
-                .WithTitle($"{((SocketGuild) Context.Guild)?.GetUser(userId)?.Username ?? userId.ToString()}'s Transactions History");
+            var trans = _mongo.Context.GetTransactions(user.Id, page);
 
-            var desc = "";
+            if (trans == null)
+            {
+                await Context.Channel.SendErrorAsync("No transactions").ConfigureAwait(false);
+                return;
+            }
+
+            var embed = new EmbedBuilder().WithDynamicColor(Context)
+                .WithTitle($"{user.Username}'s Transactions History");
+            
+            var desc = new StringBuilder();
             foreach (var tran in trans)
             {
                 var type = tran.Amount > 0 ? "🔵" : "🔴";
                 var amount = tran.Amount.ToString("N0");
-                if (tran.Reason.StartsWith("Gift from") && tran.From == userId)
+                if (tran.Reason.StartsWith("Gift from") && tran.From == user.Id)
                 {
                     type = "🔴";
                     amount = amount.Insert(0, "-");
                 }
-                var date = Format.Code($"{tran.Date.ToLocalTime():HH:mm yyyy-MM-dd}");
-                desc += $"{type} {tran.Reason?.Trim()} {date}\n\t\t{Format.Code(amount)} {Roki.Properties.CurrencyIcon}\n";
+                // var date = Format.Code($"{tran.Date:HH:mm yyyy-MM-dd}");
+                desc.AppendLine($"{type} - {tran.Reason?.Trim()} {Format.Code(amount)} {Roki.Properties.CurrencyIcon}");
             }
 
-            embed.WithDescription(desc)
-                .WithFooter($"Page {page + 1}");
+            embed.WithDescription(desc.ToString()).WithFooter($"Page {page + 1}");
             
             await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
