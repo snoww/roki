@@ -9,12 +9,10 @@ namespace Roki.Modules.Gambling
 {
     public partial class Gambling : RokiTopLevelModule
     {
-        private readonly DbService _db;
         private readonly ICurrencyService _currency;
 
-        public Gambling(DbService db, ICurrencyService currency)
+        public Gambling(ICurrencyService currency)
         {
-            _db = db;
             _currency = currency;
         }
 
