@@ -10,8 +10,8 @@ namespace Roki.Services.Database.Maps
         public int Discriminator { get; set; }
         public string AvatarId { get; set; }
         public int Xp { get; set; } = 0;
-        public DateTimeOffset LastLevelUp { get; set; } = DateTimeOffset.MinValue;
-        public DateTimeOffset LastXpGain { get; set; } = DateTimeOffset.MinValue;
+        public DateTime LastLevelUp { get; set; } = DateTime.MinValue;
+        public DateTime LastXpGain { get; set; } = DateTime.MinValue;
         public string Notification { get; set; } = "dm";
         public long Currency { get; set; } = 0;
         public List<Item> Inventory { get; set; } = new List<Item>();
@@ -22,7 +22,7 @@ namespace Roki.Services.Database.Maps
     
     public class Item
     {
-        public Guid Id { get; set; }
+        public string Id { get; set; }
         public ulong GuildId { get; set; }
         public int Quantity { get; set; }
     }
@@ -32,14 +32,14 @@ namespace Roki.Services.Database.Maps
         public string Symbol { get; set; }
         public string Position { get; set; }
         public long Shares { get; set; }
-        public DateTimeOffset? InterestDate { get; set; }
+        public DateTime? InterestDate { get; set; }
     }
 
     public class Subscription
     {
-        public Guid Id { get; set; }
+        public string Id { get; set; }
         public ulong GuildId { get; set; }
-        public DateTimeOffset StartDate { get; set; } = DateTimeOffset.UtcNow;
+        public DateTime StartDate { get; set; } = DateTime.UtcNow;
         public int Length { get; set; }
     }
 }
