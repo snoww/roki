@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Roki.Services.Database.Maps
@@ -22,7 +23,7 @@ namespace Roki.Services.Database.Maps
     
     public class XpReward
     {
-        public string Id { get; set; }
+        public ObjectId Id { get; set; }
         public int XpLevel { get; set; }
         public string Type { get; set; }
         public string Reward { get; set; }
@@ -30,7 +31,7 @@ namespace Roki.Services.Database.Maps
 
     public class Listing
     {
-        public string Id { get; set; }
+        public ObjectId Id { get; set; }
         public ulong SellerId { get; set; }
         public string Name { get; set; }
         public string Details { get; set; }
