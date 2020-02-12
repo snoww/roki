@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using Roki.Services.Database.Maps;
 
@@ -30,9 +31,9 @@ namespace Roki.Services
         decimal GetUserInvesting(ulong userId);
         IEnumerable<User> GetCurrencyLeaderboard(int page);
         Task<bool> TransferCurrencyAsync(ulong userId, decimal amount);
-        Task<bool> AddOrUpdateUserSubscriptionAsync(ulong userId, ulong guildId, string subId, int days);
+        Task<bool> AddOrUpdateUserSubscriptionAsync(ulong userId, ulong guildId, ObjectId subId, int days);
         Task<Dictionary<ulong, List<Subscription>>> RemoveExpiredSubscriptionsAsync();
-        Task<bool> AddOrUpdateUserInventoryAsync(ulong userId, ulong guildId, string itemId, int quantity);
+        Task<bool> AddOrUpdateUserInventoryAsync(ulong userId, ulong guildId, ObjectId itemId, int quantity);
 
         Task<Channel> GetOrAddChannelAsync(ITextChannel channel);
         Task DeleteChannelAsync(ITextChannel channel);
@@ -45,7 +46,7 @@ namespace Roki.Services
         Task UpdateGuildAsync(SocketGuild after);
         Task AddStoreItemAsync(ulong guildId, Listing item);
         Task<Listing> GetStoreItemByNameAsync(ulong guildId, string name);
-        Task<Listing> GetStoreItemByIdAsync(ulong guildId, string id);
+        Task<Listing> GetStoreItemByIdAsync(ulong guildId, ObjectId id);
         Task<List<Listing>> GetStoreCatalogueAsync(ulong guildId);
         Task UpdateStoreItemAsync(ulong guildId, string name, int amount);
 
@@ -182,7 +183,7 @@ namespace Roki.Services
             return true;
         }
 
-        public async Task<bool> AddOrUpdateUserSubscriptionAsync(ulong userId, ulong guildId, string subId, int days)
+        public async Task<bool> AddOrUpdateUserSubscriptionAsync(ulong userId, ulong guildId, ObjectId subId, int days)
         {
             var user = await GetUserAsync(userId).ConfigureAwait(false);
             // if exists update then return true
@@ -233,7 +234,7 @@ namespace Roki.Services
             return expired;
         }
 
-        public async Task<bool> AddOrUpdateUserInventoryAsync(ulong userId, ulong guildId, string itemId, int quantity)
+        public async Task<bool> AddOrUpdateUserInventoryAsync(ulong userId, ulong guildId, ObjectId itemId, int quantity)
         {
             var user = await GetUserAsync(userId).ConfigureAwait(false);
             // if exists update then return true
@@ -362,7 +363,7 @@ namespace Roki.Services
             return guild.Store.FirstOrDefault(l => l.Name == name);
         }
 
-        public async Task<Listing> GetStoreItemByIdAsync(ulong guildId, string id)
+        public async Task<Listing> GetStoreItemByIdAsync(ulong guildId, ObjectId id)
         {
             var guild = await GetGuildAsync(guildId).ConfigureAwait(false);
             return guild.Store.FirstOrDefault(l => l.Id == id);
