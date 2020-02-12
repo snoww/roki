@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Roki.Services.Database.Maps
 {
@@ -39,7 +40,6 @@ namespace Roki.Services.Database.Maps
     {
         public string Id { get; set; }
         public ulong GuildId { get; set; }
-        public DateTime StartDate { get; set; } = DateTime.UtcNow;
-        public int Length { get; set; }
+        public DateTime EndDate { get; set; }
     }
 }

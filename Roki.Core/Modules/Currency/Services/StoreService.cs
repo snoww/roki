@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using NLog;
 using Roki.Extensions;
 using Roki.Services;
 using Roki.Services.Database.Maps;
@@ -18,6 +19,8 @@ namespace Roki.Modules.Currency.Services
         private readonly DiscordSocketClient _client;
         private Timer _timer;
 
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        
         public StoreService(DiscordSocketClient client, IMongoService mongo)
         {
             _client = client;
@@ -27,25 +30,37 @@ namespace Roki.Modules.Currency.Services
 
         private void CheckSubscriptions()
         {
-            _timer = new Timer(RemoveSubEvent, null, TimeSpan.Zero, TimeSpan.FromHours(1));
+            _timer = new Timer(RemoveSubEvent, null, TimeSpan.Zero, TimeSpan.FromHours(3));
         }
 
         private async void RemoveSubEvent(object state)
         {
-            using var uow = _db.GetDbContext();
-            var expired = uow.Subscriptions.GetExpiredSubscriptions();
-            foreach (var sub in expired)
+            var expired = await _mongo.Context.RemoveExpiredSubscriptionsAsync().ConfigureAwait(false);
+            foreach (var (userId, subs) in expired)
             {
-                await uow.Subscriptions.RemoveSubscriptionAsync(sub.Id).ConfigureAwait(false);
-                if (sub.Type.Equals("BOOST", StringComparison.OrdinalIgnoreCase)) continue;
-                var guild = _client.GetGuild(sub.GuildId);
-                if (!(guild.GetUser(sub.UserId) is IGuildUser user)) continue;
-                var role = user.GetRoles().FirstOrDefault(r => r.Name.Contains(sub.Description, StringComparison.OrdinalIgnoreCase));
-                if (role == null) continue;
-                await user.RemoveRoleAsync(role).ConfigureAwait(false);
+                foreach (var sub in subs)
+                {
+                    var item = await _mongo.Context.GetStoreItemByIdAsync(sub.GuildId, sub.Id).ConfigureAwait(false);
+                    if (item.Category.Equals("Boost", StringComparison.Ordinal)) 
+                        continue;
+                    try
+                    {
+                        var guild = _client.GetGuild(sub.GuildId);
+                        if (!(guild.GetUser(userId) is IGuildUser user)) 
+                            continue;
+                    
+                        var role = user.GetRoles().FirstOrDefault(r => r.Name.Contains(item.Description, StringComparison.OrdinalIgnoreCase));
+                        if (role == null) 
+                            continue;
+                    
+                        await user.RemoveRoleAsync(role).ConfigureAwait(false);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Warn(e, "Error while tyring to remove subscription role");
+                    }
+                }
             }
-
-            await uow.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

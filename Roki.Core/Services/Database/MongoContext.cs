@@ -31,6 +31,7 @@ namespace Roki.Services
         IEnumerable<User> GetCurrencyLeaderboard(int page);
         Task<bool> TransferCurrencyAsync(ulong userId, decimal amount);
         Task<bool> AddOrUpdateUserSubscriptionAsync(ulong userId, ulong guildId, string subId, int days);
+        Task<Dictionary<ulong, List<Subscription>>> RemoveExpiredSubscriptionsAsync();
         Task<bool> AddOrUpdateUserInventoryAsync(ulong userId, ulong guildId, string itemId, int quantity);
 
         Task<Channel> GetOrAddChannelAsync(ITextChannel channel);
@@ -185,9 +186,11 @@ namespace Roki.Services
         {
             var user = await GetUserAsync(userId).ConfigureAwait(false);
             // if exists update then return true
-            if (user.Subscriptions.Any(x => x.Id == subId))
+            var sub = user.Subscriptions.FirstOrDefault(x => x.Id == subId);
+            if (sub != null)
             {
-                var update = Builders<User>.Update.Set(x => x.Subscriptions[-1].Length, days);
+                var newEndDate = sub.EndDate.AddDays(days).Date;
+                var update = Builders<User>.Update.Set(x => x.Subscriptions[-1].EndDate, newEndDate);
                 await UserCollection.UpdateOneAsync(x => x.Id == userId, update).ConfigureAwait(false);
                 return true;
             }
@@ -196,12 +199,38 @@ namespace Roki.Services
             {
                 Id = subId,
                 GuildId = guildId,
-                StartDate = DateTime.UtcNow,
-                Length = days
+                EndDate = DateTime.Now.AddDays(days).Date
             });
             
             await UserCollection.UpdateOneAsync(x => x.Id == userId, newSub).ConfigureAwait(false);
             return false;
+        }
+
+        public async Task<Dictionary<ulong, List<Subscription>>> RemoveExpiredSubscriptionsAsync()
+        {
+            var now = DateTime.UtcNow.Date;
+            var expired = new Dictionary<ulong, List<Subscription>>();
+
+            using (var cursor = await UserCollection.FindAsync(FilterDefinition<User>.Empty))
+            {
+                while (await cursor.MoveNextAsync())
+                {
+                    foreach (var user in cursor.Current)
+                    {
+                        expired.Add(user.Id, user.Subscriptions.Where(x => now >= x.EndDate).ToList());
+                    }
+                }
+            }
+
+            if (expired.Count == 0)
+            {
+                return expired;
+            }
+            
+            var update = Builders<User>.Update.PullFilter(x => x.Subscriptions, y => now >= y.EndDate);
+            await UserCollection.UpdateManyAsync(FilterDefinition<User>.Empty, update).ConfigureAwait(false);
+
+            return expired;
         }
 
         public async Task<bool> AddOrUpdateUserInventoryAsync(ulong userId, ulong guildId, string itemId, int quantity)
