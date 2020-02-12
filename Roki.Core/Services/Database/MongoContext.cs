@@ -6,6 +6,8 @@ using Discord;
 using Discord.WebSocket;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
+using Roki.Modules.Games.Common;
 using Roki.Services.Database.Maps;
 
 namespace Roki.Services
@@ -17,6 +19,7 @@ namespace Roki.Services
         IMongoCollection<Guild> GuildCollection { get; }
         IMongoCollection<User> UserCollection { get; }
         IMongoCollection<Transaction> TransactionCollection { get; }
+        IMongoCollection<JeopardyClue> JeopardyCollection { get; }
 
         
         Task<User> GetOrAddUserAsync(IUser user);
@@ -57,6 +60,8 @@ namespace Roki.Services
         Task AddTransaction(Transaction transaction);
         IEnumerable<Transaction> GetTransactions(ulong userId, int page);
 
+        Dictionary<string, List<JClue>> GetRandomJeopardyCategories(int number);
+
     }
 
     public class MongoContext : IMongoContext
@@ -68,6 +73,7 @@ namespace Roki.Services
         public IMongoCollection<Guild> GuildCollection { get; }
         public IMongoCollection<User> UserCollection { get; }
         public IMongoCollection<Transaction> TransactionCollection { get; }
+        public IMongoCollection<JeopardyClue> JeopardyCollection { get; }
 
         public MongoContext(IMongoDatabase database)
         {
@@ -78,6 +84,7 @@ namespace Roki.Services
             GuildCollection = database.GetCollection<Guild>("guilds");
             UserCollection = database.GetCollection<User>("users");
             TransactionCollection = database.GetCollection<Transaction>("transactions");
+            JeopardyCollection = database.GetCollection<JeopardyClue>("jeopardy");
         }
 
 
@@ -425,6 +432,41 @@ namespace Roki.Services
                 .OrderByDescending(t => t.Id)
                 .Skip(15 * page)
                 .Take(15);
+        }
+
+        public Dictionary<string, List<JClue>> GetRandomJeopardyCategories(int number)
+        {
+            var query = JeopardyCollection.AsQueryable();
+            var categories = query.Sample(number * 5).Select(x => x.Category).ToHashSet();
+            while (categories.Count < number)
+            {
+                categories = query.Sample(number * 5).Select(x => x.Category).ToHashSet();
+            }
+
+            return categories.Take(number)
+                .ToDictionary(category => category, category => new List<JClue>
+                {
+                    query.Where(x => x.Category == category && (x.Value == 200 || x.Value == 400))
+                        .Sample(1)
+                        .Select(x => new JClue {Category = category, Clue = x.Clue, Answer = x.Answer, Value = 200})
+                        .First(),
+                    query.Where(x => x.Category == category && (x.Value == 400 || x.Value == 800))
+                        .Sample(1)
+                        .Select(x => new JClue {Category = category, Clue = x.Clue, Answer = x.Answer, Value = 200})
+                        .First(),
+                    query.Where(x => x.Category == category && (x.Value == 600 || x.Value == 1200))
+                        .Sample(1)
+                        .Select(x => new JClue {Category = category, Clue = x.Clue, Answer = x.Answer, Value = 200})
+                        .First(),
+                    query.Where(x => x.Category == category && (x.Value == 800 || x.Value == 1600))
+                        .Sample(1)
+                        .Select(x => new JClue {Category = category, Clue = x.Clue, Answer = x.Answer, Value = 200})
+                        .First(),
+                    query.Where(x => x.Category == category && (x.Value == 1000 || x.Value == 2000))
+                        .Sample(1)
+                        .Select(x => new JClue {Category = category, Clue = x.Clue, Answer = x.Answer, Value = 200})
+                        .First(),
+                });
         }
     }
 }

@@ -214,13 +214,13 @@ namespace Roki.Services.Database
                 var sw = Stopwatch.StartNew();
                 Logger.Info("Starting jeopardy migration");
 
-                var collection = _mongo.GetCollection<JClue>("jeopardy");
+                var collection = _mongo.GetCollection<JeopardyClue>("jeopardy");
                 using var uow = _db.GetDbContext();
                 var query = from clue in uow.Context.Set<Clues>()
                             join document in uow.Context.Set<Documents>() on clue.Id equals document.Id
                             join classification in uow.Context.Set<Classification>() on clue.Id equals classification.ClueId
                             join categories in uow.Context.Set<Categories>() on classification.CategoryId equals categories.Id
-                            select new JClue
+                            select new JeopardyClue
                             {
                                 Category = categories.Category,
                                 Clue = document.Clue,
