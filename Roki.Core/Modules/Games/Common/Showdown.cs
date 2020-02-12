@@ -26,7 +26,6 @@ namespace Roki.Modules.Games.Common
     public class Showdown
     {
         private readonly ICurrencyService _currency;
-        private readonly DbService _db;
         private readonly IDatabase _cache;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly DiscordSocketClient _client;
@@ -69,11 +68,10 @@ namespace Roki.Modules.Games.Common
             {TimesTen, 0},
         };
 
-        public Showdown(ICurrencyService currency, DbService db, DiscordSocketClient client, ITextChannel channel, int generation,
+        public Showdown(ICurrencyService currency, DiscordSocketClient client, ITextChannel channel, int generation,
             ShowdownService service, IRedisCache cache)
         {
             _currency = currency;
-            _db = db;
             _cache = cache.Redis.GetDatabase();
             _client = client;
             _channel = channel;
@@ -506,8 +504,7 @@ namespace Roki.Modules.Games.Common
 
         private long GetCurrency(ulong userId)
         {
-            using var uow = _db.GetDbContext();
-            return uow.Users.GetUserCurrency(userId);
+            return _currency.GetCurrency(userId, _channel.GuildId).Result;
         }
     }
 }
