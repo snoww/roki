@@ -30,8 +30,8 @@ namespace Roki.Services
         decimal GetUserInvesting(ulong userId);
         IEnumerable<User> GetCurrencyLeaderboard(int page);
         Task<bool> TransferCurrencyAsync(ulong userId, decimal amount);
-        Task<bool> AddOrUpdateUserSubscriptionAsync(ulong userId, ulong guildId, Guid subId, int days);
-        Task<bool> AddOrUpdateUserInventoryAsync(ulong userId, ulong guildId, Guid itemId, int quantity);
+        Task<bool> AddOrUpdateUserSubscriptionAsync(ulong userId, ulong guildId, string subId, int days);
+        Task<bool> AddOrUpdateUserInventoryAsync(ulong userId, ulong guildId, string itemId, int quantity);
 
         Task<Channel> GetOrAddChannelAsync(ITextChannel channel);
         Task DeleteChannelAsync(ITextChannel channel);
@@ -44,7 +44,7 @@ namespace Roki.Services
         Task UpdateGuildAsync(SocketGuild after);
         Task AddStoreItemAsync(ulong guildId, Listing item);
         Task<Listing> GetStoreItemByNameAsync(ulong guildId, string name);
-        Task<Listing> GetStoreItemByIdAsync(ulong guildId, Guid id);
+        Task<Listing> GetStoreItemByIdAsync(ulong guildId, string id);
         Task<List<Listing>> GetStoreCatalogueAsync(ulong guildId);
         Task UpdateStoreItemAsync(ulong guildId, string name, int amount);
 
@@ -181,7 +181,7 @@ namespace Roki.Services
             return true;
         }
 
-        public async Task<bool> AddOrUpdateUserSubscriptionAsync(ulong userId, ulong guildId, Guid subId, int days)
+        public async Task<bool> AddOrUpdateUserSubscriptionAsync(ulong userId, ulong guildId, string subId, int days)
         {
             var user = await GetUserAsync(userId).ConfigureAwait(false);
             // if exists update then return true
@@ -204,7 +204,7 @@ namespace Roki.Services
             return false;
         }
 
-        public async Task<bool> AddOrUpdateUserInventoryAsync(ulong userId, ulong guildId, Guid itemId, int quantity)
+        public async Task<bool> AddOrUpdateUserInventoryAsync(ulong userId, ulong guildId, string itemId, int quantity)
         {
             var user = await GetUserAsync(userId).ConfigureAwait(false);
             // if exists update then return true
@@ -333,7 +333,7 @@ namespace Roki.Services
             return guild.Store.FirstOrDefault(l => l.Name == name);
         }
 
-        public async Task<Listing> GetStoreItemByIdAsync(ulong guildId, Guid id)
+        public async Task<Listing> GetStoreItemByIdAsync(ulong guildId, string id)
         {
             var guild = await GetGuildAsync(guildId).ConfigureAwait(false);
             return guild.Store.FirstOrDefault(l => l.Id == id);
@@ -361,7 +361,7 @@ namespace Roki.Services
                 GuildId = message.Channel is ITextChannel channelId ? channelId.GuildId : (ulong?) null,
                 Content = message.Content,
                 Attachments = message.Attachments?.Select(a => a.Url).ToList(),
-                Timestamp = message.Timestamp
+                Timestamp = message.Timestamp.DateTime
             }).ConfigureAwait(false);
         }
 
@@ -371,7 +371,7 @@ namespace Roki.Services
             {
                 Content = after.Content,
                 Attachments = after.Attachments.Select(m => m.Url).ToList(),
-                EditedTimestamp = after.EditedTimestamp ?? after.Timestamp
+                EditedTimestamp = after.EditedTimestamp?.DateTime ?? after.Timestamp.DateTime
             });
 
             await MessageCollection.FindOneAndUpdateAsync(m => m.Id == after.Id, update).ConfigureAwait(false);
