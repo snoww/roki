@@ -12,11 +12,13 @@ namespace Roki.Modules.Games.Services
     public class JeopardyService : IRokiService
     {
         private readonly DbService _db;
+        private readonly IMongoService _mongo;
         public readonly ConcurrentDictionary<ulong, Jeopardy> ActiveGames = new ConcurrentDictionary<ulong, Jeopardy>();
 
-        public JeopardyService(DbService db)
+        public JeopardyService(DbService db, IMongoService mongo)
         {
             _db = db;
+            _mongo = mongo;
         }
 
         public Dictionary<string, List<JClue>> GenerateGame(int categories)
@@ -122,6 +124,11 @@ namespace Roki.Modules.Games.Services
             var rng = new Random();
             var count = uow.Context.Categories.Count();
             return uow.Context.Categories.Skip(rng.Next(0, count)).Take(1).First();
+        }
+
+        private string GetRandomCategory2()
+        {
+            
         }
     }
 }
