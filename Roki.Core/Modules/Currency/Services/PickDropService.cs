@@ -84,7 +84,7 @@ namespace Roki.Modules.Currency.Services
                 
                 await _cache.StringIncrementAsync($"currency:{channel.Guild.Id}:{user.Id}", amount, CommandFlags.FireAndForget)
                     .ConfigureAwait(false);
-                await _mongo.Context.UpdateUserCurrencyAsync(user, amount).ConfigureAwait(false);
+                await _mongo.Context.UpdateUserCurrencyAsync(user.Id, amount).ConfigureAwait(false);
 
                 try
                 {
