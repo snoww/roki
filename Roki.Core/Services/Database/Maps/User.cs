@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Roki.Services.Database.Maps
@@ -23,7 +24,7 @@ namespace Roki.Services.Database.Maps
     
     public class Item
     {
-        public string Id { get; set; }
+        public ObjectId Id { get; set; }
         public ulong GuildId { get; set; }
         public int Quantity { get; set; }
     }
@@ -38,7 +39,7 @@ namespace Roki.Services.Database.Maps
 
     public class Subscription
     {
-        public string Id { get; set; }
+        public ObjectId Id { get; set; }
         public ulong GuildId { get; set; }
         public DateTime EndDate { get; set; }
     }

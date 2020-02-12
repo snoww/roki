@@ -8,8 +8,7 @@ namespace Roki.Services.Database.Maps
     public class Transaction
     {
         [BsonId(IdGenerator = typeof(ObjectIdGenerator))]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }
+        public ObjectId Id { get; set; }
         public ulong? From { get; set; }
         public ulong? To { get; set; }
         public long Amount { get; set; }
