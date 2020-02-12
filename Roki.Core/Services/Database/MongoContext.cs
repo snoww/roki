@@ -196,7 +196,7 @@ namespace Roki.Services
             {
                 Id = subId,
                 GuildId = guildId,
-                StartDate = DateTimeOffset.UtcNow,
+                StartDate = DateTime.UtcNow,
                 Length = days
             });
             
@@ -392,7 +392,7 @@ namespace Roki.Services
         public IEnumerable<Transaction> GetTransactions(ulong userId, int page)
         {
             return TransactionCollection.AsQueryable().Where(t => t.From == userId || t.To == userId)
-                .OrderByDescending(t => t.Date)
+                .OrderByDescending(t => t.Id)
                 .Skip(15 * page)
                 .Take(15)
                 .ToList();

@@ -4,7 +4,6 @@ namespace Roki.Services.Database.Maps
 {
     public class Channel
     {
-        [BsonId]
         public ulong Id { get; set; }
         public string Name { get; set; }
         public ulong GuildId { get; set; }

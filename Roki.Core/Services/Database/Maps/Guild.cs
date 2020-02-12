@@ -6,7 +6,6 @@ namespace Roki.Services.Database.Maps
 {
     public class Guild
     {
-        [BsonId]
         public ulong Id { get; set; }
         public string Name { get; set; }
         public string IconId { get; set; }
@@ -31,7 +30,7 @@ namespace Roki.Services.Database.Maps
 
     public class Listing
     {
-        public Guid Id { get; set; }
+        public string Id { get; set; }
         public ulong SellerId { get; set; }
         public string Name { get; set; }
         public string Details { get; set; }
