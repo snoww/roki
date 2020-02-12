@@ -24,7 +24,7 @@ namespace Roki.Services
         Task<User> UpdateUserAsync(IUser after);
         Task<int> UpdateUserXpAsync(User user, bool doubleXp);
         Task<bool> UpdateUserCurrencyAsync(User user, long amount);
-        Task<bool> UpdateUserCurrencyAsync(IUser user, long amount);
+        Task<bool> UpdateUserCurrencyAsync(ulong userId, long amount);
         Task UpdateBotCurrencyAsync(long amount);
         long GetBotCurrencyAsync();
         long GetUserCurrency(ulong userId);
@@ -130,9 +130,9 @@ namespace Roki.Services
             return true;
         }
 
-        public async Task<bool> UpdateUserCurrencyAsync(IUser user, long amount)
+        public async Task<bool> UpdateUserCurrencyAsync(ulong userId, long amount)
         {
-            var dbUser = await GetOrAddUserAsync(user).ConfigureAwait(false);
+            var dbUser = await GetUserAsync(userId).ConfigureAwait(false);
             return await UpdateUserCurrencyAsync(dbUser, amount).ConfigureAwait(false);
         }
 
