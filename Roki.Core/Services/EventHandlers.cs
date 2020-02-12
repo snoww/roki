@@ -241,8 +241,8 @@ namespace Roki.Services
             {
                 var user = await _context.GetOrAddUserAsync(message.Author).ConfigureAwait(false);
                 // temp
-                var doubleXp = user.Subscriptions.Any(u => u.Id.Equals(Guid.Parse("44ccdd38-98d3-3312-8e22-4c0159ab028f")));
-                var fastXp = user.Subscriptions.Any(u => u.Id.Equals(Guid.Parse("4ae529bc-7205-70b9-8e22-4c0159ab2c80")));
+                var doubleXp = user.Subscriptions.Any(u => u.Id.Equals("temp"));
+                var fastXp = user.Subscriptions.Any(u => u.Id.Equals("temp"));
 
                 var oldLevel = new XpLevel(user.Xp);
                 var newXp = 0;

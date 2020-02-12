@@ -186,11 +186,11 @@ namespace Roki.Modules.Currency
                     return;
                 }
                 var desc = new StringBuilder();
-                var now = DateTime.UtcNow;
+                var now = DateTime.UtcNow.Date;
                 foreach (var sub in subs)
                 {
                     var listing = await _mongo.Context.GetStoreItemByIdAsync(guildId, sub.Id);
-                    desc.AppendLine($"{listing.Name} - Expires in `{(sub.StartDate.AddDays(sub.Length) - now).ToReadableString()}`");
+                    desc.AppendLine($"{listing.Name} - Expires in `{(sub.EndDate - now).ToReadableString()}`");
                 }
 
                 await Context.Channel.EmbedAsync(embed.WithDescription(desc.ToString())).ConfigureAwait(false);
