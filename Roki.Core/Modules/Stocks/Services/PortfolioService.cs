@@ -2,31 +2,30 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Roki.Services;
-using Roki.Services.Database.Core;
+using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Stocks.Services
 {
     public class PortfolioService : IRokiService
     {
         private readonly IRokiConfig _config;
-        private readonly IHttpClientFactory _httpFactory;
-        private readonly DbService _db;
+        private readonly IMongoService _mongo;
+        private readonly IHttpClientFactory _http;
         private const string IexStocksUrl = "https://cloud.iexapis.com/stable/stock/";
 
-        public PortfolioService(DbService db, IHttpClientFactory httpFactory, IRokiConfig config)
+        public PortfolioService(IHttpClientFactory http, IRokiConfig config, IMongoService mongo)
         {
-            _db = db;
-            _httpFactory = httpFactory;
+            _http = http;
             _config = config;
+            _mongo = mongo;
         }
 
         public async Task<List<Investment>> GetUserPortfolio(ulong userId)
         {
-            using var uow = _db.GetDbContext();
-            return await uow.Users.GetUserPortfolioAsync(userId).ConfigureAwait(false);
+            return (await _mongo.Context.GetUserAsync(userId).ConfigureAwait(false)).Portfolio;
         }
 
-        public async Task<decimal> GetPortfolioValue(List<Investment> portfolio)
+        public async Task<decimal> GetPortfolioValue(IEnumerable<Investment> portfolio)
         {
             var value = 0m;
             foreach (var investment in portfolio)
@@ -40,7 +39,7 @@ namespace Roki.Modules.Stocks.Services
 
         private async Task<decimal> GetStockPrice(string symbol)
         {
-            using var http = _httpFactory.CreateClient();
+            using var http = _http.CreateClient();
             var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/quote/latestPrice?token={_config.IexToken}").ConfigureAwait(false);
             decimal.TryParse(result, out var price);
             return price;
