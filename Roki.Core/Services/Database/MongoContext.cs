@@ -60,7 +60,8 @@ namespace Roki.Services
         Task AddTransaction(Transaction transaction);
         IEnumerable<Transaction> GetTransactions(ulong userId, int page);
 
-        Dictionary<string, List<JClue>> GetRandomJeopardyCategories(int number);
+        Task<Dictionary<string, List<JClue>>> GetRandomJeopardyCategoriesAsync(int number);
+        Task<JClue> GetFinalJeopardyAsync();
 
     }
 
@@ -434,7 +435,7 @@ namespace Roki.Services
                 .Take(15);
         }
 
-        public Dictionary<string, List<JClue>> GetRandomJeopardyCategories(int number)
+        public async Task<Dictionary<string, List<JClue>>> GetRandomJeopardyCategoriesAsync(int number)
         {
             var query = JeopardyCollection.AsQueryable();
             var categories = query.Sample(number * 5).Select(x => x.Category).ToHashSet();
@@ -443,30 +444,47 @@ namespace Roki.Services
                 categories = query.Sample(number * 5).Select(x => x.Category).ToHashSet();
             }
 
-            return categories.Take(number)
-                .ToDictionary(category => category, category => new List<JClue>
+            var result = new Dictionary<string, List<JClue>>();
+            foreach (var category in categories.TakeWhile(category => result.Count != number))
+            {
+                try
                 {
-                    query.Where(x => x.Category == category && (x.Value == 200 || x.Value == 400))
-                        .Sample(1)
-                        .Select(x => new JClue {Category = category, Clue = x.Clue, Answer = x.Answer, Value = 200})
-                        .First(),
-                    query.Where(x => x.Category == category && (x.Value == 400 || x.Value == 800))
-                        .Sample(1)
-                        .Select(x => new JClue {Category = category, Clue = x.Clue, Answer = x.Answer, Value = 200})
-                        .First(),
-                    query.Where(x => x.Category == category && (x.Value == 600 || x.Value == 1200))
-                        .Sample(1)
-                        .Select(x => new JClue {Category = category, Clue = x.Clue, Answer = x.Answer, Value = 200})
-                        .First(),
-                    query.Where(x => x.Category == category && (x.Value == 800 || x.Value == 1600))
-                        .Sample(1)
-                        .Select(x => new JClue {Category = category, Clue = x.Clue, Answer = x.Answer, Value = 200})
-                        .First(),
-                    query.Where(x => x.Category == category && (x.Value == 1000 || x.Value == 2000))
-                        .Sample(1)
-                        .Select(x => new JClue {Category = category, Clue = x.Clue, Answer = x.Answer, Value = 200})
-                        .First(),
-                });
+                    var all = await JeopardyCollection.Find(x => x.Category == category).ToListAsync();
+
+                    result.Add(category, new List<JClue>
+                    {
+                        all.Where(x => x.Value == 200).Take(1)
+                            .Select(x => new JClue {Answer = x.Answer, Category = x.Category, Clue = x.Category, Value = 200}).Single(),
+                        all.Where(x => x.Value == 400).Take(1)
+                            .Select(x => new JClue {Answer = x.Answer, Category = x.Category, Clue = x.Category, Value = 400}).Single(),
+                        all.Where(x => x.Value == 600 || x.Value == 1200).Take(1)
+                            .Select(x => new JClue {Answer = x.Answer, Category = x.Category, Clue = x.Category, Value = 600}).Single(),
+                        all.Where(x => x.Value == 800 || x.Value == 1600).Take(1)
+                            .Select(x => new JClue {Answer = x.Answer, Category = x.Category, Clue = x.Category, Value = 800}).Single(),
+                        all.Where(x => x.Value == 200 || x.Value == 2000).Take(1)
+                            .Select(x => new JClue {Answer = x.Answer, Category = x.Category, Clue = x.Category, Value = 1000}).Single(),
+                    });
+                }
+                catch (Exception)
+                {
+                    //
+                }
+            }
+            
+            return result;
+        }
+
+        public async Task<JClue> GetFinalJeopardyAsync()
+        {
+            var clue = await JeopardyCollection.AsQueryable().Sample(1).Where(x => x.Value > 2000 || x.Value == null).SingleAsync();
+
+            return new JClue
+            {
+                Category = clue.Category,
+                Clue = clue.Clue,
+                Answer = clue.Answer,
+                Value = 0
+            };
         }
     }
 }
