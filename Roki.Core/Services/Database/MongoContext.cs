@@ -63,6 +63,13 @@ namespace Roki.Services
         Task<Dictionary<string, List<JClue>>> GetRandomJeopardyCategoriesAsync(int number);
         Task<JClue> GetFinalJeopardyAsync();
 
+        Task<Event> GetEventByIdAsync(ObjectId id);
+        Task AddNewEventAsync(Event e);
+        Task<List<Event>> GetActiveEventsAsync();
+        Task<List<Event>> GetActiveEventsByHostAsync(ulong hostId);
+        Task<List<Event>> GetActiveEventsByGuild(ulong guildId);
+        Task UpdateEventAsync(ObjectId id, UpdateDefinition<Event> update);
+
     }
 
     public class MongoContext : IMongoContext
@@ -75,6 +82,7 @@ namespace Roki.Services
         public IMongoCollection<User> UserCollection { get; }
         public IMongoCollection<Transaction> TransactionCollection { get; }
         public IMongoCollection<JeopardyClue> JeopardyCollection { get; }
+        public IMongoCollection<Event> EventCollection { get; }
 
         public MongoContext(IMongoDatabase database)
         {
@@ -86,8 +94,8 @@ namespace Roki.Services
             UserCollection = database.GetCollection<User>("users");
             TransactionCollection = database.GetCollection<Transaction>("transactions");
             JeopardyCollection = database.GetCollection<JeopardyClue>("jeopardy");
+            EventCollection = database.GetCollection<Event>("events");
         }
-
 
         public async Task<User> GetOrAddUserAsync(IUser user)
         {
@@ -485,6 +493,39 @@ namespace Roki.Services
                 Answer = clue.Answer,
                 Value = 0
             };
+        }
+
+        public async Task<Event> GetEventByIdAsync(ObjectId id)
+        {
+            return await EventCollection.Find(x => x.Id == id).FirstAsync();
+        }
+
+        public async Task AddNewEventAsync(Event e)
+        {
+            await EventCollection.InsertOneAsync(e).ConfigureAwait(false);
+        }
+
+        public async Task<List<Event>> GetActiveEventsAsync()
+        {
+            var now = DateTime.UtcNow;
+            return await EventCollection.Find(x => x.StartDate > now && !x.Deleted).ToListAsync();
+        }
+
+        public async Task<List<Event>> GetActiveEventsByHostAsync(ulong hostId)
+        {
+            var now = DateTime.UtcNow;
+            return await EventCollection.Find(x => x.Host == hostId && x.StartDate > now && !x.Deleted).ToListAsync();
+        }
+
+        public async Task<List<Event>> GetActiveEventsByGuild(ulong guildId)
+        {
+            var now = DateTime.UtcNow;
+            return await EventCollection.Find(x => x.GuildId == guildId && x.StartDate > now && !x.Deleted).ToListAsync();
+        }
+
+        public async Task UpdateEventAsync(ObjectId id, UpdateDefinition<Event> update)
+        {
+            await EventCollection.UpdateOneAsync(x => x.Id == id, update).ConfigureAwait(false);
         }
     }
 }

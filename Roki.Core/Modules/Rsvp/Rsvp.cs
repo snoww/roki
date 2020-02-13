@@ -34,6 +34,12 @@ namespace Roki.Modules.Rsvp
             }
             else if (args.StartsWith("list", StringComparison.OrdinalIgnoreCase) || args.Equals("ls", StringComparison.OrdinalIgnoreCase))
             {
+                var events = await Service.GetActiveGuildEvents(Context.Guild.Id).ConfigureAwait(false);
+                if (events.Count == 0)
+                {
+                    await Context.Channel.SendErrorAsync("No active events on this server.").ConfigureAwait(false);
+                }
+                
                 var split = args.Split();
                 var page = 0;
                 if (split.Length > 1)
@@ -43,10 +49,21 @@ namespace Roki.Modules.Rsvp
                         await Context.Channel.SendErrorAsync("Could not parse page number. Please try again.").ConfigureAwait(false);
                         return;
                     }
+
+                    if (page > events.Count)
+                    {
+                        page = 0;
+                    }
                 }
-                var events = Service.ListEvents(Context.Guild.Id, page);
+
+                var eventMessage = events
+                    .Skip(page * 9)
+                    .Take(5)
+                    .Select(e =>
+                        $"`#{e.Id.Pid}` **{e.Name}** in `{(e.StartDate - DateTimeOffset.UtcNow).ToReadableString()}` https://discordapp.com/channels/{e.GuildId}/{e.ChannelId}/{e.MessageId}");
+                
                 var embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle("List of Events")
-                    .WithDescription($"{string.Join("\n", events.Select(e => $"`#{e.Id}` **{e.Name}** in `{(e.StartDate - DateTimeOffset.UtcNow).ToReadableString()}` https://discordapp.com/channels/{e.GuildId}/{e.ChannelId}/{e.MessageId}"))}");
+                    .WithDescription($"{string.Join("\n", events)}");
 
                 await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }

@@ -7,18 +7,20 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using NLog;
 using Roki.Extensions;
 using Roki.Services;
-using Roki.Services.Database.Core;
+using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Rsvp.Services
 {
     public class RsvpService : IRokiService
     {
-        private readonly DbService _db;
         private readonly DiscordSocketClient _client;
-        private readonly ConcurrentDictionary<int, Event> _activeReminders = new ConcurrentDictionary<int, Event>();
+        private readonly IMongoService _mongo;
+        private readonly ConcurrentDictionary<ObjectId, Event> _activeReminders = new ConcurrentDictionary<ObjectId, Event>();
         private Timer _timer;
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -37,10 +39,10 @@ namespace Roki.Modules.Rsvp.Services
             Uncertain
         };
 
-        public RsvpService(DbService db, DiscordSocketClient client)
+        public RsvpService(DiscordSocketClient client, IMongoService mongo)
         {
-            _db = db;
             _client = client;
+            _mongo = mongo;
             _client.ReactionAdded += ReactionHandler;
             EventTimer();
         }
@@ -52,15 +54,14 @@ namespace Roki.Modules.Rsvp.Services
 
         private async void EventUpdate(object state)
         {
-            using var uow = _db.GetDbContext();
-            var events = uow.Events.GetAllActiveEvents();
+            var events = await _mongo.Context.GetActiveEventsAsync().ConfigureAwait(false);
             if (events.Count == 0) return;
 
             try
             {
                 foreach (var e in events)
                 {
-                    var now = DateTimeOffset.UtcNow;
+                    var now = DateTime.UtcNow;
                     var message = await _client.GetGuild(e.GuildId).GetTextChannel(e.ChannelId).GetMessageAsync(e.MessageId).ConfigureAwait(false) as IUserMessage;
                     var old = message?.Embeds.First();
                     if (old == null) continue;
@@ -87,7 +88,6 @@ namespace Roki.Modules.Rsvp.Services
                         newEmbed.WithDescription("Event started")
                             .WithFooter("Event started");
                         await message.ModifyAsync(m => m.Embed = newEmbed.Build()).ConfigureAwait(false);
-                        uow.Context.Events.Remove(e);
                         _activeReminders.Remove(e.Id, out _);
                         await message.RemoveAllReactionsAsync().ConfigureAwait(false);
                         continue;
@@ -100,8 +100,6 @@ namespace Roki.Modules.Rsvp.Services
             {
                 Logger.Error(e);
             }
-
-            await uow.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task CreateEvent(ICommandContext ctx)
@@ -333,26 +331,25 @@ namespace Roki.Modules.Rsvp.Services
                     return;
                 }
             }
-            
-            using var uow = _db.GetDbContext();
-            var ev = uow.Context.Events.Add(new Event
+
+            var ev = new Event
             {
+                Id = ObjectId.GenerateNewId(),
                 Name = eventTitle,
                 Description = eventDesc,
                 Host = ctx.User.Id,
-                StartDate = eventDate.Value,
+                StartDate = eventDate.Value.UtcDateTime,
                 GuildId = ctx.Guild.Id,
                 ChannelId = eventChannel.Id,
-            });
-            await uow.SaveChangesAsync().ConfigureAwait(false);
-
+            };
+            
             var startsIn = eventDate.Value - DateTimeOffset.Now;
             var eventEmbed = new EmbedBuilder().WithDynamicColor(ctx)
-                .WithTitle($"`#{ev.Entity.Id}` {eventTitle}")
+                .WithTitle($"`#{ev.Id.Pid}` {eventTitle}")
                 .WithAuthor(ctx.User.Username, ctx.User.GetAvatarUrl())
                 .WithDescription($"Starts in `{startsIn.ToReadableString()}`")
                 .AddField("Description", eventDesc)
-                .AddField("Event Date", $"`{eventDate.Value:f}`")
+                .AddField("Event Date", $"```{eventDate.Value:f}```")
                 .AddField("Participants (0)", "```None```")
                 .AddField("Undecided", "```None```")
                 .WithFooter("Event starts")
@@ -370,18 +367,16 @@ namespace Roki.Modules.Rsvp.Services
                 return;
             }
 
-            ev.Entity.MessageId = rsvp.Id;
-            await uow.SaveChangesAsync().ConfigureAwait(false);
+            ev.MessageId = rsvp.Id;
+            await _mongo.Context.AddNewEventAsync(ev).ConfigureAwait(false);
+
             await rsvp.AddReactionsAsync(Choices).ConfigureAwait(false);
         }
 
         public async Task EditEvent(ICommandContext ctx)
         {
             var toDelete = new List<IUserMessage> {ctx.Message};
-            var events = new List<Event>();
-            var formattedEvents = events.Select(e => $"`#{e.Id}`: {e.Name} `{e.StartDate:f}`");
-            using var uow = _db.GetDbContext();
-            events = uow.Context.Events.Where(e => e.Host == ctx.User.Id).ToList();
+            var events = await _mongo.Context.GetActiveEventsByHostAsync(ctx.User.Id).ConfigureAwait(false);
 
             if (events.Count == 0)
             {
@@ -390,12 +385,13 @@ namespace Roki.Modules.Rsvp.Services
             }
 
             SocketMessage replyMessage;
-            var ev = events.First();
+            var activeEditEvent = events.First();
             if (events.Count > 1)
             {
                 var q1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                     .WithTitle("RSVP Event Editor")
-                    .WithDescription($"Which Event would you like to edit? Type in the # to select.\n{string.Join("\n", formattedEvents)}")
+                    .WithDescription("Which Event would you like to edit? Type in the # to select.\n" +
+                                     $"{string.Join("\n", events.Select(e => $"`#{e.Id.Pid}`: {e.Name} `{e.StartDate:f}`"))}")
                     .WithFooter("Type stop to cancel event edit")
                 ).ConfigureAwait(false);
                 toDelete.Add(q1);
@@ -413,8 +409,8 @@ namespace Roki.Modules.Rsvp.Services
                     return;
                 }
 
-                ev = events.FirstOrDefault(e => e.Id.ToString().Equals(replyMessage.Content, StringComparison.OrdinalIgnoreCase));
-                while (ev == null)
+                activeEditEvent = events.FirstOrDefault(e => e.Id.Pid.ToString().Equals(replyMessage.Content, StringComparison.OrdinalIgnoreCase));
+                while (activeEditEvent == null)
                 {
                     var err = await ctx.Channel.SendErrorAsync("Cannot find an event with that ID, please try again.").ConfigureAwait(false);
                     toDelete.Add(err);
@@ -431,13 +427,13 @@ namespace Roki.Modules.Rsvp.Services
                         await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                         return;
                     }
-                    ev = events.FirstOrDefault(e => e.Id.ToString().Equals(replyMessage.Content, StringComparison.OrdinalIgnoreCase));
+                    activeEditEvent = events.FirstOrDefault(e => e.Id.Pid.ToString().Equals(replyMessage.Content, StringComparison.OrdinalIgnoreCase));
                 }
             }
             
             var q2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                 .WithTitle("RSVP Event Editor")
-                .WithDescription($"What do you want to change for: `#{ev.Id}` **{ev.Name}**\n`1.` Edit Title\n`2.` Edit Description\n`3.` Edit Event Date\n`4.` Delete Event")
+                .WithDescription($"What do you want to change for: `#{activeEditEvent.Id.Pid}` **{activeEditEvent.Name}**\n`1.` Edit Title\n`2.` Edit Description\n`3.` Edit Event Date\n`4.` Delete Event")
                 .WithFooter("Type stop to finish editing")
             ).ConfigureAwait(false);
             toDelete.Add(q2);
@@ -473,13 +469,14 @@ namespace Roki.Modules.Rsvp.Services
                         continue;
                     }
 
-                    ev.Name = editReply.Content.TrimTo(250, true);
+                    var update = Builders<Event>.Update.Set(x => x.Name, editReply.Content.TrimTo(250, true));
+                    await _mongo.Context.UpdateEventAsync(activeEditEvent.Id, update);
+                    
                     var er1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                             .WithTitle("RSVP Event Editor - Edit Title")
-                            .WithDescription($"The event title has been set to: **{ev.Name}**"))
+                            .WithDescription($"The event title has been set to: **{activeEditEvent.Name}**"))
                         .ConfigureAwait(false);
                     toDelete.Add(er1);
-                    await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
                 // Edit Description
                 else if (replyMessage.Content.StartsWith("2", StringComparison.OrdinalIgnoreCase))
@@ -502,13 +499,14 @@ namespace Roki.Modules.Rsvp.Services
                         continue;
                     }
 
-                    ev.Description = editReply.Content.TrimTo(1000, true);
+                    var update = Builders<Event>.Update.Set(x => x.Description, editReply.Content.TrimTo(1000, true));
+                    await _mongo.Context.UpdateEventAsync(activeEditEvent.Id, update);
+                    
                     var er2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                             .WithTitle("RSVP Event Editor - Edit Description")
-                            .WithDescription($"The event description has been changed to:\n{ev.Description}"))
+                            .WithDescription($"The event description has been changed to:\n{activeEditEvent.Description}"))
                         .ConfigureAwait(false);
                     toDelete.Add(er2);
-                    await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
                 // Edit Event Date
                 else if (replyMessage.Content.StartsWith("3", StringComparison.OrdinalIgnoreCase))
@@ -639,21 +637,24 @@ namespace Roki.Modules.Rsvp.Services
                             break;
                         }
                     }
-                    if (stop) continue;
-                    ev.StartDate = newDate.Value;
+                    if (stop) 
+                        continue;
+                    
+                    var update = Builders<Event>.Update.Set(x => x.StartDate, newDate.Value.UtcDateTime);
+                    await _mongo.Context.UpdateEventAsync(activeEditEvent.Id, update);
+                    
                     var er2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                             .WithTitle("RSVP Event Editor - Edit Event Date")
-                            .WithDescription($"The event date has been changed to:\n`{ev.StartDate:f}`"))
+                            .WithDescription($"The event date has been changed to:\n`{activeEditEvent.StartDate:f}`"))
                         .ConfigureAwait(false);
                     toDelete.Add(er2);
-                    await uow.SaveChangesAsync().ConfigureAwait(false);
                 }
                 // Delete
                 else if (replyMessage.Content.StartsWith("4", StringComparison.OrdinalIgnoreCase))
                 {
                     var e4 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                             .WithTitle("RSVP Event Editor - Delete Event")
-                            .WithDescription($"Are you sure you want to delete the event? `yes`/`no`\n`#{ev.Id}` **{ev.Name}**\n**You cannot undo this process.**"))
+                            .WithDescription($"Are you sure you want to delete the event? `yes`/`no`\n`#{activeEditEvent.Id.Pid}` **{activeEditEvent.Name}**\n**You cannot undo this process.**"))
                         .ConfigureAwait(false);
                     toDelete.Add(e4);
                     replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
@@ -666,9 +667,11 @@ namespace Roki.Modules.Rsvp.Services
                     if (replyMessage.Content.Equals("yes", StringComparison.OrdinalIgnoreCase) ||
                         replyMessage.Content.Equals("y", StringComparison.OrdinalIgnoreCase))
                     {
-                        var message = await _client.GetGuild(ev.GuildId).GetTextChannel(ev.ChannelId).GetMessageAsync(ev.MessageId).ConfigureAwait(false) as IUserMessage;
-                        uow.Context.Events.Remove(ev);
-                        await uow.SaveChangesAsync().ConfigureAwait(false);
+                        var message = await _client.GetGuild(activeEditEvent.GuildId).GetTextChannel(activeEditEvent.ChannelId).GetMessageAsync(activeEditEvent.MessageId).ConfigureAwait(false) as IUserMessage;
+
+                        var update = Builders<Event>.Update.Set(x => x.Deleted, true);
+                        await _mongo.Context.UpdateEventAsync(activeEditEvent.Id, update).ConfigureAwait(false);
+                        
                         try
                         {
                             await message.DeleteAsync().ConfigureAwait(false);
@@ -680,7 +683,7 @@ namespace Roki.Modules.Rsvp.Services
 
                         await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                                 .WithTitle("RSVP Event Editor - Event Deleted")
-                                .WithDescription($"`#{ev.Id}` **{ev.Name}** has been deleted"))
+                                .WithDescription($"`#{activeEditEvent.Id.Pid}` **{activeEditEvent.Name}** has been deleted"))
                             .ConfigureAwait(false);
                         return;
                     }
@@ -692,7 +695,7 @@ namespace Roki.Modules.Rsvp.Services
                 }
                 var q2Repeat = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                     .WithTitle("RSVP Event Editor")
-                    .WithDescription($"What else do you want to change for: `#{ev.Id}` **{ev.Name}**\n1. Edit Title\n2. Edit Description\n3. Edit Start Date\n4. Delete Event")
+                    .WithDescription($"What else do you want to change for: `#{activeEditEvent.Id.Pid}` **{activeEditEvent.Name}**\n1. Edit Title\n2. Edit Description\n3. Edit Start Date\n4. Delete Event")
                     .WithFooter("Type stop to finish editing")
                 ).ConfigureAwait(false);
                 toDelete.Add(q2Repeat);
@@ -710,16 +713,6 @@ namespace Roki.Modules.Rsvp.Services
                     .WithTitle("RSVP Event Editor")
                     .WithDescription("The event editor has been stopped. Any changes you've made have been saved."))
                 .ConfigureAwait(false);
-        }
-
-        public List<Event> ListEvents(ulong guildId, int page = 0)
-        {
-            var uow = _db.GetDbContext();
-            return uow.Context.Events.Where(e => e.GuildId == guildId)
-                .OrderByDescending(e => e.StartDate)
-                .Skip(page * 9)
-                .Take(9)
-                .ToList();
         }
 
         private async Task<SocketMessage> ReplyHandler(ICommandContext ctx, TimeSpan? timeout = null)
@@ -751,16 +744,20 @@ namespace Roki.Modules.Rsvp.Services
 
         private async Task ReactionHandler(Cacheable<IUserMessage, ulong> cache, ISocketMessageChannel channel, SocketReaction r)
         {
-            if (r.User.Value.IsBot) return;
-            using var uow = _db.GetDbContext();
-            var events = uow.Events.GetAllActiveEvents();
-            var messageIds = events.Select(e => e.MessageId).ToList();
+            if (r.User.Value.IsBot) 
+                return;
+            if (!Choices.Contains(r.Emote))
+                return;
+
+            var events = await _mongo.Context.GetActiveEventsAsync();
             
-            if (!messageIds.Contains(r.MessageId) || !Choices.Contains(r.Emote)) return;
+            if (events.All(x => x.MessageId != r.MessageId)) 
+                return;
 
             var msg = await cache.DownloadAsync().ConfigureAwait(false);
             var old = msg.Embeds.First();
-            if (old == null) return;
+            if (old == null) 
+                return;
             
             var date = old.Fields.First(f => f.Name.Contains("date", StringComparison.OrdinalIgnoreCase));
 
@@ -775,49 +772,56 @@ namespace Roki.Modules.Rsvp.Services
                 .WithDescription($"Starts in `{(old.Timestamp.GetValueOrDefault() - DateTimeOffset.Now).ToReadableString()}`")
                 .WithFooter("Event starts");
 
-            var und = new List<string>();
-            var par = new List<string>();
-            if (!string.IsNullOrWhiteSpace(ev.Undecided))
-                und = ev.Undecided.Split('\n').ToList();
-            if (!string.IsNullOrWhiteSpace(ev.Participants))
-                par = ev.Participants.Split('\n').ToList();
+            var user = r.User.Value;
+            var username = user.ToString();
+            var und = ev.Undecided;
+            var par = ev.Participants;
 
             if (r.Emote.Equals(Confirm))
             {
-                await msg.RemoveReactionAsync(Cancel, r.User.Value).ConfigureAwait(false);
-                await msg.RemoveReactionAsync(Uncertain, r.User.Value).ConfigureAwait(false);
-                if (und.Contains(r.User.Value.ToString())) und.Remove(r.User.Value.ToString());
-                if (par.Contains(r.User.Value.ToString())) return;
-                par.Add(r.User.Value.ToString());
+                await msg.RemoveReactionAsync(Cancel, user).ConfigureAwait(false);
+                await msg.RemoveReactionAsync(Uncertain, user).ConfigureAwait(false);
+                if (par.Contains(username)) 
+                    return;
+                if (ev.Undecided.Contains(username))
+                {
+                    und.Remove(username);
+                }
+                par.Add(username);
             }
             else if (r.Emote.Equals(Cancel))
             {
-                await msg.RemoveReactionAsync(Confirm, r.User.Value).ConfigureAwait(false);
-                await msg.RemoveReactionAsync(Uncertain, r.User.Value).ConfigureAwait(false);
-                if (und.Contains(r.User.Value.ToString())) und.Remove(r.User.Value.ToString());
-                if (par.Contains(r.User.Value.ToString())) par.Remove(r.User.Value.ToString());
+                await msg.RemoveReactionAsync(Confirm, user).ConfigureAwait(false);
+                await msg.RemoveReactionAsync(Uncertain, user).ConfigureAwait(false);
+                if (und.Contains(username)) 
+                    und.Remove(username);
+                if (par.Contains(username)) 
+                    par.Remove(username);
             }
             else 
             {
-                await msg.RemoveReactionAsync(Cancel, r.User.Value).ConfigureAwait(false);
-                await msg.RemoveReactionAsync(Confirm, r.User.Value).ConfigureAwait(false);
-                if (par.Contains(r.User.Value.ToString())) par.Remove(r.User.Value.ToString());
-                if (und.Contains(r.User.Value.ToString())) return;
-                und.Add(r.User.Value.ToString());
+                await msg.RemoveReactionAsync(Cancel, user).ConfigureAwait(false);
+                await msg.RemoveReactionAsync(Confirm, user).ConfigureAwait(false);
+                if (und.Contains(username))
+                    return;
+                if (par.Contains(username)) 
+                    par.Remove(username);
+                und.Add(username);
             }
 
-            ev.Participants = string.Join('\n', par);
-            ev.Undecided = string.Join('\n', und);
+            var update = Builders<Event>.Update.Set(x => x.Participants, par).Set(x => x.Undecided, und);
+            await _mongo.Context.UpdateEventAsync(ev.Id, update).ConfigureAwait(false);
+
             if (par.Count == 0)
                 newEmbed.AddField($"Participants ({par.Count})", "```None```");
             else
-                newEmbed.AddField($"Participants ({par.Count})", $"```{ev.Participants}```");
+                newEmbed.AddField($"Participants ({par.Count})", $"```{string.Join("\n", par)}```");
+            
             if (und.Count == 0)
                 newEmbed.AddField($"Undecided", "```None```");
             else
-                newEmbed.AddField($"Undecided ({und.Count})", $"```{ev.Undecided}```");
+                newEmbed.AddField($"Undecided ({und.Count})", $"```{string.Join("\n", und)}```");
             
-            await uow.SaveChangesAsync().ConfigureAwait(false);
             await msg.ModifyAsync(m => m.Embed = newEmbed.Build()).ConfigureAwait(false);
         }
 
@@ -846,40 +850,36 @@ namespace Roki.Modules.Rsvp.Services
 
         private Task StartEventCountdowns(Event e)
         {
-            var thirtyMinutes = e.StartDate.AddMinutes(-30) - DateTimeOffset.Now;
-            var startTime = e.StartDate - DateTimeOffset.Now;
+            var thirtyMinutes = e.StartDate.AddMinutes(-30) - DateTime.UtcNow;
+            var startTime = e.StartDate - DateTime.UtcNow;
 
             if (thirtyMinutes >= TimeSpan.Zero)
             {
                 Logger.Info("Event {name}: sending 30 minute reminder in {thirtymin}", e.Name, startTime);
-                SendNotification(e, thirtyMinutes, NotificationType.ThirtyMinutes);
+                SendNotification(e.Id, thirtyMinutes, NotificationType.ThirtyMinutes);
             }
 
             if (startTime >= TimeSpan.Zero)
             {
                 Logger.Info("Event {name}: sending start reminder in {starttime}", e.Name, startTime);
-                SendNotification(e, startTime, NotificationType.Starting);
+                SendNotification(e.Id, startTime, NotificationType.Starting);
             }
             
             return Task.CompletedTask;
         }
 
-        private void SendNotification(Event evn, TimeSpan delay, NotificationType type)
+        private void SendNotification(ObjectId id, TimeSpan delay, NotificationType type)
         {
             var _ = Task.Run(async () =>
             {
                 await Task.Delay(delay).ConfigureAwait(false);
 
-                Event latestEvent;
-                using (var uow = _db.GetDbContext())
-                {
-                    latestEvent = uow.Context.Events.FirstOrDefault(e => e.Id == evn.Id) ?? evn;
-                }
+                var latestEvent = await _mongo.Context.GetEventByIdAsync(id).ConfigureAwait(false);
                 
-                if (latestEvent.Participants.Length == 0)
+                if (latestEvent.Participants.Count == 0)
                     return;
 
-                var participants = latestEvent.Participants.Split('\n');
+                var participants = latestEvent.Participants;
                 foreach (var par in participants)
                 {
                     try
@@ -913,7 +913,12 @@ namespace Roki.Modules.Rsvp.Services
                 }
             });
         }
-        
+
+        public async Task<List<Event>> GetActiveGuildEvents(ulong guildId)
+        {
+            return await _mongo.Context.GetActiveEventsByGuild(guildId).ConfigureAwait(false);
+        }
+
         private enum NotificationType
         {
             ThirtyMinutes,
