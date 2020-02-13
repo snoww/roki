@@ -70,6 +70,11 @@ namespace Roki.Services
         Task<List<Event>> GetActiveEventsByGuild(ulong guildId);
         Task UpdateEventAsync(ObjectId id, UpdateDefinition<Event> update);
 
+        Task<Pokemon> GetPokemonByNumberAsync(int id);
+        Task<Pokemon> GetPokemonAsync(string name);
+        Task<Ability> GetAbilityAsync(string name);
+        Task<PokemonItem> GetItemAsync(string name);
+        Task<Move> GetMoveAsync(string name);
     }
 
     public class MongoContext : IMongoContext
@@ -83,6 +88,10 @@ namespace Roki.Services
         public IMongoCollection<Transaction> TransactionCollection { get; }
         public IMongoCollection<JeopardyClue> JeopardyCollection { get; }
         public IMongoCollection<Event> EventCollection { get; }
+        public IMongoCollection<Pokemon> PokedexCollection { get; }
+        public IMongoCollection<Ability> AbilityCollection { get; }
+        public IMongoCollection<PokemonItem> ItemCollection { get; }
+        public IMongoCollection<Move> MoveCollection { get; }
 
         public MongoContext(IMongoDatabase database)
         {
@@ -95,6 +104,10 @@ namespace Roki.Services
             TransactionCollection = database.GetCollection<Transaction>("transactions");
             JeopardyCollection = database.GetCollection<JeopardyClue>("jeopardy");
             EventCollection = database.GetCollection<Event>("events");
+            PokedexCollection = database.GetCollection<Pokemon>("pokemon.pokedex");
+            AbilityCollection = database.GetCollection<Ability>("pokemon.abilities");
+            ItemCollection = database.GetCollection<PokemonItem>("pokemon.items");
+            MoveCollection = database.GetCollection<Move>("pokemon.moves");
         }
 
         public async Task<User> GetOrAddUserAsync(IUser user)
@@ -526,6 +539,31 @@ namespace Roki.Services
         public async Task UpdateEventAsync(ObjectId id, UpdateDefinition<Event> update)
         {
             await EventCollection.UpdateOneAsync(x => x.Id == id, update).ConfigureAwait(false);
+        }
+
+        public async Task<Pokemon> GetPokemonByNumberAsync(int id)
+        {
+            return await PokedexCollection.Find(x => x.Num == id).FirstOrDefaultAsync();
+        }
+
+        public async Task<Pokemon> GetPokemonAsync(string name)
+        {
+            return await PokedexCollection.Find(x => x.Id == name).FirstOrDefaultAsync();
+        }
+
+        public async Task<Ability> GetAbilityAsync(string name)
+        {
+            return await AbilityCollection.Find(x => x.Id == name).FirstOrDefaultAsync();
+        }
+
+        public async Task<PokemonItem> GetItemAsync(string name)
+        {
+            return await ItemCollection.Find(x => x.Id == name).FirstOrDefaultAsync();
+        }
+
+        public async Task<Move> GetMoveAsync(string name)
+        {
+            return await MoveCollection.Find(x => x.Id == name).FirstOrDefaultAsync();
         }
     }
 }
