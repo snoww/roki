@@ -4,7 +4,6 @@ using MongoDB.Bson.Serialization.IdGenerators;
 
 namespace Roki.Services.Database.Maps
 {
-    [BsonIgnoreExtraElements]
     public class Transaction
     {
         [BsonId(IdGenerator = typeof(ObjectIdGenerator))]
