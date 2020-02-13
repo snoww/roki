@@ -24,6 +24,7 @@ namespace Roki.Services
         
         Task<User> GetOrAddUserAsync(IUser user);
         Task<User> GetUserAsync(ulong userId);
+        Task<IAsyncCursor<User>> GetAllUserCursorAsync();
         Task<User> UpdateUserAsync(IUser after);
         Task<int> UpdateUserXpAsync(User user, bool doubleXp);
         Task<bool> UpdateUserCurrencyAsync(User user, long amount);
@@ -37,6 +38,9 @@ namespace Roki.Services
         Task<bool> AddOrUpdateUserSubscriptionAsync(ulong userId, ulong guildId, ObjectId subId, int days);
         Task<Dictionary<ulong, List<Subscription>>> RemoveExpiredSubscriptionsAsync();
         Task<bool> AddOrUpdateUserInventoryAsync(ulong userId, ulong guildId, ObjectId itemId, int quantity);
+        Task ChargeInterestAsync(User user, decimal amount, string symbol);
+        Task<bool> UpdateUserInvestingAccountAsync(User user, decimal amount);
+        Task<bool> UpdateUserPortfolioAsync(User user, string symbol, string position, string action, long shares);
 
         Task<Channel> GetOrAddChannelAsync(ITextChannel channel);
         Task DeleteChannelAsync(ITextChannel channel);
@@ -57,6 +61,7 @@ namespace Roki.Services
         Task AddMessageEditAsync(SocketMessage after);
         Task MessageDeletedAsync(ulong messageId);
 
+        Task AddTrade(Trade trade);
         Task AddTransaction(Transaction transaction);
         IEnumerable<Transaction> GetTransactions(ulong userId, int page);
 
@@ -86,6 +91,7 @@ namespace Roki.Services
         public IMongoCollection<Guild> GuildCollection { get; }
         public IMongoCollection<User> UserCollection { get; }
         public IMongoCollection<Transaction> TransactionCollection { get; }
+        public IMongoCollection<Trade> TradeCollection { get; }
         public IMongoCollection<JeopardyClue> JeopardyCollection { get; }
         public IMongoCollection<Event> EventCollection { get; }
         public IMongoCollection<Pokemon> PokedexCollection { get; }
@@ -102,6 +108,7 @@ namespace Roki.Services
             GuildCollection = database.GetCollection<Guild>("guilds");
             UserCollection = database.GetCollection<User>("users");
             TransactionCollection = database.GetCollection<Transaction>("transactions");
+            TradeCollection = database.GetCollection<Trade>("trades");
             JeopardyCollection = database.GetCollection<JeopardyClue>("jeopardy");
             EventCollection = database.GetCollection<Event>("events");
             PokedexCollection = database.GetCollection<Pokemon>("pokemon.pokedex");
@@ -127,6 +134,11 @@ namespace Roki.Services
         public async Task<User> GetUserAsync(ulong userId)
         {
             return await UserCollection.Find(u => u.Id == userId).FirstAsync();
+        }
+
+        public async Task<IAsyncCursor<User>> GetAllUserCursorAsync()
+        {
+            return await UserCollection.FindAsync(FilterDefinition<User>.Empty);
         }
 
         public async Task<User> UpdateUserAsync(IUser after)
@@ -285,6 +297,70 @@ namespace Roki.Services
             return false;
         }
 
+        public async Task ChargeInterestAsync(User user, decimal amount, string symbol)
+        {
+            var update = user.InvestingAccount > 0 
+                ? Builders<User>.Update.Inc(x => x.InvestingAccount, -amount) 
+                : Builders<User>.Update.Inc(x => x.Currency, -(long) amount);
+
+            update.Set(x => x.Portfolio[-1].InterestDate, DateTime.UtcNow.AddDays(7).Date);
+
+            await UserCollection.UpdateOneAsync(x => x.Id == user.Id && x.Portfolio.Any(y => y.Symbol == symbol), update).ConfigureAwait(false);
+        }
+
+        public async Task<bool> UpdateUserInvestingAccountAsync(User user, decimal amount)
+        {
+            if (user.InvestingAccount + amount < 0)
+            {
+                return false;
+            }
+
+            var update = Builders<User>.Update.Inc(x => x.InvestingAccount, amount);
+            await UserCollection.UpdateOneAsync(x => x.Id == user.Id, update).ConfigureAwait(false);
+            return true;
+        }
+
+        public async Task<bool> UpdateUserPortfolioAsync(User user, string symbol, string position, string action, long shares)
+        {
+            var portfolio = user.Portfolio;
+            DateTime? interestDate = null;
+            if (position == "short")
+                interestDate = DateTime.UtcNow.AddDays(7).Date;
+            
+            if (portfolio.All(i => i.Symbol != symbol))
+            {
+                var update = Builders<User>.Update.Push(x => x.Portfolio, new Investment
+                {
+                    Symbol = symbol,
+                    Position = position,
+                    Shares = shares,
+                    InterestDate = interestDate
+                });
+
+                await UserCollection.UpdateOneAsync(x => x.Id == user.Id, update).ConfigureAwait(false);
+            }
+            else
+            {
+                var investment = portfolio.First(i => i.Symbol == symbol);
+                var newShares = investment.Shares + shares;
+                if (newShares < 0)
+                    return false;
+                
+                if (newShares == 0)
+                {
+                    var update = Builders<User>.Update.PullFilter(x => x.Portfolio, y => y.Symbol == symbol);
+                    await UserCollection.UpdateOneAsync(x => x.Id == user.Id, update);
+                }
+                else
+                {
+                    var update = Builders<User>.Update.Inc(x => x.Portfolio[-1].Shares, shares);
+                    await UserCollection.UpdateOneAsync(x => x.Id == user.Id, update);
+                }
+            }
+
+            return true;
+        }
+
         public async Task<Channel> GetOrAddChannelAsync(ITextChannel channel)
         {
             var dbChannel = await ChannelCollection.Find(c => c.Id == channel.Id).FirstOrDefaultAsync().ConfigureAwait(false);
@@ -441,6 +517,11 @@ namespace Roki.Services
             var update = Builders<Message>.Update.Set(m => m.IsDeleted, true);
 
             await MessageCollection.FindOneAndUpdateAsync(m => m.Id == messageId, update).ConfigureAwait(false);
+        }
+
+        public async Task AddTrade(Trade trade)
+        {
+            await TradeCollection.InsertOneAsync(trade).ConfigureAwait(false);
         }
 
         public async Task AddTransaction(Transaction transaction)
