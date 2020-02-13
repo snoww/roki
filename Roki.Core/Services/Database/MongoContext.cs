@@ -42,6 +42,11 @@ namespace Roki.Services
         Task<bool> UpdateUserInvestingAccountAsync(User user, decimal amount);
         Task<bool> UpdateUserPortfolioAsync(User user, string symbol, string position, string action, long shares);
 
+        Task<Quote> GetRandomQuoteByKeyAsync(ulong guildId, string keyword);
+        Task AddQuoteAsync(Quote quote);
+        Task DeleteQuoteAsync(ulong guildId, ulong userId, short id);
+        Task DeleteQuoteAsync(ulong guildId, ulong userId, string keyword);
+
         Task<Channel> GetOrAddChannelAsync(ITextChannel channel);
         Task DeleteChannelAsync(ITextChannel channel);
         Task UpdateChannelAsync(ITextChannel after);
@@ -90,6 +95,7 @@ namespace Roki.Services
         public IMongoCollection<Channel> ChannelCollection { get; }
         public IMongoCollection<Guild> GuildCollection { get; }
         public IMongoCollection<User> UserCollection { get; }
+        public IMongoCollection<Quote> QuoteCollection { get; }
         public IMongoCollection<Transaction> TransactionCollection { get; }
         public IMongoCollection<Trade> TradeCollection { get; }
         public IMongoCollection<JeopardyClue> JeopardyCollection { get; }
@@ -107,6 +113,7 @@ namespace Roki.Services
             ChannelCollection = database.GetCollection<Channel>("channels");
             GuildCollection = database.GetCollection<Guild>("guilds");
             UserCollection = database.GetCollection<User>("users");
+            QuoteCollection = database.GetCollection<Quote>("quotes");
             TransactionCollection = database.GetCollection<Transaction>("transactions");
             TradeCollection = database.GetCollection<Trade>("trades");
             JeopardyCollection = database.GetCollection<JeopardyClue>("jeopardy");
@@ -359,6 +366,31 @@ namespace Roki.Services
             }
 
             return true;
+        }
+
+        public async Task<Quote> GetRandomQuoteByKeyAsync(ulong guildId, string keyword)
+        {
+            var quote = await QuoteCollection.AsQueryable().Sample(1).Where(x => x.GuildId == guildId && x.Keyword == keyword).FirstOrDefaultAsync();
+            if (quote == null)
+                return null;
+            var update = Builders<Quote>.Update.Inc(x => x.UseCount, 1);
+            return await QuoteCollection.FindOneAndUpdateAsync<Quote>(x => x.Id == quote.Id, update,
+                new FindOneAndUpdateOptions<Quote> {ReturnDocument = ReturnDocument.After}).ConfigureAwait(false);
+        }
+
+        public async Task AddQuoteAsync(Quote quote)
+        {
+            await QuoteCollection.InsertOneAsync(quote).ConfigureAwait(false);
+        }
+
+        public async Task DeleteQuoteAsync(ulong guildId, ulong userId, short id)
+        {
+            await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.AuthorId == userId && x.Id.Pid == id).ConfigureAwait(false);
+        }
+
+        public async Task DeleteQuoteAsync(ulong guildId, ulong userId, string keyword)
+        {
+            await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.AuthorId == userId && x.Keyword == keyword).ConfigureAwait(false);
         }
 
         public async Task<Channel> GetOrAddChannelAsync(ITextChannel channel)

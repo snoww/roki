@@ -1,13 +1,12 @@
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using MongoDB.Bson;
 using Roki.Common.Attributes;
 using Roki.Extensions;
-using Roki.Modules.Utility.Services;
 using Roki.Services;
 using Roki.Services.Database.Core;
+using Quote = Roki.Services.Database.Maps.Quote;
 
 namespace Roki.Modules.Utility
 {
@@ -16,11 +15,11 @@ namespace Roki.Modules.Utility
         [Group]
         public class QuoteCommands : RokiSubmodule
         {
-            private readonly DbService _db;
-
-            public QuoteCommands(DbService db)
+            private readonly IMongoService _mongo;
+            
+            public QuoteCommands(IMongoService mongo)
             {
-                _db = db;
+                _mongo = mongo;
             }
 
             [RokiCommand, Description, Usage, Aliases]
@@ -55,20 +54,17 @@ namespace Roki.Modules.Utility
 
                 keyword = keyword.ToUpperInvariant();
 
-                Quote quote;
-                using (var uow = _db.GetDbContext())
-                {
-                    quote = await uow.Quotes.GetRandomQuoteByKeywordAsync(Context.Guild.Id, keyword).ConfigureAwait(false);
-                    if (quote == null)
-                        return;
-                }
+                var quote = await _mongo.Context.GetRandomQuoteByKeyAsync(Context.Guild.Id, keyword).ConfigureAwait(false)
+                if (quote == null)
+                    return;
+                
                 var author = await Context.Guild.GetUserAsync(quote.AuthorId).ConfigureAwait(false);
                 if (context)
                 {
-                    await Context.Channel.SendMessageAsync($"`#{quote.Id}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}\nContext: {quote.Context}").ConfigureAwait(false);
+                    await Context.Channel.SendMessageAsync($"`#{quote.Id.Pid}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}\nContext: {quote.Context}").ConfigureAwait(false);
                     return;
                 }
-                await Context.Channel.SendMessageAsync($"`#{quote.Id}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}").ConfigureAwait(false);
+                await Context.Channel.SendMessageAsync($"`#{quote.Id.Pid}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}").ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]
@@ -80,21 +76,19 @@ namespace Roki.Modules.Utility
 
                 keyword = keyword.ToUpperInvariant();
 
-                using (var uow = _db.GetDbContext())
+                var quote = new Quote
                 {
-                    uow.Quotes.Add(new Quote
-                    {
-                        AuthorId = Context.Message.Author.Id,
-                        AuthorName = Context.Message.Author.Username,
-                        GuildId = Context.Guild.Id,
-                        Keyword = keyword,
-                        Context = $"https://discordapp.com/channels/{Context.Guild.Id}/{Context.Channel.Id}/{Context.Message.Id}",
-                        Text = text
-                    });
-                    await uow.SaveChangesAsync().ConfigureAwait(false);
-                }
+                    Id = ObjectId.GenerateNewId(),
+                    AuthorId = Context.Message.Author.Id,
+                    GuildId = Context.Guild.Id,
+                    Keyword = keyword,
+                    Context = $"https://discordapp.com/channels/{Context.Guild.Id}/{Context.Channel.Id}/{Context.Message.Id}",
+                    Text = text
+                };
+                
+                await _mongo.Context.AddQuoteAsync(quote);
 
-                await Context.Channel.SendMessageAsync("Quote added.").ConfigureAwait(false);
+                await Context.Channel.SendMessageAsync($"Quote `{quote.Id.Pid}` added.").ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]
