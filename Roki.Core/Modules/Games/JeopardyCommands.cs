@@ -33,9 +33,9 @@ namespace Roki.Modules.Games
                 var opts = OptionsParser.ParseFrom(new JeopardyArgs(), args);
                 
                 var channel = (ITextChannel) Context.Channel;
-                var questions = Service.GenerateGame(opts.NumCategories);
+                var questions = await Service.GenerateGame(opts.NumCategories).ConfigureAwait(false);
 
-                var jeopardy = new Jeopardy(_client, questions, channel.Guild, channel, _currency, Service.GetFinalJeopardy());
+                var jeopardy = new Jeopardy(_client, questions, channel.Guild, channel, _currency, await Service.GenerateFinalJeopardy());
 
                 if (Service.ActiveGames.TryAdd(channel.Id, jeopardy))
                 {
