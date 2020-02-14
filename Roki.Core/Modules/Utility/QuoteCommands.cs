@@ -35,7 +35,7 @@ namespace Roki.Modules.Utility
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithTitle("Quote List")
-                            .WithDescription(string.Join("\n", quotes.Select(x => $"`#{x.Id.Pid}` **{x.Keyword}** by {Context.Guild.GetUserAsync(x.AuthorId)}"))))
+                            .WithDescription(string.Join("\n", quotes.Select(async x => $"`#{x.Id.Increment}` **{x.Keyword}** by {await Context.Guild.GetUserAsync(x.AuthorId)}"))))
                         .ConfigureAwait(false);
                 }
                 else
