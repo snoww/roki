@@ -134,7 +134,7 @@ namespace Roki
                 {
                     try
                     {
-                        var botCurrency = Mongo.Context.GetBotCurrencyAsync();
+                        // var botCurrency = Mongo.Context.GetBotCurrencyAsync();
                         
                         var cache = Cache.Redis.GetDatabase();
                         await Client.DownloadUsersAsync(Client.Guilds).ConfigureAwait(false);
@@ -143,9 +143,9 @@ namespace Roki
                         
                         foreach (var guild in Client.Guilds)
                         {
-                            await cache.StringSetAsync($"currency:{guild.Id}:{Properties.BotId}", botCurrency, flags: CommandFlags.FireAndForget)
-                                .ConfigureAwait(false);
-                            await UpdateCache(cache, guild.Users).ConfigureAwait(false);
+                            // await cache.StringSetAsync($"currency:{guild.Id}:{Properties.BotId}", botCurrency, flags: CommandFlags.FireAndForget)
+                                // .ConfigureAwait(false);
+                            // await UpdateCache(cache, guild.Users).ConfigureAwait(false);
 
                             await Mongo.Context.GetOrAddGuildAsync(guild).ConfigureAwait(false);
 
