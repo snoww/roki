@@ -249,27 +249,22 @@ namespace Roki.Services
                 var fastXp = user.Subscriptions.Any(x => x.Id == FastXpId);
 
                 var oldLevel = new XpLevel(user.Xp);
-                var newXp = 0;
+                var newLevel = new XpLevel(user.Xp);
                 if (fastXp)
                 {
                     if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpFastCooldown))
                     {
-                        newXp = await _context.UpdateUserXpAsync(user, doubleXp).ConfigureAwait(false);
+                        newLevel = await _context.UpdateUserXpAsync(user, doubleXp).ConfigureAwait(false);
                     }
                 }
                 else
                 {
                     if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpCooldown))
                     {
-                        newXp = await _context.UpdateUserXpAsync(user, doubleXp).ConfigureAwait(false);
+                        newLevel = await _context.UpdateUserXpAsync(user, doubleXp).ConfigureAwait(false);
                     }
                 }
-                
-                if (newXp == 0)
-                    return;
 
-                var newLevel = new XpLevel(newXp);
-                
                 if (newLevel.Level > oldLevel.Level)
                 {
                     await SendNotification(user, message, newLevel.Level).ConfigureAwait(false);
