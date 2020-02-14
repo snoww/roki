@@ -47,7 +47,7 @@ namespace Roki.Modules.Currency
                             {
                                 var type = c.Type == "Subscription" ? $"**{c.SubscriptionDays}** Day {c.Type}" : c.Type;
                                 var desc = $"{Format.Bold(c.Name)} | {type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remaining" : "**Sold Out**")} | `{c.Cost:N0}` {Roki.Properties.CurrencyIcon}";
-                                return $"`{c.Id.GetId()}:` {desc}\n\t{c.Description.TrimTo(120)}";
+                                return $"`#{c.Id.GetId()}` {desc}\n\t{c.Description.TrimTo(120)}";
                             }));
                         return new EmbedBuilder().WithDynamicColor(Context)
                             .WithTitle("Stone Shop")
