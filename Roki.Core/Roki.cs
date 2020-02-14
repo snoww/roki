@@ -13,6 +13,7 @@ using MongoDB.Driver;
 using NLog;
 using Roki.Extensions;
 using Roki.Services;
+using Roki.Services.Database;
 using Roki.Services.Database.Maps;
 using StackExchange.Redis;
 using Victoria;
@@ -159,6 +160,11 @@ namespace Roki
 
                         sw.Stop();
                         Logger.Info("Cache loaded in {elapsed} ms", sw.ElapsedMilliseconds);
+                        var migration = new Migration(_db, Mongo.Database);
+                        await migration.MigrateQuotes();
+                        await migration.MigrateStore();
+                        await migration.MigrateTransactions();
+                        await migration.MigrateStore();
                     }
                     catch (Exception e)
                     {
