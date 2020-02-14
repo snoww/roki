@@ -35,16 +35,17 @@ namespace Roki.Modules.Searches
 
                 var types = string.Join(", ", pokemon.Types);
                 var abilities = string.Join(", ", pokemon.Abilities.Select(x => x.Key == "H" ? Format.Italics(x.Value) : x.Value));
-                
+
                 var embed = new EmbedBuilder().WithColor(PokemonService.GetColorOfPokemon(pokemon.Color))
                     .WithTitle($"#{pokemon.Num:D3} {pokemon.Species}")
                     .AddField("Types", types, true)
                     .AddField("Abilities", abilities, true)
-                    .AddField("Base Stats", PokemonService.FormatStats(pokemon), true)
+                    .AddField("Egg Groups", string.Join(", ", pokemon.EggGroups), true)
+                    .AddField("Base Stats", PokemonService.FormatStats(pokemon))
                     .AddField("Height", $"{pokemon.Height:N1} m", true)
                     .AddField("Weight", $"{pokemon.Weight} kg", true)
-                    .AddField("Evolution", $"```php\n{Service.GetEvolution(pokemon)}```")
-                    .AddField("Egg Groups", string.Join(", ", pokemon.EggGroups), true);
+                    .AddField("Evolution", $"```php\n{await Service.GetEvolution(pokemon).ConfigureAwait(false)}```");
+                    
 
                 if (pokemon.GenderRatio != null)
                     embed.AddField("Gender Ratio", string.Join("\n", pokemon.GenderRatio.Select(x => $"{x.Key}: `{x.Value}`")), true);
