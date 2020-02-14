@@ -161,11 +161,8 @@ namespace Roki
                         sw.Stop();
                         Logger.Info("Cache loaded in {elapsed} ms", sw.ElapsedMilliseconds);
                         var migration = new Migration(_db, Mongo.Database);
-                        await migration.MigrateQuotes();
                         await migration.MigrateStore();
-                        await migration.MigrateTransactions();
-                        await migration.MigrateStore();
-                        await migration.MigrateUsers();
+                        await migration.MigrateMessages();
                     }
                     catch (Exception e)
                     {
