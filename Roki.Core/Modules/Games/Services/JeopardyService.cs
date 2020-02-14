@@ -21,20 +21,12 @@ namespace Roki.Modules.Games.Services
         public async Task<Dictionary<string, List<JClue>>> GenerateGame(int number)
         {
             var game = await _mongo.Context.GetRandomJeopardyCategoriesAsync(number).ConfigureAwait(false);
-            foreach (var clue in game.Cast<List<JClue>>().SelectMany(clues => clues))
-            {
-                clue.SanitizeAnswer();
-            }
-
             return game;
         }
 
         public async Task<JClue> GenerateFinalJeopardy()
         {
-            var clue =  await _mongo.Context.GetFinalJeopardyAsync().ConfigureAwait(false);
-            clue.SanitizeAnswer();
-
-            return clue;
+            return await _mongo.Context.GetFinalJeopardyAsync().ConfigureAwait(false);
         }
     }
 }
