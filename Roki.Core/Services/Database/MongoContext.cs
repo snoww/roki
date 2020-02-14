@@ -320,7 +320,7 @@ namespace Roki.Services
             // if exists update then return true
             if (user.Inventory.Any(x => x.Id == itemId))
             {
-                var update = Builders<User>.Update.Set(x => x.Inventory[-1].Quantity, quantity);
+                var update = Builders<User>.Update.Inc(x => x.Inventory[-1].Quantity, quantity);
                 await UserCollection.UpdateOneAsync(x => x.Id == userId, update).ConfigureAwait(false);
                 return true;
             }
