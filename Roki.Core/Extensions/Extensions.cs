@@ -235,7 +235,7 @@ namespace Roki.Extensions
             return JsonSerializer.Deserialize<T>(json, Options);
         }
 
-        public static int GetId(this ObjectId id, int digits = 3)
+        public static int GetId(this ObjectId id, int digits = 4)
         {
             return id.Increment % (int) Math.Pow(10, digits);
         }
