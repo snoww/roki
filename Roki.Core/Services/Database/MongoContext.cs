@@ -42,10 +42,14 @@ namespace Roki.Services
         Task<bool> UpdateUserInvestingAccountAsync(User user, decimal amount);
         Task<bool> UpdateUserPortfolioAsync(User user, string symbol, string position, string action, long shares);
 
-        Task<Quote> GetRandomQuoteByKeyAsync(ulong guildId, string keyword);
+        Task<Quote> GetRandomQuoteAsync(ulong guildId, string keyword);
+        Task<Quote> GetRandomQuoteAsync(ulong guildId, short id);
         Task AddQuoteAsync(Quote quote);
-        Task DeleteQuoteAsync(ulong guildId, ulong userId, short id);
-        Task DeleteQuoteAsync(ulong guildId, ulong userId, string keyword);
+        Task<DeleteResult> DeleteQuoteAdmin(ulong guildId, short id = 0, string keyword = null);
+        Task<DeleteResult> DeleteQuoteAsync(ulong guildId, ulong userId, short id);
+        Task<DeleteResult> DeleteQuoteAsync(ulong guildId, ulong userId, string keyword);
+        Task<List<Quote>> ListQuotesAsync(ulong guildId, int page);
+        Task<List<Quote>> SearchQuotesByText(ulong guildId, string content);
 
         Task<Channel> GetOrAddChannelAsync(ITextChannel channel);
         Task DeleteChannelAsync(ITextChannel channel);
@@ -368,9 +372,19 @@ namespace Roki.Services
             return true;
         }
 
-        public async Task<Quote> GetRandomQuoteByKeyAsync(ulong guildId, string keyword)
+        public async Task<Quote> GetRandomQuoteAsync(ulong guildId, string keyword)
         {
             var quote = await QuoteCollection.AsQueryable().Sample(1).Where(x => x.GuildId == guildId && x.Keyword == keyword).FirstOrDefaultAsync();
+            if (quote == null)
+                return null;
+            var update = Builders<Quote>.Update.Inc(x => x.UseCount, 1);
+            return await QuoteCollection.FindOneAndUpdateAsync<Quote>(x => x.Id == quote.Id, update,
+                new FindOneAndUpdateOptions<Quote> {ReturnDocument = ReturnDocument.After}).ConfigureAwait(false);
+        }
+
+        public async Task<Quote> GetRandomQuoteAsync(ulong guildId, short id)
+        {
+            var quote = await QuoteCollection.AsQueryable().Sample(1).Where(x => x.GuildId == guildId && x.Id.Pid == id).FirstOrDefaultAsync();
             if (quote == null)
                 return null;
             var update = Builders<Quote>.Update.Inc(x => x.UseCount, 1);
@@ -383,14 +397,46 @@ namespace Roki.Services
             await QuoteCollection.InsertOneAsync(quote).ConfigureAwait(false);
         }
 
-        public async Task DeleteQuoteAsync(ulong guildId, ulong userId, short id)
+        public async Task<DeleteResult> DeleteQuoteAdmin(ulong guildId, short id = 0, string keyword = null)
         {
-            await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.AuthorId == userId && x.Id.Pid == id).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                return await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.Keyword == keyword).ConfigureAwait(false);
+            }
+            else
+            {
+                return await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.Id.Pid == id).ConfigureAwait(false);
+            }
         }
 
-        public async Task DeleteQuoteAsync(ulong guildId, ulong userId, string keyword)
+        public async Task<DeleteResult> DeleteQuoteAsync(ulong guildId, ulong userId, short id)
         {
-            await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.AuthorId == userId && x.Keyword == keyword).ConfigureAwait(false);
+            return await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.AuthorId == userId && x.Id.Pid == id).ConfigureAwait(false);
+        }
+
+        public async Task<DeleteResult> DeleteQuoteAsync(ulong guildId, ulong userId, string keyword)
+        {
+            return await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.AuthorId == userId && x.Keyword == keyword).ConfigureAwait(false);
+        }
+
+        public async Task<List<Quote>> ListQuotesAsync(ulong guildId, int page)
+        {
+            return await QuoteCollection.Aggregate()
+                .Match(x => x.GuildId == guildId)
+                .SortBy(x => x.Keyword)
+                .Skip(page * 15)
+                .Limit(15)
+                .ToListAsync()
+                .ConfigureAwait(false);
+        }
+
+        public async Task<List<Quote>> SearchQuotesByText(ulong guildId, string content)
+        {
+            var filter = Builders<Quote>.Filter.Text(content);
+            return await QuoteCollection.Find(filter)
+                .Limit(9)
+                .ToListAsync()
+                .ConfigureAwait(false);
         }
 
         public async Task<Channel> GetOrAddChannelAsync(ITextChannel channel)
