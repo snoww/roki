@@ -53,7 +53,7 @@ namespace Roki.Modules.Currency
                 return;
             if (page > 0)
                 page -= 1;
-            var list = _mongo.Context.GetCurrencyLeaderboard(page);
+            var list = await _mongo.Context.GetCurrencyLeaderboardAsync(page).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle("Currency Leaderboard");
             var i = 9 * page + 1;

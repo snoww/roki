@@ -5,23 +5,25 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using MongoDB.Bson;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Xp.Common;
 using Roki.Modules.Xp.Extensions;
 using Roki.Services;
+using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Xp
 {
     public partial class Xp : RokiTopLevelModule
     {
-        private readonly DbService _db;
+        private readonly IMongoService _mongo;
         private readonly IHttpClientFactory _http;
 
-        public Xp(DbService db, IHttpClientFactory http)
+        public Xp(IHttpClientFactory http, IMongoService mongo)
         {
-            _db = db;
             _http = http;
+            _mongo = mongo;
         }
         
         [RokiCommand, Description, Usage, Aliases]
@@ -51,16 +53,15 @@ namespace Roki.Modules.Xp
                 }
             }
 
-            using var uow = _db.GetDbContext();
-            var dUser = await uow.Users.GetUserAsync(user.Id).ConfigureAwait(false);
-            var xp = new XpLevel(dUser.TotalXp);
-            var rank = uow.Users.GetUserXpRank(user.Id);
-            var doubleXp = uow.Subscriptions.DoubleXpIsActive(user.Id);
-            var fastXp = uow.Subscriptions.FastXpIsActive(user.Id);
+            var dbUser = await _mongo.Context.GetUserAsync(user.Id);
+            var xp = new XpLevel(dbUser.Xp);
+            var rank = await _mongo.Context.GetUserXpRankAsync(dbUser).ConfigureAwait(false);
+            var doubleXp = dbUser.Subscriptions.Any(x => x.Id == ObjectId.Empty);
+            var fastXp = dbUser.Subscriptions.Any(x => x.Id == ObjectId.Empty);
 
             await using var xpImage = XpDrawExtensions.GenerateXpBar(avatar, 
                 xp.ProgressXp, xp.RequiredXp, $"{xp.TotalXp}", $"{xp.Level}", $"{rank}", 
-                user.Username, user.Discriminator, dUser.LastLevelUp, doubleXp, fastXp);
+                user.Username, user.Discriminator, dbUser.LastLevelUp, doubleXp, fastXp);
             await Context.Channel.SendFileAsync(xpImage, $"xp-{user.Id}.png").ConfigureAwait(false);
         }
 
@@ -71,14 +72,13 @@ namespace Roki.Modules.Xp
                 return;
             if (page > 0)
                 page -= 1;
-            using var uow = _db.GetDbContext();
-            var list = uow.Users.GetUsersXpLeaderboard(page);
+            var list = await _mongo.Context.GetXpLeaderboardAsync(page).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle("XP Leaderboard");
             var i = 9 * page + 1;
             foreach (var user in list)
             {
-                embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"Level `{new XpLevel(user.TotalXp).Level:N0}` - `{user.TotalXp:N0}` xp");
+                embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"Level `{new XpLevel(user.Xp).Level:N0}` - `{user.Xp:N0}` xp");
             }
 
             await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
@@ -114,14 +114,13 @@ namespace Roki.Modules.Xp
                 return;
             }
 
-            using var uow = _db.GetDbContext();
             if (!isAdmin)
             {
-                await uow.Users.ChangeNotificationLocation(Context.User.Id, notify).ConfigureAwait(false);
+                await _mongo.Context.UpdateUserNotificationPreferenceAsync(Context.User.Id, notify).ConfigureAwait(false);
             }
             else
             {
-                await uow.Users.ChangeNotificationLocation(user.Id, notify).ConfigureAwait(false);
+                await _mongo.Context.UpdateUserNotificationPreferenceAsync(user.Id, notify).ConfigureAwait(false);
             }
             
             await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
@@ -143,15 +142,14 @@ namespace Roki.Modules.Xp
                 page--;
             }
             
-            using var uow = _db.GetDbContext();
-            var rewards = await uow.Guilds.GetAllXpRewardsAsync(Context.Guild.Id).ConfigureAwait(false);
+            var rewards = (await _mongo.Context.GetGuildAsync(Context.Guild.Id).ConfigureAwait(false)).XpRewards;
             if (rewards == null || rewards.Count == 0)
             {
                 await Context.Channel.SendErrorAsync("There are currently no XP rewards setup for this server.").ConfigureAwait(false);
                 return;
             }
 
-            var sorted = rewards.OrderByDescending(r => r.XpLevel).ToList();
+            var sorted = rewards.OrderByDescending(r => r.Level).ToList();
             
             var totalPages = sorted.Count / 9;
             if (page > totalPages)
@@ -169,8 +167,8 @@ namespace Roki.Modules.Xp
                     .Skip(page * 9)
                     .Take(9)
                     .Select(r => r.Type == "currency"
-                        ? $"Level `{r.XpLevel}` - `{int.Parse(r.Reward):N0}` {Roki.Properties.CurrencyIcon}"
-                        : $"Level `{r.XpLevel}` - <@&{r.Reward}>")));
+                        ? $"Level `{r.Level}` - `{int.Parse(r.Reward):N0}` {Roki.Properties.CurrencyIcon}"
+                        : $"Level `{r.Level}` - <@&{r.Reward}>")));
             }
             else
             {
@@ -178,8 +176,8 @@ namespace Roki.Modules.Xp
                     .Skip(page * 9)
                     .Take(9)
                     .Select(r => r.Type == "currency"
-                        ? $"`{r.Id}` Level `{r.XpLevel}` - `{int.Parse(r.Reward):N0}` {Roki.Properties.CurrencyIcon}"
-                        : $"`{r.Id}` Level `{r.XpLevel}` - <@&{r.Reward}>")));
+                        ? $"`{r.Id}` Level `{r.Level}` - `{int.Parse(r.Reward):N0}` {Roki.Properties.CurrencyIcon}"
+                        : $"`{r.Id}` Level `{r.Level}` - <@&{r.Reward}>")));
             }
 
             await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
@@ -190,7 +188,6 @@ namespace Roki.Modules.Xp
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task XpRewardAdd(RewardType rewardType, int level, string reward)
         {
-            using var uow = _db.GetDbContext();
             if (rewardType == RewardType.Currency)
             {
                 if (!int.TryParse(reward, out var rewardAmount))
@@ -199,12 +196,20 @@ namespace Roki.Modules.Xp
                     return;
                 }
 
+                var curReward = new XpReward
+                {
+                    Id = ObjectId.GenerateNewId(),
+                    Level = level,
+                    Reward = rewardAmount.ToString(),
+                    Type = "currency"
+                };
                 
-                var currReward = await uow.Guilds.AddXpRewardAsync(Context.Guild.Id, level, "currency", rewardAmount.ToString());
+                await _mongo.Context.AddXpRewardAsync(Context.Guild.Id, curReward).ConfigureAwait(false);
+                
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle("XP Reward Added")
                         .WithDescription("Successfully added a new XP reward.\n" +
-                                         $"Reward ID: `{currReward.Id}`\n" +
+                                         $"Reward ID: `{curReward.Id.Pid}`\n" +
                                          $"XP Level: `{level}`\n" +
                                          "Reward Type: currency\n" +
                                          $"Reward Amount: `{rewardAmount:N0}`"))
@@ -230,12 +235,20 @@ namespace Roki.Modules.Xp
                 await Context.Channel.SendErrorAsync("Could not find that role. Please check the role ID again.").ConfigureAwait(false);
                 return;
             }
+
+            var roleReward = new XpReward
+            {
+                Id = ObjectId.GenerateNewId(),
+                Level = level,
+                Reward = role.Id.ToString(),
+                Type = "role"
+            };
             
-            var roleReward = await uow.Guilds.AddXpRewardAsync(Context.Guild.Id, level, "role", role.Id.ToString());
+            await _mongo.Context.AddXpRewardAsync(Context.Guild.Id, roleReward).ConfigureAwait(false);
             await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                     .WithTitle("XP Reward Added")
                     .WithDescription("Successfully added a new XP reward.\n" +
-                                     $"Reward ID: `{roleReward.Id}`\n" +
+                                     $"Reward ID: `{roleReward.Id.Pid}`\n" +
                                      $"XP Level: `{level}`\n" +
                                      "Reward Type: role\n" +
                                      $"Reward Role: <@&{role.Id}>"))
@@ -254,9 +267,15 @@ namespace Roki.Modules.Xp
                 return;
             }
 
-            using var uow = _db.GetDbContext();
-            var success = await uow.Guilds.RemoveXpRewardAsync(Context.Guild.Id, id).ConfigureAwait(false);
-            if (success)
+            if (!short.TryParse(id, out var pid))
+            {
+                await Context.Channel.SendErrorAsync("Invalid ID specified. You can obtain the IDs by using `xpr <page_num> true`.")
+                    .ConfigureAwait(false);
+                return;
+            }
+
+            var success = await _mongo.Context.RemoveXpRewardAsync(Context.Guild.Id, pid).ConfigureAwait(false);
+            if (success.IsAcknowledged && success.ModifiedCount > 1)
             {
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle("XP Reward Removed.")

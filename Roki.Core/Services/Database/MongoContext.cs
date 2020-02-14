@@ -27,13 +27,16 @@ namespace Roki.Services
         Task<IAsyncCursor<User>> GetAllUserCursorAsync();
         Task<User> UpdateUserAsync(IUser after);
         Task<int> UpdateUserXpAsync(User user, bool doubleXp);
+        Task<int> GetUserXpRankAsync(User user);
+        Task UpdateUserNotificationPreferenceAsync(ulong userId, string location);
         Task<bool> UpdateUserCurrencyAsync(User user, long amount);
         Task<bool> UpdateUserCurrencyAsync(ulong userId, long amount);
         Task UpdateBotCurrencyAsync(long amount);
         long GetBotCurrencyAsync();
         long GetUserCurrency(ulong userId);
         decimal GetUserInvesting(ulong userId);
-        IEnumerable<User> GetCurrencyLeaderboard(int page);
+        Task<IEnumerable<User>> GetCurrencyLeaderboardAsync(int page);
+        Task<IEnumerable<User>> GetXpLeaderboardAsync(int page);
         Task<bool> TransferCurrencyAsync(ulong userId, decimal amount);
         Task<bool> AddOrUpdateUserSubscriptionAsync(ulong userId, ulong guildId, ObjectId subId, int days);
         Task<Dictionary<ulong, List<Subscription>>> RemoveExpiredSubscriptionsAsync();
@@ -60,6 +63,8 @@ namespace Roki.Services
         Task<Guild> GetGuildAsync(ulong guildId);
         Task ChangeGuildAvailabilityAsync(SocketGuild guild, bool available);
         Task UpdateGuildAsync(SocketGuild after);
+        Task AddXpRewardAsync(ulong guildId, XpReward reward);
+        Task<UpdateResult> RemoveXpRewardAsync(ulong guildId, short id);
         Task AddStoreItemAsync(ulong guildId, Listing item);
         Task<Listing> GetStoreItemByNameAsync(ulong guildId, string name);
         Task<Listing> GetStoreItemByIdAsync(ulong guildId, ObjectId id);
@@ -173,6 +178,17 @@ namespace Roki.Services
                 .ConfigureAwait(false);
         }
 
+        public async Task<int> GetUserXpRankAsync(User user)
+        {
+            return (int) await UserCollection.CountDocumentsAsync(x => x.Xp > user.Xp).ConfigureAwait(false) + 1;
+        }
+
+        public async Task UpdateUserNotificationPreferenceAsync(ulong userId, string location)
+        {
+            var update = Builders<User>.Update.Set(x => x.Notification, location);
+            await UserCollection.UpdateOneAsync(x => x.Id == userId, update).ConfigureAwait(false);
+        }
+
         public async Task<bool> UpdateUserCurrencyAsync(User user, long amount)
         {
             if (user.Currency + amount < 0)
@@ -209,14 +225,26 @@ namespace Roki.Services
             return UserCollection.Find(u => u.Id == userId).First().InvestingAccount;
         }
 
-        public IEnumerable<User> GetCurrencyLeaderboard(int page)
+        public async Task<IEnumerable<User>> GetCurrencyLeaderboardAsync(int page)
         {
-            return UserCollection.AsQueryable()
-                .Where(u => u.Currency > 0 && u.Id != Roki.Properties.BotId)
-                .OrderByDescending(u => u.Currency)
+            return await UserCollection.Aggregate()
+                .Match(u => u.Currency > 0 && u.Id != Roki.Properties.BotId)
+                .SortByDescending(u => u.Currency)
                 .Skip(page * 9)
-                .Take(9)
-                .ToList();
+                .Limit(9)
+                .ToListAsync()
+                .ConfigureAwait(false);
+        }
+
+        public async Task<IEnumerable<User>> GetXpLeaderboardAsync(int page)
+        {
+            return await UserCollection.Aggregate()
+                .Match(u => u.Xp > 0 && u.Id != Roki.Properties.BotId)
+                .SortByDescending(u => u.Xp)
+                .Skip(page * 9)
+                .Limit(9)
+                .ToListAsync()
+                .ConfigureAwait(false);
         }
 
         public async Task<bool> TransferCurrencyAsync(ulong userId, decimal amount)
@@ -532,6 +560,18 @@ namespace Roki.Services
                 .Set(g => g.RegionId, after.VoiceRegionId);
 
             await GuildCollection.FindOneAndUpdateAsync(g => g.Id == after.Id, updateGuild).ConfigureAwait(false);
+        }
+
+        public async Task AddXpRewardAsync(ulong guildId, XpReward reward)
+        {
+            var update = Builders<Guild>.Update.Push(x => x.XpRewards, reward);
+            await GuildCollection.UpdateOneAsync(x => x.Id == guildId, update).ConfigureAwait(false);
+        }
+
+        public async Task<UpdateResult> RemoveXpRewardAsync(ulong guildId, short id)
+        {
+            var update = Builders<Guild>.Update.PullFilter(x => x.XpRewards, y => y.Id.Pid == id);
+            return await GuildCollection.UpdateOneAsync(x => x.Id == guildId, update).ConfigureAwait(false);
         }
 
         public async Task AddStoreItemAsync(ulong guildId, Listing item)
