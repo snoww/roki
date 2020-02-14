@@ -176,22 +176,22 @@ namespace Roki.Services
         {
             var now = DateTime.UtcNow;
             var increment = doubleXp
-                ? user.Xp + Roki.Properties.XpPerMessage * 2
-                : user.Xp + Roki.Properties.XpPerMessage;
+                ? Roki.Properties.XpPerMessage * 2
+                : Roki.Properties.XpPerMessage;
             
             var oldXp = new XpLevel(user.Xp);
             var newXp = new XpLevel(user.Xp + increment);
 
             if (newXp.Level > oldXp.Level)
             {
-                var updateXp = Builders<User>.Update.Inc(u => u.Xp, user.Xp + increment)
+                var updateXp = Builders<User>.Update.Inc(u => u.Xp, increment)
                     .Set(u => u.LastLevelUp, now)
                     .Set(u => u.LastXpGain, now);
                 await UserCollection.FindOneAndUpdateAsync(u => u.Id == user.Id, updateXp).ConfigureAwait(false);
             }
             else
             {
-                var updateXp = Builders<User>.Update.Inc(u => u.Xp, user.Xp + increment)
+                var updateXp = Builders<User>.Update.Inc(u => u.Xp, increment)
                     .Set(u => u.LastXpGain, now);
                 await UserCollection.FindOneAndUpdateAsync(u => u.Id == user.Id, updateXp).ConfigureAwait(false);
             }
