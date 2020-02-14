@@ -22,8 +22,6 @@ namespace Roki
 {
     public class Roki
     {
-        private readonly DbService _db;
-
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         private RokiConfig Config { get; }
@@ -45,9 +43,6 @@ namespace Roki
             Mongo = new MongoService();
             Cache = new RedisCache(Config.RedisConfig);
             
-            _db = new DbService(Config.Db.ConnectionString);
-            _db.Setup(); ;
-
             // global properties
             // future: guild specific properties
             Properties = File.ReadAllText("./data/properties.json").Deserialize<Properties>();
@@ -134,7 +129,7 @@ namespace Roki
                 {
                     try
                     {
-                        // var botCurrency = Mongo.Context.GetBotCurrencyAsync();
+                        var botCurrency = Mongo.Context.GetBotCurrencyAsync();
                         
                         var cache = Cache.Redis.GetDatabase();
                         await Client.DownloadUsersAsync(Client.Guilds).ConfigureAwait(false);
@@ -143,9 +138,9 @@ namespace Roki
                         
                         foreach (var guild in Client.Guilds)
                         {
-                            // await cache.StringSetAsync($"currency:{guild.Id}:{Properties.BotId}", botCurrency, flags: CommandFlags.FireAndForget)
-                                // .ConfigureAwait(false);
-                            // await UpdateCache(cache, guild.Users).ConfigureAwait(false);
+                            await cache.StringSetAsync($"currency:{guild.Id}:{Properties.BotId}", botCurrency, flags: CommandFlags.FireAndForget)
+                                .ConfigureAwait(false);
+                            await UpdateCache(cache, guild.Users).ConfigureAwait(false);
 
                             await Mongo.Context.GetOrAddGuildAsync(guild).ConfigureAwait(false);
 
@@ -160,9 +155,6 @@ namespace Roki
 
                         sw.Stop();
                         Logger.Info("Cache loaded in {elapsed} ms", sw.ElapsedMilliseconds);
-                        var migration = new Migration(_db, Mongo.Database);
-                        await migration.MigrateStore();
-                        await migration.MigrateMessages();
                     }
                     catch (Exception e)
                     {
@@ -182,7 +174,6 @@ namespace Roki
             
             var service = new ServiceCollection()
                 .AddSingleton<IRokiConfig>(Config)
-                .AddSingleton(_db)
                 .AddSingleton(Mongo)
                 .AddSingleton(Cache)
                 .AddSingleton(Client)
