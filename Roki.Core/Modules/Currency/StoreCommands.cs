@@ -142,8 +142,7 @@ namespace Roki.Modules.Currency
                     int.TryParse(quantity, out amount);
                     if (amount <= 0)
                     {
-                        await Context.Channel.SendErrorAsync("You need to buy at least `1`.").ConfigureAwait(false);
-                        return;
+                        amount = 1;
                     }
                 }
 
