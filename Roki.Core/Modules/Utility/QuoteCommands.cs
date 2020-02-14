@@ -99,7 +99,7 @@ namespace Roki.Modules.Utility
                 
                 await _mongo.Context.AddQuoteAsync(quote);
 
-                await Context.Channel.SendMessageAsync($"Quote `{quote.Id.GetId()}` added.").ConfigureAwait(false);
+                await Context.Channel.SendMessageAsync($"Quote `#{quote.Id.GetId()}` `{keyword}` added.").ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]

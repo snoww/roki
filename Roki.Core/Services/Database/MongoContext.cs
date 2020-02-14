@@ -405,7 +405,7 @@ namespace Roki.Services
 
         public async Task<Quote> GetRandomQuoteAsync(ulong guildId, string keyword)
         {
-            var quote = await QuoteCollection.AsQueryable().Sample(1).Where(x => x.GuildId == guildId && x.Keyword == keyword).FirstOrDefaultAsync();
+            var quote = await QuoteCollection.AsQueryable().Where(x => x.GuildId == guildId && x.Keyword == keyword).Sample(1).SingleOrDefaultAsync();
             if (quote == null)
                 return null;
             var update = Builders<Quote>.Update.Inc(x => x.UseCount, 1);
@@ -415,7 +415,7 @@ namespace Roki.Services
 
         public async Task<Quote> GetRandomQuoteAsync(ulong guildId, short id)
         {
-            var quote = await QuoteCollection.AsQueryable().Sample(1).Where(x => x.GuildId == guildId && x.Id.Increment % 1000 == id).FirstOrDefaultAsync();
+            var quote = await QuoteCollection.AsQueryable().Where(x => x.GuildId == guildId && x.Id.Increment % 1000 == id).Sample(1).SingleOrDefaultAsync();
             if (quote == null)
                 return null;
             var update = Builders<Quote>.Update.Inc(x => x.UseCount, 1);
@@ -711,7 +711,7 @@ namespace Roki.Services
 
         public async Task<JClue> GetFinalJeopardyAsync()
         {
-            var clue = await JeopardyCollection.AsQueryable().Sample(1).Where(x => x.Value > 2000 || x.Value == null).SingleAsync();
+            var clue = await JeopardyCollection.AsQueryable().Where(x => x.Value > 2000 || x.Value == null).Sample(1).SingleAsync();
 
             return new JClue
             {
