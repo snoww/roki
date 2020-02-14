@@ -283,7 +283,7 @@ namespace Roki.Services
             {
                 Id = subId,
                 GuildId = guildId,
-                EndDate = DateTime.Now.AddDays(days).Date
+                EndDate = DateTime.UtcNow.AddDays(days).Date
             });
             
             await UserCollection.UpdateOneAsync(x => x.Id == userId, newSub).ConfigureAwait(false);
