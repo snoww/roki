@@ -9,6 +9,7 @@ using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using Roki.Extensions;
 using Roki.Modules.Games.Common;
+using Roki.Modules.Xp.Common;
 using Roki.Services.Database.Maps;
 
 namespace Roki.Services
@@ -27,7 +28,7 @@ namespace Roki.Services
         Task<User> GetUserAsync(ulong userId);
         Task<IAsyncCursor<User>> GetAllUserCursorAsync();
         Task<User> UpdateUserAsync(IUser after);
-        Task<int> UpdateUserXpAsync(User user, bool doubleXp);
+        Task<XpLevel> UpdateUserXpAsync(User user, bool doubleXp);
         Task<int> GetUserXpRankAsync(User user);
         Task UpdateUserNotificationPreferenceAsync(ulong userId, string location);
         Task<bool> UpdateUserCurrencyAsync(User user, long amount);
@@ -171,14 +172,31 @@ namespace Roki.Services
                 new FindOneAndUpdateOptions<User>{ReturnDocument = ReturnDocument.After, IsUpsert = true}).ConfigureAwait(false);
         }
 
-        public async Task<int> UpdateUserXpAsync(User user, bool doubleXp)
+        public async Task<XpLevel> UpdateUserXpAsync(User user, bool doubleXp)
         {
-            var updateXp = Builders<User>.Update.Inc(u => u.Xp,
-                doubleXp ? Roki.Properties.XpPerMessage * 2 : Roki.Properties.XpPerMessage);
+            var now = DateTime.UtcNow;
+            var increment = doubleXp
+                ? user.Xp + Roki.Properties.XpPerMessage * 2
+                : user.Xp + Roki.Properties.XpPerMessage;
             
-            return await UserCollection.FindOneAndUpdateAsync(u => u.Id == user.Id, updateXp,
-                    new FindOneAndUpdateOptions<User, int> {ReturnDocument = ReturnDocument.After})
-                .ConfigureAwait(false);
+            var oldXp = new XpLevel(user.Xp);
+            var newXp = new XpLevel(user.Xp + increment);
+
+            if (newXp.Level > oldXp.Level)
+            {
+                var updateXp = Builders<User>.Update.Inc(u => u.Xp, user.Xp + increment)
+                    .Set(u => u.LastLevelUp, now)
+                    .Set(u => u.LastXpGain, now);
+                await UserCollection.FindOneAndUpdateAsync(u => u.Id == user.Id, updateXp).ConfigureAwait(false);
+            }
+            else
+            {
+                var updateXp = Builders<User>.Update.Inc(u => u.Xp, user.Xp + increment)
+                    .Set(u => u.LastXpGain, now);
+                await UserCollection.FindOneAndUpdateAsync(u => u.Id == user.Id, updateXp).ConfigureAwait(false);
+            }
+
+            return newXp;
         }
 
         public async Task<int> GetUserXpRankAsync(User user)

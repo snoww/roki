@@ -19,6 +19,9 @@ namespace Roki.Modules.Xp
     {
         private readonly IMongoService _mongo;
         private readonly IHttpClientFactory _http;
+        
+        private static readonly ObjectId DoubleXpId = ObjectId.Parse("5db772de03eb7230a1b5bba1");
+        private static readonly ObjectId FastXpId = ObjectId.Parse("5dbc2dd103eb7230a1b5bba5");
 
         public Xp(IHttpClientFactory http, IMongoService mongo)
         {
@@ -56,8 +59,8 @@ namespace Roki.Modules.Xp
             var dbUser = await _mongo.Context.GetUserAsync(user.Id);
             var xp = new XpLevel(dbUser.Xp);
             var rank = await _mongo.Context.GetUserXpRankAsync(dbUser).ConfigureAwait(false);
-            var doubleXp = dbUser.Subscriptions.Any(x => x.Id == ObjectId.Empty);
-            var fastXp = dbUser.Subscriptions.Any(x => x.Id == ObjectId.Empty);
+            var doubleXp = dbUser.Subscriptions.Any(x => x.Id == DoubleXpId);
+            var fastXp = dbUser.Subscriptions.Any(x => x.Id == FastXpId);
 
             await using var xpImage = XpDrawExtensions.GenerateXpBar(avatar, 
                 xp.ProgressXp, xp.RequiredXp, $"{xp.TotalXp}", $"{xp.Level}", $"{rank}", 
