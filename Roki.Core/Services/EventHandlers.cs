@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using MongoDB.Bson;
 using NLog;
 using Roki.Extensions;
 using Roki.Modules.Xp.Common;
@@ -241,8 +242,8 @@ namespace Roki.Services
             {
                 var user = await _context.GetOrAddUserAsync(message.Author).ConfigureAwait(false);
                 // temp
-                var doubleXp = user.Subscriptions.Any(u => u.Id.Equals("temp"));
-                var fastXp = user.Subscriptions.Any(u => u.Id.Equals("temp"));
+                var doubleXp = user.Subscriptions.Any(x => x.Id == ObjectId.Empty);
+                var fastXp = user.Subscriptions.Any(x => x.Id == ObjectId.Empty);
 
                 var oldLevel = new XpLevel(user.Xp);
                 var newXp = 0;

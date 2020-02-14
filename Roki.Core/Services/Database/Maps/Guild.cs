@@ -24,7 +24,7 @@ namespace Roki.Services.Database.Maps
     public class XpReward
     {
         public ObjectId Id { get; set; }
-        public int XpLevel { get; set; }
+        public int Level { get; set; }
         public string Type { get; set; }
         public string Reward { get; set; }
     }
