@@ -165,6 +165,7 @@ namespace Roki
                         await migration.MigrateStore();
                         await migration.MigrateTransactions();
                         await migration.MigrateStore();
+                        await migration.MigrateUsers();
                     }
                     catch (Exception e)
                     {

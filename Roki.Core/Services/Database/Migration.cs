@@ -15,7 +15,7 @@ namespace Roki.Services.Database
     {
         private readonly DbService _db;
         private readonly IMongoDatabase _mongo;
-        private static Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public Migration(DbService db, IMongoDatabase mongo)
         {
@@ -44,8 +44,8 @@ namespace Roki.Services.Database
                         Xp = user.TotalXp,
                         Inventory = user.Inventory?.Deserialize<List<Item>>() ?? new List<Item>(),
                         InvestingAccount = user.InvestingAccount,
-                        LastLevelUp = user.LastLevelUp.DateTime,
-                        LastXpGain = user.LastLevelUp.DateTime,
+                        LastLevelUp = user.LastLevelUp.UtcDateTime,
+                        LastXpGain = user.LastLevelUp.UtcDateTime,
                         Notification = user.NotificationLocation,
                         Portfolio = user.Portfolio?.Deserialize<List<Investment>>() ?? new List<Investment>()
                     };
