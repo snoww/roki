@@ -237,7 +237,7 @@ namespace Roki.Extensions
 
         public static int GetId(this ObjectId id, int digits = 3)
         {
-            return id.Increment % (10 ^ digits);
+            return id.Increment % (int) Math.Pow(10, digits);
         }
     }
 }
