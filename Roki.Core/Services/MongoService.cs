@@ -1,7 +1,6 @@
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
-using Roki.Services.Database.Core;
 
 namespace Roki.Services
 {
