@@ -9,6 +9,7 @@ using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Currency.Services;
 using Roki.Services;
+using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Currency
 {
@@ -102,6 +103,32 @@ namespace Roki.Modules.Currency
                     return;
                 }
 
+                await InternalBuy(listing, quantity).ConfigureAwait(false);
+            }
+
+            [RokiCommand, Description, Usage, Aliases]
+            [RequireContext(ContextType.Guild)]
+            [Priority(1)]
+            public async Task Buy(int id, string quantity = "1")
+            {
+                var listing = await _mongo.Context.GetStoreItemByIdAsync(Context.Guild.Id, id).ConfigureAwait(false);
+                if (listing == null)
+                {
+                    await Context.Channel.SendErrorAsync("Cannot find this item. Make sure the name matches exactly, or use ID").ConfigureAwait(false);
+                    return;
+                }
+
+                if (listing.Quantity <= 0)
+                {
+                    await Context.Channel.SendErrorAsync("Sorry. This item is out of stock, please come back later.").ConfigureAwait(false);
+                    return;
+                }
+
+                await InternalBuy(listing, quantity).ConfigureAwait(false);
+            }
+
+            private async Task InternalBuy(Listing listing, string quantity)
+            {
                 int amount;
                 if (quantity.Equals("all", StringComparison.OrdinalIgnoreCase))
                     amount = listing.Quantity;
@@ -129,7 +156,7 @@ namespace Roki.Modules.Currency
                     return;
                 }
 
-                await _mongo.Context.UpdateStoreItemAsync(Context.Guild.Id, name, amount);
+                await _mongo.Context.UpdateStoreItemAsync(Context.Guild.Id, listing.Id, amount);
                 Enum.TryParse<Category>(listing.Category, out var category); 
                 Enum.TryParse<Type>(listing.Type, out var type); 
                 switch (category)

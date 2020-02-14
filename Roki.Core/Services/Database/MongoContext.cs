@@ -7,6 +7,7 @@ using Discord.WebSocket;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
+using Roki.Extensions;
 using Roki.Modules.Games.Common;
 using Roki.Services.Database.Maps;
 
@@ -69,8 +70,9 @@ namespace Roki.Services
         Task AddStoreItemAsync(ulong guildId, Listing item);
         Task<Listing> GetStoreItemByNameAsync(ulong guildId, string name);
         Task<Listing> GetStoreItemByIdAsync(ulong guildId, ObjectId id);
+        Task<Listing> GetStoreItemByIdAsync(ulong guildId, int id);
         Task<List<Listing>> GetStoreCatalogueAsync(ulong guildId);
-        Task UpdateStoreItemAsync(ulong guildId, string name, int amount);
+        Task UpdateStoreItemAsync(ulong guildId, ObjectId id, int amount);
 
         Task AddMessageAsync(SocketMessage message);
         Task AddMessageEditAsync(SocketMessage after);
@@ -590,7 +592,7 @@ namespace Roki.Services
         public async Task<Listing> GetStoreItemByNameAsync(ulong guildId, string name)
         {
             var guild = await GetGuildAsync(guildId).ConfigureAwait(false);
-            return guild.Store.FirstOrDefault(l => l.Name == name);
+            return guild.Store.FirstOrDefault(l => l.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
         public async Task<Listing> GetStoreItemByIdAsync(ulong guildId, ObjectId id)
@@ -599,16 +601,22 @@ namespace Roki.Services
             return guild.Store.FirstOrDefault(l => l.Id == id);
         }
 
+        public async Task<Listing> GetStoreItemByIdAsync(ulong guildId, int id)
+        {
+            var guild = await GetGuildAsync(guildId).ConfigureAwait(false);
+            return guild.Store.FirstOrDefault(l => l.Id.GetId() == id);
+        }
+
         public async Task<List<Listing>> GetStoreCatalogueAsync(ulong guildId)
         {
             var guild = await GetGuildAsync(guildId).ConfigureAwait(false);
             return guild.Store;
         }
 
-        public async Task UpdateStoreItemAsync(ulong guildId, string name, int amount)
+        public async Task UpdateStoreItemAsync(ulong guildId, ObjectId id, int amount)
         {
             var update = Builders<Guild>.Update.Inc(g => g.Store[-1].Quantity, amount);
-            await GuildCollection.FindOneAndUpdateAsync(g => g.Id == guildId && g.Store.Any(l => l.Name == name), update).ConfigureAwait(false);
+            await GuildCollection.FindOneAndUpdateAsync(g => g.Id == guildId && g.Store.Any(l => l.Id == id), update).ConfigureAwait(false);
         }
 
         public async Task AddMessageAsync(SocketMessage message)
