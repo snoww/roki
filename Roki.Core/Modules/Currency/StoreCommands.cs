@@ -211,7 +211,7 @@ namespace Roki.Modules.Currency
                     desc = "Your inventory is empty";
                 else
                     desc = string.Join("\n", inv
-                        .Select(async i => $"{(await _mongo.Context.GetStoreItemByIdAsync(guildId, i.Id)).Name.ToTitleCase()}: {i.Quantity}"));
+                        .Select(i => $"{_mongo.Context.GetStoreItemByIdAsync(guildId, i.Id).Result.Name.ToTitleCase()}: {i.Quantity}"));
 
                 embed.WithDescription(desc);
 
