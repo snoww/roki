@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -88,8 +89,12 @@ namespace Roki.Modules.Currency
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
             [Priority(0)]
-            public async Task Buy(string name, string quantity = "1")
+            public async Task Buy([Leftover] string name)
             {
+                var parsedName = name.Split();
+                var quantity = parsedName[^1];
+                Array.Resize(ref parsedName, parsedName.Length - 1);
+                
                 var listing = await _mongo.Context.GetStoreItemByNameAsync(Context.Guild.Id, name).ConfigureAwait(false);
                 if (listing == null)
                 {
