@@ -686,11 +686,11 @@ namespace Roki.Services
                 {
                     var all = await JeopardyCollection.Find(x => x.Category == category).ToListAsync();
 
-                    var two = all.Where(x => x.Value == 200).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Category, 200)).Single();
-                    var four = all.Where(x => x.Value == 400).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Category, 400)).Single();
-                    var six = all.Where(x => x.Value == 600 || x.Value == 1200).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Category, 600)).Single();
-                    var eight = all.Where(x => x.Value == 800 || x.Value == 1600).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Category, 800)).Single();
-                    var ten = all.Where(x => x.Value == 1000 || x.Value == 2000).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Category, 1000)).Single();
+                    var two = all.Where(x => x.Value == 200).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Clue, 200)).Single();
+                    var four = all.Where(x => x.Value == 400).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Clue, 400)).Single();
+                    var six = all.Where(x => x.Value == 600 || x.Value == 1200).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Clue, 600)).Single();
+                    var eight = all.Where(x => x.Value == 800 || x.Value == 1600).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Clue, 800)).Single();
+                    var ten = all.Where(x => x.Value == 1000 || x.Value == 2000).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Clue, 1000)).Single();
                     
                     result.Add(category, new List<JClue> {two, four, six, eight, ten});
                 }
