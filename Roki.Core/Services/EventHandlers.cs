@@ -18,6 +18,9 @@ namespace Roki.Services
         private readonly DiscordSocketClient _client;
         private readonly IDatabase _cache;
         private readonly IMongoContext _context;
+        
+        private static readonly ObjectId DoubleXpId = ObjectId.Parse("5db772de03eb7230a1b5bba1");
+        private static readonly ObjectId FastXpId = ObjectId.Parse("5dbc2dd103eb7230a1b5bba5");
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -242,8 +245,8 @@ namespace Roki.Services
             {
                 var user = await _context.GetOrAddUserAsync(message.Author).ConfigureAwait(false);
                 // temp
-                var doubleXp = user.Subscriptions.Any(x => x.Id == ObjectId.Empty);
-                var fastXp = user.Subscriptions.Any(x => x.Id == ObjectId.Empty);
+                var doubleXp = user.Subscriptions.Any(x => x.Id == DoubleXpId);
+                var fastXp = user.Subscriptions.Any(x => x.Id == FastXpId);
 
                 var oldLevel = new XpLevel(user.Xp);
                 var newXp = 0;

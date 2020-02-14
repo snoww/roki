@@ -16,10 +16,10 @@ namespace Roki.Modules.Moderation
         public class PowerCommands : RokiSubmodule<PowersService>
         {
             // temp solution only applies to 1 guild
-            private static readonly ObjectId MuteId = ObjectId.Empty;
-            private static readonly ObjectId BlockId = ObjectId.Empty;
-            private static readonly ObjectId TimeoutId = ObjectId.Empty;
-            private static readonly ObjectId NickId = ObjectId.Empty;
+            private static readonly ObjectId MuteId = ObjectId.Parse("5db876eb03eb7230a1b5bba2");
+            private static readonly ObjectId BlockId = ObjectId.Parse("5dbaefbb03eb7230a1b5bba3");
+            private static readonly ObjectId TimeoutId = ObjectId.Parse("5db84cbb03eb7230a1b5bba4");
+            private static readonly ObjectId NickId = ObjectId.Parse("5def9e9f03eb7230a1b5bba6");
             
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
