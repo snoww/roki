@@ -35,7 +35,7 @@ namespace Roki.Modules.Utility
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithTitle("Quote List")
-                            .WithDescription(string.Join("\n", quotes.Select(x => $"`#{x.Id.Increment}` **{x.Keyword}** by {Context.Guild.GetUserAsync(x.AuthorId).Result}"))))
+                            .WithDescription(string.Join("\n", quotes.Select(x => $"`#{x.Id.GetId()}` **{x.Keyword}** by {Context.Guild.GetUserAsync(x.AuthorId).Result}"))))
                         .ConfigureAwait(false);
                 }
                 else
@@ -55,10 +55,10 @@ namespace Roki.Modules.Utility
                 var author = await Context.Guild.GetUserAsync(quote.AuthorId).ConfigureAwait(false);
                 if (context)
                 {
-                    await Context.Channel.SendMessageAsync($"`#{quote.Id.Pid}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}\nContext: {quote.Context}").ConfigureAwait(false);
+                    await Context.Channel.SendMessageAsync($"`#{quote.Id.GetId()}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}\nContext: {quote.Context}").ConfigureAwait(false);
                     return;
                 }
-                await Context.Channel.SendMessageAsync($"`#{quote.Id.Pid}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}").ConfigureAwait(false);
+                await Context.Channel.SendMessageAsync($"`#{quote.Id.GetId()}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}").ConfigureAwait(false);
             }
             
             [RokiCommand, Description, Usage, Aliases]
@@ -72,10 +72,10 @@ namespace Roki.Modules.Utility
                 var author = await Context.Guild.GetUserAsync(quote.AuthorId).ConfigureAwait(false);
                 if (context)
                 {
-                    await Context.Channel.SendMessageAsync($"`#{quote.Id.Pid}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}\nContext: {quote.Context}").ConfigureAwait(false);
+                    await Context.Channel.SendMessageAsync($"`#{quote.Id.GetId()}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}\nContext: {quote.Context}").ConfigureAwait(false);
                     return;
                 }
-                await Context.Channel.SendMessageAsync($"`#{quote.Id.Pid}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}").ConfigureAwait(false);
+                await Context.Channel.SendMessageAsync($"`#{quote.Id.GetId()}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}").ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]
@@ -99,7 +99,7 @@ namespace Roki.Modules.Utility
                 
                 await _mongo.Context.AddQuoteAsync(quote);
 
-                await Context.Channel.SendMessageAsync($"Quote `{quote.Id.Pid}` added.").ConfigureAwait(false);
+                await Context.Channel.SendMessageAsync($"Quote `{quote.Id.GetId()}` added.").ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]
@@ -159,7 +159,7 @@ namespace Roki.Modules.Utility
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithTitle("Quote Search Results")
-                            .WithDescription(string.Join("\n", quotes.Select(x => $"`#{x.Id.Pid}` **{x.Keyword}**: {x.Text.TrimTo(50)}"))))
+                            .WithDescription(string.Join("\n", quotes.Select(x => $"`#{x.Id.GetId()}` **{x.Keyword}**: {x.Text.TrimTo(50)}"))))
                         .ConfigureAwait(false);
                 }
                 else

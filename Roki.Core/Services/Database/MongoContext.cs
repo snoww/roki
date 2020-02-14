@@ -413,7 +413,7 @@ namespace Roki.Services
 
         public async Task<Quote> GetRandomQuoteAsync(ulong guildId, short id)
         {
-            var quote = await QuoteCollection.AsQueryable().Sample(1).Where(x => x.GuildId == guildId && x.Id.Pid == id).FirstOrDefaultAsync();
+            var quote = await QuoteCollection.AsQueryable().Sample(1).Where(x => x.GuildId == guildId && x.Id.Increment % 1000 == id).FirstOrDefaultAsync();
             if (quote == null)
                 return null;
             var update = Builders<Quote>.Update.Inc(x => x.UseCount, 1);
@@ -434,13 +434,13 @@ namespace Roki.Services
             }
             else
             {
-                return await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.Id.Pid == id).ConfigureAwait(false);
+                return await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.Id.Increment % 1000 == id).ConfigureAwait(false);
             }
         }
 
         public async Task<DeleteResult> DeleteQuoteAsync(ulong guildId, ulong userId, short id)
         {
-            return await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.AuthorId == userId && x.Id.Pid == id).ConfigureAwait(false);
+            return await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.AuthorId == userId && x.Id.Increment % 1000 == id).ConfigureAwait(false);
         }
 
         public async Task<DeleteResult> DeleteQuoteAsync(ulong guildId, ulong userId, string keyword)
@@ -577,7 +577,7 @@ namespace Roki.Services
 
         public async Task<UpdateResult> RemoveXpRewardAsync(ulong guildId, short id)
         {
-            var update = Builders<Guild>.Update.PullFilter(x => x.XpRewards, y => y.Id.Pid == id);
+            var update = Builders<Guild>.Update.PullFilter(x => x.XpRewards, y => y.Id.Increment % 1000 == id);
             return await GuildCollection.UpdateOneAsync(x => x.Id == guildId, update).ConfigureAwait(false);
         }
 

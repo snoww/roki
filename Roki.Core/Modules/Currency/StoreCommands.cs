@@ -59,7 +59,7 @@ namespace Roki.Modules.Currency
                     return;
                 }
 
-                var item = cat.FirstOrDefault(i => i.Name == itemName);
+                var item = cat.FirstOrDefault(i => i.Name.Equals(itemName, StringComparison.OrdinalIgnoreCase));
                 if (item == null)
                 {
                     await Context.Channel.SendErrorAsync("Cannot find the specified item.").ConfigureAwait(false);
@@ -67,7 +67,7 @@ namespace Roki.Modules.Currency
                 }
 
                 var embed = new EmbedBuilder().WithDynamicColor(Context)
-                    .WithTitle($"`{item.Id.Pid}:` | {item.Name} | `{item.Cost:N0}` {Roki.Properties.CurrencyIcon}")
+                    .WithTitle($"`{item.Id.GetId()}:` | {item.Name} | `{item.Cost:N0}` {Roki.Properties.CurrencyIcon}")
                     .WithDescription(item.Description)
                     .AddField("Category", $"{item.Category}", true)
                     .AddField("Quantity", $"{(item.Quantity > 0 ? $"**{item.Quantity}** Remaining" : "**Sold Out**")}")

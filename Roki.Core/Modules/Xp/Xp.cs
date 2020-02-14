@@ -209,7 +209,7 @@ namespace Roki.Modules.Xp
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle("XP Reward Added")
                         .WithDescription("Successfully added a new XP reward.\n" +
-                                         $"Reward ID: `{curReward.Id.Pid}`\n" +
+                                         $"Reward ID: `{curReward.Id.GetId()}`\n" +
                                          $"XP Level: `{level}`\n" +
                                          "Reward Type: currency\n" +
                                          $"Reward Amount: `{rewardAmount:N0}`"))
@@ -248,7 +248,7 @@ namespace Roki.Modules.Xp
             await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                     .WithTitle("XP Reward Added")
                     .WithDescription("Successfully added a new XP reward.\n" +
-                                     $"Reward ID: `{roleReward.Id.Pid}`\n" +
+                                     $"Reward ID: `{roleReward.Id.GetId()}`\n" +
                                      $"XP Level: `{level}`\n" +
                                      "Reward Type: role\n" +
                                      $"Reward Role: <@&{role.Id}>"))
@@ -267,14 +267,14 @@ namespace Roki.Modules.Xp
                 return;
             }
 
-            if (!short.TryParse(id, out var pid))
+            if (!short.TryParse(id, out var oid))
             {
                 await Context.Channel.SendErrorAsync("Invalid ID specified. You can obtain the IDs by using `xpr <page_num> true`.")
                     .ConfigureAwait(false);
                 return;
             }
 
-            var success = await _mongo.Context.RemoveXpRewardAsync(Context.Guild.Id, pid).ConfigureAwait(false);
+            var success = await _mongo.Context.RemoveXpRewardAsync(Context.Guild.Id, oid).ConfigureAwait(false);
             if (success.IsAcknowledged && success.ModifiedCount > 1)
             {
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)

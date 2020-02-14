@@ -60,10 +60,10 @@ namespace Roki.Modules.Rsvp
                     .Skip(page * 9)
                     .Take(5)
                     .Select(e =>
-                        $"`#{e.Id.Pid}` **{e.Name}** in `{(e.StartDate - DateTimeOffset.UtcNow).ToReadableString()}` https://discordapp.com/channels/{e.GuildId}/{e.ChannelId}/{e.MessageId}");
+                        $"`#{e.Id.GetId()}` **{e.Name}** in `{(e.StartDate - DateTimeOffset.UtcNow).ToReadableString()}` https://discordapp.com/channels/{e.GuildId}/{e.ChannelId}/{e.MessageId}");
                 
                 var embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle("List of Events")
-                    .WithDescription($"{string.Join("\n", events)}");
+                    .WithDescription($"{string.Join("\n", eventMessage)}");
 
                 await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
