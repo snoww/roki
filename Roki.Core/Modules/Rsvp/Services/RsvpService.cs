@@ -345,7 +345,7 @@ namespace Roki.Modules.Rsvp.Services
             
             var startsIn = eventDate.Value - DateTimeOffset.Now;
             var eventEmbed = new EmbedBuilder().WithDynamicColor(ctx)
-                .WithTitle($"`#{ev.Id.Pid}` {eventTitle}")
+                .WithTitle($"`#{ev.Id.GetId()}` {eventTitle}")
                 .WithAuthor(ctx.User.Username, ctx.User.GetAvatarUrl())
                 .WithDescription($"Starts in `{startsIn.ToReadableString()}`")
                 .AddField("Description", eventDesc)
@@ -391,7 +391,7 @@ namespace Roki.Modules.Rsvp.Services
                 var q1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                     .WithTitle("RSVP Event Editor")
                     .WithDescription("Which Event would you like to edit? Type in the # to select.\n" +
-                                     $"{string.Join("\n", events.Select(e => $"`#{e.Id.Pid}`: {e.Name} `{e.StartDate:f}`"))}")
+                                     $"{string.Join("\n", events.Select(e => $"`#{e.Id.GetId()}`: {e.Name} `{e.StartDate:f}`"))}")
                     .WithFooter("Type stop to cancel event edit")
                 ).ConfigureAwait(false);
                 toDelete.Add(q1);
@@ -409,7 +409,7 @@ namespace Roki.Modules.Rsvp.Services
                     return;
                 }
 
-                activeEditEvent = events.FirstOrDefault(e => e.Id.Pid.ToString().Equals(replyMessage.Content, StringComparison.OrdinalIgnoreCase));
+                activeEditEvent = events.FirstOrDefault(e => e.Id.GetId().ToString().Equals(replyMessage.Content, StringComparison.OrdinalIgnoreCase));
                 while (activeEditEvent == null)
                 {
                     var err = await ctx.Channel.SendErrorAsync("Cannot find an event with that ID, please try again.").ConfigureAwait(false);
@@ -427,13 +427,13 @@ namespace Roki.Modules.Rsvp.Services
                         await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                         return;
                     }
-                    activeEditEvent = events.FirstOrDefault(e => e.Id.Pid.ToString().Equals(replyMessage.Content, StringComparison.OrdinalIgnoreCase));
+                    activeEditEvent = events.FirstOrDefault(e => e.Id.GetId().ToString().Equals(replyMessage.Content, StringComparison.OrdinalIgnoreCase));
                 }
             }
             
             var q2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                 .WithTitle("RSVP Event Editor")
-                .WithDescription($"What do you want to change for: `#{activeEditEvent.Id.Pid}` **{activeEditEvent.Name}**\n`1.` Edit Title\n`2.` Edit Description\n`3.` Edit Event Date\n`4.` Delete Event")
+                .WithDescription($"What do you want to change for: `#{activeEditEvent.Id.GetId()}` **{activeEditEvent.Name}**\n`1.` Edit Title\n`2.` Edit Description\n`3.` Edit Event Date\n`4.` Delete Event")
                 .WithFooter("Type stop to finish editing")
             ).ConfigureAwait(false);
             toDelete.Add(q2);
@@ -654,7 +654,7 @@ namespace Roki.Modules.Rsvp.Services
                 {
                     var e4 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                             .WithTitle("RSVP Event Editor - Delete Event")
-                            .WithDescription($"Are you sure you want to delete the event? `yes`/`no`\n`#{activeEditEvent.Id.Pid}` **{activeEditEvent.Name}**\n**You cannot undo this process.**"))
+                            .WithDescription($"Are you sure you want to delete the event? `yes`/`no`\n`#{activeEditEvent.Id.GetId()}` **{activeEditEvent.Name}**\n**You cannot undo this process.**"))
                         .ConfigureAwait(false);
                     toDelete.Add(e4);
                     replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
@@ -683,7 +683,7 @@ namespace Roki.Modules.Rsvp.Services
 
                         await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                                 .WithTitle("RSVP Event Editor - Event Deleted")
-                                .WithDescription($"`#{activeEditEvent.Id.Pid}` **{activeEditEvent.Name}** has been deleted"))
+                                .WithDescription($"`#{activeEditEvent.Id.GetId()}` **{activeEditEvent.Name}** has been deleted"))
                             .ConfigureAwait(false);
                         return;
                     }
@@ -695,7 +695,7 @@ namespace Roki.Modules.Rsvp.Services
                 }
                 var q2Repeat = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                     .WithTitle("RSVP Event Editor")
-                    .WithDescription($"What else do you want to change for: `#{activeEditEvent.Id.Pid}` **{activeEditEvent.Name}**\n1. Edit Title\n2. Edit Description\n3. Edit Start Date\n4. Delete Event")
+                    .WithDescription($"What else do you want to change for: `#{activeEditEvent.Id.GetId()}` **{activeEditEvent.Name}**\n1. Edit Title\n2. Edit Description\n3. Edit Start Date\n4. Delete Event")
                     .WithFooter("Type stop to finish editing")
                 ).ConfigureAwait(false);
                 toDelete.Add(q2Repeat);

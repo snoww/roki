@@ -9,6 +9,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Bson;
 using NLog;
 using Roki.Common;
 using Roki.Services;
@@ -232,6 +233,11 @@ namespace Roki.Extensions
         public static T Deserialize<T>(this string json)
         {       
             return JsonSerializer.Deserialize<T>(json, Options);
+        }
+
+        public static int GetId(this ObjectId id, int digits = 3)
+        {
+            return id.Increment % (10 ^ digits);
         }
     }
 }
