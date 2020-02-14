@@ -58,7 +58,8 @@ namespace Roki.Services
         Task DeleteChannelAsync(ITextChannel channel);
         Task UpdateChannelAsync(ITextChannel after);
         bool IsLoggingEnabled(ITextChannel channel);
-        
+        Task ChangeChannelLogging(ulong channelId, bool change);
+
         Task<Guild> GetOrAddGuildAsync(SocketGuild guild);
         Task<Guild> GetGuildAsync(ulong guildId);
         Task ChangeGuildAvailabilityAsync(SocketGuild guild, bool available);
@@ -506,6 +507,12 @@ namespace Roki.Services
         public bool IsLoggingEnabled(ITextChannel channel)
         {
             return ChannelCollection.Find(x => x.Id == channel.Id).First().Logging;
+        }
+
+        public async Task ChangeChannelLogging(ulong channelId, bool change)
+        {
+            var update = Builders<Channel>.Update.Set(x => x.Logging, change);
+            await ChannelCollection.UpdateOneAsync(x => x.Id == channelId, update).ConfigureAwait(false);
         }
 
         public async Task<Guild> GetOrAddGuildAsync(SocketGuild guild)

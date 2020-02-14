@@ -6,19 +6,16 @@ namespace Roki.Modules.Moderation.Services
 {
     public class ModerationService : IRokiService
     {
-        private readonly DbService _db;
+        private readonly IMongoService _mongo;
 
-        public ModerationService(DbService db)
+        public ModerationService(IMongoService mongo)
         {
-            _db = db;
+            _mongo = mongo;
         }
 
         public async Task LoggingChannel(ulong channelId, bool enable)
         {
-            using var uow = _db.GetDbContext();
-            var channel = await uow.Context.Channels.FirstAsync(c => c.ChannelId == channelId);
-            channel.Logging = enable;
-            await uow.SaveChangesAsync().ConfigureAwait(false);
+            await _mongo.Context.ChangeChannelLogging(channelId, enable).ConfigureAwait(false);
         }
     }
 }
