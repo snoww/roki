@@ -126,7 +126,7 @@ namespace Roki.Modules.Searches.Services
             {
                 var pad = new StringBuilder();
                 if (pokemon.Evos != null)
-                    pad.Append($"{Regex.Replace(pokemon.Prevo + pokemon.Species, ".", " ")}   ");
+                    pad.Append($"{Regex.Replace(pokemon.Prevo + pokemon.Species, ".", " ")}");
                 else
                     pad.Append(Regex.Replace(pokemon.Species, ".", " "));
                 chain.Append($"\n{pad} > {await GetEvolutionChain(await _mongo.Context.GetPokemonAsync(ev))}");
