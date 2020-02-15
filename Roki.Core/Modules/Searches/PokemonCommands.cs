@@ -33,8 +33,8 @@ namespace Roki.Modules.Searches
                     return;
                 }
 
-                var types = string.Join(", ", pokemon.Types);
-                var abilities = string.Join(", ", pokemon.Abilities.Select(x => x.Key == "H" ? Format.Italics(x.Value) : x.Value));
+                var types = string.Join("\n", pokemon.Types);
+                var abilities = string.Join("\n", pokemon.Abilities.Select(x => x.Key == "H" ? Format.Italics(x.Value) : x.Value));
 
                 var embed = new EmbedBuilder().WithColor(PokemonService.GetColorOfPokemon(pokemon.Color))
                     .WithTitle($"#{pokemon.Num:D3} {pokemon.Species}")
@@ -44,10 +44,10 @@ namespace Roki.Modules.Searches
                     .AddField("Height", $"{pokemon.Height:N1} m", true)
                     .AddField("Weight", $"{pokemon.Weight} kg", true)
                     .AddField("Evolution", $"```php\n{await Service.GetEvolution(pokemon).ConfigureAwait(false)}```")
-                    .AddField("Egg Groups", string.Join(", ", pokemon.EggGroups), true);
+                    .AddField("Egg Groups", string.Join("\n", pokemon.EggGroups), true);
 
                 if (pokemon.GenderRatio != null)
-                    embed.AddField("Gender Ratio", string.Join("\n", pokemon.GenderRatio.Select(x => $"{x.Key}: `{x.Value:P}`")), true);
+                    embed.AddField("Gender Ratio", $"```{string.Join("\n", pokemon.GenderRatio.Select(x => $"{x.Key}: {x.Value:P}"))}``", true);
                 
                 var sprite = PokemonService.GetSprite(pokemon.Id, pokemon.Num);
                 embed.WithThumbnailUrl($"attachment://{sprite.Split("/").Last()}");
