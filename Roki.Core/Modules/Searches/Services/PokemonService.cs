@@ -146,8 +146,8 @@ namespace Roki.Modules.Searches.Services
             var max = (int) Math.Ceiling(Math.Log10(stats.Max()));
 
             return max == 2 
-                ? $"```css\nHP:  {stats[0],2}|Atk: {stats[1],2}|Def: {stats[2],2}\nSpA: {stats[3],2}|SpD: {stats[4],2}|Spd: {stats[5],2}```" 
-                : $"```css\nHP:  {stats[0],3}|Atk: {stats[1],3}|Def: {stats[2],3}\nSpA: {stats[3],3}|SpD: {stats[4],3}|Spd: {stats[5],3}```";
+                ? $"```css\nHP:  {stats[0],2}  Atk: {stats[1],2}  Def: {stats[2],2}\nSpA: {stats[3],2}  SpD: {stats[4],2}  Spd: {stats[5],2}```" 
+                : $"```css\nHP:  {stats[0],3}  Atk: {stats[1],3}  Def: {stats[2],3}\nSpA: {stats[3],3}  SpD: {stats[4],3}  Spd: {stats[5],3}```";
         }
 
         public async Task<Ability> GetAbilityAsync(string query)
