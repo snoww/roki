@@ -42,7 +42,7 @@ namespace Roki.Modules.Searches
                     .AddField("Abilities", abilities, true);
                 
                 if (pokemon.GenderRatio != null)
-                    embed.AddField("Gender Ratio", $"```{string.Join("\n", pokemon.GenderRatio.Select(x => $"{x.Key}: {x.Value:P1}"))}```", true);
+                    embed.AddField("Gender Ratio", $"{string.Join("\n", pokemon.GenderRatio.Select(x => $"{x.Key}: {x.Value:P1}"))}", true);
 
                 embed.AddField("Base Stats", PokemonService.FormatStats(pokemon))
                     .AddField("Height", $"{pokemon.Height:N1} m", true)
