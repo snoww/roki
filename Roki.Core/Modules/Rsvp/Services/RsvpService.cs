@@ -71,7 +71,7 @@ namespace Roki.Modules.Rsvp.Services
                         .WithAuthor(old.Author?.Name, old.Author?.IconUrl)
                         .WithTitle(old.Title)
                         .AddField("Description", e.Description)
-                        .AddField("Event Date", $"`{e.StartDate:f}`")
+                        .AddField("Event Date", $"`{e.StartDate:f}`\nSee footer for local time.")
                         .AddField(part.Name, part.Value)
                         .AddField(und.Name, und.Value)
                         .WithTimestamp(e.StartDate)
@@ -268,7 +268,7 @@ namespace Roki.Modules.Rsvp.Services
             while (!confirm.Content.Contains("yes", StringComparison.OrdinalIgnoreCase) || !confirm.Content.Contains("y", StringComparison.OrdinalIgnoreCase))
             {
                 var err = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithTitle("RSVP Event Setup - Step 4")
-                        .WithDescription($"Please enter the date this event starts. Default timezone is `{TimeZoneInfo.Local.StandardName}` or you can specify `UTC`" +
+                        .WithDescription($"Please enter the date this event starts. Default timezone is `{TimeZoneInfo.Local.StandardName}` or you can specify `UTC`\n" +
                                          "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`")
                         .WithFooter("Type stop to cancel event setup"))
                     .ConfigureAwait(false);
@@ -349,7 +349,7 @@ namespace Roki.Modules.Rsvp.Services
                 .WithAuthor(ctx.User.Username, ctx.User.GetAvatarUrl())
                 .WithDescription($"Starts in `{startsIn.ToReadableString()}`")
                 .AddField("Description", eventDesc)
-                .AddField("Event Date", $"```{eventDate.Value:f}```")
+                .AddField("Event Date", $"`{eventDate.Value:f}`\nSee footer for local time.")
                 .AddField("Participants (0)", "```None```")
                 .AddField("Undecided", "```None```")
                 .WithFooter("Event starts")
@@ -577,7 +577,7 @@ namespace Roki.Modules.Rsvp.Services
                     {
                         var err = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithTitle("RSVP Event Editor - Edit Event Date")
                                 .WithDescription(
-                                    $"Please enter the correct date. Default timezone is `{TimeZoneInfo.Local.StandardName}` or you can specify `UTC`" +
+                                    $"Please enter the correct date. Default timezone is `{TimeZoneInfo.Local.StandardName}` or you can specify `UTC`\n" +
                                     "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`"))
                             .ConfigureAwait(false);
                         toDelete.Add(err);
@@ -645,7 +645,7 @@ namespace Roki.Modules.Rsvp.Services
                     
                     var er2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                             .WithTitle("RSVP Event Editor - Edit Event Date")
-                            .WithDescription($"The event date has been changed to:\n`{activeEditEvent.StartDate:f}`"))
+                            .WithDescription($"The event date has been changed to:\n`{activeEditEvent.StartDate:f}` UTC"))
                         .ConfigureAwait(false);
                     toDelete.Add(er2);
                 }
