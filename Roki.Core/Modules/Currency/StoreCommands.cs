@@ -160,7 +160,7 @@ namespace Roki.Modules.Currency
                     return;
                 }
 
-                await _mongo.Context.UpdateStoreItemAsync(Context.Guild.Id, listing.Id, amount);
+                await _mongo.Context.UpdateStoreItemAsync(Context.Guild.Id, listing.Id, -amount);
                 Enum.TryParse<Category>(listing.Category, out var category); 
                 Enum.TryParse<Type>(listing.Type, out var type); 
                 switch (category)
