@@ -740,7 +740,7 @@ namespace Roki.Services
 
         public async Task<List<Event>> GetActiveEventsAsync()
         {
-            var now = DateTime.UtcNow;
+            var now = DateTime.UtcNow.AddMinutes(-15);
             return await EventCollection.Find(x => x.StartDate > now && !x.Deleted).ToListAsync();
         }
 
