@@ -253,14 +253,14 @@ namespace Roki.Services
                 var newLevel = new XpLevel(user.Xp);
                 if (fastXp)
                 {
-                    if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpFastCooldown))
+                    if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpFastCooldown))
                     {
                         newLevel = await _context.UpdateUserXpAsync(user, doubleXp).ConfigureAwait(false);
                     }
                 }
                 else
                 {
-                    if (DateTimeOffset.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpCooldown))
+                    if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpCooldown))
                     {
                         newLevel = await _context.UpdateUserXpAsync(user, doubleXp).ConfigureAwait(false);
                     }
