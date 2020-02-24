@@ -12,7 +12,7 @@ using Roki.Modules.Games.Common;
 using Roki.Modules.Xp.Common;
 using Roki.Services.Database.Maps;
 
-namespace Roki.Services
+namespace Roki.Services.Database
 {
     public interface IMongoContext
     {

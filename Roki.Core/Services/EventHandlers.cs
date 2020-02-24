@@ -8,6 +8,7 @@ using MongoDB.Bson;
 using NLog;
 using Roki.Extensions;
 using Roki.Modules.Xp.Common;
+using Roki.Services.Database;
 using Roki.Services.Database.Maps;
 using StackExchange.Redis;
 
