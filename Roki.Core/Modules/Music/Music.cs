@@ -21,8 +21,6 @@ namespace Roki.Modules.Music
             if (string.IsNullOrWhiteSpace(query))
                 return;
             
-            var user = ctx.User as SocketGuildUser;
-            
             await Service.ConnectAsync(user?.VoiceChannel, Context.Channel as ITextChannel).ConfigureAwait(false);
             await Service.QueueAsync(Context, query).ConfigureAwait(false);
         }
@@ -51,7 +49,7 @@ namespace Roki.Modules.Music
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
-            await Service.ResumeAsync(ctx).ConfigureAwait(false);
+            await Service.ResumeAsync(Context).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
