@@ -19,6 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="data\dlls" />
       <Folder Include="Properties" />
       <Folder Include="temp" />
     </ItemGroup>
