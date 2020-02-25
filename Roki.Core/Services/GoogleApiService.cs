@@ -17,6 +17,8 @@ namespace Roki.Core.Services
         Task<IEnumerable<string>> GetVideoLinksByKeywordAsync(string keywords, int count = 1);
         Task<IEnumerable<(string Name, string Id, string Url)>> GetVideoInfoByKeywordAsync(string keywords, int count = 1);
         Task<ImageResult> GetImagesAsync(string query, bool random = false);
+        Task<string> GetRelatedVideo(string videoId);
+        Task<string> GetRelatedVideoByQuery(string keywords);
     }
 
     public struct ImageResult
@@ -106,6 +108,24 @@ namespace Roki.Core.Services
             return random
                 ? new ImageResult(search.Items[start].Image, search.Items[start].Link)
                 : new ImageResult(search.Items[0].Image, search.Items[0].Link);
+        }
+
+        public async Task<string> GetRelatedVideo(string videoId)
+        {
+            var query = yt.Search.List("snippet");
+            query.MaxResults = 1;
+            query.RelatedToVideoId = videoId;
+            query.Type = "video";
+            return (await query.ExecuteAsync().ConfigureAwait(false)).Items.FirstOrDefault()?.Id.VideoId;
+        }
+
+        public async Task<string> GetRelatedVideoByQuery(string keywords)
+        {
+            var query = yt.Search.List("snippet");
+            query.MaxResults = 1;
+            query.Q = keywords;
+            query.Type = "video";
+            return await GetRelatedVideo((await query.ExecuteAsync().ConfigureAwait(false)).Items.FirstOrDefault()?.Id.VideoId).ConfigureAwait(false);
         }
     }
 }

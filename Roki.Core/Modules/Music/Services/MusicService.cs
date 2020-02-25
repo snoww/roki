@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -17,11 +18,13 @@ namespace Roki.Modules.Music.Services
     public class MusicService : IRService
     {
         private readonly LavaNode _lavaNode;
+        private readonly IGoogleApiService _google;
         private readonly Logger _log;
 
-        public MusicService(LavaNode lavaNode)
+        public MusicService(LavaNode lavaNode, IGoogleApiService google)
         {
             _lavaNode = lavaNode;
+            _google = google;
             _log = LogManager.GetCurrentClassLogger();
             OnReadyAsync().Wait();
             _lavaNode.OnTrackEnded += TrackFinished;
@@ -77,6 +80,21 @@ namespace Roki.Modules.Music.Services
             }
             
             await ctx.Message.DeleteAsync().ConfigureAwait(false);
+        }
+
+        public async Task AutoplayAsync(ICommandContext ctx)
+        {
+            var player = _lavaNode.GetPlayer(ctx.Guild);
+            if (player.Autoplay)
+            {
+                player.Autoplay = false;
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDescription("Autoplay disabled")).ConfigureAwait(false);
+            }
+            else
+            {
+                player.Autoplay = true;
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDescription("Autoplay enabled")).ConfigureAwait(false);
+            }
         }
         
         public async Task PauseAsync(ICommandContext ctx)
@@ -243,10 +261,27 @@ namespace Roki.Modules.Music.Services
 
             if (!args.Player.Queue.TryDequeue(out _))
             {
-                await args.Player.TextChannel.SendErrorAsync("Finished player queue").ConfigureAwait(false);
-                return;
-            }
+                if (args.Player.Autoplay)
+                {
+                    var nextSong = await GetNextSong(args.Track).ConfigureAwait(false);
+                    var result = await _lavaNode.SearchYouTubeAsync(nextSong).ConfigureAwait(false);
 
+                    if (string.IsNullOrWhiteSpace(nextSong) || result.LoadStatus == LoadStatus.NoMatches || result.LoadStatus == LoadStatus.LoadFailed)
+                    {
+                        await args.Player.TextChannel.SendErrorAsync("No more songs for autoplay").ConfigureAwait(false);
+                        return;
+                    }
+
+                    var track = result.Tracks.First();
+                    args.Player.Queue.Enqueue(track);
+                }
+                else
+                {
+                    await args.Player.TextChannel.SendErrorAsync("Finished player queue").ConfigureAwait(false);
+                    return;
+                }
+            }
+            
             await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithOkColor()
                 .WithAuthor($"Playing song", "http://i.imgur.com/nhKS3PT.png")
                 .WithDescription($"{args.Track.PrettyTrack()}")
@@ -260,6 +295,34 @@ namespace Roki.Modules.Music.Services
             if (player != null) return true;
             await ctx.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
             return false;
+        }
+
+        private async Task<string> GetNextSong(LavaTrack track)
+        {
+            var uri = new Uri(track.Url);
+            const string related = "https://www.youtube.com/watch?v={0}";
+            
+            if (uri.Host != "www.youtube.com")
+            {
+                var search = await _google.GetRelatedVideoByQuery(track.Title).ConfigureAwait(false);
+                return search == null ? null : string.Format(related, search);
+            }
+
+            var query = HttpUtility.ParseQueryString(uri.Query);
+
+            var videoId = string.Empty;
+
+            if (query.AllKeys.Contains("v"))
+            {
+                videoId = query["v"];
+            }
+            else
+            {
+                videoId = uri.Segments.Last();
+            }
+            
+            var relatedId = await _google.GetRelatedVideo(videoId).ConfigureAwait(false);
+            return relatedId == null ? null : string.Format(related, relatedId);
         }
     }
 }
