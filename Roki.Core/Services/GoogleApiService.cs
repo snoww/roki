@@ -84,7 +84,7 @@ namespace Roki.Services
 
         public async Task<string> GetRelatedVideo(string videoId)
         {
-            var query = yt.Search.List("snippet");
+            var query = _yt.Search.List("snippet");
             query.MaxResults = 1;
             query.RelatedToVideoId = videoId;
             query.Type = "video";
@@ -93,7 +93,7 @@ namespace Roki.Services
 
         public async Task<string> GetRelatedVideoByQuery(string keywords)
         {
-            var query = yt.Search.List("snippet");
+            var query = _yt.Search.List("snippet");
             query.MaxResults = 1;
             query.Q = keywords;
             query.Type = "video";

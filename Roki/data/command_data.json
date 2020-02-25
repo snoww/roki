@@ -226,6 +226,13 @@
       "{0}q https://www.youtube.com/watch?v=dQw4w9WgXcQ"
     ]
   },
+  "autoplay": {
+    "Aliases": "qauto",
+    "Description": "Enables/Disables autoplay for the current player. Must be in a voice channel.",
+    "Usage": [
+      "{0}qauto"
+    ]
+  },
   "pause": {
     "Aliases": "",
     "Description": "Pauses the current track playing. Must be in a voice channel.",
