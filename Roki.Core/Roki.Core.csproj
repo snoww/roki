@@ -12,7 +12,7 @@
       <PackageReference Include="Discord.Net" Version="2.1.1" />
       <PackageReference Include="EFCore.NamingConventions" Version="1.0.0" />
       <PackageReference Include="Google.Apis.Customsearch.v1" Version="1.43.0.1369" />
-      <PackageReference Include="Google.Apis.YouTube.v3" Version="1.43.0.1758" />
+      <PackageReference Include="Google.Apis.YouTube.v3" Version="1.43.0.1834" />
       <PackageReference Include="linqtotwitter" Version="5.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.0" />
@@ -29,7 +29,6 @@
       <PackageReference Include="SixLabors.Shapes.Text" Version="1.0.0-beta0009" />
       <PackageReference Include="Socks" Version="1.1.0" />
       <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
-      <PackageReference Include="Victoria" Version="5.0.3" />
    </ItemGroup>
 
     <ItemGroup>
@@ -58,6 +57,12 @@
 
     <ItemGroup>
       <DeployManifest Remove="obj\Debug\netcoreapp2.2\Roki.Core.application" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Victoria, Version=5.1.2.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\Roki\data\dlls\Victoria.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>
