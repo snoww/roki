@@ -25,7 +25,6 @@
       <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0007" />
       <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0007" />
       <PackageReference Include="Socks" Version="1.1.0" />
-      <PackageReference Include="Victoria" Version="5.1.2" />
    </ItemGroup>
 
     <ItemGroup>
@@ -54,6 +53,12 @@
 
     <ItemGroup>
       <DeployManifest Remove="obj\Debug\netcoreapp2.2\Roki.Core.application" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Victoria, Version=5.1.2.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\Roki\data\dlls\Victoria.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>
