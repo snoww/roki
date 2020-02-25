@@ -20,12 +20,14 @@ namespace Roki.Modules.Music.Extensions
 
         public static string PrettyFullTrack(this LavaTrack track)
         {
-            return $"{track.PrettyTrack()}\n\t\t`{track.PrettyLength()} | {track.Queued.Username}`";
+            return track.Queued != null ? $"{track.PrettyTrack()}\n\t\t`{track.PrettyLength()} | {track.Queued.Username}`"
+                : $"{track.PrettyTrack()}\n\t\t`{track.PrettyLength()} | Autoplay";
         }
 
         public static string PrettyFooter(this LavaTrack track, int volume)
         {
-            return $"🔉 {volume}% | {track.PrettyLength()} | {track.Queued.Username}";
+            return track.Queued != null ? $"🔉 {volume}% | {track.PrettyLength()} | {track.Queued.Username}"
+                : $"🔉 {volume}% | {track.PrettyLength()} | Autoplay";
         }
 
         public static string PrettyLength(this LavaTrack track)

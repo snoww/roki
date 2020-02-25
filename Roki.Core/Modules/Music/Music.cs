@@ -27,6 +27,16 @@ namespace Roki.Modules.Music
         }
 
         [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
+        public async Task Autoplay()
+        {
+            if (!await IsUserInVoice().ConfigureAwait(false))
+                return;
+            await _service.AutoplayAsync(Context).ConfigureAwait(false);
+        }
+
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
         public async Task Pause()
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
@@ -35,6 +45,7 @@ namespace Roki.Modules.Music
         }
         
         [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
         public async Task Resume()
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
@@ -43,6 +54,7 @@ namespace Roki.Modules.Music
         }
 
         [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
         public async Task Destroy()
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
@@ -57,6 +69,7 @@ namespace Roki.Modules.Music
         }
 
         [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
         public async Task Next()
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
@@ -65,6 +78,7 @@ namespace Roki.Modules.Music
         }
 
         [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
         public async Task ListQueue(int page = 0)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
@@ -74,6 +88,7 @@ namespace Roki.Modules.Music
         }
 
         [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
         public async Task SongRemove(int index = 0)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
@@ -89,6 +104,7 @@ namespace Roki.Modules.Music
         }
         
         [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
         public async Task Volume(int volume)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
@@ -103,6 +119,7 @@ namespace Roki.Modules.Music
         }
 
         [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
         public async Task Seek(int seconds = 0)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
