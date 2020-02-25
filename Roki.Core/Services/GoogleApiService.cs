@@ -15,6 +15,8 @@ namespace Roki.Services
         Task<IEnumerable<string>> GetVideoLinksByKeywordAsync(string keywords, int count = 1);
         Task<IEnumerable<(string Name, string Id, string Url)>> GetVideoInfoByKeywordAsync(string keywords, int count = 1);
         Task<ImageResult> GetImagesAsync(string query, bool random = false);
+        Task<string> GetRelatedVideo(string videoId);
+        Task<string> GetRelatedVideoByQuery(string keywords);
     }
 
     public class GoogleApiService : IGoogleApiService
@@ -78,6 +80,24 @@ namespace Roki.Services
             var search = await request.ExecuteAsync().ConfigureAwait(false);
             
             return new ImageResult {Image = search.Items[start].Image, Link = search.Items[start].Link};
+        }
+
+        public async Task<string> GetRelatedVideo(string videoId)
+        {
+            var query = yt.Search.List("snippet");
+            query.MaxResults = 1;
+            query.RelatedToVideoId = videoId;
+            query.Type = "video";
+            return (await query.ExecuteAsync().ConfigureAwait(false)).Items.FirstOrDefault()?.Id.VideoId;
+        }
+
+        public async Task<string> GetRelatedVideoByQuery(string keywords)
+        {
+            var query = yt.Search.List("snippet");
+            query.MaxResults = 1;
+            query.Q = keywords;
+            query.Type = "video";
+            return await GetRelatedVideo((await query.ExecuteAsync().ConfigureAwait(false)).Items.FirstOrDefault()?.Id.VideoId).ConfigureAwait(false);
         }
     }
     

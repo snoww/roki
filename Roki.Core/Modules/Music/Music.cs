@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -17,20 +18,44 @@ namespace Roki.Modules.Music
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
             var user = Context.User as SocketGuildUser;
+            if (string.IsNullOrWhiteSpace(query))
+                return;
+            
+            var user = ctx.User as SocketGuildUser;
             
             await Service.ConnectAsync(user?.VoiceChannel, Context.Channel as ITextChannel).ConfigureAwait(false);
             await Service.QueueAsync(Context, query).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
+        public async Task Autoplay()
+        {
+            if (!await IsUserInVoice().ConfigureAwait(false))
+                return;
+            await Service.AutoplayAsync(Context).ConfigureAwait(false);
+        }
+
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
         public async Task Pause()
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
             await Service.PauseAsync(Context);
         }
+        
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
+        public async Task Resume()
+        {
+            if (!await IsUserInVoice().ConfigureAwait(false))
+                return;
+            await Service.ResumeAsync(ctx).ConfigureAwait(false);
+        }
 
         [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
         public async Task Destroy()
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
@@ -45,6 +70,7 @@ namespace Roki.Modules.Music
         }
 
         [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
         public async Task Next()
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
@@ -53,7 +79,8 @@ namespace Roki.Modules.Music
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task ListQueue([Leftover] int page = 0)
+        [RequireContext(ContextType.Guild)]
+        public async Task ListQueue(int page = 0)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
@@ -62,7 +89,8 @@ namespace Roki.Modules.Music
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task SongRemove([Leftover] int index = 0)
+        [RequireContext(ContextType.Guild)]
+        public async Task SongRemove(int index = 0)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
@@ -77,7 +105,8 @@ namespace Roki.Modules.Music
         }
         
         [RokiCommand, Description, Usage, Aliases]
-        public async Task Volume([Leftover] int volume)
+        [RequireContext(ContextType.Guild)]
+        public async Task Volume(int volume)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
@@ -91,11 +120,12 @@ namespace Roki.Modules.Music
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task Seek([Leftover] int seconds = 0)
+        [RequireContext(ContextType.Guild)]
+        public async Task Seek(int seconds = 0)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
-            if (seconds == 0)
+            if (seconds <= 0)
             {
                 await Context.Channel.SendErrorAsync("Cannot skip that far.").ConfigureAwait(false);
                 return;
