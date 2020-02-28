@@ -59,9 +59,9 @@ namespace Roki.Modules.Rsvp.Services
 
             try
             {
+                var now = DateTime.UtcNow;
                 foreach (var e in events)
                 {
-                    var now = DateTime.UtcNow;
                     var message = await _client.GetGuild(e.GuildId).GetTextChannel(e.ChannelId).GetMessageAsync(e.MessageId).ConfigureAwait(false) as IUserMessage;
                     var old = message?.Embeds.First();
                     if (old == null) continue;
@@ -69,9 +69,9 @@ namespace Roki.Modules.Rsvp.Services
                     var und = old.Fields.First(f => f.Name.Contains("unde", StringComparison.OrdinalIgnoreCase));
                     var newEmbed = new EmbedBuilder().WithDynamicColor(e.GuildId)
                         .WithAuthor(old.Author?.Name, old.Author?.IconUrl)
-                        .WithTitle(old.Title)
+                        .WithTitle(e.Name)
                         .AddField("Description", e.Description)
-                        .AddField("Event Date", $"`{e.StartDate:f}`\nSee footer for local time.")
+                        .AddField("Event Date", $"```{e.StartDate:f} UTC```\nSee footer for local time.")
                         .AddField(part.Name, part.Value)
                         .AddField(und.Name, und.Value)
                         .WithTimestamp(e.StartDate)
@@ -349,7 +349,7 @@ namespace Roki.Modules.Rsvp.Services
                 .WithAuthor(ctx.User.Username, ctx.User.GetAvatarUrl())
                 .WithDescription($"Starts in `{startsIn.ToReadableString()}`")
                 .AddField("Description", eventDesc)
-                .AddField("Event Date", $"`{eventDate.Value:f}`\nSee footer for local time.")
+                .AddField("Event Date", $"```{eventDate.Value.ToUniversalTime():f} UTC```\nSee footer for local time.")
                 .AddField("Participants (0)", "```None```")
                 .AddField("Undecided", "```None```")
                 .WithFooter("Event starts")
@@ -693,6 +693,10 @@ namespace Roki.Modules.Rsvp.Services
                     var err = await ctx.Channel.SendErrorAsync("Unknown Option, please select a valid option.").ConfigureAwait(false);
                     toDelete.Add(err);
                 }
+                
+                // get updated event
+                activeEditEvent = events.First(e => e.Id.GetId() == activeEditEvent.Id.GetId());
+
                 var q2Repeat = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                     .WithTitle("RSVP Event Editor")
                     .WithDescription($"What else do you want to change for: `#{activeEditEvent.Id.GetId()}` **{activeEditEvent.Name}**\n1. Edit Title\n2. Edit Description\n3. Edit Start Date\n4. Delete Event")
@@ -723,7 +727,10 @@ namespace Roki.Modules.Rsvp.Services
 
             Task Handler(SocketMessage message)
             {
-                if (message.Channel.Id != ctx.Channel.Id || message.Author.Id != ctx.User.Id) return Task.CompletedTask;
+                if (message.Channel.Id != ctx.Channel.Id || message.Author.Id != ctx.User.Id) 
+                    return Task.CompletedTask;
+                if (message.Content.StartsWith(Roki.Properties.Prefix)) // ignore commands
+                    return Task.CompletedTask;
                 eventTrigger.SetResult(message);
                 return Task.CompletedTask;
             }
