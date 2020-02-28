@@ -91,6 +91,7 @@ namespace Roki.Services.Database
         Task<List<Event>> GetActiveEventsAsync();
         Task<List<Event>> GetActiveEventsByHostAsync(ulong hostId);
         Task<List<Event>> GetActiveEventsByGuild(ulong guildId);
+        bool GetActiveEventAsync(ulong messageId, out Event e);
         Task UpdateEventAsync(ObjectId id, UpdateDefinition<Event> update);
 
         Task<Pokemon> GetPokemonByNumberAsync(int id);
@@ -754,6 +755,13 @@ namespace Roki.Services.Database
         {
             var now = DateTime.UtcNow;
             return await EventCollection.Find(x => x.GuildId == guildId && x.StartDate > now && !x.Deleted).ToListAsync();
+        }
+
+        public bool GetActiveEventAsync(ulong messageId, out Event e)
+        {
+            var now = DateTime.UtcNow;
+            e = EventCollection.Find(x => x.MessageId == messageId && x.StartDate > now && !x.Deleted).SingleOrDefault();
+            return e != null;
         }
 
         public async Task UpdateEventAsync(ObjectId id, UpdateDefinition<Event> update)

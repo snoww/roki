@@ -65,8 +65,8 @@ namespace Roki.Modules.Rsvp.Services
                     var message = await _client.GetGuild(e.GuildId).GetTextChannel(e.ChannelId).GetMessageAsync(e.MessageId).ConfigureAwait(false) as IUserMessage;
                     var old = message?.Embeds.First();
                     if (old == null) continue;
-                    var part = old.Fields.First(f => f.Name.Contains("part", StringComparison.OrdinalIgnoreCase));
-                    var und = old.Fields.First(f => f.Name.Contains("unde", StringComparison.OrdinalIgnoreCase));
+                    var part = old.Fields.First(f => f.Name.StartsWith("P", StringComparison.Ordinal));
+                    var und = old.Fields.First(f => f.Name.StartsWith("U", StringComparison.Ordinal));
                     var newEmbed = new EmbedBuilder().WithDynamicColor(e.GuildId)
                         .WithAuthor(old.Author?.Name, old.Author?.IconUrl)
                         .WithTitle(e.Name)
@@ -77,7 +77,7 @@ namespace Roki.Modules.Rsvp.Services
                         .WithTimestamp(e.StartDate)
                         .WithDescription($"Starts in `{(e.StartDate - now).ToReadableString()}`")
                         .WithFooter("Event starts");
-                    if (e.StartDate.AddMinutes(-45) <= now && !_activeReminders.ContainsKey(e.Id))
+                    if (!_activeReminders.ContainsKey(e.Id) && e.StartDate.AddMinutes(-45) <= now)
                     {
                         _activeReminders.TryAdd(e.Id, e);
                         Logger.Info("Event {name} reminder countdown has started", e.Name);
@@ -751,32 +751,21 @@ namespace Roki.Modules.Rsvp.Services
 
         private async Task ReactionHandler(Cacheable<IUserMessage, ulong> cache, ISocketMessageChannel channel, SocketReaction r)
         {
-            if (r.User.Value.IsBot) 
+            if (r.User.Value.IsBot || !Choices.Contains(r.Emote) || !_mongo.Context.GetActiveEventAsync(r.MessageId, out var ev)) 
                 return;
-            if (!Choices.Contains(r.Emote))
-                return;
-
-            var events = await _mongo.Context.GetActiveEventsAsync();
             
-            if (events.All(x => x.MessageId != r.MessageId)) 
-                return;
-
             var msg = await cache.DownloadAsync().ConfigureAwait(false);
             var old = msg.Embeds.First();
             if (old == null) 
                 return;
             
-            var date = old.Fields.First(f => f.Name.Contains("date", StringComparison.OrdinalIgnoreCase));
-
-            var ev = events.First(e => e.MessageId == r.MessageId);
-
             var newEmbed = new EmbedBuilder().WithDynamicColor(((IGuildChannel) channel).GuildId)
                 .WithAuthor(old.Author?.Name, old.Author?.IconUrl)
-                .WithTitle(old.Title)
+                .WithTitle(ev.Name)
                 .AddField("Description", ev.Description)
-                .AddField("Event Date", date.Value)
-                .WithTimestamp(old.Timestamp.GetValueOrDefault())
-                .WithDescription($"Starts in `{(old.Timestamp.GetValueOrDefault() - DateTimeOffset.Now).ToReadableString()}`")
+                .AddField("Event Date", $"```{ev.StartDate:f} UTC```\nSee footer for local time.")
+                .WithTimestamp(ev.StartDate)
+                .WithDescription($"Starts in `{(ev.StartDate - DateTime.UtcNow).ToReadableString()}`")
                 .WithFooter("Event starts");
 
             var user = r.User.Value;
