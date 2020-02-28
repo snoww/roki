@@ -760,7 +760,7 @@ namespace Roki.Services.Database
         public bool GetActiveEventAsync(ulong messageId, out Event e)
         {
             var now = DateTime.UtcNow;
-            e = EventCollection.Find(x => x.MessageId == messageId && x.StartDate > now && !x.Deleted).SingleOrDefault();
+            e = EventCollection.Find(x => x.MessageId == messageId && x.StartDate > now && !x.Deleted).Limit(1).SingleOrDefault();
             return e != null;
         }
 
