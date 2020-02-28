@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -7,24 +6,23 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
-using Microsoft.EntityFrameworkCore;
 using Roki.Extensions;
 using Roki.Services;
 using Roki.Services.Database;
-using Roki.Services.Database.Data;
+using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Searches.Services
 {
     public class PokemonService : IRokiService
     {
-        private readonly DbService _db;
+        private readonly IMongoService _mongo;
 
-        public PokemonService(DbService db)
+        public PokemonService(IMongoService mongo)
         {
-            _db = db;
+            _mongo = mongo;
         }
 
-        public Color GetColorOfPokemon(string color)
+        public static Color GetColorOfPokemon(string color)
         {
             color = color.ToLower();
             switch (color)
@@ -56,18 +54,16 @@ namespace Roki.Modules.Searches.Services
 
         public async Task<Pokemon> GetPokemonByNameAsync(string query)
         {
-            using var uow = _db.GetDbContext();
-            query = query.SanitizeStringFull().ToLowerInvariant();
-            var pokemon = await uow.Context.Pokedex.FirstOrDefaultAsync(p => p.Name == query)
-                .ConfigureAwait(false);
-            if (pokemon != null) return pokemon;
+            query = query.SanitizeStringFull().ToLower();
+            var pokemon = await _mongo.Context.GetPokemonAsync(query);
+            if (pokemon != null) 
+                return pokemon;
             return await GetPokemonByAliasAsync(query).ConfigureAwait(false);
         }
         
         public async Task<Pokemon> GetPokemonByIdAsync(int number)
         {
-            using var uow = _db.GetDbContext();
-            return await uow.Context.Pokedex.Where(p => p.Number == number).OrderBy(p => p.Name).FirstOrDefaultAsync().ConfigureAwait(false);
+            return await _mongo.Context.GetPokemonByNumberAsync(number).ConfigureAwait(false);
         }
 
         private async Task<Pokemon> GetPokemonByAliasAsync(string query)
@@ -75,10 +71,8 @@ namespace Roki.Modules.Searches.Services
             var aliases = JsonDocument.Parse(File.ReadAllText("./data/pokemon_aliases.json"));
             if (!aliases.RootElement.TryGetProperty(query, out var name)) 
                 return null;
-            
-            using var uow = _db.GetDbContext();
-            return await uow.Context.Pokedex.FirstOrDefaultAsync(p => p.Species == name.GetString())
-                .ConfigureAwait(false);
+
+            return await _mongo.Context.GetPokemonAsync(name.GetString()).ConfigureAwait(false);
         }
 
         public static string GetSprite(string pokemon, int number)
@@ -93,49 +87,49 @@ namespace Roki.Modules.Searches.Services
                 .EndsWith(pokemon, StringComparison.OrdinalIgnoreCase));
         }
 
-        public string GetEvolution(Pokemon pokemon)
+        public async Task<string> GetEvolution(Pokemon pokemon)
         {
-            using var uow = _db.GetDbContext();
-            var pkmn = GetBaseEvo(uow, pokemon);
-            return pkmn.Evolutions == null
+            var pkmn = await GetBaseEvo(pokemon).ConfigureAwait(false);
+            return pkmn.Evos == null
                 ? "N/A" 
-                : GetEvolutionChain(uow, pkmn);
+                : await GetEvolutionChain(pkmn).ConfigureAwait(false);
         }
 
-        private static Pokemon GetBaseEvo(IUnitOfWork uow, Pokemon pokemon)
+        private async Task<Pokemon> GetBaseEvo(Pokemon pokemon)
         {
-            if (string.IsNullOrEmpty(pokemon.PreEvolution))
+            if (string.IsNullOrEmpty(pokemon.Prevo))
                 return pokemon;
 
             var basic = pokemon;
             do
-            { 
-                basic = uow.Context.Pokedex.First(p => p.Name == basic.PreEvolution);
-            } while (!string.IsNullOrEmpty(basic.PreEvolution));
+            {
+                basic = await _mongo.Context.GetPokemonAsync(basic.Prevo).ConfigureAwait(false);
+            } while (!string.IsNullOrEmpty(basic.Prevo));
 
             return basic;
         }
 
-        private static string GetEvolutionChain(IUnitOfWork uow, Pokemon pokemon)
+        private async Task<string> GetEvolutionChain(Pokemon pokemon)
         {
-            if (pokemon.Evolutions == null)
+            if (pokemon.Evos == null)
             {
                 return pokemon.Species;
             }
 
             var chain = new StringBuilder();
 
-            chain.Append($"{pokemon.Species} > {GetEvolutionChain(uow, uow.Context.Pokedex.First(p => p.Name == pokemon.Evolutions.First()))}");
-            if (pokemon.Evolutions.Length <= 1) return chain.ToString();
+            chain.Append($"{pokemon.Species} > {await GetEvolutionChain(await _mongo.Context.GetPokemonAsync(pokemon.Evos.First()))}");
+            if (pokemon.Evos.Count <= 1) 
+                return chain.ToString();
             
-            foreach (var ev in pokemon.Evolutions.Skip(1))
+            foreach (var ev in pokemon.Evos.Skip(1))
             {
                 var pad = new StringBuilder();
-                if (pokemon.PreEvolution != null)
-                    pad.Append($"{Regex.Replace(pokemon.PreEvolution + pokemon.Species, ".", " ")}   ");
+                if (pokemon.Evos != null)
+                    pad.Append($"{Regex.Replace(pokemon.Prevo + pokemon.Species, ".", " ")}");
                 else
                     pad.Append(Regex.Replace(pokemon.Species, ".", " "));
-                chain.Append($"\n{pad} > {GetEvolutionChain(uow, uow.Context.Pokedex.First(p => p.Name == ev))}");
+                chain.Append($"\n{pad} > {await GetEvolutionChain(await _mongo.Context.GetPokemonAsync(ev))}");
             }
             
             return chain.ToString();
@@ -143,27 +137,31 @@ namespace Roki.Modules.Searches.Services
 
         public static string FormatStats(Pokemon pokemon)
         {
-            var stats = new[] {pokemon.Hp, pokemon.Attack, pokemon.Defence, pokemon.SpecialAttack, pokemon.SpecialDefense, pokemon.Speed};
+            var stats = new[] 
+            {
+                pokemon.BaseStats["hp"], pokemon.BaseStats["atk"], pokemon.BaseStats["def"], 
+                pokemon.BaseStats["spa"], pokemon.BaseStats["spd"], pokemon.BaseStats["spe"]
+            };
+            
             var max = (int) Math.Ceiling(Math.Log10(stats.Max()));
 
             return max == 2 
-                ? $"```css\nHP: {stats[0],2}|Atk: {stats[1],2}|Def: {stats[2],2}\nSpA: {stats[3],2}|SpD: {stats[4],2}|Spd: {stats[5],2}```" 
-                : $"```css\nHP: {stats[0],3}|Atk: {stats[1],3}|Def: {stats[2],3}\nSpA: {stats[3],3}|SpD: {stats[4],3}|Spd: {stats[5],3}```";
+                ? $"```css\nHP:  {stats[0],2}  Atk: {stats[1],2}  Def: {stats[2],2}\nSpA: {stats[3],2}  SpD: {stats[4],2}  Spd: {stats[5],2}```" 
+                : $"```css\nHP:  {stats[0],3}  Atk: {stats[1],3}  Def: {stats[2],3}\nSpA: {stats[3],3}  SpD: {stats[4],3}  Spd: {stats[5],3}```";
         }
 
         public async Task<Ability> GetAbilityAsync(string query)
         {
-            query = query.SanitizeStringFull().ToLowerInvariant();
-            using var uow = _db.GetDbContext();
-            return await uow.Context.Abilities.FirstOrDefaultAsync(a => a.Id == query).ConfigureAwait(false);
+            query = query.SanitizeStringFull().ToLower();
+            return await _mongo.Context.GetAbilityAsync(query).ConfigureAwait(false);
         }
 
         public async Task<Move> GetMoveAsync(string query)
         {
-            query = query.SanitizeStringFull().ToLowerInvariant();
-            using var uow = _db.GetDbContext();
-            var move = await uow.Context.Moves.FirstOrDefaultAsync(m => m.Id == query).ConfigureAwait(false);
-            if (move != null) return move;
+            query = query.SanitizeStringFull().ToLower();
+            var move = await _mongo.Context.GetMoveAsync(query).ConfigureAwait(false);
+            if (move != null) 
+                return move;
             return await GetMoveAliasAsync(query).ConfigureAwait(false);
         }
 
@@ -173,8 +171,13 @@ namespace Roki.Modules.Searches.Services
             if (!aliases.RootElement.TryGetProperty(query, out var name))
                 return null;
             
-            using var uow = _db.GetDbContext();
-            return await uow.Context.Moves.FirstOrDefaultAsync(p => p.Name == name.GetString()).ConfigureAwait(false);
+            return await _mongo.Context.GetMoveAsync(name.GetString()).ConfigureAwait(false);
+        }
+
+        public async Task<PokemonItem> GetItemAsync(string query)
+        {
+            query = query.SanitizeStringFull().ToLower();
+            return await _mongo.Context.GetItemAsync(query).ConfigureAwait(false);
         }
     }
 }

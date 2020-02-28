@@ -8,23 +8,23 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Roki.Extensions;
 using Roki.Services;
-using Roki.Services.Database.Core;
 using StackExchange.Redis;
 
 namespace Roki.Modules.Currency.Services
 {
     public class PickDropService : IRokiService
     {
-        private readonly DbService _db;
-        private readonly IDatabase _cache = RedisCache.Instance.Cache;
+        private readonly IMongoService _mongo;
+        private readonly IDatabase _cache;
 
         private ConcurrentDictionary<ulong, DateTime> LastGenerations { get; } = new ConcurrentDictionary<ulong, DateTime>();
         private readonly SemaphoreSlim _pickLock = new SemaphoreSlim(1, 1);
 
 
-        public PickDropService(CommandHandler command, DbService db)
+        public PickDropService(CommandHandler command, IRedisCache cache, IMongoService mongo)
         {
-            _db = db;
+            _mongo = mongo;
+            _cache = cache.Redis.GetDatabase();
             command.OnMessageNoTrigger += CurrencyGeneration;
         }
         
@@ -56,23 +56,15 @@ namespace Roki.Modules.Currency.Services
                 
                 if (drop > 0)
                 {
+                    await _cache.StringIncrementAsync($"gen:{channel.GuildId}:{channel.Id}", drop).ConfigureAwait(false);
+                    await _cache.StringAppendAsync($"gen:log:{channel.GuildId}:{channel.Id}", $"{message.Id},").ConfigureAwait(false);
+
                     var prefix = Roki.Properties.Prefix;
                     var toSend = drop == 1
                         ? $"{Roki.Properties.CurrencyIcon} A random {Roki.Properties.CurrencyName} appeared! Type `{prefix}pick` to pick it up."
                         : $"{Roki.Properties.CurrencyIcon} {drop} random {Roki.Properties.CurrencyNamePlural} appeared! Type `{prefix}pick` to pick them up.";
                     // TODO add images to send with drop
-                    var curMessage = await channel.SendMessageAsync(toSend).ConfigureAwait(false);
-                    using var uow = _db.GetDbContext();
-                    uow.Transaction.Add(new CurrencyTransaction
-                    {
-                        Amount = drop,
-                        Reason = "GCA",
-                        From = Roki.Properties.BotId,
-                        GuildId = channel.GuildId,
-                        ChannelId = channel.Id,
-                        MessageId = curMessage.Id
-                    });
-                    await uow.SaveChangesAsync().ConfigureAwait(false);
+                    await channel.SendMessageAsync(toSend).ConfigureAwait(false);
                 }
             }
         }
@@ -82,30 +74,34 @@ namespace Roki.Modules.Currency.Services
             await _pickLock.WaitAsync();
             try
             {
-                long amount;
-                ulong[] ids;
-                using (var uow = _db.GetDbContext())
-                {
-                    (amount, ids) = await uow.Transaction.PickCurrency(channel.Id, user.Id).ConfigureAwait(false);
-                    if (amount > 0)
-                    {
-                        await _cache.StringIncrementAsync($"currency:{channel.Guild.Id}:{user.Id}", amount, CommandFlags.FireAndForget)
-                            .ConfigureAwait(false);
-                        await uow.Users.UpdateCurrencyAsync(user.Id, amount).ConfigureAwait(false);
-                    }
+                var rawAmount = await _cache.StringGetAsync($"gen:{channel.GuildId}:{channel.Id}").ConfigureAwait(false);
+                var messages = await _cache.StringGetAsync($"gen:log:{channel.GuildId}:{channel.Id}").ConfigureAwait(false);
 
-                    await uow.SaveChangesAsync().ConfigureAwait(false);
-                }
+                var amount = (long) rawAmount;
+
+                if (rawAmount.IsNullOrEmpty || messages.IsNullOrEmpty)
+                    return 0;
+                
+                await _cache.StringIncrementAsync($"currency:{channel.Guild.Id}:{user.Id}", amount, CommandFlags.FireAndForget)
+                    .ConfigureAwait(false);
+                await _mongo.Context.UpdateUserCurrencyAsync(user.Id, amount).ConfigureAwait(false);
 
                 try
                 {
-                    if (ids[0] == 0)
-                        return 0;
-                    var _ = channel.DeleteMessagesAsync(ids);
+                    var ids = (from id in ((string) messages).Split(',')
+                               where !string.IsNullOrWhiteSpace(id)
+                               select ulong.Parse(id))
+                        .ToList();
+                    await channel.DeleteMessagesAsync(ids).ConfigureAwait(false);
                 }
                 catch
                 {
                     //
+                }
+                finally
+                {
+                    _cache.KeyDelete($"gen:{channel.GuildId}:{channel.Id}");
+                    _cache.KeyDelete($"gen:log:{channel.GuildId}:{channel.Id}");
                 }
 
                 return amount;
@@ -118,30 +114,23 @@ namespace Roki.Modules.Currency.Services
 
         public async Task<bool> DropAsync(ICommandContext ctx, IUser user, long amount)
         {
-            using var uow = _db.GetDbContext();
-            var dUser = await uow.Users.GetUserAsync(user.Id).ConfigureAwait(false);
-            if (dUser.Currency < amount)
+            var dbUser = await _mongo.Context.GetOrAddUserAsync(user).ConfigureAwait(false);
+            if (dbUser.Currency < amount)
                 return false;
-
+            
+            await _cache.StringIncrementAsync($"gen:{ctx.Guild.Id}:{ctx.Channel.Id}", amount).ConfigureAwait(false);
             await _cache.StringIncrementAsync($"currency:{ctx.Guild.Id}:{user.Id}", -amount, CommandFlags.FireAndForget)
                 .ConfigureAwait(false);
-            var updated = await uow.Users.UpdateCurrencyAsync(user.Id, -amount).ConfigureAwait(false);
+            
+            await _mongo.Context.UpdateUserCurrencyAsync(dbUser, -amount).ConfigureAwait(false);
+            
+            var msg = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
+                    .WithDescription($"{user.Username} dropped {amount:N0} {Roki.Properties.CurrencyIcon}")
+                    .WithFooter($"Use {Roki.Properties.Prefix}pick to pick it up"))
+                .ConfigureAwait(false);
+            
+            await _cache.StringAppendAsync($"gen:log:{ctx.Guild.Id}:{ctx.Channel.Id}", $"{msg.Id},").ConfigureAwait(false);
 
-            if (!updated) return false;
-                
-            var msg = await ctx.Channel.SendMessageAsync($"{user.Username} dropped {amount:N0} {Roki.Properties.CurrencyIcon}\nType `.pick` to pick it up.");
-
-            uow.Transaction.Add(new CurrencyTransaction
-            {
-                Amount = amount,
-                Reason = "UserDrop",
-                From = dUser.UserId,
-                GuildId = ctx.Guild.Id,
-                ChannelId = msg.Channel.Id,
-                MessageId = msg.Id
-            });
-                
-            await uow.SaveChangesAsync().ConfigureAwait(false);
             return true;
         }
     }

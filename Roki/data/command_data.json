@@ -127,7 +127,7 @@
   },
   "showquote": {
     "Aliases": "..",
-    "Description": "Shows a random quote with a specified name.",
+    "Description": "Shows a random quote with a specified name",
     "Usage": [
       "{0}.. abc"
     ]
@@ -148,7 +148,7 @@
   },
   "quotedelete": {
     "Aliases": "quotedel qdel",
-    "Description": "Deletes a quote with the specified ID. You have to be either server Administrator or the creator of the quote to delete it.",
+    "Description": "Deletes a quote with the specified ID or Keyword. If the quote you want to delete's keyword is a number, it will use it as the ID instead. You have to be either server Administrator or the creator of the quote to delete it.",
     "Usage": [
       "{0}qdel 123456"
     ]
@@ -159,6 +159,13 @@
     "Usage": [
       "{0}liqu 3",
       "{0}liqu 3 id"
+    ]
+  },
+  "quotesearch": {
+    "Aliases": "qs",
+    "Description": "Search quotes text that matches the query, and returns results closest matching.",
+    "Usage": [
+      "{0}qs 3"
     ]
   },
   "textoimage": {
@@ -187,13 +194,6 @@
     "Description": "Returns the description of the specified move.",
     "Usage": [
       "{0}move bubble"
-    ]
-  },
-  "nature": {
-    "Aliases": "",
-    "Description": "Returns the modifiers of the specified nature.",
-    "Usage": [
-      "{0}nature jolly"
     ]
   },
   "item": {
@@ -226,11 +226,26 @@
       "{0}q https://www.youtube.com/watch?v=dQw4w9WgXcQ"
     ]
   },
+  "autoplay": {
+    "Aliases": "qauto",
+    "Description": "Enables/Disables autoplay for the current player. Must be in a voice channel.",
+    "Usage": [
+      "{0}qauto"
+    ]
+  },
   "pause": {
     "Aliases": "",
     "Description": "Pauses the current track playing. Must be in a voice channel.",
     "Usage": [
       "{0}pause"
+    ]
+  },
+  "resume": {
+    "Command": "resume unpause",
+    "Description": "Un-pauses the current paused track. Must be in a voice channel.",
+    "Usage": [
+      "{0}resume",
+      "{0}unpause"
     ]
   },
   "destroy": {

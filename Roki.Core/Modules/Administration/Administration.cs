@@ -13,7 +13,7 @@ namespace Roki.Modules.Administration
     {
         [RokiCommand, Description, Usage, Aliases]
         [OwnerOnly]
-        public async Task Fill(ulong afterMessage = 657601009455071232)
+        public async Task Fill(ulong afterMessage = 677951058307186698)
         {
             var sw = Stopwatch.StartNew();
             await Service.FillMissingMessagesAsync(afterMessage).ConfigureAwait(false);

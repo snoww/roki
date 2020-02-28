@@ -9,9 +9,12 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 using NLog;
 using Roki.Extensions;
 using Roki.Services;
+using Roki.Services.Database;
+using Roki.Services.Database.Maps;
 using StackExchange.Redis;
 using Victoria;
 
@@ -19,15 +22,15 @@ namespace Roki
 {
     public class Roki
     {
-        private readonly DbService _db;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private static readonly IDatabase Cache = RedisCache.Instance.Cache;
 
         private RokiConfig Config { get; }
         private DiscordSocketClient Client { get; }
         private CommandService CommandService { get; }
+        private IMongoService Mongo { get; }
+        private IRedisCache Cache { get; }
         private IServiceProvider Services { get; set; }
-        
+
         public static Properties Properties { get; private set; }
         public static Color OkColor { get; private set; }
         public static Color ErrorColor { get; private set; }
@@ -37,10 +40,9 @@ namespace Roki
             LogSetup.SetupLogger();
 
             Config = new RokiConfig();
+            Mongo = new MongoService();
+            Cache = new RedisCache(Config.RedisConfig);
             
-            _db = new DbService(Config.Db.ConnectionString);
-            _db.Setup();
-
             // global properties
             // future: guild specific properties
             Properties = File.ReadAllText("./data/properties.json").Deserialize<Properties>();
@@ -98,7 +100,7 @@ namespace Roki
             var commandService = Services.GetService<CommandService>();
             
             await commandHandler.StartHandling().ConfigureAwait(false);
-            await new EventHandlers(_db, Client).StartHandling().ConfigureAwait(false);
+            await new EventHandlers(Mongo, Client, Cache).StartHandling().ConfigureAwait(false);
 
             await commandService.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
         }
@@ -127,29 +129,32 @@ namespace Roki
                 {
                     try
                     {
-                        using var uow = _db.GetDbContext();
+                        var botCurrency = Mongo.Context.GetBotCurrencyAsync();
+                        
+                        var cache = Cache.Redis.GetDatabase();
                         await Client.DownloadUsersAsync(Client.Guilds).ConfigureAwait(false);
                         Logger.Info("Loading cache");
                         var sw = Stopwatch.StartNew();
                         
                         foreach (var guild in Client.Guilds)
                         {
-                            var botCurrency = uow.Users.GetUserCurrency(Properties.BotId);
-                            await Cache.StringSetAsync($"currency:{guild.Id}:{Properties.BotId}", botCurrency, flags: CommandFlags.FireAndForget)
+                            await cache.StringSetAsync($"currency:{guild.Id}:{Properties.BotId}", botCurrency, flags: CommandFlags.FireAndForget)
                                 .ConfigureAwait(false);
-                            await UpdateCache(guild.Users).ConfigureAwait(false);
-                            
-                            await uow.Guilds.GetOrCreateGuildAsync(guild).ConfigureAwait(false);
+                            await UpdateCache(cache, guild.Users).ConfigureAwait(false);
+
+                            await Mongo.Context.GetOrAddGuildAsync(guild).ConfigureAwait(false);
+
                             foreach (var channel in guild.Channels)
                             {
-                                if (channel is SocketTextChannel textChannel)
-                                    await uow.Channels.GetOrCreateChannelAsync(textChannel).ConfigureAwait(false);
+                                if (!(channel is SocketTextChannel textChannel)) 
+                                    continue;
+
+                                await Mongo.Context.GetOrAddChannelAsync(textChannel).ConfigureAwait(false);
                             }
                         }
 
                         sw.Stop();
                         Logger.Info("Cache loaded in {elapsed} ms", sw.ElapsedMilliseconds);
-                        await uow.SaveChangesAsync().ConfigureAwait(false);
                     }
                     catch (Exception e)
                     {
@@ -169,7 +174,8 @@ namespace Roki
             
             var service = new ServiceCollection()
                 .AddSingleton<IRokiConfig>(Config)
-                .AddSingleton(_db)
+                .AddSingleton(Mongo)
+                .AddSingleton(Cache)
                 .AddSingleton(Client)
                 .AddSingleton(CommandService)
                 .AddSingleton<LavaConfig>()
@@ -230,11 +236,11 @@ namespace Roki
             return Task.CompletedTask;
         }
 
-        private Task UpdateCache(IEnumerable<SocketGuildUser> users)
+        private Task UpdateCache(IDatabaseAsync cache, IEnumerable<SocketGuildUser> users)
         {
             var _ = Task.Run(async () =>
             {
-                using var uow = _db.GetDbContext();
+                var collection = Mongo.Database.GetCollection<User>("users");
                 foreach (var guildUser in users)
                 {
                     if (guildUser.Id == Client.CurrentUser.Id)
@@ -243,11 +249,11 @@ namespace Roki
 
                         if (role == null)
                         {
-                            await Cache.StringSetAsync($"color:{guildUser.Guild.Id}", Color.Green.RawValue).ConfigureAwait(false);
+                            await cache.StringSetAsync($"color:{guildUser.Guild.Id}", Color.Green.RawValue).ConfigureAwait(false);
                         }
                         else
                         {
-                            await Cache.StringSetAsync($"color:{guildUser.Guild.Id}", role.Color.RawValue).ConfigureAwait(false);
+                            await cache.StringSetAsync($"color:{guildUser.Guild.Id}", role.Color.RawValue).ConfigureAwait(false);
                         }
                         
                         continue;
@@ -255,9 +261,16 @@ namespace Roki
                     
                     if (guildUser.IsBot)
                         continue;
+
+                    var userUpdate = Builders<User>.Update.Set(u => u.Id, guildUser.Id)
+                        .Set(u => u.Username, guildUser.Username)
+                        .Set(u => u.Discriminator, int.Parse(guildUser.Discriminator))
+                        .Set(u => u.AvatarId, guildUser.AvatarId);
+
+                    var user = await collection.FindOneAndUpdateAsync<User>(u => u.Id == guildUser.Id, userUpdate, 
+                        new FindOneAndUpdateOptions<User>{ReturnDocument = ReturnDocument.After, IsUpsert = true}).ConfigureAwait(false);
                     
-                    var user = await uow.Users.GetOrCreateUserAsync(guildUser).ConfigureAwait(false);
-                    await Cache.StringSetAsync($"currency:{guildUser.Guild.Id}:{guildUser.Id}", user.Currency, flags: CommandFlags.FireAndForget)
+                    await cache.StringSetAsync($"currency:{guildUser.Guild.Id}:{guildUser.Id}", user.Currency, flags: CommandFlags.FireAndForget)
                         .ConfigureAwait(false);
                 }
             });
