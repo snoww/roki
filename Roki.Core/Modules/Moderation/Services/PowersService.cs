@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using MongoDB.Bson;
 using Roki.Extensions;
 using Roki.Services;
 
@@ -11,29 +12,30 @@ namespace Roki.Modules.Moderation.Services
 {
     public class PowersService : IRokiService
     {
-        private readonly DbService _db;
+        private readonly IMongoService _mongo;
         private readonly ConcurrentDictionary<ulong, DateTime> _muted = new ConcurrentDictionary<ulong, DateTime>();
         private readonly ConcurrentDictionary<ulong, DateTime> _blocked = new ConcurrentDictionary<ulong, DateTime>();
         private readonly ConcurrentDictionary<ulong, DateTime> _timeout = new ConcurrentDictionary<ulong, DateTime>();
         
 
-        public PowersService(DbService db)
+        public PowersService(IMongoService mongo)
         {
-            _db = db;
+            _mongo = mongo;
         }
 
-        public async Task<bool> AvailablePower(ulong userId, string power)
+        public async Task<bool> ConsumePower(ulong guildId, ulong userId, ObjectId power)
         {
-            using var uow = _db.GetDbContext();
-            var inv =  await uow.Users.GetUserInventory(userId).ConfigureAwait(false);
-            return inv.Any(i => i.Name.Equals(power, StringComparison.OrdinalIgnoreCase));
-        }
-        
-        public async Task ConsumePower(ulong userId, string power)
-        {
-            using var uow = _db.GetDbContext();
-            await uow.Users.UpdateUserInventory(userId, power, -1).ConfigureAwait(false);
-            await uow.SaveChangesAsync().ConfigureAwait(false);
+            var inv = (await _mongo.Context.GetUserAsync(userId).ConfigureAwait(false)).Inventory;
+            foreach (var item in inv)
+            {
+                var listing = await _mongo.Context.GetStoreItemByIdAsync(guildId, item.Id).ConfigureAwait(false);
+                if (listing.Id != power) continue;
+                
+                await _mongo.Context.AddOrUpdateUserInventoryAsync(userId, guildId, power, -1).ConfigureAwait(false);
+                return true;
+            }
+
+            return false;
         }
 
         public async Task MuteUser(ICommandContext ctx, IGuildUser user)

@@ -9,6 +9,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Bson;
 using NLog;
 using Roki.Common;
 using Roki.Services;
@@ -27,7 +28,7 @@ namespace Roki.Extensions
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static readonly Random Rng = new Random();
-        private static readonly IDatabase Cache = RedisCache.Instance.Cache;
+        private static readonly IDatabase Cache = new RedisCache().Redis.GetDatabase();
         private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
 
         public static EmbedBuilder WithDynamicColor(this EmbedBuilder embed, ICommandContext context)
@@ -232,6 +233,11 @@ namespace Roki.Extensions
         public static T Deserialize<T>(this string json)
         {       
             return JsonSerializer.Deserialize<T>(json, Options);
+        }
+
+        public static int GetId(this ObjectId id, int digits = 4)
+        {
+            return id.Increment % (int) Math.Pow(10, digits);
         }
     }
 }

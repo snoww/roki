@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -6,7 +5,7 @@ using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Searches.Services;
-using Roki.Services.Database.Data;
+using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Searches
 {
@@ -17,7 +16,7 @@ namespace Roki.Modules.Searches
         {
             
             [RokiCommand, Usage, Description, Aliases]
-            public async Task Pokedex([Leftover] string query = null)
+            public async Task Pokedex([Leftover] string query)
             {
                 if (string.IsNullOrWhiteSpace(query))
                     return;
@@ -34,31 +33,31 @@ namespace Roki.Modules.Searches
                     return;
                 }
 
-                var types = pokemon.Type0 + (string.IsNullOrEmpty(pokemon.Type1) ? string.Empty : $", {pokemon.Type1}");
-                var abilities = pokemon.Ability0 + (string.IsNullOrEmpty(pokemon.Ability1) ? string.Empty : $", {pokemon.Ability1}") +
-                                (string.IsNullOrEmpty(pokemon.AbilityH) ? string.Empty : $", {Format.Italics(pokemon.AbilityH)}");
+                var types = string.Join("\n", pokemon.Types);
+                var abilities = string.Join("\n", pokemon.Abilities.Select(x => x.Key == "H" ? Format.Italics(x.Value) : x.Value));
 
-                var embed = new EmbedBuilder().WithColor(Service.GetColorOfPokemon(pokemon.Color))
-                    .WithTitle($"#{pokemon.Number:D3} {pokemon.Species}")
+                var embed = new EmbedBuilder().WithColor(PokemonService.GetColorOfPokemon(pokemon.Color))
+                    .WithTitle($"#{pokemon.Num:D3} {pokemon.Species}")
                     .AddField("Types", types, true)
-                    .AddField("Abilities", abilities, true)
-                    .AddField("Base Stats", PokemonService.FormatStats(pokemon), true)
+                    .AddField("Abilities", abilities, true);
+                
+                if (pokemon.GenderRatio != null)
+                    embed.AddField("Gender Ratio", $"{string.Join("\n", pokemon.GenderRatio.Select(x => $"`{x.Key}: {x.Value:P1}`"))}", true);
+
+                embed.AddField("Base Stats", PokemonService.FormatStats(pokemon))
                     .AddField("Height", $"{pokemon.Height:N1} m", true)
                     .AddField("Weight", $"{pokemon.Weight} kg", true)
-                    .AddField("Evolution", $"```php\n{Service.GetEvolution(pokemon)}```")
-                    .AddField("Egg Groups", string.Join(", ", pokemon.EggGroups), true);
+                    .AddField("Egg Groups", string.Join("\n", pokemon.EggGroups), true)
+                    .AddField("Evolution", $"```less\n{await Service.GetEvolution(pokemon).ConfigureAwait(false)}```");
 
-                if (pokemon.MaleRatio.HasValue)
-                    embed.AddField("Gender Ratio", $"M: `{pokemon.MaleRatio.Value:P1}` F: `{pokemon.FemaleRatio:P1}`", true);
-                
-                var sprite = PokemonService.GetSprite(pokemon.Name, pokemon.Number);
+                var sprite = PokemonService.GetSprite(pokemon.Id, pokemon.Num);
                 embed.WithThumbnailUrl($"attachment://{sprite.Split("/").Last()}");
 
                 await Context.Channel.SendFileAsync(sprite, embed: embed.Build()).ConfigureAwait(false);
             }
 
             [RokiCommand, Usage, Description, Aliases]
-            public async Task Ability([Leftover] string query = null)
+            public async Task Ability([Leftover] string query)
             {
                 if (string.IsNullOrWhiteSpace(query))
                     return;
@@ -73,13 +72,13 @@ namespace Roki.Modules.Searches
 
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle(ability.Name)
-                        .WithDescription((ability.Description ?? ability.ShortDescription).TrimTo(2048))
+                        .WithDescription((ability.Desc ?? ability.ShortDesc).TrimTo(2048))
                         .AddField("Rating", $"{ability.Rating:N1}"))
                     .ConfigureAwait(false);
             }
 
             [RokiCommand, Usage, Description, Aliases]
-            public async Task Move([Leftover] string query = null)
+            public async Task Move([Leftover] string query)
             {
                 if (string.IsNullOrWhiteSpace(query))
                     return;
@@ -92,75 +91,39 @@ namespace Roki.Modules.Searches
                 }
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle(move.Name)
-                        .WithDescription((move.Description ?? move.ShortDescription).TrimTo(2048))
+                        .WithDescription((move.Desc ?? move.ShortDesc).TrimTo(2048))
                         .AddField("Type", move.Type, true)
                         .AddField("Category", move.Category, true)
                         .AddField("Accuracy", move.Accuracy != null ? $"{move.Accuracy.Value}" : "-", true)
-                        .AddField("Power", move.BasePower, true)
+                        .AddField("Power", move.Power, true)
                         .AddField("PP", move.Pp, true)
                         .AddField("Priority", move.Priority, true))
                     .ConfigureAwait(false);
             }
 
-            /*[RokiCommand, Usage, Description, Aliases]
-            public async Task Nature([Leftover] string query)
-            {
-                if (string.IsNullOrWhiteSpace(query))
-                    return;
-                await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
-                try
-                {
-                    var nature = await _pokeClient.GetResourceAsync<Nature>(query).ConfigureAwait(false);
-                    
-                    var embed = new EmbedBuilder().WithDynamicColor(Context)
-                        .WithTitle(nature.Name.ToTitleCase());
-                    
-                    // checks if nature is not neutral
-                    if (nature.IncreasedStat != null)    
-                        embed.AddField("Increased Stat", nature.IncreasedStat.Name.ToTitleCase().Replace('-', ' '), true)
-                        .AddField("Decreased Stat", nature.DecreasedStat.Name.ToTitleCase().Replace('-', ' '), true)
-                        .AddField("Likes Flavor", nature.LikesFlavor.Name.ToTitleCase(), true)
-                        .AddField("Hates Flavor", nature.HatesFlavor.Name.ToTitleCase(), true);
-                    else
-                        embed.AddField("Increased Stat", "—", true)
-                            .AddField("Decreased Stat", "—", true)
-                            .AddField("Likes Flavor", "—", true)
-                            .AddField("Hates Flavor", "—", true);
-                    
-                    await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
-                }
-                catch
-                {
-                    await ctx.Channel.SendErrorAsync("Nature not found.").ConfigureAwait(false);
-                }
-            }*/
-
-            /*[RokiCommand, Usage, Description, Aliases]
+            [RokiCommand, Usage, Description, Aliases]
             public async Task Item([Leftover] string query)
             {
                 if (string.IsNullOrWhiteSpace(query))
                     return;
-                await ctx.Channel.TriggerTypingAsync().ConfigureAwait(false);
-                try
-                {
-                    var item = await _pokeClient.GetResourceAsync<Item>(query).ConfigureAwait(false);
+                await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
+                var item = await Service.GetItemAsync(query);
 
-                    var embed = new EmbedBuilder().WithDynamicColor(Context)
-                        .WithAuthor(item.Name.ToTitleCase().Replace('-', ' '))
-                        .WithDescription(item.EffectEntries[0].Effect)
-                        .WithThumbnailUrl(item.Sprites.Default)
-                        .AddField("Category", item.Category.Name.ToTitleCase().Replace('-', ' '), true)
-                        .AddField("Cost", item.Cost, true);
-                    if (item.FlingPower != null)
-                        embed.AddField("Fling Power", item.FlingPower, true);
-                    
-                    await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
-                }
-                catch
+                if (item == null)
                 {
-                    await ctx.Channel.SendErrorAsync("Item not found.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("Item not found.").ConfigureAwait(false);
+                    return;
                 }
-            }*/
+                
+                var embed = new EmbedBuilder().WithDynamicColor(Context)
+                    .WithAuthor(item.Name)
+                    .WithDescription(item.Desc)
+                    .AddField("Introduced in", $"Generation {item.Gen}", true);
+                if (item.Fling != null)
+                    embed.AddField("Fling Power", string.Join("\n", item.Fling.Select(x => x.Key == "basePower" ? $"Base Power: `{x.Value}`" : $"{x.Key}: `{x.Value}`")), true);
+                    
+                await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            }
         }
     }
 }

@@ -18,6 +18,16 @@ namespace Roki.Modules.Games.Common
         private string _minAnswer;
         private readonly List<string> _acceptedAnswers = new List<string>();
 
+        public JClue(string answer, string category, string clue, int value)
+        {
+            Category = category;
+            Clue = clue;
+            Answer = answer;
+            Value = value;
+
+            SanitizeAnswer();
+        }
+
         public void SanitizeAnswer()
         {
             var minAnswer = Regex.Replace(Answer.ToLowerInvariant(), "^(the |a |an )", "")

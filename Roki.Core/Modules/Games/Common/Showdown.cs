@@ -26,18 +26,18 @@ namespace Roki.Modules.Games.Common
     public class Showdown
     {
         private readonly ICurrencyService _currency;
-        private readonly DbService _db;
+        private readonly IDatabase _cache;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly DiscordSocketClient _client;
         private readonly ShowdownService _service;
-
-        private static readonly IDatabase Cache = RedisCache.Instance.Cache;
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         
+        private readonly ITextChannel _channel;
+
+        private readonly int _generation;
         public string GameId { get; }
+        
         private List<List<string>> _teams;
         private IUserMessage _game;
-        private readonly ITextChannel _channel;
-        private readonly int _generation;
 
         private readonly Dictionary<IUser, PlayerBet> _scores = new Dictionary<IUser, PlayerBet>();
         
@@ -68,11 +68,11 @@ namespace Roki.Modules.Games.Common
             {TimesTen, 0},
         };
 
-        public Showdown(ICurrencyService currency, DbService db, DiscordSocketClient client, ITextChannel channel, int generation,
-            ShowdownService service)
+        public Showdown(ICurrencyService currency, DiscordSocketClient client, ITextChannel channel, int generation,
+            ShowdownService service, IRedisCache cache)
         {
             _currency = currency;
-            _db = db;
+            _cache = cache.Redis.GetDatabase();
             _client = client;
             _channel = channel;
             _generation = generation;
@@ -324,7 +324,7 @@ namespace Roki.Modules.Games.Common
                 }
             }
             proc.WaitForExit();
-            await Cache.StringSetAsync($"pokemon:{uid}", gameId, TimeSpan.FromMinutes(5), flags: CommandFlags.FireAndForget).ConfigureAwait(false);
+            await _cache.StringSetAsync($"pokemon:{uid}", gameId, TimeSpan.FromMinutes(5), flags: CommandFlags.FireAndForget).ConfigureAwait(false);
             File.AppendAllText(@"./data/pokemon_betshowdown_logs.txt", $"{uid}={gameId}\n");
             _teams = teams;
         }
@@ -504,8 +504,7 @@ namespace Roki.Modules.Games.Common
 
         private long GetCurrency(ulong userId)
         {
-            using var uow = _db.GetDbContext();
-            return uow.Users.GetUserCurrency(userId);
+            return _currency.GetCurrency(userId, _channel.GuildId).Result;
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -6,6 +7,7 @@ using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Stocks.Extensions;
 using Roki.Modules.Stocks.Services;
+using Roki.Services;
 
 namespace Roki.Modules.Stocks
 {
@@ -14,6 +16,13 @@ namespace Roki.Modules.Stocks
         [Group]
         public class TradingCommands : RokiSubmodule<TradingService>
         {
+            private readonly IMongoService _mongo;
+
+            public TradingCommands(IMongoService mongo)
+            {
+                _mongo = mongo;
+            }
+
             [RokiCommand, Usage, Description, Aliases]
             public async Task StockSell(string symbol, long amount)
             {
@@ -31,7 +40,8 @@ namespace Roki.Modules.Stocks
                     return;
                 }
 
-                var investment = await Service.GetOwnedShares(Context.User.Id, symbol).ConfigureAwait(false);
+                var user = await _mongo.Context.GetUserAsync(Context.User.Id).ConfigureAwait(false);
+                var investment = user.Portfolio.FirstOrDefault(x => x.Symbol == symbol);
                 if (investment == null)
                 {
                     await Context.Channel.SendErrorAsync($"You do not own any shares of `{symbol}`").ConfigureAwait(false);
@@ -47,7 +57,7 @@ namespace Roki.Modules.Stocks
                 Enum.TryParse<Position>(investment.Position.ToUpper(), out var pos);
                 if (pos == Position.LONG)
                 {
-                    var status = await Service.LongPositionAsync(Context.User.Id, symbol, "sell", price.Value, amount).ConfigureAwait(false);
+                    var status = await Service.LongPositionAsync(user, symbol, "sell", price.Value, amount).ConfigureAwait(false);
                     if (status == TradingService.Status.NotEnoughShares)
                     {
                         await Context.Channel.SendErrorAsync("You do not have enough in your Investing Account sell these shares").ConfigureAwait(false);
@@ -61,7 +71,7 @@ namespace Roki.Modules.Stocks
                 }
                 else if (pos == Position.SHORT)
                 {
-                    var status = await Service.ShortPositionAsync(Context.User.Id, symbol, "sell", price.Value, amount).ConfigureAwait(false);
+                    var status = await Service.ShortPositionAsync(user, symbol, "sell", price.Value, amount).ConfigureAwait(false);
                     if (status == TradingService.Status.NotEnoughInvesting)
                     {
                         await Context.Channel.SendErrorAsync("You do not have enough in your Investing Account sell these shares").ConfigureAwait(false);
@@ -91,9 +101,11 @@ namespace Roki.Modules.Stocks
                     return;
                 }
                 var cost = amount * price.Value;
+                
+                var user = await _mongo.Context.GetUserAsync(Context.User.Id).ConfigureAwait(false);
                 if (position == Position.LONG)
                 {
-                    var status = await Service.LongPositionAsync(Context.User.Id, symbol, "buy", price.Value, amount).ConfigureAwait(false);
+                    var status = await Service.LongPositionAsync(user, symbol, "buy", price.Value, amount).ConfigureAwait(false);
                     if (status == TradingService.Status.NotEnoughInvesting)
                     {
                         await Context.Channel.SendErrorAsync("You do not have enough in your Investing Account to invest").ConfigureAwait(false);
@@ -116,7 +128,7 @@ namespace Roki.Modules.Stocks
                 }
                 else
                 {
-                    var status = await Service.ShortPositionAsync(Context.User.Id, symbol, "buy", price.Value, amount).ConfigureAwait(false);
+                    var status = await Service.ShortPositionAsync(user, symbol, "buy", price.Value, amount).ConfigureAwait(false);
                     if (status == TradingService.Status.TooMuchLeverage)
                     {
                         await Context.Channel.SendErrorAsync($"You have leveraged over `{100000:N2}` {Roki.Properties.CurrencyIcon}.\n" +

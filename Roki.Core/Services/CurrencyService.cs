@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Roki.Services.Database.Core;
+using Roki.Services.Database.Maps;
 using StackExchange.Redis;
 
 namespace Roki.Services
@@ -15,12 +15,13 @@ namespace Roki.Services
     
     public class CurrencyService : ICurrencyService
     {
-        private readonly DbService _db;
-        private static readonly IDatabase Cache = RedisCache.Instance.Cache;
+        private readonly IMongoService _mongo;
+        private readonly IDatabase _cache;
 
-        public CurrencyService(DbService db)
+        public CurrencyService(IMongoService mongo, IRedisCache cache)
         {
-            _db = db;
+            _mongo = mongo;
+            _cache = cache.Redis.GetDatabase();
         }
 
         public async Task<bool> RemoveAsync(ulong userId, string reason, long amount, ulong guildId, ulong channelId, ulong messageId)
@@ -45,34 +46,30 @@ namespace Roki.Services
         {
             return await InternalTransferAsync(userIdFrom, userIdTo, reason, amount, guildId, channelId, messageId);
         }
-        
-        private static CurrencyTransaction CreateTransaction(string reason, long amount, ulong from, ulong to, ulong guildId, ulong channelId, ulong messageId) =>
-            new CurrencyTransaction
-            {
-                Amount = amount,
-                Reason = reason ?? "-",
-                To = to,
-                From = from,
-                GuildId = guildId,
-                ChannelId = channelId,
-                MessageId = messageId
-            };
 
         private async Task<bool> InternalTransferAsync(ulong userIdFrom, ulong userIdTo, string reason, long amount, ulong guildId, ulong channelId, 
             ulong messageId)
         {
-            using var uow = _db.GetDbContext();
-            var success = await uow.Users.UpdateCurrencyAsync(userIdFrom, -amount).ConfigureAwait(false);
+            var success = await _mongo.Context.UpdateUserCurrencyAsync(userIdFrom, -amount).ConfigureAwait(false);
             if (success)
             {
                 await CacheChangeAsync(userIdFrom, guildId, -amount).ConfigureAwait(false);
                 await CacheChangeAsync(userIdTo, guildId, amount).ConfigureAwait(false);
-                await uow.Users.UpdateCurrencyAsync(userIdTo, amount).ConfigureAwait(false);
-                var _ = CreateTransaction(reason, amount, userIdFrom, userIdTo, guildId, channelId, messageId);
-                uow.Transaction.Add(_);
+                await _mongo.Context.UpdateUserCurrencyAsync(userIdTo, amount).ConfigureAwait(false);
+                
+                
+                await _mongo.Context.AddTransaction(new Transaction
+                {
+                    Amount = amount,
+                    Reason = reason ?? "-",
+                    To = userIdTo,
+                    From = userIdFrom,
+                    GuildId = guildId,
+                    ChannelId = channelId,
+                    MessageId = messageId
+                });
             }
 
-            await uow.SaveChangesAsync().ConfigureAwait(false);
             return success;
         }
 
@@ -80,25 +77,31 @@ namespace Roki.Services
         {
             var _ = Task.Run(async () =>
             {
-                using var uow = _db.GetDbContext();
                 if (from == Roki.Properties.BotId)
                 {
-                    await uow.Users.UpdateBotCurrencyAsync(from, -amount);
-                    await uow.Users.UpdateCurrencyAsync(to, amount).ConfigureAwait(false);
+                    await _mongo.Context.UpdateBotCurrencyAsync(-amount).ConfigureAwait(false);
+                    await _mongo.Context.UpdateUserCurrencyAsync(to, amount).ConfigureAwait(false);
                 }
                 else if (to == Roki.Properties.BotId)
                 {
-                    await uow.Users.UpdateBotCurrencyAsync(to, -amount);
-                    await uow.Users.UpdateCurrencyAsync(from, amount).ConfigureAwait(false);
+                    await _mongo.Context.UpdateBotCurrencyAsync(-amount).ConfigureAwait(false);
+                    await _mongo.Context.UpdateUserCurrencyAsync(from, amount).ConfigureAwait(false);
                 }
                 else
                 {
-                    await uow.Users.UpdateCurrencyAsync(from, amount).ConfigureAwait(false);
+                    await _mongo.Context.UpdateUserCurrencyAsync(from, amount).ConfigureAwait(false);
                 }
 
-                var transaction = CreateTransaction(reason, amount, from, to, guildId, channelId, messageId);
-                uow.Transaction.Add(transaction);
-                await uow.SaveChangesAsync().ConfigureAwait(false);
+                await _mongo.Context.AddTransaction(new Transaction
+                {
+                    Amount = amount,
+                    Reason = reason ?? "-",
+                    To = to,
+                    From = from,
+                    GuildId = guildId,
+                    ChannelId = channelId,
+                    MessageId = messageId
+                });
             });
 
             return Task.CompletedTask;
@@ -106,7 +109,7 @@ namespace Roki.Services
 
         public async Task<long> GetCurrency(ulong userId, ulong guildId)
         { 
-            return (long) await Cache.StringGetAsync($"currency:{guildId}:{userId}").ConfigureAwait(false);
+            return (long) await _cache.StringGetAsync($"currency:{guildId}:{userId}").ConfigureAwait(false);
         }
 
         public async Task<bool> CacheChangeAsync(ulong userId, ulong guildId, long amount)
@@ -114,17 +117,17 @@ namespace Roki.Services
             if (amount == 0)
                 return false;
             
-            var currency = await Cache.StringGetAsync($"currency:{guildId}:{userId}").ConfigureAwait(false);
+            var currency = await _cache.StringGetAsync($"currency:{guildId}:{userId}").ConfigureAwait(false);
             var cached = (long) currency;
             if (cached + amount < 0) return false;
             
-            await Cache.StringIncrementAsync($"currency:{guildId}:{userId}", amount, CommandFlags.FireAndForget).ConfigureAwait(false);
+            await _cache.StringIncrementAsync($"currency:{guildId}:{userId}", amount, CommandFlags.FireAndForget).ConfigureAwait(false);
             return true;
         }
 
         private async Task ChangeBotCacheAsync(ulong guildId, long amount)
         {
-            await Cache.StringIncrementAsync($"currency:{guildId}:{Roki.Properties.BotId}", amount, CommandFlags.FireAndForget).ConfigureAwait(false);
+            await _cache.StringIncrementAsync($"currency:{guildId}:{Roki.Properties.BotId}", amount, CommandFlags.FireAndForget).ConfigureAwait(false);
         }
     }
 }
