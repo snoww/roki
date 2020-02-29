@@ -311,7 +311,7 @@ namespace Roki.Modules.Music.Services
                     }
 
                     var track = result.Tracks.First();
-                    args.Player.Queue.Enqueue(track);
+                    await args.Player.PlayAsync(track).ConfigureAwait(false);
                 }
                 else
                 {
