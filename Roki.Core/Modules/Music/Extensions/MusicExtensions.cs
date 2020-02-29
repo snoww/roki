@@ -35,8 +35,8 @@ namespace Roki.Modules.Music.Extensions
             var time = track.Duration.ToString(@"mm\:ss");
             var hrs = track.Duration.TotalHours;
 
-            if (hrs > 0)
-                return hrs + ":" + time;
+            if (hrs >= 1)
+                return (int) hrs + ":" + time;
             return time;
         }
     }
