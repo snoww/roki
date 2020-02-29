@@ -65,14 +65,14 @@ namespace Roki.Modules.Music.Services
                 player.Queue.Enqueue(track);
                 embed.WithAuthor($"Queued: #{player.Queue.Count}", "http://i.imgur.com/nhKS3PT.png")
                     .WithDescription($"{track.PrettyTrack()}")
-                    .WithFooter(track.PrettyFooter(player.Volume));
+                    .WithFooter(track.PrettyFooter(player.Volume) + $" | Autoplay: {(player.Autoplay ? "On" : "Off")}");
                 var msg = await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 msg.DeleteAfter(10);
             }
             else
             {
                 await player.PlayAsync(track).ConfigureAwait(false);
-                embed.WithAuthor($"Playing song", "http://i.imgur.com/nhKS3PT.png")
+                embed.WithAuthor("Playing song", "http://i.imgur.com/nhKS3PT.png")
                     .WithDescription($"{track.PrettyTrack()}")
                     .WithFooter(track.PrettyFooter(player.Volume));
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
@@ -173,7 +173,8 @@ namespace Roki.Modules.Music.Services
             {
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                         .WithAuthor("Player queue", "http://i.imgur.com/nhKS3PT.png")
-                        .WithDescription("`🔊` " + player.Track.PrettyFullTrack() + "\n\nNo tracks in queue."))
+                        .WithDescription("`🔊` " + player.Track.PrettyFullTrack() + "\n\nNo tracks in queue.")
+                        .WithFooter($"Autoplay: {(player.Autoplay ? "On" : "Off")} | .autoplay to toggle autoplay"))
                     .ConfigureAwait(false);
                 return;
             }
@@ -209,7 +210,7 @@ namespace Roki.Modules.Music.Services
                 var embed = new EmbedBuilder().WithDynamicColor(ctx)
                     .WithAuthor($"Player queue - Page {curPage + 1}/{Math.Ceiling((double) queue.Length / itemsPerPage)}", "http://i.imgur.com/nhKS3PT.png")
                     .WithDescription(desc)
-                    .WithFooter($"🔉 {player.Volume}% | {queue.Length} tracks | {totalStr}");
+                    .WithFooter($"🔉 {player.Volume}% | {queue.Length} tracks | {totalStr} | Autoplay: {(player.Autoplay ? "On" : "Off")}");
                 return embed;
             }
 
