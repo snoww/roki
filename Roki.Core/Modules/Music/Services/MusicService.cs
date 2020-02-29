@@ -86,12 +86,12 @@ namespace Roki.Modules.Music.Services
             if (player.Autoplay)
             {
                 player.Autoplay = false;
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDescription("Autoplay disabled")).ConfigureAwait(false);
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithDescription("Autoplay disabled")).ConfigureAwait(false);
             }
             else
             {
                 player.Autoplay = true;
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDescription("Autoplay enabled")).ConfigureAwait(false);
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithDescription("Autoplay enabled")).ConfigureAwait(false);
             }
         }
         
