@@ -82,7 +82,12 @@ namespace Roki.Modules.Music.Services
 
         public async Task AutoplayAsync(ICommandContext ctx)
         {
-            var player = _lavaNode.GetPlayer(ctx.Guild);
+            if (!IsPlayerActive(ctx.Guild, out var player))
+            {
+                await ctx.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
+                return;
+            }
+            
             if (player.Autoplay)
             {
                 player.Autoplay = false;
@@ -97,9 +102,11 @@ namespace Roki.Modules.Music.Services
         
         public async Task PauseAsync(ICommandContext ctx)
         {
-            if (!await IsPlayerActive(ctx))
+            if (!IsPlayerActive(ctx.Guild, out var player))
+            {
+                await ctx.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
                 return;
-            var player = _lavaNode.GetPlayer(ctx.Guild);
+            }
             
             if (player.PlayerState != PlayerState.Playing)
                 return;
@@ -113,9 +120,11 @@ namespace Roki.Modules.Music.Services
 
         public async Task ResumeAsync(ICommandContext ctx)
         {
-            if (!await IsPlayerActive(ctx))
+            if (!IsPlayerActive(ctx.Guild, out var player))
+            {
+                await ctx.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
                 return;
-            var player = _lavaNode.GetPlayer(ctx.Guild);
+            }
             
             if (player.PlayerState != PlayerState.Paused)
                 return;
@@ -129,9 +138,11 @@ namespace Roki.Modules.Music.Services
 
         public async Task SkipAsync(ICommandContext ctx)
         {
-            if (!await IsPlayerActive(ctx))
+            if (!IsPlayerActive(ctx.Guild, out var player))
+            {
+                await ctx.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
                 return;
-            var player = _lavaNode.GetPlayer(ctx.Guild);
+            }
             
             try
             {
@@ -150,11 +161,22 @@ namespace Roki.Modules.Music.Services
 
         public async Task ListQueueAsync(ICommandContext ctx, int page = 0)
         {
-            if (!await IsPlayerActive(ctx))
+            if (!IsPlayerActive(ctx.Guild, out var player))
+            {
+                await ctx.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
                 return;
-            var player = _lavaNode.GetPlayer(ctx.Guild);
+            }
 
             var queue = player.Queue.Items.Cast<LavaTrack>().ToArray();
+            if (queue.Length == 0)
+            {
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
+                        .WithAuthor("Player queue", "http://i.imgur.com/nhKS3PT.png")
+                        .WithDescription(player.Track.PrettyFullTrack() + "\nNo tracks in queue."))
+                    .ConfigureAwait(false);
+                return;
+            }
+            
             if (--page < -1)
                 return;
             const int itemsPerPage = 10;
@@ -176,9 +198,9 @@ namespace Roki.Modules.Music.Services
 
                 desc = $"`🔊` {player.Track.PrettyFullTrack()}\n\n" + desc;
 
-                var pStatus = "";
+                string pStatus = null;
                 if (player.PlayerState == PlayerState.Paused)
-                    pStatus += Format.Bold($"Player is paused. Use {Format.Code(".play")}` command to start playing.");
+                    pStatus = Format.Bold($"Player is paused. Use {Format.Code(".play")}` command to start playing.");
 
                 if (!string.IsNullOrWhiteSpace(pStatus))
                     desc = pStatus + "\n" + desc;
@@ -195,9 +217,12 @@ namespace Roki.Modules.Music.Services
 
         public async Task RemoveSongAsync(ICommandContext ctx, int index)
         {
-            if (!await IsPlayerActive(ctx))
+            if (!IsPlayerActive(ctx.Guild, out var player))
+            {
+                await ctx.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
                 return;
-            var player = _lavaNode.GetPlayer(ctx.Guild);
+            }
+            
             index -= 1;
             if (index < 0 || index > player.Queue.Count)
             {
@@ -217,9 +242,11 @@ namespace Roki.Modules.Music.Services
 
         public async Task SetVolumeAsync(ICommandContext ctx, ushort volume)
         {
-            if (!await IsPlayerActive(ctx))
+            if (!IsPlayerActive(ctx.Guild, out var player))
+            {
+                await ctx.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
                 return;
-            var player = _lavaNode.GetPlayer(ctx.Guild);
+            }
 
             await player.UpdateVolumeAsync(volume).ConfigureAwait(false);
             var embed = new EmbedBuilder().WithDynamicColor(ctx)
@@ -227,11 +254,23 @@ namespace Roki.Modules.Music.Services
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
+        public int GetPlayerVolume(IGuild guild)
+        {
+            if (!IsPlayerActive(guild, out var player))
+            {
+                return -1;
+            }
+
+            return player.Volume;
+        }
+
         public async Task SeekAsync(ICommandContext ctx, int seconds)
         {
-            if (!await IsPlayerActive(ctx))
+            if (!IsPlayerActive(ctx.Guild, out var player))
+            {
+                await ctx.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
                 return;
-            var player = _lavaNode.GetPlayer(ctx.Guild);
+            }
 
             var currTime = player.Track.Position;
             var addedTime = currTime.Add(new TimeSpan(0, 0, seconds));
@@ -287,12 +326,10 @@ namespace Roki.Modules.Music.Services
             await args.Player.PlayAsync(args.Player.Track).ConfigureAwait(false);
         }
 
-        private async Task<bool> IsPlayerActive(ICommandContext ctx)
+        private bool IsPlayerActive(IGuild guild, out LavaPlayer player)
         {
-            var player = _lavaNode.GetPlayer(ctx.Guild);
-            if (player != null) return true;
-            await ctx.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
-            return false;
+            player = _lavaNode.GetPlayer(guild);
+            return player != null;
         }
 
         private async Task<string> GetNextSong(LavaTrack track)
