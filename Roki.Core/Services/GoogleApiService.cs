@@ -85,17 +85,16 @@ namespace Roki.Services
         public async Task<string> GetRelatedVideo(string videoId)
         {
             var query = _yt.Search.List("snippet");
-            query.MaxResults = 1;
+            query.MaxResults = 2;
             query.RelatedToVideoId = videoId;
             query.Type = "video";
-            var result = await query.ExecuteAsync().ConfigureAwait(false);
-            return result.Items.FirstOrDefault()?.Id.VideoId;
+            return (await query.ExecuteAsync().ConfigureAwait(false)).Items.FirstOrDefault()?.Id.VideoId;
         }
 
         public async Task<string> GetRelatedVideoByQuery(string keywords)
         {
             var query = _yt.Search.List("snippet");
-            query.MaxResults = 1;
+            query.MaxResults = 2;
             query.Q = keywords;
             query.Type = "video";
             return await GetRelatedVideo((await query.ExecuteAsync().ConfigureAwait(false)).Items.FirstOrDefault()?.Id.VideoId).ConfigureAwait(false);
