@@ -173,7 +173,7 @@ namespace Roki.Modules.Music.Services
             {
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                         .WithAuthor("Player queue", "http://i.imgur.com/nhKS3PT.png")
-                        .WithDescription(player.Track.PrettyFullTrack() + "\nNo tracks in queue."))
+                        .WithDescription("`🔊` " + player.Track.PrettyFullTrack() + "\n\nNo tracks in queue."))
                     .ConfigureAwait(false);
                 return;
             }
@@ -311,13 +311,16 @@ namespace Roki.Modules.Music.Services
                     }
 
                     var track = result.Tracks.First();
+                    await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithDynamicColor(args.Player.TextChannel.GuildId)
+                        .WithAuthor("Playing song", "http://i.imgur.com/nhKS3PT.png")
+                        .WithDescription($"{track.PrettyTrack()}")
+                        .WithFooter(track.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
                     await args.Player.PlayAsync(track).ConfigureAwait(false);
-                }
-                else
-                {
-                    await args.Player.TextChannel.SendErrorAsync("Finished player queue").ConfigureAwait(false);
                     return;
                 }
+
+                await args.Player.TextChannel.SendErrorAsync("Finished player queue").ConfigureAwait(false);
+                return;
             }
 
             await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithDynamicColor(args.Player.TextChannel.GuildId)
