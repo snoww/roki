@@ -104,13 +104,26 @@ namespace Roki.Modules.Music
         
         [RokiCommand, Description, Usage, Aliases]
         [RequireContext(ContextType.Guild)]
-        public async Task Volume(int volume)
+        public async Task Volume(int volume = 0)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
+            if (volume == 0)
+            {
+                var curVol = Service.GetPlayerVolume(Context.Guild);
+                if (curVol == -1)
+                {
+                    await Context.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
+                    return;
+                }
+                
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context).WithDescription($"Current volume is {curVol}%"));
+                return;
+            }
+            
             if (volume < 0 || volume > 100)
             {
-                await Context.Channel.SendErrorAsync("Volume must be from 0-100.").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync("Volume must be from 1-100.").ConfigureAwait(false);
                 return;
             }
             
