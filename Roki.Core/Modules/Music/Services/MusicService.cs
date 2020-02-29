@@ -47,6 +47,7 @@ namespace Roki.Modules.Music.Services
         public async Task QueueAsync(ICommandContext ctx, string query)
         {
             var player = _lavaNode.GetPlayer(ctx.Guild);
+            await player.UpdateVolumeAsync(50).ConfigureAwait(false); // since volume default value is not set, it shows 0, manually setting volume here to update the property
             var result = await _lavaNode.SearchYouTubeAsync(query).ConfigureAwait(false);
 
             if (result.LoadStatus == LoadStatus.NoMatches || result.LoadStatus == LoadStatus.LoadFailed)
