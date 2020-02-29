@@ -88,7 +88,8 @@ namespace Roki.Services
             query.MaxResults = 1;
             query.RelatedToVideoId = videoId;
             query.Type = "video";
-            return (await query.ExecuteAsync().ConfigureAwait(false)).Items.FirstOrDefault()?.Id.VideoId;
+            var result = await query.ExecuteAsync().ConfigureAwait(false);
+            return result.Items.FirstOrDefault()?.Id.VideoId;
         }
 
         public async Task<string> GetRelatedVideoByQuery(string keywords)
