@@ -71,11 +71,11 @@ namespace Roki.Modules.Rsvp.Services
                         .WithAuthor(old.Author?.Name, old.Author?.IconUrl)
                         .WithTitle(e.Name)
                         .AddField("Description", e.Description)
-                        .AddField("Event Date", $"```{e.StartDate:f} UTC```\nSee footer for local time.")
+                        .AddField("Event Date", $"```{e.StartDate:f} UTC```See footer for local time.")
                         .AddField(part.Name, part.Value)
                         .AddField(und.Name, und.Value)
                         .WithTimestamp(e.StartDate)
-                        .WithDescription($"Starts in `{(e.StartDate - now).ToReadableString()}`")
+                        .WithDescription($"Starts in```{(e.StartDate - now).ToReadableString()}```")
                         .WithFooter("Event starts");
                     if (!_activeReminders.ContainsKey(e.Id) && e.StartDate.AddMinutes(-45) <= now)
                     {
@@ -107,7 +107,7 @@ namespace Roki.Modules.Rsvp.Services
             var toDelete = new List<IUserMessage> {ctx.Message};
             var q1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                 .WithTitle("RSVP Event Setup - Step 1")
-                .WithDescription("Which **channel** should the event be in?\n`this`, `current` or `here` for current channel, `default` for default channel\n(default is <#217668245644247041>)")
+                .WithDescription("Which **channel** should the event be in?\n`this`, `current` or `here` for current channel, `default` for default channel\n(default is <#217668245644247041>)") // temp default need to change later
                 .WithFooter("Type stop to cancel event setup")
             ).ConfigureAwait(false);
             toDelete.Add(q1);
@@ -347,9 +347,9 @@ namespace Roki.Modules.Rsvp.Services
             var eventEmbed = new EmbedBuilder().WithDynamicColor(ctx)
                 .WithTitle($"`#{ev.Id.GetId()}` {eventTitle}")
                 .WithAuthor(ctx.User.Username, ctx.User.GetAvatarUrl())
-                .WithDescription($"Starts in `{startsIn.ToReadableString()}`")
+                .WithDescription($"Starts in```{startsIn.ToReadableString()}```")
                 .AddField("Description", eventDesc)
-                .AddField("Event Date", $"```{eventDate.Value.ToUniversalTime():f} UTC```\nSee footer for local time.")
+                .AddField("Event Date", $"```{eventDate.Value.ToUniversalTime():f} UTC```See footer for local time.")
                 .AddField("Participants (0)", "```None```")
                 .AddField("Undecided", "```None```")
                 .WithFooter("Event starts")
@@ -763,9 +763,9 @@ namespace Roki.Modules.Rsvp.Services
                 .WithAuthor(old.Author?.Name, old.Author?.IconUrl)
                 .WithTitle(ev.Name)
                 .AddField("Description", ev.Description)
-                .AddField("Event Date", $"```{ev.StartDate:f} UTC```\nSee footer for local time.")
+                .AddField("Event Date", $"```{ev.StartDate:f} UTC```See footer for local time.")
                 .WithTimestamp(ev.StartDate)
-                .WithDescription($"Starts in `{(ev.StartDate - DateTime.UtcNow).ToReadableString()}`")
+                .WithDescription($"Starts in```{(ev.StartDate - DateTime.UtcNow).ToReadableString()}```")
                 .WithFooter("Event starts");
 
             var user = r.User.Value;
