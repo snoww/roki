@@ -38,7 +38,8 @@ namespace Roki.Modules.Music.Services
                 return;
             }
             
-            await _lavaNode.JoinAsync(voiceChannel, textChannel).ConfigureAwait(false);
+            var player = await _lavaNode.JoinAsync(voiceChannel, textChannel).ConfigureAwait(false);
+            await player.UpdateVolumeAsync(50).ConfigureAwait(false); // since volume default value is not set, it shows 0, manually setting volume here to update the property
         }
         
         public async Task LeaveAsync(SocketVoiceChannel voiceChannel)
@@ -47,7 +48,15 @@ namespace Roki.Modules.Music.Services
         public async Task QueueAsync(ICommandContext ctx, string query)
         {
             var player = _lavaNode.GetPlayer(ctx.Guild);
-            await player.UpdateVolumeAsync(50).ConfigureAwait(false); // since volume default value is not set, it shows 0, manually setting volume here to update the property
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                await player.TextChannel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
+                    .WithAuthor("Playing song", "http://i.imgur.com/nhKS3PT.png")
+                    .WithDescription($"{player.Track.PrettyFullTrackWithCurrentPos()}")
+                    .WithFooter(player.Track.PrettyFooter(player.Volume))).ConfigureAwait(false);
+                return;
+            }
+            
             var result = await _lavaNode.SearchYouTubeAsync(query).ConfigureAwait(false);
 
             if (result.LoadStatus == LoadStatus.NoMatches || result.LoadStatus == LoadStatus.LoadFailed)
@@ -65,7 +74,7 @@ namespace Roki.Modules.Music.Services
                 player.Queue.Enqueue(track);
                 embed.WithAuthor($"Queued: #{player.Queue.Count}", "http://i.imgur.com/nhKS3PT.png")
                     .WithDescription($"{track.PrettyTrack()}")
-                    .WithFooter(track.PrettyFooter(player.Volume) + $" | Autoplay: {(player.Autoplay ? "On" : "Off")}");
+                    .WithFooter(track.PrettyFooter(player.Volume) + $" | Autoplay: {(player.Autoplay ? "ON" : "OFF")}");
                 var msg = await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 msg.DeleteAfter(10);
             }
@@ -148,15 +157,18 @@ namespace Roki.Modules.Music.Services
             try
             {
                 await player.SkipAsync().ConfigureAwait(false);
-                var embed = new EmbedBuilder().WithDynamicColor(ctx)
-                    .WithAuthor("Skipped song")
-                    .WithDescription(player.Track.PrettyFullTrack());
-
-                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
+                        .WithAuthor("Skipped song")
+                        .WithDescription("`🔊` Now playing:\n" + player.Track.PrettyFullTrack()))
+                    .ConfigureAwait(false);
             }
             catch
             {
-                await ctx.Channel.SendErrorAsync("There are no more tracks in the queue.");
+                await player.StopAsync().ConfigureAwait(false);
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
+                        .WithAuthor("Skipped song")
+                        .WithDescription("No more songs in queue."))
+                    .ConfigureAwait(false);
             }
         }
 
@@ -174,7 +186,7 @@ namespace Roki.Modules.Music.Services
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                         .WithAuthor("Player queue", "http://i.imgur.com/nhKS3PT.png")
                         .WithDescription("`🔊` " + player.Track.PrettyFullTrackWithCurrentPos() + "\n\nNo tracks in queue.")
-                        .WithFooter($"Autoplay: {(player.Autoplay ? "On" : "Off")} | .autoplay to toggle autoplay"))
+                        .WithFooter($"Autoplay: {(player.Autoplay ? "ON" : "OFF")} | .autoplay to toggle autoplay"))
                     .ConfigureAwait(false);
                 return;
             }
