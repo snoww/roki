@@ -13,13 +13,11 @@ namespace Roki.Modules.Music
     {
         [RokiCommand, Description, Usage, Aliases]
         [RequireContext(ContextType.Guild)]
-        public async Task Queue([Leftover] string query)
+        public async Task Queue([Leftover] string query = null)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
             var user = Context.User as SocketGuildUser;
-            if (string.IsNullOrWhiteSpace(query))
-                return;
             
             await Service.ConnectAsync(user?.VoiceChannel, Context.Channel as ITextChannel).ConfigureAwait(false);
             await Service.QueueAsync(Context, query).ConfigureAwait(false);
