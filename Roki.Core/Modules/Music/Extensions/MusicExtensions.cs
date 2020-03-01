@@ -18,26 +18,32 @@ namespace Roki.Modules.Music.Extensions
             return $"**[{track.Title.TrimTo(65)}]({track.Url})**";
         }
 
+        public static string PrettyFullTrackWithCurrentPos(this LavaTrack track)
+        {
+            return track.Queued != null ? $"{track.PrettyTrack()}\n\t\t`{track.Position.PrettyLength()}/{track.Duration.PrettyLength()}` | `{track.Queued}`"
+                : $"{track.PrettyTrack()}\n\t\t`{track.Position.PrettyLength()}/{track.Duration.PrettyLength()}` | `Autoplay`";
+        }
+
         public static string PrettyFullTrack(this LavaTrack track)
         {
-            return track.Queued != null ? $"{track.PrettyTrack()}\n\t\t`{track.PrettyLength()}` | `{track.Queued}`"
-                : $"{track.PrettyTrack()}\n\t\t`{track.PrettyLength()}` | `Autoplay`";
+            return track.Queued != null ? $"{track.PrettyTrack()}\n\t\t`{track.Duration.PrettyLength()}` | `{track.Queued}`"
+                : $"{track.PrettyTrack()}\n\t\t`{track.Duration.PrettyLength()}` | `Autoplay`";
         }
 
         public static string PrettyFooter(this LavaTrack track, int volume)
         {
-            return track.Queued != null ? $"🔉 {volume}% | {track.PrettyLength()} | {track.Queued}"
-                : $"🔉 {volume}% | {track.PrettyLength()} | Autoplay";
+            return track.Queued != null ? $"🔉 {volume}% | {track.Duration.PrettyLength()} | {track.Queued}"
+                : $"🔉 {volume}% | {track.Duration.PrettyLength()} | Autoplay";
         }
 
-        public static string PrettyLength(this LavaTrack track)
+        private static string PrettyLength(this TimeSpan timeSpan)
         {
-            var time = track.Duration.ToString(@"mm\:ss");
-            var hrs = track.Duration.TotalHours;
+            var time = timeSpan.ToString(@"mm\:ss");
+            var hrs = timeSpan.TotalHours;
 
-            if (hrs >= 1)
-                return (int) hrs + ":" + time;
-            return time;
+            return hrs >= 1 
+                ? (int) hrs + ":" + time 
+                : time;
         }
     }
 }

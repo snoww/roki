@@ -173,7 +173,7 @@ namespace Roki.Modules.Music.Services
             {
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                         .WithAuthor("Player queue", "http://i.imgur.com/nhKS3PT.png")
-                        .WithDescription("`🔊` " + player.Track.PrettyFullTrack() + "\n\nNo tracks in queue.")
+                        .WithDescription("`🔊` " + player.Track.PrettyFullTrackWithCurrentPos() + "\n\nNo tracks in queue.")
                         .WithFooter($"Autoplay: {(player.Autoplay ? "On" : "Off")} | .autoplay to toggle autoplay"))
                     .ConfigureAwait(false);
                 return;
@@ -198,7 +198,7 @@ namespace Roki.Modules.Music.Services
                     .Take(itemsPerPage)
                     .Select(t => $"`{number++}.` {t.PrettyFullTrack()}"));
 
-                desc = $"`🔊` {player.Track.PrettyFullTrack()}\n\n" + desc;
+                desc = $"`🔊` {player.Track.PrettyFullTrackWithCurrentPos()}\n\n" + desc;
 
                 string pStatus = null;
                 if (player.PlayerState == PlayerState.Paused)
