@@ -298,7 +298,7 @@ namespace Roki.Modules.Music.Services
                 .WithDescription(args.Track.PrettyTrack())
                 .WithFooter(args.Track.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
 
-            if (!args.Player.Queue.TryDequeue(out _))
+            if (!args.Player.Queue.TryDequeue(out var dequeued))
             {
                 if (args.Player.Autoplay)
                 {
@@ -324,11 +324,12 @@ namespace Roki.Modules.Music.Services
                 return;
             }
 
+            var dq = (LavaTrack) dequeued;
             await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithDynamicColor(args.Player.TextChannel.GuildId)
-                .WithAuthor($"Playing song", "http://i.imgur.com/nhKS3PT.png")
-                .WithDescription($"{args.Track.PrettyTrack()}")
-                .WithFooter(args.Track.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
-            await args.Player.PlayAsync(args.Player.Track).ConfigureAwait(false);
+                .WithAuthor("Playing song", "http://i.imgur.com/nhKS3PT.png")
+                .WithDescription($"{dq.PrettyTrack()}")
+                .WithFooter(dq.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
+            await args.Player.PlayAsync(dq).ConfigureAwait(false);
         }
 
         private bool IsPlayerActive(IGuild guild, out LavaPlayer player)
