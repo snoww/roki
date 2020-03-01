@@ -26,8 +26,8 @@ namespace Roki.Modules.Music.Extensions
 
         public static string PrettyFooter(this LavaTrack track, int volume)
         {
-            return track.Queued != null ? $"🔉 {volume}% | {track.PrettyLength()} | `{track.Queued}`"
-                : $"🔉 {volume}% | {track.PrettyLength()} | `Autoplay`";
+            return track.Queued != null ? $"🔉 {volume}% | {track.PrettyLength()} | {track.Queued}"
+                : $"🔉 {volume}% | {track.PrettyLength()} | Autoplay";
         }
 
         public static string PrettyLength(this LavaTrack track)
