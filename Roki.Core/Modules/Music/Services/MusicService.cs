@@ -186,10 +186,20 @@ namespace Roki.Modules.Music.Services
             var queue = player.Queue.Items.Cast<LavaTrack>().ToArray();
             if (queue.Length == 0)
             {
+                if (player.PlayerState == PlayerState.Stopped)
+                {
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
+                            .WithAuthor("Player queue", "http://i.imgur.com/nhKS3PT.png")
+                            .WithDescription($"Queue is empty, `{Roki.Properties.Prefix}q <query>` to search and queue a track.")
+                            .WithFooter($"Autoplay: {(player.Autoplay ? "ON" : "OFF")} | {Roki.Properties.Prefix}autoplay to toggle autoplay"))
+                        .ConfigureAwait(false);
+                    return;
+                }
+                
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                         .WithAuthor("Player queue", "http://i.imgur.com/nhKS3PT.png")
                         .WithDescription("`🔊` " + player.Track.PrettyFullTrackWithCurrentPos() + "\n\nNo tracks in queue.")
-                        .WithFooter($"Autoplay: {(player.Autoplay ? "ON" : "OFF")} | .autoplay to toggle autoplay"))
+                        .WithFooter($"Autoplay: {(player.Autoplay ? "ON" : "OFF")} | {Roki.Properties.Prefix}autoplay to toggle autoplay"))
                     .ConfigureAwait(false);
                 return;
             }
