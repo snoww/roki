@@ -69,7 +69,7 @@ namespace Roki.Modules.Rsvp.Services
                     var und = old.Fields.First(f => f.Name.StartsWith("U", StringComparison.Ordinal));
                     var newEmbed = new EmbedBuilder().WithDynamicColor(e.GuildId)
                         .WithAuthor(old.Author?.Name, old.Author?.IconUrl)
-                        .WithTitle(e.Name)
+                        .WithTitle($"`#{e.Id.GetId()}` {e.Name}")
                         .AddField("Description", e.Description)
                         .AddField("Event Date", $"```{e.StartDate:f} UTC```See footer for local time.")
                         .AddField(part.Name, part.Value)
