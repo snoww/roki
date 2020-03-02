@@ -153,13 +153,16 @@ namespace Roki.Modules.Music.Services
                 await ctx.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
                 return;
             }
+
+            var currentTrack = player.Track;
             
             try
             {
                 await player.SkipAsync().ConfigureAwait(false);
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                         .WithAuthor("Skipped song")
-                        .WithDescription("`🔊` Now playing:\n" + player.Track.PrettyFullTrack()))
+                        .WithDescription($"`⏭️` Skipped:\n{currentTrack.PrettyFullTrack()}" +
+                                         $"`🔊` Now playing:\n{player.Track.PrettyFullTrack()}"))
                     .ConfigureAwait(false);
             }
             catch
@@ -167,7 +170,7 @@ namespace Roki.Modules.Music.Services
                 await player.StopAsync().ConfigureAwait(false);
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                         .WithAuthor("Skipped song")
-                        .WithDescription("No more songs in queue."))
+                        .WithDescription($"`⏭️` Skipped:\n{currentTrack.PrettyFullTrack()}"))
                     .ConfigureAwait(false);
             }
         }
@@ -199,7 +202,6 @@ namespace Roki.Modules.Music.Services
                 page = 0;
 
             var total = queue.TotalPlaytime();
-            var totalStr = total.ToString(@"hh\:mm\:ss");
 
             EmbedBuilder QueueEmbed(int curPage)
             {
@@ -222,7 +224,7 @@ namespace Roki.Modules.Music.Services
                 var embed = new EmbedBuilder().WithDynamicColor(ctx)
                     .WithAuthor($"Player queue - Page {curPage + 1}/{Math.Ceiling((double) queue.Length / itemsPerPage)}", "http://i.imgur.com/nhKS3PT.png")
                     .WithDescription(desc)
-                    .WithFooter($"🔉 {player.Volume}% | {queue.Length} tracks | {totalStr} | Autoplay: {(player.Autoplay ? "On" : "Off")}");
+                    .WithFooter($"🔉 {player.Volume}% | {queue.Length} tracks | {total.PrettyLength()} | Autoplay: {(player.Autoplay ? "On" : "Off")}");
                 return embed;
             }
 
@@ -302,13 +304,14 @@ namespace Roki.Modules.Music.Services
 
         private async Task TrackFinished(TrackEndedEventArgs args)
         {
-            if (!args.Reason.ShouldPlayNext())
+            if (args.Reason != TrackEndReason.Finished || args.Reason != TrackEndReason.LoadFailed)
                 return;
-            
-            await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithDynamicColor(args.Player.TextChannel.GuildId)
-                .WithAuthor("Finished song", "http://i.imgur.com/nhKS3PT.png")
-                .WithDescription(args.Track.PrettyTrack())
-                .WithFooter(args.Track.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
+
+            if (args.Reason != TrackEndReason.Stopped)
+                await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithDynamicColor(args.Player.TextChannel.GuildId)
+                    .WithAuthor("Finished song", "http://i.imgur.com/nhKS3PT.png")
+                    .WithDescription(args.Track.PrettyTrack())
+                    .WithFooter(args.Track.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
 
             if (!args.Player.Queue.TryDequeue(out var dequeued))
             {
