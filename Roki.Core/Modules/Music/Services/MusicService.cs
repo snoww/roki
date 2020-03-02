@@ -304,7 +304,7 @@ namespace Roki.Modules.Music.Services
 
         private async Task TrackFinished(TrackEndedEventArgs args)
         {
-            if (args.Reason != TrackEndReason.Finished || args.Reason != TrackEndReason.LoadFailed)
+            if (args.Reason != TrackEndReason.Finished || args.Reason != TrackEndReason.LoadFailed || args.Reason != TrackEndReason.Stopped)
                 return;
 
             if (args.Reason != TrackEndReason.Stopped)
