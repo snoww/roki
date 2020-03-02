@@ -36,7 +36,7 @@ namespace Roki.Modules.Music.Extensions
                 : $"🔉 {volume}% | {track.Duration.PrettyLength()} | Autoplay";
         }
 
-        private static string PrettyLength(this TimeSpan timeSpan)
+        public static string PrettyLength(this TimeSpan timeSpan)
         {
             var time = timeSpan.ToString(@"mm\:ss");
             var hrs = timeSpan.TotalHours;
