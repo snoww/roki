@@ -140,7 +140,7 @@ namespace Roki.Modules.Music.Services
                 return;
 
             await player.ResumeAsync().ConfigureAwait(false);
-            var embed = new EmbedBuilder().WithOkColor()
+            var embed = new EmbedBuilder().WithDynamicColor(ctx)
                 .WithDescription("Playback resumed.");
             
             await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
@@ -188,7 +188,7 @@ namespace Roki.Modules.Music.Services
                 if (player.PlayerState == PlayerState.Stopped)
                 {
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
-                            .WithAuthor("Player queue", "http://i.imgur.com/nhKS3PT.png")
+                            .WithAuthor("Player queue", "https://i.imgur.com/9ue01Qt.png")
                             .WithDescription($"Queue is empty, `{Roki.Properties.Prefix}q <query>` to search and queue a track.")
                             .WithFooter($"Autoplay: {(player.Autoplay ? "ON" : "OFF")} | {Roki.Properties.Prefix}autoplay to toggle autoplay"))
                         .ConfigureAwait(false);
@@ -196,7 +196,7 @@ namespace Roki.Modules.Music.Services
                 }
                 
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
-                        .WithAuthor("Player queue", "http://i.imgur.com/nhKS3PT.png")
+                        .WithAuthor("Player queue", "https://i.imgur.com/9ue01Qt.png")
                         .WithDescription("`🔊` " + player.Track.PrettyFullTrackWithCurrentPos() + "\n\nNo tracks in queue.")
                         .WithFooter($"Autoplay: {(player.Autoplay ? "ON" : "OFF")} | {Roki.Properties.Prefix}autoplay to toggle autoplay"))
                     .ConfigureAwait(false);
@@ -231,7 +231,7 @@ namespace Roki.Modules.Music.Services
                     desc = pStatus + "\n" + desc;
                 
                 var embed = new EmbedBuilder().WithDynamicColor(ctx)
-                    .WithAuthor($"Player queue - Page {curPage + 1}/{Math.Ceiling((double) queue.Length / itemsPerPage)}", "http://i.imgur.com/nhKS3PT.png")
+                    .WithAuthor($"Player queue - Page {curPage + 1}/{Math.Ceiling((double) queue.Length / itemsPerPage)}", "https://i.imgur.com/9ue01Qt.png")
                     .WithDescription(desc)
                     .WithFooter($"🔉 {player.Volume}% | {queue.Length} tracks | {total.PrettyLength()} | Autoplay: {(player.Autoplay ? "On" : "Off")}");
                 return embed;
@@ -318,7 +318,7 @@ namespace Roki.Modules.Music.Services
 
             if (args.Reason != TrackEndReason.Stopped)
                 await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithDynamicColor(args.Player.TextChannel.GuildId)
-                    .WithAuthor("Finished song", "http://i.imgur.com/nhKS3PT.png")
+                    .WithAuthor("Finished song", "https://i.imgur.com/VTRacvz.png")
                     .WithDescription(args.Track.PrettyTrack())
                     .WithFooter(args.Track.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
 
@@ -337,7 +337,7 @@ namespace Roki.Modules.Music.Services
 
                     var track = result.Tracks.First();
                     await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithDynamicColor(args.Player.TextChannel.GuildId)
-                        .WithAuthor("Playing song", "http://i.imgur.com/nhKS3PT.png")
+                        .WithAuthor("Playing song", "https://i.imgur.com/fGNKX6x.png")
                         .WithDescription($"{track.PrettyTrack()}")
                         .WithFooter(track.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
                     await args.Player.PlayAsync(track).ConfigureAwait(false);
@@ -350,7 +350,7 @@ namespace Roki.Modules.Music.Services
 
             var dq = (LavaTrack) dequeued;
             await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithDynamicColor(args.Player.TextChannel.GuildId)
-                .WithAuthor("Playing song", "http://i.imgur.com/nhKS3PT.png")
+                .WithAuthor("Playing song", "https://i.imgur.com/fGNKX6x.png")
                 .WithDescription($"{dq.PrettyTrack()}")
                 .WithFooter(dq.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
             await args.Player.PlayAsync(dq).ConfigureAwait(false);
