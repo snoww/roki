@@ -161,8 +161,8 @@ namespace Roki.Modules.Music.Services
                 await player.SkipAsync().ConfigureAwait(false);
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                         .WithAuthor("Skipped song")
-                        .WithDescription($"`⏭️` Skipped:\n{currentTrack.PrettyFullTrack()}" +
-                                         $"`🔊` Now playing:\n{player.Track.PrettyFullTrack()}"))
+                        .WithDescription($"⏭️ Skipped:\n{currentTrack.PrettyFullTrack()}" +
+                                         $"🔊 Now playing:\n{player.Track.PrettyFullTrack()}"))
                     .ConfigureAwait(false);
             }
             catch
@@ -170,7 +170,7 @@ namespace Roki.Modules.Music.Services
                 await player.StopAsync().ConfigureAwait(false);
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                         .WithAuthor("Skipped song")
-                        .WithDescription($"`⏭️` Skipped:\n{currentTrack.PrettyFullTrack()}"))
+                        .WithDescription($"⏭️ Skipped:\n{currentTrack.PrettyFullTrack()}"))
                     .ConfigureAwait(false);
             }
         }
@@ -314,7 +314,7 @@ namespace Roki.Modules.Music.Services
 
         private async Task TrackFinished(TrackEndedEventArgs args)
         {
-            if (args.Reason != TrackEndReason.Finished || args.Reason != TrackEndReason.LoadFailed || args.Reason != TrackEndReason.Stopped)
+            if (args.Reason != TrackEndReason.Finished && args.Reason != TrackEndReason.LoadFailed && args.Reason != TrackEndReason.Stopped)
                 return;
 
             if (args.Reason != TrackEndReason.Stopped)
