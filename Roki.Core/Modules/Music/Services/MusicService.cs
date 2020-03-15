@@ -160,17 +160,16 @@ namespace Roki.Modules.Music.Services
             {
                 await player.SkipAsync().ConfigureAwait(false);
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
-                        .WithAuthor("Skipped song")
-                        .WithDescription($"⏭️ Skipped:\n{currentTrack.PrettyFullTrack()}" +
-                                         $"🔊 Now playing:\n{player.Track.PrettyFullTrack()}"))
+                        .WithAuthor("Skipped song", "https://i.imgur.com/xSDmw1M.png")
+                        .WithDescription(currentTrack.PrettyFullTrack() + $"\n🔊 Now playing:\n{player.Track.PrettyFullTrack()}"))
                     .ConfigureAwait(false);
             }
             catch
             {
                 await player.StopAsync().ConfigureAwait(false);
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
-                        .WithAuthor("Skipped song")
-                        .WithDescription($"⏭️ Skipped:\n{currentTrack.PrettyFullTrack()}"))
+                        .WithAuthor("Skipped song", "https://i.imgur.com/xSDmw1M.png")
+                        .WithDescription(currentTrack.PrettyFullTrack()))
                     .ConfigureAwait(false);
             }
         }
