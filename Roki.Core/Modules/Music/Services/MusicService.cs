@@ -51,7 +51,7 @@ namespace Roki.Modules.Music.Services
             if (string.IsNullOrWhiteSpace(query))
             {
                 await player.TextChannel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
-                    .WithAuthor("Playing song", "http://i.imgur.com/nhKS3PT.png")
+                    .WithAuthor("Playing song", "https://i.imgur.com/fGNKX6x.png")
                     .WithDescription($"{player.Track.PrettyFullTrackWithCurrentPos()}")
                     .WithFooter(player.Track.PrettyFooter(player.Volume))).ConfigureAwait(false);
                 return;
@@ -72,7 +72,7 @@ namespace Roki.Modules.Music.Services
             if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
             {
                 player.Queue.Enqueue(track);
-                embed.WithAuthor($"Queued: #{player.Queue.Count}", "http://i.imgur.com/nhKS3PT.png")
+                embed.WithAuthor($"Queued: #{player.Queue.Count}", "https://i.imgur.com/VTRacvz.png")
                     .WithDescription($"{track.PrettyTrack()}")
                     .WithFooter(track.PrettyFooter(player.Volume) + $" | Autoplay: {(player.Autoplay ? "ON" : "OFF")}");
                 var msg = await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
@@ -81,7 +81,7 @@ namespace Roki.Modules.Music.Services
             else
             {
                 await player.PlayAsync(track).ConfigureAwait(false);
-                embed.WithAuthor("Playing song", "http://i.imgur.com/nhKS3PT.png")
+                embed.WithAuthor("Playing song", "https://i.imgur.com/fGNKX6x.png")
                     .WithDescription($"{track.PrettyTrack()}")
                     .WithFooter(track.PrettyFooter(player.Volume));
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
@@ -233,7 +233,7 @@ namespace Roki.Modules.Music.Services
                 var embed = new EmbedBuilder().WithDynamicColor(ctx)
                     .WithAuthor($"Player queue - Page {curPage + 1}/{Math.Ceiling((double) queue.Length / itemsPerPage)}", "https://i.imgur.com/9ue01Qt.png")
                     .WithDescription(desc)
-                    .WithFooter($"🔉 {player.Volume}% | {queue.Length} tracks | {total.PrettyLength()} | Autoplay: {(player.Autoplay ? "On" : "Off")}");
+                    .WithFooter($"🔉 {player.Volume}% | {queue.Length} tracks | {total.PrettyLength()} | Autoplay: {(player.Autoplay ? "ON" : "OFF")}");
                 return embed;
             }
 
