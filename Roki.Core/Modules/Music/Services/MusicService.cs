@@ -320,7 +320,8 @@ namespace Roki.Modules.Music.Services
                 await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithDynamicColor(args.Player.TextChannel.GuildId)
                     .WithAuthor("Finished song", "https://i.imgur.com/VTRacvz.png")
                     .WithDescription(args.Track.PrettyTrack())
-                    .WithFooter(args.Track.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
+                    .WithFooter($"🔉 {args.Player.Volume}% | {args.Track.Duration.PrettyLength()}"))
+                    .ConfigureAwait(false);
 
             if (!args.Player.Queue.TryDequeue(out var dequeued))
             {
