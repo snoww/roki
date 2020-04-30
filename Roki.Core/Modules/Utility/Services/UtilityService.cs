@@ -67,7 +67,7 @@ namespace Roki.Modules.Utility.Services
             var random = Rng.Next(3);
             if (random == 0)
             {
-                await _client.SetGameAsync(await GetMCStatus().ConfigureAwait(false), null, ActivityType.CustomStatus).ConfigureAwait(false);
+                await _client.SetGameAsync(await GetMCStatus().ConfigureAwait(false)).ConfigureAwait(false);
             }
             else if (random == 1)
             {
@@ -90,7 +90,7 @@ namespace Roki.Modules.Utility.Services
                 {
                     using var json = JsonDocument.Parse(status);
                     var players = json.RootElement.GetProperty("players");
-                    return $"MC Server: {players.GetProperty("online").GetInt32()}/{players.GetProperty("max").GetInt32()} online";
+                    return $"with {players.GetProperty("online").GetInt32()}/{players.GetProperty("max").GetInt32()} on Minecraft Server";
                 }
                 catch (Exception)
                 {
