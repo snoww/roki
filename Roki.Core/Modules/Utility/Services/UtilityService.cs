@@ -1,11 +1,14 @@
 using System;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using Roki.Modules.Utility.Common;
 using Roki.Services;
 
 namespace Roki.Modules.Utility.Services
@@ -15,10 +18,11 @@ namespace Roki.Modules.Utility.Services
         private readonly DiscordSocketClient _client;
         private readonly IMongoService _mongo;
         private Timer _timer;
+        private Timer _status;
         private static readonly Random Rng = new Random();
         
         // temp hard coding values
-        private const ulong GuildId = 125025699827417095;
+        private const ulong DefaultGuildId = 125025699827417095;
         private static readonly ObjectId RainbowId = ObjectId.Parse("5db3150b03eb7230a1b5bb9d");
         private SocketGuild _guild;
 
@@ -26,13 +30,14 @@ namespace Roki.Modules.Utility.Services
         {
             _client = client;
             _mongo = mongo;
-            _guild = _client.GetGuild(GuildId);
-            ColorChangeTimer();
+            _guild = _client.GetGuild(DefaultGuildId);
+            StartTimers();
         }
 
-        private void ColorChangeTimer()
+        private void StartTimers()
         {
             _timer = new Timer(ChangeRoleColor, null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
+            _status = new Timer(RotateStatus, null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
         }
         
         private async void ChangeRoleColor(object state)
@@ -55,6 +60,45 @@ namespace Roki.Modules.Utility.Services
             {
                 Console.WriteLine(e);
             }
+        }
+
+        private async void RotateStatus(object state)
+        {
+            var random = Rng.Next(3);
+            if (random == 0)
+            {
+                await _client.SetGameAsync(await GetMCStatus().ConfigureAwait(false), null, ActivityType.CustomStatus).ConfigureAwait(false);
+            }
+            else if (random == 1)
+            {
+                await _client.SetGameAsync("with Thermonuclear Warheads");
+            }
+            else if (random == 2)
+            {
+                await _client.SetGameAsync("Ivor's personal project video", null, ActivityType.Watching);
+            }
+            
+        }
+
+        private async Task<string> GetMCStatus()
+        {
+            var server = new MinecraftServer("mc.roki.sh");
+            var status = await server.GetStatus().ConfigureAwait(false);
+            if (status.StartsWith("{", StringComparison.Ordinal))
+            {
+                try
+                {
+                    using var json = JsonDocument.Parse(status);
+                    var players = json.RootElement.GetProperty("players");
+                    return $"MC Server: {players.GetProperty("online").GetInt32()}/{players.GetProperty("max").GetInt32()} online";
+                }
+                catch (Exception)
+                {
+                    return "Server Offline";
+                }
+            }
+
+            return status;
         }
 
         public string Uwulate(string message)
