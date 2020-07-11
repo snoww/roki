@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Text;
@@ -88,7 +89,7 @@ namespace Roki.Modules.Games.Services
                 var description = new StringBuilder();
                 description.AppendLine($"{ctx.User.Mention} vs {opts.ChallengeTo.Mention}");
                     
-                Enum.TryParse(json.RootElement.GetProperty("status").GetString(), out ChessResult result);
+                Enum.TryParse(json.RootElement.GetProperty("status").GetString().ToTitleCase(), out ChessResult result);
 
                 if (result == ChessResult.Draw)
                 {
