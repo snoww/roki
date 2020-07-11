@@ -27,7 +27,7 @@ namespace Roki.Modules.Games.Services
             using var http = _http.CreateClient();
             var opts = new Dictionary<string, string>
             {
-                {"clock.limit", args.Time.ToString()},
+                {"clock.limit", (args.Time * 60).ToString()},
                 {"clock.increment", args.Increment.ToString()}
             };
             
