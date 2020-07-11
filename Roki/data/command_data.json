@@ -765,5 +765,14 @@
     "Usage": [
       "{0}nsfw"
     ]
+  },
+  "chesschallenge": {
+    "Aliases": "chessc cc",
+    "Description": "Challenge a user to a chess game by mentioning them. Options: `-t` time of game in seconds, default is 600 (10min), `-i` increment of game in seconds, default is 0, `-c` choose color (white or black), default is random",
+    "Usage": [
+      "{0}chessc @snow",
+      "{0}cc @snow -t 3 -c white",
+      "{0}cc @snow -c 10"
+    ]
   }
 }
