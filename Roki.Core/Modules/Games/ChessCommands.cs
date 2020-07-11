@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -34,7 +35,12 @@ namespace Roki.Modules.Games
                 var opts = OptionsParser.ParseFrom(new ChessArgs(), args);
                 opts.ChallengeTo = opponent;
 
-                var challengeUrl = await Service.CreateChessChallenge(opts).ConfigureAwait(false);
+                var response = await Service.CreateChessChallenge(opts).ConfigureAwait(false);
+                using var json = JsonDocument.Parse(response);
+                var challenge = json.RootElement.GetProperty("challenge");
+                var challengeUrl = challenge.GetProperty("url").GetString();
+                var speed = $"{challenge.GetProperty("timeControl").GetProperty("show").GetString()} {challenge.GetProperty("speed").GetString().ToTitleCase()}";
+ 
                 if (string.IsNullOrWhiteSpace(challengeUrl))
                 {
                     await Context.Channel.SendErrorAsync("Something went wrong when creating the challenge.\nPlease try again later");
@@ -46,7 +52,7 @@ namespace Roki.Modules.Games
 
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle("Chess Challenge")
-                        .WithAuthor($"{opts.Time}+{opts.Increment}")
+                        .WithAuthor(speed)
                         .WithDescription($"{Context.User.Mention} vs {opponent.Mention}\nCheck DMs for challenge link."))
                     .ConfigureAwait(false);
 
@@ -56,13 +62,13 @@ namespace Roki.Modules.Games
                     {
                         await userDm.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                                 .WithTitle($"Chess Challenge vs {opponent}")
-                                .WithAuthor($"{opts.Time}+{opts.Increment}")
+                                .WithAuthor(speed)
                                 .WithDescription($"[Click here for Challenge Link]({challengeUrl})"))
                             .ConfigureAwait(false);
                     
                         await oppDm.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                                 .WithTitle($"Chess Challenge vs {Context.User}")
-                                .WithAuthor($"{opts.Time}+{opts.Increment}")
+                                .WithAuthor(speed)
                                 .WithDescription($"[Click here for Challenge Link]({challengeUrl})"))
                             .ConfigureAwait(false);
                     }
@@ -70,13 +76,13 @@ namespace Roki.Modules.Games
                     {
                         await userDm.EmbedAsync(new EmbedBuilder().WithColor(opts.Color == ChessColor.White ? new Color(255, 255, 255) : new Color(0, 0, 0))
                                 .WithTitle($"Chess Challenge vs {opponent}")
-                                .WithAuthor($"{opts.Time}+{opts.Increment} as {opts.Color}")
+                                .WithAuthor($"{speed} as {opts.Color}")
                                 .WithDescription($"[Click here for Challenge Link]({challengeUrl}{(opts.Color == ChessColor.White ? "?color=white" : "?color=black")})"))
                             .ConfigureAwait(false);
                     
                         await oppDm.EmbedAsync(new EmbedBuilder().WithColor(opts.Color == ChessColor.Black ? new Color(255, 255, 255) : new Color(0, 0, 0))
                                 .WithTitle($"Chess Challenge vs {Context.User}")
-                                .WithAuthor($"{opts.Time}+{opts.Increment} as {opts.Color}")
+                                .WithAuthor($"{speed} as {opts.Color}")
                                 .WithDescription($"[Click here for Challenge Link]({challengeUrl}{(opts.Color == ChessColor.Black ? "?color=white" : "?color=black")})"))
                             .ConfigureAwait(false);
                     }
@@ -87,7 +93,7 @@ namespace Roki.Modules.Games
                     {
                         await userDm.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                                 .WithTitle("Chess Challenge")
-                                .WithAuthor($"{opts.Time}+{opts.Increment}")
+                                .WithAuthor(speed)
                                 .WithDescription($"{Context.User.Mention} vs {opponent.Mention}\n[Click here for Challenge Link]({challengeUrl})"))
                             .ConfigureAwait(false);
                     }
@@ -95,13 +101,13 @@ namespace Roki.Modules.Games
                     {
                         await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                                 .WithTitle("Chess Challenge")
-                                .WithAuthor($"{opts.Time}+{opts.Increment} as {opts.Color}")
+                                .WithAuthor($"{speed} as {opts.Color}")
                                 .WithDescription($"{Context.User.Mention} vs {opponent.Mention}\n[Click here for Challenge Link]({challengeUrl}{(opts.Color == ChessColor.White ? "?color=white" : "?color=black")})"))
                             .ConfigureAwait(false);
                     }
                 }
 
-                Service.PollGame(Context, opts, challengeUrl);
+                Service.PollGame(Context, opts, challengeUrl, speed);
             }
         }
     }
