@@ -25,7 +25,6 @@ namespace Roki.Modules.Games.Services
         public async Task<string> CreateChessChallenge(ChessArgs args)
         {
             using var http = _http.CreateClient();
-            http.DefaultRequestHeaders.Add("Content-Type", "application/x-www-form-urlencoded");
             var opts = new Dictionary<string, string>
             {
                 {"clock.limit", args.Time.ToString()},
