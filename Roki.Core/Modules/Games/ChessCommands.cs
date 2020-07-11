@@ -68,13 +68,13 @@ namespace Roki.Modules.Games
                     }
                     else
                     {
-                        await userDm.EmbedAsync(new EmbedBuilder().WithColor(opts.Color == ChessColor.White ? new Color(0xFFFFFF) : new Color(0x0))
+                        await userDm.EmbedAsync(new EmbedBuilder().WithColor(opts.Color == ChessColor.White ? new Color(255, 255, 255) : new Color(0, 0, 0))
                                 .WithTitle($"Chess Challenge vs {opponent}")
                                 .WithAuthor($"{opts.Time}+{opts.Increment} as {opts.Color}")
                                 .WithDescription($"[Click here for Challenge Link]({challengeUrl}{(opts.Color == ChessColor.White ? "?color=white" : "?color=black")})"))
                             .ConfigureAwait(false);
                     
-                        await oppDm.EmbedAsync(new EmbedBuilder().WithColor(opts.Color == ChessColor.Black ? new Color(0xFFFFFF) : new Color(0x0))
+                        await oppDm.EmbedAsync(new EmbedBuilder().WithColor(opts.Color == ChessColor.Black ? new Color(255, 255, 255) : new Color(0, 0, 0))
                                 .WithTitle($"Chess Challenge vs {Context.User}")
                                 .WithAuthor($"{opts.Time}+{opts.Increment} as {opts.Color}")
                                 .WithDescription($"[Click here for Challenge Link]({challengeUrl}{(opts.Color == ChessColor.Black ? "?color=white" : "?color=black")})"))
