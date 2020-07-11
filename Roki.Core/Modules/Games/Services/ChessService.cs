@@ -48,7 +48,7 @@ namespace Roki.Modules.Games.Services
                 var gameId = challengeUrl.Substring(challengeUrl.LastIndexOf('/'));
                 using var http = _http.CreateClient();
                 http.DefaultRequestHeaders.Add("Accept", "application/json");
-                var response = await http.GetStringAsync($"https://lichess.org/game/export/{gameId}").ConfigureAwait(false);
+                var response = await http.GetStringAsync($"https://lichess.org/game/export{gameId}").ConfigureAwait(false);
                 using var json = JsonDocument.Parse(response);
 
                 var counter = 0;
@@ -82,6 +82,10 @@ namespace Roki.Modules.Games.Services
                 {
                     description.AppendLine(winner.GetString().Equals("white", StringComparison.Ordinal) ? "White won with Black's Resignation" : "Black won with White's Resignation");
                 }
+                else if (result == ChessResult.Outoftime)
+                {
+                    description.AppendLine(winner.GetString().Equals("white", StringComparison.Ordinal) ? "White won by Timeout" : "Black won by Timeout");
+                }
                 else
                 {
                     description.AppendLine("Game was Aborted");
@@ -100,7 +104,8 @@ namespace Roki.Modules.Games.Services
             Draw,
             Mate,
             Resign,
-            Aborted
+            Outoftime,
+            Aborted,
         }
     }
 }
