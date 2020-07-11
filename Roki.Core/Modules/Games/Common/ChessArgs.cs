@@ -1,4 +1,5 @@
 using CommandLine;
+using Discord;
 using Roki.Common;
 
 namespace Roki.Modules.Games.Common
@@ -14,6 +15,8 @@ namespace Roki.Modules.Games.Common
         [Option('c', "color", Required = false, Default = ChessColor.Random, HelpText = "Choose what color you'd wish to play as, choose from white, black, and random. Default is random.")]
         public ChessColor Color { get; set; }
         
+        public IGuildUser ChallengeTo { get; set; }
+
         public void NormalizeArgs()
         {
             if (Time <= 0 || Time > 10800)
