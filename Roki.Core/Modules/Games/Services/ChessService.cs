@@ -45,12 +45,30 @@ namespace Roki.Modules.Games.Services
         {
             var _ = Task.Run(async () =>
             {
-                // wait 30 sec before checking game
-                await Task.Delay(30000);
                 var gameId = challengeUrl.Substring(challengeUrl.LastIndexOf('/'));
                 using var http = _http.CreateClient();
                 http.DefaultRequestHeaders.Add("Accept", "application/json");
-                var response = await http.GetStringAsync($"https://lichess.org/game/export{gameId}").ConfigureAwait(false);
+                var retry = 0;
+                string response;
+                do
+                {
+                    try
+                    {
+                        response = await http.GetStringAsync($"https://lichess.org/game/export{gameId}").ConfigureAwait(false);
+                        goto found;
+                    }
+                    catch (HttpRequestException)
+                    {
+                        // retry
+                    }
+                    
+                    await Task.Delay(20000);
+                    retry++;
+                } while (retry < 15);
+                
+                return;
+                
+                found:
                 using var json = JsonDocument.Parse(response);
 
                 var counter = 0;
