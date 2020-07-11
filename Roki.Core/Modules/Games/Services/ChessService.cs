@@ -46,7 +46,7 @@ namespace Roki.Modules.Games.Services
             var _ = Task.Run(async () =>
             {
                 // wait 30 sec before checking game
-                await Task.Delay(3000);
+                await Task.Delay(30000);
                 var gameId = challengeUrl.Substring(challengeUrl.LastIndexOf('/'));
                 using var http = _http.CreateClient();
                 http.DefaultRequestHeaders.Add("Accept", "application/json");
