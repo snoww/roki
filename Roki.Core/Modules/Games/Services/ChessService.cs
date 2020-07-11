@@ -37,12 +37,10 @@ namespace Roki.Modules.Games.Services
             {
                 return null;
             }
-            var raw = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            using var json = JsonDocument.Parse(raw);
-            return json.RootElement.GetProperty("challenge").GetProperty("url").GetString();
+            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
 
-        public void PollGame(ICommandContext ctx, ChessArgs opts, string challengeUrl)
+        public void PollGame(ICommandContext ctx, ChessArgs opts, string challengeUrl, string speed)
         {
             var _ = Task.Run(async () =>
             {
@@ -70,6 +68,13 @@ namespace Roki.Modules.Games.Services
                 return;
                 
                 found:
+                
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
+                        .WithTitle($"Chess Challenge {ctx.User} vs {opts.ChallengeTo}")
+                        .WithAuthor(speed)
+                        .WithDescription($"[Click here for to spectate game]({challengeUrl})"))
+                    .ConfigureAwait(false);
+                
                 using var json = JsonDocument.Parse(response);
 
                 var counter = 0;
