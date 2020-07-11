@@ -45,9 +45,9 @@ namespace Roki.Modules.Games
                 var oppDm = await opponent.GetOrCreateDMChannelAsync().ConfigureAwait(false);
 
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                        .WithTitle($"{Context.User} vs {opponent}")
-                        .WithAuthor($"{opts.Time / 60}+{opts.Increment}")
-                        .WithDescription("Check DMs for challenge link."))
+                        .WithTitle("Chess Challenge")
+                        .WithAuthor($"{opts.Time}+{opts.Increment}")
+                        .WithDescription($"{Context.User.Mention} vs {opponent.Mention}\nCheck DMs for challenge link."))
                     .ConfigureAwait(false);
 
                 try
@@ -56,13 +56,13 @@ namespace Roki.Modules.Games
                     {
                         await userDm.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                                 .WithTitle($"Chess Challenge vs {opponent}")
-                                .WithAuthor($"{opts.Time/60}+{opts.Increment}")
+                                .WithAuthor($"{opts.Time}+{opts.Increment}")
                                 .WithDescription($"[Click here for Challenge Link]({challengeUrl})"))
                             .ConfigureAwait(false);
                     
                         await oppDm.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                                 .WithTitle($"Chess Challenge vs {Context.User}")
-                                .WithAuthor($"{opts.Time/60}+{opts.Increment}")
+                                .WithAuthor($"{opts.Time}+{opts.Increment}")
                                 .WithDescription($"[Click here for Challenge Link]({challengeUrl})"))
                             .ConfigureAwait(false);
                     }
@@ -70,13 +70,13 @@ namespace Roki.Modules.Games
                     {
                         await userDm.EmbedAsync(new EmbedBuilder().WithColor(opts.Color == ChessColor.White ? new Color(0xFFFFFF) : new Color(0x0))
                                 .WithTitle($"Chess Challenge vs {opponent}")
-                                .WithAuthor($"{opts.Time/60}+{opts.Increment} as {opts.Color}")
+                                .WithAuthor($"{opts.Time}+{opts.Increment} as {opts.Color}")
                                 .WithDescription($"[Click here for Challenge Link]({challengeUrl}{(opts.Color == ChessColor.White ? "?color=white" : "?color=black")})"))
                             .ConfigureAwait(false);
                     
                         await oppDm.EmbedAsync(new EmbedBuilder().WithColor(opts.Color == ChessColor.Black ? new Color(0xFFFFFF) : new Color(0x0))
                                 .WithTitle($"Chess Challenge vs {Context.User}")
-                                .WithAuthor($"{opts.Time/60}+{opts.Increment} as {opts.Color}")
+                                .WithAuthor($"{opts.Time}+{opts.Increment} as {opts.Color}")
                                 .WithDescription($"[Click here for Challenge Link]({challengeUrl}{(opts.Color == ChessColor.Black ? "?color=white" : "?color=black")})"))
                             .ConfigureAwait(false);
                     }
@@ -87,7 +87,7 @@ namespace Roki.Modules.Games
                     {
                         await userDm.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                                 .WithTitle("Chess Challenge")
-                                .WithAuthor($"{opts.Time/60}+{opts.Increment}")
+                                .WithAuthor($"{opts.Time}+{opts.Increment}")
                                 .WithDescription($"{Context.User.Mention} vs {opponent.Mention}\n[Click here for Challenge Link]({challengeUrl})"))
                             .ConfigureAwait(false);
                     }
@@ -95,7 +95,7 @@ namespace Roki.Modules.Games
                     {
                         await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                                 .WithTitle("Chess Challenge")
-                                .WithAuthor($"{opts.Time/60}+{opts.Increment} as {opts.Color}")
+                                .WithAuthor($"{opts.Time}+{opts.Increment} as {opts.Color}")
                                 .WithDescription($"{Context.User.Mention} vs {opponent.Mention}\n[Click here for Challenge Link]({challengeUrl}{(opts.Color == ChessColor.White ? "?color=white" : "?color=black")})"))
                             .ConfigureAwait(false);
                     }

@@ -52,7 +52,7 @@ namespace Roki.Modules.Games.Services
                 using var json = JsonDocument.Parse(response);
 
                 var counter = 0;
-                var maxCounter = opts.Time * 3;
+                var maxCounter = opts.Time * 60 * 3;
                 while (!json.RootElement.TryGetProperty("winner", out var _))
                 {
                     await Task.Delay(2000);
