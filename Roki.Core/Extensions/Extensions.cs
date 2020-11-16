@@ -19,7 +19,6 @@ using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.Primitives;
 using StackExchange.Redis;
 
 namespace Roki.Extensions
@@ -150,7 +149,7 @@ namespace Roki.Extensions
             }
             else
             {
-                img.SaveAsPng(imageStream, new PngEncoder { CompressionLevel = 9 });
+                img.SaveAsPng(imageStream, new PngEncoder {CompressionLevel = PngCompressionLevel.BestCompression});
             }
             
             imageStream.Position = 0;
@@ -168,10 +167,11 @@ namespace Roki.Extensions
             void DrawFrame(Image<Rgba32>[] imgArray, Image<Rgba32> imgFrame, int frameNumber)
             {
                 var xOffset = 0;
+                var options = new GraphicsOptions();
                 foreach (var t in imgArray)
                 {
                     var frame = t.Frames.CloneFrame(frameNumber % t.Frames.Count);
-                    imgFrame.Mutate(x => x.DrawImage(frame, new Point(xOffset, 0), GraphicsOptions.Default));
+                    imgFrame.Mutate(x => x.DrawImage(frame, new Point(xOffset, 0), options));
                     xOffset += t.Bounds().Width;
                 }
             }

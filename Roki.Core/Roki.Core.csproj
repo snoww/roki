@@ -1,31 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net5.0</TargetFramework>
         <RootNamespace>Roki</RootNamespace>
         <Configurations>Debug;Release;Default</Configurations>
         <LangVersion>8</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="CommandLineParser" Version="2.7.82" />
+      <PackageReference Include="CommandLineParser" Version="2.8.0" />
       <PackageReference Include="Discord.Net" Version="2.2.0" />
-      <PackageReference Include="Google.Apis.Customsearch.v1" Version="1.43.0.1369" />
-      <PackageReference Include="Google.Apis.YouTube.v3" Version="1.43.0.1834" />
-      <PackageReference Include="linqtotwitter" Version="5.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="3.1.0" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.0" />
-      <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.0" />
-      <PackageReference Include="MongoDB.Driver" Version="2.10.1" />
-      <PackageReference Include="NLog" Version="4.6.8" />
-      <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta0009" />
-      <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0007" />
-      <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0007" />
+      <PackageReference Include="Google.Apis.Customsearch.v1" Version="1.49.0.2084" />
+      <PackageReference Include="Google.Apis.YouTube.v3" Version="1.49.0.2141" />
+      <PackageReference Include="linqtotwitter" Version="6.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
+      <PackageReference Include="MongoDB.Driver" Version="2.11.4" />
+      <PackageReference Include="NLog" Version="4.7.5" />
+      <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta0013" />
+      <PackageReference Include="SixLabors.ImageSharp" Version="1.0.2" />
+      <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0010" />
       <PackageReference Include="SixLabors.Shapes" Version="1.0.0-beta0009" />
       <PackageReference Include="SixLabors.Shapes.Text" Version="1.0.0-beta0009" />
-      <PackageReference Include="Socks" Version="1.4.1" />
-      <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
+      <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
+      <PackageReference Include="Victoria" Version="5.1.9" />
    </ItemGroup>
 
     <ItemGroup>
@@ -54,12 +54,6 @@
 
     <ItemGroup>
       <DeployManifest Remove="obj\Debug\netcoreapp2.2\Roki.Core.application" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="Victoria, Version=5.1.2.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\Roki\data\dlls\Victoria.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
 </Project>
