@@ -23,6 +23,7 @@ namespace Roki.Services
     {
         private readonly CustomsearchService _cs;
         private readonly YouTubeService _yt;
+        private readonly Random _rand = new Random();
         
         private const string SearchEngineId = "009851753967553605166:ffip6ctnuaq";
 
@@ -71,8 +72,9 @@ namespace Roki.Services
             if (string.IsNullOrWhiteSpace(query))
                 throw new ArgumentNullException(nameof(query));
 
-            var request = _cs.Cse.List(query);
-            var start = random ? new Random().Next(0, 10) : 0;
+            var request = _cs.Cse.List();
+            request.Q = query;
+            var start = random ? _rand.Next(0, 10) : 0;
             request.Cx = SearchEngineId;
             request.Fields = "items(image(contextLink,thumbnailLink),link)";
             request.SearchType = CseResource.ListRequest.SearchTypeEnum.Image;

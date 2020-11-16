@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using LinqToTwitter;
+using LinqToTwitter.Common;
+using LinqToTwitter.OAuth;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Services;
@@ -51,7 +53,7 @@ namespace Roki.Modules.Searches
                         select search)
                     .ToListAsync().ConfigureAwait(false);
 
-                if (tweets == null)
+                if (tweets.Count == 0)
                 {
                     await Context.Channel.SendErrorAsync("No tweets found.");
                     return;

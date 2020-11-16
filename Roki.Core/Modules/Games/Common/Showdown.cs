@@ -17,7 +17,6 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.Primitives;
 using StackExchange.Redis;
 using Image = SixLabors.ImageSharp.Image;
 
@@ -453,6 +452,7 @@ namespace Roki.Modules.Games.Common
 
             // setup canvas
             using var image = new Image<Rgba32>(width, height + height2);
+            var graphicsOptions = new GraphicsOptions();
             
             for (int i = 0; i < frames; i++)
             {
@@ -470,7 +470,7 @@ namespace Roki.Modules.Games.Common
                         y = height / 2 - frame.Height / 2;
                     }
 
-                    emptyFrame.Mutate(x => x.DrawImage(frame, new Point(currentWidth, y), GraphicsOptions.Default));
+                    emptyFrame.Mutate(x => x.DrawImage(frame, new Point(currentWidth, y), graphicsOptions));
                     currentWidth += (int) Math.Round(frame.Width * 0.5);
                 }
 
@@ -486,7 +486,7 @@ namespace Roki.Modules.Games.Common
                         y = height2 / 2 + height - frame.Height / 2;
                     }
 
-                    emptyFrame.Mutate(x => x.DrawImage(frame, new Point(currentWidth, y), GraphicsOptions.Default));
+                    emptyFrame.Mutate(x => x.DrawImage(frame, new Point(currentWidth, y), graphicsOptions));
                     currentWidth += (int) Math.Round(frame.Width * 0.5);
                 }
 
