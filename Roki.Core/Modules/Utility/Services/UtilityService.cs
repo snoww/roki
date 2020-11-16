@@ -89,7 +89,7 @@ namespace Roki.Modules.Utility.Services
 
         private async Task<string> GetMCStatus()
         {
-            var server = new MinecraftServer("mc.roki.sh");
+            var server = new MinecraftServer("localhost");
             var status = await server.GetStatus().ConfigureAwait(false);
             if (status.StartsWith("{", StringComparison.Ordinal))
             {
