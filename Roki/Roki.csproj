@@ -3,11 +3,12 @@
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
-        <Configurations>Debug;Release;Default</Configurations>
+        <Configurations>Debug;Release</Configurations>
         <Authors>Snow</Authors>
         <Product>Roki</Product>
         <AssemblyVersion>0.1.2</AssemblyVersion>
         <LangVersion>8</LangVersion>
+        <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
