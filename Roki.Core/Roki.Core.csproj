@@ -25,7 +25,6 @@
       <PackageReference Include="SixLabors.Shapes" Version="1.0.0-beta0009" />
       <PackageReference Include="SixLabors.Shapes.Text" Version="1.0.0-beta0009" />
       <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
-      <PackageReference Include="Victoria" Version="5.1.9" />
    </ItemGroup>
 
     <ItemGroup>
@@ -54,6 +53,12 @@
 
     <ItemGroup>
       <DeployManifest Remove="obj\Debug\netcoreapp2.2\Roki.Core.application" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Victoria, Version=5.1.10.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\Roki\data\dlls\Victoria.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>
