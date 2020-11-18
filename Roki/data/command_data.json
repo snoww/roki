@@ -162,10 +162,18 @@
   },
   "listquotes": {
     "Aliases": "liqu",
-    "Description": "Lists all quotes on the server ordered alphabetically or by ID. 15 Per page.",
+    "Description": "Lists all quotes on the server ordered alphabetically. 15 Per page.",
     "Usage": [
-      "{0}liqu 3",
-      "{0}liqu 3 id"
+      "{0}liqu",
+      "{0}liqu 3"
+    ]
+  },
+  "listquotesid": {
+    "Aliases": "liquid",
+    "Description": "Lists all quotes on the server ordered by creation date. 15 Per page.",
+    "Usage": [
+      "{0}liquid",
+      "{0}liquid 3"
     ]
   },
   "textoimage": {
