@@ -48,10 +48,10 @@ namespace Roki.Services.Database
         Task<bool> UpdateUserPortfolioAsync(User user, string symbol, string position, string action, long shares);
 
         Task<Quote> GetRandomQuoteAsync(ulong guildId, string keyword);
-        Task<Quote> GetRandomQuoteAsync(ulong guildId, short id);
+        Task<Quote> GetQuoteByIdAsync(ulong guildId, string id);
         Task AddQuoteAsync(Quote quote);
-        Task<DeleteResult> DeleteQuoteAdmin(ulong guildId, short id = 0, string keyword = null);
-        Task<DeleteResult> DeleteQuoteAsync(ulong guildId, ulong userId, short id);
+        Task<DeleteResult> DeleteQuoteAdmin(ulong guildId, string id = null, string keyword = null);
+        Task<DeleteResult> DeleteQuoteByIdAsync(ulong guildId, ulong userId, string id);
         Task<DeleteResult> DeleteQuoteAsync(ulong guildId, ulong userId, string keyword);
         Task<List<Quote>> ListQuotesAsync(ulong guildId, int page);
         Task<List<Quote>> SearchQuotesByText(ulong guildId, string content);
@@ -67,11 +67,11 @@ namespace Roki.Services.Database
         Task ChangeGuildAvailabilityAsync(SocketGuild guild, bool available);
         Task UpdateGuildAsync(SocketGuild after);
         Task AddXpRewardAsync(ulong guildId, XpReward reward);
-        Task<UpdateResult> RemoveXpRewardAsync(ulong guildId, short id);
+        Task<UpdateResult> RemoveXpRewardAsync(ulong guildId, string id);
         Task AddStoreItemAsync(ulong guildId, Listing item);
         Task<Listing> GetStoreItemByNameAsync(ulong guildId, string name);
-        Task<Listing> GetStoreItemByIdAsync(ulong guildId, ObjectId id);
-        Task<Listing> GetStoreItemByIdAsync(ulong guildId, int id);
+        Task<Listing> GetStoreItemByObjectIdAsync(ulong guildId, ObjectId id);
+        Task<Listing> GetStoreItemByIdAsync(ulong guildId, string id);
         Task<List<Listing>> GetStoreCatalogueAsync(ulong guildId);
         Task UpdateStoreItemAsync(ulong guildId, ObjectId id, int amount);
 
@@ -432,9 +432,10 @@ namespace Roki.Services.Database
                 new FindOneAndUpdateOptions<Quote> {ReturnDocument = ReturnDocument.After}).ConfigureAwait(false);
         }
 
-        public async Task<Quote> GetRandomQuoteAsync(ulong guildId, short id)
+        public async Task<Quote> GetQuoteByIdAsync(ulong guildId, string id)
         {
-            var quote = await QuoteCollection.AsQueryable().Where(x => x.GuildId == guildId && x.Id.Increment % 1000 == id).Sample(1).SingleOrDefaultAsync();
+            id = id.ToLowerInvariant();
+            var quote = await QuoteCollection.AsQueryable().Where(x => x.GuildId == guildId && x.Id.ToString().Substring(18) == id).Sample(1).SingleOrDefaultAsync();
             if (quote == null)
                 return null;
             var update = Builders<Quote>.Update.Inc(x => x.UseCount, 1);
@@ -447,21 +448,25 @@ namespace Roki.Services.Database
             await QuoteCollection.InsertOneAsync(quote).ConfigureAwait(false);
         }
 
-        public async Task<DeleteResult> DeleteQuoteAdmin(ulong guildId, short id = 0, string keyword = null)
+        public async Task<DeleteResult> DeleteQuoteAdmin(ulong guildId, string id = null, string keyword = null)
         {
-            if (string.IsNullOrWhiteSpace(keyword))
+            if (!string.IsNullOrWhiteSpace(id))
+            {
+                id = id.ToLowerInvariant();
+                return await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.Id.ToString().Substring(18) == id).ConfigureAwait(false);
+            }
+            if (!string.IsNullOrWhiteSpace(keyword))
             {
                 return await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.Keyword == keyword).ConfigureAwait(false);
             }
-            else
-            {
-                return await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.Id.Increment % 1000 == id).ConfigureAwait(false);
-            }
+
+            return await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.Id.ToString().Substring(18) == id.ToLowerInvariant() && x.Keyword == keyword).ConfigureAwait(false);
         }
 
-        public async Task<DeleteResult> DeleteQuoteAsync(ulong guildId, ulong userId, short id)
+        public async Task<DeleteResult> DeleteQuoteByIdAsync(ulong guildId, ulong userId, string id)
         {
-            return await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.AuthorId == userId && x.Id.Increment % 1000 == id).ConfigureAwait(false);
+            id = id.ToLowerInvariant();
+            return await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.AuthorId == userId && x.Id.ToString().Substring(18) == id).ConfigureAwait(false);
         }
 
         public async Task<DeleteResult> DeleteQuoteAsync(ulong guildId, ulong userId, string keyword)
@@ -596,9 +601,10 @@ namespace Roki.Services.Database
             await GuildCollection.UpdateOneAsync(x => x.Id == guildId, update).ConfigureAwait(false);
         }
 
-        public async Task<UpdateResult> RemoveXpRewardAsync(ulong guildId, short id)
+        public async Task<UpdateResult> RemoveXpRewardAsync(ulong guildId, string id)
         {
-            var update = Builders<Guild>.Update.PullFilter(x => x.XpRewards, y => y.Id.Increment % 1000 == id);
+            id = id.ToLowerInvariant();
+            var update = Builders<Guild>.Update.PullFilter(x => x.XpRewards, y => y.Id.ToString().Substring(18) == id);
             return await GuildCollection.UpdateOneAsync(x => x.Id == guildId, update).ConfigureAwait(false);
         }
 
@@ -614,16 +620,17 @@ namespace Roki.Services.Database
             return guild.Store.FirstOrDefault(l => l.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
-        public async Task<Listing> GetStoreItemByIdAsync(ulong guildId, ObjectId id)
+        public async Task<Listing> GetStoreItemByObjectIdAsync(ulong guildId, ObjectId id)
         {
             var guild = await GetGuildAsync(guildId).ConfigureAwait(false);
             return guild.Store.FirstOrDefault(l => l.Id == id);
         }
 
-        public async Task<Listing> GetStoreItemByIdAsync(ulong guildId, int id)
+        public async Task<Listing> GetStoreItemByIdAsync(ulong guildId, string id)
         {
+            id = id.ToLowerInvariant();
             var guild = await GetGuildAsync(guildId).ConfigureAwait(false);
-            return guild.Store.FirstOrDefault(l => l.Id.GetId() == id);
+            return guild.Store.FirstOrDefault(l => l.Id.ToString().Substring(18) == id);
         }
 
         public async Task<List<Listing>> GetStoreCatalogueAsync(ulong guildId)

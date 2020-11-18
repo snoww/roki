@@ -28,7 +28,7 @@ namespace Roki.Modules.Moderation.Services
             var inv = (await _mongo.Context.GetUserAsync(userId).ConfigureAwait(false)).Inventory;
             foreach (var item in inv)
             {
-                var listing = await _mongo.Context.GetStoreItemByIdAsync(guildId, item.Id).ConfigureAwait(false);
+                var listing = await _mongo.Context.GetStoreItemByObjectIdAsync(guildId, item.Id).ConfigureAwait(false);
                 if (listing.Id != power) continue;
                 
                 await _mongo.Context.AddOrUpdateUserInventoryAsync(userId, guildId, power, -1).ConfigureAwait(false);

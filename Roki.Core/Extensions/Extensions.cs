@@ -235,9 +235,6 @@ namespace Roki.Extensions
             return JsonSerializer.Deserialize<T>(json, Options);
         }
 
-        public static int GetId(this ObjectId id, int digits = 4)
-        {
-            return id.Increment % (int) Math.Pow(10, digits);
-        }
+        public static string GetHexId(this ObjectId objectId) => objectId.ToString().Substring(18);
     }
 }
