@@ -125,7 +125,10 @@ namespace Roki.Modules.Currency
                     amount = listing.Quantity;
                 else
                 {
-                    amount = int.Parse(quantity);
+                    if (!int.TryParse(quantity, out amount))
+                    {
+                        amount = 1;
+                    }
                     if (amount <= 0)
                     {
                         amount = 1;
