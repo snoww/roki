@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -32,6 +33,27 @@ namespace Roki.Modules.Utility
                     page = 0;
 
                 var quotes = await _mongo.Context.ListQuotesAsync(Context.Guild.Id, page);
+                if (quotes.Count > 0)
+                {
+                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
+                            .WithTitle("Quote List")
+                            .WithDescription(string.Join("\n", quotes.Select(x => $"`{x.Id.GetHexId()}` **{x.Keyword}** by {Context.Guild.GetUserAsync(x.AuthorId).Result}"))))
+                        .ConfigureAwait(false);
+                }
+                else
+                    await Context.Channel.SendErrorAsync("No quotes found on that page.").ConfigureAwait(false);
+            }
+            
+            [RokiCommand, Description, Usage, Aliases]
+            [RequireContext(ContextType.Guild)]
+            public async Task ListQuotesId(int page = 1)
+            {
+                page -= 1;
+                if (page < 0)
+                    page = 0;
+
+                var quotes = (await _mongo.Context.ListQuotesAsync(Context.Guild.Id, page)).OrderBy(x => x.Id).ToList();
+
                 if (quotes.Count > 0)
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
