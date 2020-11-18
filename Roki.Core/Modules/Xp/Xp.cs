@@ -212,7 +212,7 @@ namespace Roki.Modules.Xp
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle("XP Reward Added")
                         .WithDescription("Successfully added a new XP reward.\n" +
-                                         $"Reward ID: `{curReward.Id.GetId()}`\n" +
+                                         $"Reward ID: `{curReward.Id.GetHexId()}`\n" +
                                          $"XP Level: `{level}`\n" +
                                          "Reward Type: currency\n" +
                                          $"Reward Amount: `{rewardAmount:N0}`"))
@@ -251,7 +251,7 @@ namespace Roki.Modules.Xp
             await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                     .WithTitle("XP Reward Added")
                     .WithDescription("Successfully added a new XP reward.\n" +
-                                     $"Reward ID: `{roleReward.Id.GetId()}`\n" +
+                                     $"Reward ID: `{roleReward.Id.GetHexId()}`\n" +
                                      $"XP Level: `{level}`\n" +
                                      "Reward Type: role\n" +
                                      $"Reward Role: <@&{role.Id}>"))
@@ -265,19 +265,12 @@ namespace Roki.Modules.Xp
         {
             if (string.IsNullOrWhiteSpace(id))
             {
-                await Context.Channel.SendErrorAsync("Please specify the XP reward ID. You can obtain the IDs by using `xpr <page_num> true`.")
+                await Context.Channel.SendErrorAsync($"Please specify the XP reward ID. You can obtain the IDs by using `{Roki.Properties.Prefix}xpr <page_num>`.")
                     .ConfigureAwait(false);
                 return;
             }
 
-            if (!short.TryParse(id, out var oid))
-            {
-                await Context.Channel.SendErrorAsync("Invalid ID specified. You can obtain the IDs by using `xpr <page_num> true`.")
-                    .ConfigureAwait(false);
-                return;
-            }
-
-            var success = await _mongo.Context.RemoveXpRewardAsync(Context.Guild.Id, oid).ConfigureAwait(false);
+            var success = await _mongo.Context.RemoveXpRewardAsync(Context.Guild.Id, id).ConfigureAwait(false);
             if (success.IsAcknowledged && success.ModifiedCount > 1)
             {
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
@@ -287,8 +280,7 @@ namespace Roki.Modules.Xp
             }
             else
             {
-                await Context.Channel.SendErrorAsync($"Something went wrong when trying to remove the reward with ID: `{id}`\n" +
-                                                 $"Please double check the ID and try again.")
+                await Context.Channel.SendErrorAsync($"Something went wrong when trying to remove the reward with ID: `{id}`\nPlease double check the ID and try again.")
                     .ConfigureAwait(false);
             }
         }

@@ -148,7 +148,14 @@
   },
   "quotedelete": {
     "Aliases": "quotedel qdel",
-    "Description": "Deletes a quote with the specified ID or Keyword. If the quote you want to delete's keyword is a number, it will use it as the ID instead. You have to be either server Administrator or the creator of the quote to delete it.",
+    "Description": "Deletes a quote with the specified Keyword. You have to be either server Administrator or the creator of the quote to delete it.",
+    "Usage": [
+      "{0}qdel 123456"
+    ]
+  },
+  "quotedeleteid": {
+    "Aliases": "quotedelid qdelid",
+    "Description": "Deletes a quote with the specified ID. You have to be either server Administrator or the creator of the quote to delete it.",
     "Usage": [
       "{0}qdel 123456"
     ]
@@ -159,13 +166,6 @@
     "Usage": [
       "{0}liqu 3",
       "{0}liqu 3 id"
-    ]
-  },
-  "quotesearch": {
-    "Aliases": "qs",
-    "Description": "Search quotes text that matches the query, and returns results closest matching.",
-    "Usage": [
-      "{0}qs 3"
     ]
   },
   "textoimage": {
@@ -481,7 +481,7 @@
     "Aliases": "",
     "Description": "Buy an item from the store using its name or id, with an optional amount or all (default is 1).",
     "Usage": [
-      "{0}buy 123 1",
+      "{0}buy abcdef 1",
       "{0}buy pizza all"
     ]
   },

@@ -1,5 +1,4 @@
 using System;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,13 +47,13 @@ namespace Roki.Modules.Currency
                             .Select(c =>
                             {
                                 var type = c.Type == "Subscription" ? $"**{c.SubscriptionDays}** Day {c.Type}" : c.Type;
-                                var desc = $"{Format.Bold(c.Name)} | {type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remaining" : "**Sold Out**")} | `{c.Cost:N0}` {Roki.Properties.CurrencyIcon}";
-                                return $"`#{c.Id.GetId()}` {desc}\n\t{c.Description.TrimTo(120)}";
+                                var desc = $"{Format.Bold(c.Name)} | {type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remain" : "**Sold Out**")} | `{c.Cost:N0}` {Roki.Properties.CurrencyIcon}";
+                                return $"`{c.Id.GetHexId()}` {desc}\n\t{c.Description.TrimTo(120)}";
                             }));
                         return new EmbedBuilder().WithDynamicColor(Context)
                             .WithTitle("Stone Shop")
                             .WithDescription(catalogStr)
-                            .WithFooter($"Page {page + 1}/{Math.Ceiling((double) cat.Count / itemsPerPage)} Use .buy to purchase items");
+                            .WithFooter($"Page {page + 1}/{Math.Ceiling((double) cat.Count / itemsPerPage)} Use {Roki.Properties.Prefix}buy <id> <quantity> to purchase items");
                     }
                                                 
                     await Context.SendPaginatedMessageAsync(0, Catalog, cat.Count, 9).ConfigureAwait(false);
@@ -69,7 +68,7 @@ namespace Roki.Modules.Currency
                 }
 
                 var embed = new EmbedBuilder().WithDynamicColor(Context)
-                    .WithTitle($"`{item.Id.GetId()}:` | {item.Name} | `{item.Cost:N0}` {Roki.Properties.CurrencyIcon}")
+                    .WithTitle($"`{item.Id.GetHexId()}` | {item.Name} | `{item.Cost:N0}` {Roki.Properties.CurrencyIcon}")
                     .WithDescription(item.Description)
                     .AddField("Category", $"{item.Category}", true)
                     .AddField("Quantity", $"{(item.Quantity > 0 ? $"**{item.Quantity}** Remaining" : "**Sold Out**")}")
@@ -93,30 +92,17 @@ namespace Roki.Modules.Currency
             {
                 var parsedName = name.Split();
                 var quantity = parsedName[^1];
-                Array.Resize(ref parsedName, parsedName.Length - 1);
+
+                Listing listing;
+                if (parsedName.Length == 2 && parsedName[0].Length == 6)
+                {
+                    listing = await _mongo.Context.GetStoreItemByIdAsync(Context.Guild.Id, parsedName[0]).ConfigureAwait(false);
+                }
+                else
+                {
+                    listing = await _mongo.Context.GetStoreItemByNameAsync(Context.Guild.Id, string.Join(' ', parsedName[..^1])).ConfigureAwait(false);
+                }
                 
-                var listing = await _mongo.Context.GetStoreItemByNameAsync(Context.Guild.Id, name).ConfigureAwait(false);
-                if (listing == null)
-                {
-                    await Context.Channel.SendErrorAsync("Cannot find this item. Make sure the name matches exactly, or use ID").ConfigureAwait(false);
-                    return;
-                }
-
-                if (listing.Quantity <= 0)
-                {
-                    await Context.Channel.SendErrorAsync("Sorry. This item is out of stock, please come back later.").ConfigureAwait(false);
-                    return;
-                }
-
-                await InternalBuy(listing, quantity).ConfigureAwait(false);
-            }
-
-            [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
-            [Priority(1)]
-            public async Task Buy(int id, string quantity = "1")
-            {
-                var listing = await _mongo.Context.GetStoreItemByIdAsync(Context.Guild.Id, id).ConfigureAwait(false);
                 if (listing == null)
                 {
                     await Context.Channel.SendErrorAsync("Cannot find this item. Make sure the name matches exactly, or use ID").ConfigureAwait(false);
@@ -139,7 +125,7 @@ namespace Roki.Modules.Currency
                     amount = listing.Quantity;
                 else
                 {
-                    int.TryParse(quantity, out amount);
+                    amount = int.Parse(quantity);
                     if (amount <= 0)
                     {
                         amount = 1;
@@ -220,7 +206,7 @@ namespace Roki.Modules.Currency
                 var now = DateTime.UtcNow.Date;
                 foreach (var sub in subs)
                 {
-                    var listing = await _mongo.Context.GetStoreItemByIdAsync(guildId, sub.Id);
+                    var listing = await _mongo.Context.GetStoreItemByObjectIdAsync(guildId, sub.Id);
                     desc.AppendLine($"{listing.Name} - Expires in `{(sub.EndDate - now).ToReadableString()}`");
                 }
 
@@ -242,7 +228,7 @@ namespace Roki.Modules.Currency
                     desc = "Your inventory is empty";
                 else
                     desc = string.Join("\n", inv
-                        .Select(i => $"{_mongo.Context.GetStoreItemByIdAsync(guildId, i.Id).Result.Name.ToTitleCase()}: {i.Quantity}"));
+                        .Select(i => $"{_mongo.Context.GetStoreItemByObjectIdAsync(guildId, i.Id).Result.Name.ToTitleCase()}: {i.Quantity}"));
 
                 embed.WithDescription(desc);
 

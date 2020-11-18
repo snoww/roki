@@ -40,7 +40,7 @@ namespace Roki.Modules.Currency.Services
             {
                 foreach (var sub in subs)
                 {
-                    var item = await _mongo.Context.GetStoreItemByIdAsync(sub.GuildId, sub.Id).ConfigureAwait(false);
+                    var item = await _mongo.Context.GetStoreItemByObjectIdAsync(sub.GuildId, sub.Id).ConfigureAwait(false);
                     if (item.Category.Equals("Boost", StringComparison.Ordinal)) 
                         continue;
                     try

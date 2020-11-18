@@ -6,6 +6,7 @@ using MongoDB.Bson;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Services;
+using Roki.Services.Database;
 using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Utility
@@ -35,7 +36,7 @@ namespace Roki.Modules.Utility
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithTitle("Quote List")
-                            .WithDescription(string.Join("\n", quotes.Select(x => $"`#{x.Id.GetId()}` **{x.Keyword}** by {Context.Guild.GetUserAsync(x.AuthorId).Result}"))))
+                            .WithDescription(string.Join("\n", quotes.Select(x => $"`{x.Id.GetHexId()}` **{x.Keyword}** by {Context.Guild.GetUserAsync(x.AuthorId).Result}"))))
                         .ConfigureAwait(false);
                 }
                 else
@@ -44,7 +45,7 @@ namespace Roki.Modules.Utility
 
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
-            public async Task ShowQuote(string keyword, bool context = false)
+            public async Task ShowQuote(string keyword)
             {
                 keyword = keyword.ToUpperInvariant();
 
@@ -52,30 +53,18 @@ namespace Roki.Modules.Utility
                 if (quote == null)
                     return;
                 
-                var author = await Context.Guild.GetUserAsync(quote.AuthorId).ConfigureAwait(false);
-                if (context)
-                {
-                    await Context.Channel.SendMessageAsync($"`#{quote.Id.GetId()}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}\nContext: {quote.Context}").ConfigureAwait(false);
-                    return;
-                }
-                await Context.Channel.SendMessageAsync($"`#{quote.Id.GetId()}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}").ConfigureAwait(false);
+                await Context.Channel.SendMessageAsync(quote.Text).ConfigureAwait(false);
             }
             
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
-            public async Task QuoteId(short id, bool context = false)
+            public async Task QuoteId(string id)
             {
-                var quote = await _mongo.Context.GetRandomQuoteAsync(Context.Guild.Id, id).ConfigureAwait(false);
+                var quote = await _mongo.Context.GetQuoteByIdAsync(Context.Guild.Id, id).ConfigureAwait(false);
                 if (quote == null)
                     return;
                 
-                var author = await Context.Guild.GetUserAsync(quote.AuthorId).ConfigureAwait(false);
-                if (context)
-                {
-                    await Context.Channel.SendMessageAsync($"`#{quote.Id.GetId()}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}\nContext: {quote.Context}").ConfigureAwait(false);
-                    return;
-                }
-                await Context.Channel.SendMessageAsync($"`#{quote.Id.GetId()}` by `{author}`. Use count: `{quote.UseCount}`\n📣 {quote.Text}").ConfigureAwait(false);
+                await Context.Channel.SendMessageAsync(quote.Text).ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]
@@ -83,7 +72,11 @@ namespace Roki.Modules.Utility
             public async Task AddQuote(string keyword, [Leftover] string text)
             {
                 if (string.IsNullOrWhiteSpace(keyword) || string.IsNullOrWhiteSpace(text))
+                {
+                    await Context.Channel.SendErrorAsync($"You need to include the content of the quote.\n`{Roki.Properties.Prefix}addquote <quote_name> <quote_content>`")
+                        .ConfigureAwait(false);
                     return;
+                }
 
                 keyword = keyword.ToUpperInvariant();
 
@@ -99,24 +92,23 @@ namespace Roki.Modules.Utility
                 
                 await _mongo.Context.AddQuoteAsync(quote);
 
-                await Context.Channel.SendMessageAsync($"Quote `#{quote.Id.GetId()}` `{keyword}` added.").ConfigureAwait(false);
+                await Context.Channel.SendMessageAsync($"Quote `{quote.Id.GetHexId()}` **{keyword}** added.").ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
-            [Priority(1)]
-            public async Task QuoteDelete(short id)
+            public async Task QuoteDeleteId(string id)
             {
                 var isAdmin = ((IGuildUser) Context.User).GuildPermissions.Administrator;
 
                 var result = isAdmin
                     ? await _mongo.Context.DeleteQuoteAdmin(Context.Guild.Id, id)
-                    : await _mongo.Context.DeleteQuoteAsync(Context.Guild.Id, Context.User.Id, id).ConfigureAwait(false);
+                    : await _mongo.Context.DeleteQuoteByIdAsync(Context.Guild.Id, Context.User.Id, id).ConfigureAwait(false);
 
                 if (result.IsAcknowledged && result.DeletedCount > 0)
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription($"Quote `#{id}` deleted"))
+                            .WithDescription($"Quote `{id}` deleted"))
                         .ConfigureAwait(false);
                 }
                 else
@@ -127,7 +119,6 @@ namespace Roki.Modules.Utility
             
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
-            [Priority(0)]
             public async Task QuoteDelete(string keyword)
             {
                 var isAdmin = ((IGuildUser) Context.User).GuildPermissions.Administrator;
@@ -135,11 +126,11 @@ namespace Roki.Modules.Utility
                 var result = isAdmin
                     ? await _mongo.Context.DeleteQuoteAdmin(Context.Guild.Id, keyword: keyword)
                     : await _mongo.Context.DeleteQuoteAsync(Context.Guild.Id, Context.User.Id, keyword).ConfigureAwait(false);
-
+                
                 if (result.IsAcknowledged && result.DeletedCount > 0)
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription($"Quote `{keyword.ToUpper()}` deleted"))
+                            .WithDescription($"Quote `{keyword.ToUpperInvariant()}` deleted"))
                         .ConfigureAwait(false);
                 }
                 else
@@ -159,7 +150,7 @@ namespace Roki.Modules.Utility
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithTitle("Quote Search Results")
-                            .WithDescription(string.Join("\n", quotes.Select(x => $"`#{x.Id.GetId()}` **{x.Keyword}**: {x.Text.TrimTo(50)}"))))
+                            .WithDescription(string.Join("\n", quotes.Select(x => $"`{x.Id.GetHexId()}` **{x.Keyword}**: {x.Text.TrimTo(50)}"))))
                         .ConfigureAwait(false);
                 }
                 else
