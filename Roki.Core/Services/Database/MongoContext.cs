@@ -630,7 +630,7 @@ namespace Roki.Services.Database
         {
             id = id.ToLowerInvariant();
             var guild = await GetGuildAsync(guildId).ConfigureAwait(false);
-            return guild.Store.FirstOrDefault(l => l.Id.ToString().Substring(18) == id);
+            return guild.Store.FirstOrDefault(l => l.Id.GetHexId() == id);
         }
 
         public async Task<List<Listing>> GetStoreCatalogueAsync(ulong guildId)

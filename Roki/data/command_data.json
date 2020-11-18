@@ -487,10 +487,10 @@
   },
   "buy": {
     "Aliases": "",
-    "Description": "Buy an item from the store using its name or id, with an optional amount or all (default is 1).",
+    "Description": "Buy an item from the store using its name or id, must specify amount or all",
     "Usage": [
-      "{0}buy abcdef 1",
-      "{0}buy pizza all"
+      "{0}buy 1 ffffff",
+      "{0}buy all pizza"
     ]
   },
   "subscriptions": {

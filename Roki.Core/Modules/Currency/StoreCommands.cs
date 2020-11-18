@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -88,54 +89,54 @@ namespace Roki.Modules.Currency
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
             [Priority(0)]
-            public async Task Buy([Leftover] string name)
-            {
-                var parsedName = name.Split();
-                var quantity = parsedName[^1];
-
-                Listing listing;
-                if (parsedName.Length == 2 && parsedName[0].Length == 6)
-                {
-                    listing = await _mongo.Context.GetStoreItemByIdAsync(Context.Guild.Id, parsedName[0]).ConfigureAwait(false);
-                }
-                else
-                {
-                    listing = await _mongo.Context.GetStoreItemByNameAsync(Context.Guild.Id, string.Join(' ', parsedName[..^1])).ConfigureAwait(false);
-                }
-                
-                if (listing == null)
-                {
-                    await Context.Channel.SendErrorAsync("Cannot find this item. Make sure the name matches exactly, or use ID").ConfigureAwait(false);
-                    return;
-                }
-
-                if (listing.Quantity <= 0)
-                {
-                    await Context.Channel.SendErrorAsync("Sorry. This item is out of stock, please come back later.").ConfigureAwait(false);
-                    return;
-                }
-
-                await InternalBuy(listing, quantity).ConfigureAwait(false);
-            }
-
-            private async Task InternalBuy(Listing listing, string quantity)
+            public async Task Buy(string quantity, [Leftover] string name)
             {
                 int amount;
                 if (quantity.Equals("all", StringComparison.OrdinalIgnoreCase))
-                    amount = listing.Quantity;
+                {
+                    amount = 0;
+                }
                 else
                 {
                     if (!int.TryParse(quantity, out amount))
                     {
                         amount = 1;
                     }
+
                     if (amount <= 0)
                     {
                         amount = 1;
                     }
                 }
+                Listing listing;
+                if (Regex.IsMatch(name, "^[a-fA-F0-9]{6}"))
+                {
+                    listing = await _mongo.Context.GetStoreItemByIdAsync(Context.Guild.Id, name)
+                        .ConfigureAwait(false);
+                }
+                else
+                {
+                    listing = await _mongo.Context.GetStoreItemByNameAsync(Context.Guild.Id, name).ConfigureAwait(false);
+                }
+                
+                if (listing == null)
+                {
+                    await Context.Channel.SendErrorAsync("Cannot find this item. Use the ID of the item preferably.").ConfigureAwait(false);
+                    return;
+                }
 
-                if (listing.Quantity < amount)
+                if (listing.Quantity <= 0)
+                {
+                    await Context.Channel.SendErrorAsync("Sorry. This item is out of stock, please check again later.").ConfigureAwait(false);
+                    return;
+                }
+
+                await InternalBuy(listing, amount).ConfigureAwait(false);
+            }
+
+            private async Task InternalBuy(Listing listing, int amount)
+            {
+                if (listing.Quantity < amount || amount == 0)
                     amount = listing.Quantity;
 
                 var buyer = Context.User;
