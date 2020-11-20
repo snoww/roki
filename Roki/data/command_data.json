@@ -236,9 +236,16 @@
   },
   "autoplay": {
     "Aliases": "qauto",
-    "Description": "Enables/Disables autoplay for the current player. Must be in a voice channel.",
+    "Description": "Enables/Disables autoplay for the current player. Automatically plays a related track to the last track played. Mutually exclusive with loop (i.e. only one can be enabled). Must be in a voice channel.",
     "Usage": [
       "{0}qauto"
+    ]
+  },
+  "queueloop": {
+    "Aliases": "qloop",
+    "Description": "Enables/Disables loop for the current player. Restarts the player queue from the beginning. Mutually exclusive with autoplay (i.e. only one can be enabled). Must be in a voice channel.",
+    "Usage": [
+      "{0}qloop"
     ]
   },
   "pause": {
