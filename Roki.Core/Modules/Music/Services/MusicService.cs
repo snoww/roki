@@ -65,12 +65,13 @@ namespace Roki.Modules.Music.Services
             }
 
             var track = result.Tracks[0];
+            // set the queued property so we know which user queued the track
             track.Queued = ctx.User as IGuildUser;
+            var linkedTrack = player.Queue.Enqueue(track);
 
             var embed = new EmbedBuilder().WithDynamicColor(ctx);
             if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
             {
-                player.Queue.Enqueue(track);
                 embed.WithAuthor($"Queued: #{player.Queue.Count}", "https://i.imgur.com/VTRacvz.png")
                     .WithDescription($"{track.PrettyTrack()}")
                     .WithFooter(track.PrettyFooter(player.Volume) + $" | Autoplay: {(player.Autoplay ? "ON" : "OFF")}");
@@ -79,7 +80,7 @@ namespace Roki.Modules.Music.Services
             }
             else
             {
-                await player.PlayAsync(track).ConfigureAwait(false);
+                await player.PlayAsync(linkedTrack).ConfigureAwait(false);
                 embed.WithAuthor("Playing song", "https://i.imgur.com/fGNKX6x.png")
                     .WithDescription($"{track.PrettyTrack()}")
                     .WithFooter(track.PrettyFooter(player.Volume));
@@ -104,8 +105,46 @@ namespace Roki.Modules.Music.Services
             }
             else
             {
-                player.Autoplay = true;
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithDescription("Autoplay enabled")).ConfigureAwait(false);
+                if (player.Loop)
+                {
+                    player.Loop = false;
+                    player.Autoplay = true;
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithDescription("Autoplay and Loop cannot **both** be enabled.\nAutoplay **enabled**, Loop disabled.")).ConfigureAwait(false);
+                }
+                else
+                {
+                    player.Autoplay = true;
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithDescription("Autoplay enabled")).ConfigureAwait(false);
+                }
+            }
+        }
+
+        public async Task LoopAsync(ICommandContext ctx)
+        {
+            if (!IsPlayerActive(ctx.Guild, out var player))
+            {
+                await ctx.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
+                return;
+            }
+            
+            if (player.Loop)
+            {
+                player.Loop = false;
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithDescription("Autoplay disabled")).ConfigureAwait(false);
+            }
+            else
+            {
+                if (player.Autoplay)
+                {
+                    player.Autoplay = false;
+                    player.Loop = true;
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithDescription("Autoplay and Loop cannot both be enabled.\nAutoplay turned disabled, Loop **enabled**.")).ConfigureAwait(false);
+                }
+                else
+                {
+                    player.Loop = true;
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithDescription("Loop enabled")).ConfigureAwait(false);
+                }
             }
         }
         
@@ -317,8 +356,22 @@ namespace Roki.Modules.Music.Services
                     .WithFooter($"🔉 {args.Player.Volume}% | {args.Track.Duration.PrettyLength()}"))
                     .ConfigureAwait(false);
 
-            if (!args.Player.Queue.TryDequeue(out var dequeued))
+            var nextTrack = args.Player.LinkedListTrack.Next;
+            if (nextTrack == null)
             {
+                // loop and autoplay are mutually exclusive
+                // i.e. cannot have loop and autoplay active at the same time
+                if (args.Player.Loop)
+                {
+                    // loop back to beginning of linked list
+                    var firstTrack = args.Player.Queue.First();
+                    await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithDynamicColor(args.Player.TextChannel.GuildId)
+                        .WithAuthor("Playing song", "https://i.imgur.com/fGNKX6x.png")
+                        .WithDescription($"{firstTrack.Value.PrettyTrack()}")
+                        .WithFooter(firstTrack.Value.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
+                    await args.Player.PlayAsync(firstTrack).ConfigureAwait(false);
+                    return;
+                }
                 if (args.Player.Autoplay)
                 {
                     var nextSong = await GetNextSong(args.Track).ConfigureAwait(false);
@@ -330,11 +383,12 @@ namespace Roki.Modules.Music.Services
                         return;
                     }
 
-                    var track = result.Tracks[0];
+                    var track = args.Player.Queue.Enqueue(result.Tracks[0]);
+
                     await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithDynamicColor(args.Player.TextChannel.GuildId)
                         .WithAuthor("Playing song", "https://i.imgur.com/fGNKX6x.png")
-                        .WithDescription($"{track.PrettyTrack()}")
-                        .WithFooter(track.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
+                        .WithDescription($"{track.Value.PrettyTrack()}")
+                        .WithFooter(track.Value.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
                     await args.Player.PlayAsync(track).ConfigureAwait(false);
                     return;
                 }
@@ -345,9 +399,9 @@ namespace Roki.Modules.Music.Services
 
             await args.Player.TextChannel.EmbedAsync(new EmbedBuilder().WithDynamicColor(args.Player.TextChannel.GuildId)
                 .WithAuthor("Playing song", "https://i.imgur.com/fGNKX6x.png")
-                .WithDescription($"{dequeued.PrettyTrack()}")
-                .WithFooter(dequeued.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
-            await args.Player.PlayAsync(dequeued).ConfigureAwait(false);
+                .WithDescription($"{nextTrack.Value.PrettyTrack()}")
+                .WithFooter(nextTrack.Value.PrettyFooter(args.Player.Volume))).ConfigureAwait(false);
+            await args.Player.PlayAsync(nextTrack).ConfigureAwait(false);
         }
 
         private bool IsPlayerActive(IGuild guild, out LavaPlayer player)

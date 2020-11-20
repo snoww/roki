@@ -31,6 +31,15 @@ namespace Roki.Modules.Music
                 return;
             await Service.AutoplayAsync(Context).ConfigureAwait(false);
         }
+        
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
+        public async Task QueueLoop()
+        {
+            if (!await IsUserInVoice().ConfigureAwait(false))
+                return;
+            await Service.LoopAsync(Context).ConfigureAwait(false);
+        }
 
         [RokiCommand, Description, Usage, Aliases]
         [RequireContext(ContextType.Guild)]

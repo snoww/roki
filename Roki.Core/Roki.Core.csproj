@@ -58,7 +58,7 @@
 
     <ItemGroup>
       <Reference Include="Victoria, Version=5.1.10.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\Roki\data\dlls\Victoria.dll</HintPath>
+        <HintPath>..\Roki\data\bin\Victoria.dll</HintPath>
       </Reference>
     </ItemGroup>
 
