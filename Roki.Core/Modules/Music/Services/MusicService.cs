@@ -1,5 +1,8 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using Discord;
@@ -55,12 +58,28 @@ namespace Roki.Modules.Music.Services
                     .WithFooter(player.Track.PrettyFooter(player.Volume))).ConfigureAwait(false);
                 return;
             }
-            
-            var result = await _lavaNode.SearchYouTubeAsync(query).ConfigureAwait(false);
 
-            if (result.LoadStatus == LoadStatus.NoMatches || result.LoadStatus == LoadStatus.LoadFailed)
+            // matches youtube playlist
+            // can use to capture playlist ID if needed
+            var isYtPlaylist = Regex.IsMatch(query, @"^.*(youtu.be\/|list=)([^#\&\?]*).*");
+
+            var result = await _lavaNode.SearchYouTubeAsync(query).ConfigureAwait(false);
+            
+            if (result.LoadStatus == LoadStatus.NoMatches)
             {
                 await ctx.Channel.SendErrorAsync("No matches found.").ConfigureAwait(false);
+                return;
+            }
+
+            if (result.LoadStatus == LoadStatus.LoadFailed)
+            {
+                await ctx.Channel.SendErrorAsync("Failed to load track.").ConfigureAwait(false);
+                return;
+            }
+
+            if (isYtPlaylist && result.Tracks.Count > 1)
+            {
+                await QueuePlaylistAsync(ctx, player, result.Tracks).ConfigureAwait(false);
                 return;
             }
 
@@ -88,6 +107,37 @@ namespace Roki.Modules.Music.Services
             }
             
             await ctx.Message.DeleteAsync().ConfigureAwait(false);
+        }
+
+        private static async Task QueuePlaylistAsync(ICommandContext ctx, LavaPlayer player, IReadOnlyCollection<LavaTrack> tracks)
+        {
+            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithDescription($"Queuing {tracks.Count} tracks...")).ConfigureAwait(false);
+
+            foreach (var track in tracks)
+            {
+                track.Queued = ctx.User as IGuildUser;
+                player.Queue.Enqueue(track);
+            }
+
+            var embed = new EmbedBuilder().WithDynamicColor(ctx);
+            if (player.PlayerState == PlayerState.Playing || player.PlayerState == PlayerState.Paused)
+            {
+                embed.WithAuthor($"Queued: #{player.Queue.Count}", "https://i.imgur.com/VTRacvz.png")
+                    .WithDescription($"Queued {tracks.Count} tracks")
+                    .WithFooter($"🔉 {player.Volume}% | {ctx.User} | Autoplay: {(player.Autoplay ? "ON" : "OFF")}");
+                var msg = await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                msg.DeleteAfter(10);
+            }
+            else
+            {
+                var track = player.Queue.First();
+                await player.PlayAsync(track).ConfigureAwait(false);
+                embed.WithAuthor($"Playing song, queued {tracks.Count} tracks", "https://i.imgur.com/fGNKX6x.png")
+                    .WithDescription($"{track.Value.PrettyTrack()}")
+                    .WithFooter(track.Value.PrettyFooter(player.Volume));
+                await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            }
+
         }
 
         public async Task AutoplayAsync(ICommandContext ctx)

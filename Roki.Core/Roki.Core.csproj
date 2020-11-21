@@ -27,35 +27,7 @@
       <PackageReference Include="SixLabors.Shapes.Text" Version="1.0.0-beta0009" />
       <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
    </ItemGroup>
-
-    <ItemGroup>
-      <_UnmanagedRegistrationCache Remove="obj\Roki.Core.csproj.UnmanagedRegistration.cache" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <_ResolveComReferenceCache Remove="obj\Debug\netcoreapp2.2\Roki.Core.csproj.ResolveComReference.cache" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <IntermediateAssembly Remove="obj\Debug\netcoreapp2.2\Roki.Core.dll" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <_DebugSymbolsIntermediatePath Remove="obj\Debug\netcoreapp2.2\Roki.Core.pdb" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <_DeploymentManifestEntryPoint Remove="obj\Debug\netcoreapp2.2\Roki.Core.dll" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ApplicationManifest Remove="obj\Debug\netcoreapp2.2\Native.Roki.Core.manifest" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <DeployManifest Remove="obj\Debug\netcoreapp2.2\Roki.Core.application" />
-    </ItemGroup>
-
+    
     <ItemGroup>
       <Reference Include="Victoria, Version=5.1.10.0, Culture=neutral, PublicKeyToken=null">
         <HintPath>..\Roki\data\bin\Victoria.dll</HintPath>
