@@ -14,6 +14,7 @@ using Roki.Services;
 using Victoria;
 using Victoria.Enums;
 using Victoria.EventArgs;
+using Victoria.Responses.Rest;
 
 namespace Roki.Modules.Music.Services
 {
@@ -58,12 +59,24 @@ namespace Roki.Modules.Music.Services
                     .WithFooter(player.Track.PrettyFooter(player.Volume))).ConfigureAwait(false);
                 return;
             }
-
+            
+            // check if url is youtube
+            var isYtUrl = Regex.IsMatch(query, @"^(https?\:\/\/)?((www\.)?youtube\.com|youtu\.?be)\/.+$");
+            
             // matches youtube playlist
             // can use to capture playlist ID if needed
             var isYtPlaylist = Regex.IsMatch(query, @"^.*(youtu.be\/|list=)([^#\&\?]*).*");
 
-            var result = await _lavaNode.SearchYouTubeAsync(query).ConfigureAwait(false);
+            SearchResponse result;
+            
+            if (isYtUrl)
+            {
+                result = await _lavaNode.SearchAsync(query).ConfigureAwait(false);
+            }
+            else
+            {
+                result = await _lavaNode.SearchYouTubeAsync(query).ConfigureAwait(false);
+            }
             
             if (result.LoadStatus == LoadStatus.NoMatches)
             {
