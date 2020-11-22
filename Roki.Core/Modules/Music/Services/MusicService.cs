@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
@@ -107,7 +108,7 @@ namespace Roki.Modules.Music.Services
             {
                 embed.WithAuthor($"Queued: #{player.Queue.Count}", "https://i.imgur.com/VTRacvz.png")
                     .WithDescription($"{track.PrettyTrack()}")
-                    .WithFooter(track.PrettyFooter(player.Volume) + $" | Autoplay: {(player.Autoplay ? "ON" : "OFF")}");
+                    .WithFooter(track.PrettyFooter(player.Volume) + FormatAutoplayAndLoop(player));
                 var msg = await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 msg.DeleteAfter(10);
             }
@@ -138,7 +139,7 @@ namespace Roki.Modules.Music.Services
             {
                 embed.WithAuthor($"Queued: #{player.Queue.Count}", "https://i.imgur.com/VTRacvz.png")
                     .WithDescription($"Queued {tracks.Count} tracks")
-                    .WithFooter($"🔉 {player.Volume}% | {ctx.User} | Autoplay: {(player.Autoplay ? "ON" : "OFF")}");
+                    .WithFooter($"🔉 {player.Volume}% | {ctx.User}{FormatAutoplayAndLoop(player)}");
                 var msg = await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 msg.DeleteAfter(10);
             }
@@ -344,7 +345,7 @@ namespace Roki.Modules.Music.Services
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                             .WithAuthor("Player queue", "https://i.imgur.com/9ue01Qt.png")
                             .WithDescription($"Queue is empty, `{Roki.Properties.Prefix}q <query>` to search and queue a track.")
-                            .WithFooter($"Autoplay: {(player.Autoplay ? "ON" : "OFF")} | {Roki.Properties.Prefix}autoplay to toggle autoplay"))
+                            .WithFooter(FormatAutoplayAndLoop(player, false)))
                         .ConfigureAwait(false);
                     return;
                 }
@@ -352,7 +353,7 @@ namespace Roki.Modules.Music.Services
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                         .WithAuthor("Player queue", "https://i.imgur.com/9ue01Qt.png")
                         .WithDescription("`🔊` " + player.Track.PrettyFullTrackWithCurrentPos() + "\n\nNo tracks in queue.")
-                        .WithFooter($"Autoplay: {(player.Autoplay ? "ON" : "OFF")} | {Roki.Properties.Prefix}autoplay to toggle autoplay"))
+                        .WithFooter(FormatAutoplayAndLoop(player, false)))
                     .ConfigureAwait(false);
                 return;
             }
@@ -378,7 +379,7 @@ namespace Roki.Modules.Music.Services
 
                 string pStatus = null;
                 if (player.PlayerState == PlayerState.Paused)
-                    pStatus = Format.Bold($"Player is paused. Use {Format.Code(".play")}` command to start playing.");
+                    pStatus = Format.Bold($"Player is paused. Use {Format.Code($"{Roki.Properties.Prefix}resume")}` command to resume playback.");
 
                 if (!string.IsNullOrWhiteSpace(pStatus))
                     desc = pStatus + "\n" + desc;
@@ -386,7 +387,7 @@ namespace Roki.Modules.Music.Services
                 var embed = new EmbedBuilder().WithDynamicColor(ctx)
                     .WithAuthor($"Player queue - Page {curPage + 1}/{Math.Ceiling((double) queue.Length / itemsPerPage)}", "https://i.imgur.com/9ue01Qt.png")
                     .WithDescription(desc)
-                    .WithFooter($"🔉 {player.Volume}% | {queue.Length} tracks | {total.PrettyLength()} | Autoplay: {(player.Autoplay ? "ON" : "OFF")}");
+                    .WithFooter($"🔉 {player.Volume}% | {queue.Length} tracks | {total.PrettyLength()}{FormatAutoplayAndLoop(player)}");
                 return embed;
             }
 
@@ -555,9 +556,36 @@ namespace Roki.Modules.Music.Services
             return relatedId == null ? null : string.Format(related, relatedId);
         }
 
-        private string FormatAutoplayAndLoop(bool autoplay, bool loop)
+        private static string FormatAutoplayAndLoop(LavaPlayer player, bool cont = true)
         {
-            return $"Autoplay: {(autoplay ? "ON" : "OFF")} | Loop: {(loop ? "ON" : "OFF")}";
+            var output = string.Empty;
+            if (cont)
+            {
+                if (player.Autoplay)
+                {
+                    output += " | Autoplay: ON";
+                }
+                else
+                {
+                    output += " | Autoplay: OFF";
+                }
+
+                if (player.Loop)
+                {
+                    output += " | Loop: ON";
+                }
+                else
+                {
+                    output += " | Loop: OFF";
+                }
+            }
+            else
+            {
+                output = $"Autoplay: {(player.Autoplay ? "ON" : "OFF")} | Loop: {(player.Loop ? "ON" : "OFF")}";
+            }
+
+
+            return output;
         }
     }
 }
