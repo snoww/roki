@@ -281,7 +281,7 @@
     "Aliases": "lq",
     "Description": "Shows the current track queue (10 tracks per page).",
     "Usage": [
-      "{0}liqu 2"
+      "{0}liqu"
     ]
   },
   "next": {
