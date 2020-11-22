@@ -174,29 +174,38 @@ namespace Roki.Modules.Music.Services
                 return;
             }
 
+            LinkedListNode<LavaTrack> track;
             // search forwards
             if (player.Queue.Count / 2 >= trackNum)
             {
-                var track = player.Queue.First();
-                for (int i = 0; i < trackNum; i++)
+                track = player.Queue.First();
+                for (int i = 0; i < trackNum - 1; i++)
                 {
                     track = track?.Next;
                 }
-
-                await player.PlayAsync(track).ConfigureAwait(false);
             }
             // search backwards
             else
             {
                 var reverseTrackNum = player.Queue.Count - trackNum;
-                var track = player.Queue.Last();
+                track = player.Queue.Last();
                 for (int i = 0; i < reverseTrackNum; i++)
                 {
                     track = track?.Previous;
                 }
-
-                await player.PlayAsync(track).ConfigureAwait(false);
             }
+
+            if (track == null)
+            {
+                await ctx.Channel.SendErrorAsync("Something went wrong when trying to play that track.").ConfigureAwait(false);
+                return;
+            }
+            
+            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(player.TextChannel.GuildId)
+                .WithAuthor("Playing song", "https://i.imgur.com/fGNKX6x.png")
+                .WithDescription($"{track.Value.PrettyTrack()}")
+                .WithFooter(track.Value.PrettyFooter(player.Volume))).ConfigureAwait(false);
+            await player.PlayAsync(track).ConfigureAwait(false);
         }
 
         public async Task AutoplayAsync(ICommandContext ctx)
@@ -352,7 +361,7 @@ namespace Roki.Modules.Music.Services
             
             const int itemsPerPage = 10;
 
-            var page = (int) Math.Ceiling((double) currentIndex / itemsPerPage);
+            var page = (int) Math.Floor((double) currentIndex / itemsPerPage);
 
             var total = queue.TotalPlaytime();
 
