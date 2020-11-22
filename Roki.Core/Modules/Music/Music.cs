@@ -25,6 +25,22 @@ namespace Roki.Modules.Music
 
         [RokiCommand, Description, Usage, Aliases]
         [RequireContext(ContextType.Guild)]
+        public async Task Play(int trackNum = 0)
+        {
+            if (!await IsUserInVoice().ConfigureAwait(false))
+                return;
+
+            if (trackNum < 1)
+            {
+                await Context.Channel.SendErrorAsync("Please specify a track number to play.").ConfigureAwait(false);
+                return;
+            }
+
+            await Service.PlayAsync(Context, trackNum).ConfigureAwait(false);
+        }
+        
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
         public async Task Autoplay()
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
