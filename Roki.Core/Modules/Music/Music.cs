@@ -85,12 +85,12 @@ namespace Roki.Modules.Music
 
         [RokiCommand, Description, Usage, Aliases]
         [RequireContext(ContextType.Guild)]
-        public async Task ListQueue(int page = 0)
+        public async Task ListQueue()
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
                 return;
             
-            await Service.ListQueueAsync(Context, page).ConfigureAwait(false);
+            await Service.ListQueueAsync(Context).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
