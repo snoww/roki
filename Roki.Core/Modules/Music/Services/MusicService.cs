@@ -202,7 +202,7 @@ namespace Roki.Modules.Music.Services
             }
             
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(player.TextChannel.GuildId)
-                .WithAuthor("Playing song", "https://i.imgur.com/fGNKX6x.png")
+                .WithAuthor($"Playing song #{trackNum}", "https://i.imgur.com/fGNKX6x.png")
                 .WithDescription($"{track.Value.PrettyTrack()}")
                 .WithFooter(track.Value.PrettyFooter(player.Volume))).ConfigureAwait(false);
             await player.PlayAsync(track).ConfigureAwait(false);
