@@ -180,7 +180,7 @@ namespace Roki.Modules.Music.Services
             if (player.Loop)
             {
                 player.Loop = false;
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithDescription("Autoplay disabled")).ConfigureAwait(false);
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithDescription("Loop disabled")).ConfigureAwait(false);
             }
             else
             {
@@ -188,7 +188,7 @@ namespace Roki.Modules.Music.Services
                 {
                     player.Autoplay = false;
                     player.Loop = true;
-                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithDescription("Autoplay and Loop cannot both be enabled.\nAutoplay turned disabled, Loop **enabled**.")).ConfigureAwait(false);
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithDescription("Autoplay and Loop cannot **both** be enabled.\nAutoplay turned disabled, Loop **enabled**.")).ConfigureAwait(false);
                 }
                 else
                 {
@@ -260,7 +260,7 @@ namespace Roki.Modules.Music.Services
             }
         }
 
-        public async Task ListQueueAsync(ICommandContext ctx, int page = 0)
+        public async Task ListQueueAsync(ICommandContext ctx)
         {
             if (!IsPlayerActive(ctx.Guild, out var player))
             {
@@ -288,13 +288,12 @@ namespace Roki.Modules.Music.Services
                     .ConfigureAwait(false);
                 return;
             }
+
+            var currentIndex = Array.IndexOf(queue, player.Track);
             
-            if (--page < -1)
-                return;
             const int itemsPerPage = 10;
 
-            if (page == -1)
-                page = 0;
+            var page = (int) Math.Ceiling((double) currentIndex / itemsPerPage);
 
             var total = queue.TotalPlaytime();
 
@@ -486,6 +485,11 @@ namespace Roki.Modules.Music.Services
             
             var relatedId = await _google.GetRelatedVideo(videoId).ConfigureAwait(false);
             return relatedId == null ? null : string.Format(related, relatedId);
+        }
+
+        private string FormatAutoplayAndLoop(bool autoplay, bool loop)
+        {
+            return $"Autoplay: {(autoplay ? "ON" : "OFF")} | Loop: {(loop ? "ON" : "OFF")}";
         }
     }
 }
