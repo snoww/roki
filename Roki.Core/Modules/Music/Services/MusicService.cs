@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -151,6 +152,51 @@ namespace Roki.Modules.Music.Services
                 await ctx.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
 
+        }
+        
+        public async Task PlayAsync(ICommandContext ctx, int trackNum)
+        {
+            if (!IsPlayerActive(ctx.Guild, out var player))
+            {
+                await ctx.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
+                return;
+            }
+
+            if (player.Queue.Count == 0)
+            {
+                await ctx.Channel.SendErrorAsync($"There are no tracks in queue, use `{Roki.Properties.Prefix}q` to queue some tracks first.").ConfigureAwait(false);
+                return;
+            }
+
+            if (player.Queue.Count < trackNum)
+            {
+                await ctx.Channel.SendErrorAsync($"There are only {player.Queue.Count} songs in the queue.").ConfigureAwait(false);
+                return;
+            }
+
+            // search forwards
+            if (player.Queue.Count / 2 >= trackNum)
+            {
+                var track = player.Queue.First();
+                for (int i = 0; i < trackNum; i++)
+                {
+                    track = track?.Next;
+                }
+
+                await player.PlayAsync(track).ConfigureAwait(false);
+            }
+            // search backwards
+            else
+            {
+                var reverseTrackNum = player.Queue.Count - trackNum;
+                var track = player.Queue.Last();
+                for (int i = 0; i < reverseTrackNum; i++)
+                {
+                    track = track?.Previous;
+                }
+
+                await player.PlayAsync(track).ConfigureAwait(false);
+            }
         }
 
         public async Task AutoplayAsync(ICommandContext ctx)

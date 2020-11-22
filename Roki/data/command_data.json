@@ -228,10 +228,17 @@
   },
   "queue": {
     "Aliases": "q",
-    "Description": "Searches and plays the query for the specified song, or plays the url provided. Must be in a voice channel.",
+    "Description": "Searches and plays the query for the specified song, or plays the url provided. If the url is a playlist, it adds all tracks in the playlist into the queue. Must be in a voice channel.",
     "Usage": [
       "{0}q hello",
       "{0}q https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+    ]
+  },
+  "play": {
+    "Aliases": "play",
+    "Description": "Plays a specific track # in the queue.",
+    "Usage": [
+      "{0}play 12"
     ]
   },
   "autoplay": {
