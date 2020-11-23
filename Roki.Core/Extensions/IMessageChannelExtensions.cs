@@ -12,6 +12,8 @@ namespace Roki.Extensions
     {
         private static readonly IEmote ArrowLeft = new Emoji("⬅");
         private static readonly IEmote ArrowRight = new Emoji("➡");
+        private static readonly IEmote First = new Emoji("⏪");
+        private static readonly IEmote Last = new Emoji("⏩");
 
         public static Task<IUserMessage> EmbedAsync(this IMessageChannel channel, EmbedBuilder embed, string msg = "")
         {
@@ -46,8 +48,10 @@ namespace Roki.Extensions
             if (lastPage == 0)
                 return;
 
+            await message.AddReactionAsync(First).ConfigureAwait(false);
             await message.AddReactionAsync(ArrowLeft).ConfigureAwait(false);
             await message.AddReactionAsync(ArrowRight).ConfigureAwait(false);
+            await message.AddReactionAsync(Last).ConfigureAwait(false);
 
             await Task.Delay(2000).ConfigureAwait(false);
 
@@ -59,31 +63,50 @@ namespace Roki.Extensions
                 {
                     if (r.UserId != ctx.User.Id)
                         return;
-                    if (DateTime.UtcNow - lastPageChange < TimeSpan.FromSeconds(1))
+                    if (DateTime.UtcNow - lastPageChange < TimeSpan.FromMilliseconds(500))
                         return;
+                    EmbedBuilder updatedEmbed;
                     if (r.Emote.Name == ArrowLeft.Name)
                     {
                         if (currentPage == 0)
                             return;
                         lastPageChange = DateTime.UtcNow;
-                        var updatedEmbed = await pageFunc(--currentPage).ConfigureAwait(false);
-                        if (addPaginatedFooter)
-                            updatedEmbed.AddPaginatedFooter(currentPage, lastPage);
-                        await message.ModifyAsync(x => x.Embed = updatedEmbed.Build()).ConfigureAwait(false);
+                        updatedEmbed = await pageFunc(--currentPage).ConfigureAwait(false);
                         await message.RemoveReactionAsync(ArrowLeft, ctx.User).ConfigureAwait(false);
                     }
                     else if (r.Emote.Name == ArrowRight.Name)
                     {
-                        if (lastPage > currentPage)
-                        {
-                            lastPageChange = DateTime.UtcNow;
-                            var updatedEmbed = await pageFunc(++currentPage).ConfigureAwait(false);
-                            if (addPaginatedFooter)
-                                updatedEmbed.AddPaginatedFooter(currentPage, lastPage);
-                            await message.ModifyAsync(x => x.Embed = updatedEmbed.Build()).ConfigureAwait(false);
-                            await message.RemoveReactionAsync(ArrowRight, ctx.User).ConfigureAwait(false);
-                        }
+                        if (currentPage == lastPage)
+                            return;
+                        
+                        lastPageChange = DateTime.UtcNow;
+                        updatedEmbed = await pageFunc(++currentPage).ConfigureAwait(false);
+                        await message.RemoveReactionAsync(ArrowRight, ctx.User).ConfigureAwait(false);
                     }
+                    else if (r.Emote.Name == First.Name)
+                    {
+                        if (currentPage == 0)
+                            return;
+                        lastPageChange = DateTime.UtcNow;
+                        updatedEmbed = await pageFunc(0).ConfigureAwait(false);
+                        await message.RemoveReactionAsync(First, ctx.User).ConfigureAwait(false);
+                    }
+                    else if (r.Emote.Name == Last.Name)
+                    {
+                        if (currentPage == lastPage)
+                            return;
+                        lastPageChange = DateTime.UtcNow;
+                        updatedEmbed = await pageFunc(lastPage).ConfigureAwait(false);
+                        await message.RemoveReactionAsync(First, ctx.User).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        return;
+                    }
+                    
+                    if (addPaginatedFooter)
+                        updatedEmbed.AddPaginatedFooter(currentPage, lastPage);
+                    await message.ModifyAsync(x => x.Embed = updatedEmbed.Build()).ConfigureAwait(false);
                 }
                 catch (Exception)
                 {
@@ -93,7 +116,7 @@ namespace Roki.Extensions
 
             using (message.OnReaction((DiscordSocketClient) ctx.Client, ChangePage))
             {
-                await Task.Delay(30000).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromMinutes(5)).ConfigureAwait(false);
             }
 
             try
