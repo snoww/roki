@@ -648,21 +648,17 @@ namespace Roki.Services.Database
 
         public async Task AddMessageAsync(SocketMessage message)
         {
-            var dbMessage = new Message
+            await MessageCollection.InsertOneAsync(new Message
             {
                 Id = message.Id,
                 AuthorId = message.Author.Id,
                 ChannelId = message.Channel.Id,
                 GuildId = message.Channel is ITextChannel channelId ? channelId.GuildId : (ulong?) null,
                 Content = message.Content,
+                MessageReference = message.Reference?.MessageId.GetValueOrDefault(),
                 Attachments = message.Attachments?.Select(a => a.Url).ToList(),
                 Timestamp = message.Timestamp.DateTime
-            };
-            if (message.Reference != null)
-            {
-                dbMessage.MessageReference = message.Reference.ToString();
-            }
-            await MessageCollection.InsertOneAsync(dbMessage).ConfigureAwait(false);
+            }).ConfigureAwait(false);
         }
 
         public async Task AddMessageEditAsync(SocketMessage after)
