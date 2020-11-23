@@ -648,18 +648,21 @@ namespace Roki.Services.Database
 
         public async Task AddMessageAsync(SocketMessage message)
         {
-            await MessageCollection.InsertOneAsync(new Message
+            var dbMessage = new Message
             {
                 Id = message.Id,
                 AuthorId = message.Author.Id,
                 ChannelId = message.Channel.Id,
                 GuildId = message.Channel is ITextChannel channelId ? channelId.GuildId : (ulong?) null,
                 Content = message.Content,
-                MessageReference = message.Reference?.ToString(),
-                Embeds = JsonSerializer.Serialize(message.Embeds),
                 Attachments = message.Attachments?.Select(a => a.Url).ToList(),
                 Timestamp = message.Timestamp.DateTime
-            }).ConfigureAwait(false);
+            };
+            if (message.Reference != null)
+            {
+                dbMessage.MessageReference = message.Reference.ToString();
+            }
+            await MessageCollection.InsertOneAsync(dbMessage).ConfigureAwait(false);
         }
 
         public async Task AddMessageEditAsync(SocketMessage after)
@@ -667,7 +670,6 @@ namespace Roki.Services.Database
             var update = Builders<Message>.Update.Push(m => m.Edits, new Edit
             {
                 Content = after.Content,
-                Embeds = JsonSerializer.Serialize(after.Embeds),
                 Attachments = after.Attachments.Select(m => m.Url).ToList(),
                 EditedTimestamp = after.EditedTimestamp?.DateTime ?? after.Timestamp.DateTime
             });
