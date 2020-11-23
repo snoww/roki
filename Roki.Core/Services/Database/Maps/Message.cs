@@ -12,6 +12,8 @@ namespace Roki.Services.Database.Maps
         public ulong ChannelId { get; set; }
         public ulong? GuildId { get; set; }
         public string Content { get; set; }
+        public string MessageReference { get; set; }
+        public string Embeds { get; set; }
         public List<Edit> Edits { get; set; } = new List<Edit>();
         public List<string> Attachments { get; set; } = new List<string>();
         public DateTime Timestamp { get; set; }
@@ -21,6 +23,7 @@ namespace Roki.Services.Database.Maps
     public class Edit
     {
         public string Content { get; set; }
+        public string Embeds { get; set; }
         public List<string> Attachments { get; set; } = new List<string>();
         public DateTime EditedTimestamp { get; set; }
     }
