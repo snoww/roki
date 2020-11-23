@@ -655,7 +655,7 @@ namespace Roki.Services.Database
                 ChannelId = message.Channel.Id,
                 GuildId = message.Channel is ITextChannel channelId ? channelId.GuildId : (ulong?) null,
                 Content = message.Content,
-                MessageReference = message.Reference.ToString(),
+                MessageReference = message.Reference?.ToString(),
                 Embeds = JsonSerializer.Serialize(message.Embeds),
                 Attachments = message.Attachments?.Select(a => a.Url).ToList(),
                 Timestamp = message.Timestamp.DateTime
