@@ -175,7 +175,7 @@ namespace Roki.Modules.Utility.Services
                     return null;
                 }
                 await _page.WaitForTimeoutAsync(1000);
-                await _page.ClickAsync($"css=.mat-focus-indicator.clr-star.mat-raised-button.mat-button-base >> text={type}");
+                await _page.ClickAsync($"css=.mat-focus-indicator.clr-{type.ToLowerInvariant()}.mat-raised-button.mat-button-base >> text={type}");
 
                 IElementHandle[] selector;
                 switch (type)
