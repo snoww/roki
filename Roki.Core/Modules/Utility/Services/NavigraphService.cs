@@ -77,7 +77,7 @@ namespace Roki.Modules.Utility.Services
         public async Task<string> GetAirport(ICommandContext ctx, string icao)
         {
             using var typing = ctx.Channel.EnterTypingState();
-            var chartName = $"data/charts/{icao}-airport.png";
+            var chartName = $"data/charts/{icao}-airport.png".ToLowerInvariant();
             if (ChartExists(chartName))
             {
                 return chartName;
@@ -102,7 +102,7 @@ namespace Roki.Modules.Utility.Services
         private static string GetChartName(string icao, string filename)
         {
             var chars = Array.FindAll(filename.ToArray(), char.IsLetterOrDigit);
-            return $"data/charts/{icao}_{new string(chars)}.png";
+            return $"data/charts/{icao}_{new string(chars)}.png".ToLowerInvariant();
         }
 
         private static bool ChartExists(string filename)
