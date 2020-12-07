@@ -176,7 +176,7 @@ namespace Roki.Modules.Utility.Services
                 }
                 await _page.WaitForTimeoutAsync(1500);
                 await _page.ClickAsync($"css=.mat-focus-indicator.clr-{type.ToLowerInvariant()} >> text={type}");
-                await _page.WaitForTimeoutAsync(1000);
+                await _page.WaitForTimeoutAsync(1500);
 
                 IElementHandle[] selector;
                 switch (type)
@@ -241,7 +241,7 @@ namespace Roki.Modules.Utility.Services
                 {
                     if (options.Count == 0)
                     {
-                        await ctx.Channel.SendErrorAsync($"No APP charts found for {icao}, please try again if there should eb charts.");
+                        await ctx.Channel.SendErrorAsync($"No APP charts found for {icao}, please try again if there should be charts.");
                         return null;
                     }
                     await ctx.Channel.EmbedAsync(new EmbedBuilder()
@@ -257,8 +257,9 @@ namespace Roki.Modules.Utility.Services
                 var url = substring.Substring(0, end).Replace("amp;", "");
                 return GetImage(url, filename);
             }
-            catch
+            catch (Exception e)
             {
+                Console.WriteLine(e);
                 await ctx.Channel.SendErrorAsync("Something went wrong while trying to get charts. Please try again");
             }
             finally
