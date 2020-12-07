@@ -38,7 +38,7 @@ namespace Roki.Modules.Utility.Services
             _page = await _browser.NewPageAsync();
             await _page.GoToAsync("https://charts.navigraph.com/");
             await _page.ClickAsync("text=Sign in");
-            await _page.WaitForTimeoutAsync(1000);
+            await _page.WaitForTimeoutAsync(1500);
             await _page.FillAsync("id=username", _config.NavigraphUsername);
             await _page.FillAsync("id=password", _config.NavigraphPassword);
             await _page.PressAsync("id=username", "Enter");
@@ -101,7 +101,8 @@ namespace Roki.Modules.Utility.Services
 
         private static string GetChartName(string icao, string filename)
         {
-            return $"data/charts/{icao}_{Regex.Replace(filename, "[^a-zA-Z0-9 -]", "")}.png";
+            var chars = Array.FindAll(filename.ToArray(), char.IsLetterOrDigit);
+            return $"data/charts/{icao}_{new string(chars)}.png";
         }
 
         private static bool ChartExists(string filename)
@@ -120,9 +121,9 @@ namespace Roki.Modules.Utility.Services
             {
                 await _page.FillAsync("id=mat-input-0", icao);
                 await _page.PressAsync("id=mat-input-0", "Enter");
-                await _page.WaitForTimeoutAsync(1000);
+                await _page.WaitForTimeoutAsync(1500);
                 await _page.ClickAsync("css=.mat-focus-indicator.charts-btn.mat-mini-fab.mat-button-base.mat-primary.ng-star-inserted");
-                await _page.WaitForTimeoutAsync(1000);
+                await _page.WaitForTimeoutAsync(1500);
                 _currentAirport = icao;
             }
         }
@@ -181,7 +182,7 @@ namespace Roki.Modules.Utility.Services
             }
             
             download:
-            await _page.WaitForTimeoutAsync(1000);
+            await _page.WaitForTimeoutAsync(1500);
             string content = await _page.GetContentAsync();
             _semaphore.Release();
             var index = content.IndexOf("https://airport.charts.api.navigraph.com/raw", StringComparison.OrdinalIgnoreCase);
