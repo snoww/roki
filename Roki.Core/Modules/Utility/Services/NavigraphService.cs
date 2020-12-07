@@ -107,6 +107,10 @@ namespace Roki.Modules.Utility.Services
 
         private static string GetChartName(string icao, string filename)
         {
+            if (filename == null)
+            {
+                return $"data/charts/{icao}_NA.png".ToLowerInvariant();
+            }
             var chars = Array.FindAll(filename.ToArray(), char.IsLetterOrDigit);
             return $"data/charts/{icao}_{new string(chars)}.png".ToLowerInvariant();
         }
@@ -160,18 +164,48 @@ namespace Roki.Modules.Utility.Services
             }
 
             await _page.ClickAsync($"text={type}");
-            if (type == "APPR" && Regex.IsMatch(chart, "^\\d{1,2}(L|R|C)?$"))
+
+            IElementHandle[] selector;
+            switch (type)
             {
-                await _page.ClickAsync($"text={chart}");
-                goto download;
+                case "SID":
+                {
+                    selector = (await _page.QuerySelectorAllAsync("text=DEP")).ToArray();
+                    if (selector.Length == 0)
+                    {
+                        await ctx.Channel.SendErrorAsync($"No STAR charts found for {icao}");
+                        _semaphore.Release();
+                        return null;
+                    }
+
+                    break;
+                }
+                case "STAR":
+                {
+                    selector = (await _page.QuerySelectorAllAsync("text=ARR")).ToArray();
+                    if (selector.Length == 0)
+                    {
+                        await ctx.Channel.SendErrorAsync($"No SID charts found for {icao}");
+                        _semaphore.Release();
+                        return null;
+                    }
+
+                    break;
+                }
+                default:
+                {
+                    selector = (await _page.QuerySelectorAllAsync("text=RWY")).ToArray();
+                    if (selector.Length == 0)
+                    {
+                        await ctx.Channel.SendErrorAsync($"No APPR charts found for {icao}");
+                        _semaphore.Release();
+                        return null;
+                    }
+
+                    break;
+                }
             }
-            var selector = (await _page.QuerySelectorAllAsync($"text={chart}")).ToArray();
-            if (selector.Length == 0)
-            {
-                await ctx.Channel.SendErrorAsync($"No charts found for {icao} {chart}");
-                _semaphore.Release();
-                return null;
-            }
+
             var match = false;
             var options = new List<string>();
             foreach (var element in selector)
@@ -189,11 +223,7 @@ namespace Roki.Modules.Utility.Services
                 }
                 options.Add(name);
             }
-
-            if (options.Count == 1)
-            {
-                match = true;
-            }
+            
             if (!match)
             {
                 await ctx.Channel.EmbedAsync(new EmbedBuilder()
@@ -203,7 +233,6 @@ namespace Roki.Modules.Utility.Services
                 return null;
             }
             
-            download:
             await _page.WaitForTimeoutAsync(1500);
             string content = await _page.GetContentAsync();
             _semaphore.Release();
