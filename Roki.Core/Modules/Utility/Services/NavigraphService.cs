@@ -175,7 +175,7 @@ namespace Roki.Modules.Utility.Services
                     return null;
                 }
                 await _page.WaitForTimeoutAsync(1000);
-                await _page.ClickAsync($"css=.mat-focus-indicator.clr-{type.ToLowerInvariant()}.mat-raised-button.mat-button-base >> text={type}");
+                await _page.ClickAsync($"css=.mat-focus-indicator.clr-{type.ToLowerInvariant()} >> text={type}");
                 await _page.WaitForTimeoutAsync(1500);
 
                 IElementHandle[] selector;
@@ -221,6 +221,9 @@ namespace Roki.Modules.Utility.Services
                 foreach (var element in selector)
                 {
                     var name = await element.GetInnerTextAsync();
+                    // hardcode skip
+                    if (name == "arrow_drop_down")
+                        continue;
                     if (chart == name)
                     {
                         match = true;
