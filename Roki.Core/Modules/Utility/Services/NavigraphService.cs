@@ -93,10 +93,10 @@ namespace Roki.Modules.Utility.Services
                     return null;
                 }
                 
-                await _page.WaitForTimeoutAsync(1000);
+                await _page.WaitForTimeoutAsync(1500);
                 await _page.ClickAsync("text=TAXI");
                 await _page.ClickAsync("text=-9");
-                await _page.WaitForTimeoutAsync(1500);
+                await _page.WaitForTimeoutAsync(1000);
                 var content = await _page.GetContentAsync();
                 var index = content.IndexOf("https://airport.charts.api.navigraph.com/raw", StringComparison.OrdinalIgnoreCase);
                 var substring = content.Substring(index);
@@ -176,6 +176,7 @@ namespace Roki.Modules.Utility.Services
                 }
                 await _page.WaitForTimeoutAsync(1000);
                 await _page.ClickAsync($"css=.mat-focus-indicator.clr-{type.ToLowerInvariant()}.mat-raised-button.mat-button-base >> text={type}");
+                await _page.WaitForTimeoutAsync(1000);
 
                 IElementHandle[] selector;
                 switch (type)
