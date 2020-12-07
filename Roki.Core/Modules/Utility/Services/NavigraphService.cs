@@ -82,14 +82,20 @@ namespace Roki.Modules.Utility.Services
             {
                 return chartName;
             }
+
             await _semaphore.WaitAsync();
             await EnsureContextCreated();
-            await SetCurrentAirport(icao);
+            if (!await SetCurrentAirport(icao))
+            {
+                await ctx.Channel.SendErrorAsync("Airport not found");
+                _semaphore.Release();
+                return null;
+            }
             
             await _page.ClickAsync("text=TAXI");
             await _page.ClickAsync("text=-9");
             await _page.WaitForTimeoutAsync(1500);
-            string content = await _page.GetContentAsync();
+            var content = await _page.GetContentAsync();
             _semaphore.Release();
             var index = content.IndexOf("https://airport.charts.api.navigraph.com/raw", StringComparison.OrdinalIgnoreCase);
             var substring = content.Substring(index);
@@ -115,17 +121,23 @@ namespace Roki.Modules.Utility.Services
             return false;
         }
 
-        private async Task SetCurrentAirport(string icao)
+        private async Task<bool> SetCurrentAirport(string icao)
         {
             if (_currentAirport != icao)
             {
                 await _page.FillAsync("id=mat-input-0", icao);
                 await _page.PressAsync("id=mat-input-0", "Enter");
                 await _page.WaitForTimeoutAsync(1500);
-                await _page.ClickAsync("css=.mat-focus-indicator.charts-btn.mat-mini-fab.mat-button-base.mat-primary.ng-star-inserted");
+                var selector = await _page.QuerySelectorAsync("css=.mat-focus-indicator.charts-btn.mat-mini-fab.mat-button-base.mat-primary.ng-star-inserted");
+                if (selector == null)
+                {
+                    return false;
+                }
                 await _page.WaitForTimeoutAsync(1500);
                 _currentAirport = icao;
             }
+
+            return true;
         }
 
         private async Task<string> GetChartPage(ICommandContext ctx, string icao, string type, string chart)
@@ -138,7 +150,13 @@ namespace Roki.Modules.Utility.Services
             }
             await _semaphore.WaitAsync();
             await EnsureContextCreated();
-            await SetCurrentAirport(icao);
+            if (!await SetCurrentAirport(icao))
+            {
+                await ctx.Channel.SendErrorAsync("Airport not found");
+                _semaphore.Release();
+                return null;
+            }
+
             await _page.ClickAsync($"text={type}");
             if (type == "APPR" && Regex.IsMatch(chart, "^\\d{1,2}(L|R|C)?$"))
             {
@@ -149,6 +167,7 @@ namespace Roki.Modules.Utility.Services
             if (selector.Length == 0)
             {
                 await ctx.Channel.SendErrorAsync($"No charts found for {icao} {chart}");
+                _semaphore.Release();
                 return null;
             }
             var match = false;
@@ -178,6 +197,7 @@ namespace Roki.Modules.Utility.Services
                 await ctx.Channel.EmbedAsync(new EmbedBuilder()
                     .WithOkColor().WithTitle($"{type} results for {icao}")
                     .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', options)}```")).ConfigureAwait(false);
+                _semaphore.Release();
                 return null;
             }
             
