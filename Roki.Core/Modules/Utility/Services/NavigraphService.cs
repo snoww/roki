@@ -92,7 +92,8 @@ namespace Roki.Modules.Utility.Services
                     await ctx.Channel.SendErrorAsync("Airport not found");
                     return null;
                 }
-            
+                
+                await _page.WaitForTimeoutAsync(1000);
                 await _page.ClickAsync("text=TAXI");
                 await _page.ClickAsync("text=-9");
                 await _page.WaitForTimeoutAsync(1500);
@@ -149,7 +150,6 @@ namespace Roki.Modules.Utility.Services
                 }
 
                 await selector.ClickAsync();
-                await _page.WaitForTimeoutAsync(1500);
                 _currentAirport = icao;
             }
 
@@ -174,7 +174,7 @@ namespace Roki.Modules.Utility.Services
                     await ctx.Channel.SendErrorAsync("Airport not found");
                     return null;
                 }
-
+                await _page.WaitForTimeoutAsync(1000);
                 await _page.ClickAsync($"text={type}");
 
                 IElementHandle[] selector;
