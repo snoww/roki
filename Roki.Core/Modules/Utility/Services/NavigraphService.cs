@@ -139,6 +139,11 @@ namespace Roki.Modules.Utility.Services
             await EnsureContextCreated();
             await SetCurrentAirport(icao);
             await _page.ClickAsync($"text={type}");
+            if (type == "APPR" && Regex.IsMatch(chart, "^\\d{1,2}(L|R|C)?$"))
+            {
+                await _page.ClickAsync($"text={chart}");
+                goto download;
+            }
             var selector = (await _page.QuerySelectorAllAsync($"text={chart}")).ToArray();
             if (selector.Length == 0)
             {
@@ -163,6 +168,10 @@ namespace Roki.Modules.Utility.Services
                 options.Add(name);
             }
 
+            if (options.Count == 1)
+            {
+                match = true;
+            }
             if (!match)
             {
                 await ctx.Channel.EmbedAsync(new EmbedBuilder()
@@ -170,6 +179,8 @@ namespace Roki.Modules.Utility.Services
                     .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', options)}```")).ConfigureAwait(false);
                 return null;
             }
+            
+            download:
             await _page.WaitForTimeoutAsync(1000);
             string content = await _page.GetContentAsync();
             _semaphore.Release();
