@@ -175,7 +175,7 @@ namespace Roki.Modules.Utility.Services
                     return null;
                 }
                 await _page.WaitForTimeoutAsync(1000);
-                await _page.ClickAsync($"text={type}");
+                await _page.ClickAsync($"css=.mat-focus-indicator.clr-star.mat-raised-button.mat-button-base >> text={type}");
 
                 IElementHandle[] selector;
                 switch (type)
@@ -220,11 +220,6 @@ namespace Roki.Modules.Utility.Services
                 foreach (var element in selector)
                 {
                     var name = await element.GetInnerTextAsync();
-                    // hard coding this
-                    if (name == "arrow_drop_down")
-                    {
-                        continue;
-                    }
                     if (chart == name)
                     {
                         match = true;
@@ -251,7 +246,6 @@ namespace Roki.Modules.Utility.Services
                     return null;
                 }
             
-                await _page.WaitForTimeoutAsync(1500);
                 string content = await _page.GetContentAsync();
                 var index = content.IndexOf("https://airport.charts.api.navigraph.com/raw", StringComparison.OrdinalIgnoreCase);
                 var substring = content.Substring(index);
