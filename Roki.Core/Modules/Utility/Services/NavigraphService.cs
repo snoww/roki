@@ -174,9 +174,9 @@ namespace Roki.Modules.Utility.Services
                     await ctx.Channel.SendErrorAsync("Airport not found");
                     return null;
                 }
-                await _page.WaitForTimeoutAsync(1000);
-                await _page.ClickAsync($"css=.mat-focus-indicator.clr-{type.ToLowerInvariant()} >> text={type}");
                 await _page.WaitForTimeoutAsync(1500);
+                await _page.ClickAsync($"css=.mat-focus-indicator.clr-{type.ToLowerInvariant()} >> text={type}");
+                await _page.WaitForTimeoutAsync(1000);
 
                 IElementHandle[] selector;
                 switch (type)
