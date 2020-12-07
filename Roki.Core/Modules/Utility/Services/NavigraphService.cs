@@ -83,26 +83,36 @@ namespace Roki.Modules.Utility.Services
                 return chartName;
             }
 
-            await _semaphore.WaitAsync();
-            await EnsureContextCreated();
-            if (!await SetCurrentAirport(icao))
+            try
             {
-                await ctx.Channel.SendErrorAsync("Airport not found");
+                await _semaphore.WaitAsync();
+                await EnsureContextCreated();
+                if (!await SetCurrentAirport(icao))
+                {
+                    await ctx.Channel.SendErrorAsync("Airport not found");
+                    return null;
+                }
+            
+                await _page.ClickAsync("text=TAXI");
+                await _page.ClickAsync("text=-9");
+                await _page.WaitForTimeoutAsync(1500);
+                var content = await _page.GetContentAsync();
+                var index = content.IndexOf("https://airport.charts.api.navigraph.com/raw", StringComparison.OrdinalIgnoreCase);
+                var substring = content.Substring(index);
+                int end = substring.IndexOf("\"", StringComparison.Ordinal);
+                var url = substring.Substring(0, end).Replace("amp;", "");
+                return GetImage(url, chartName);
+            }
+            catch
+            {
+                await ctx.Channel.SendErrorAsync("Something went wrong while trying to get charts. Please try again");
+            }
+            finally
+            {
                 _semaphore.Release();
-                return null;
             }
             
-            await _page.ClickAsync("text=TAXI");
-            await _page.ClickAsync("text=-9");
-            await _page.WaitForTimeoutAsync(1500);
-            var content = await _page.GetContentAsync();
-            _semaphore.Release();
-            var index = content.IndexOf("https://airport.charts.api.navigraph.com/raw", StringComparison.OrdinalIgnoreCase);
-            var substring = content.Substring(index);
-            int end = substring.IndexOf("\"", StringComparison.Ordinal);
-            var url = substring.Substring(0, end).Replace("amp;", "");
-            GetImage(url, chartName);
-            return chartName;
+            return null;
         }
 
         private static string GetChartName(string icao, string filename)
@@ -154,99 +164,107 @@ namespace Roki.Modules.Utility.Services
             {
                 return filename;
             }
-            await _semaphore.WaitAsync();
-            await EnsureContextCreated();
-            if (!await SetCurrentAirport(icao))
+
+            try
             {
-                await ctx.Channel.SendErrorAsync("Airport not found");
+                await _semaphore.WaitAsync();
+                await EnsureContextCreated();
+                if (!await SetCurrentAirport(icao))
+                {
+                    await ctx.Channel.SendErrorAsync("Airport not found");
+                    return null;
+                }
+
+                await _page.ClickAsync($"text={type}");
+
+                IElementHandle[] selector;
+                switch (type)
+                {
+                    case "SID":
+                    {
+                        selector = (await _page.QuerySelectorAllAsync("text=DEP")).ToArray();
+                        if (selector.Length == 0)
+                        {
+                            await ctx.Channel.SendErrorAsync($"No STAR charts found for {icao}");
+                            return null;
+                        }
+
+                        break;
+                    }
+                    case "STAR":
+                    {
+                        selector = (await _page.QuerySelectorAllAsync("text=ARR")).ToArray();
+                        if (selector.Length == 0)
+                        {
+                            await ctx.Channel.SendErrorAsync($"No SID charts found for {icao}");
+                            return null;
+                        }
+
+                        break;
+                    }
+                    default:
+                    {
+                        selector = (await _page.QuerySelectorAllAsync("text=RWY")).ToArray();
+                        if (selector.Length == 0)
+                        {
+                            await ctx.Channel.SendErrorAsync($"No APPR charts found for {icao}");
+                            return null;
+                        }
+
+                        break;
+                    }
+                }
+
+                var match = false;
+                var options = new List<string>();
+                foreach (var element in selector)
+                {
+                    var name = await element.GetInnerTextAsync();
+                    if (chart == name)
+                    {
+                        match = true;
+                        await element.ClickAsync();
+                        break;
+                    }
+                    if (options.Contains(name, StringComparer.Ordinal))
+                    {
+                        break;
+                    }
+                    options.Add(name);
+                }
+            
+                if (!match)
+                {
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder()
+                        .WithOkColor().WithTitle($"{type} results for {icao}")
+                        .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', options)}```")).ConfigureAwait(false);
+                    return null;
+                }
+            
+                await _page.WaitForTimeoutAsync(1500);
+                string content = await _page.GetContentAsync();
+                var index = content.IndexOf("https://airport.charts.api.navigraph.com/raw", StringComparison.OrdinalIgnoreCase);
+                var substring = content.Substring(index);
+                int end = substring.IndexOf("\"", StringComparison.Ordinal);
+                var url = substring.Substring(0, end).Replace("amp;", "");
+                return GetImage(url, filename);
+            }
+            catch
+            {
+                await ctx.Channel.SendErrorAsync("Something went wrong while trying to get charts. Please try again");
+            }
+            finally
+            {
                 _semaphore.Release();
-                return null;
-            }
-
-            await _page.ClickAsync($"text={type}");
-
-            IElementHandle[] selector;
-            switch (type)
-            {
-                case "SID":
-                {
-                    selector = (await _page.QuerySelectorAllAsync("text=DEP")).ToArray();
-                    if (selector.Length == 0)
-                    {
-                        await ctx.Channel.SendErrorAsync($"No STAR charts found for {icao}");
-                        _semaphore.Release();
-                        return null;
-                    }
-
-                    break;
-                }
-                case "STAR":
-                {
-                    selector = (await _page.QuerySelectorAllAsync("text=ARR")).ToArray();
-                    if (selector.Length == 0)
-                    {
-                        await ctx.Channel.SendErrorAsync($"No SID charts found for {icao}");
-                        _semaphore.Release();
-                        return null;
-                    }
-
-                    break;
-                }
-                default:
-                {
-                    selector = (await _page.QuerySelectorAllAsync("text=RWY")).ToArray();
-                    if (selector.Length == 0)
-                    {
-                        await ctx.Channel.SendErrorAsync($"No APPR charts found for {icao}");
-                        _semaphore.Release();
-                        return null;
-                    }
-
-                    break;
-                }
-            }
-
-            var match = false;
-            var options = new List<string>();
-            foreach (var element in selector)
-            {
-                var name = await element.GetInnerTextAsync();
-                if (chart == name)
-                {
-                    match = true;
-                    await element.ClickAsync();
-                    break;
-                }
-                if (options.Contains(name, StringComparer.Ordinal))
-                {
-                    break;
-                }
-                options.Add(name);
             }
             
-            if (!match)
-            {
-                await ctx.Channel.EmbedAsync(new EmbedBuilder()
-                    .WithOkColor().WithTitle($"{type} results for {icao}")
-                    .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', options)}```")).ConfigureAwait(false);
-                _semaphore.Release();
-                return null;
-            }
-            
-            await _page.WaitForTimeoutAsync(1500);
-            string content = await _page.GetContentAsync();
-            _semaphore.Release();
-            var index = content.IndexOf("https://airport.charts.api.navigraph.com/raw", StringComparison.OrdinalIgnoreCase);
-            var substring = content.Substring(index);
-            int end = substring.IndexOf("\"", StringComparison.Ordinal);
-            var url = substring.Substring(0, end).Replace("amp;", "");
-            GetImage(url, filename);
-            return filename;
+            return null;
         }
 
-        private void GetImage(string url, string filename)
+        private string GetImage(string url, string filename)
         {
             _webClient.DownloadFile(url, filename);
+            return filename;
         }
 
         private async Task DisposeContext()
