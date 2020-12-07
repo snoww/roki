@@ -240,6 +240,11 @@ namespace Roki.Modules.Utility.Services
             
                 if (!match)
                 {
+                    if (options.Count == 0)
+                    {
+                        await ctx.Channel.SendErrorAsync($"No APP charts found for {icao}, please try again if there should eb charts.");
+                        return null;
+                    }
                     await ctx.Channel.EmbedAsync(new EmbedBuilder()
                         .WithOkColor().WithTitle($"{type} results for {icao}")
                         .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', options)}```")).ConfigureAwait(false);
