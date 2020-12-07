@@ -50,7 +50,7 @@ namespace Roki.Modules.Utility.Services
             if (_page == null)
             {
                 await CreateContext();
-                await Task.Run(async () =>
+                var _ = Task.Run(async () =>
                 {
                     await Task.Delay(TimeSpan.FromMinutes(30));
                     await DisposeContext();
