@@ -21,6 +21,8 @@ namespace Roki.Services
         string TwitterAccessSecret { get; }
         string IexToken { get; }
         string WolframAlphaApi { get; }
+        string NavigraphUsername { get; }
+        string NavigraphPassword { get; }
 
         ImmutableArray<ulong> OwnerIds { get; }
 
@@ -46,6 +48,8 @@ namespace Roki.Services
         public string TwitterAccessSecret { get; }
         public string IexToken { get; }
         public string WolframAlphaApi { get; }
+        public string NavigraphUsername { get; }
+        public string NavigraphPassword { get; }
         public ImmutableArray<ulong> OwnerIds { get; }
 
         public string RedisConfig { get; }
@@ -83,6 +87,8 @@ namespace Roki.Services
                 TwitterAccessSecret = data[nameof(TwitterAccessSecret)];
                 IexToken = data[nameof(IexToken)];
                 WolframAlphaApi = data[nameof(WolframAlphaApi)];
+                NavigraphUsername = data[nameof(NavigraphUsername)];
+                NavigraphPassword = data[nameof(NavigraphPassword)];
 
                 if (!ulong.TryParse(data[nameof(ClientId)], out var clId))
                     clId = 0;
