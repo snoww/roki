@@ -42,7 +42,7 @@ namespace Roki.Modules.Utility.Services
             await _page.FillAsync("id=username", _config.NavigraphUsername);
             await _page.FillAsync("id=password", _config.NavigraphPassword);
             await _page.PressAsync("id=username", "Enter");
-            await _page.WaitForTimeoutAsync(1000);
+            await _page.WaitForTimeoutAsync(1500);
         }
 
         private async Task EnsureContextCreated()
@@ -77,7 +77,7 @@ namespace Roki.Modules.Utility.Services
         public async Task<string> GetAirport(ICommandContext ctx, string icao)
         {
             var typing = ctx.Channel.EnterTypingState();
-            var chartName = $"{icao}-airport";
+            var chartName = $"data/charts/{icao}-airport.png";
             if (ChartExists(chartName))
             {
                 return chartName;
@@ -88,7 +88,7 @@ namespace Roki.Modules.Utility.Services
             
             await _page.ClickAsync("text=TAXI");
             await _page.ClickAsync("text=-9");
-            await _page.WaitForTimeoutAsync(1000);
+            await _page.WaitForTimeoutAsync(1500);
             string content = await _page.GetContentAsync();
             _semaphore.Release();
             var index = content.IndexOf("https://airport.charts.api.navigraph.com/raw", StringComparison.OrdinalIgnoreCase);
@@ -102,7 +102,7 @@ namespace Roki.Modules.Utility.Services
 
         private static string GetChartName(string icao, string filename)
         {
-            return $"charts/{icao}_{Regex.Replace(filename, "[^a-zA-Z0-9 -]", "")}.png";
+            return $"data/charts/{icao}_{Regex.Replace(filename, "[^a-zA-Z0-9 -]", "")}.png";
         }
 
         private static bool ChartExists(string filename)
