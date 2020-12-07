@@ -71,7 +71,7 @@ namespace Roki.Modules.Utility.Services
         public async Task<string> GetAPPR(ICommandContext ctx, string icao, string appr)
         {
 
-            return await GetChartPage(ctx, icao, "APPR", appr);
+            return await GetChartPage(ctx, icao, "APP", appr);
         }
 
         public async Task<string> GetAirport(ICommandContext ctx, string icao)
@@ -207,7 +207,7 @@ namespace Roki.Modules.Utility.Services
                         selector = (await _page.QuerySelectorAllAsync("text=RWY")).ToArray();
                         if (selector.Length == 0)
                         {
-                            await ctx.Channel.SendErrorAsync($"No APPR charts found for {icao}");
+                            await ctx.Channel.SendErrorAsync($"No APP charts found for {icao}");
                             return null;
                         }
 
@@ -220,6 +220,11 @@ namespace Roki.Modules.Utility.Services
                 foreach (var element in selector)
                 {
                     var name = await element.GetInnerTextAsync();
+                    // hard coding this
+                    if (name == "arrow_drop_down")
+                    {
+                        continue;
+                    }
                     if (chart == name)
                     {
                         match = true;
