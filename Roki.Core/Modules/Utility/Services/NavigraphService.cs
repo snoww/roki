@@ -133,6 +133,8 @@ namespace Roki.Modules.Utility.Services
                 {
                     return false;
                 }
+
+                await selector.ClickAsync();
                 await _page.WaitForTimeoutAsync(1500);
                 _currentAirport = icao;
             }
