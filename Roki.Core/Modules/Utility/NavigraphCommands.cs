@@ -21,7 +21,7 @@ namespace Roki.Modules.Utility
                     return;
                 }
 
-                if (sid.Split().Length < 2 && Regex.IsMatch(sid, "\\d+"))
+                if (sid.Split().Length < 2 || !Regex.IsMatch(sid, "\\d+"))
                 {
                     await Context.Channel.SendErrorAsync("Invalid SID.").ConfigureAwait(false);
                     return;
@@ -42,7 +42,7 @@ namespace Roki.Modules.Utility
                     await Context.Channel.SendErrorAsync("Invalid ICAO").ConfigureAwait(false);
                     return;
                 }
-                if (star.Split().Length < 2 && Regex.IsMatch(star, "\\d+"))
+                if (star.Split().Length < 2 || !Regex.IsMatch(star, "\\d+"))
                 {
                     await Context.Channel.SendErrorAsync("Invalid STAR.").ConfigureAwait(false);
                     return;
