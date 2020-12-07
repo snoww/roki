@@ -76,7 +76,7 @@ namespace Roki.Modules.Utility.Services
 
         public async Task<string> GetAirport(ICommandContext ctx, string icao)
         {
-            var typing = ctx.Channel.EnterTypingState();
+            using var typing = ctx.Channel.EnterTypingState();
             var chartName = $"data/charts/{icao}-airport.png";
             if (ChartExists(chartName))
             {
@@ -96,7 +96,6 @@ namespace Roki.Modules.Utility.Services
             int end = substring.IndexOf("\"", StringComparison.Ordinal);
             var url = substring.Substring(0, end).Replace("amp;", "");
             GetImage(url, chartName);
-            typing.Dispose();
             return chartName;
         }
 
@@ -130,7 +129,7 @@ namespace Roki.Modules.Utility.Services
 
         private async Task<string> GetChartPage(ICommandContext ctx, string icao, string type, string chart)
         {
-            var typing = ctx.Channel.EnterTypingState();
+            using var typing = ctx.Channel.EnterTypingState();
             var filename = GetChartName(icao, chart);
             if (ChartExists(filename))
             {
@@ -179,7 +178,6 @@ namespace Roki.Modules.Utility.Services
             int end = substring.IndexOf("\"", StringComparison.Ordinal);
             var url = substring.Substring(0, end).Replace("amp;", "");
             GetImage(url, filename);
-            typing.Dispose();
             return filename;
         }
 
