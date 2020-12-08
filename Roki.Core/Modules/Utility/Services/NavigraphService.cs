@@ -23,7 +23,7 @@ namespace Roki.Modules.Utility.Services
         private IBrowser _browser;
         private IPage _page;
         private string _currentAirport;
-        private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+        private SemaphoreSlim _semaphore;
 
         public NavigraphService(IRokiConfig config)
         {
@@ -33,6 +33,8 @@ namespace Roki.Modules.Utility.Services
 
         private async Task CreateContext()
         {
+            _semaphore = new SemaphoreSlim(1, 1);
+            await _semaphore.WaitAsync();
             _playwright = await Playwright.CreateAsync();
             _browser = await _playwright.Firefox.LaunchAsync();
             _page = await _browser.NewPageAsync();
@@ -43,6 +45,7 @@ namespace Roki.Modules.Utility.Services
             await _page.FillAsync("id=password", _config.NavigraphPassword);
             await _page.PressAsync("id=username", "Enter");
             await _page.WaitForTimeoutAsync(1500);
+            _semaphore.Release();
         }
 
         private async Task EnsureContextCreated()
@@ -281,6 +284,7 @@ namespace Roki.Modules.Utility.Services
             await _page.CloseAsync();
             await _browser.CloseAsync();
             _playwright.Dispose();
+            _semaphore.Dispose();
         }
     }
 }
