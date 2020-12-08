@@ -107,8 +107,9 @@ namespace Roki.Modules.Utility.Services
                 var url = substring.Substring(0, end).Replace("amp;", "");
                 return GetImage(url, chartName);
             }
-            catch
+            catch (Exception e)
             {
+                Console.WriteLine(e);
                 await ctx.Channel.SendErrorAsync("Something went wrong while trying to get charts. Please try again");
             }
             finally
