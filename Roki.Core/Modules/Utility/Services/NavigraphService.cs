@@ -88,8 +88,8 @@ namespace Roki.Modules.Utility.Services
 
             try
             {
-                await _semaphore.WaitAsync();
                 await EnsureContextCreated();
+                await _semaphore.WaitAsync();
                 if (!await SetCurrentAirport(icao))
                 {
                     await ctx.Channel.SendErrorAsync("Airport not found");
@@ -171,8 +171,8 @@ namespace Roki.Modules.Utility.Services
 
             try
             {
-                await _semaphore.WaitAsync();
                 await EnsureContextCreated();
+                await _semaphore.WaitAsync();
                 if (!await SetCurrentAirport(icao))
                 {
                     await ctx.Channel.SendErrorAsync("Airport not found");
