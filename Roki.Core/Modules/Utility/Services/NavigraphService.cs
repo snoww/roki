@@ -286,6 +286,10 @@ namespace Roki.Modules.Utility.Services
             await _browser.CloseAsync();
             _playwright.Dispose();
             _semaphore.Dispose();
+            _page = null;
+            _browser = null;
+            _playwright = null;
+            _semaphore = null;
         }
     }
 }
