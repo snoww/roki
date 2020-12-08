@@ -176,7 +176,6 @@ namespace Roki.Modules.Utility.Services
                 }
                 await _page.WaitForTimeoutAsync(1500);
                 await _page.ClickAsync($"css=.mat-focus-indicator.clr-{type.ToLowerInvariant()} >> text={type}");
-                await _page.WaitForTimeoutAsync(1500);
 
                 IElementHandle[] selector;
                 switch (type)
@@ -249,7 +248,8 @@ namespace Roki.Modules.Utility.Services
                         .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', options)}```")).ConfigureAwait(false);
                     return null;
                 }
-            
+                
+                await _page.WaitForTimeoutAsync(1000);
                 string content = await _page.GetContentAsync();
                 var index = content.IndexOf("https://airport.charts.api.navigraph.com/raw", StringComparison.OrdinalIgnoreCase);
                 var substring = content.Substring(index);
