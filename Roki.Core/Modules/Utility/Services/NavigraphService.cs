@@ -244,12 +244,27 @@ namespace Roki.Modules.Utility.Services
                 {
                     if (options.Count == 0)
                     {
-                        await ctx.Channel.SendErrorAsync($"No APP charts found for {icao}, please try again if there should be charts.");
+                        await ctx.Channel.SendErrorAsync($"No charts found for {icao}, please try again if there should be charts.");
                         return null;
                     }
-                    await ctx.Channel.EmbedAsync(new EmbedBuilder()
-                        .WithOkColor().WithTitle($"{type} results for {icao}")
-                        .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', options)}```")).ConfigureAwait(false);
+
+                    var list = string.Join('\n', options);
+                    if (list.Length > 1900)
+                    {
+                        // hard coding pagination
+                        await ctx.Channel.EmbedAsync(new EmbedBuilder()
+                            .WithOkColor().WithTitle($"{type} results for {icao} 1/2")
+                            .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', options.Take(options.Count/2))}```")).ConfigureAwait(false);
+                        await ctx.Channel.EmbedAsync(new EmbedBuilder()
+                            .WithOkColor().WithTitle($"{type} results for {icao} 2/2")
+                            .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', options.Skip(options.Count/2))}```")).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        await ctx.Channel.EmbedAsync(new EmbedBuilder()
+                            .WithOkColor().WithTitle($"{type} results for {icao}")
+                            .WithDescription($"Use command again with the exact name from below:\n```{list}```")).ConfigureAwait(false);
+                    }
                     return null;
                 }
                 
