@@ -102,14 +102,6 @@ namespace Roki.Modules.Utility.Services
                 : $"data/charts/{icao}/{icao}_{new string(Array.FindAll(filename.ToArray(), char.IsLetterOrDigit))}.png".ToLowerInvariant();
         }
 
-        private static bool ChartExists(string filename)
-        {
-            var path = filename;
-            if (!File.Exists(path)) return false;
-            var created = File.GetCreationTimeUtc(path);
-            return created - DateTime.UtcNow <= TimeSpan.FromDays(30);
-        }
-
         private async Task<bool> SetCurrentAirport(string icao)
         {
             if (_currentAirport != icao)
@@ -241,131 +233,9 @@ namespace Roki.Modules.Utility.Services
             }
         }
 
-        private async Task<string> GetChartPage(ICommandContext ctx, string icao, string type, string chart)
-        {
-            using var typing = ctx.Channel.EnterTypingState();
-            var filename = GetChartName(icao, chart);
-            if (ChartExists(filename))
-            {
-                return filename;
-            }
-
-            try
-            {
-                await EnsureContextCreated();
-                await _semaphore.WaitAsync();
-                if (!await SetCurrentAirport(icao))
-                {
-                    await ctx.Channel.SendErrorAsync("Airport not found");
-                    return null;
-                }
-                await _page.WaitForTimeoutAsync(1500);
-                await _page.ClickAsync($"css=.mat-focus-indicator.clr-{type.ToLowerInvariant()} >> text={type}");
-
-                IElementHandle[] selector;
-                switch (type)
-                {
-                    case "SID":
-                    {
-                        selector = (await _page.QuerySelectorAllAsync("text=DEP")).ToArray();
-                        if (selector.Length == 0)
-                        {
-                            await ctx.Channel.SendErrorAsync($"No STAR charts found for {icao}");
-                            return null;
-                        }
-
-                        break;
-                    }
-                    case "STAR":
-                    {
-                        selector = (await _page.QuerySelectorAllAsync("text=ARR")).ToArray();
-                        if (selector.Length == 0)
-                        {
-                            await ctx.Channel.SendErrorAsync($"No SID charts found for {icao}");
-                            return null;
-                        }
-
-                        break;
-                    }
-                    default:
-                    {
-                        selector = (await _page.QuerySelectorAllAsync("text=RWY")).ToArray();
-                        if (selector.Length == 0)
-                        {
-                            await ctx.Channel.SendErrorAsync($"No APP charts found for {icao}");
-                            return null;
-                        }
-
-                        break;
-                    }
-                }
-
-                var match = false;
-                var options = new List<string>();
-                foreach (var element in selector)
-                {
-                    var name = await element.GetInnerTextAsync();
-                    // hardcode skip
-                    if (name == "arrow_drop_down")
-                        continue;
-                    if (chart == name)
-                    {
-                        match = true;
-                        await element.ClickAsync();
-                        break;
-                    }
-                    if (options.Contains(name, StringComparer.Ordinal))
-                    {
-                        break;
-                    }
-                    options.Add(name);
-                }
-            
-                if (!match)
-                {
-                    if (options.Count == 0)
-                    {
-                        await ctx.Channel.SendErrorAsync($"No charts found for {icao}, please try again if there should be charts.");
-                        return null;
-                    }
-
-                    var list = string.Join('\n', options);
-                    if (list.Length > 1900)
-                    {
-                        // hard coding pagination
-                        await ctx.Channel.EmbedAsync(new EmbedBuilder()
-                            .WithOkColor().WithTitle($"{type} results for {icao} 1/2")
-                            .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', options.Take(options.Count/2))}```")).ConfigureAwait(false);
-                        await ctx.Channel.EmbedAsync(new EmbedBuilder()
-                            .WithOkColor().WithTitle($"{type} results for {icao} 2/2")
-                            .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', options.Skip(options.Count/2))}```")).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        await ctx.Channel.EmbedAsync(new EmbedBuilder()
-                            .WithOkColor().WithTitle($"{type} results for {icao}")
-                            .WithDescription($"Use command again with the exact name from below:\n```{list}```")).ConfigureAwait(false);
-                    }
-                    return null;
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                await ctx.Channel.SendErrorAsync("Something went wrong while trying to get charts. Please try again");
-            }
-            finally
-            {
-                _semaphore.Release();
-            }
-            
-            return null;
-        }
-
-        private string GetImage(string url, string filename)
+        private void GetImage(string url, string filename)
         {
             _webClient.DownloadFile(url, filename);
-            return filename;
         }
 
         private async Task DisposeContext()
