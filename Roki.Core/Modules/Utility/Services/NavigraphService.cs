@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text.RegularExpressions;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using HtmlAgilityPack;
 using PlaywrightSharp;
 using Roki.Extensions;
 using Roki.Services;
@@ -17,6 +19,7 @@ namespace Roki.Modules.Utility.Services
     public class NavigraphService : IRokiService
     {
         private readonly IRokiConfig _config;
+        private readonly IHttpClientFactory _http;
 
         private readonly WebClient _webClient;
         private IPlaywright _playwright;
@@ -25,10 +28,11 @@ namespace Roki.Modules.Utility.Services
         private string _currentAirport;
         private SemaphoreSlim _semaphore;
 
-        public NavigraphService(IRokiConfig config)
+        public NavigraphService(IRokiConfig config, IHttpClientFactory http)
         {
             _config = config;
             _webClient = new WebClient();
+            _http = http;
         }
 
         private async Task CreateContext()
@@ -63,71 +67,39 @@ namespace Roki.Modules.Utility.Services
 
         public async Task<string> GetSTAR(ICommandContext ctx, string icao, string star)
         {
-            return await GetChartPage(ctx, icao, "STAR", star);
+            using var typing = ctx.Channel.EnterTypingState();
+            await DownloadAllCharts(ctx, icao, "STAR");
+            return GetChartName(icao, star);
         }
         
         public async Task<string> GetSID(ICommandContext ctx, string icao, string sid)
         {
-            return await GetChartPage(ctx, icao, "SID", sid);
+            using var typing = ctx.Channel.EnterTypingState();
+            await DownloadAllCharts(ctx, icao, "SID");
+            return GetChartName(icao, sid);
         }
 
         public async Task<string> GetAPPR(ICommandContext ctx, string icao, string appr)
         {
 
-            return await GetChartPage(ctx, icao, "APP", appr);
-        }
-
-        public async Task<string> GetAirport(ICommandContext ctx, string icao)
-        {
             using var typing = ctx.Channel.EnterTypingState();
-            var chartName = $"data/charts/{icao}-airport.png".ToLowerInvariant();
-            if (ChartExists(chartName))
-            {
-                return chartName;
-            }
+            await DownloadAllCharts(ctx, icao, "APPR");
+            return GetChartName(icao, appr);
+        }
+        
+        public async Task<string> GetTAXI(ICommandContext ctx, string icao, string taxi)
+        {
 
-            try
-            {
-                await EnsureContextCreated();
-                await _semaphore.WaitAsync();
-                if (!await SetCurrentAirport(icao))
-                {
-                    await ctx.Channel.SendErrorAsync("Airport not found");
-                    return null;
-                }
-                
-                await _page.WaitForTimeoutAsync(1500);
-                await _page.ClickAsync("text=TAXI");
-                await _page.ClickAsync("text=-9");
-                await _page.WaitForTimeoutAsync(1000);
-                var content = await _page.GetContentAsync();
-                var index = content.IndexOf("https://airport.charts.api.navigraph.com/raw", StringComparison.OrdinalIgnoreCase);
-                var substring = content.Substring(index);
-                int end = substring.IndexOf("\"", StringComparison.Ordinal);
-                var url = substring.Substring(0, end).Replace("amp;", "");
-                return GetImage(url, chartName);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                await ctx.Channel.SendErrorAsync("Something went wrong while trying to get charts. Please try again");
-            }
-            finally
-            {
-                _semaphore.Release();
-            }
-            
-            return null;
+            using var typing = ctx.Channel.EnterTypingState();
+            await DownloadAllCharts(ctx, icao, "TAXI");
+            return GetChartName(icao, taxi);
         }
 
         private static string GetChartName(string icao, string filename)
         {
-            if (filename == null)
-            {
-                return $"data/charts/{icao}_NA.png".ToLowerInvariant();
-            }
-            var chars = Array.FindAll(filename.ToArray(), char.IsLetterOrDigit);
-            return $"data/charts/{icao}_{new string(chars)}.png".ToLowerInvariant();
+            return filename == null 
+                ? $"data/charts/{icao}/{icao}_NA.png".ToLowerInvariant() 
+                : $"data/charts/{icao}/{icao}_{new string(Array.FindAll(filename.ToArray(), char.IsLetterOrDigit))}.png".ToLowerInvariant();
         }
 
         private static bool ChartExists(string filename)
@@ -135,9 +107,7 @@ namespace Roki.Modules.Utility.Services
             var path = filename;
             if (!File.Exists(path)) return false;
             var created = File.GetCreationTimeUtc(path);
-            if (created - DateTime.UtcNow <= TimeSpan.FromDays(14)) return true;
-            File.Delete(path);
-            return false;
+            return created - DateTime.UtcNow <= TimeSpan.FromDays(30);
         }
 
         private async Task<bool> SetCurrentAirport(string icao)
@@ -158,6 +128,117 @@ namespace Roki.Modules.Utility.Services
             }
 
             return true;
+        }
+
+        private async Task DownloadAllCharts(ICommandContext ctx, string icao, string type)
+        {
+            if (Directory.Exists($"data/charts/{icao}") && Directory.GetCreationTime($"data/charts/{icao}") - DateTime.UtcNow <= TimeSpan.FromDays(30))
+            {
+                return;
+            }
+
+            try
+            {
+                await EnsureContextCreated();
+                await _semaphore.WaitAsync();
+                if (!await SetCurrentAirport(icao))
+                {
+                    await ctx.Channel.SendErrorAsync("Invalid ICAO");
+                    return;
+                }
+
+                var chartIds = new Dictionary<string, string>();
+                var htmlDoc = new HtmlDocument();
+                var selectedNames = new List<string>();
+                
+                // get STARs
+                await _page.WaitForTimeoutAsync(1000);
+                await _page.ClickAsync("css=.mat-focus-indicator.clr-star >> text=STAR");
+                await _page.WaitForTimeoutAsync(1000);
+                htmlDoc.LoadHtml(await _page.GetContentAsync());
+                var nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
+                foreach (var htmlNode in nodes)
+                {
+                    var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
+                    var idNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/small").InnerText);
+                    if (type == "STAR") selectedNames.Add(nameNode);
+                    chartIds.TryAdd(nameNode, idNode);
+                }
+                
+                // get SIDSs
+                await _page.ClickAsync("css=.mat-focus-indicator.clr-sid >> text=SID");
+                await _page.WaitForTimeoutAsync(1000);
+                htmlDoc.LoadHtml(await _page.GetContentAsync());
+                nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
+                foreach (var htmlNode in nodes)
+                {
+                    var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
+                    var idNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/small").InnerText);
+                    if (type == "SID") selectedNames.Add(nameNode);
+                    chartIds.TryAdd(nameNode, idNode);
+                }
+                
+                // get APPRs
+                await _page.ClickAsync("css=.mat-focus-indicator.clr-app >> text=APP");
+                await _page.WaitForTimeoutAsync(1000);
+                htmlDoc.LoadHtml(await _page.GetContentAsync());
+                nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
+                foreach (var htmlNode in nodes)
+                {
+                    var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
+                    var idNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/small").InnerText);
+                    if (type == "APPR") selectedNames.Add(nameNode);
+                    chartIds.TryAdd(nameNode, idNode);
+                }
+                
+                // get TAXIs
+                await _page.ClickAsync("css=.mat-focus-indicator.clr-taxi >> text=TAXI");
+                await _page.WaitForTimeoutAsync(1000);
+                htmlDoc.LoadHtml(await _page.GetContentAsync());
+                nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
+                foreach (var htmlNode in nodes)
+                {
+                    var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
+                    var idNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/small").InnerText);
+                    if (type == "TAXI") selectedNames.Add(nameNode);
+                    chartIds.TryAdd(nameNode, idNode);
+                }
+
+                var element = await _page.EvaluateAsync("window.localStorage.getItem(\"access_token\")");
+                var token = element?.GetString();
+                using var http = _http.CreateClient();
+                http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                Directory.CreateDirectory($"data/charts/{icao}");
+                foreach (var (name, id) in chartIds)
+                {
+                    var imageUrl = await http.GetStringAsync(
+                        $"https://charts.api.navigraph.com/2/airports/{icao.ToUpperInvariant()}/signedurls/{icao.ToLowerInvariant()}{new string(Array.FindAll(id.ToArray(), char.IsLetterOrDigit)).ToLowerInvariant()}.png");
+                    GetImage(imageUrl, GetChartName(icao, name));
+                }
+
+                var desc = string.Join('\n', selectedNames);
+                if (desc.Length >= 1990)
+                {
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder()
+                        .WithOkColor().WithTitle($"{type} results for {icao.ToUpperInvariant()} 1/2")
+                        .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', selectedNames.Take(selectedNames.Count/2))}```")).ConfigureAwait(false);
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder()
+                        .WithOkColor().WithTitle($"{type} results for {icao.ToUpperInvariant()} 2/2")
+                        .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', selectedNames.Skip(selectedNames.Count/2))}```")).ConfigureAwait(false);
+                }
+                else
+                {
+                    await ctx.Channel.EmbedAsync(new EmbedBuilder()
+                        .WithOkColor().WithTitle($"{type} results for {icao.ToUpperInvariant()}")
+                        .WithDescription($"Use command again with the exact name from below:\n```{desc}```")).ConfigureAwait(false);
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                await ctx.Channel.SendErrorAsync("Something went wrong, please try again.");
+            }
         }
 
         private async Task<string> GetChartPage(ICommandContext ctx, string icao, string type, string chart)
@@ -267,14 +348,6 @@ namespace Roki.Modules.Utility.Services
                     }
                     return null;
                 }
-                
-                await _page.WaitForTimeoutAsync(1000);
-                string content = await _page.GetContentAsync();
-                var index = content.IndexOf("https://airport.charts.api.navigraph.com/raw", StringComparison.OrdinalIgnoreCase);
-                var substring = content.Substring(index);
-                int end = substring.IndexOf("\"", StringComparison.Ordinal);
-                var url = substring.Substring(0, end).Replace("amp;", "");
-                return GetImage(url, filename);
             }
             catch (Exception e)
             {
