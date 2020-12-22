@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -69,6 +70,11 @@ namespace Roki.Modules.Utility.Services
         {
             using var typing = ctx.Channel.EnterTypingState();
             await DownloadAllCharts(ctx, icao, "STAR");
+            if (string.IsNullOrWhiteSpace(star))
+            {
+                await SendInfo(ctx, icao, "star");
+                return null;
+            }
             return GetChartName(icao, star);
         }
         
@@ -76,6 +82,11 @@ namespace Roki.Modules.Utility.Services
         {
             using var typing = ctx.Channel.EnterTypingState();
             await DownloadAllCharts(ctx, icao, "SID");
+            if (string.IsNullOrWhiteSpace(sid))
+            {
+                await SendInfo(ctx, icao, "sid");
+                return null;
+            }
             return GetChartName(icao, sid);
         }
 
@@ -84,6 +95,11 @@ namespace Roki.Modules.Utility.Services
 
             using var typing = ctx.Channel.EnterTypingState();
             await DownloadAllCharts(ctx, icao, "APPR");
+            if (string.IsNullOrWhiteSpace(appr))
+            {
+                await SendInfo(ctx, icao, "appr");
+                return null;
+            }
             return GetChartName(icao, appr);
         }
         
@@ -92,7 +108,32 @@ namespace Roki.Modules.Utility.Services
 
             using var typing = ctx.Channel.EnterTypingState();
             await DownloadAllCharts(ctx, icao, "TAXI");
+            if (string.IsNullOrWhiteSpace(taxi))
+            {
+                await SendInfo(ctx, icao, "taxi");
+                return null;
+            }
             return GetChartName(icao, taxi);
+        }
+
+        private static async Task SendInfo(ICommandContext ctx, string icao, string type)
+        {
+            var desc = await File.ReadAllLinesAsync($"data/charts/{icao}/{type}s.txt");
+            if (desc.Sum(x => x.Length) >= 1990)
+            {
+                await ctx.Channel.EmbedAsync(new EmbedBuilder()
+                    .WithOkColor().WithTitle($"{type.ToUpperInvariant()} results for {icao.ToUpperInvariant()} 1/2")
+                    .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', desc.Take(desc.Length / 2))}```")).ConfigureAwait(false);
+                await ctx.Channel.EmbedAsync(new EmbedBuilder()
+                    .WithOkColor().WithTitle($"{type.ToUpperInvariant()} results for {icao.ToUpperInvariant()} 2/2")
+                    .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', desc.Skip(desc.Length / 2))}```")).ConfigureAwait(false);
+            }
+            else
+            {
+                await ctx.Channel.EmbedAsync(new EmbedBuilder()
+                    .WithOkColor().WithTitle($"{type.ToUpperInvariant()} results for {icao.ToUpperInvariant()}")
+                    .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', desc)}```")).ConfigureAwait(false);
+            }
         }
 
         private static string GetChartName(string icao, string filename)
@@ -141,61 +182,70 @@ namespace Roki.Modules.Utility.Services
 
                 var chartIds = new Dictionary<string, string>();
                 var htmlDoc = new HtmlDocument();
-                var selectedNames = new List<string>();
-                
+
                 // get STARs
                 await _page.WaitForTimeoutAsync(1000);
                 await _page.ClickAsync("css=.mat-focus-indicator.clr-star >> text=STAR");
                 await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 var nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
+                Directory.CreateDirectory($"data/charts/{icao}");
+                var stars = new StringBuilder();
                 foreach (var htmlNode in nodes)
                 {
                     var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
                     var idNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/small").InnerText);
-                    if (type == "STAR") selectedNames.Add(nameNode);
                     chartIds.TryAdd(nameNode, idNode);
+                    stars.AppendLine(nameNode);
                 }
-                
+                await File.WriteAllTextAsync($"data/charts/{icao}/stars.txt", stars.ToString());
+
                 // get SIDSs
                 await _page.ClickAsync("css=.mat-focus-indicator.clr-sid >> text=SID");
                 await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
+                var sids = new StringBuilder();
                 foreach (var htmlNode in nodes)
                 {
                     var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
                     var idNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/small").InnerText);
-                    if (type == "SID") selectedNames.Add(nameNode);
                     chartIds.TryAdd(nameNode, idNode);
+                    sids.AppendLine(nameNode);
                 }
-                
+                await File.WriteAllTextAsync($"data/charts/{icao}/sids.txt", sids.ToString());
+
                 // get APPRs
                 await _page.ClickAsync("css=.mat-focus-indicator.clr-app >> text=APP");
                 await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
+                var apprs = new StringBuilder();
                 foreach (var htmlNode in nodes)
                 {
                     var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
                     var idNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/small").InnerText);
-                    if (type == "APPR") selectedNames.Add(nameNode);
                     chartIds.TryAdd(nameNode, idNode);
+                    apprs.AppendLine(nameNode);
                 }
-                
+                await File.WriteAllTextAsync($"data/charts/{icao}/apprs.txt", apprs.ToString());
+
+
                 // get TAXIs
                 await _page.ClickAsync("css=.mat-focus-indicator.clr-taxi >> text=TAXI");
                 await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
+                var taxis = new StringBuilder();
                 foreach (var htmlNode in nodes)
                 {
                     var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
                     var idNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/small").InnerText);
-                    if (type == "TAXI") selectedNames.Add(nameNode);
                     chartIds.TryAdd(nameNode, idNode);
+                    taxis.AppendLine(nameNode);
                 }
-
+                await File.WriteAllTextAsync($"data/charts/{icao}/taxis.txt", taxis.ToString());
+                
                 var element = await _page.EvaluateAsync("window.localStorage.getItem(\"access_token\")");
                 var token = element?.GetString();
                 using var http = _http.CreateClient();
@@ -207,32 +257,18 @@ namespace Roki.Modules.Utility.Services
                         $"https://charts.api.navigraph.com/2/airports/{icao.ToUpperInvariant()}/signedurls/{icao.ToLowerInvariant()}{new string(Array.FindAll(id.ToArray(), char.IsLetterOrDigit)).ToLowerInvariant()}.png");
                     GetImage(imageUrl, GetChartName(icao, name));
                 }
-
-                var desc = string.Join('\n', selectedNames);
-                if (desc.Length >= 1990)
-                {
-                    await ctx.Channel.EmbedAsync(new EmbedBuilder()
-                        .WithOkColor().WithTitle($"{type} results for {icao.ToUpperInvariant()} 1/2")
-                        .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', selectedNames.Take(selectedNames.Count/2))}```")).ConfigureAwait(false);
-                    await ctx.Channel.EmbedAsync(new EmbedBuilder()
-                        .WithOkColor().WithTitle($"{type} results for {icao.ToUpperInvariant()} 2/2")
-                        .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', selectedNames.Skip(selectedNames.Count/2))}```")).ConfigureAwait(false);
-                }
-                else
-                {
-                    await ctx.Channel.EmbedAsync(new EmbedBuilder()
-                        .WithOkColor().WithTitle($"{type} results for {icao.ToUpperInvariant()}")
-                        .WithDescription($"Use command again with the exact name from below:\n```{desc}```")).ConfigureAwait(false);
-                }
-
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 await ctx.Channel.SendErrorAsync("Something went wrong, please try again.");
             }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
-
+        
         private void GetImage(string url, string filename)
         {
             _webClient.DownloadFile(url, filename);
