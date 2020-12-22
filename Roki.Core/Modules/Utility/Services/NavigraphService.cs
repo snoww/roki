@@ -185,7 +185,7 @@ namespace Roki.Modules.Utility.Services
 
                 // get STARs
                 await _page.WaitForTimeoutAsync(1000);
-                await _page.ClickAsync("css=.mat-focus-indicator.clr-star >> text=STAR");
+                await _page.ClickAsync("//html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/chart-filter/div/button[1]");
                 await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 var nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
@@ -201,7 +201,7 @@ namespace Roki.Modules.Utility.Services
                 await File.WriteAllTextAsync($"data/charts/{icao}/stars.txt", stars.ToString());
 
                 // get SIDSs
-                await _page.ClickAsync("css=.mat-focus-indicator.clr-sid >> text=SID");
+                await _page.ClickAsync("//html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/chart-filter/div/button[4]");
                 await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
@@ -216,7 +216,7 @@ namespace Roki.Modules.Utility.Services
                 await File.WriteAllTextAsync($"data/charts/{icao}/sids.txt", sids.ToString());
 
                 // get APPRs
-                await _page.ClickAsync("css=.mat-focus-indicator.clr-app >> text=APP");
+                await _page.ClickAsync("//html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/chart-filter/div/button[2]");
                 await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
@@ -232,7 +232,7 @@ namespace Roki.Modules.Utility.Services
 
 
                 // get TAXIs
-                await _page.ClickAsync("css=.mat-focus-indicator.clr-taxi >> text=TAXI");
+                await _page.ClickAsync("//html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/chart-filter/div/button[3]");
                 await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
