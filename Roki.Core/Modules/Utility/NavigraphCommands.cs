@@ -64,9 +64,15 @@ namespace Roki.Modules.Utility
             }
             
             [RokiCommand, Usage, Description, Aliases]
-            public async Task Airport(string icao)
+            public async Task Taxi(string icao, [Leftover] string taxi = null)
             {
-                var path = await Service.GetAirport(Context, icao);
+                if (icao.Length != 4)
+                {
+                    await Context.Channel.SendErrorAsync("Invalid ICAO").ConfigureAwait(false);
+                    return;
+                }
+
+                var path = await Service.GetTAXI(Context, icao, taxi);
                 if (path == null)
                 {
                     return;
