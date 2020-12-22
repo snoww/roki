@@ -146,7 +146,7 @@ namespace Roki.Modules.Utility.Services
                 // get STARs
                 await _page.WaitForTimeoutAsync(1000);
                 await _page.ClickAsync("css=.mat-focus-indicator.clr-star >> text=STAR");
-                await _page.WaitForTimeoutAsync(1000);
+                await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 var nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
                 foreach (var htmlNode in nodes)
@@ -159,7 +159,7 @@ namespace Roki.Modules.Utility.Services
                 
                 // get SIDSs
                 await _page.ClickAsync("css=.mat-focus-indicator.clr-sid >> text=SID");
-                await _page.WaitForTimeoutAsync(1000);
+                await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
                 foreach (var htmlNode in nodes)
@@ -172,7 +172,7 @@ namespace Roki.Modules.Utility.Services
                 
                 // get APPRs
                 await _page.ClickAsync("css=.mat-focus-indicator.clr-app >> text=APP");
-                await _page.WaitForTimeoutAsync(1000);
+                await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
                 foreach (var htmlNode in nodes)
@@ -185,7 +185,7 @@ namespace Roki.Modules.Utility.Services
                 
                 // get TAXIs
                 await _page.ClickAsync("css=.mat-focus-indicator.clr-taxi >> text=TAXI");
-                await _page.WaitForTimeoutAsync(1000);
+                await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
                 foreach (var htmlNode in nodes)
