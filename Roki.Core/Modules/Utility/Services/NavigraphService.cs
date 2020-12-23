@@ -191,7 +191,6 @@ namespace Roki.Modules.Utility.Services
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Downloading STARs...")).ConfigureAwait(false);
                 await _page.WaitForTimeoutAsync(1000);
                 await _page.ClickAsync("css=.mat-focus-indicator.clr-star >> text=STAR");
-                await cha
                 await _page.WaitForTimeoutAsync(2000);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 var starNodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
