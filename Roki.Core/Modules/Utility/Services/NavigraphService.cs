@@ -69,7 +69,7 @@ namespace Roki.Modules.Utility.Services
         public async Task<string> GetSTAR(ICommandContext ctx, string icao, string star)
         {
             using var typing = ctx.Channel.EnterTypingState();
-            await DownloadAllCharts(ctx, icao, "STAR");
+            await DownloadAllCharts(ctx, icao);
             if (string.IsNullOrWhiteSpace(star))
             {
                 await SendInfo(ctx, icao, "star");
@@ -81,7 +81,7 @@ namespace Roki.Modules.Utility.Services
         public async Task<string> GetSID(ICommandContext ctx, string icao, string sid)
         {
             using var typing = ctx.Channel.EnterTypingState();
-            await DownloadAllCharts(ctx, icao, "SID");
+            await DownloadAllCharts(ctx, icao);
             if (string.IsNullOrWhiteSpace(sid))
             {
                 await SendInfo(ctx, icao, "sid");
@@ -94,7 +94,7 @@ namespace Roki.Modules.Utility.Services
         {
 
             using var typing = ctx.Channel.EnterTypingState();
-            await DownloadAllCharts(ctx, icao, "APPR");
+            await DownloadAllCharts(ctx, icao);
             if (string.IsNullOrWhiteSpace(appr))
             {
                 await SendInfo(ctx, icao, "appr");
@@ -107,7 +107,7 @@ namespace Roki.Modules.Utility.Services
         {
 
             using var typing = ctx.Channel.EnterTypingState();
-            await DownloadAllCharts(ctx, icao, "TAXI");
+            await DownloadAllCharts(ctx, icao);
             if (string.IsNullOrWhiteSpace(taxi))
             {
                 await SendInfo(ctx, icao, "taxi");
