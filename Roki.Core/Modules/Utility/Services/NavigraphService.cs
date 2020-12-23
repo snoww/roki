@@ -188,10 +188,10 @@ namespace Roki.Modules.Utility.Services
                 await _page.ClickAsync("//html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/chart-filter/div/button[1]");
                 await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
-                var nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
+                var starNodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
                 Directory.CreateDirectory($"data/charts/{icao}");
                 var stars = new StringBuilder();
-                foreach (var htmlNode in nodes)
+                foreach (var htmlNode in starNodes)
                 {
                     var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
                     var idNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/small").InnerText);
@@ -204,9 +204,9 @@ namespace Roki.Modules.Utility.Services
                 await _page.ClickAsync("//html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/chart-filter/div/button[4]");
                 await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
-                nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
+                var sidNodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
                 var sids = new StringBuilder();
-                foreach (var htmlNode in nodes)
+                foreach (var htmlNode in sidNodes)
                 {
                     var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
                     var idNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/small").InnerText);
@@ -219,9 +219,9 @@ namespace Roki.Modules.Utility.Services
                 await _page.ClickAsync("//html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/chart-filter/div/button[2]");
                 await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
-                nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
+                var apprNodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
                 var apprs = new StringBuilder();
-                foreach (var htmlNode in nodes)
+                foreach (var htmlNode in apprNodes)
                 {
                     var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
                     var idNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/small").InnerText);
@@ -235,9 +235,9 @@ namespace Roki.Modules.Utility.Services
                 await _page.ClickAsync("//html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/chart-filter/div/button[3]");
                 await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
-                nodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
+                var taxiNodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
                 var taxis = new StringBuilder();
-                foreach (var htmlNode in nodes)
+                foreach (var htmlNode in taxiNodes)
                 {
                     var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
                     var idNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/small").InnerText);
