@@ -163,7 +163,7 @@ namespace Roki.Modules.Utility.Services
             return true;
         }
 
-        private async Task DownloadAllCharts(ICommandContext ctx, string icao, string type)
+        private async Task DownloadAllCharts(ICommandContext ctx, string icao)
         {
             if (Directory.Exists($"data/charts/{icao}") && Directory.GetCreationTime($"data/charts/{icao}") - DateTime.UtcNow <= TimeSpan.FromDays(30))
             {
@@ -182,6 +182,9 @@ namespace Roki.Modules.Utility.Services
 
                 var chartIds = new Dictionary<string, string>();
                 var htmlDoc = new HtmlDocument();
+
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDescription($"Downloading charts for {icao.ToUpperInvariant()}, this might take a while. Hold tight."))
+                    .ConfigureAwait(false);
 
                 // get STARs
                 await _page.WaitForTimeoutAsync(1000);
