@@ -119,6 +119,7 @@ namespace Roki.Modules.Utility.Services
 
         private static async Task SendInfo(ICommandContext ctx, string icao, string type)
         {
+            icao = icao.ToLowerInvariant();
             var desc = await File.ReadAllLinesAsync($"data/charts/{icao}/{type}s.txt");
             if (desc.Sum(x => x.Length) >= 1990)
             {
