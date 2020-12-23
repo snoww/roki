@@ -255,7 +255,7 @@ namespace Roki.Modules.Utility.Services
                 foreach (var (name, id) in chartIds)
                 {
                     var imageUrl = await http.GetStringAsync(
-                        $"https://charts.api.navigraph.com/2/airports/{icao.ToUpperInvariant()}/signedurls/{icao.ToLowerInvariant()}{new string(Array.FindAll(id.ToArray(), char.IsLetterOrDigit)).ToLowerInvariant()}.png");
+                        $"https://charts.api.navigraph.com/2/airports/{icao.ToUpperInvariant()}/signedurls/{icao.ToLowerInvariant()}{new string(Array.FindAll(id.ToArray(), char.IsLetterOrDigit)).ToLowerInvariant()}_d.png");
                     GetImage(imageUrl, GetChartName(icao, name));
                 }
             }
