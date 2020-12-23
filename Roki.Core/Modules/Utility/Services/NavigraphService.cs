@@ -184,7 +184,7 @@ namespace Roki.Modules.Utility.Services
                 var chartIds = new Dictionary<string, string>();
                 var htmlDoc = new HtmlDocument();
 
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDescription($"Downloading charts for {icao.ToUpperInvariant()}, this might take a while. Hold tight."))
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"Downloading charts for {icao.ToUpperInvariant()}, this might take a while. Hold tight."))
                     .ConfigureAwait(false);
 
                 // get STARs
