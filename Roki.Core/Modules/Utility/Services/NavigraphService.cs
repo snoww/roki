@@ -268,8 +268,15 @@ namespace Roki.Modules.Utility.Services
                     {
                         imageUrl = await http.GetStringAsync($"https://charts.api.navigraph.com/2/airports/{icao.ToUpperInvariant()}/signedurls/{icao.ToLowerInvariant()}{chartName}_d.png");
                     }
-                    
-                    GetImage(imageUrl, GetChartName(icao, name));
+
+                    try
+                    {
+                        GetImage(imageUrl, GetChartName(icao, name));
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
             }
             catch (Exception e)
