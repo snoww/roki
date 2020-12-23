@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Discord;
@@ -257,8 +258,17 @@ namespace Roki.Modules.Utility.Services
                 Directory.CreateDirectory($"data/charts/{icao}");
                 foreach (var (name, id) in chartIds)
                 {
-                    var imageUrl = await http.GetStringAsync(
-                        $"https://charts.api.navigraph.com/2/airports/{icao.ToUpperInvariant()}/signedurls/{icao.ToLowerInvariant()}{new string(Array.FindAll(id.ToArray(), char.IsLetterOrDigit)).ToLowerInvariant()}_d.png");
+                    var chartName = new string(Array.FindAll(id.ToArray(), char.IsLetterOrDigit)).ToLower();
+                    string imageUrl;
+                    if (Regex.IsMatch(chartName, "^\\d+.+\\w+.+\\d$"))
+                    {
+                        imageUrl = await http.GetStringAsync($"https://charts.api.navigraph.com/2/airports/{icao.ToUpperInvariant()}/signedurls/{icao.ToLowerInvariant()}{chartName.Substring(1)}_d.png");
+                    }
+                    else
+                    {
+                        imageUrl = await http.GetStringAsync($"https://charts.api.navigraph.com/2/airports/{icao.ToUpperInvariant()}/signedurls/{icao.ToLowerInvariant()}{chartName}_d.png");
+                    }
+                    
                     GetImage(imageUrl, GetChartName(icao, name));
                 }
             }
