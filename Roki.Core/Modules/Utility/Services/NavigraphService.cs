@@ -260,6 +260,7 @@ namespace Roki.Modules.Utility.Services
                 using var http = _http.CreateClient();
                 http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 Directory.CreateDirectory($"data/charts/{icao}");
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Saving charts...")).ConfigureAwait(false);
                 foreach (var (name, id) in chartIds)
                 {
                     var chartName = new string(Array.FindAll(id.ToArray(), char.IsLetterOrDigit)).ToLower();
