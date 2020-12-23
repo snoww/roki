@@ -188,9 +188,11 @@ namespace Roki.Modules.Utility.Services
                     .ConfigureAwait(false);
 
                 // get STARs
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Downloading STARs...")).ConfigureAwait(false);
                 await _page.WaitForTimeoutAsync(1000);
-                await _page.ClickAsync("//html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/chart-filter/div/button[1]");
-                await _page.WaitForTimeoutAsync(1500);
+                await _page.ClickAsync("css=.mat-focus-indicator.clr-star >> text=STAR");
+                await cha
+                await _page.WaitForTimeoutAsync(2000);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 var starNodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
                 Directory.CreateDirectory($"data/charts/{icao}");
@@ -205,7 +207,8 @@ namespace Roki.Modules.Utility.Services
                 await File.WriteAllTextAsync($"data/charts/{icao}/stars.txt", stars.ToString());
 
                 // get SIDSs
-                await _page.ClickAsync("//html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/chart-filter/div/button[4]");
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Downloading SIDs...")).ConfigureAwait(false);
+                await _page.ClickAsync("css=.mat-focus-indicator.clr-sid >> text=SID");
                 await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 var sidNodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
@@ -220,7 +223,8 @@ namespace Roki.Modules.Utility.Services
                 await File.WriteAllTextAsync($"data/charts/{icao}/sids.txt", sids.ToString());
 
                 // get APPRs
-                await _page.ClickAsync("//html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/chart-filter/div/button[2]");
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Downloading APPs...")).ConfigureAwait(false);
+                await _page.ClickAsync("css=.mat-focus-indicator.clr-app >> text=APP");
                 await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 var apprNodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
@@ -237,7 +241,8 @@ namespace Roki.Modules.Utility.Services
                 await File.WriteAllTextAsync($"data/charts/{icao}/apprs.txt", apprs.ToString());
 
                 // get TAXIs
-                await _page.ClickAsync("//html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/chart-filter/div/button[3]");
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Downloading TAXIs...")).ConfigureAwait(false);
+                await _page.ClickAsync("css=.mat-focus-indicator.clr-taxi >> text=TAXI");
                 await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 var taxiNodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
