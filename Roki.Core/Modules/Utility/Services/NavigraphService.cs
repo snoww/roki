@@ -223,9 +223,11 @@ namespace Roki.Modules.Utility.Services
                 var apprs = new StringBuilder();
                 foreach (var htmlNode in apprNodes)
                 {
+                    var idNode = htmlNode.SelectSingleNode("div/div[3]/small");
+                    if (idNode == null)
+                        continue;
                     var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
-                    var idNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/small").InnerText);
-                    chartIds.TryAdd(nameNode, idNode);
+                    chartIds.TryAdd(nameNode, HtmlEntity.DeEntitize(idNode.InnerText));
                     apprs.AppendLine(nameNode);
                 }
                 await File.WriteAllTextAsync($"data/charts/{icao}/apprs.txt", apprs.ToString());
@@ -238,11 +240,9 @@ namespace Roki.Modules.Utility.Services
                 var taxis = new StringBuilder();
                 foreach (var htmlNode in taxiNodes)
                 {
-                    var idNode = htmlNode.SelectSingleNode("div/div[3]/small");
-                    if (idNode == null)
-                        continue;
                     var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
-                    chartIds.TryAdd(nameNode, HtmlEntity.DeEntitize(idNode.InnerText));
+                    var idNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/small").InnerText);
+                    chartIds.TryAdd(nameNode, idNode);
                     taxis.AppendLine(nameNode);
                 }
                 await File.WriteAllTextAsync($"data/charts/{icao}/taxis.txt", taxis.ToString());
