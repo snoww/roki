@@ -166,6 +166,7 @@ namespace Roki.Modules.Utility.Services
 
         private async Task DownloadAllCharts(ICommandContext ctx, string icao)
         {
+            icao = icao.ToLowerInvariant();
             if (Directory.Exists($"data/charts/{icao}") && Directory.GetCreationTime($"data/charts/{icao}") - DateTime.UtcNow <= TimeSpan.FromDays(30))
             {
                 return;
