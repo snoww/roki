@@ -121,6 +121,12 @@ namespace Roki.Modules.Utility.Services
         {
             icao = icao.ToLowerInvariant();
             var desc = await File.ReadAllLinesAsync($"data/charts/{icao}/{type}s.txt");
+            if (desc.Contains("none", StringComparer.OrdinalIgnoreCase))
+            {
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithTitle($"{type.ToUpperInvariant()} results for {icao.ToUpperInvariant()}")
+                    .WithDescription($"There are no {type.ToUpperInvariant()} charts for {icao.ToUpperInvariant()}")).ConfigureAwait(false);
+                return;
+            }
             if (desc.Sum(x => x.Length) >= 1990)
             {
                 await ctx.Channel.EmbedAsync(new EmbedBuilder()
