@@ -189,6 +189,7 @@ namespace Roki.Modules.Utility.Services
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"Downloading charts for {icao.ToUpperInvariant()}, this might take a while. Hold tight."))
                     .ConfigureAwait(false);
 
+                Directory.CreateDirectory($"data/charts/{icao}");
                 // get STARs
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Downloading STARs...")).ConfigureAwait(false);
                 await _page.WaitForTimeoutAsync(1000);
@@ -196,18 +197,22 @@ namespace Roki.Modules.Utility.Services
                 await _page.WaitForTimeoutAsync(2000);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 var starNodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
-                Directory.CreateDirectory($"data/charts/{icao}");
-                var stars = new StringBuilder();
-                foreach (var htmlNode in starNodes)
+                if (starNodes != null)
                 {
-                    var idNode = htmlNode.SelectSingleNode("div/div[3]/small");
-                    if (idNode == null)
-                        continue;
-                    var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
-                    chartIds.TryAdd(nameNode, HtmlEntity.DeEntitize(idNode.InnerText));
-                    stars.AppendLine(nameNode);
+                    var stars = new StringBuilder();
+                    foreach (var htmlNode in starNodes)
+                    {
+                        var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
+                        var idNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/small").InnerText);
+                        chartIds.TryAdd(nameNode, idNode);
+                        stars.AppendLine(nameNode);
+                    }
+                    await File.WriteAllTextAsync($"data/charts/{icao}/stars.txt", stars.ToString());
                 }
-                await File.WriteAllTextAsync($"data/charts/{icao}/stars.txt", stars.ToString());
+                else
+                {
+                    await File.WriteAllTextAsync($"data/charts/{icao}/stars.txt", "none");
+                }
 
                 // get SIDSs
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Downloading SIDs...")).ConfigureAwait(false);
@@ -215,17 +220,22 @@ namespace Roki.Modules.Utility.Services
                 await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 var sidNodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
-                var sids = new StringBuilder();
-                foreach (var htmlNode in sidNodes)
+                if (sidNodes != null)
                 {
-                    var idNode = htmlNode.SelectSingleNode("div/div[3]/small");
-                    if (idNode == null)
-                        continue;
-                    var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
-                    chartIds.TryAdd(nameNode, HtmlEntity.DeEntitize(idNode.InnerText));
-                    sids.AppendLine(nameNode);
+                    var sids = new StringBuilder();
+                    foreach (var htmlNode in sidNodes)
+                    {
+                        var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
+                        var idNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/small").InnerText);
+                        chartIds.TryAdd(nameNode, idNode);
+                        sids.AppendLine(nameNode);
+                    }
+                    await File.WriteAllTextAsync($"data/charts/{icao}/sids.txt", sids.ToString());
                 }
-                await File.WriteAllTextAsync($"data/charts/{icao}/sids.txt", sids.ToString());
+                else
+                {
+                    await File.WriteAllTextAsync($"data/charts/{icao}/sids.txt", "none");
+                }
 
                 // get APPRs
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Downloading APPs...")).ConfigureAwait(false);
@@ -233,17 +243,24 @@ namespace Roki.Modules.Utility.Services
                 await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 var apprNodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
-                var apprs = new StringBuilder();
-                foreach (var htmlNode in apprNodes)
+                if (sidNodes != null)
                 {
-                    var idNode = htmlNode.SelectSingleNode("div/div[3]/small");
-                    if (idNode == null)
-                        continue;
-                    var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
-                    chartIds.TryAdd(nameNode, HtmlEntity.DeEntitize(idNode.InnerText));
-                    apprs.AppendLine(nameNode);
+                    var apprs = new StringBuilder();
+                    foreach (var htmlNode in apprNodes)
+                    {
+                        var idNode = htmlNode.SelectSingleNode("div/div[3]/small");
+                        if (idNode == null)
+                            continue;
+                        var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
+                        chartIds.TryAdd(nameNode, HtmlEntity.DeEntitize(idNode.InnerText));
+                        apprs.AppendLine(nameNode);
+                    }
+                    await File.WriteAllTextAsync($"data/charts/{icao}/apprs.txt", apprs.ToString());
                 }
-                await File.WriteAllTextAsync($"data/charts/{icao}/apprs.txt", apprs.ToString());
+                else
+                {
+                    await File.WriteAllTextAsync($"data/charts/{icao}/apprs.txt", "none");
+                }
 
                 // get TAXIs
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Downloading TAXIs...")).ConfigureAwait(false);
@@ -251,17 +268,22 @@ namespace Roki.Modules.Utility.Services
                 await _page.WaitForTimeoutAsync(1500);
                 htmlDoc.LoadHtml(await _page.GetContentAsync());
                 var taxiNodes = htmlDoc.DocumentNode.SelectNodes("/html/body/app-root/sidenav/mat-sidenav-container/mat-sidenav/div/charts/mat-list/mat-list-item");
-                var taxis = new StringBuilder();
-                foreach (var htmlNode in taxiNodes)
+                if (taxiNodes != null)
                 {
-                    var idNode = htmlNode.SelectSingleNode("div/div[3]/small");
-                    if (idNode == null)
-                        continue;
-                    var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
-                    chartIds.TryAdd(nameNode, HtmlEntity.DeEntitize(idNode.InnerText));
-                    taxis.AppendLine(nameNode);
+                    var taxis = new StringBuilder();
+                    foreach (var htmlNode in taxiNodes)
+                    {
+                        var nameNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/b").InnerText);
+                        var idNode = HtmlEntity.DeEntitize(htmlNode.SelectSingleNode("div/div[3]/small").InnerText);
+                        chartIds.TryAdd(nameNode, idNode);
+                        taxis.AppendLine(nameNode);
+                    }
+                    await File.WriteAllTextAsync($"data/charts/{icao}/taxis.txt", taxis.ToString());
                 }
-                await File.WriteAllTextAsync($"data/charts/{icao}/taxis.txt", taxis.ToString());
+                else
+                {
+                    await File.WriteAllTextAsync($"data/charts/{icao}/taxi.txt", "none");
+                }
                 
                 var element = await _page.EvaluateAsync("window.localStorage.getItem(\"access_token\")");
                 var token = element?.GetString();
