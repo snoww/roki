@@ -18,14 +18,14 @@ namespace Roki.Services
         public IMongoDatabase Database { get; }
         public IMongoContext Context { get; }
 
-        public MongoService()
+        public MongoService(DbConfig config)
         {
             var conventions = new ConventionPack {new LowerCaseElementNameConvention()};
             ConventionRegistry.Register("LowerCaseElementName", conventions, t => true);
             BsonSerializer.RegisterSerializer(typeof(decimal), new DecimalSerializer(BsonType.Decimal128));
             BsonSerializer.RegisterSerializer(typeof(decimal?), new NullableSerializer<decimal>(new DecimalSerializer(BsonType.Decimal128)));
 
-            Database = new MongoClient().GetDatabase("roki");
+            Database = new MongoClient($"mongodb://{config.Username}:{config.Password}@localhost").GetDatabase("roki");
             Context = new MongoContext(Database);
         }
     }

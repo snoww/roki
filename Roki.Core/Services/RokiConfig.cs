@@ -95,12 +95,7 @@ namespace Roki.Services
                 ClientId = clId;
 
                 var dbSection = data.GetSection("db");
-                Db = new DbConfig(string.IsNullOrWhiteSpace(dbSection["Type"])
-                        ? "postgres"
-                        : dbSection["Type"],
-                    string.IsNullOrWhiteSpace(dbSection["ConnectionString"])
-                        ? "Host=localhost;Database=roki;Username=postgres;Password=roki-snow"
-                        : dbSection["ConnectionString"]);
+                Db = new DbConfig(dbSection["Username"], dbSection["Password"]);
 
                 RedisConfig = "localhost";
             }
@@ -114,13 +109,13 @@ namespace Roki.Services
     
     public class DbConfig
     {
-        public DbConfig(string type, string connectionString)
+        public DbConfig(string username, string password)
         {
-            Type = type;
-            ConnectionString = connectionString;
+            Username = username;
+            Password = password;
         }
 
-        public string Type { get; }
-        public string ConnectionString { get; }
+        public string Username { get; }
+        public string Password { get; }
     }
 }

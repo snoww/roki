@@ -40,7 +40,7 @@ namespace Roki
             LogSetup.SetupLogger();
 
             Config = new RokiConfig();
-            Mongo = new MongoService();
+            Mongo = new MongoService(Config.Db);
             Cache = new RedisCache(Config.RedisConfig);
             
             // global properties
