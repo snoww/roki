@@ -25,7 +25,7 @@ namespace Roki.Services
             BsonSerializer.RegisterSerializer(typeof(decimal), new DecimalSerializer(BsonType.Decimal128));
             BsonSerializer.RegisterSerializer(typeof(decimal?), new NullableSerializer<decimal>(new DecimalSerializer(BsonType.Decimal128)));
 
-            Database = new MongoClient($"mongodb://{config.Username}:{config.Password}@localhost").GetDatabase("roki");
+            Database = new MongoClient($"mongodb://{config.Username}:{config.Password}@localhost/?authSource=admin").GetDatabase("roki");
             Context = new MongoContext(Database);
         }
     }
