@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Extensions;
@@ -89,6 +90,8 @@ namespace Roki.Modules.Utility
                     return;
                 }
 
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Updating chart database..."))
+                    .ConfigureAwait(false);
                 await Service.DownloadAllCharts(Context, icao);
             }
         }
