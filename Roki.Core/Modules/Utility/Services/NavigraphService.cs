@@ -345,11 +345,14 @@ namespace Roki.Modules.Utility.Services
             {
                 Console.WriteLine(e);
                 await ctx.Channel.SendErrorAsync("Something went wrong, please try again.");
+                return;
             }
             finally
             {
                 _semaphore.Release();
             }
+
+            await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"Finished saving charts for {icao.ToUpperInvariant()}"));
         }
         
         private void GetImage(string url, string filename)
