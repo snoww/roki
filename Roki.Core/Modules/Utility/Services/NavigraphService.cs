@@ -147,14 +147,14 @@ namespace Roki.Modules.Utility.Services
                 await ctx.Channel.EmbedAsync(new EmbedBuilder()
                     .WithOkColor().WithTitle($"{type.ToUpperInvariant()} results for {icao.ToUpperInvariant()} 2/2")
                     .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', desc.Skip(desc.Length / 2))}```")
-                    .WithFooter("Use `.chartupdate ICAO` to update chart database")).ConfigureAwait(false);
+                    .WithFooter("Use .chartupdate ICAO to update chart database")).ConfigureAwait(false);
             }
             else
             {
                 await ctx.Channel.EmbedAsync(new EmbedBuilder()
                     .WithOkColor().WithTitle($"{type.ToUpperInvariant()} results for {icao.ToUpperInvariant()}")
                     .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', desc)}```")
-                    .WithFooter("Use `.chartupdate ICAO` to update chart database")).ConfigureAwait(false);
+                    .WithFooter("Use .chartupdate ICAO to update chart database")).ConfigureAwait(false);
             }
         }
 
