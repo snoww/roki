@@ -70,7 +70,10 @@ namespace Roki.Modules.Utility.Services
         public async Task<string> GetSTAR(ICommandContext ctx, string icao, string star)
         {
             using var typing = ctx.Channel.EnterTypingState();
-            await DownloadAllCharts(ctx, icao);
+            if (!CheckExistingCharts(icao, "star"))
+            {
+                await DownloadAllCharts(ctx, icao);
+            }
             if (string.IsNullOrWhiteSpace(star))
             {
                 await SendInfo(ctx, icao, "star");
@@ -82,7 +85,10 @@ namespace Roki.Modules.Utility.Services
         public async Task<string> GetSID(ICommandContext ctx, string icao, string sid)
         {
             using var typing = ctx.Channel.EnterTypingState();
-            await DownloadAllCharts(ctx, icao);
+            if (!CheckExistingCharts(icao, "sid"))
+            {
+                await DownloadAllCharts(ctx, icao);
+            }
             if (string.IsNullOrWhiteSpace(sid))
             {
                 await SendInfo(ctx, icao, "sid");
@@ -95,7 +101,10 @@ namespace Roki.Modules.Utility.Services
         {
 
             using var typing = ctx.Channel.EnterTypingState();
-            await DownloadAllCharts(ctx, icao);
+            if (!CheckExistingCharts(icao, "appr"))
+            {
+                await DownloadAllCharts(ctx, icao);
+            }
             if (string.IsNullOrWhiteSpace(appr))
             {
                 await SendInfo(ctx, icao, "appr");
@@ -108,7 +117,10 @@ namespace Roki.Modules.Utility.Services
         {
 
             using var typing = ctx.Channel.EnterTypingState();
-            await DownloadAllCharts(ctx, icao);
+            if (!CheckExistingCharts(icao, "taxi"))
+            {
+                await DownloadAllCharts(ctx, icao);
+            }
             if (string.IsNullOrWhiteSpace(taxi))
             {
                 await SendInfo(ctx, icao, "taxi");
@@ -134,13 +146,15 @@ namespace Roki.Modules.Utility.Services
                     .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', desc.Take(desc.Length / 2))}```")).ConfigureAwait(false);
                 await ctx.Channel.EmbedAsync(new EmbedBuilder()
                     .WithOkColor().WithTitle($"{type.ToUpperInvariant()} results for {icao.ToUpperInvariant()} 2/2")
-                    .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', desc.Skip(desc.Length / 2))}```")).ConfigureAwait(false);
+                    .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', desc.Skip(desc.Length / 2))}```")
+                    .WithFooter("Use `.chartupdate ICAO` to update chart database")).ConfigureAwait(false);
             }
             else
             {
                 await ctx.Channel.EmbedAsync(new EmbedBuilder()
                     .WithOkColor().WithTitle($"{type.ToUpperInvariant()} results for {icao.ToUpperInvariant()}")
-                    .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', desc)}```")).ConfigureAwait(false);
+                    .WithDescription($"Use command again with the exact name from below:\n```{string.Join('\n', desc)}```")
+                    .WithFooter("Use `.chartupdate ICAO` to update chart database")).ConfigureAwait(false);
             }
         }
 
@@ -171,13 +185,20 @@ namespace Roki.Modules.Utility.Services
             return true;
         }
 
-        private async Task DownloadAllCharts(ICommandContext ctx, string icao)
+        private bool CheckExistingCharts(string icao, string type)
         {
             icao = icao.ToLowerInvariant();
-            if (Directory.Exists($"data/charts/{icao}") && Directory.GetCreationTime($"data/charts/{icao}") - DateTime.UtcNow <= TimeSpan.FromDays(30))
+            if (File.Exists($"data/charts/{icao}/{type}s.txt") && File.GetCreationTime($"data/charts/{icao}/{type}s.txt") - DateTime.UtcNow <= TimeSpan.FromDays(30))
             {
-                return;
+                return true;
             }
+
+            return false;
+        }
+
+        public async Task DownloadAllCharts(ICommandContext ctx, string icao)
+        {
+            icao = icao.ToLowerInvariant();
 
             try
             {
