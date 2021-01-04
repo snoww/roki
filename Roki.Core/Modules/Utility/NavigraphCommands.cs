@@ -79,6 +79,18 @@ namespace Roki.Modules.Utility
                 }
                 await Context.Channel.SendFileAsync(path);
             }
+
+            [RokiCommand, Usage, Description, Aliases]
+            public async Task ChartUpdate(string icao)
+            {
+                if (icao.Length != 4)
+                {
+                    await Context.Channel.SendErrorAsync("Invalid ICAO").ConfigureAwait(false);
+                    return;
+                }
+
+                await Service.DownloadAllCharts(Context, icao);
+            }
         }
     }
 }
