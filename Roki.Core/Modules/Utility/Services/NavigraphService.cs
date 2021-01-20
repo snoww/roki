@@ -29,7 +29,9 @@ namespace Roki.Modules.Utility.Services
         private IPage _page;
         private string _currentAirport;
         private SemaphoreSlim _semaphore;
-
+        
+        private CancellationTokenSource _cancellationToken = new CancellationTokenSource();
+        
         public NavigraphService(IRokiConfig config, IHttpClientFactory http)
         {
             _config = config;
@@ -61,9 +63,13 @@ namespace Roki.Modules.Utility.Services
                 await CreateContext();
                 var _ = Task.Run(async () =>
                 {
-                    await Task.Delay(TimeSpan.FromMinutes(30));
+                    await Task.Delay(TimeSpan.FromMinutes(30), _cancellationToken.Token);
+                    if (_cancellationToken.IsCancellationRequested)
+                    {
+                        return;
+                    }
                     await DisposeContext();
-                });
+                }, _cancellationToken.Token);
             }
         }
 
@@ -185,16 +191,7 @@ namespace Roki.Modules.Utility.Services
             return true;
         }
 
-        private bool CheckExistingCharts(string icao, string type)
-        {
-            icao = icao.ToLowerInvariant();
-            if (File.Exists($"data/charts/{icao}/{type}s.txt") && File.GetCreationTime($"data/charts/{icao}/{type}s.txt") - DateTime.UtcNow <= TimeSpan.FromDays(30))
-            {
-                return true;
-            }
-
-            return false;
-        }
+        private static bool CheckExistingCharts(string icao, string type) => File.Exists($"data/charts/{icao.ToLowerInvariant()}/{type}s.txt");
 
         public async Task DownloadAllCharts(ICommandContext ctx, string icao)
         {
@@ -344,6 +341,8 @@ namespace Roki.Modules.Utility.Services
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                _cancellationToken.Cancel();
+                await DisposeContext();
                 await ctx.Channel.SendErrorAsync("Something went wrong, please try again.");
                 return;
             }
