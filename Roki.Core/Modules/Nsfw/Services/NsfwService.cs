@@ -14,33 +14,34 @@ namespace Roki.Modules.Nsfw.Services
 {
     public class NsfwService : IRokiService
     {
-        private readonly IHttpClientFactory _http;
+        private readonly IHttpClientFactory _factory;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly Random Random = new Random();
         
-        private static readonly Dictionary<string, string> Sources = File.ReadAllText("./data/nsfw.json").Deserialize<Dictionary<string, string>>();
+        private static readonly Dictionary<string, List<string>> Sources = File.ReadAllText("./data/nsfw_sources.json").Deserialize<Dictionary<string, List<string>>>();
         private const string BaseUrl = "https://www.reddit.com/r/{0}/random.json";
 
-        public NsfwService(IHttpClientFactory http)
+        public NsfwService(IHttpClientFactory factory)
         {
-            _http = http;
+            _factory = factory;
         }
 
         public async Task<string> GetRandomNsfw(NsfwCategory category)
         {
-            var options = Sources[category.ToString().ToLower()].Split();
-            var rng = new Random().Next(options.Length);
+            List<string> options = Sources[category.ToString().ToLowerInvariant()];
+            int rng = Random.Next(options.Count);
 
             try
             {
-                using var http = _http.CreateClient();
-                var result = await http.GetStringAsync(string.Format(BaseUrl, options[rng])).ConfigureAwait(false);
-                using var json = JsonDocument.Parse(result);
+                using HttpClient http = _factory.CreateClient();
+                string result = await http.GetStringAsync(string.Format(BaseUrl, options[rng])).ConfigureAwait(false);
+                using JsonDocument json = JsonDocument.Parse(result);
                 // maybe return source as well?
                 return json.RootElement[0].GetProperty("data").GetProperty("children")[0].GetProperty("data").GetProperty("url").GetString();
             }
             catch (Exception e)
             {
-                Logger.Warn(e, "Failed to get random image from: r/{subreddit:l}", options[rng]);
+                Logger.Error(e, "Failed to get random image from: r/{Subreddit}", options[rng]);
                 return null;
             }
         }
