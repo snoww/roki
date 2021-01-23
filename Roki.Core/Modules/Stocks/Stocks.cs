@@ -12,6 +12,8 @@ namespace Roki.Modules.Stocks
 {
     public partial class Stocks : RokiTopLevelModule<StocksService>
     {
+        private static readonly string TempDir = Path.GetTempPath();
+
         [RokiCommand, Usage, Description, Aliases]
         public async Task StockStats(string symbol, [Leftover] string all = "false")
         {
@@ -171,8 +173,8 @@ namespace Roki.Modules.Stocks
                 .WithAuthor(quote.Symbol.ToUpper())
                 .WithDescription($"{options[period]} Price")
                 .WithImageUrl("attachment://image.png");
-            await Context.Channel.SendFileAsync("./temp/image.png", embed: embed.Build()).ConfigureAwait(false);
-            File.Delete("./temp/image.png");
+            await Context.Channel.SendFileAsync($"{TempDir}/image.png", embed: embed.Build()).ConfigureAwait(false);
+            File.Delete($"{TempDir}/image.png");
         }
     }
 }

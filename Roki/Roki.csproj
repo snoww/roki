@@ -20,7 +20,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="temp" />
+      <Content Include="data/**">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>

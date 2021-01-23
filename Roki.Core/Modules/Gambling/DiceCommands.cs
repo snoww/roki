@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -17,7 +18,7 @@ namespace Roki.Modules.Gambling
         [Group]
         public class DiceCommands : RokiSubmodule
         {
-            private const string Path = "./data/dice/";
+            private const string DicePath = "./data/dice/";
             private readonly ICurrencyService _currency;
 
             public DiceCommands(ICurrencyService currency)
@@ -143,7 +144,7 @@ namespace Roki.Modules.Gambling
                 if (num < 0 || num > 6)
                     throw new ArgumentOutOfRangeException(nameof(num));
                 
-                return Image.Load<Rgba32>(Path + $"{num}.png");
+                return Image.Load<Rgba32>(DicePath + $"{num}.png");
             }
         }
     }
