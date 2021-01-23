@@ -37,9 +37,9 @@ namespace Roki.Modules
             var client = (DiscordSocketClient) Context.Client;
             client.MessageReceived += Handler;
 
-            var trigger = eventTrigger.Task;
-            var delay = Task.Delay(timeout.Value);
-            var task = await Task.WhenAny(trigger, delay).ConfigureAwait(false);
+            Task<SocketMessage> trigger = eventTrigger.Task;
+            Task delay = Task.Delay(timeout.Value);
+            Task task = await Task.WhenAny(trigger, delay).ConfigureAwait(false);
 
             client.MessageReceived -= Handler;
 
