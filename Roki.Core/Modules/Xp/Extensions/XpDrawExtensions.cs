@@ -25,7 +25,7 @@ namespace Roki.Modules.Xp.Extensions
         private const int MaxUsernameLength = 965;
 
         public static Stream GenerateXpBar(Stream avatar, int currentXp, int xpCap, string totalXp, string level, string rank,
-            string username, string discrim, DateTimeOffset date, bool doubleXp, bool fastXp)
+            string username, string discriminator, DateTime date, bool doubleXp, bool fastXp)
         {
             using Image image = Image.Load("./data/xp/roki_xp.png");
 
@@ -64,7 +64,7 @@ namespace Roki.Modules.Xp.Extensions
             Font headerFont = fonts.CreateFont("DIN Medium", 40);
             Font bodyFont = fonts.CreateFont("DIN", 50);
             image.Mutate(x => x
-                .DrawUsername(usernameFont, discriminatorFont, username, $"#{discrim}", new PointF(XpBarX, 100)) // username + discrim
+                .DrawUsername(usernameFont, discriminatorFont, username, $"#{discriminator}", new PointF(XpBarX, 100)) // username + discrim
                 .DrawText(new TextGraphicsOptions {TextOptions = {HorizontalAlignment = HorizontalAlignment.Center}},
                     $"XP: {currentXp} / {xpCap}", xpFont, Color.DarkSlateGray, new PointF(XpBarX + XpBarLength / 2, 139)) // xp progress
                 .DrawStats(headerFont, bodyFont, $"#{rank}", level, totalXp, date)
@@ -106,7 +106,7 @@ namespace Roki.Modules.Xp.Extensions
         }
 
         private static IImageProcessingContext DrawStats(this IImageProcessingContext source, Font header, Font body,
-            string rank, string level, string total, DateTimeOffset llup)
+            string rank, string level, string total, DateTime lastLevelUp)
         {
             const float spacing = XpBarLength / 4f;
             const int y = 235;
@@ -127,7 +127,7 @@ namespace Roki.Modules.Xp.Extensions
                 .DrawText(bodyOptions, total, body, Color.DarkSlateGray, new PointF(1116, 340))
                 .DrawText(headerOptions, "Last Level Up", header, Color.HotPink, new PointF(1390, y))
                 // need to use en-US since en-CA adds a . to month abbreviation (en-US -> Jan, en-CA -> Jan.)
-                .DrawText(bodyOptions, llup.ToString("MMM dd yyyy", new CultureInfo("en-US")), body, Color.DarkSlateGray, new PointF(1390, 340));
+                .DrawText(bodyOptions, lastLevelUp.ToString("MMM dd yyyy", new CultureInfo("en-US")), body, Color.DarkSlateGray, new PointF(1390, 340));
 
             return source;
         }
@@ -136,17 +136,17 @@ namespace Roki.Modules.Xp.Extensions
         {
             if (doubleXp && fastXp)
             {
-                using var image = Image.Load<Rgba32>("./data/xp/boost_both.png");
+                using Image<Rgba32> image = Image.Load<Rgba32>("./data/xp/boost_both.png");
                 source.DrawImage(image, new Point(1335, XpBarY), 1); // 1500 - 10 - width of boost_both.png
             }
             else if (doubleXp)
             {
-                using var image = Image.Load<Rgba32>("./data/xp/boost_double.png");
+                using Image<Rgba32> image = Image.Load<Rgba32>("./data/xp/boost_double.png");
                 source.DrawImage(image, new Point(1420, XpBarY), 1);
             }
             else if (fastXp)
             {
-                using var image = Image.Load<Rgba32>("./data/xp/boost_fast.png");
+                using Image<Rgba32> image = Image.Load<Rgba32>("./data/xp/boost_fast.png");
                 source.DrawImage(image, new Point(1420, XpBarY + 5), 1);
             }
 
