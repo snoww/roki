@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,13 +10,10 @@ namespace Roki.Modules.Utility.Common
     // derived from https://gist.github.com/csh/2480d14fbbb33b4bbae3
     public class MinecraftServer
     {
-        private string Host { get; }
-        private int Port { get; }
-
         private readonly TcpClient _client;
-        private NetworkStream _stream;
         private List<byte> _buffer;
         private int _offset;
+        private NetworkStream _stream;
 
         public MinecraftServer(string host, int port = 25565)
         {
@@ -25,6 +21,9 @@ namespace Roki.Modules.Utility.Common
             Port = port;
             _client = new TcpClient();
         }
+
+        private string Host { get; }
+        private int Port { get; }
 
         public async Task<string> GetStatus()
         {
@@ -34,22 +33,22 @@ namespace Roki.Modules.Utility.Common
             {
                 return "Server Offline";
             }
-            
+
             _buffer = new List<byte>();
             _stream = _client.GetStream();
-            
+
             Handshake();
             Flush(0);
-            
-            var buffer = new byte[short.MaxValue]; 
+
+            var buffer = new byte[short.MaxValue];
             _stream.Read(buffer, 0, buffer.Length);
-            
+
             try
             {
-                var length = ReadVarInt(buffer);
-                var packet = ReadVarInt(buffer);
-                var jsonLength = ReadVarInt(buffer);
-                var json = ReadString(buffer, jsonLength);
+                int length = ReadVarInt(buffer);
+                int packet = ReadVarInt(buffer);
+                int jsonLength = ReadVarInt(buffer);
+                string json = ReadString(buffer, jsonLength);
                 return json;
             }
             catch (IOException)
@@ -66,10 +65,10 @@ namespace Roki.Modules.Utility.Common
             WriteVarInt(1);
             Flush(0);
         }
-        
+
         private byte ReadByte(byte[] buffer)
         {
-            var b = buffer[_offset];
+            byte b = buffer[_offset];
             _offset += 1;
             return b;
         }
@@ -89,18 +88,19 @@ namespace Roki.Modules.Utility.Common
             int b;
             while (((b = ReadByte(buffer)) & 0x80) == 0x80)
             {
-                value |= (b & 0x7F) << (size++*7);
+                value |= (b & 0x7F) << (size++ * 7);
                 if (size > 5)
                 {
                     throw new IOException("This VarInt is an imposter!");
                 }
             }
-            return value | ((b & 0x7F) << (size*7));
+
+            return value | ((b & 0x7F) << (size * 7));
         }
 
         private string ReadString(byte[] buffer, int length)
         {
-            var data = Read(buffer, length);
+            byte[] data = Read(buffer, length);
             return Encoding.UTF8.GetString(data);
         }
 
@@ -108,9 +108,10 @@ namespace Roki.Modules.Utility.Common
         {
             while ((value & 128) != 0)
             {
-                _buffer.Add((byte) (value & 127 | 128));
-                value = (int) ((uint) value) >> 7;
+                _buffer.Add((byte) ((value & 127) | 128));
+                value = (int) (uint) value >> 7;
             }
+
             _buffer.Add((byte) value);
         }
 
@@ -121,7 +122,7 @@ namespace Roki.Modules.Utility.Common
 
         private void WriteString(string data)
         {
-            var buffer = Encoding.UTF8.GetBytes(data);
+            byte[] buffer = Encoding.UTF8.GetBytes(data);
             WriteVarInt(buffer.Length);
             _buffer.AddRange(buffer);
         }
@@ -133,7 +134,7 @@ namespace Roki.Modules.Utility.Common
 
         private void Flush(int id = -1)
         {
-            var buffer = _buffer.ToArray();
+            byte[] buffer = _buffer.ToArray();
             _buffer.Clear();
 
             var add = 0;
@@ -147,7 +148,7 @@ namespace Roki.Modules.Utility.Common
             }
 
             WriteVarInt(buffer.Length + add);
-            var bufferLength = _buffer.ToArray();
+            byte[] bufferLength = _buffer.ToArray();
             _buffer.Clear();
 
             _stream.Write(bufferLength, 0, bufferLength.Length);

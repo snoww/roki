@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,19 +15,20 @@ namespace Roki.Modules.Utility
         [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
         public async Task Pins()
         {
-            var pins = await Context.Channel.GetPinnedMessagesAsync().ConfigureAwait(false);
+            IReadOnlyCollection<IMessage> pins = await Context.Channel.GetPinnedMessagesAsync().ConfigureAwait(false);
             if (pins.Count < 1)
             {
                 await Context.Channel.SendErrorAsync("No pins in this channel");
                 return;
             }
-            var pin = pins.First();
+
+            IMessage pin = pins.First();
 // TODO handle pinned embeds?
-            var embed = new EmbedBuilder().WithDynamicColor(Context)
+            EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle(pin.Author.Username)
                 .WithDescription(pin.Content)
                 .WithFooter($"{pin.Timestamp.ToLocalTime():hh:mm tt MM/dd/yyyy}");
-            
+
             await Context.Channel.EmbedAsync(embed);
         }
 
@@ -35,8 +37,8 @@ namespace Roki.Modules.Utility
         {
             if (message == null)
             {
-                var msgs = await Context.Channel.GetMessagesAsync(Context.Message, Direction.Before, 5).FlattenAsync();
-                var userMsg = msgs.FirstOrDefault(m => !string.IsNullOrWhiteSpace(m.Content));
+                IEnumerable<IMessage> msgs = await Context.Channel.GetMessagesAsync(Context.Message, Direction.Before, 5).FlattenAsync();
+                IMessage? userMsg = msgs.FirstOrDefault(m => !string.IsNullOrWhiteSpace(m.Content));
                 if (userMsg == null)
                 {
                     await Context.Channel.SendErrorAsync("nyothing to uwufy uwu").ConfigureAwait(false);
@@ -46,15 +48,15 @@ namespace Roki.Modules.Utility
                 message = userMsg.Content;
             }
 
-            var uwuize = Service.Uwulate(message);
+            string uwuize = Service.Uwulate(message);
             await Context.Channel.SendMessageAsync(uwuize).ConfigureAwait(false);
         }
-        
+
         [RokiCommand, Description, Usage, Aliases]
         public async Task Ping()
         {
             var sw = Stopwatch.StartNew();
-            var msg = await Context.Channel.SendMessageAsync("🏓").ConfigureAwait(false);
+            IUserMessage msg = await Context.Channel.SendMessageAsync("🏓").ConfigureAwait(false);
             sw.Stop();
             await msg.DeleteAsync().ConfigureAwait(false);
 
@@ -72,7 +74,9 @@ namespace Roki.Modules.Utility
         public async Task Say([Leftover] string message = null)
         {
             if (string.IsNullOrWhiteSpace(message))
+            {
                 return;
+            }
 
             await Context.Channel.SendMessageAsync(message).ConfigureAwait(false);
         }
@@ -83,8 +87,10 @@ namespace Roki.Modules.Utility
         public async Task SayRaw([Leftover] string message = null)
         {
             if (string.IsNullOrWhiteSpace(message))
+            {
                 return;
-            
+            }
+
             await Context.Channel.SendMessageAsync(Format.Code(message)).ConfigureAwait(false);
         }
     }
