@@ -15,12 +15,14 @@ namespace Roki.Modules.Utility
         public class CalcCommands : RokiSubmodule
         {
             private static readonly string TempDir = Path.GetTempPath();
-            
+
             [RokiCommand, Description, Usage, Aliases]
             public async Task TexToImage([Leftover] string tex)
             {
                 if (string.IsNullOrWhiteSpace(tex))
+                {
                     return;
+                }
 
                 string encoded = HttpUtility.UrlEncode(tex.Trim());
                 var filePath = $"{TempDir}/{Context.User.Username}-{Guid.NewGuid().ToString().Substring(0, 7)}.png";
@@ -38,7 +40,7 @@ namespace Roki.Modules.Utility
                         Arguments = $"-flatten {filePath} {filePath}",
                         RedirectStandardOutput = false,
                         UseShellExecute = false,
-                        CreateNoWindow = true,
+                        CreateNoWindow = true
                     }
                 };
                 proc.Start();

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -15,16 +16,16 @@ namespace Roki.Modules.Utility.Services
 {
     public class UtilityService : IRokiService
     {
-        private readonly DiscordSocketClient _client;
-        private readonly IMongoService _mongo;
-        private Timer _timer;
-        private Timer _status;
-        private static readonly Random Rng = new Random();
-        
         // temp hard coding values
         private const ulong DefaultGuildId = 125025699827417095;
+        private static readonly Random Rng = new Random();
         private static readonly ObjectId RainbowId = ObjectId.Parse("5db3150b03eb7230a1b5bb9d");
-        private SocketGuild _guild;
+        
+        private readonly DiscordSocketClient _client;
+        private readonly IMongoService _mongo;
+        private readonly SocketGuild _guild;
+        private Timer _status;
+        private Timer _timer;
 
         public UtilityService(DiscordSocketClient client, IMongoService mongo)
         {
@@ -39,22 +40,21 @@ namespace Roki.Modules.Utility.Services
             _timer = new Timer(ChangeRoleColor, null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
             _status = new Timer(RotateStatus, null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
         }
-        
+
         private async void ChangeRoleColor(object state)
         {
             // if no users has rainbow subscription, do not update
-            var users = await _mongo.Context.UserCollection.Find(x => x.Subscriptions.Any(y => y.Id == RainbowId)).Limit(1).CountDocumentsAsync()
+            long users = await _mongo.Context.UserCollection.Find(x => x.Subscriptions.Any(y => y.Id == RainbowId)).Limit(1).CountDocumentsAsync()
                 .ConfigureAwait(false);
             if (users == 0)
+            {
                 return;
-            
-            var roles = _guild.Roles.Where(r => r.Name.Contains("rainbow", StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            List<SocketRole> roles = _guild.Roles.Where(r => r.Name.Contains("rainbow", StringComparison.OrdinalIgnoreCase)).ToList();
             try
             {
-                foreach (var role in roles)
-                {
-                    await role.ModifyAsync(r => r.Color = new Color(Rng.Next(256), Rng.Next(256), Rng.Next(256))).ConfigureAwait(false);
-                }
+                foreach (SocketRole role in roles) await role.ModifyAsync(r => r.Color = new Color(Rng.Next(256), Rng.Next(256), Rng.Next(256))).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -64,12 +64,12 @@ namespace Roki.Modules.Utility.Services
 
         private async void RotateStatus(object state)
         {
-            var random = Rng.Next(3);
+            int random = Rng.Next(3);
             if (random == 0)
             {
-                var _ = Task.Run(async () =>
+                Task _ = Task.Run(async () =>
                 {
-                    for (int i = 0; i < 10; i++)
+                    for (var i = 0; i < 10; i++)
                     {
                         await _client.SetGameAsync(await GetMCStatus().ConfigureAwait(false)).ConfigureAwait(false);
                         await Task.Delay(TimeSpan.FromSeconds(55)).ConfigureAwait(false);
@@ -84,19 +84,18 @@ namespace Roki.Modules.Utility.Services
             {
                 await _client.SetGameAsync("Ivor's personal project video", null, ActivityType.Watching);
             }
-            
         }
 
-        private async Task<string> GetMCStatus()
+        private static async Task<string> GetMCStatus()
         {
             var server = new MinecraftServer("localhost");
-            var status = await server.GetStatus().ConfigureAwait(false);
+            string status = await server.GetStatus().ConfigureAwait(false);
             if (status.StartsWith("{", StringComparison.Ordinal))
             {
                 try
                 {
-                    using var json = JsonDocument.Parse(status);
-                    var players = json.RootElement.GetProperty("players");
+                    using JsonDocument json = JsonDocument.Parse(status);
+                    JsonElement players = json.RootElement.GetProperty("players");
                     return $"with {players.GetProperty("online").GetInt32()}/{players.GetProperty("max").GetInt32()} on Minecraft Server";
                 }
                 catch (Exception)
@@ -111,22 +110,24 @@ namespace Roki.Modules.Utility.Services
         public string Uwulate(string message)
         {
             var result = new StringBuilder();
-            for (int i = 0; i < message.Length; i++)
+            for (var i = 0; i < message.Length; i++)
             {
-                var currChar = message[i];
+                char currChar = message[i];
                 var preChar = '\0';
                 if (i > 0)
+                {
                     preChar = message[i - 1];
+                }
 
                 switch (currChar)
                 {
                     case 'L':
                     case 'R':
-                        result.Append("W");
+                        result.Append('W');
                         break;
                     case 'l':
                     case 'r':
-                        result.Append("w");
+                        result.Append('w');
                         break;
                     // special case
                     case 'o':
@@ -143,6 +144,7 @@ namespace Roki.Modules.Utility.Services
                                 result.Append(currChar);
                                 break;
                         }
+
                         break;
                     default:
                         result.Append(currChar);

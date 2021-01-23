@@ -1,13 +1,13 @@
-using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using MongoDB.Bson;
+using MongoDB.Driver;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Services;
-using Roki.Services.Database;
 using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Utility
@@ -18,7 +18,7 @@ namespace Roki.Modules.Utility
         public class QuoteCommands : RokiSubmodule
         {
             private readonly IMongoService _mongo;
-            
+
             public QuoteCommands(IMongoService mongo)
             {
                 _mongo = mongo;
@@ -30,9 +30,11 @@ namespace Roki.Modules.Utility
             {
                 page -= 1;
                 if (page < 0)
+                {
                     page = 0;
+                }
 
-                var quotes = await _mongo.Context.ListQuotesAsync(Context.Guild.Id, page);
+                List<Quote> quotes = await _mongo.Context.ListQuotesAsync(Context.Guild.Id, page);
                 if (quotes.Count > 0)
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
@@ -41,18 +43,22 @@ namespace Roki.Modules.Utility
                         .ConfigureAwait(false);
                 }
                 else
+                {
                     await Context.Channel.SendErrorAsync("No quotes found on that page.").ConfigureAwait(false);
+                }
             }
-            
+
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
             public async Task ListQuotesId(int page = 1)
             {
                 page -= 1;
                 if (page < 0)
+                {
                     page = 0;
+                }
 
-                var quotes = (await _mongo.Context.ListQuotesAsync(Context.Guild.Id, page)).OrderBy(x => x.Id).ToList();
+                List<Quote> quotes = (await _mongo.Context.ListQuotesAsync(Context.Guild.Id, page)).OrderBy(x => x.Id).ToList();
 
                 if (quotes.Count > 0)
                 {
@@ -62,7 +68,9 @@ namespace Roki.Modules.Utility
                         .ConfigureAwait(false);
                 }
                 else
+                {
                     await Context.Channel.SendErrorAsync("No quotes found on that page.").ConfigureAwait(false);
+                }
             }
 
             [RokiCommand, Description, Usage, Aliases]
@@ -71,21 +79,25 @@ namespace Roki.Modules.Utility
             {
                 keyword = keyword.ToUpperInvariant();
 
-                var quote = await _mongo.Context.GetRandomQuoteAsync(Context.Guild.Id, keyword).ConfigureAwait(false);
+                Quote quote = await _mongo.Context.GetRandomQuoteAsync(Context.Guild.Id, keyword).ConfigureAwait(false);
                 if (quote == null)
+                {
                     return;
-                
+                }
+
                 await Context.Channel.SendMessageAsync(quote.Text).ConfigureAwait(false);
             }
-            
+
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
             public async Task QuoteId(string id)
             {
-                var quote = await _mongo.Context.GetQuoteByIdAsync(Context.Guild.Id, id).ConfigureAwait(false);
+                Quote quote = await _mongo.Context.GetQuoteByIdAsync(Context.Guild.Id, id).ConfigureAwait(false);
                 if (quote == null)
+                {
                     return;
-                
+                }
+
                 await Context.Channel.SendMessageAsync(quote.Text).ConfigureAwait(false);
             }
 
@@ -111,7 +123,7 @@ namespace Roki.Modules.Utility
                     Context = $"https://discordapp.com/channels/{Context.Guild.Id}/{Context.Channel.Id}/{Context.Message.Id}",
                     Text = text
                 };
-                
+
                 await _mongo.Context.AddQuoteAsync(quote);
 
                 await Context.Channel.SendMessageAsync($"Quote `{quote.Id.GetHexId()}` **{keyword}** added.").ConfigureAwait(false);
@@ -121,9 +133,9 @@ namespace Roki.Modules.Utility
             [RequireContext(ContextType.Guild)]
             public async Task QuoteDeleteId(string id)
             {
-                var isAdmin = ((IGuildUser) Context.User).GuildPermissions.Administrator;
+                bool isAdmin = ((IGuildUser) Context.User).GuildPermissions.Administrator;
 
-                var result = isAdmin
+                DeleteResult result = isAdmin
                     ? await _mongo.Context.DeleteQuoteAdmin(Context.Guild.Id, id)
                     : await _mongo.Context.DeleteQuoteByIdAsync(Context.Guild.Id, Context.User.Id, id).ConfigureAwait(false);
 
@@ -138,17 +150,17 @@ namespace Roki.Modules.Utility
                     await Context.Channel.SendErrorAsync("No quotes found which you can remove.").ConfigureAwait(false);
                 }
             }
-            
+
             [RokiCommand, Description, Usage, Aliases]
             [RequireContext(ContextType.Guild)]
             public async Task QuoteDelete(string keyword)
             {
-                var isAdmin = ((IGuildUser) Context.User).GuildPermissions.Administrator;
+                bool isAdmin = ((IGuildUser) Context.User).GuildPermissions.Administrator;
 
-                var result = isAdmin
+                DeleteResult result = isAdmin
                     ? await _mongo.Context.DeleteQuoteAdmin(Context.Guild.Id, keyword: keyword)
                     : await _mongo.Context.DeleteQuoteAsync(Context.Guild.Id, Context.User.Id, keyword).ConfigureAwait(false);
-                
+
                 if (result.IsAcknowledged && result.DeletedCount > 0)
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
@@ -165,9 +177,11 @@ namespace Roki.Modules.Utility
             public async Task QuoteSearch([Leftover] string query = null)
             {
                 if (string.IsNullOrWhiteSpace(query))
+                {
                     return;
+                }
 
-                var quotes = await _mongo.Context.SearchQuotesByText(Context.Guild.Id, query).ConfigureAwait(false);
+                List<Quote> quotes = await _mongo.Context.SearchQuotesByText(Context.Guild.Id, query).ConfigureAwait(false);
                 if (quotes.Count > 0)
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
@@ -176,7 +190,9 @@ namespace Roki.Modules.Utility
                         .ConfigureAwait(false);
                 }
                 else
+                {
                     await Context.Channel.SendErrorAsync("No quotes found with that query.").ConfigureAwait(false);
+                }
             }
         }
     }
