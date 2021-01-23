@@ -23,6 +23,7 @@ namespace Roki.Modules.Searches.Services
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         
         private const string ApiUrl = "https://en.wikipedia.org/w/api.php?action=query";
+        private static readonly string TempDir = Path.GetTempPath();
 
         public SearchService(IHttpClientFactory http, IRokiConfig config)
         {
@@ -147,8 +148,8 @@ namespace Roki.Modules.Searches.Services
             var result = await http.GetStringAsync("https://aws.random.cat/meow").ConfigureAwait(false);
             using var cat = JsonDocument.Parse(result);
             using var client = new WebClient();
-            var uri = new Uri(cat.RootElement.GetProperty("file").GetString());
-            var path = "./temp/" + Path.GetFileName(uri.LocalPath);
+            var uri = new Uri(cat.RootElement.GetProperty("file").GetString()!);
+            var path = TempDir + Path.GetFileName(uri.LocalPath);
             await client.DownloadFileTaskAsync(uri, path).ConfigureAwait(false);
             return path;
         }
@@ -159,8 +160,8 @@ namespace Roki.Modules.Searches.Services
             var result = await http.GetStringAsync("https://random.dog/woof.json").ConfigureAwait(false);
             using var dog = JsonDocument.Parse(result);
             using var client = new WebClient();
-            var uri = new Uri(dog.RootElement.GetProperty("url").GetString());
-            var path = "./temp/" + Path.GetFileName(uri.LocalPath);
+            var uri = new Uri(dog.RootElement.GetProperty("url").GetString()!);
+            var path = TempDir + Path.GetFileName(uri.LocalPath);
             await client.DownloadFileTaskAsync(uri, path).ConfigureAwait(false);
             return path;
         }
@@ -193,7 +194,7 @@ namespace Roki.Modules.Searches.Services
             
                 foreach (var page in enumerator)
                 {
-                    var snippet = page.GetProperty("snippet").GetString().Replace(@"<span class=""searchmatch"">", "**").Replace("</span>", "**");
+                    var snippet = page.GetProperty("snippet").GetString()!.Replace(@"<span class=""searchmatch"">", "**").Replace("</span>", "**");
                     results.Add(new WikiSearch
                     {
                         Title = page.GetProperty("title").GetString(),

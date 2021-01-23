@@ -19,7 +19,8 @@ namespace Roki.Modules.Music
         public class TextToSpeechCommands : RokiSubmodule
         {
             private const string StreamlabsApi = "https://streamlabs.com/polly/speak";
-            
+            private static readonly string TempDir = Path.GetTempPath();
+
             [RokiCommand, Description, Usage, Aliases]
             public async Task Tts([Leftover] string query = null)
             {
@@ -52,11 +53,11 @@ namespace Roki.Modules.Music
                 var tts = (await result.Content.ReadAsStringAsync().ConfigureAwait(false)).Deserialize<TtsModel>();
                 if (tts.Success)
                 {
-                    var guid = Guid.NewGuid().ToString().Substring(0, 7);
-                    var fileName = $"{Context.User.Username}-{guid}";
+                    string guid = Guid.NewGuid().ToString().Substring(0, 7);
+                    var filePath = $"{TempDir}/{Context.User.Username}-{guid}";
                     using (var client = new WebClient())
                     {
-                        await client.DownloadFileTaskAsync(tts.SpeakUrl, $"./temp/{fileName}.ogg").ConfigureAwait(false);
+                        await client.DownloadFileTaskAsync(tts.SpeakUrl, filePath + ".ogg").ConfigureAwait(false);
                     }
 
                     using (var proc = new Process())
@@ -64,18 +65,18 @@ namespace Roki.Modules.Music
                         proc.StartInfo = new ProcessStartInfo
                         {
                             FileName = "ffmpeg",
-                            Arguments = $"-i ./temp/tts-{guid}.ogg ./temp/tts-{guid}.mp3",
+                            Arguments = $"-i {filePath}.ogg {filePath}.mp3",
                             RedirectStandardOutput = false,
                             UseShellExecute = false,
                             CreateNoWindow = true,
                         };
                         proc.Start();
-                        proc.WaitForExit();
+                        await proc.WaitForExitAsync();
                     }
 
-                    await Context.Channel.SendFileAsync($"./temp/{fileName}.mp3").ConfigureAwait(false);
-                    File.Delete($"./temp/{fileName}.ogg");
-                    File.Delete($"./temp/{fileName}.mp3");
+                    await Context.Channel.SendFileAsync($"{filePath}.mp3").ConfigureAwait(false);
+                    File.Delete($"{filePath}.ogg");
+                    File.Delete($"{filePath}.mp3");
                 }
                 else
                 {

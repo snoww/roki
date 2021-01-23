@@ -14,18 +14,20 @@ namespace Roki.Modules.Utility
         [Group]
         public class CalcCommands : RokiSubmodule
         {
+            private static readonly string TempDir = Path.GetTempPath();
+            
             [RokiCommand, Description, Usage, Aliases]
             public async Task TexToImage([Leftover] string tex)
             {
                 if (string.IsNullOrWhiteSpace(tex))
                     return;
 
-                var encoded = HttpUtility.UrlEncode(tex.Trim());
-                var fileName = $"{Context.User.Username}-{Guid.NewGuid().ToString().Substring(0, 7)}";
+                string encoded = HttpUtility.UrlEncode(tex.Trim());
+                var filePath = $"{TempDir}/{Context.User.Username}-{Guid.NewGuid().ToString().Substring(0, 7)}.png";
 
                 using (var client = new WebClient())
                 {
-                    client.DownloadFile($"https://math.now.sh?from={encoded}.png", $"./temp/{fileName}.png");
+                    client.DownloadFile($"https://math.now.sh?from={encoded}.png", filePath);
                 }
 
                 using var proc = new Process
@@ -33,17 +35,17 @@ namespace Roki.Modules.Utility
                     StartInfo = new ProcessStartInfo
                     {
                         FileName = "convert",
-                        Arguments = $"-flatten ./temp/{fileName}.png ./temp/{fileName}.png",
+                        Arguments = $"-flatten {filePath} {filePath}",
                         RedirectStandardOutput = false,
                         UseShellExecute = false,
                         CreateNoWindow = true,
                     }
                 };
                 proc.Start();
-                proc.WaitForExit();
+                await proc.WaitForExitAsync();
 
-                await Context.Channel.SendFileAsync($"./temp/{fileName}.png").ConfigureAwait(false);
-                File.Delete($"./temp/{fileName}.png");
+                await Context.Channel.SendFileAsync(filePath).ConfigureAwait(false);
+                File.Delete(filePath);
             }
         }
     }
