@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -16,15 +17,14 @@ namespace Roki.Modules.Searches
 {
     public partial class Searches : RokiTopLevelModule<SearchService>
     {
-        private readonly IRokiConfig _config;
-        private readonly IGoogleApiService _google;
-        private readonly IHttpClientFactory _http;
-        
         private const string WikipediaIconUrl = "https://i.imgur.com/UA0wMvt.png";
         private const string WikipediaUrl = "https://en.wikipedia.org/wiki";
         private const string XkcdUrl = "https://xkcd.com";
         private const string WolframUrl = "https://api.wolframalpha.com/v1/result?i=";
         private const string UrbanDictUrl = "http://api.urbandictionary.com/v0/define?term=";
+        private readonly IRokiConfig _config;
+        private readonly IGoogleApiService _google;
+        private readonly IHttpClientFactory _http;
 
         public Searches(IRokiConfig config, IGoogleApiService google, IHttpClientFactory http)
         {
@@ -32,24 +32,24 @@ namespace Roki.Modules.Searches
             _google = google;
             _http = http;
         }
-        
+
         [RokiCommand, Usage, Description, Aliases]
         public async Task Weather([Leftover] string query = "toronto")
         {
             try
             {
-                using var _ = Context.Channel.EnterTypingState();
-                var location = await Service.GetLocationDataAsync(query).ConfigureAwait(false);
+                using IDisposable _ = Context.Channel.EnterTypingState();
+                GeolocationResult location = await Service.GetLocationDataAsync(query).ConfigureAwait(false);
                 if (location == null)
                 {
                     await Context.Channel.SendErrorAsync("Cannot find specified location. Please try again.");
                     return;
                 }
 
-                var addr = location.Results[0];
-                var result = await Service.GetWeatherDataAsync(addr.Geometry.Location.Lat, addr.Geometry.Location.Lng).ConfigureAwait(false);
-                var tz = await Service.GetLocalDateTime(addr.Geometry.Location.Lat, addr.Geometry.Location.Lng).ConfigureAwait(false);
-                var localDt = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTimeOffset.UtcNow, tz.TimeZoneId);
+                GeolocationModel addr = location.Results[0];
+                string result = await Service.GetWeatherDataAsync(addr.Geometry.Location.Lat, addr.Geometry.Location.Lng).ConfigureAwait(false);
+                TimeZoneResult tz = await Service.GetLocalDateTime(addr.Geometry.Location.Lat, addr.Geometry.Location.Lng).ConfigureAwait(false);
+                DateTimeOffset localDt = TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTimeOffset.UtcNow, tz.TimeZoneId);
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithAuthor("Weather Report")
                         .WithDescription(addr.FormattedAddress + "\n" + Format.Code(result))
@@ -70,10 +70,10 @@ namespace Roki.Modules.Searches
                 await Context.Channel.SendErrorAsync("No Google Api key provided.").ConfigureAwait(false);
                 return;
             }
-            
-            var data = await Service.GetTimeDataAsync(query).ConfigureAwait(false);
 
-            var embed = new EmbedBuilder().WithDynamicColor(Context)
+            TimeData data = await Service.GetTimeDataAsync(query).ConfigureAwait(false);
+
+            EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle(data.Address)
                 .WithDescription($"`{data.Time:f}, {data.TimeZoneName}, UTC{data.Time:zz}`");
 
@@ -89,7 +89,7 @@ namespace Roki.Modules.Searches
         [RokiCommand, Description, Usage, Aliases]
         public async Task Youtube([Leftover] string query)
         {
-            var result = (await _google.GetVideoLinksByKeywordAsync(query).ConfigureAwait(false)).FirstOrDefault();
+            string? result = (await _google.GetVideoLinksByKeywordAsync(query).ConfigureAwait(false)).FirstOrDefault();
             if (string.IsNullOrWhiteSpace(result))
             {
                 await Context.Channel.SendErrorAsync("No results.").ConfigureAwait(false);
@@ -102,8 +102,8 @@ namespace Roki.Modules.Searches
         [RokiCommand, Description, Usage, Aliases]
         public async Task Image([Leftover] string query)
         {
-            var result = await _google.GetImagesAsync(query).ConfigureAwait(false);
-            var embed = new EmbedBuilder().WithDynamicColor(Context)
+            ImageResult result = await _google.GetImagesAsync(query).ConfigureAwait(false);
+            EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithAuthor("Image search for: " + query.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
                     $"https://www.google.com/search?q={HttpUtility.UrlEncode(query)}&source=lnms&tbm=isch")
                 .WithDescription(result.Link)
@@ -115,8 +115,8 @@ namespace Roki.Modules.Searches
         [RokiCommand, Description, Usage, Aliases]
         public async Task RandomImage([Leftover] string query)
         {
-            var result = await _google.GetImagesAsync(query, true).ConfigureAwait(false);
-            var embed = new EmbedBuilder().WithDynamicColor(Context)
+            ImageResult result = await _google.GetImagesAsync(query, true).ConfigureAwait(false);
+            EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithAuthor("Image search for: " + query.TrimTo(50), "https://i.imgur.com/u1WtML5.png",
                     $"https://www.google.com/search?q={HttpUtility.UrlEncode(query)}&source=lnms&tbm=isch")
                 .WithDescription(result.Link)
@@ -130,14 +130,14 @@ namespace Roki.Modules.Searches
         {
             await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
 
-            var movie = await Service.GetMovieDataAsync(query).ConfigureAwait(false);
+            OmdbMovie movie = await Service.GetMovieDataAsync(query).ConfigureAwait(false);
             if (movie == null)
             {
                 await Context.Channel.SendErrorAsync("No results found.").ConfigureAwait(false);
                 return;
             }
 
-            var embed = new EmbedBuilder().WithDynamicColor(Context)
+            EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle(movie.Title)
                 .WithUrl($"http://www.imdb.com/title/{movie.ImdbId}/")
                 .WithDescription(movie.Plot.TrimTo(1000))
@@ -154,21 +154,23 @@ namespace Roki.Modules.Searches
         {
             await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
             query = HttpUtility.UrlEncode(query);
-            using var http = _http.CreateClient();
-            var response = await http.GetStringAsync(UrbanDictUrl + query)
+            using HttpClient http = _http.CreateClient();
+            string response = await http.GetStringAsync(UrbanDictUrl + query)
                 .ConfigureAwait(false);
             try
             {
-                var items = response.Deserialize<UrbanResponse>().List;
+                UrbanModel[] items = response.Deserialize<UrbanResponse>().List;
                 if (items.Any())
+                {
                     await Context.SendPaginatedMessageAsync(0, p =>
                     {
-                        var item = items[p];
+                        UrbanModel item = items[p];
                         return new EmbedBuilder().WithDynamicColor(Context)
                             .WithUrl(item.Permalink)
                             .WithAuthor(item.Word, "https://i.imgur.com/p1NqHdf.jpg")
                             .WithDescription(item.Definition);
                     }, items.Length, 1).ConfigureAwait(false);
+                }
                 else
                 {
                     await Context.Channel.SendErrorAsync($"No results for `{query}`");
@@ -185,7 +187,7 @@ namespace Roki.Modules.Searches
         {
             try
             {
-                var path = await Service.GetRandomCatAsync().ConfigureAwait(false);
+                string path = await Service.GetRandomCatAsync().ConfigureAwait(false);
                 await Context.Channel.SendFileAsync(path).ConfigureAwait(false);
                 File.Delete(path);
             }
@@ -194,13 +196,13 @@ namespace Roki.Modules.Searches
                 await Context.Channel.SendErrorAsync("Something went wrong :(").ConfigureAwait(false);
             }
         }
-        
+
         [RokiCommand, Description, Usage, Aliases]
         public async Task RandomDog()
         {
             try
             {
-                var path = await Service.GetRandomDogAsync().ConfigureAwait(false);
+                string path = await Service.GetRandomDogAsync().ConfigureAwait(false);
                 await Context.Channel.SendFileAsync(path).ConfigureAwait(false);
                 File.Delete(path);
             }
@@ -215,7 +217,7 @@ namespace Roki.Modules.Searches
         {
             try
             {
-                var fact = await Service.GetCatFactAsync().ConfigureAwait(false);
+                string fact = await Service.GetCatFactAsync().ConfigureAwait(false);
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                     .WithTitle("Random Cat Fact")
                     .WithDescription(fact));
@@ -225,14 +227,14 @@ namespace Roki.Modules.Searches
                 await Context.Channel.SendErrorAsync("Something went wrong :(").ConfigureAwait(false);
             }
         }
-        
+
         [RokiCommand, Description, Usage, Aliases]
         public async Task Wikipedia([Leftover] string args)
         {
-            var argsSplit = args.Split(' ');
+            string[] argsSplit = args.Split(' ');
             var queryBuilder = new StringBuilder();
             var showResults = false;
-            foreach (var str in argsSplit)
+            foreach (string str in argsSplit)
             {
                 if (!showResults && str.Equals("-q", StringComparison.OrdinalIgnoreCase))
                 {
@@ -243,30 +245,31 @@ namespace Roki.Modules.Searches
                 queryBuilder.Append(str + " ");
             }
 
-            var query = queryBuilder.ToString().Trim();
-            using var typing = Context.Channel.EnterTypingState();
+            string query = queryBuilder.ToString().Trim();
+            using IDisposable typing = Context.Channel.EnterTypingState();
             // maybe in future only get 1 article if -q not provided
-            var results = await Service.SearchAsync(query).ConfigureAwait(false);
+            List<WikiSearch> results = await Service.SearchAsync(query).ConfigureAwait(false);
             if (results == null || results.Count == 0)
             {
                 await Context.Channel.SendErrorAsync($"Cannot find any results for: `{query}`").ConfigureAwait(false);
                 return;
             }
+
             if (string.IsNullOrWhiteSpace(results[0].Snippet))
             {
                 await Context.Channel.SendErrorAsync($"Cannot find any results for: `{query}`, did you mean `{results[0].Title}`?");
                 return;
             }
-            
+
             if (!showResults)
             {
-                var article = await Service.GetSummaryAsync(results[0].Title).ConfigureAwait(false);
+                WikiSummary article = await Service.GetSummaryAsync(results[0].Title).ConfigureAwait(false);
                 await SendArticleAsync(article).ConfigureAwait(false);
                 return;
             }
 
             var counter = 1;
-            var embed = new EmbedBuilder().WithDynamicColor(Context)
+            EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithAuthor("Wikipedia", WikipediaIconUrl)
                 .WithTitle($"Search results for: `{query}`")
                 .WithDescription(string.Join("\n", results
@@ -275,19 +278,19 @@ namespace Roki.Modules.Searches
             await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
             // for future allow selecting article and showing it
         }
-        
+
         [RokiCommand, Description, Usage, Aliases]
         public async Task Xkcd(int num = 0)
         {
             try
             {
-                using var http = _http.CreateClient();
-                var result = num == 0
+                using HttpClient http = _http.CreateClient();
+                string result = num == 0
                     ? await http.GetStringAsync($"{XkcdUrl}/info.0.json").ConfigureAwait(false)
                     : await http.GetStringAsync($"{XkcdUrl}/{num}/info.0.json").ConfigureAwait(false);
 
                 var xkcd = result.Deserialize<XkcdModel>();
-                var embed = new EmbedBuilder().WithDynamicColor(Context)
+                EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                     .WithAuthor(xkcd.Title, "https://xkcd.com/s/919f27.ico", $"{XkcdUrl}/{xkcd.Num}")
                     .WithImageUrl(xkcd.Img)
                     .AddField("Comic #", xkcd.Num, true)
@@ -300,7 +303,7 @@ namespace Roki.Modules.Searches
                 await Context.Channel.SendErrorAsync("Comic not found").ConfigureAwait(false);
             }
         }
-        
+
         [RokiCommand, Description, Usage, Aliases]
         public async Task Ask([Leftover] string query = null)
         {
@@ -309,11 +312,11 @@ namespace Roki.Modules.Searches
                 return;
             }
 
-            using var http = _http.CreateClient();
+            using HttpClient http = _http.CreateClient();
             try
             {
                 await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
-                var result = await http.GetStringAsync($"{WolframUrl}{query}&appid={_config.WolframAlphaApi}").ConfigureAwait(false);
+                string result = await http.GetStringAsync($"{WolframUrl}{query}&appid={_config.WolframAlphaApi}").ConfigureAwait(false);
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle("Ask Roki")
                         .WithDescription(result))
@@ -324,15 +327,15 @@ namespace Roki.Modules.Searches
                 await Context.Channel.SendErrorAsync($"Sorry, I don't have an answer for that question\n`{query}`").ConfigureAwait(false);
             }
         }
-        
+
         private async Task SendArticleAsync(WikiSummary article)
         {
-            var embed = new EmbedBuilder().WithDynamicColor(Context)
+            EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithAuthor("Wikipedia", WikipediaIconUrl)
                 .WithTitle(article.Title)
                 .WithUrl($"{WikipediaUrl}/{HttpUtility.UrlPathEncode(article.Title)}")
                 .WithDescription(article.Extract);
-            
+
             if (!string.IsNullOrWhiteSpace(article.ImageUrl))
             {
                 embed.WithImageUrl(article.ImageUrl);

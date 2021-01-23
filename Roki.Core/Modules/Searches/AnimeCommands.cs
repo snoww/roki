@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web;
@@ -25,17 +24,17 @@ namespace Roki.Modules.Searches
                     return;
                 }
 
-                var media = await Service.GetAnimeDataAsync(query).ConfigureAwait(false);
+                List<Anime> media = await Service.GetAnimeDataAsync(query).ConfigureAwait(false);
                 if (media.Count < 1)
                 {
                     await Context.Channel.SendErrorAsync("Couldn't find that anime :(").ConfigureAwait(false);
                     return;
                 }
 
-                await Context.SendPaginatedMessageAsync( 0, p =>
+                await Context.SendPaginatedMessageAsync(0, p =>
                 {
-                    var anime = media[p];
-                    var embed = new EmbedBuilder().WithDynamicColor(Context)
+                    Anime anime = media[p];
+                    EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle(anime.Title.GetTitle())
                         .WithImageUrl(anime.CoverImage.Large)
                         .WithDescription(HttpUtility.HtmlDecode(anime.Description).TrimTo(2048))
@@ -50,7 +49,7 @@ namespace Roki.Modules.Searches
             }
         }
     }
-    
+
     public static class AnimeExtensions
     {
         public static string GetTitle(this AnimeTitle title)
@@ -58,31 +57,49 @@ namespace Roki.Modules.Searches
             var titles = new List<string>();
 
             if (!string.IsNullOrWhiteSpace(title.Romaji))
+            {
                 titles.Add(title.Romaji);
+            }
+
             if (!string.IsNullOrWhiteSpace(title.English))
+            {
                 titles.Add(title.English);
+            }
+
             if (!string.IsNullOrWhiteSpace(title.Native))
+            {
                 titles.Add(title.Native);
+            }
 
             return string.Join(" | ", titles);
         }
-        
+
         public static string GetReleaseYear(this int? seasonInt)
         {
             if (seasonInt == null)
+            {
                 return "N/A";
-            
-            var year = seasonInt.ToString().Substring(0, seasonInt.ToString().Length - 1);
-            var season = seasonInt.ToString().Substring(seasonInt.ToString().Length - 1);
-            
+            }
+
+            string year = seasonInt.ToString().Substring(0, seasonInt.ToString().Length - 1);
+            string season = seasonInt.ToString().Substring(seasonInt.ToString().Length - 1);
+
             if (string.IsNullOrWhiteSpace(year))
+            {
                 year = "2000";
+            }
             else if (int.Parse(year) > 0 && int.Parse(year) < 10)
+            {
                 year = "200" + year;
+            }
             else if (int.Parse(year) > 30)
+            {
                 year = "19" + year;
+            }
             else
+            {
                 year = "20" + year;
+            }
 
             switch (season)
             {
