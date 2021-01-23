@@ -8,7 +8,6 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web;
-using Discord.WebSocket;
 using NLog;
 using Roki.Extensions;
 using Roki.Modules.Searches.Models;
@@ -18,12 +17,11 @@ namespace Roki.Modules.Searches.Services
 {
     public class SearchService : IRokiService
     {
+        private const string ApiUrl = "https://en.wikipedia.org/w/api.php?action=query";
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly string TempDir = Path.GetTempPath();
         private readonly IRokiConfig _config;
         private readonly IHttpClientFactory _http;
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        
-        private const string ApiUrl = "https://en.wikipedia.org/w/api.php?action=query";
-        private static readonly string TempDir = Path.GetTempPath();
 
         public SearchService(IHttpClientFactory http, IRokiConfig config)
         {
@@ -35,8 +33,8 @@ namespace Roki.Modules.Searches.Services
         {
             try
             {
-                using var http = _http.CreateClient();
-                var result = await http.GetStringAsync($"https://wttr.in/{lat},{lng}?0ATQ").ConfigureAwait(false);
+                using HttpClient http = _http.CreateClient();
+                string result = await http.GetStringAsync($"https://wttr.in/{lat},{lng}?0ATQ").ConfigureAwait(false);
                 return result;
             }
             catch (Exception e)
@@ -50,12 +48,12 @@ namespace Roki.Modules.Searches.Services
         {
             try
             {
-                using var http = _http.CreateClient();
-                var obj = await GetLocationDataAsync(arg);
-                var culture = GetLocalCulture(obj.Results[0].AddressComponents);
+                using HttpClient http = _http.CreateClient();
+                GeolocationResult obj = await GetLocationDataAsync(arg);
+                CultureInfo culture = GetLocalCulture(obj.Results[0].AddressComponents);
 
-                var currentSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-                var timeResult = await http
+                long currentSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                string timeResult = await http
                     .GetStringAsync(
                         $"https://maps.googleapis.com/maps/api/timezone/json?location={obj.Results[0].Geometry.Location.Lat},{obj.Results[0].Geometry.Location.Lng}&timestamp={currentSeconds}&key={_config.GoogleApi}")
                     .ConfigureAwait(false);
@@ -68,7 +66,7 @@ namespace Roki.Modules.Searches.Services
                     TimeZoneName = timeObj.TimeZoneName,
                     Culture = culture
                 };
-                
+
                 return timeData;
             }
             catch (Exception e)
@@ -80,7 +78,7 @@ namespace Roki.Modules.Searches.Services
 
         private CultureInfo GetLocalCulture(IEnumerable<AddressComponent> components)
         {
-            var country = components.FirstOrDefault(c => c.Types.Contains("country", StringComparer.Ordinal));
+            AddressComponent country = components.FirstOrDefault(c => c.Types.Contains("country", StringComparer.Ordinal));
             if (country == null)
             {
                 return null;
@@ -88,22 +86,22 @@ namespace Roki.Modules.Searches.Services
 
             try
             {
-                using var json = JsonDocument.Parse(File.ReadAllText("./data/countries.json"));
-                var lang = json.RootElement.GetProperty(country.ShortName).GetProperty("languages")[0].GetString();
-                return new CultureInfo(lang);
+                using JsonDocument json = JsonDocument.Parse(File.ReadAllText("./data/countries.json"));
+                string lang = json.RootElement.GetProperty(country.ShortName).GetProperty("languages")[0].GetString();
+                return new CultureInfo(lang!);
             }
             catch (Exception)
             {
-                Logger.Warn("Could not find culture for {culture}", country.LongName);
+                Logger.Warn("Could not find culture for {Culture}", country.LongName);
                 return null;
             }
         }
 
         public async Task<TimeZoneResult> GetLocalDateTime(float lat, float lng)
         {
-            using var http = _http.CreateClient();
-            var currentSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            var timeResult = await http
+            using HttpClient http = _http.CreateClient();
+            long currentSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            string timeResult = await http
                 .GetStringAsync(
                     $"https://maps.googleapis.com/maps/api/timezone/json?location={lat},{lng}&timestamp={currentSeconds}&key={_config.GoogleApi}")
                 .ConfigureAwait(false);
@@ -114,13 +112,13 @@ namespace Roki.Modules.Searches.Services
         {
             try
             {
-                using var http = _http.CreateClient();
-                var result = await http.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={location}&key={_config.GoogleApi}")
+                using HttpClient http = _http.CreateClient();
+                string result = await http.GetStringAsync($"https://maps.googleapis.com/maps/api/geocode/json?address={location}&key={_config.GoogleApi}")
                     .ConfigureAwait(false);
                 var geo = result.Deserialize<GeolocationResult>();
                 if (geo?.Results == null || geo.Results.Length == 0)
                 {
-                    Logger.Warn("Geocode lookup failed for {location}", location);
+                    Logger.Warn("Geocode lookup failed for {lLocation", location);
                     return null;
                 }
 
@@ -136,65 +134,65 @@ namespace Roki.Modules.Searches.Services
         public async Task<OmdbMovie> GetMovieDataAsync(string name)
         {
             name = HttpUtility.UrlEncode(name.ToLowerInvariant());
-            using var http = _http.CreateClient();
-            var result = await http.GetStringAsync($"http://www.omdbapi.com/?t={name}&apikey={_config.OmdbApi}&y=&plot=full&r=json").ConfigureAwait(false);
+            using HttpClient http = _http.CreateClient();
+            string result = await http.GetStringAsync($"http://www.omdbapi.com/?t={name}&apikey={_config.OmdbApi}&y=&plot=full&r=json").ConfigureAwait(false);
             var movie = result.Deserialize<OmdbMovie>();
             return movie?.Title == null ? null : movie;
         }
 
         public async Task<string> GetRandomCatAsync()
         {
-            using var http = _http.CreateClient();
-            var result = await http.GetStringAsync("https://aws.random.cat/meow").ConfigureAwait(false);
-            using var cat = JsonDocument.Parse(result);
+            using HttpClient http = _http.CreateClient();
+            string result = await http.GetStringAsync("https://aws.random.cat/meow").ConfigureAwait(false);
+            using JsonDocument cat = JsonDocument.Parse(result);
             using var client = new WebClient();
             var uri = new Uri(cat.RootElement.GetProperty("file").GetString()!);
-            var path = TempDir + Path.GetFileName(uri.LocalPath);
+            string path = TempDir + Path.GetFileName(uri.LocalPath);
             await client.DownloadFileTaskAsync(uri, path).ConfigureAwait(false);
             return path;
         }
-        
+
         public async Task<string> GetRandomDogAsync()
         {
-            using var http = _http.CreateClient();
-            var result = await http.GetStringAsync("https://random.dog/woof.json").ConfigureAwait(false);
-            using var dog = JsonDocument.Parse(result);
+            using HttpClient http = _http.CreateClient();
+            string result = await http.GetStringAsync("https://random.dog/woof.json").ConfigureAwait(false);
+            using JsonDocument dog = JsonDocument.Parse(result);
             using var client = new WebClient();
             var uri = new Uri(dog.RootElement.GetProperty("url").GetString()!);
-            var path = TempDir + Path.GetFileName(uri.LocalPath);
+            string path = TempDir + Path.GetFileName(uri.LocalPath);
             await client.DownloadFileTaskAsync(uri, path).ConfigureAwait(false);
             return path;
         }
 
         public async Task<string> GetCatFactAsync()
         {
-            using var http = _http.CreateClient();
-            var result = await http.GetStringAsync("https://catfact.ninja/fact").ConfigureAwait(false);
-            using var fact = JsonDocument.Parse(result);
+            using HttpClient http = _http.CreateClient();
+            string result = await http.GetStringAsync("https://catfact.ninja/fact").ConfigureAwait(false);
+            using JsonDocument fact = JsonDocument.Parse(result);
 
             return fact.RootElement.GetProperty("fact").GetString();
         }
-        
+
         public async Task<List<WikiSearch>> SearchAsync(string query, int limit = 5)
         {
-            using var http = _http.CreateClient();
-            var result = await http.GetStringAsync($"{ApiUrl}&list=search&srsearch={query}&srlimit={limit}&format=json").ConfigureAwait(false);
+            using HttpClient http = _http.CreateClient();
+            string result = await http.GetStringAsync($"{ApiUrl}&list=search&srsearch={query}&srlimit={limit}&format=json").ConfigureAwait(false);
 
-            using var json = JsonDocument.Parse(result);
-            var queryElement = json.RootElement.GetProperty("query");
+            using JsonDocument json = JsonDocument.Parse(result);
+            JsonElement queryElement = json.RootElement.GetProperty("query");
 
-            var searchInfo = queryElement.GetProperty("searchinfo");
-            var hits = searchInfo.GetProperty("totalhits").GetInt32();
+            JsonElement searchInfo = queryElement.GetProperty("searchinfo");
+            int hits = searchInfo.GetProperty("totalhits").GetInt32();
 
             var results = new List<WikiSearch>();
 
             if (hits != 0)
             {
-                var enumerator = queryElement.GetProperty("search").EnumerateArray();
-            
-                foreach (var page in enumerator)
+                JsonElement.ArrayEnumerator enumerator = queryElement.GetProperty("search").EnumerateArray();
+
+                foreach (JsonElement page in enumerator)
                 {
-                    var snippet = page.GetProperty("snippet").GetString()!.Replace(@"<span class=""searchmatch"">", "**").Replace("</span>", "**");
+                    string snippet = page.GetProperty("snippet").GetString()!.Replace(@"<span class=""searchmatch"">", "**").Replace("</span>", "**");
                     results.Add(new WikiSearch
                     {
                         Title = page.GetProperty("title").GetString(),
@@ -202,7 +200,7 @@ namespace Roki.Modules.Searches.Services
                     });
                 }
             }
-            else if (searchInfo.TryGetProperty("suggestion", out var suggestion))
+            else if (searchInfo.TryGetProperty("suggestion", out JsonElement suggestion))
             {
                 results.Add(new WikiSearch
                 {
@@ -215,30 +213,30 @@ namespace Roki.Modules.Searches.Services
 
         public async Task<WikiSummary> GetSummaryAsync(string title)
         {
-            using var http = _http.CreateClient();
-            var result = await http.GetStringAsync($"{ApiUrl}&list=&prop=extracts&explaintext&exsentences=3&exintro=&titles={title}&format=json").ConfigureAwait(false);
+            using HttpClient http = _http.CreateClient();
+            string result = await http.GetStringAsync($"{ApiUrl}&list=&prop=extracts&explaintext&exsentences=3&exintro=&titles={title}&format=json").ConfigureAwait(false);
 
             var summary = new WikiSummary();
-            using (var json = JsonDocument.Parse(result))
+            using (JsonDocument json = JsonDocument.Parse(result))
             {
-                var element = json.RootElement.GetProperty("query").GetProperty("pages");
-                var page = element.EnumerateObject().First();
+                JsonElement element = json.RootElement.GetProperty("query").GetProperty("pages");
+                JsonProperty page = element.EnumerateObject().First();
                 summary.Title = page.Value.GetProperty("title").GetString();
                 summary.Extract = page.Value.GetProperty("extract").GetString();
             }
-            
-            var imageResult = await http.GetStringAsync($"{ApiUrl}&titles={title}&prop=pageimages&pithumbsize=500&format=json").ConfigureAwait(false);
 
-            using (var json = JsonDocument.Parse(imageResult))
+            string imageResult = await http.GetStringAsync($"{ApiUrl}&titles={title}&prop=pageimages&pithumbsize=500&format=json").ConfigureAwait(false);
+
+            using (JsonDocument json = JsonDocument.Parse(imageResult))
             {
-                var element = json.RootElement.GetProperty("query").GetProperty("pages");
-                var page = element.EnumerateObject().First();
-                if (page.Value.TryGetProperty("thumbnail", out var thumbnail))
+                JsonElement element = json.RootElement.GetProperty("query").GetProperty("pages");
+                JsonProperty page = element.EnumerateObject().First();
+                if (page.Value.TryGetProperty("thumbnail", out JsonElement thumbnail))
                 {
                     summary.ImageUrl = thumbnail.GetProperty("source").GetString();
                 }
             }
-            
+
             return summary;
         }
     }
