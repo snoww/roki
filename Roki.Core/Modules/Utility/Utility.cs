@@ -38,7 +38,7 @@ namespace Roki.Modules.Utility
             if (message == null)
             {
                 IEnumerable<IMessage> msgs = await Context.Channel.GetMessagesAsync(Context.Message, Direction.Before, 5).FlattenAsync();
-                IMessage? userMsg = msgs.FirstOrDefault(m => !string.IsNullOrWhiteSpace(m.Content));
+                IMessage userMsg = msgs.FirstOrDefault(m => !string.IsNullOrWhiteSpace(m.Content));
                 if (userMsg == null)
                 {
                     await Context.Channel.SendErrorAsync("nyothing to uwufy uwu").ConfigureAwait(false);

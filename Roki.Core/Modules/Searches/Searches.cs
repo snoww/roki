@@ -89,7 +89,7 @@ namespace Roki.Modules.Searches
         [RokiCommand, Description, Usage, Aliases]
         public async Task Youtube([Leftover] string query)
         {
-            string? result = (await _google.GetVideoLinksByKeywordAsync(query).ConfigureAwait(false)).FirstOrDefault();
+            string result = (await _google.GetVideoLinksByKeywordAsync(query).ConfigureAwait(false)).FirstOrDefault();
             if (string.IsNullOrWhiteSpace(result))
             {
                 await Context.Channel.SendErrorAsync("No results.").ConfigureAwait(false);
