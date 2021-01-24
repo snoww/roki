@@ -314,7 +314,7 @@ namespace Roki.Modules.Utility.Services
                 using HttpClient http = _factory.CreateClient();
                 http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 Directory.CreateDirectory($"data/charts/{icao}");
-                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Saving charts...")).ConfigureAwait(false);
+                await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Saving charts, this may take a while...")).ConfigureAwait(false);
                 foreach ((string name, string id) in chartIds)
                 {
                     string chartName = new string(Array.FindAll(id.ToArray(), char.IsLetterOrDigit)).ToLower();
