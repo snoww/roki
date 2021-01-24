@@ -92,10 +92,12 @@ namespace Roki.Modules.Utility
                     await Context.Channel.SendErrorAsync("Invalid ICAO").ConfigureAwait(false);
                     return;
                 }
-
+                
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Updating chart database..."))
                     .ConfigureAwait(false);
+                await Service.Semaphore.WaitAsync();
                 await Service.DownloadAllCharts(Context, icao);
+                Service.Semaphore.Release();
             }
         }
     }

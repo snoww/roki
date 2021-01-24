@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -22,28 +23,23 @@ namespace Roki.Modules.Utility.Services
     public class NavigraphService : IRokiService
     {
         private readonly IRokiConfig _config;
-        private readonly IHttpClientFactory _http;
-
-        private readonly WebClient _webClient;
+        private readonly IHttpClientFactory _factory;
+        private readonly WebClient _webClient = new WebClient();
         private IBrowser _browser;
-
-        private readonly CancellationTokenSource _cancellationToken = new CancellationTokenSource();
-        private string _currentAirport;
         private IPage _page;
         private IPlaywright _playwright;
-        private SemaphoreSlim _semaphore;
+        public readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
 
-        public NavigraphService(IRokiConfig config, IHttpClientFactory http)
+        // utility to view navigraph charts in discord
+        // note you must own a valid navigraph account and subscription
+        public NavigraphService(IRokiConfig config, IHttpClientFactory factory)
         {
             _config = config;
-            _webClient = new WebClient();
-            _http = http;
+            _factory = factory;
         }
 
         private async Task CreateContext()
         {
-            _semaphore = new SemaphoreSlim(1, 1);
-            await _semaphore.WaitAsync();
             _playwright = await Playwright.CreateAsync();
             _browser = await _playwright.Firefox.LaunchAsync();
             _page = await _browser.NewPageAsync();
@@ -54,34 +50,17 @@ namespace Roki.Modules.Utility.Services
             await _page.FillAsync("id=password", _config.NavigraphPassword);
             await _page.PressAsync("id=username", "Enter");
             await _page.WaitForTimeoutAsync(1500);
-            _semaphore.Release();
-        }
-
-        private async Task EnsureContextCreated()
-        {
-            if (_page == null)
-            {
-                await CreateContext();
-                Task _ = Task.Run(async () =>
-                {
-                    await Task.Delay(TimeSpan.FromMinutes(30), _cancellationToken.Token);
-                    if (_cancellationToken.IsCancellationRequested)
-                    {
-                        return;
-                    }
-
-                    await DisposeContext();
-                }, _cancellationToken.Token);
-            }
         }
 
         public async Task<string> GetSTAR(ICommandContext ctx, string icao, string star)
         {
             using IDisposable typing = ctx.Channel.EnterTypingState();
+            await Semaphore.WaitAsync();
             if (!CheckExistingCharts(icao, "star"))
             {
                 await DownloadAllCharts(ctx, icao);
             }
+            Semaphore.Release();
 
             if (string.IsNullOrWhiteSpace(star))
             {
@@ -95,10 +74,12 @@ namespace Roki.Modules.Utility.Services
         public async Task<string> GetSID(ICommandContext ctx, string icao, string sid)
         {
             using IDisposable typing = ctx.Channel.EnterTypingState();
+            await Semaphore.WaitAsync();
             if (!CheckExistingCharts(icao, "sid"))
             {
                 await DownloadAllCharts(ctx, icao);
             }
+            Semaphore.Release();
 
             if (string.IsNullOrWhiteSpace(sid))
             {
@@ -112,10 +93,12 @@ namespace Roki.Modules.Utility.Services
         public async Task<string> GetAPPR(ICommandContext ctx, string icao, string appr)
         {
             using IDisposable typing = ctx.Channel.EnterTypingState();
+            await Semaphore.WaitAsync();
             if (!CheckExistingCharts(icao, "appr"))
             {
                 await DownloadAllCharts(ctx, icao);
             }
+            Semaphore.Release();
 
             if (string.IsNullOrWhiteSpace(appr))
             {
@@ -129,10 +112,12 @@ namespace Roki.Modules.Utility.Services
         public async Task<string> GetTAXI(ICommandContext ctx, string icao, string taxi)
         {
             using IDisposable typing = ctx.Channel.EnterTypingState();
+            await Semaphore.WaitAsync();
             if (!CheckExistingCharts(icao, "taxi"))
             {
                 await DownloadAllCharts(ctx, icao);
             }
+            Semaphore.Release();
 
             if (string.IsNullOrWhiteSpace(taxi))
             {
@@ -180,22 +165,18 @@ namespace Roki.Modules.Utility.Services
                 : $"data/charts/{icao}/{icao}_{new string(Array.FindAll(filename.ToArray(), char.IsLetterOrDigit))}.png".ToLowerInvariant();
         }
 
-        private async Task<bool> SetCurrentAirport(string icao)
+        private async Task<bool> TrySetCurrentAirport(string icao)
         {
-            if (_currentAirport != icao)
+            await _page.FillAsync("id=mat-input-0", icao);
+            await _page.PressAsync("id=mat-input-0", "Enter");
+            await _page.WaitForTimeoutAsync(1500);
+            IElementHandle selector = await _page.QuerySelectorAsync("css=.mat-focus-indicator.charts-btn.mat-mini-fab.mat-button-base.mat-primary.ng-star-inserted");
+            if (selector == null)
             {
-                await _page.FillAsync("id=mat-input-0", icao);
-                await _page.PressAsync("id=mat-input-0", "Enter");
-                await _page.WaitForTimeoutAsync(1500);
-                IElementHandle selector = await _page.QuerySelectorAsync("css=.mat-focus-indicator.charts-btn.mat-mini-fab.mat-button-base.mat-primary.ng-star-inserted");
-                if (selector == null)
-                {
-                    return false;
-                }
-
-                await selector.ClickAsync();
-                _currentAirport = icao;
+                return false;
             }
+
+            await selector.ClickAsync();
 
             return true;
         }
@@ -211,9 +192,9 @@ namespace Roki.Modules.Utility.Services
 
             try
             {
-                await EnsureContextCreated();
-                await _semaphore.WaitAsync();
-                if (!await SetCurrentAirport(icao))
+                await CreateContext();
+
+                if (!await TrySetCurrentAirport(icao))
                 {
                     await ctx.Channel.SendErrorAsync("Invalid ICAO");
                     return;
@@ -329,8 +310,8 @@ namespace Roki.Modules.Utility.Services
                 }
 
                 JsonElement? element = await _page.EvaluateAsync("window.localStorage.getItem(\"access_token\")");
-                string? token = element?.GetString();
-                using HttpClient http = _http.CreateClient();
+                string token = element?.GetString();
+                using HttpClient http = _factory.CreateClient();
                 http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 Directory.CreateDirectory($"data/charts/{icao}");
                 await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Saving charts...")).ConfigureAwait(false);
@@ -340,6 +321,9 @@ namespace Roki.Modules.Utility.Services
                     string imageUrl;
                     if (Regex.IsMatch(chartName, "^\\d+.+\\w+.+\\d$"))
                     {
+                        // sub charts of primary chart name doesn't have chart number
+                        // e.g. BOXUM5 for RWY 05 & 06L/R has ID 10-2A, but url is 102a
+                        //      while for RWY 23 & 24L/R has ID 10-2A2, but url is 02a2
                         imageUrl = await http.GetStringAsync(
                             $"https://charts.api.navigraph.com/2/airports/{icao.ToUpperInvariant()}/signedurls/{icao.ToLowerInvariant()}{chartName.Substring(1)}_d.png");
                     }
@@ -350,7 +334,7 @@ namespace Roki.Modules.Utility.Services
 
                     try
                     {
-                        GetImage(imageUrl, GetChartName(icao, name));
+                        _webClient.DownloadFile(imageUrl, GetChartName(icao, name));
                     }
                     catch
                     {
@@ -361,34 +345,25 @@ namespace Roki.Modules.Utility.Services
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                _cancellationToken.Cancel();
-                await DisposeContext();
                 await ctx.Channel.SendErrorAsync("Something went wrong, please try again.");
                 return;
             }
             finally
             {
-                _semaphore.Release();
+                await DisposeContext();
             }
 
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"Finished saving charts for {icao.ToUpperInvariant()}"));
         }
-
-        private void GetImage(string url, string filename)
-        {
-            _webClient.DownloadFile(url, filename);
-        }
-
+        
         private async Task DisposeContext()
         {
             await _page.CloseAsync();
             await _browser.CloseAsync();
             _playwright.Dispose();
-            _semaphore.Dispose();
             _page = null;
             _browser = null;
             _playwright = null;
-            _semaphore = null;
         }
     }
 }
