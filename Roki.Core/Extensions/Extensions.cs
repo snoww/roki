@@ -20,6 +20,7 @@ using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using StackExchange.Redis;
+using Color = Discord.Color;
 
 namespace Roki.Extensions
 {
@@ -28,20 +29,19 @@ namespace Roki.Extensions
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static readonly Random Rng = new Random();
         private static readonly IDatabase Cache = new RedisCache().Redis.GetDatabase();
-        private static readonly JsonSerializerOptions Options = new JsonSerializerOptions{PropertyNameCaseInsensitive = true};
+        private static readonly JsonSerializerOptions Options = new JsonSerializerOptions {PropertyNameCaseInsensitive = true};
 
         public static EmbedBuilder WithDynamicColor(this EmbedBuilder embed, ICommandContext context)
         {
-            var color = (uint) Cache.StringGet($"color:{context.Guild.Id}");
-            return embed.WithColor(new Discord.Color(color));
+            return embed.WithDynamicColor(context.Guild.Id);
         }
-        
+
         public static EmbedBuilder WithDynamicColor(this EmbedBuilder embed, ulong guildId)
         {
             var color = (uint) Cache.StringGet($"color:{guildId}");
-            return embed.WithColor(new Discord.Color(color));
+            return embed.WithColor(new Color(color));
         }
-        
+
         public static EmbedBuilder WithOkColor(this EmbedBuilder embed)
         {
             return embed.WithColor(Roki.OkColor);
@@ -54,7 +54,7 @@ namespace Roki.Extensions
 
         public static ModuleInfo GetTopLevelModule(this ModuleInfo module)
         {
-            while (module.Parent != null) 
+            while (module.Parent != null)
                 module = module.Parent;
             return module;
         }
@@ -71,21 +71,23 @@ namespace Roki.Extensions
                 Log.Warn(e);
                 return;
             }
-            
-            var services = new Queue<Type>(allTypes.Where(x => 
+
+            var services = new Queue<Type>(allTypes.Where(x =>
                 x.GetInterfaces().Contains(typeof(IRokiService)) && !x.GetTypeInfo().IsInterface && !x.GetTypeInfo().IsAbstract));
 
-            var interfaces = new HashSet<Type>(allTypes.Where(x => 
+            var interfaces = new HashSet<Type>(allTypes.Where(x =>
                 x.GetInterfaces().Contains(typeof(IRokiService)) && x.GetTypeInfo().IsInterface));
-            
+
             while (services.Count > 0)
             {
-                var serviceType = services.Dequeue();
+                Type serviceType = services.Dequeue();
 
                 if (collection.FirstOrDefault(x => x.ServiceType == serviceType) != null)
+                {
                     continue;
+                }
 
-                var interfaceType = interfaces.FirstOrDefault(x => serviceType.GetInterfaces().Contains(x));
+                Type? interfaceType = interfaces.FirstOrDefault(x => serviceType.GetInterfaces().Contains(x));
                 collection.AddSingleton(interfaceType != null ? interfaceType : serviceType, serviceType);
             }
         }
@@ -109,17 +111,16 @@ namespace Roki.Extensions
         public static ReactionEventWrapper OnReaction(this IUserMessage msg, DiscordSocketClient client, Func<SocketReaction, Task> reactionAdded,
             Func<SocketReaction, Task> reactionRemoved = null)
         {
-            if (reactionRemoved == null)
-                reactionRemoved = _ => Task.CompletedTask;
+            reactionRemoved ??= _ => Task.CompletedTask;
 
             var wrap = new ReactionEventWrapper(client, msg);
             wrap.OnReactionAdded += r =>
             {
-                var _ = Task.Run(() => reactionAdded(r));
+                Task _ = Task.Run(() => reactionAdded(r));
             };
             wrap.OnReactionRemoved += r =>
             {
-                var _ = Task.Run(() => reactionRemoved(r));
+                Task _ = Task.Run(() => reactionRemoved(r));
             };
             return wrap;
         }
@@ -142,7 +143,7 @@ namespace Roki.Extensions
         public static Stream ToStream(this Image<Rgba32> img, IImageFormat format = null)
         {
             var imageStream = new MemoryStream();
-            
+
             if (format == GifFormat.Instance)
             {
                 img.SaveAsGif(imageStream);
@@ -151,36 +152,37 @@ namespace Roki.Extensions
             {
                 img.SaveAsPng(imageStream, new PngEncoder {CompressionLevel = PngCompressionLevel.BestCompression});
             }
-            
+
             imageStream.Position = 0;
             return imageStream;
         }
-        
+
         public static Image<Rgba32> Merge(this IEnumerable<Image<Rgba32>> images)
         {
             return images.Merge(out _);
         }
-        
+
         public static Image<Rgba32> Merge(this IEnumerable<Image<Rgba32>> images, out IImageFormat format)
         {
             format = PngFormat.Instance;
+
             void DrawFrame(Image<Rgba32>[] imgArray, Image<Rgba32> imgFrame, int frameNumber)
             {
                 var xOffset = 0;
                 var options = new GraphicsOptions();
-                foreach (var t in imgArray)
+                foreach (Image<Rgba32> t in imgArray)
                 {
-                    var frame = t.Frames.CloneFrame(frameNumber % t.Frames.Count);
+                    Image<Rgba32> frame = t.Frames.CloneFrame(frameNumber % t.Frames.Count);
                     imgFrame.Mutate(x => x.DrawImage(frame, new Point(xOffset, 0), options));
                     xOffset += t.Bounds().Width;
                 }
             }
 
-            var imgs = images.ToArray();
-            
-            var frames = imgs.Max(x => x.Frames.Count);
-            var width = imgs.Sum(img => img.Width);
-            var height = imgs.Max(img => img.Height);
+            Image<Rgba32>[] imgs = images.ToArray();
+
+            int frames = imgs.Max(x => x.Frames.Count);
+            int width = imgs.Sum(img => img.Width);
+            int height = imgs.Max(img => img.Height);
             var canvas = new Image<Rgba32>(width, height);
             if (frames == 1)
             {
@@ -189,52 +191,61 @@ namespace Roki.Extensions
             }
 
             format = GifFormat.Instance;
-            for (int j = 0; j < frames; j++)
+            for (var j = 0; j < frames; j++)
             {
                 using var imgFrame = new Image<Rgba32>(width, height);
                 DrawFrame(imgs, imgFrame, j);
 
-                var frameToAdd = imgFrame.Frames.RootFrame;
+                ImageFrame<Rgba32> frameToAdd = imgFrame.Frames.RootFrame;
                 canvas.Frames.AddFrame(frameToAdd);
             }
+
             canvas.Frames.RemoveFrame(0);
             return canvas;
         }
-        
-        public static void Shuffle<T>(this IList<T> list)  
-        {  
-            var n = list.Count;  
-            while (n > 1) {  
-                n--;  
-                var k = Rng.Next(n + 1);
-                var value = list[k];  
-                list[k] = list[n];  
-                list[n] = value;  
-            }  
+
+        public static void Shuffle<T>(this IList<T> list)
+        {
+            int n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = Rng.Next(n + 1);
+                T value = list[k];
+                list[k] = list[n];
+                list[n] = value;
+            }
         }
-        
+
         public static string ToReadableString(this TimeSpan span, string separator = ", ")
         {
-            var formatted =
+            string formatted =
                 $"{(span.Duration().Days >= 7 ? $"{span.Days / 7} week{(span.Days / 7 == 1 ? string.Empty : "s")}{separator}" : string.Empty)}" +
                 $"{(span.Duration().Days % 7 > 0 ? $"{span.Days % 7} day{(span.Days % 7 == 1 ? string.Empty : "s")}{separator}" : string.Empty)}" +
                 $"{(span.Duration().Hours > 0 ? $"{span.Hours:0} hour{(span.Hours == 1 ? string.Empty : "s")}{separator}" : string.Empty)}" +
                 $"{(span.Duration().Minutes > 0 ? $"{span.Minutes:0} minute{(span.Minutes == 1 ? string.Empty : "s")}{separator}" : string.Empty)}";
 
-            if (formatted.EndsWith(", ")) 
+            if (formatted.EndsWith(", "))
+            {
                 formatted = formatted.Substring(0, formatted.Length - 2);
+            }
 
-            if (string.IsNullOrEmpty(formatted)) 
+            if (string.IsNullOrEmpty(formatted))
+            {
                 formatted = "0 seconds";
+            }
 
             return formatted;
         }
-        
+
         public static T Deserialize<T>(this string json)
-        {       
+        {
             return JsonSerializer.Deserialize<T>(json, Options);
         }
 
-        public static string GetHexId(this ObjectId objectId) => objectId.ToString().Substring(18);
+        public static string GetHexId(this ObjectId objectId)
+        {
+            return objectId.ToString().Substring(18);
+        }
     }
 }
