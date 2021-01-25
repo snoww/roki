@@ -25,7 +25,7 @@ namespace Roki.Modules.Utility
                 }
 
                 string encoded = HttpUtility.UrlEncode(tex.Trim());
-                var filePath = $"{TempDir}/{Context.User.Username}-{Guid.NewGuid().ToString().Substring(0, 7)}.png";
+                var filePath = $"{TempDir}{Context.User.Username}-{Guid.NewGuid().ToString().Substring(0, 7)}.png";
 
                 using (var client = new WebClient())
                 {

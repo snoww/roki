@@ -347,8 +347,8 @@ namespace Roki.Modules.Games.Common
                 }
             }
 
-            await File.WriteAllTextAsync($"{TempDir}/roki{_player1Id}.env", string.Join('\n', roki1)).ConfigureAwait(false);
-            await File.WriteAllTextAsync($"{TempDir}/roki{_player2Id}.env", string.Join('\n', roki2)).ConfigureAwait(false);
+            await File.WriteAllTextAsync($"{TempDir}roki-{_player1Id}.env", string.Join('\n', roki1)).ConfigureAwait(false);
+            await File.WriteAllTextAsync($"{TempDir}roki-{_player2Id}.env", string.Join('\n', roki2)).ConfigureAwait(false);
         }
 
         private async Task RunAiGameAsync(string uid)
@@ -358,7 +358,7 @@ namespace Roki.Modules.Games.Common
                 StartInfo =
                 {
                     FileName = "bash",
-                    Arguments = $"scripts/showdown.sh {TempDir}/roki{_player1Id}.env {TempDir}/roki{_player2Id}.env",
+                    Arguments = $"scripts/showdown.sh {TempDir}roki-{_player1Id}.env {TempDir}roki-{_player2Id}.env",
                     UseShellExecute = false,
                     RedirectStandardOutput = true
                 }
@@ -409,8 +409,8 @@ namespace Roki.Modules.Games.Common
                 }
 
                 reader.Close();
-                File.Delete($"{TempDir}/roki{_player1Id}.env");
-                File.Delete($"{TempDir}/roki{_player2Id}.env");
+                File.Delete($"{TempDir}roki-{_player1Id}.env");
+                File.Delete($"{TempDir}roki-{_player2Id}.env");
             });
         }
 
