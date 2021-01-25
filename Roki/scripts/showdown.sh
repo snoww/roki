@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
-/home/snow/Documents/showdown/run.py /home/snow/Documents/showdown/roki1.env &
+
+# second argument: the user to accept the challenge
+/home/snow/Documents/showdown/run.py $2 &
 sleep 2
-/home/snow/Documents/showdown/run.py /home/snow/Documents/showdown/roki.env &
+# first argument: the user issuing challenge
+/home/snow/Documents/showdown/run.py $1 &

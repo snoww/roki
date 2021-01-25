@@ -58,7 +58,9 @@ namespace Roki.Modules.Games
                 await Context.Channel.SendErrorAsync("Game already in progress in current channel.");
             }
 
-            [RokiCommand, Description, Aliases, Usage]
+            // unavailable since running on custom showdown server
+            // todo parse html replay
+            /*[RokiCommand, Description, Aliases, Usage]
             [RequireContext(ContextType.Guild)]
             public async Task BetPokemonReplay([Leftover] string uid = null)
             {
@@ -85,7 +87,7 @@ namespace Roki.Modules.Games
 
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context).WithDescription($"{Context.User.Mention} Here is the replay url:\nhttps://replay.pokemonshowdown.com/{url}"))
                     .ConfigureAwait(false);
-            }
+            }*/
         }
     }
 }

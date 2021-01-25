@@ -37,6 +37,7 @@ namespace Roki.Modules.Games.Common
         private static readonly Emote TimesTwo = Emote.Parse("<:2x:637062546817417244>");
         private static readonly Emote TimesFive = Emote.Parse("<:5x:637062547169869824>");
         private static readonly Emote TimesTen = Emote.Parse("<:10x:637062547169738752>");
+        private static readonly string TempDir = Path.GetTempPath();
         private readonly IDatabase _cache;
 
         private readonly ITextChannel _channel;
@@ -44,6 +45,9 @@ namespace Roki.Modules.Games.Common
         private readonly ICurrencyService _currency;
 
         private readonly int _generation;
+
+        private readonly string _player1Id;
+        private readonly string _player2Id;
 
         private readonly Dictionary<IEmote, int> _reactionMap = new Dictionary<IEmote, int>
         {
@@ -77,6 +81,8 @@ namespace Roki.Modules.Games.Common
             _generation = generation;
             _service = service;
             GameId = $"{_generation}{Guid.NewGuid().ToSubGuid()}";
+            _player1Id = Guid.NewGuid().ToSubGuid();
+            _player2Id = Guid.NewGuid().ToSubGuid();
         }
 
         public string GameId { get; }
@@ -96,10 +102,7 @@ namespace Roki.Modules.Games.Common
             }
 
             // block until retrieved teams
-            while (_teams == null)
-            {
-                await Task.Delay(1000);
-            }
+            while (_teams == null) await Task.Delay(1000);
 
             var t1 = new List<Image<Rgba32>>();
             var t2 = new List<Image<Rgba32>>();
@@ -141,12 +144,14 @@ namespace Roki.Modules.Games.Common
             }
 
             foreach ((IUser key, PlayerBet value) in _scores)
+            {
                 await _currency
                     .RemoveAsync(key.Id, "BetShowdown Entry", value.Amount * value.Multiple, _channel.Guild.Id, _channel.Id, _game.Id)
                     .ConfigureAwait(false);
+            }
 
             // block until game is finished
-            int counter = 0;
+            var counter = 0;
             while (_winner == null)
             {
                 await Task.Delay(1000);
@@ -158,7 +163,7 @@ namespace Roki.Modules.Games.Common
                     return;
                 }
             }
-            
+
             var winners = new StringBuilder();
             var losers = new StringBuilder();
 
@@ -309,12 +314,41 @@ namespace Roki.Modules.Games.Common
 
         private async Task InitializeGame()
         {
-            string roki = await File.ReadAllTextAsync("/home/snow/Documents/showdown/roki.env").ConfigureAwait(false);
-            string roki1 = await File.ReadAllTextAsync("/home/snow/Documents/showdown/roki1.env").ConfigureAwait(false);
-            roki = Regex.Replace(roki, @"gen\d", $"gen{_generation}");
-            roki1 = Regex.Replace(roki1, @"gen\d", $"gen{_generation}");
-            await File.WriteAllTextAsync("/home/snow/Documents/showdown/roki.env", roki).ConfigureAwait(false);
-            await File.WriteAllTextAsync("/home/snow/Documents/showdown/roki1.env", roki1).ConfigureAwait(false);
+            // put this in solution somewhere later
+            string[] roki1 = await File.ReadAllLinesAsync("/home/snow/Documents/showdown/roki.env").ConfigureAwait(false);
+            string[] roki2 = await File.ReadAllLinesAsync("/home/snow/Documents/showdown/roki1.env").ConfigureAwait(false);
+            for (var i = 0; i < roki1.Length; i++)
+            {
+                if (roki1[i].StartsWith("PS_USERNAME", StringComparison.Ordinal))
+                {
+                    roki1[i] = "PS_USERNAME=roki" + _player1Id;
+                }
+                else if (roki1[i].StartsWith("USER_TO_CHALLENGE", StringComparison.Ordinal))
+                {
+                    roki1[i] = "USER_TO_CHALLENGE=roki" + _player2Id;
+                }
+                else if (roki1[i].StartsWith("POKEMON_MODE", StringComparison.Ordinal))
+                {
+                    roki1[i] = $"POKEMON_MODE=gen{_generation}randombattle";
+                    break;
+                }
+            }
+
+            for (var i = 0; i < roki2.Length; i++)
+            {
+                if (roki1[i].StartsWith("PS_USERNAME", StringComparison.Ordinal))
+                {
+                    roki1[i] = "PS_USERNAME=roki" + _player2Id;
+                }
+                else if (roki1[i].StartsWith("POKEMON_MODE", StringComparison.Ordinal))
+                {
+                    roki1[i] = $"POKEMON_MODE=gen{_generation}randombattle";
+                    break;
+                }
+            }
+
+            await File.WriteAllTextAsync($"{TempDir}/roki{_player1Id}.env", string.Join('\n', roki1)).ConfigureAwait(false);
+            await File.WriteAllTextAsync($"{TempDir}/roki{_player2Id}.env", string.Join('\n', roki2)).ConfigureAwait(false);
         }
 
         private async Task RunAiGameAsync(string uid)
@@ -324,7 +358,7 @@ namespace Roki.Modules.Games.Common
                 StartInfo =
                 {
                     FileName = "bash",
-                    Arguments = "scripts/showdown.sh",
+                    Arguments = $"scripts/showdown.sh {TempDir}/roki{_player1Id}.env {TempDir}/roki{_player2Id}.env",
                     UseShellExecute = false,
                     RedirectStandardOutput = true
                 }
@@ -351,7 +385,7 @@ namespace Roki.Modules.Games.Common
                     if (teamsFound && gameIdFound && !winnerFound && output!.Contains("Winner:", StringComparison.Ordinal))
                     {
                         winnerFound = true;
-                        _winner = output.Contains("roki1", StringComparison.Ordinal) ? Bet.P1 : Bet.P2;
+                        _winner = output.Contains(_player1Id, StringComparison.Ordinal) ? Bet.P1 : Bet.P2;
                     }
 
                     if (!teamsFound && output!.Contains("|request|{", StringComparison.Ordinal))
@@ -373,7 +407,10 @@ namespace Roki.Modules.Games.Common
                         await File.AppendAllTextAsync(@"./data/pokemon_betshowdown_logs.txt", $"{uid}={gameId}\n");
                     }
                 }
+
                 reader.Close();
+                File.Delete($"{TempDir}/roki{_player1Id}.env");
+                File.Delete($"{TempDir}/roki{_player2Id}.env");
             });
         }
 
