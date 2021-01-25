@@ -173,8 +173,8 @@ namespace Roki.Modules.Stocks
                 .WithAuthor(quote.Symbol.ToUpper())
                 .WithDescription($"{options[period]} Price")
                 .WithImageUrl("attachment://image.png");
-            await Context.Channel.SendFileAsync($"{TempDir}/image.png", embed: embed.Build()).ConfigureAwait(false);
-            File.Delete($"{TempDir}/image.png");
+            await Context.Channel.SendFileAsync($"{TempDir}image.png", embed: embed.Build()).ConfigureAwait(false);
+            File.Delete($"{TempDir}image.png");
         }
     }
 }

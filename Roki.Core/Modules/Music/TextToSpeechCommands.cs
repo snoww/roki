@@ -57,7 +57,7 @@ namespace Roki.Modules.Music
                 if (tts.Success)
                 {
                     string guid = Guid.NewGuid().ToSubGuid();
-                    var filePath = $"{TempDir}/{Context.User.Username}-{guid}";
+                    var filePath = $"{TempDir}{Context.User.Username}-{guid}";
                     using (var client = new WebClient())
                     {
                         await client.DownloadFileTaskAsync(tts.SpeakUrl, filePath + ".ogg").ConfigureAwait(false);
