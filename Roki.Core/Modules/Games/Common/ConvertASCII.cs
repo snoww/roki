@@ -13,30 +13,30 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * modified by snow
  */
 
 namespace Roki.Modules.Games.Common
 {
-    public class ConvertASCII
+    public static class ConvertASCII
     {
-        public char[] Output { get; private set; } = new char[128];
-        public int OutputPos { get; private set; }
-        
         /// <summary>
         /// Converts characters above ASCII to their ASCII equivalents.  For example,
         /// accents are removed from accented characters. </summary>
         /// <param name="input"> The string to fold </param>
         /// <param name="length"> The number of characters in the input string </param>
-        public void FoldToASCII(char[] input, int length)
+        public static string FoldToASCII(char[] input, int length)
         {
             // Worst-case length required:
             int maxSizeNeeded = 4 * length;
-            if (Output.Length < maxSizeNeeded)
+            var output = new char[128];
+            if (output.Length < maxSizeNeeded)
             {
-                Output = new char[maxSizeNeeded];
+                output = new char[maxSizeNeeded];
             }
 
-            OutputPos = FoldToASCII(input, 0, Output, 0, length);
+            return FoldToASCII(input, 0, output, 0, length);
         }
         
         /// <summary>
@@ -51,7 +51,7 @@ namespace Roki.Modules.Games.Common
         /// <param name="outputPos"> Index of output where to put the result of the folding </param>
         /// <param name="length">    The number of characters to fold </param>
         /// <returns> length of output </returns>
-        public static int FoldToASCII(char[] input, int inputPos, char[] output, int outputPos, int length)
+        private static string FoldToASCII(char[] input, int inputPos, char[] output, int outputPos, int length)
         {
             int end = inputPos + length;
             for (int pos = inputPos; pos < end; ++pos)
@@ -1981,7 +1981,7 @@ namespace Roki.Modules.Games.Common
                 }
             }
 
-            return outputPos;
+            return new string(output).Trim('\0');
         }
     }
 }
