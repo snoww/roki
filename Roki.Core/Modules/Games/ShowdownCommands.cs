@@ -31,7 +31,7 @@ namespace Roki.Modules.Games
             [RequireContext(ContextType.Guild)]
             public async Task BetPokemonGame(int gen = 8)
             {
-                if (gen > 8 || gen < 3) gen = 8;
+                if (gen > 8 || gen < 4) gen = 8;
                 
                 var showdown = new Showdown(_currency, _client, (ITextChannel)Context.Channel, gen, Service, _cache);
                 
