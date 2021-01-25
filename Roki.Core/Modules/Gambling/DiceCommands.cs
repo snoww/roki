@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -18,8 +17,9 @@ namespace Roki.Modules.Gambling
         [Group]
         public class DiceCommands : RokiSubmodule
         {
-            private const string DicePath = "./data/dice/";
+            private const string DicePath = "data/dice/";
             private readonly ICurrencyService _currency;
+            private readonly Random _rng = new Random();
 
             public DiceCommands(ICurrencyService currency)
             {
@@ -37,14 +37,13 @@ namespace Roki.Modules.Gambling
                     return;
                 }
 
-
-                var removed = await _currency
+                bool removed = await _currency
                     .RemoveAsync(Context.User.Id, "BetDie Entry", amount, Context.Guild.Id, Context.Channel.Id, Context.Message.Id)
                     .ConfigureAwait(false);
                 if (!removed)
                 {
                     await Context.Channel.SendErrorAsync($"Not enough {Roki.Properties.CurrencyIcon}\n" +
-                                                     $"You have `{await _currency.GetCurrency(Context.User.Id, Context.Guild.Id):N0}`")
+                                                         $"You have `{await _currency.GetCurrency(Context.User.Id, Context.Guild.Id):N0}`")
                         .ConfigureAwait(false);
                     return;
                 }
@@ -54,7 +53,7 @@ namespace Roki.Modules.Gambling
                 var die = new List<Image<Rgba32>>(6);
                 while (rolls < 6)
                 {
-                    var rng = new Random().Next(1, 7);
+                    int rng = _rng.Next(1, 7);
                     total += rng;
                     die.Add(GetDice(rng));
                     rolls += 1;
@@ -62,8 +61,11 @@ namespace Roki.Modules.Gambling
 
                 long won;
                 if (total >= 18 && total <= 24)
+                {
                     won = 0;
+                }
                 else
+                {
                     switch (total)
                     {
                         case 17:
@@ -114,12 +116,13 @@ namespace Roki.Modules.Gambling
                             won = amount * 100;
                             break;
                     }
+                }
 
-                using var image = die.Merge();
+                using Image<Rgba32> image = die.Merge();
                 await using var stream = image.ToStream();
-                foreach (var dice in die) dice.Dispose();
+                foreach (Image<Rgba32> dice in die) dice.Dispose();
 
-                var embed = new EmbedBuilder().WithImageUrl("attachment://dice.png");
+                EmbedBuilder embed = new EmbedBuilder().WithImageUrl("attachment://dice.png");
 
                 if (won > 0)
                 {
@@ -142,8 +145,10 @@ namespace Roki.Modules.Gambling
             private Image<Rgba32> GetDice(int num)
             {
                 if (num < 0 || num > 6)
+                {
                     throw new ArgumentOutOfRangeException(nameof(num));
-                
+                }
+
                 return Image.Load<Rgba32>(DicePath + $"{num}.png");
             }
         }

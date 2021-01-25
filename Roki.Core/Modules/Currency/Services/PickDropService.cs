@@ -38,8 +38,8 @@ namespace Roki.Modules.Currency.Services
                 return;
             }
             
-            // impossible to drop if value is set to 0.01
-            if (Roki.Properties.CurrencyGenerationChance <= 0.01)
+            // impossible to drop if value is set below 0.01
+            if (Roki.Properties.CurrencyGenerationChance < 0.01)
             {
                 return;
             }
@@ -51,8 +51,7 @@ namespace Roki.Modules.Currency.Services
                 return;
             }
 
-            double num = _rng.Next(0, 100) + Roki.Properties.CurrencyGenerationChance * 100;
-            if (num > 100 && LastGenerations.TryUpdate(channel.Id, DateTime.UtcNow, lastGeneration))
+            if (Roki.Properties.CurrencyGenerationChance * 100 >= _rng.Next(0, 101) && LastGenerations.TryUpdate(channel.Id, DateTime.UtcNow, lastGeneration))
             {
                 int drop = Roki.Properties.CurrencyDropAmount;
                 int? dropMax = Roki.Properties.CurrencyDropAmountMax;
@@ -72,10 +71,9 @@ namespace Roki.Modules.Currency.Services
                     await _cache.StringIncrementAsync($"gen:{channel.GuildId}:{channel.Id}", drop).ConfigureAwait(false);
                     await _cache.StringAppendAsync($"gen:log:{channel.GuildId}:{channel.Id}", $"{message.Id},").ConfigureAwait(false);
 
-                    string prefix = Roki.Properties.Prefix;
                     string toSend = drop == 1
-                        ? $"{Roki.Properties.CurrencyIcon} A random {Roki.Properties.CurrencyName} appeared! Type `{prefix}pick` to pick it up."
-                        : $"{Roki.Properties.CurrencyIcon} {drop} random {Roki.Properties.CurrencyNamePlural} appeared! Type `{prefix}pick` to pick them up.";
+                        ? $"{Roki.Properties.CurrencyIcon} A random {Roki.Properties.CurrencyName} appeared! Type `{Roki.Properties.Prefix}pick` to pick it up."
+                        : $"{Roki.Properties.CurrencyIcon} {drop} random {Roki.Properties.CurrencyNamePlural} appeared! Type `{Roki.Properties.Prefix}pick` to pick them up.";
                     // TODO add images to send with drop
                     await channel.SendMessageAsync(toSend).ConfigureAwait(false);
                 }
@@ -89,12 +87,12 @@ namespace Roki.Modules.Currency.Services
             {
                 RedisValue rawAmount = await _cache.StringGetAsync($"gen:{channel.GuildId}:{channel.Id}").ConfigureAwait(false);
                 RedisValue messages = await _cache.StringGetAsync($"gen:log:{channel.GuildId}:{channel.Id}").ConfigureAwait(false);
-                
+
                 if (rawAmount.IsNullOrEmpty || messages.IsNullOrEmpty)
                 {
                     return 0;
                 }
-                
+
                 var amount = (long) rawAmount;
 
                 await _cache.StringIncrementAsync($"currency:{channel.Guild.Id}:{user.Id}", amount, CommandFlags.FireAndForget)
