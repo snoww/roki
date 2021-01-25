@@ -1,11 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
-using NLog;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Services;
@@ -23,27 +22,33 @@ namespace Roki.Modules.Help.Services
 
         public async Task SendCommandInfo(CommandInfo command, ICommandContext context)
         {
-            var prefix = _command.DefaultPrefix;
+            string prefix = _command.DefaultPrefix;
 
-            var str = $"**`{prefix + command.Aliases.First()}`**";
-            var aliases = string.Join("/", command.Aliases.Skip(1).Select(a => $"`{a}`"));
-            if (!string.IsNullOrWhiteSpace(aliases)) 
+            var str = $"**`{prefix + command.Aliases[0]}`**";
+            string aliases = string.Join("/", command.Aliases.Skip(1).Select(a => $"`{a}`"));
+            if (!string.IsNullOrWhiteSpace(aliases))
+            {
                 str += $"/{aliases}";
-            
-            var embed = new EmbedBuilder().WithDynamicColor(context).AddField(str, command.FormatSummary(prefix), true)
+            }
+
+            EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(context).AddField(str, command.FormatSummary(prefix), true)
                 .AddField("Usage", command.FormatRemarks(prefix), true)
-                .WithFooter($"Module: {command.Module.GetTopLevelModule().Name}");;
+                .WithFooter($"Module: {command.Module.GetTopLevelModule().Name}");
 
-            var requirements = GetCommandRequirements(command);
-            if (!string.IsNullOrWhiteSpace(requirements)) 
+            string requirements = GetCommandRequirements(command);
+            if (!string.IsNullOrWhiteSpace(requirements))
+            {
                 embed.AddField("Requires", requirements);
+            }
 
-            var options = ((RokiOptions) command.Attributes.FirstOrDefault(x => x is RokiOptions))?.OptionType;
+            Type options = ((RokiOptions) command.Attributes.FirstOrDefault(x => x is RokiOptions))?.OptionType;
             if (options != null)
             {
-                var optionsHelp = GetCommandOptions(options);
+                string optionsHelp = GetCommandOptions(options);
                 if (!string.IsNullOrWhiteSpace(optionsHelp))
+                {
                     embed.AddField("Options", optionsHelp);
+                }
             }
 
             await context.Channel.EmbedAsync(embed).ConfigureAwait(false);
@@ -51,20 +56,16 @@ namespace Roki.Modules.Help.Services
 
         private static string GetCommandOptions(Type option)
         {
-            var options = option.GetProperties()
+            IEnumerable<string> options = option.GetProperties()
                 .Select(x => x.GetCustomAttributes(true).FirstOrDefault(a => a is OptionAttribute))
                 .Where(x => x != null)
                 .Cast<OptionAttribute>()
                 .Select(x =>
                 {
-                    var optionString = string.Empty; 
-                        
+                    string optionString = !string.IsNullOrWhiteSpace(x.ShortName) 
+                        ? $"`-{x.ShortName}`, `--{x.LongName}`" 
+                        : $"`--{x.LongName}`";
 
-                    if (!string.IsNullOrWhiteSpace(x.ShortName))
-                        optionString += $"`-{x.ShortName}`, `--{x.LongName}`";
-                    else
-                        optionString += $"`--{x.LongName}`";
-                    
                     optionString += $" {x.HelpText}";
                     return optionString;
                 });
@@ -73,7 +74,7 @@ namespace Roki.Modules.Help.Services
 
         private static string GetCommandRequirements(CommandInfo command)
         {
-            var requirements = command.Preconditions
+            IEnumerable<string> requirements = command.Preconditions
                 .Where(a => a is RequireUserPermissionAttribute || a is OwnerOnly)
                 .Select(a =>
                 {
@@ -87,7 +88,7 @@ namespace Roki.Modules.Help.Services
                         ? $"{perm.GuildPermission} Server Permission".Replace("Guild", "Server", StringComparison.Ordinal)
                         : $"{perm.ChannelPermission} Channel Permission";
                 });
-            
+
             return string.Join("\n", requirements);
         }
     }
