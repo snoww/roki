@@ -13,9 +13,9 @@ namespace Roki.Modules.Moderation.Services
     public class PowersService : IRokiService
     {
         private readonly IMongoService _mongo;
-        private readonly ConcurrentDictionary<ulong, DateTime> _muted = new ConcurrentDictionary<ulong, DateTime>();
-        private readonly ConcurrentDictionary<ulong, DateTime> _blocked = new ConcurrentDictionary<ulong, DateTime>();
-        private readonly ConcurrentDictionary<ulong, DateTime> _timeout = new ConcurrentDictionary<ulong, DateTime>();
+        private readonly ConcurrentDictionary<ulong, DateTime> _muted = new();
+        private readonly ConcurrentDictionary<ulong, DateTime> _blocked = new();
+        private readonly ConcurrentDictionary<ulong, DateTime> _timeout = new();
         
 
         public PowersService(IMongoService mongo)

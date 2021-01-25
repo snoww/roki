@@ -18,12 +18,12 @@ namespace Roki.Modules.Utility.Services
     {
         // temp hard coding values
         private const ulong DefaultGuildId = 125025699827417095;
-        private static readonly Random Rng = new Random();
+        private static readonly Random Rng = new();
         private static readonly ObjectId RainbowId = ObjectId.Parse("5db3150b03eb7230a1b5bb9d");
-        
+
         private readonly DiscordSocketClient _client;
-        private readonly IMongoService _mongo;
         private readonly SocketGuild _guild;
+        private readonly IMongoService _mongo;
         private Timer _status;
         private Timer _timer;
 

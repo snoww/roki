@@ -13,7 +13,7 @@ namespace Roki.Modules.Games.Services
     public class TriviaService : IRokiService
     {
         private readonly IHttpClientFactory _http;
-        public readonly ConcurrentDictionary<ulong, ulong> TriviaGames = new ConcurrentDictionary<ulong, ulong>();
+        public readonly ConcurrentDictionary<ulong, ulong> TriviaGames = new();
         private const string OpenTdbUrl = "https://opentdb.com/api.php";
 
         public TriviaService(IHttpClientFactory http)

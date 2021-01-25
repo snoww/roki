@@ -20,7 +20,7 @@ namespace Roki.Modules.Rsvp.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly IMongoService _mongo;
-        private readonly ConcurrentDictionary<ObjectId, Event> _activeReminders = new ConcurrentDictionary<ObjectId, Event>();
+        private readonly ConcurrentDictionary<ObjectId, Event> _activeReminders = new();
         private Timer _timer;
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();

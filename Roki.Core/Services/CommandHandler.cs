@@ -19,7 +19,7 @@ namespace Roki.Services
         private readonly CommandService _commandService;
         private readonly IServiceProvider _services;
 
-        private readonly object _errorLock = new object();
+        private readonly object _errorLock = new();
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 

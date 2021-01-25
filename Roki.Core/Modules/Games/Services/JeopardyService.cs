@@ -10,7 +10,7 @@ namespace Roki.Modules.Games.Services
     {
         private readonly IMongoService _mongo;
 
-        public readonly ConcurrentDictionary<ulong, Jeopardy> ActiveGames = new ConcurrentDictionary<ulong, Jeopardy>();
+        public readonly ConcurrentDictionary<ulong, Jeopardy> ActiveGames = new();
 
         public JeopardyService(IMongoService mongo)
         {

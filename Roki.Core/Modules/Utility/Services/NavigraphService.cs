@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -24,11 +23,11 @@ namespace Roki.Modules.Utility.Services
     {
         private readonly IRokiConfig _config;
         private readonly IHttpClientFactory _factory;
-        private readonly WebClient _webClient = new WebClient();
+        private readonly WebClient _webClient = new();
+        public readonly SemaphoreSlim Semaphore = new(1, 1);
         private IBrowser _browser;
         private IPage _page;
         private IPlaywright _playwright;
-        public readonly SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
 
         // utility to view navigraph charts in discord
         // note you must own a valid navigraph account and subscription
@@ -60,6 +59,7 @@ namespace Roki.Modules.Utility.Services
             {
                 await DownloadAllCharts(ctx, icao);
             }
+
             Semaphore.Release();
 
             if (string.IsNullOrWhiteSpace(star))
@@ -79,6 +79,7 @@ namespace Roki.Modules.Utility.Services
             {
                 await DownloadAllCharts(ctx, icao);
             }
+
             Semaphore.Release();
 
             if (string.IsNullOrWhiteSpace(sid))
@@ -98,6 +99,7 @@ namespace Roki.Modules.Utility.Services
             {
                 await DownloadAllCharts(ctx, icao);
             }
+
             Semaphore.Release();
 
             if (string.IsNullOrWhiteSpace(appr))
@@ -117,6 +119,7 @@ namespace Roki.Modules.Utility.Services
             {
                 await DownloadAllCharts(ctx, icao);
             }
+
             Semaphore.Release();
 
             if (string.IsNullOrWhiteSpace(taxi))
@@ -355,7 +358,7 @@ namespace Roki.Modules.Utility.Services
 
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription($"Finished saving charts for {icao.ToUpperInvariant()}"));
         }
-        
+
         private async Task DisposeContext()
         {
             await _page.CloseAsync();

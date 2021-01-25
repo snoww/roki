@@ -18,8 +18,8 @@ namespace Roki.Modules.Currency.Services
     {
         private readonly IDatabase _cache;
         private readonly IMongoService _mongo;
-        private readonly SemaphoreSlim _pickLock = new SemaphoreSlim(1, 1);
-        private readonly Random _rng = new Random();
+        private readonly SemaphoreSlim _pickLock = new(1, 1);
+        private readonly Random _rng = new();
 
 
         public PickDropService(CommandHandler command, IRedisCache cache, IMongoService mongo)
@@ -29,7 +29,7 @@ namespace Roki.Modules.Currency.Services
             command.OnMessageNoTrigger += CurrencyGeneration;
         }
 
-        private ConcurrentDictionary<ulong, DateTime> LastGenerations { get; } = new ConcurrentDictionary<ulong, DateTime>();
+        private ConcurrentDictionary<ulong, DateTime> LastGenerations { get; } = new();
 
         private async Task CurrencyGeneration(IUserMessage message)
         {
@@ -37,7 +37,7 @@ namespace Roki.Modules.Currency.Services
             {
                 return;
             }
-            
+
             // impossible to drop if value is set below 0.01
             if (Roki.Properties.CurrencyGenerationChance < 0.01)
             {
