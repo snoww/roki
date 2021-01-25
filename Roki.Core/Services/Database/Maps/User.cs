@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
 
 namespace Roki.Services.Database.Maps
 {
@@ -15,13 +14,13 @@ namespace Roki.Services.Database.Maps
         public DateTime LastLevelUp { get; set; } = DateTime.MinValue;
         public DateTime LastXpGain { get; set; } = DateTime.MinValue;
         public string Notification { get; set; } = "dm";
-        public long Currency { get; set; } = 0;
-        public List<Item> Inventory { get; set; } = new List<Item>();
-        public List<Subscription> Subscriptions { get; set; } = new List<Subscription>();
+        public long Currency { get; set; } = 1000;
+        public List<Item> Inventory { get; set; } = new();
+        public List<Subscription> Subscriptions { get; set; } = new();
         public decimal InvestingAccount { get; set; } = 50000;
-        public List<Investment> Portfolio { get; set; } = new List<Investment>();
+        public List<Investment> Portfolio { get; set; } = new();
     }
-    
+
     public class Item
     {
         public ObjectId Id { get; set; }

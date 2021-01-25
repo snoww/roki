@@ -134,8 +134,19 @@ namespace Roki
                         {
                             await cache.StringSetAsync($"currency:{guild.Id}:{Properties.BotId}", botCurrency, flags: CommandFlags.FireAndForget)
                                 .ConfigureAwait(false);
-                            await UpdateCache(cache, guild.Users).ConfigureAwait(false);
 
+                            SocketGuildUser bot = guild.CurrentUser;
+                            SocketRole role = bot.Roles.OrderByDescending(r => r.Position).FirstOrDefault();
+
+                            if (role == null || role.IsEveryone)
+                            {
+                                await cache.StringSetAsync($"color:{bot.Guild.Id}", Color.Magenta.RawValue).ConfigureAwait(false);
+                            }
+                            else
+                            {
+                                await cache.StringSetAsync($"color:{bot.Guild.Id}", role.Color.RawValue).ConfigureAwait(false);
+                            }
+                            
                             await Mongo.Context.GetOrAddGuildAsync(guild).ConfigureAwait(false);
 
                             foreach (SocketGuildChannel channel in guild.Channels)
@@ -235,50 +246,6 @@ namespace Roki
             {
                 Logger.Warn(arg.Exception);
             }
-
-            return Task.CompletedTask;
-        }
-
-        private Task UpdateCache(IDatabaseAsync cache, IEnumerable<SocketGuildUser> users)
-        {
-            Task _ = Task.Run(async () =>
-            {
-                IMongoCollection<User> collection = Mongo.Database.GetCollection<User>("users");
-                foreach (SocketGuildUser guildUser in users)
-                {
-                    if (guildUser.Id == Client.CurrentUser.Id)
-                    {
-                        SocketRole role = guildUser.Roles.OrderByDescending(r => r.Position).FirstOrDefault();
-
-                        if (role == null || role.IsEveryone)
-                        {
-                            await cache.StringSetAsync($"color:{guildUser.Guild.Id}", Color.Magenta.RawValue).ConfigureAwait(false);
-                        }
-                        else
-                        {
-                            await cache.StringSetAsync($"color:{guildUser.Guild.Id}", role.Color.RawValue).ConfigureAwait(false);
-                        }
-
-                        continue;
-                    }
-
-                    if (guildUser.IsBot)
-                    {
-                        continue;
-                    }
-
-                    UpdateDefinition<User> userUpdate = Builders<User>.Update.Set(u => u.Id, guildUser.Id)
-                        .Set(u => u.Username, guildUser.Username)
-                        .Set(u => u.Discriminator, int.Parse(guildUser.Discriminator))
-                        .Set(u => u.AvatarId, guildUser.AvatarId);
-
-                    User user = await collection.FindOneAndUpdateAsync<User>(u => u.Id == guildUser.Id, userUpdate,
-                        new FindOneAndUpdateOptions<User> {ReturnDocument = ReturnDocument.After, IsUpsert = true}).ConfigureAwait(false);
-
-                    await cache.StringSetAsync($"currency:{guildUser.Guild.Id}:{guildUser.Id}", user.Currency, flags: CommandFlags.FireAndForget)
-                        .ConfigureAwait(false);
-                }
-            });
 
             return Task.CompletedTask;
         }
