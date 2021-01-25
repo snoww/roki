@@ -11,7 +11,7 @@ namespace Roki.Common
                 x.HelpWriter = null;
                 x.CaseInsensitiveEnumValues = true;
             });
-            var res = p.ParseArguments<T>(args);
+            ParserResult<T> res = p.ParseArguments<T>(args);
             options = res.MapResult(x => x, x => options);
             options.NormalizeArgs();
 
