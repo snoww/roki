@@ -321,11 +321,11 @@ namespace Roki.Modules.Games.Common
             {
                 if (roki1[i].StartsWith("PS_USERNAME", StringComparison.Ordinal))
                 {
-                    roki1[i] = "PS_USERNAME=roki" + _player1Id;
+                    roki1[i] = "PS_USERNAME=roki-" + _player1Id;
                 }
                 else if (roki1[i].StartsWith("USER_TO_CHALLENGE", StringComparison.Ordinal))
                 {
-                    roki1[i] = "USER_TO_CHALLENGE=roki" + _player2Id;
+                    roki1[i] = "USER_TO_CHALLENGE=roki-" + _player2Id;
                 }
                 else if (roki1[i].StartsWith("POKEMON_MODE", StringComparison.Ordinal))
                 {
@@ -338,7 +338,7 @@ namespace Roki.Modules.Games.Common
             {
                 if (roki2[i].StartsWith("PS_USERNAME", StringComparison.Ordinal))
                 {
-                    roki2[i] = "PS_USERNAME=roki" + _player2Id;
+                    roki2[i] = "PS_USERNAME=roki-" + _player2Id;
                 }
                 else if (roki2[i].StartsWith("POKEMON_MODE", StringComparison.Ordinal))
                 {
