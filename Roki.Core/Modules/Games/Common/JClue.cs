@@ -9,14 +9,9 @@ namespace Roki.Modules.Games.Common
 {
     public class JClue
     {
-        public string Category { get; set; }
-        public string Clue { get; set; }
-        public string Answer { get; set; }
-        public int Value { get; set; }
-        public bool Available { get; set; } = true;
+        private readonly List<string> _acceptedAnswers = new List<string>();
 
         private string _minAnswer;
-        private readonly List<string> _acceptedAnswers = new List<string>();
 
         public JClue(string answer, string category, string clue, int value)
         {
@@ -28,50 +23,48 @@ namespace Roki.Modules.Games.Common
             SanitizeAnswer();
         }
 
-        public void SanitizeAnswer()
+        public string Category { get; set; }
+        public string Clue { get; set; }
+        public string Answer { get; set; }
+        public int Value { get; set; }
+        public bool Available { get; set; } = true;
+
+        private void SanitizeAnswer()
         {
-            var minAnswer = Regex.Replace(Answer.ToLowerInvariant(), "^(the |a |an )", "")
+            string minAnswer = Regex.Replace(Answer.ToLowerInvariant(), "^(the |a |an )", "")
                 .Replace(" the ", "")
                 .Replace(" an ", "")
                 .Replace(" a ", "");
-            
-            var convert = new ConvertASCII();
-            convert.FoldToASCII(minAnswer.ToCharArray(), minAnswer.Length);
-            minAnswer = new string(convert.Output).Trim('\0');
+
+
+            minAnswer = ConvertASCII.FoldToASCII(minAnswer.ToCharArray(), minAnswer.Length);
 
             if (minAnswer.StartsWith("(1 of)", StringComparison.Ordinal))
             {
-                var answers = minAnswer.Replace("(1 of) ", "").Split(", ");
-                foreach (var answer in answers)
-                {
-                    _acceptedAnswers.Add(answer.ToLowerInvariant().SanitizeStringFull());
-                }
+                string[] answers = minAnswer.Replace("(1 of) ", "").Split(", ");
+                foreach (string answer in answers) _acceptedAnswers.Add(answer.ToLowerInvariant().SanitizeStringFull());
                 _minAnswer = minAnswer.SanitizeStringFull();
                 return;
             }
+
             if (minAnswer.StartsWith("(2 of)", StringComparison.Ordinal))
             {
-                var answers = minAnswer.Replace("(2 of) ", "").Split(", ");
-                foreach (var answer in answers)
-                {
-                    _acceptedAnswers.Add(answer.ToLowerInvariant().SanitizeStringFull().SanitizeStringFull());
-                }
+                string[] answers = minAnswer.Replace("(2 of) ", "").Split(", ");
+                foreach (string answer in answers) _acceptedAnswers.Add(answer.ToLowerInvariant().SanitizeStringFull().SanitizeStringFull());
                 return;
             }
+
             if (minAnswer.StartsWith("(3 of)", StringComparison.Ordinal))
             {
-                var answers = minAnswer.Replace("(3 of) ", "").Split(", ");
-                foreach (var answer in answers)
-                {
-                    _acceptedAnswers.Add(answer.ToLowerInvariant().SanitizeStringFull().SanitizeStringFull());
-                }
+                string[] answers = minAnswer.Replace("(3 of) ", "").Split(", ");
+                foreach (string answer in answers) _acceptedAnswers.Add(answer.ToLowerInvariant().SanitizeStringFull().SanitizeStringFull());
                 return;
             }
 
             if (minAnswer.Contains("/", StringComparison.Ordinal))
             {
-                var answers = minAnswer.Split("/");
-                foreach (var answer in answers)
+                string[] answers = minAnswer.Split("/");
+                foreach (string answer in answers)
                 {
                     if (answer.Length < 2) continue;
                     _acceptedAnswers.Add(answer.SanitizeStringFull());
@@ -80,32 +73,26 @@ namespace Roki.Modules.Games.Common
 
             if (minAnswer.Contains(" and ", StringComparison.Ordinal))
             {
-                var answers = minAnswer.Split(" and ");
-                foreach (var answer in answers)
-                {
-                    _acceptedAnswers.Add(answer.SanitizeStringFull());
-                }
+                string[] answers = minAnswer.Split(" and ");
+                foreach (string answer in answers) _acceptedAnswers.Add(answer.SanitizeStringFull());
             }
             else if (minAnswer.Contains(" & ", StringComparison.Ordinal))
             {
-                var answers = minAnswer.Split(" & ");
-                foreach (var answer in answers)
-                {
-                    _acceptedAnswers.Add(answer.SanitizeStringFull());
-                }
+                string[] answers = minAnswer.Split(" & ");
+                foreach (string answer in answers) _acceptedAnswers.Add(answer.SanitizeStringFull());
             }
-            
+
             // if it contains an optional answer
             if (Answer.Contains('(', StringComparison.Ordinal) && Answer.Contains(')', StringComparison.Ordinal))
             {
                 // currently this wont be correctly split: "termite (in term itemize) (mite accepted)"
-                var optional = minAnswer.Split('(', ')')[1];
-                
+                string optional = minAnswer.Split('(', ')')[1];
+
                 // example: "cruisers (or ships)"
                 if (optional.StartsWith("or", StringComparison.Ordinal))
                 {
-                    var optionals = optional.Split("or");
-                    foreach (var op in optionals)
+                    string[] optionals = optional.Split("or");
+                    foreach (string op in optionals)
                     {
                         // 2nd condition example "mare(s or maria)"
                         if (string.IsNullOrWhiteSpace(op) || op.SanitizeStringFull().Length < 2) continue;
@@ -130,6 +117,7 @@ namespace Roki.Modules.Games.Common
                 {
                     _acceptedAnswers.Add(optional.SanitizeStringFull());
                 }
+
                 _acceptedAnswers.Add(minAnswer.SanitizeStringFull());
 
                 minAnswer = Regex.Replace(minAnswer, @"\(.*?\)", "");
@@ -140,47 +128,48 @@ namespace Roki.Modules.Games.Common
 
         public bool CheckAnswer(string answer)
         {
-            var convert = new ConvertASCII();
-            convert.FoldToASCII(answer.ToCharArray(), answer.Length);
-            answer = new string(convert.Output).Trim('\0');
-            
+            answer = ConvertASCII.FoldToASCII(answer.ToCharArray(), answer.Length);
+
             if (Answer.StartsWith("(2 of)", StringComparison.Ordinal) || Answer.StartsWith("(3 of)", StringComparison.Ordinal))
             {
-                var answers = SanitizeAnswerToList(answer);
+                List<string> answers = SanitizeAnswerToList(answer);
                 if (answers == null) return false;
                 var correct = 0;
-                foreach (var optionalAnswer in _acceptedAnswers)
+                foreach (string optionalAnswer in _acceptedAnswers)
                 {
                     var ansLev = new Levenshtein(optionalAnswer);
-                    foreach (var ans in answers)
-                    {
+                    foreach (string ans in answers)
                         if (ansLev.DistanceFrom(ans) <= Math.Round(optionalAnswer.Length * 0.1))
                         {
                             correct++;
                             // so they don't get points for submitting the same answer multiple times
                             break;
                         }
-                    }
                 }
 
                 if (Answer.StartsWith("(2 of)", StringComparison.Ordinal))
+                {
                     return correct >= 2;
+                }
+
                 if (Answer.StartsWith("(3 of)", StringComparison.Ordinal))
+                {
                     return correct >= 3;
+                }
             }
 
-            var sanitizedAnswer = SanitizeAnswer(answer);
+            string sanitizedAnswer = SanitizeAnswer(answer);
 
             if (_acceptedAnswers.Count > 0)
             {
                 if (Answer.Contains(" and ", StringComparison.OrdinalIgnoreCase) || Answer.Contains(" & ", StringComparison.OrdinalIgnoreCase))
                 {
-                    var answers = SanitizeAnswerToList(answer);
+                    List<string> answers = SanitizeAnswerToList(answer);
                     var correct = 0;
-                    foreach (var optionalAnswer in _acceptedAnswers)
+                    foreach (string optionalAnswer in _acceptedAnswers)
                     {
                         var ansLev = new Levenshtein(optionalAnswer);
-                        foreach (var ans in answers)
+                        foreach (string ans in answers)
                         {
                             if (!(ansLev.DistanceFrom(ans) <= Math.Round(optionalAnswer.Length * 0.1))) continue;
                             correct++;
@@ -189,26 +178,42 @@ namespace Roki.Modules.Games.Common
                         }
                     }
 
-                    if (answers.Count == correct) 
+                    if (answers.Count == correct)
+                    {
                         return true;
+                    }
                 }
                 else
                 {
                     var optLev = new Levenshtein(sanitizedAnswer);
                     if (_acceptedAnswers.Any(optionalAnswer => optLev.DistanceFrom(optionalAnswer) <= Math.Round(optionalAnswer.Length * 0.1)))
+                    {
                         return true;
+                    }
                 }
             }
 
             var minLev = new Levenshtein(_minAnswer);
-            var distance = minLev.DistanceFrom(sanitizedAnswer);
+            int distance = minLev.DistanceFrom(sanitizedAnswer);
+            // exact answer
             if (distance == 0)
+            {
                 return true;
-            if (_minAnswer.Length <= 5)
-                return distance == 0;
-            if (_minAnswer.Length <= 9)
-                return distance <= 1;
+            }
 
+            // if min answer is less than 5 characters long, you need to have distance of 0 (i.e. exact answer)
+            if (_minAnswer.Length <= 5)
+            {
+                return false;
+            }
+
+            // if min answer is less than 9 characters long, you can have a distance of 1
+            if (_minAnswer.Length <= 9)
+            {
+                return distance <= 1;
+            }
+
+            // otherwise calculate min distance by length
             return distance <= Math.Round(_minAnswer.Length * 0.15);
         }
 
@@ -245,7 +250,7 @@ namespace Roki.Modules.Games.Common
             }
 
             var answers = new List<string>();
-            foreach (var guess in guesses)
+            foreach (string guess in guesses)
             {
                 if (string.IsNullOrWhiteSpace(guess)) continue;
                 answers.Add(Regex.Replace(guess.Trim(), "^(the |a |an )", "").SanitizeStringFull());
