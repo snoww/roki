@@ -4,7 +4,7 @@
         <TargetFramework>net5.0</TargetFramework>
         <RootNamespace>Roki</RootNamespace>
         <Configurations>Debug;Release</Configurations>
-        <LangVersion>8</LangVersion>
+        <LangVersion>default</LangVersion>
         <Platforms>AnyCPU</Platforms>
     </PropertyGroup>
 
