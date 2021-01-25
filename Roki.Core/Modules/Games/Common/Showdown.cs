@@ -336,13 +336,13 @@ namespace Roki.Modules.Games.Common
 
             for (var i = 0; i < roki2.Length; i++)
             {
-                if (roki1[i].StartsWith("PS_USERNAME", StringComparison.Ordinal))
+                if (roki2[i].StartsWith("PS_USERNAME", StringComparison.Ordinal))
                 {
-                    roki1[i] = "PS_USERNAME=roki" + _player2Id;
+                    roki2[i] = "PS_USERNAME=roki" + _player2Id;
                 }
-                else if (roki1[i].StartsWith("POKEMON_MODE", StringComparison.Ordinal))
+                else if (roki2[i].StartsWith("POKEMON_MODE", StringComparison.Ordinal))
                 {
-                    roki1[i] = $"POKEMON_MODE=gen{_generation}randombattle";
+                    roki2[i] = $"POKEMON_MODE=gen{_generation}randombattle";
                     break;
                 }
             }
@@ -383,7 +383,7 @@ namespace Roki.Modules.Games.Common
                     string output = await reader.ReadLineAsync().ConfigureAwait(false);
 
                     if (teamsFound && gameIdFound && !winnerFound && output!.Contains("Winner:", StringComparison.Ordinal))
-                    {
+                    {   
                         winnerFound = true;
                         _winner = output.Contains(_player1Id, StringComparison.Ordinal) ? Bet.P1 : Bet.P2;
                     }
