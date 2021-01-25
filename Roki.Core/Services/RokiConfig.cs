@@ -66,7 +66,7 @@ namespace Roki.Services
             {
                 var configBuilder = new ConfigurationBuilder();
                 configBuilder.AddJsonFile(_config, true);
-                var data = configBuilder.Build();
+                IConfigurationRoot data = configBuilder.Build();
 
                 Token = data[nameof(Token)];
                 if (string.IsNullOrWhiteSpace(Token))
@@ -94,7 +94,7 @@ namespace Roki.Services
                     clId = 0;
                 ClientId = clId;
 
-                var dbSection = data.GetSection("db");
+                IConfigurationSection dbSection = data.GetSection("db");
                 Db = new DbConfig(dbSection["Username"], dbSection["Password"]);
 
                 RedisConfig = "localhost";
