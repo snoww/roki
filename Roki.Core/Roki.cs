@@ -105,15 +105,15 @@ namespace Roki
             var ready = new TaskCompletionSource<bool>();
 
             Logger.Info("Logging in ...");
+            Client.Ready += UpdateDatabase;
 
             await Client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
             await Client.StartAsync().ConfigureAwait(false);
 
-            Client.Ready += UpdateDatabase;
             await ready.Task.ConfigureAwait(false);
             Client.Ready -= UpdateDatabase;
 
-            Logger.Info("Logged in as {@CurrentUser}", Client.CurrentUser);
+            Logger.Info("Logged in as {CurrentUser}", Client.CurrentUser);
 
             // makes sure database contains latest guild/channel info
             Task UpdateDatabase()
