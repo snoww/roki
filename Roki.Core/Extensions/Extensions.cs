@@ -87,7 +87,7 @@ namespace Roki.Extensions
                     continue;
                 }
 
-                Type? interfaceType = interfaces.FirstOrDefault(x => serviceType.GetInterfaces().Contains(x));
+                Type interfaceType = interfaces.FirstOrDefault(x => serviceType.GetInterfaces().Contains(x));
                 collection.AddSingleton(interfaceType != null ? interfaceType : serviceType, serviceType);
             }
         }
@@ -246,6 +246,11 @@ namespace Roki.Extensions
         public static string GetHexId(this ObjectId objectId)
         {
             return objectId.ToString().Substring(18);
+        }
+        
+        public static string ToSubGuid(this Guid guid)
+        {
+            return guid.ToString().Substring(0, 7);
         }
     }
 }
