@@ -76,7 +76,7 @@ namespace Roki.Modules.Games.Common
             _channel = channel;
             _generation = generation;
             _service = service;
-            GameId = $"{_generation}{Guid.NewGuid().ToString().Substring(0, 7)}";
+            GameId = $"{_generation}{Guid.NewGuid().ToSubGuid()}";
         }
 
         public string GameId { get; }

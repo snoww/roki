@@ -21,12 +21,16 @@ namespace Roki.Modules.Music
             private const string StreamlabsApi = "https://streamlabs.com/polly/speak";
             private static readonly string TempDir = Path.GetTempPath();
 
+            private readonly IHttpClientFactory _factory;
+
+            public TextToSpeechCommands(IHttpClientFactory factory)
+            {
+                _factory = factory;
+            }
+
             [RokiCommand, Description, Usage, Aliases]
             public async Task Tts([Leftover] string query = null)
             {
-//                query = query.SanitizeString();
-//                unsure if sanitize removes spaces
-
                 if (string.IsNullOrWhiteSpace(query))
                 {
                     await Context.Channel.SendErrorAsync("No text provided.").ConfigureAwait(false);
@@ -39,10 +43,9 @@ namespace Roki.Modules.Music
                     return;
                 }
 
-                using var http = new HttpClient();
-                var queryRequest = JsonSerializer.Serialize(new TtsRequest {Text = query});
-                var content = new StringContent(queryRequest, Encoding.UTF8, "application/json");
-                var result = await http.PostAsync(StreamlabsApi, content).ConfigureAwait(false);
+                using HttpClient http = _factory.CreateClient();
+                var content = new StringContent(JsonSerializer.Serialize(new TtsRequest {Text = query}), Encoding.UTF8, "application/json");
+                HttpResponseMessage result = await http.PostAsync(StreamlabsApi, content).ConfigureAwait(false);
 
                 if (!result.IsSuccessStatusCode)
                 {
@@ -53,7 +56,7 @@ namespace Roki.Modules.Music
                 var tts = (await result.Content.ReadAsStringAsync().ConfigureAwait(false)).Deserialize<TtsModel>();
                 if (tts.Success)
                 {
-                    string guid = Guid.NewGuid().ToString().Substring(0, 7);
+                    string guid = Guid.NewGuid().ToSubGuid();
                     var filePath = $"{TempDir}/{Context.User.Username}-{guid}";
                     using (var client = new WebClient())
                     {
@@ -68,7 +71,7 @@ namespace Roki.Modules.Music
                             Arguments = $"-i {filePath}.ogg {filePath}.mp3",
                             RedirectStandardOutput = false,
                             UseShellExecute = false,
-                            CreateNoWindow = true,
+                            CreateNoWindow = true
                         };
                         proc.Start();
                         await proc.WaitForExitAsync();
@@ -88,18 +91,18 @@ namespace Roki.Modules.Music
 
     public class TtsRequest
     {
-        [JsonPropertyName("voice")]
+        [JsonPropertyName("voice")] 
         public string Voice { get; set; } = "Brian";
-        
-        [JsonPropertyName("text")]
+
+        [JsonPropertyName("text")] 
         public string Text { get; set; }
     }
-    
+
     public class TtsModel
     {
         public bool Success { get; set; }
-        
-        [JsonPropertyName("speak_url")]
+
+        [JsonPropertyName("speak_url")] 
         public string SpeakUrl { get; set; }
     }
 }
