@@ -26,7 +26,7 @@ namespace Roki.Modules.Gambling
             }
 
             private readonly ICurrencyService _currency;
-            private readonly Random _rng = new Random();
+            private readonly Random _rng = new();
 
             public CoinCommands(ICurrencyService currency)
             {

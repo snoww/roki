@@ -16,7 +16,7 @@ namespace Roki.Modules.Nsfw.Services
     {
         private readonly IHttpClientFactory _factory;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private static readonly Random Random = new Random();
+        private static readonly Random Random = new();
         
         private static readonly Dictionary<string, List<string>> Sources = File.ReadAllText("./data/nsfw_sources.json").Deserialize<Dictionary<string, List<string>>>();
         private const string BaseUrl = "https://www.reddit.com/r/{0}/random.json";

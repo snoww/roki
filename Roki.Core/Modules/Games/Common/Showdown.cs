@@ -49,7 +49,7 @@ namespace Roki.Modules.Games.Common
         private readonly string _player1Id;
         private readonly string _player2Id;
 
-        private readonly Dictionary<IEmote, int> _reactionMap = new Dictionary<IEmote, int>
+        private readonly Dictionary<IEmote, int> _reactionMap = new()
         {
             {Player1, 0},
             {Player2, 0},
@@ -64,7 +64,7 @@ namespace Roki.Modules.Games.Common
             {TimesTen, 0}
         };
 
-        private readonly Dictionary<IUser, PlayerBet> _scores = new Dictionary<IUser, PlayerBet>();
+        private readonly Dictionary<IUser, PlayerBet> _scores = new();
         private readonly ShowdownService _service;
         private IUserMessage _game;
 
@@ -383,7 +383,7 @@ namespace Roki.Modules.Games.Common
                     string output = await reader.ReadLineAsync().ConfigureAwait(false);
 
                     if (teamsFound && gameIdFound && !winnerFound && output!.Contains("Winner:", StringComparison.Ordinal))
-                    {   
+                    {
                         winnerFound = true;
                         _winner = output.Contains(_player1Id, StringComparison.Ordinal) ? Bet.P1 : Bet.P2;
                     }

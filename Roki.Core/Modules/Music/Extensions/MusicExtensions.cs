@@ -10,7 +10,7 @@ namespace Roki.Modules.Music.Extensions
     {
         public static TimeSpan TotalPlaytime(this IEnumerable<LavaTrack> queue)
         {
-            return new TimeSpan(queue.Sum(q => q.Duration.Ticks));
+            return new(queue.Sum(q => q.Duration.Ticks));
         }
 
         public static string PrettyTrack(this LavaTrack track)

@@ -10,7 +10,7 @@ namespace Roki.Modules.Gambling
     public partial class Gambling : RokiTopLevelModule
     {
         private readonly ICurrencyService _currency;
-        private readonly Random _rng = new Random();
+        private readonly Random _rng = new();
 
         public Gambling(ICurrencyService currency)
         {

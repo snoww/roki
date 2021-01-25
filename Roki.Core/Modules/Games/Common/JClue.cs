@@ -9,7 +9,7 @@ namespace Roki.Modules.Games.Common
 {
     public class JClue
     {
-        private readonly List<string> _acceptedAnswers = new List<string>();
+        private readonly List<string> _acceptedAnswers = new();
 
         private string _minAnswer;
 
@@ -139,12 +139,14 @@ namespace Roki.Modules.Games.Common
                 {
                     var ansLev = new Levenshtein(optionalAnswer);
                     foreach (string ans in answers)
+                    {
                         if (ansLev.DistanceFrom(ans) <= Math.Round(optionalAnswer.Length * 0.1))
                         {
                             correct++;
                             // so they don't get points for submitting the same answer multiple times
                             break;
                         }
+                    }
                 }
 
                 if (Answer.StartsWith("(2 of)", StringComparison.Ordinal))

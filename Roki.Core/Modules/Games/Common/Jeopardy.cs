@@ -21,17 +21,17 @@ namespace Roki.Modules.Games.Common
         private readonly ITextChannel _channel;
         private readonly DiscordSocketClient _client;
         private readonly Dictionary<string, List<JClue>> _clues;
-        private readonly ConcurrentBag<bool> _confirmed = new ConcurrentBag<bool>();
+        private readonly ConcurrentBag<bool> _confirmed = new();
         private readonly ICurrencyService _currency;
         private readonly JClue _finalJeopardy;
-        private readonly Dictionary<ulong, string> _finalJeopardyAnswers = new Dictionary<ulong, string>();
-        private readonly SemaphoreSlim _guess = new SemaphoreSlim(1, 1);
+        private readonly Dictionary<ulong, string> _finalJeopardyAnswers = new();
+        private readonly SemaphoreSlim _guess = new(1, 1);
 
         private readonly IGuild _guild;
 
         public readonly Color Color = Color.DarkBlue;
 
-        public readonly ConcurrentDictionary<IUser, int> Users = new ConcurrentDictionary<IUser, int>();
+        public readonly ConcurrentDictionary<IUser, int> Users = new();
 
         private CancellationTokenSource _cancel;
 
@@ -52,7 +52,7 @@ namespace Roki.Modules.Games.Common
 
         public JClue CurrentClue { get; private set; }
 
-        public HashSet<ulong> Votes { get; } = new HashSet<ulong>();
+        public HashSet<ulong> Votes { get; } = new();
 
         public async Task StartGame()
         {
@@ -162,8 +162,10 @@ namespace Roki.Modules.Games.Common
 
             if (!Users.Any()) return;
             foreach ((IUser user, int winnings) in Users)
+            {
                 await _currency.AddAsync(user.Id, "Jeopardy Winnings", winnings, _guild.Id, _channel.Id, msg.Id)
                     .ConfigureAwait(false);
+            }
         }
 
         public async Task StopJeopardyGame()
@@ -203,7 +205,7 @@ namespace Roki.Modules.Games.Common
                 // shouldn't ever reach here, since message is retrieved from regex pattern which needs a number
                 return CategoryStatus.WrongAmount;
             }
-            
+
             JClue clue = null;
             foreach ((string cat, List<JClue> clues) in _clues)
             {

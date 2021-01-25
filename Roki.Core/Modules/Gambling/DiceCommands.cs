@@ -19,7 +19,7 @@ namespace Roki.Modules.Gambling
         {
             private const string DicePath = "data/dice/";
             private readonly ICurrencyService _currency;
-            private readonly Random _rng = new Random();
+            private readonly Random _rng = new();
 
             public DiceCommands(ICurrencyService currency)
             {

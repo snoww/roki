@@ -13,7 +13,7 @@ namespace Roki.Modules.Games.Services
     {
         private readonly IDatabase _cache;
         
-        public readonly ConcurrentDictionary<ulong, Showdown> ActiveGames = new ConcurrentDictionary<ulong, Showdown>();
+        public readonly ConcurrentDictionary<ulong, Showdown> ActiveGames = new();
 
         public ShowdownService(IRedisCache cache)
         {
