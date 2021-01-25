@@ -10,8 +10,6 @@ namespace Roki.Common
     {
         private readonly DiscordSocketClient _client;
         private bool _disposing;
-        
-        public IUserMessage Message { get; }
 
         public ReactionEventWrapper(DiscordSocketClient client, [NotNull] IUserMessage message)
         {
@@ -23,10 +21,15 @@ namespace Roki.Common
             _client.ReactionsCleared += ReactionsCleared;
         }
 
+        public IUserMessage Message { get; }
+
         public void Dispose()
         {
             if (_disposing)
+            {
                 return;
+            }
+
             _disposing = true;
             UnsubscribeAll();
         }
@@ -42,7 +45,9 @@ namespace Roki.Common
                 try
                 {
                     if (message.Id == Message.Id)
+                    {
                         OnReactionAdded?.Invoke(reaction);
+                    }
                 }
                 catch
                 {
@@ -60,7 +65,9 @@ namespace Roki.Common
                 try
                 {
                     if (message.Id == Message.Id)
+                    {
                         OnReactionRemoved?.Invoke(reaction);
+                    }
                 }
                 catch
                 {
@@ -78,7 +85,9 @@ namespace Roki.Common
                 try
                 {
                     if (message.Id == Message.Id)
+                    {
                         OnReactionCleared?.Invoke();
+                    }
                 }
                 catch
                 {
@@ -89,7 +98,7 @@ namespace Roki.Common
             return Task.CompletedTask;
         }
 
-        public void UnsubscribeAll()
+        private void UnsubscribeAll()
         {
             _client.ReactionAdded -= ReactionAdded;
             _client.ReactionRemoved -= ReactionRemoved;

@@ -1,7 +1,7 @@
 namespace Roki.Common
 {
     // Copyright (c) 2017 DanHartley
-    
+
     /// <summary>
     ///     Measures the difference between two strings.
     ///     Uses the Levenshtein string difference algorithm.
@@ -46,15 +46,15 @@ namespace Roki.Common
             for (var i = 0; i < value.Length; i++)
             {
                 // cost of the first index
-                var cost = i;
-                var additionCost = i;
+                int cost = i;
+                int additionCost = i;
 
                 // cache value for inner loop to avoid index lookup and bonds checking, profiled this is quicker
-                var value1Char = value[i];
+                char value1Char = value[i];
 
                 for (var j = 0; j < _storedValue.Length; j++)
                 {
-                    var insertionCost = cost;
+                    int insertionCost = cost;
 
                     cost = additionCost;
 
