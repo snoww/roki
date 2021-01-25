@@ -536,11 +536,12 @@ namespace Roki.Modules.Games.Common
                 }
 
                 // IMPORTANT: this makes the gif not ghost
-                emptyFrame.Frames.RootFrame.Metadata.GetFormatMetadata(GifFormat.Instance).DisposalMethod = GifDisposalMethod.RestoreToBackground;
+                emptyFrame.Frames.RootFrame.Metadata.GetGifMetadata().DisposalMethod = GifDisposalMethod.RestoreToBackground;
                 image.Frames.AddFrame(emptyFrame.Frames.RootFrame);
             }
 
             image.Frames.RemoveFrame(0);
+            image.Metadata.GetGifMetadata().RepeatCount = 0;
             var stream = new MemoryStream();
             image.SaveAsGif(stream, new GifEncoder());
             stream.Position = 0;
