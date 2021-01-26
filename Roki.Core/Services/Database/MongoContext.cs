@@ -66,6 +66,7 @@ namespace Roki.Services.Database
 
         Task<Guild> GetOrAddGuildAsync(SocketGuild guild);
         Task<Guild> GetGuildAsync(ulong guildId);
+        Task<GuildConfig> GetGuildConfigAsync(ulong guildId);
         Task ChangeGuildAvailabilityAsync(SocketGuild guild, bool available);
         Task UpdateGuildAsync(SocketGuild after);
         Task AddXpRewardAsync(ulong guildId, XpReward reward);
@@ -504,12 +505,22 @@ namespace Roki.Services.Database
                 return dbChannel;
             }
 
+            GuildConfig guildConfig = await GetGuildConfigAsync(channel.GuildId);
             dbChannel = new Channel
             {
                 Id = channel.Id,
                 Name = channel.Name,
                 GuildId = channel.GuildId,
                 IsNsfw = channel.IsNsfw,
+                CreatedAt = channel.CreatedAt,
+                Config =  new ChannelConfig
+                {
+                    Logging = guildConfig.Logging,
+                    CurrencyGeneration = guildConfig.CurrencyGeneration,
+                    XpGain = guildConfig.XpGain,
+                    Modules = guildConfig.Modules,
+                    Commands = guildConfig.Commands
+                }
             };
 
             await ChannelCollection.InsertOneAsync(dbChannel);
@@ -574,6 +585,11 @@ namespace Roki.Services.Database
         public async Task<Guild> GetGuildAsync(ulong guildId)
         {
             return await GuildCollection.Find(g => g.Id == guildId).FirstAsync().ConfigureAwait(false);
+        }
+
+        public async Task<GuildConfig> GetGuildConfigAsync(ulong guildId)
+        {
+            return (await GuildCollection.Find(g => g.Id == guildId).FirstAsync().ConfigureAwait(false)).Config;
         }
 
         public async Task ChangeGuildAvailabilityAsync(SocketGuild guild, bool available)
