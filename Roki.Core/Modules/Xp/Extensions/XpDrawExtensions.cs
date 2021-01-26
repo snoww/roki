@@ -24,7 +24,7 @@ namespace Roki.Modules.Xp.Extensions
 
         private const int MaxUsernameLength = 965;
 
-        public static Stream GenerateXpBar(Stream avatar, int currentXp, int xpCap, string totalXp, string level, string rank,
+        public static MemoryStream GenerateXpBar(Stream avatar, int currentXp, int xpCap, string totalXp, string level, string rank,
             string username, string discriminator, DateTime date, bool doubleXp, bool fastXp)
         {
             using Image image = Image.Load("./data/xp/roki_xp.png");
