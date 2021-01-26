@@ -69,13 +69,13 @@ namespace Roki.Modules.Currency.Services
                 if (drop > 0)
                 {
                     await _cache.StringIncrementAsync($"gen:{channel.GuildId}:{channel.Id}", drop).ConfigureAwait(false);
-                    await _cache.StringAppendAsync($"gen:log:{channel.GuildId}:{channel.Id}", $"{message.Id},").ConfigureAwait(false);
 
                     string toSend = drop == 1
                         ? $"{Roki.Properties.CurrencyIcon} A random {Roki.Properties.CurrencyName} appeared! Type `{Roki.Properties.Prefix}pick` to pick it up."
                         : $"{Roki.Properties.CurrencyIcon} {drop} random {Roki.Properties.CurrencyNamePlural} appeared! Type `{Roki.Properties.Prefix}pick` to pick them up.";
                     // TODO add images to send with drop
-                    await channel.SendMessageAsync(toSend).ConfigureAwait(false);
+                    IUserMessage sent = await channel.SendMessageAsync(toSend).ConfigureAwait(false);
+                    await _cache.StringAppendAsync($"gen:log:{channel.GuildId}:{channel.Id}", $"{sent.Id},").ConfigureAwait(false);
                 }
             }
         }
