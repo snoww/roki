@@ -59,12 +59,12 @@ namespace Roki.Services
             {
                 return Task.CompletedTask;
             }
-
+            
             UpdateXp(message).ConfigureAwait(false);
 
             Task _ = Task.Run(async () =>
             {
-                if (!_context.IsLoggingEnabled(message.Channel as ITextChannel))
+                if (!await _context.IsLoggingEnabled(message.Channel as ITextChannel))
                 {
                     return;
                 }
@@ -82,7 +82,7 @@ namespace Roki.Services
             if (after.EditedTimestamp == null) return Task.CompletedTask;
             Task _ = Task.Run(async () =>
             {
-                if (!_context.IsLoggingEnabled(after.Channel as ITextChannel))
+                if (!await _context.IsLoggingEnabled(after.Channel as ITextChannel))
                 {
                     return;
                 }
@@ -98,7 +98,7 @@ namespace Roki.Services
             if (cache.HasValue && cache.Value.Author.IsBot) return Task.CompletedTask;
             Task _ = Task.Run(async () =>
             {
-                if (!_context.IsLoggingEnabled(channel as ITextChannel))
+                if (!await _context.IsLoggingEnabled(channel as ITextChannel))
                 {
                     return;
                 }
@@ -112,7 +112,7 @@ namespace Roki.Services
         {
             Task _ = Task.Run(async () =>
             {
-                if (!_context.IsLoggingEnabled(channel as ITextChannel))
+                if (!await _context.IsLoggingEnabled(channel as ITextChannel))
                 {
                     return;
                 }
@@ -271,6 +271,12 @@ namespace Roki.Services
         {
             Task _ = Task.Run(async () =>
             {
+                ChannelConfig channelConfig = await _context.GetChannelConfigAsync(message.Channel as ITextChannel);
+                if (!channelConfig.XpGain)
+                {
+                    return;
+                }
+                
                 User user = await _context.GetOrAddUserAsync(message.Author).ConfigureAwait(false);
 
                 // temp
