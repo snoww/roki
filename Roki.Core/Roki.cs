@@ -124,7 +124,7 @@ namespace Roki
                 {
                     try
                     {
-                        long botCurrency = Mongo.Context.GetBotCurrencyAsync();
+                        long botCurrency = await Mongo.Context.GetBotCurrencyAsync(Client.CurrentUser);
 
                         IDatabase cache = Cache.Redis.GetDatabase();
                         Logger.Info("Loading cache");

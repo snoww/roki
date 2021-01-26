@@ -95,7 +95,7 @@ namespace Roki.Services
                 ClientId = clId;
 
                 IConfigurationSection dbSection = data.GetSection("db");
-                Db = new DbConfig(dbSection["Username"], dbSection["Password"]);
+                Db = new DbConfig(dbSection["Username"], dbSection["Password"], dbSection["Database"], dbSection["Host"]);
 
                 RedisConfig = "localhost";
             }
@@ -109,13 +109,17 @@ namespace Roki.Services
     
     public class DbConfig
     {
-        public DbConfig(string username, string password)
+        public DbConfig(string username, string password, string database, string host)
         {
             Username = username;
             Password = password;
+            Database = database;
+            Host = host;
         }
 
         public string Username { get; }
         public string Password { get; }
+        public string Database { get; }
+        public string Host { get; set; }
     }
 }

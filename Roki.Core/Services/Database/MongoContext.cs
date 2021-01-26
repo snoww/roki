@@ -36,7 +36,7 @@ namespace Roki.Services.Database
         Task<bool> UpdateUserCurrencyAsync(User user, long amount);
         Task<bool> UpdateUserCurrencyAsync(ulong userId, long amount);
         Task UpdateBotCurrencyAsync(long amount);
-        long GetBotCurrencyAsync();
+        Task<long> GetBotCurrencyAsync(IUser user);
         long GetUserCurrency(ulong userId);
         decimal GetUserInvesting(ulong userId);
         Task<IEnumerable<User>> GetCurrencyLeaderboardAsync(int page);
@@ -235,9 +235,11 @@ namespace Roki.Services.Database
             await UserCollection.UpdateOneAsync(u => u.Id == Roki.Properties.BotId, updateCurrency).ConfigureAwait(false);
         }
 
-        public long GetBotCurrencyAsync()
+        public async Task<long> GetBotCurrencyAsync(IUser user)
         {
-            return UserCollection.Find(u => u.Id == Roki.Properties.BotId).First().Currency;
+            User bot = await UserCollection.Find(u => u.Id == Roki.Properties.BotId).FirstOrDefaultAsync() ?? await GetOrAddUserAsync(user);
+
+            return bot.Currency;
         }
 
         public long GetUserCurrency(ulong userId)
