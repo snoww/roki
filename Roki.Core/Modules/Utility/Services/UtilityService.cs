@@ -67,14 +67,14 @@ namespace Roki.Modules.Utility.Services
             int random = Rng.Next(3);
             if (random == 0)
             {
-                Task _ = Task.Run(async () =>
-                {
-                    for (var i = 0; i < 10; i++)
-                    {
-                        await _client.SetGameAsync(await GetMCStatus().ConfigureAwait(false)).ConfigureAwait(false);
-                        await Task.Delay(TimeSpan.FromSeconds(55)).ConfigureAwait(false);
-                    }
-                });
+                // Task _ = Task.Run(async () =>
+                // {
+                //     for (var i = 0; i < 10; i++)
+                //     {
+                //         // await _client.SetGameAsync(await GetMCStatus().ConfigureAwait(false)).ConfigureAwait(false);
+                //         await Task.Delay(TimeSpan.FromSeconds(55)).ConfigureAwait(false);
+                //     }
+                // });
             }
             else if (random == 1)
             {
