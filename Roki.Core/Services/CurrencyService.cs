@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Roki.Services.Database.Maps;
 using StackExchange.Redis;
@@ -58,7 +59,7 @@ namespace Roki.Services
             }
             
             long balance = _mongo.Context.GetUserCurrency(userId);
-            await _cache.StringSetAsync($"currency:{guildId}:{userId}", balance, flags: CommandFlags.FireAndForget).ConfigureAwait(false);
+            await _cache.StringSetAsync($"currency:{guildId}:{userId}", balance, TimeSpan.FromDays(7), flags: CommandFlags.FireAndForget).ConfigureAwait(false);
             return balance;
         }
 
@@ -78,7 +79,7 @@ namespace Roki.Services
             else
             {
                 balance = _mongo.Context.GetUserCurrency(userId);
-                await _cache.StringSetAsync($"currency:{guildId}:{userId}", balance).ConfigureAwait(false);
+                await _cache.StringSetAsync($"currency:{guildId}:{userId}", balance, TimeSpan.FromDays(7)).ConfigureAwait(false);
             }
             
             if (balance + amount < 0) return false;

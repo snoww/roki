@@ -95,15 +95,22 @@ namespace Roki.Modules.Currency.Services
 
                 var amount = (long) rawAmount;
 
+                RedisValue currency = await _cache.StringGetAsync($"currency:{channel.Guild.Id}:{user.Id}").ConfigureAwait(false);
+                if (!currency.HasValue)
+                {
+                    long balance = _mongo.Context.GetUserCurrency(user.Id);
+                    await _cache.StringSetAsync($"currency:{channel.Guild.Id}:{user.Id}", balance, TimeSpan.FromDays(7)).ConfigureAwait(false);
+                }
+
                 await _cache.StringIncrementAsync($"currency:{channel.Guild.Id}:{user.Id}", amount, CommandFlags.FireAndForget)
                     .ConfigureAwait(false);
                 await _mongo.Context.UpdateUserCurrencyAsync(user.Id, amount).ConfigureAwait(false);
 
                 try
                 {
-                    List<ulong> ids = (from id in ((string) messages).Split(',')
-                            where !string.IsNullOrWhiteSpace(id)
-                            select ulong.Parse(id))
+                    List<ulong> ids = ((string) messages).Split(',')
+                        .Where(id => !string.IsNullOrWhiteSpace(id))
+                        .Select(ulong.Parse)
                         .ToList();
                     await channel.DeleteMessagesAsync(ids).ConfigureAwait(false);
                 }
