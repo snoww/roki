@@ -640,8 +640,8 @@
     "Description": "Enables or disables logging of a channel. Logging is disabled by default in channels.",
     "Usage": [
       "{0}log",
-      "{0}log false",
-      "{0}logging true"
+      "{0}log disable",
+      "{0}logging enable"
     ]
   },
   "stalk": {

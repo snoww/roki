@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -21,21 +22,67 @@ namespace Roki.Modules.Moderation
         [RokiCommand, Description, Usage, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequireUserPermission(GuildPermission.ManageMessages)]
-        public async Task Logging(bool enable = true)
+        public async Task Logging(string option = null)
         {
-            await Service.LoggingChannel(Context.Channel.Id, enable);
-            
-            if (enable)
+            bool enabled = Service.IsLoggingEnabled(Context.Channel as ITextChannel);
+            EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context);
+
+            if (option == null)
             {
-                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                    .WithDescription("This channel's messages will now be logged.\nUse `.logging false` to disable logging"))
-                .ConfigureAwait(false);
+                if (enabled)
+                {
+                    await Context.Channel.EmbedAsync(embed.WithDescription("Logging is currently enabled in this channel.\n" +
+                                                                           $"Use `{Roki.Properties.Prefix}logging disable` to disable logging"))
+                        .ConfigureAwait(false);
+                }
+                else
+                {
+                    await Context.Channel.EmbedAsync(embed.WithDescription("Logging is currently disabled in this channel.\n" +
+                                                                           $"Use `{Roki.Properties.Prefix}logging enable` to enable logging"))
+                        .ConfigureAwait(false);
+                }
+            }
+            else if (option.Equals("enable", StringComparison.OrdinalIgnoreCase))
+            {
+                if (enabled)
+                {
+                    await Context.Channel.EmbedAsync(embed.WithDescription("Logging is already enabled in this channel.\n" +
+                                                                           $"Use `{Roki.Properties.Prefix}logging disable` to disable logging"))
+                        .ConfigureAwait(false);
+                }
+                else
+                {
+                    await Service.ChangeChannelLoggingAsync(Context.Channel.Id, true).ConfigureAwait(false);
+                }
+
+            }
+            else if (option.Equals("disable", StringComparison.OrdinalIgnoreCase))
+            {
+                if (enabled)
+                {
+                    await Service.ChangeChannelLoggingAsync(Context.Channel.Id, false).ConfigureAwait(false);
+                }
+                else
+                {
+                    await Context.Channel.EmbedAsync(embed.WithDescription("Logging is already disabled in this channel.\n" +
+                                                                           $"Use `{Roki.Properties.Prefix}logging enable` to enable logging"))
+                        .ConfigureAwait(false);
+                }
             }
             else
             {
-                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                        .WithDescription("Logging is disabled in this channel.\nUse `.logging false` to enable logging"))
-                    .ConfigureAwait(false);
+                if (enabled)
+                {
+                    await Context.Channel.EmbedAsync(embed.WithDescription("Logging is currently enabled in this channel.\n" +
+                                                                           $"Use `{Roki.Properties.Prefix}logging disable` to disable logging"))
+                        .ConfigureAwait(false);
+                }
+                else
+                {
+                    await Context.Channel.EmbedAsync(embed.WithDescription("Logging is currently disabled in this channel.\n" +
+                                                                           $"Use `{Roki.Properties.Prefix}logging enable` to enable logging"))
+                        .ConfigureAwait(false);
+                }
             }
         }
     }
