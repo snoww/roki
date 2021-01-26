@@ -49,8 +49,8 @@ namespace Roki.Services.Database.Maps
         // default settings for guild
         // i.e. when a new channel is created, these settings are inherited
         public bool Logging { get; set; } = false;
-        public bool CurrencyGeneration { get; set; } = false;
-        public bool XpGain { get; set; } = false;
+        public bool CurrencyGeneration { get; set; } = true;
+        public bool XpGain { get; set; } = true;
         public Dictionary<string, bool> Modules { get; set; } = new();
         public Dictionary<string, bool> Commands { get; set; } = new();
     }
