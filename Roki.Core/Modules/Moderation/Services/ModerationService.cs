@@ -14,16 +14,5 @@ namespace Roki.Modules.Moderation.Services
         {
             _mongo = mongo;
         }
-
-        public bool IsLoggingEnabled(ITextChannel channel)
-        {
-            return _mongo.Context.IsLoggingEnabled(channel);
-        }
-
-        public async Task ChangeChannelLoggingAsync(ulong channelId, bool enable)
-        {
-            UpdateDefinition<Channel> update = Builders<Channel>.Update.Set(x => x.Logging, enable);
-            await _mongo.Context.ChangeChannelProperty(x => x.Id == channelId, update).ConfigureAwait(false);
-        }
     }
 }

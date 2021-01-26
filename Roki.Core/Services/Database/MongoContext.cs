@@ -61,7 +61,8 @@ namespace Roki.Services.Database
         Task<Channel> GetOrAddChannelAsync(ITextChannel channel);
         Task DeleteChannelAsync(ITextChannel channel);
         Task UpdateChannelAsync(ITextChannel after);
-        bool IsLoggingEnabled(ITextChannel channel);
+        Task<ChannelConfig> GetChannelConfigAsync(ITextChannel channel);
+        Task<bool> IsLoggingEnabled(ITextChannel channel);
         Task ChangeChannelProperty(Expression<Func<Channel, bool>> filter, UpdateDefinition<Channel> update, UpdateOptions options = null);
 
         Task<Guild> GetOrAddGuildAsync(SocketGuild guild);
@@ -545,9 +546,30 @@ namespace Roki.Services.Database
             await ChannelCollection.FindOneAndUpdateAsync(c => c.Id == after.Id, updateChannel).ConfigureAwait(false);
         }
 
-        public bool IsLoggingEnabled(ITextChannel channel)
+        public async Task<ChannelConfig> GetChannelConfigAsync(ITextChannel channel)
         {
-            return ChannelCollection.Find(x => x.Id == channel.Id).First().Logging;
+            Channel dbChannel = await GetOrAddChannelAsync(channel).ConfigureAwait(false);
+            ChannelConfig config = dbChannel.Config;
+            if (config != null) 
+                return config;
+            
+            Guild guild = await GetGuildAsync(channel.GuildId).ConfigureAwait(false);
+            var channelConfig = new ChannelConfig
+            {
+                Logging = guild.Config.Logging,
+                CurrencyGeneration = guild.Config.CurrencyGeneration,
+                XpGain = guild.Config.XpGain,
+                Modules = guild.Config.Modules,
+                Commands = guild.Config.Commands
+            };
+            dbChannel.Config = channelConfig;
+            await ChannelCollection.FindOneAndReplaceAsync(c => c.Id == channel.Id, dbChannel).ConfigureAwait(false);
+            return channelConfig;
+        }
+
+        public async Task<bool> IsLoggingEnabled(ITextChannel channel)
+        {
+            return (await GetChannelConfigAsync(channel)).Logging;
         }
 
         public async Task ChangeChannelProperty(Expression<Func<Channel, bool>> filter, UpdateDefinition<Channel> update, UpdateOptions options = null)
