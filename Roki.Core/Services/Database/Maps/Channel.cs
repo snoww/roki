@@ -10,10 +10,7 @@ namespace Roki.Services.Database.Maps
         public string Name { get; set; }
         public ulong GuildId { get; set; }
         public bool IsNsfw { get; set; }
-        public bool CurrencyGeneration { get; set; } = true;
-        public bool XpGain { get; set; } = true;
         public bool IsDeleted { get; set; } = false;
-        public bool Logging { get; set; } = false;
         public DateTimeOffset CreatedAt { get; set; }
         public ChannelConfig Config { get; set; }
     }
