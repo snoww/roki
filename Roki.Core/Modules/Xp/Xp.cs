@@ -14,6 +14,7 @@ using Roki.Modules.Xp.Common;
 using Roki.Modules.Xp.Extensions;
 using Roki.Services;
 using Roki.Services.Database.Maps;
+using StackExchange.Redis;
 
 namespace Roki.Modules.Xp
 {
@@ -21,16 +22,18 @@ namespace Roki.Modules.Xp
     {
         private readonly IMongoService _mongo;
         private readonly IHttpClientFactory _http;
+        private readonly IDatabase _cache;
         
         // hard-coding xp boosts
         // needs fixing in future
         private static readonly ObjectId DoubleXpId = ObjectId.Parse("5db772de03eb7230a1b5bba1");
         private static readonly ObjectId FastXpId = ObjectId.Parse("5dbc2dd103eb7230a1b5bba5");
 
-        public Xp(IHttpClientFactory http, IMongoService mongo)
+        public Xp(IHttpClientFactory http, IMongoService mongo, IRedisCache cache)
         {
             _http = http;
             _mongo = mongo;
+            _cache = cache.Redis.GetDatabase();
         }
         
         [RokiCommand, Description, Usage, Aliases]
@@ -42,7 +45,15 @@ namespace Roki.Modules.Xp
             }
 
             await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
-            
+
+            RedisValue image = await _cache.StringGetAsync($"xp:image:{user.Id}");
+            if (image.HasValue)
+            {
+                await using var stream = new MemoryStream((byte[]) image);
+                await Context.Channel.SendFileAsync(stream, $"xp-{user.Id}.png").ConfigureAwait(false);
+                return;
+            }
+
             Stream avatar;
 
             using (HttpClient http = _http.CreateClient())
@@ -66,9 +77,10 @@ namespace Roki.Modules.Xp
             bool doubleXp = dbUser.Subscriptions.Any(x => x.Id == DoubleXpId);
             bool fastXp = dbUser.Subscriptions.Any(x => x.Id == FastXpId);
 
-            await using Stream xpImage = XpDrawExtensions.GenerateXpBar(avatar, 
+            await using MemoryStream xpImage = XpDrawExtensions.GenerateXpBar(avatar, 
                 xp.ProgressXp, xp.RequiredXp, $"{xp.TotalXp}", $"{xp.Level}", $"{rank}", 
                 user.Username, user.Discriminator, dbUser.LastLevelUp, doubleXp, fastXp);
+            await _cache.StringSetAsync($"xp:image:{user.Id}", xpImage.ToArray(), TimeSpan.FromMinutes(5), flags: CommandFlags.FireAndForget);
             await Context.Channel.SendFileAsync(xpImage, $"xp-{user.Id}.png").ConfigureAwait(false);
         }
 
