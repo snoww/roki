@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Discord;
@@ -61,7 +62,7 @@ namespace Roki.Services.Database
         Task DeleteChannelAsync(ITextChannel channel);
         Task UpdateChannelAsync(ITextChannel after);
         bool IsLoggingEnabled(ITextChannel channel);
-        Task ChangeChannelLogging(ulong channelId, bool change);
+        Task ChangeChannelProperty(Expression<Func<Channel, bool>> filter, UpdateDefinition<Channel> update, UpdateOptions options = null);
 
         Task<Guild> GetOrAddGuildAsync(SocketGuild guild);
         Task<Guild> GetGuildAsync(ulong guildId);
@@ -536,10 +537,9 @@ namespace Roki.Services.Database
             return ChannelCollection.Find(x => x.Id == channel.Id).First().Logging;
         }
 
-        public async Task ChangeChannelLogging(ulong channelId, bool change)
+        public async Task ChangeChannelProperty(Expression<Func<Channel, bool>> filter, UpdateDefinition<Channel> update, UpdateOptions options = null)
         {
-            var update = Builders<Channel>.Update.Set(x => x.Logging, change);
-            await ChannelCollection.UpdateOneAsync(x => x.Id == channelId, update).ConfigureAwait(false);
+            await ChannelCollection.UpdateOneAsync(filter, update, options).ConfigureAwait(false);
         }
 
         public async Task<Guild> GetOrAddGuildAsync(SocketGuild guild)
