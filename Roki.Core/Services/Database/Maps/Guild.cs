@@ -17,8 +17,9 @@ namespace Roki.Services.Database.Maps
         public string RegionId { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
         public bool Available { get; set; } = true;
-        public List<XpReward> XpRewards { get; set; } = new List<XpReward>();
-        public List<Listing> Store { get; set; } = new List<Listing>();
+        public List<XpReward> XpRewards { get; set; } = new();
+        public List<Listing> Store { get; set; } = new();
+        public GuildConfig Config { get; set; } = new();
     }
     
     public class XpReward
@@ -41,5 +42,16 @@ namespace Roki.Services.Database.Maps
         public int? SubscriptionDays { get; set; }
         public long Cost { get; set; }
         public int Quantity { get; set; } = 1;
+    }
+
+    public class GuildConfig : Properties
+    {
+        // default settings for guild
+        // i.e. when a new channel is created, these settings are inherited
+        public bool Logging { get; set; } = false;
+        public bool CurrencyGeneration { get; set; } = false;
+        public bool XpGain { get; set; } = false;
+        public Dictionary<string, bool> Modules { get; set; } = new();
+        public Dictionary<string, bool> Commands { get; set; } = new();
     }
 }
