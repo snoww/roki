@@ -98,13 +98,13 @@ namespace Roki.Modules.Currency.Services
                 RedisValue currency = await _cache.StringGetAsync($"currency:{channel.Guild.Id}:{user.Id}").ConfigureAwait(false);
                 if (!currency.HasValue)
                 {
-                    long balance = _mongo.Context.GetUserCurrency(user.Id);
+                    long balance = await _mongo.Context.GetUserCurrency(user, channel.GuildId);
                     await _cache.StringSetAsync($"currency:{channel.Guild.Id}:{user.Id}", balance, TimeSpan.FromDays(7)).ConfigureAwait(false);
                 }
 
                 await _cache.StringIncrementAsync($"currency:{channel.Guild.Id}:{user.Id}", amount, CommandFlags.FireAndForget)
                     .ConfigureAwait(false);
-                await _mongo.Context.UpdateUserCurrencyAsync(user.Id, amount).ConfigureAwait(false);
+                await _mongo.Context.UpdateUserCurrencyAsync(user, channel.GuildId, amount).ConfigureAwait(false);
 
                 try
                 {
@@ -132,22 +132,22 @@ namespace Roki.Modules.Currency.Services
             }
         }
 
-        public async Task<bool> DropAsync(ICommandContext ctx, IUser user, long amount)
+        public async Task<bool> DropAsync(ICommandContext ctx, long amount)
         {
-            User dbUser = await _mongo.Context.GetOrAddUserAsync(user).ConfigureAwait(false);
-            if (dbUser.Currency < amount)
+            User dbUser = await _mongo.Context.GetOrAddUserAsync(ctx.User, ctx.Guild.Id).ConfigureAwait(false);
+            if (dbUser.Data[ctx.Guild.Id].Currency < amount)
             {
                 return false;
             }
 
             await _cache.StringIncrementAsync($"gen:{ctx.Guild.Id}:{ctx.Channel.Id}", amount).ConfigureAwait(false);
-            await _cache.StringIncrementAsync($"currency:{ctx.Guild.Id}:{user.Id}", -amount, CommandFlags.FireAndForget)
+            await _cache.StringIncrementAsync($"currency:{ctx.Guild.Id}:{ctx.User.Id}", -amount, CommandFlags.FireAndForget)
                 .ConfigureAwait(false);
 
-            await _mongo.Context.UpdateUserCurrencyAsync(dbUser, -amount).ConfigureAwait(false);
+            await _mongo.Context.UpdateUserCurrencyAsync(dbUser, ctx.Guild.Id, -amount).ConfigureAwait(false);
 
             IUserMessage msg = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
-                    .WithDescription($"{user.Username} dropped {amount:N0} {Roki.Properties.CurrencyIcon}")
+                    .WithDescription($"{ctx.User.Username} dropped {amount:N0} {Roki.Properties.CurrencyIcon}")
                     .WithFooter($"Use {Roki.Properties.Prefix}pick to pick it up"))
                 .ConfigureAwait(false);
 

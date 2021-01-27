@@ -27,7 +27,7 @@ namespace Roki.Modules.Moderation
             [Priority(0)]
             public async Task Mute(IUser user)
             {
-                if (!await Service.ConsumePower(Context.Guild.Id, Context.User.Id, MuteId).ConfigureAwait(false))
+                if (!await Service.ConsumePower(Context.User, Context.Guild.Id, MuteId).ConfigureAwait(false))
                 {
                     await Context.Channel.SendErrorAsync($"{Context.User.Mention} do not have any mute powers available.").ConfigureAwait(false);
                     return;
@@ -42,7 +42,7 @@ namespace Roki.Modules.Moderation
             [Priority(0)]
             public async Task Block(IUser user)
             {
-                if (!await Service.ConsumePower(Context.Guild.Id, Context.User.Id, BlockId).ConfigureAwait(false))
+                if (!await Service.ConsumePower(Context.User, Context.Guild.Id, BlockId).ConfigureAwait(false))
                 {
                     await Context.Channel.SendErrorAsync($"{Context.User.Mention} do not have any mute powers available.").ConfigureAwait(false);
                     return;
@@ -56,7 +56,7 @@ namespace Roki.Modules.Moderation
             [Priority(0)]
             public async Task Timeout(IUser user)
             {
-                if (!await Service.ConsumePower(Context.Guild.Id, Context.User.Id, TimeoutId).ConfigureAwait(false))
+                if (!await Service.ConsumePower(Context.User, Context.Guild.Id, TimeoutId).ConfigureAwait(false))
                 {
                     await Context.Channel.SendErrorAsync($"{Context.User.Mention} do not have any mute powers available.").ConfigureAwait(false);
                     return;
@@ -71,7 +71,7 @@ namespace Roki.Modules.Moderation
             [Priority(0)]
             public async Task Nickname(IUser user, [Leftover] string nickname = null)
             {
-                if (!await Service.ConsumePower(Context.Guild.Id, Context.User.Id, NickId).ConfigureAwait(false))
+                if (!await Service.ConsumePower(Context.User, Context.Guild.Id, NickId).ConfigureAwait(false))
                 {
                     await Context.Channel.SendErrorAsync($"{Context.User.Mention} do not have any nickname powers available.").ConfigureAwait(false);
                     return;

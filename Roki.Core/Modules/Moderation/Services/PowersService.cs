@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -7,31 +8,32 @@ using Discord.Commands;
 using MongoDB.Bson;
 using Roki.Extensions;
 using Roki.Services;
+using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Moderation.Services
 {
     public class PowersService : IRokiService
     {
+        private readonly ConcurrentDictionary<ulong, DateTime> _blocked = new();
         private readonly IMongoService _mongo;
         private readonly ConcurrentDictionary<ulong, DateTime> _muted = new();
-        private readonly ConcurrentDictionary<ulong, DateTime> _blocked = new();
         private readonly ConcurrentDictionary<ulong, DateTime> _timeout = new();
-        
+
 
         public PowersService(IMongoService mongo)
         {
             _mongo = mongo;
         }
 
-        public async Task<bool> ConsumePower(ulong guildId, ulong userId, ObjectId power)
+        public async Task<bool> ConsumePower(IUser user, ulong guildId, ObjectId power)
         {
-            var inv = (await _mongo.Context.GetUserAsync(userId).ConfigureAwait(false)).Inventory;
-            foreach (var item in inv)
+            Dictionary<ObjectId, Item> inv = (await _mongo.Context.GetOrAddUserAsync(user, guildId).ConfigureAwait(false)).Data[guildId].Inventory;
+            foreach ((ObjectId id, Item _) in inv)
             {
-                var listing = await _mongo.Context.GetStoreItemByObjectIdAsync(guildId, item.Id).ConfigureAwait(false);
-                if (listing.Id != power) continue;
-                
-                await _mongo.Context.AddOrUpdateUserInventoryAsync(userId, guildId, power, -1).ConfigureAwait(false);
+                (ObjectId listingId, _) = await _mongo.Context.GetStoreItemByObjectIdAsync(guildId, id).ConfigureAwait(false);
+                if (listingId != power) continue;
+
+                await _mongo.Context.AddOrUpdateUserInventoryAsync(user, guildId, power, -1).ConfigureAwait(false);
                 return true;
             }
 
@@ -40,9 +42,9 @@ namespace Roki.Modules.Moderation.Services
 
         public async Task MuteUser(ICommandContext ctx, IGuildUser user)
         {
-            var muted = ctx.Guild.Roles.First(r => r.Name.Contains("mute", StringComparison.OrdinalIgnoreCase));
-            var time = DateTime.UtcNow + TimeSpan.FromMinutes(5);
-            var updatedTime = time;
+            IRole muted = ctx.Guild.Roles.First(r => r.Name.Contains("mute", StringComparison.OrdinalIgnoreCase));
+            DateTime time = DateTime.UtcNow + TimeSpan.FromMinutes(5);
+            DateTime updatedTime = time;
             _muted.AddOrUpdate(user.Id, time, (key, oldTime) => updatedTime += TimeSpan.FromMinutes(5));
             await user.AddRoleAsync(muted).ConfigureAwait(false);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
@@ -51,7 +53,7 @@ namespace Roki.Modules.Moderation.Services
                 .ConfigureAwait(false);
 
             await Task.Delay(TimeSpan.FromMinutes(5));
-            _muted.TryGetValue(user.Id, out var latest);
+            _muted.TryGetValue(user.Id, out DateTime latest);
 
             if (DateTime.UtcNow >= latest)
             {
@@ -64,18 +66,18 @@ namespace Roki.Modules.Moderation.Services
 
         public async Task BlockUser(ICommandContext ctx, IGuildUser user)
         {
-            var blocked = ctx.Guild.Roles.First(r => r.Name.Contains("blocked", StringComparison.OrdinalIgnoreCase));
-            var time = DateTime.UtcNow + TimeSpan.FromMinutes(5);
-            var updatedTime = time;
+            IRole blocked = ctx.Guild.Roles.First(r => r.Name.Contains("blocked", StringComparison.OrdinalIgnoreCase));
+            DateTime time = DateTime.UtcNow + TimeSpan.FromMinutes(5);
+            DateTime updatedTime = time;
             _blocked.AddOrUpdate(user.Id, time, (key, oldTime) => updatedTime += TimeSpan.FromMinutes(5));
             await user.AddRoleAsync(blocked).ConfigureAwait(false);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
                     .WithTitle($"🔇 {ctx.User.Username} used a Block Power on {user.Username}")
                     .WithDescription($"{user.Mention} is blocked from chat for 5 minutes.\nUnblocked in {updatedTime - DateTime.UtcNow:m\\:ss}"))
                 .ConfigureAwait(false);
-            
+
             await Task.Delay(TimeSpan.FromMinutes(5));
-            _blocked.TryGetValue(user.Id, out var latest);
+            _blocked.TryGetValue(user.Id, out DateTime latest);
 
             if (DateTime.UtcNow >= latest)
             {
@@ -85,21 +87,21 @@ namespace Roki.Modules.Moderation.Services
                     .ConfigureAwait(false);
             }
         }
-        
+
         public async Task TimeoutUser(ICommandContext ctx, IGuildUser user)
         {
-            var timeout = ctx.Guild.Roles.First(r => r.Name.Contains("timeout", StringComparison.OrdinalIgnoreCase));
-            var time = DateTime.UtcNow + TimeSpan.FromMinutes(5);
-            var updatedTime = time;
+            IRole timeout = ctx.Guild.Roles.First(r => r.Name.Contains("timeout", StringComparison.OrdinalIgnoreCase));
+            DateTime time = DateTime.UtcNow + TimeSpan.FromMinutes(5);
+            DateTime updatedTime = time;
             _timeout.AddOrUpdate(user.Id, time, (key, oldTime) => updatedTime += TimeSpan.FromMinutes(5));
             await user.AddRoleAsync(timeout).ConfigureAwait(false);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
                     .WithTitle($"🔇 {ctx.User.Username} used a Timeout Power on {user.Username}")
                     .WithDescription($"{user.Mention} is timed out for 5 minutes.\nUnbanned in {updatedTime - DateTime.UtcNow:m\\:ss}"))
                 .ConfigureAwait(false);
-            
+
             await Task.Delay(TimeSpan.FromMinutes(5));
-            _timeout.TryGetValue(user.Id, out var latest);
+            _timeout.TryGetValue(user.Id, out DateTime latest);
 
             if (DateTime.UtcNow >= latest)
             {

@@ -45,7 +45,7 @@ namespace Roki.Modules.Currency
                     return;
                 }
 
-                bool success = await Service.DropAsync(Context, Context.User, amount).ConfigureAwait(false);
+                bool success = await Service.DropAsync(Context, amount).ConfigureAwait(false);
 
                 if (!success)
                 {

@@ -17,14 +17,13 @@ namespace Roki.Services.Database.Maps
         public string RegionId { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
         public bool Available { get; set; } = true;
-        public List<XpReward> XpRewards { get; set; } = new();
-        public List<Listing> Store { get; set; } = new();
+        public Dictionary<ObjectId, XpReward> XpRewards { get; set; } = new();
+        public Dictionary<ObjectId, Listing> Store { get; set; } = new();
         public GuildConfig Config { get; set; } = new();
     }
     
     public class XpReward
     {
-        public ObjectId Id { get; set; }
         public int Level { get; set; }
         public string Type { get; set; }
         public string Reward { get; set; }
@@ -32,7 +31,6 @@ namespace Roki.Services.Database.Maps
 
     public class Listing
     {
-        public ObjectId Id { get; set; }
         public ulong SellerId { get; set; }
         public string Name { get; set; }
         public string Details { get; set; }

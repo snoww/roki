@@ -4,10 +4,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Discord;
 using Discord.WebSocket;
 using NLog;
-using Roki.Extensions;
 using Roki.Services;
 using Roki.Services.Database.Maps;
 
@@ -15,29 +13,40 @@ namespace Roki.Modules.Stocks.Services
 {
     public class TradingService : IRokiService
     {
-        private readonly IRokiConfig _config;
-        private readonly IMongoService _mongo;
-        private readonly IHttpClientFactory _http;
-        private readonly DiscordSocketClient _client;
-        private Timer _timer;
+        public enum Status
+        {
+            NotEnoughInvesting = -1,
+            NotEnoughShares = -2,
+            TooMuchLeverage = -3,
+            OwnsShortShares = -4,
+            OwnsLongShares = -5,
+            Success = 1
+        }
+
         private const string IexStocksUrl = "https://cloud.iexapis.com/stable/stock/";
 
         private static Logger Logger = LogManager.GetCurrentClassLogger();
+        private readonly DiscordSocketClient _client;
+        private readonly IRokiConfig _config;
+        private readonly IHttpClientFactory _factory;
+        private readonly IMongoService _mongo;
+        // private Timer _timer;
 
-        public TradingService(IHttpClientFactory http, IRokiConfig config, DiscordSocketClient client, IMongoService mongo)
+        public TradingService(IHttpClientFactory factory, IRokiConfig config, DiscordSocketClient client, IMongoService mongo)
         {
-            _http = http;
+            _factory = factory;
             _config = config;
             _client = client;
             _mongo = mongo;
-            ShortPremiumTimer();
+            // ShortPremiumTimer();
         }
 
         private void ShortPremiumTimer()
         {
-            _timer = new Timer(ChargePremium, null, TimeSpan.Zero, TimeSpan.FromHours(3));
+            // _timer = new Timer(ChargePremium, null, TimeSpan.Zero, TimeSpan.FromHours(3));
         }
 
+        /*
         private async void ChargePremium(object state)
         {
             using var cursor = await _mongo.Context.GetAllUserCursorAsync().ConfigureAwait(false);
@@ -57,8 +66,8 @@ namespace Roki.Modules.Stocks.Services
                     var embed = new EmbedBuilder().WithOkColor().WithTitle("Short Interest Charge");
                     foreach (var investment in interestList)
                     {
-                        var cost = await CalculateInterest(investment.Symbol, investment.Shares).ConfigureAwait(false);
-                        await _mongo.Context.ChargeInterestAsync(dbUser, cost, investment.Symbol);
+                        var cost = await CalculateInterest(investment.ticker, investment.Shares).ConfigureAwait(false);
+                        await _mongo.Context.ChargeInterestAsync(dbUser, TODO, cost, investment.ticker);
                         await _mongo.Context.AddTransaction(new Transaction
                         {
                            Amount = (long) cost,
@@ -68,7 +77,7 @@ namespace Roki.Modules.Stocks.Services
                         });
                         
                         total += cost;
-                        embed.AddField($"`{investment.Symbol}` - `{investment.Shares}` Shares", $"`{cost:C2}` {Roki.Properties.CurrencyIcon}", true);
+                        embed.AddField($"`{investment.ticker}` - `{investment.Shares}` Shares", $"`{cost:C2}` {Roki.Properties.CurrencyIcon}", true);
                     }
                     
                     embed.WithDescription($"You have been charged a total of `{total}` {Roki.Properties.CurrencyIcon}\n");
@@ -84,15 +93,15 @@ namespace Roki.Modules.Stocks.Services
                 }
             }
         }
+        */
 
-        public async Task<decimal?> GetLatestPriceAsync(string symbol)
+        public async Task<decimal?> GetLatestPriceAsync(string ticker)
         {
-            using var http = _http.CreateClient();
+            using HttpClient http = _factory.CreateClient();
             try
             {
-                var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/quote/latestPrice?token={_config.IexToken}").ConfigureAwait(false);
-                decimal.TryParse(result, out var price);
-                return price;
+                string result = await http.GetStringAsync($"{IexStocksUrl}/{ticker}/quote/latestPrice?token={_config.IexToken}").ConfigureAwait(false);
+                return decimal.Parse(result);
             }
             catch (HttpRequestException)
             {
@@ -100,107 +109,121 @@ namespace Roki.Modules.Stocks.Services
             }
         }
 
-        public async Task<Status> ShortPositionAsync(User user, string symbol, string action, decimal price, long amount)
+        public async Task<Status> ShortPositionAsync(User user, ulong guildId, string ticker, string action, decimal price, long amount)
         {
-            var existing = user.Portfolio.FirstOrDefault(x => x.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
+            Dictionary<string, Investment> portfolio = user.Data[guildId].Portfolio;
+
+            Investment existing = portfolio.ContainsKey(ticker) ? user.Data[guildId].Portfolio[ticker] : null;
             if (existing != null && !existing.Position.Equals("short"))
             {
                 return Status.OwnsLongShares;
             }
-            var total = price * amount;
+
+            decimal total = price * amount;
             bool success;
-            var portfolio = user.Portfolio;
             if (action == "buy") // LENDING SHARES FROM BANK, SELLING IMMEDIATELY
             {
-                if (!portfolio.Any(i => i.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase)) && total >= 100000)
+                if (!portfolio.ContainsKey(ticker) && total >= 100000)
+                {
                     return Status.TooMuchLeverage;
+                }
+
                 if (!await CanShortStock(portfolio, total).ConfigureAwait(false))
+                {
                     return Status.TooMuchLeverage;
-                await _mongo.Context.UpdateUserInvestingAccountAsync(user, total).ConfigureAwait(false);
-                success = await _mongo.Context.UpdateUserPortfolioAsync(user, symbol, "short", action, amount).ConfigureAwait(false);
+                }
+
+                await _mongo.Context.UpdateUserInvestingAccountAsync(user, guildId, total).ConfigureAwait(false);
+                success = await _mongo.Context.UpdateUserPortfolioAsync(user, guildId, ticker, "short", amount).ConfigureAwait(false);
             }
             else // SELLING SHARES BACK TO BANK
             {
-                var update = await _mongo.Context.UpdateUserInvestingAccountAsync(user, -total).ConfigureAwait(false);
+                bool update = await _mongo.Context.UpdateUserInvestingAccountAsync(user, guildId, -total).ConfigureAwait(false);
                 if (!update) return Status.NotEnoughInvesting;
-                success = await _mongo.Context.UpdateUserPortfolioAsync(user, symbol, "short", action, -amount).ConfigureAwait(false);
+                success = await _mongo.Context.UpdateUserPortfolioAsync(user, guildId, ticker, "short", -amount).ConfigureAwait(false);
             }
 
             if (!success) return Status.NotEnoughShares;
-            
+
             await _mongo.Context.AddTrade(new Trade
             {
                 UserId = user.Id,
-                Symbol = symbol,
+                Ticker = ticker,
                 Position = "short",
                 Action = action,
                 Shares = amount,
-                Price = price,
+                Price = price
             }).ConfigureAwait(false);
-            
+
             return Status.Success;
         }
-        
-        public async Task<Status> LongPositionAsync(User user, string symbol, string action, decimal price, long amount)
+
+        public async Task<Status> LongPositionAsync(User user, ulong guildId, string ticker, string action, decimal price, long amount)
         {
-            var existing = user.Portfolio.FirstOrDefault(x => x.Symbol.Equals(symbol, StringComparison.OrdinalIgnoreCase));
+            Investment existing = user.Data[guildId].Portfolio.ContainsKey(ticker) ? user.Data[guildId].Portfolio[ticker] : null;
             if (existing != null && !existing.Position.Equals("long"))
             {
-                return Status.OwnsShortShares;
+                return Status.OwnsLongShares;
             }
-            var total = price * amount;
+
+            decimal total = price * amount;
             bool success;
             if (action == "buy") // BUYING SHARES
             {
-                var update = await _mongo.Context.UpdateUserInvestingAccountAsync(user, -total).ConfigureAwait(false);
+                bool update = await _mongo.Context.UpdateUserInvestingAccountAsync(user, guildId, -total).ConfigureAwait(false);
                 if (!update) return Status.NotEnoughInvesting;
-                success = await _mongo.Context.UpdateUserPortfolioAsync(user, symbol, "long", action, amount).ConfigureAwait(false);
+                success = await _mongo.Context.UpdateUserPortfolioAsync(user, guildId, ticker, "long", amount).ConfigureAwait(false);
             }
             else // SELLING SHARES
             {
-                await _mongo.Context.UpdateUserInvestingAccountAsync(user, total).ConfigureAwait(false);
-                success = await _mongo.Context.UpdateUserPortfolioAsync(user, symbol, "long", action, -amount).ConfigureAwait(false);
+                await _mongo.Context.UpdateUserInvestingAccountAsync(user, guildId, total).ConfigureAwait(false);
+                success = await _mongo.Context.UpdateUserPortfolioAsync(user, guildId, ticker, "long", -amount).ConfigureAwait(false);
             }
 
             if (!success) return Status.NotEnoughShares;
-            
+
             await _mongo.Context.AddTrade(new Trade
             {
                 UserId = user.Id,
-                Symbol = symbol,
-                Position = "short",
+                Ticker = ticker,
+                Position = "long",
                 Action = action,
                 Shares = amount,
-                Price = price,
+                Price = price
             });
-            
+
             return Status.Success;
         }
-        
-        private async Task<bool> CanShortStock(List<Investment> portfolio, decimal cost)
+
+        private async Task<bool> CanShortStock(Dictionary<string, Investment> portfolio, decimal cost)
         {
-            foreach (var investment in portfolio.Where(investment => investment.Position.Equals("short", StringComparison.OrdinalIgnoreCase)))
+            // foreach (Investment investment in portfolio.Where(investment => investment.Position.Equals("short", StringComparison.OrdinalIgnoreCase)))
+            // {
+            //     decimal? price = await GetLatestPriceAsync(investment.ticker).ConfigureAwait(false);
+            //     cost += price.Value * investment.Shares;
+            // }
+
+            foreach ((string ticker, Investment investment) in portfolio)
             {
-                var price = await GetLatestPriceAsync(investment.Symbol).ConfigureAwait(false);
-                cost += price.Value * investment.Shares;
+                if (investment.Position.Equals("short", StringComparison.Ordinal))
+                {
+                    decimal? price = await GetLatestPriceAsync(ticker).ConfigureAwait(false);
+                    cost += (price ?? 0) * investment.Shares;
+                }
             }
+
             return cost <= 100000;
         }
 
-        private async Task<decimal> CalculateInterest(string symbol, long shares)
+        private async Task<decimal> CalculateInterest(string ticker, long shares)
         {
-            var price = (await GetLatestPriceAsync(symbol).ConfigureAwait(false)).Value;
-            return price * shares * 0.025m;
-        }
-        
-        public enum Status
-        {
-            NotEnoughInvesting = -1,
-            NotEnoughShares = -2,
-            TooMuchLeverage = -3,
-            OwnsShortShares = -4,
-            OwnsLongShares = -5,
-            Success = 1
+            decimal? price = await GetLatestPriceAsync(ticker).ConfigureAwait(false);
+            if (price.HasValue)
+            {
+                return price.Value * shares * 0.025m;
+            }
+
+            return 0;
         }
     }
 }

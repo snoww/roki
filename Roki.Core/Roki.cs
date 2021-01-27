@@ -124,14 +124,13 @@ namespace Roki
                 {
                     try
                     {
-                        long botCurrency = await Mongo.Context.GetBotCurrencyAsync(Client.CurrentUser);
-
                         IDatabase cache = Cache.Redis.GetDatabase();
                         Logger.Info("Loading cache");
                         var sw = Stopwatch.StartNew();
 
                         foreach (SocketGuild guild in Client.Guilds)
                         {
+                            long botCurrency = await Mongo.Context.GetUserCurrency(Client.CurrentUser, guild.Id);
                             await cache.StringSetAsync($"currency:{guild.Id}:{Properties.BotId}", botCurrency, flags: CommandFlags.FireAndForget)
                                 .ConfigureAwait(false);
 

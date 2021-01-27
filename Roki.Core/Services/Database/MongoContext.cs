@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -11,7 +10,6 @@ using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using Roki.Extensions;
 using Roki.Modules.Games.Common;
-using Roki.Modules.Xp.Common;
 using Roki.Services.Database.Maps;
 
 namespace Roki.Services.Database
@@ -25,29 +23,32 @@ namespace Roki.Services.Database
         IMongoCollection<Transaction> TransactionCollection { get; }
         IMongoCollection<JeopardyClue> JeopardyCollection { get; }
 
-        
-        Task<User> GetOrAddUserAsync(IUser user);
-        Task<User> GetUserAsync(ulong userId);
+        #region Users
+
+        Task<User> GetOrAddUserAsync(IUser user, ulong guildId);
         Task<IAsyncCursor<User>> GetAllUserCursorAsync();
         Task<User> UpdateUserAsync(IUser after);
-        Task<XpLevel> UpdateUserXpAsync(User user, bool doubleXp);
-        Task<int> GetUserXpRankAsync(User user);
-        Task UpdateUserNotificationPreferenceAsync(ulong userId, string location);
-        Task<bool> UpdateUserCurrencyAsync(User user, long amount);
-        Task<bool> UpdateUserCurrencyAsync(ulong userId, long amount);
-        Task UpdateBotCurrencyAsync(long amount);
-        Task<long> GetBotCurrencyAsync(IUser user);
-        long GetUserCurrency(ulong userId);
-        decimal GetUserInvesting(ulong userId);
-        Task<IEnumerable<User>> GetCurrencyLeaderboardAsync(int page);
-        Task<IEnumerable<User>> GetXpLeaderboardAsync(int page);
-        Task<bool> TransferCurrencyAsync(ulong userId, decimal amount);
-        Task<bool> AddOrUpdateUserSubscriptionAsync(ulong userId, ulong guildId, ObjectId subId, int days);
-        Task<Dictionary<ulong, List<Subscription>>> RemoveExpiredSubscriptionsAsync();
-        Task<bool> AddOrUpdateUserInventoryAsync(ulong userId, ulong guildId, ObjectId itemId, int quantity);
-        Task ChargeInterestAsync(User user, decimal amount, string symbol);
-        Task<bool> UpdateUserInvestingAccountAsync(User user, decimal amount);
-        Task<bool> UpdateUserPortfolioAsync(User user, string symbol, string position, string action, long shares);
+        Task UpdateUserXpAsync(User user, ulong guildId, DateTime now, int increment, bool levelUp);
+        Task<int> GetUserXpRankAsync(User user, ulong guildId);
+        Task UpdateUserNotificationPreferenceAsync(ulong userId, ulong guildId, string location);
+        Task<bool> UpdateUserCurrencyAsync(User user, ulong guildId, long amount);
+        Task<bool> UpdateUserCurrencyAsync(IUser user, ulong guildId, long amount);
+        Task UpdateBotCurrencyAsync(long amount, ulong guildId);
+        Task<long> GetUserCurrency(IUser user, ulong guildId);
+        Task<decimal> GetUserInvesting(IUser user, ulong guildId);
+        Task<IEnumerable<User>> GetCurrencyLeaderboardAsync(ulong guildId, int page);
+        Task<IEnumerable<User>> GetXpLeaderboardAsync(ulong guildId, int page);
+        Task<bool> TransferCurrencyAsync(IUser user, ulong guildId, decimal amount);
+        Task<bool> AddOrUpdateUserSubscriptionAsync(IUser user, ulong guildId, ObjectId subId, int days);
+        Task<Dictionary<ulong, Dictionary<ulong, List<ObjectId>>>> RemoveExpiredSubscriptionsAsync();
+        Task<bool> AddOrUpdateUserInventoryAsync(IUser user, ulong guildId, ObjectId itemId, int quantity);
+        Task ChargeInterestAsync(User user, ulong guildId, decimal amount, string ticker);
+        Task<bool> UpdateUserInvestingAccountAsync(User user, ulong guildId, decimal amount);
+        Task<bool> UpdateUserPortfolioAsync(User user, ulong guildId, string ticker, string position, long shares);
+
+        #endregion
+
+        #region Quotes
 
         Task<Quote> GetRandomQuoteAsync(ulong guildId, string keyword);
         Task<Quote> GetQuoteByIdAsync(ulong guildId, string id);
@@ -58,6 +59,10 @@ namespace Roki.Services.Database
         Task<List<Quote>> ListQuotesAsync(ulong guildId, int page);
         Task<List<Quote>> SearchQuotesByText(ulong guildId, string content);
 
+        #endregion
+
+        #region Channels
+
         Task<Channel> GetOrAddChannelAsync(ITextChannel channel);
         Task DeleteChannelAsync(ITextChannel channel);
         Task UpdateChannelAsync(ITextChannel after);
@@ -65,30 +70,50 @@ namespace Roki.Services.Database
         Task<bool> IsLoggingEnabled(ITextChannel channel);
         Task ChangeChannelProperty(Expression<Func<Channel, bool>> filter, UpdateDefinition<Channel> update, UpdateOptions options = null);
 
+        #endregion
+
+        #region Guilds
+
         Task<Guild> GetOrAddGuildAsync(SocketGuild guild);
         Task<Guild> GetGuildAsync(ulong guildId);
         Task<GuildConfig> GetGuildConfigAsync(ulong guildId);
         Task ChangeGuildAvailabilityAsync(SocketGuild guild, bool available);
         Task UpdateGuildAsync(SocketGuild after);
-        Task AddXpRewardAsync(ulong guildId, XpReward reward);
-        Task<UpdateResult> RemoveXpRewardAsync(ulong guildId, string id);
-        Task AddStoreItemAsync(ulong guildId, Listing item);
-        Task<Listing> GetStoreItemByNameAsync(ulong guildId, string name);
-        Task<Listing> GetStoreItemByObjectIdAsync(ulong guildId, ObjectId id);
-        Task<Listing> GetStoreItemByIdAsync(ulong guildId, string id);
-        Task<List<Listing>> GetStoreCatalogueAsync(ulong guildId);
+        Task AddXpRewardAsync(ulong guildId, ObjectId id, XpReward reward);
+        Task<UpdateResult> RemoveXpRewardAsync(ulong guildId, ObjectId id);
+        Task AddStoreItemAsync(ulong guildId, ObjectId id, Listing item);
+        Task<(ObjectId, Listing)> GetStoreItemByNameAsync(ulong guildId, string name);
+        Task<(ObjectId, Listing)> GetStoreItemByObjectIdAsync(ulong guildId, ObjectId id);
+        Task<(ObjectId, Listing)> GetStoreItemByIdAsync(ulong guildId, string id);
+        Task<Dictionary<ObjectId, Listing>> GetStoreCatalogueAsync(ulong guildId);
         Task UpdateStoreItemAsync(ulong guildId, ObjectId id, int amount);
+
+        #endregion
+
+        #region Messages
 
         Task AddMessageAsync(SocketMessage message);
         Task AddMessageEditAsync(SocketMessage after);
         Task MessageDeletedAsync(ulong messageId);
 
+        #endregion
+
+        #region Transactions
+
         Task AddTrade(Trade trade);
         Task AddTransaction(Transaction transaction);
         IEnumerable<Transaction> GetTransactions(ulong userId, int page);
 
+        #endregion
+
+        #region Jeopardy
+
         Task<Dictionary<string, List<JClue>>> GetRandomJeopardyCategoriesAsync(int number);
         Task<JClue> GetFinalJeopardyAsync();
+
+        #endregion
+
+        #region Events
 
         Task<Event> GetEventByIdAsync(ObjectId id);
         Task AddNewEventAsync(Event e);
@@ -98,35 +123,27 @@ namespace Roki.Services.Database
         bool GetActiveEventAsync(ulong messageId, out Event e);
         Task UpdateEventAsync(ObjectId id, UpdateDefinition<Event> update);
 
+        #endregion
+
+        #region Pokemon
+
         Task<Pokemon> GetPokemonByNumberAsync(int id);
         Task<Pokemon> GetPokemonAsync(string name);
         Task<Ability> GetAbilityAsync(string name);
         Task<PokemonItem> GetItemAsync(string name);
         Task<Move> GetMoveAsync(string name);
+
+        #endregion
     }
 
     public class MongoContext : IMongoContext
     {
         private readonly IMongoDatabase _database;
-        
-        public IMongoCollection<Message> MessageCollection { get; }
-        public IMongoCollection<Channel> ChannelCollection { get; }
-        public IMongoCollection<Guild> GuildCollection { get; }
-        public IMongoCollection<User> UserCollection { get; }
-        public IMongoCollection<Quote> QuoteCollection { get; }
-        public IMongoCollection<Transaction> TransactionCollection { get; }
-        public IMongoCollection<Trade> TradeCollection { get; }
-        public IMongoCollection<JeopardyClue> JeopardyCollection { get; }
-        public IMongoCollection<Event> EventCollection { get; }
-        public IMongoCollection<Pokemon> PokedexCollection { get; }
-        public IMongoCollection<Ability> AbilityCollection { get; }
-        public IMongoCollection<PokemonItem> ItemCollection { get; }
-        public IMongoCollection<Move> MoveCollection { get; }
 
         public MongoContext(IMongoDatabase database)
         {
             _database = database;
-            
+
             MessageCollection = database.GetCollection<Message>("messages");
             ChannelCollection = database.GetCollection<Channel>("channels");
             GuildCollection = database.GetCollection<Guild>("guilds");
@@ -142,23 +159,39 @@ namespace Roki.Services.Database
             MoveCollection = database.GetCollection<Move>("pokemon.moves");
         }
 
-        public async Task<User> GetOrAddUserAsync(IUser user)
+        public IMongoCollection<Quote> QuoteCollection { get; }
+        public IMongoCollection<Trade> TradeCollection { get; }
+        public IMongoCollection<Event> EventCollection { get; }
+        public IMongoCollection<Pokemon> PokedexCollection { get; }
+        public IMongoCollection<Ability> AbilityCollection { get; }
+        public IMongoCollection<PokemonItem> ItemCollection { get; }
+        public IMongoCollection<Move> MoveCollection { get; }
+
+        public IMongoCollection<Message> MessageCollection { get; }
+        public IMongoCollection<Channel> ChannelCollection { get; }
+        public IMongoCollection<Guild> GuildCollection { get; }
+        public IMongoCollection<User> UserCollection { get; }
+        public IMongoCollection<Transaction> TransactionCollection { get; }
+        public IMongoCollection<JeopardyClue> JeopardyCollection { get; }
+
+        public async Task<User> GetOrAddUserAsync(IUser user, ulong guildId)
         {
-            var dbUser = await UserCollection.Find(u => u.Id == user.Id).FirstOrDefaultAsync().ConfigureAwait(false);
+            User dbUser = await UserCollection.Find(u => u.Id == user.Id).FirstOrDefaultAsync().ConfigureAwait(false);
             if (dbUser != null)
             {
+                if (!dbUser.Data.ContainsKey(guildId))
+                {
+                    UpdateDefinition<User> update = Builders<User>.Update.Set(x => x.Data[guildId], new UserData());
+                    dbUser = await UserCollection.FindOneAndUpdateAsync<User>(x => x.Id == user.Id, update, new FindOneAndUpdateOptions<User> {ReturnDocument = ReturnDocument.After});
+                }
+
                 return dbUser;
             }
 
-            dbUser = new User{Id = user.Id, Discriminator = user.DiscriminatorValue, AvatarId = user.AvatarId, Username = user.Username};
+            dbUser = new User {Id = user.Id, Discriminator = user.DiscriminatorValue, AvatarId = user.AvatarId, Username = user.Username};
 
             await UserCollection.InsertOneAsync(dbUser);
             return dbUser;
-        }
-
-        public async Task<User> GetUserAsync(ulong userId)
-        {
-            return await UserCollection.Find(u => u.Id == userId).FirstAsync();
         }
 
         public async Task<IAsyncCursor<User>> GetAllUserCursorAsync()
@@ -168,237 +201,257 @@ namespace Roki.Services.Database
 
         public async Task<User> UpdateUserAsync(IUser after)
         {
-            var updateUser = Builders<User>.Update.Set(u => u.Id, after.Id)
+            UpdateDefinition<User> updateUser = Builders<User>.Update.Set(u => u.Id, after.Id)
                 .Set(u => u.Username, after.Username)
                 .Set(u => u.Discriminator, int.Parse(after.Discriminator))
                 .Set(u => u.AvatarId, after.AvatarId);
 
             return await UserCollection.FindOneAndUpdateAsync<User>(u => u.Id == after.Id, updateUser,
-                new FindOneAndUpdateOptions<User>{ReturnDocument = ReturnDocument.After, IsUpsert = true}).ConfigureAwait(false);
+                new FindOneAndUpdateOptions<User> {ReturnDocument = ReturnDocument.After, IsUpsert = true}).ConfigureAwait(false);
         }
 
-        public async Task<XpLevel> UpdateUserXpAsync(User user, bool doubleXp)
+        public async Task UpdateUserXpAsync(User user, ulong guildId, DateTime now, int increment, bool levelUp)
         {
-            var now = DateTime.UtcNow;
-            var increment = doubleXp
-                ? Roki.Properties.XpPerMessage * 2
-                : Roki.Properties.XpPerMessage;
-            
-            var oldXp = new XpLevel(user.Xp);
-            var newXp = new XpLevel(user.Xp + increment);
-
-            if (newXp.Level > oldXp.Level)
+            if (levelUp)
             {
-                var updateXp = Builders<User>.Update.Inc(u => u.Xp, increment)
-                    .Set(u => u.LastLevelUp, now)
-                    .Set(u => u.LastXpGain, now);
-                await UserCollection.FindOneAndUpdateAsync(u => u.Id == user.Id, updateXp).ConfigureAwait(false);
+                UpdateDefinition<User> updateXp = Builders<User>.Update.Inc(u => u.Data[guildId].Xp, increment)
+                    .Set(u => u.Data[guildId].LastLevelUp, now)
+                    .Set(u => u.Data[guildId].LastXpGain, now);
+                await UserCollection.UpdateOneAsync(u => u.Id == user.Id, updateXp).ConfigureAwait(false);
             }
             else
             {
-                var updateXp = Builders<User>.Update.Inc(u => u.Xp, increment)
-                    .Set(u => u.LastXpGain, now);
-                await UserCollection.FindOneAndUpdateAsync(u => u.Id == user.Id, updateXp).ConfigureAwait(false);
+                UpdateDefinition<User> updateXp = Builders<User>.Update.Inc(u => u.Data[guildId].Xp, increment)
+                    .Set(u => u.Data[guildId].LastXpGain, now);
+                await UserCollection.UpdateOneAsync(u => u.Id == user.Id, updateXp).ConfigureAwait(false);
             }
-
-            return newXp;
         }
 
-        public async Task<int> GetUserXpRankAsync(User user)
+        public async Task<int> GetUserXpRankAsync(User user, ulong guildId)
         {
-            return (int) await UserCollection.CountDocumentsAsync(x => x.Xp > user.Xp).ConfigureAwait(false) + 1;
+            return (int) await UserCollection.CountDocumentsAsync(x => x.Data[guildId].Xp > user.Data[guildId].Xp).ConfigureAwait(false) + 1;
         }
 
-        public async Task UpdateUserNotificationPreferenceAsync(ulong userId, string location)
+        public async Task UpdateUserNotificationPreferenceAsync(ulong userId, ulong guildId, string location)
         {
-            var update = Builders<User>.Update.Set(x => x.Notification, location);
+            UpdateDefinition<User> update = Builders<User>.Update.Set(x => x.Data[guildId].Notification, location);
             await UserCollection.UpdateOneAsync(x => x.Id == userId, update).ConfigureAwait(false);
         }
 
-        public async Task<bool> UpdateUserCurrencyAsync(User user, long amount)
+        public async Task<bool> UpdateUserCurrencyAsync(User user, ulong guildId, long amount)
         {
-            if (user.Currency + amount < 0)
+            if (user.Data[guildId].Currency + amount < 0)
+            {
                 return false;
-            var updateCurrency = Builders<User>.Update.Inc(u => u.Currency, amount);
+            }
+
+            UpdateDefinition<User> updateCurrency = Builders<User>.Update.Inc(u => u.Data[guildId].Currency, amount);
             await UserCollection.UpdateOneAsync(u => u.Id == user.Id, updateCurrency).ConfigureAwait(false);
             return true;
         }
 
-        public async Task<bool> UpdateUserCurrencyAsync(ulong userId, long amount)
+        public async Task<bool> UpdateUserCurrencyAsync(IUser user, ulong guildId, long amount)
         {
-            var dbUser = await GetUserAsync(userId).ConfigureAwait(false);
-            return await UpdateUserCurrencyAsync(dbUser, amount).ConfigureAwait(false);
+            User dbUser = await GetOrAddUserAsync(user, guildId).ConfigureAwait(false);
+            return await UpdateUserCurrencyAsync(dbUser, guildId, amount).ConfigureAwait(false);
         }
 
-        public async Task UpdateBotCurrencyAsync(long amount)
+        public async Task UpdateBotCurrencyAsync(long amount, ulong guildId)
         {
-            var updateCurrency = Builders<User>.Update.Inc(u => u.Currency, amount);
+            UpdateDefinition<User> updateCurrency = Builders<User>.Update.Inc(u => u.Data[guildId].Currency, amount);
+            // todo get bot id
             await UserCollection.UpdateOneAsync(u => u.Id == Roki.Properties.BotId, updateCurrency).ConfigureAwait(false);
         }
 
-        public async Task<long> GetBotCurrencyAsync(IUser user)
+        public async Task<long> GetUserCurrency(IUser user, ulong guildId)
         {
-            User bot = await UserCollection.Find(u => u.Id == Roki.Properties.BotId).FirstOrDefaultAsync() ?? await GetOrAddUserAsync(user);
-
-            return bot.Currency;
+            return (await GetOrAddUserAsync(user, guildId)).Data[guildId].Currency;
         }
 
-        public long GetUserCurrency(ulong userId)
+        public async Task<decimal> GetUserInvesting(IUser user, ulong guildId)
         {
-            return UserCollection.Find(u => u.Id == userId).First().Currency;
+            return (await GetOrAddUserAsync(user, guildId)).Data[guildId].InvestingAccount;
         }
 
-        public decimal GetUserInvesting(ulong userId)
-        {
-            return UserCollection.Find(u => u.Id == userId).First().InvestingAccount;
-        }
-
-        public async Task<IEnumerable<User>> GetCurrencyLeaderboardAsync(int page)
+        public async Task<IEnumerable<User>> GetCurrencyLeaderboardAsync(ulong guildId, int page)
         {
             return await UserCollection.Aggregate()
-                .Match(u => u.Currency > 0 && u.Id != Roki.Properties.BotId)
-                .SortByDescending(u => u.Currency)
+                // todo get botid
+                .Match(u => u.Data[guildId].Currency > 0 && u.Id != Roki.Properties.BotId)
+                .SortByDescending(u => u.Data[guildId].Currency)
                 .Skip(page * 9)
                 .Limit(9)
                 .ToListAsync()
                 .ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<User>> GetXpLeaderboardAsync(int page)
+        public async Task<IEnumerable<User>> GetXpLeaderboardAsync(ulong guildId, int page)
         {
             return await UserCollection.Aggregate()
-                .Match(u => u.Xp > 0 && u.Id != Roki.Properties.BotId)
-                .SortByDescending(u => u.Xp)
+                .Match(u => u.Data[guildId].Xp > 0 && u.Id != Roki.Properties.BotId)
+                .SortByDescending(u => u.Data[guildId].Xp)
                 .Skip(page * 9)
                 .Limit(9)
                 .ToListAsync()
                 .ConfigureAwait(false);
         }
 
-        public async Task<bool> TransferCurrencyAsync(ulong userId, decimal amount)
+        public async Task<bool> TransferCurrencyAsync(IUser user, ulong guildId, decimal amount)
         {
-            var user = await GetUserAsync(userId).ConfigureAwait(false);
-            var cash = user.Currency;
-            var invest = user.InvestingAccount;
-            
-            if ((amount <= 0 || cash - amount < 0) && (amount >= 0 || invest + amount < 0)) 
+            User dbUser = await GetOrAddUserAsync(user, guildId).ConfigureAwait(false);
+            long cash = dbUser.Data[guildId].Currency;
+            decimal invest = dbUser.Data[guildId].InvestingAccount;
+
+            if ((amount <= 0 || cash - amount < 0) && (amount >= 0 || invest + amount < 0))
+            {
                 return false;
+            }
 
-            var update = Builders<User>.Update.Inc(u => u.Currency, -(long) amount)
-                .Inc(u => u.InvestingAccount, amount);
+            UpdateDefinition<User> update = Builders<User>.Update.Inc(u => u.Data[guildId].Currency, -(long) amount)
+                .Inc(u => u.Data[guildId].InvestingAccount, amount);
 
-            await UserCollection.UpdateOneAsync(u => u.Id == userId, update).ConfigureAwait(false);
+            await UserCollection.UpdateOneAsync(u => u.Id == user.Id, update).ConfigureAwait(false);
             return true;
         }
 
-        public async Task<bool> AddOrUpdateUserSubscriptionAsync(ulong userId, ulong guildId, ObjectId subId, int days)
+        public async Task<bool> AddOrUpdateUserSubscriptionAsync(IUser user, ulong guildId, ObjectId subId, int days)
         {
-            var user = await GetUserAsync(userId).ConfigureAwait(false);
+            User dbUser = await GetOrAddUserAsync(user, guildId).ConfigureAwait(false);
             // if exists update then return true
-            var sub = user.Subscriptions.FirstOrDefault(x => x.Id == subId);
+            Subscription sub = dbUser.Data[guildId].Subscriptions[subId];
             if (sub != null)
             {
-                var newEndDate = sub.EndDate.AddDays(days).Date;
-                var update = Builders<User>.Update.Set(x => x.Subscriptions[-1].EndDate, newEndDate);
-                await UserCollection.UpdateOneAsync(x => x.Id == userId, update).ConfigureAwait(false);
+                UpdateDefinition<User> update = Builders<User>.Update.Set(x => x.Data[guildId].Subscriptions[subId].EndDate, sub.EndDate.AddDays(days).Date);
+                await UserCollection.UpdateOneAsync(x => x.Id == user.Id, update).ConfigureAwait(false);
                 return true;
             }
-            
-            var newSub = Builders<User>.Update.Push(x => x.Subscriptions, new Subscription
+
+            UpdateDefinition<User> newSub = Builders<User>.Update.Set(x => x.Data[guildId].Subscriptions[subId], new Subscription
             {
-                Id = subId,
-                GuildId = guildId,
                 EndDate = DateTime.UtcNow.AddDays(days).Date
             });
-            
-            await UserCollection.UpdateOneAsync(x => x.Id == userId, newSub).ConfigureAwait(false);
+
+            await UserCollection.UpdateOneAsync(x => x.Id == user.Id, newSub).ConfigureAwait(false);
             return false;
         }
 
-        public async Task<Dictionary<ulong, List<Subscription>>> RemoveExpiredSubscriptionsAsync()
+        public async Task<Dictionary<ulong, Dictionary<ulong, List<ObjectId>>>> RemoveExpiredSubscriptionsAsync()
         {
-            var now = DateTime.UtcNow.Date;
-            var expired = new Dictionary<ulong, List<Subscription>>();
+            DateTime now = DateTime.UtcNow.Date;
+            var expired = new Dictionary<ulong, Dictionary<ulong, List<ObjectId>>>();
 
-            using (var cursor = await UserCollection.FindAsync(FilterDefinition<User>.Empty))
+            using IAsyncCursor<User> cursor = await UserCollection.FindAsync(FilterDefinition<User>.Empty);
+            while (await cursor.MoveNextAsync())
             {
-                while (await cursor.MoveNextAsync())
+                foreach (User user in cursor.Current)
                 {
-                    foreach (var user in cursor.Current)
+                    expired[user.Id] = new Dictionary<ulong, List<ObjectId>>();
+                    foreach ((ulong guildId, UserData data) in user.Data)
                     {
-                        expired.Add(user.Id, user.Subscriptions.Where(x => now >= x.EndDate).ToList());
+                        expired[user.Id][guildId] = new List<ObjectId>();
+                        foreach ((ObjectId id, Subscription subscription) in data.Subscriptions)
+                        {
+                            if (now >= subscription.EndDate)
+                            {
+                                expired[user.Id][guildId].Add(id);
+                                UpdateDefinition<User> remove = Builders<User>.Update.Unset(x => x.Data[guildId].Subscriptions[id]);
+                                await UserCollection.UpdateOneAsync(x => x.Id == user.Id, remove);
+                            }
+                        }
+
+                        if (expired[user.Id][guildId].Count == 0)
+                        {
+                            expired[user.Id].Remove(guildId);
+                        }
+                    }
+
+                    if (expired[user.Id].Count == 0)
+                    {
+                        expired.Remove(user.Id);
                     }
                 }
             }
 
-            if (expired.Count == 0)
-            {
-                return expired;
-            }
-            
-            var update = Builders<User>.Update.PullFilter(x => x.Subscriptions, y => now >= y.EndDate);
-            await UserCollection.UpdateManyAsync(FilterDefinition<User>.Empty, update).ConfigureAwait(false);
-
             return expired;
         }
 
-        public async Task<bool> AddOrUpdateUserInventoryAsync(ulong userId, ulong guildId, ObjectId itemId, int quantity)
+        public async Task<bool> AddOrUpdateUserInventoryAsync(IUser user, ulong guildId, ObjectId itemId, int quantity)
         {
-            var user = await GetUserAsync(userId).ConfigureAwait(false);
+            User dbUser = await GetOrAddUserAsync(user, guildId).ConfigureAwait(false);
             // if exists update then return true
-            if (user.Inventory.Any(x => x.Id == itemId))
+            if (dbUser.Data[guildId].Inventory.ContainsKey(itemId))
             {
-                var update = Builders<User>.Update.Inc(x => x.Inventory[-1].Quantity, quantity);
-                await UserCollection.UpdateOneAsync(x => x.Id == userId, update).ConfigureAwait(false);
+                UpdateDefinition<User> update = Builders<User>.Update.Inc(x => x.Data[guildId].Inventory[itemId].Quantity, quantity);
+                await UserCollection.UpdateOneAsync(x => x.Id == user.Id, update).ConfigureAwait(false);
                 return true;
             }
 
-            var newItem = Builders<User>.Update.Push(x => x.Inventory, new Item
+            UpdateDefinition<User> newItem = Builders<User>.Update.Set(x => x.Data[guildId].Inventory[itemId], new Item
             {
-                Id = itemId,
-                GuildId = guildId,
                 Quantity = quantity
             });
 
-            await UserCollection.UpdateOneAsync(x => x.Id == userId, newItem).ConfigureAwait(false);
+            await UserCollection.UpdateOneAsync(x => x.Id == user.Id, newItem).ConfigureAwait(false);
             return false;
         }
 
-        public async Task ChargeInterestAsync(User user, decimal amount, string symbol)
+        public async Task ChargeInterestAsync(User user, ulong guildId, decimal amount, string ticker)
         {
-            var update = user.InvestingAccount > 0 
-                ? Builders<User>.Update.Inc(x => x.InvestingAccount, -amount) 
-                : Builders<User>.Update.Inc(x => x.Currency, -(long) amount);
+            UpdateDefinition<User> update = user.Data[guildId].InvestingAccount > 0
+                ? Builders<User>.Update.Inc(x => x.Data[guildId].InvestingAccount, -amount)
+                : Builders<User>.Update.Inc(x => x.Data[guildId].Currency, -(long) amount);
 
-            update.Set(x => x.Portfolio[-1].InterestDate, DateTime.UtcNow.AddDays(7).Date);
+            // todo maybe stop charging interest after they are like -100k or something idk 
 
-            await UserCollection.UpdateOneAsync(x => x.Id == user.Id && x.Portfolio.Any(y => y.Symbol == symbol), update).ConfigureAwait(false);
+            update.Set(x => x.Data[guildId].Portfolio[ticker].InterestDate, DateTime.UtcNow.AddDays(7).Date);
+
+            await UserCollection.UpdateOneAsync(x => x.Id == user.Id, update).ConfigureAwait(false);
         }
 
-        public async Task<bool> UpdateUserInvestingAccountAsync(User user, decimal amount)
+        public async Task<bool> UpdateUserInvestingAccountAsync(User user, ulong guildId, decimal amount)
         {
-            if (user.InvestingAccount + amount < 0)
+            if (user.Data[guildId].InvestingAccount + amount < 0)
             {
                 return false;
             }
 
-            var update = Builders<User>.Update.Inc(x => x.InvestingAccount, amount);
+            UpdateDefinition<User> update = Builders<User>.Update.Inc(x => x.Data[guildId].InvestingAccount, amount);
             await UserCollection.UpdateOneAsync(x => x.Id == user.Id, update).ConfigureAwait(false);
             return true;
         }
 
-        public async Task<bool> UpdateUserPortfolioAsync(User user, string symbol, string position, string action, long shares)
+        public async Task<bool> UpdateUserPortfolioAsync(User user, ulong guildId, string ticker, string position, long shares)
         {
-            var portfolio = user.Portfolio;
+            Dictionary<string, Investment> portfolio = user.Data[guildId].Portfolio;
             DateTime? interestDate = null;
             if (position == "short")
-                interestDate = DateTime.UtcNow.AddDays(7).Date;
-            
-            if (portfolio.All(i => i.Symbol != symbol))
             {
-                var update = Builders<User>.Update.Push(x => x.Portfolio, new Investment
+                interestDate = DateTime.UtcNow.AddDays(7).Date;
+            }
+
+            if (portfolio.ContainsKey(ticker))
+            {
+                long newShares = portfolio[ticker].Shares + shares;
+                if (newShares < 0)
                 {
-                    Symbol = symbol,
+                    return false;
+                }
+
+                if (newShares == 0)
+                {
+                    UpdateDefinition<User> update = Builders<User>.Update.Unset(x => x.Data[guildId].Portfolio[ticker]);
+                    await UserCollection.UpdateOneAsync(x => x.Id == user.Id, update);
+                }
+                else
+                {
+                    UpdateDefinition<User> update = Builders<User>.Update.Inc(x => x.Data[guildId].Portfolio[ticker].Shares, shares);
+                    await UserCollection.UpdateOneAsync(x => x.Id == user.Id, update);
+                }
+            }
+            else
+            {
+                UpdateDefinition<User> update = Builders<User>.Update.Set(x => x.Data[guildId].Portfolio[ticker], new Investment
+                {
                     Position = position,
                     Shares = shares,
                     InterestDate = interestDate
@@ -406,34 +459,19 @@ namespace Roki.Services.Database
 
                 await UserCollection.UpdateOneAsync(x => x.Id == user.Id, update).ConfigureAwait(false);
             }
-            else
-            {
-                var investment = portfolio.First(i => i.Symbol == symbol);
-                var newShares = investment.Shares + shares;
-                if (newShares < 0)
-                    return false;
-                
-                if (newShares == 0)
-                {
-                    var update = Builders<User>.Update.PullFilter(x => x.Portfolio, y => y.Symbol == symbol);
-                    await UserCollection.UpdateOneAsync(x => x.Id == user.Id, update);
-                }
-                else
-                {
-                    var update = Builders<User>.Update.Inc(x => x.Portfolio[-1].Shares, shares);
-                    await UserCollection.UpdateOneAsync(x => x.Id == user.Id, update);
-                }
-            }
 
             return true;
         }
 
         public async Task<Quote> GetRandomQuoteAsync(ulong guildId, string keyword)
         {
-            var quote = await QuoteCollection.AsQueryable().Where(x => x.GuildId == guildId && x.Keyword == keyword).Sample(1).SingleOrDefaultAsync();
+            Quote quote = await QuoteCollection.AsQueryable().Where(x => x.GuildId == guildId && x.Keyword == keyword).Sample(1).SingleOrDefaultAsync();
             if (quote == null)
+            {
                 return null;
-            var update = Builders<Quote>.Update.Inc(x => x.UseCount, 1);
+            }
+
+            UpdateDefinition<Quote> update = Builders<Quote>.Update.Inc(x => x.UseCount, 1);
             return await QuoteCollection.FindOneAndUpdateAsync<Quote>(x => x.Id == quote.Id, update,
                 new FindOneAndUpdateOptions<Quote> {ReturnDocument = ReturnDocument.After}).ConfigureAwait(false);
         }
@@ -441,10 +479,13 @@ namespace Roki.Services.Database
         public async Task<Quote> GetQuoteByIdAsync(ulong guildId, string id)
         {
             id = id.ToLowerInvariant();
-            var quote = await QuoteCollection.AsQueryable().Where(x => x.GuildId == guildId && x.Id.ToString().Substring(18) == id).Sample(1).SingleOrDefaultAsync();
+            Quote quote = await QuoteCollection.AsQueryable().Where(x => x.GuildId == guildId && x.Id.ToString().Substring(18) == id).Sample(1).SingleOrDefaultAsync();
             if (quote == null)
+            {
                 return null;
-            var update = Builders<Quote>.Update.Inc(x => x.UseCount, 1);
+            }
+
+            UpdateDefinition<Quote> update = Builders<Quote>.Update.Inc(x => x.UseCount, 1);
             return await QuoteCollection.FindOneAndUpdateAsync<Quote>(x => x.Id == quote.Id, update,
                 new FindOneAndUpdateOptions<Quote> {ReturnDocument = ReturnDocument.After}).ConfigureAwait(false);
         }
@@ -461,6 +502,7 @@ namespace Roki.Services.Database
                 id = id.ToLowerInvariant();
                 return await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.Id.ToString().Substring(18) == id).ConfigureAwait(false);
             }
+
             if (!string.IsNullOrWhiteSpace(keyword))
             {
                 return await QuoteCollection.DeleteOneAsync(x => x.GuildId == guildId && x.Keyword == keyword).ConfigureAwait(false);
@@ -493,7 +535,7 @@ namespace Roki.Services.Database
 
         public async Task<List<Quote>> SearchQuotesByText(ulong guildId, string content)
         {
-            var filter = Builders<Quote>.Filter.Text(content);
+            FilterDefinition<Quote> filter = Builders<Quote>.Filter.Text(content);
             return await QuoteCollection.Find(filter)
                 .Limit(9)
                 .ToListAsync()
@@ -502,7 +544,7 @@ namespace Roki.Services.Database
 
         public async Task<Channel> GetOrAddChannelAsync(ITextChannel channel)
         {
-            var dbChannel = await ChannelCollection.Find(c => c.Id == channel.Id).FirstOrDefaultAsync().ConfigureAwait(false);
+            Channel dbChannel = await ChannelCollection.Find(c => c.Id == channel.Id).FirstOrDefaultAsync().ConfigureAwait(false);
             if (dbChannel != null)
             {
                 return dbChannel;
@@ -516,7 +558,7 @@ namespace Roki.Services.Database
                 GuildId = channel.GuildId,
                 IsNsfw = channel.IsNsfw,
                 CreatedAt = channel.CreatedAt,
-                Config =  new ChannelConfig
+                Config = new ChannelConfig
                 {
                     Logging = guildConfig.Logging,
                     CurrencyGeneration = guildConfig.CurrencyGeneration,
@@ -532,17 +574,17 @@ namespace Roki.Services.Database
 
         public async Task DeleteChannelAsync(ITextChannel channel)
         {
-            var updateChannel = Builders<Channel>.Update.Set(c => c.IsDeleted, true);
-                
+            UpdateDefinition<Channel> updateChannel = Builders<Channel>.Update.Set(c => c.IsDeleted, true);
+
             await ChannelCollection.FindOneAndUpdateAsync(c => c.Id == channel.Id, updateChannel).ConfigureAwait(false);
         }
 
         public async Task UpdateChannelAsync(ITextChannel after)
         {
-            var updateChannel = Builders<Channel>.Update.Set(c => c.Name, after.Name)
+            UpdateDefinition<Channel> updateChannel = Builders<Channel>.Update.Set(c => c.Name, after.Name)
                 .Set(c => c.GuildId, after.Guild.Id)
                 .Set(c => c.IsNsfw, after.IsNsfw);
-                
+
             await ChannelCollection.FindOneAndUpdateAsync(c => c.Id == after.Id, updateChannel).ConfigureAwait(false);
         }
 
@@ -550,9 +592,11 @@ namespace Roki.Services.Database
         {
             Channel dbChannel = await GetOrAddChannelAsync(channel).ConfigureAwait(false);
             ChannelConfig config = dbChannel.Config;
-            if (config != null) 
+            if (config != null)
+            {
                 return config;
-            
+            }
+
             Guild guild = await GetGuildAsync(channel.GuildId).ConfigureAwait(false);
             var channelConfig = new ChannelConfig
             {
@@ -569,7 +613,8 @@ namespace Roki.Services.Database
 
         public async Task<bool> IsLoggingEnabled(ITextChannel channel)
         {
-            return (await GetChannelConfigAsync(channel)).Logging;
+            // logging is enabled if message is from DM
+            return channel == null || (await GetChannelConfigAsync(channel)).Logging;
         }
 
         public async Task ChangeChannelProperty(Expression<Func<Channel, bool>> filter, UpdateDefinition<Channel> update, UpdateOptions options = null)
@@ -579,12 +624,14 @@ namespace Roki.Services.Database
 
         public async Task<Guild> GetOrAddGuildAsync(SocketGuild guild)
         {
-            var dbGuild = await GuildCollection.Find(x => x.Id == guild.Id).FirstOrDefaultAsync().ConfigureAwait(false);
+            Guild dbGuild = await GuildCollection.Find(x => x.Id == guild.Id).FirstOrDefaultAsync().ConfigureAwait(false);
             if (dbGuild != null)
             {
                 if (dbGuild.Available)
+                {
                     return dbGuild;
-                
+                }
+
                 await ChangeGuildAvailabilityAsync(guild, true).ConfigureAwait(false);
                 return dbGuild;
             }
@@ -618,14 +665,14 @@ namespace Roki.Services.Database
 
         public async Task ChangeGuildAvailabilityAsync(SocketGuild guild, bool available)
         {
-            var update = Builders<Guild>.Update.Set(x => x.Available, available);
-                
-            await GuildCollection.FindOneAndUpdateAsync(x => x.Id == guild.Id, update).ConfigureAwait(false);
+            UpdateDefinition<Guild> update = Builders<Guild>.Update.Set(x => x.Available, available);
+
+            await GuildCollection.UpdateOneAsync(x => x.Id == guild.Id, update).ConfigureAwait(false);
         }
 
         public async Task UpdateGuildAsync(SocketGuild after)
         {
-            var updateGuild = Builders<Guild>.Update.Set(g => g.Name, after.Name)
+            UpdateDefinition<Guild> updateGuild = Builders<Guild>.Update.Set(g => g.Name, after.Name)
                 .Set(g => g.IconId, after.IconId)
                 .Set(g => g.ChannelCount, after.Channels.Count)
                 .Set(g => g.MemberCount, after.MemberCount)
@@ -633,57 +680,59 @@ namespace Roki.Services.Database
                 .Set(g => g.OwnerId, after.OwnerId)
                 .Set(g => g.RegionId, after.VoiceRegionId);
 
-            await GuildCollection.FindOneAndUpdateAsync(g => g.Id == after.Id, updateGuild).ConfigureAwait(false);
+            await GuildCollection.UpdateOneAsync(g => g.Id == after.Id, updateGuild).ConfigureAwait(false);
         }
 
-        public async Task AddXpRewardAsync(ulong guildId, XpReward reward)
+        public async Task AddXpRewardAsync(ulong guildId, ObjectId id, XpReward reward)
         {
-            var update = Builders<Guild>.Update.Push(x => x.XpRewards, reward);
+            UpdateDefinition<Guild> update = Builders<Guild>.Update.Set(x => x.XpRewards[id], reward);
             await GuildCollection.UpdateOneAsync(x => x.Id == guildId, update).ConfigureAwait(false);
         }
 
-        public async Task<UpdateResult> RemoveXpRewardAsync(ulong guildId, string id)
+        public async Task<UpdateResult> RemoveXpRewardAsync(ulong guildId, ObjectId id)
         {
-            id = id.ToLowerInvariant();
-            var update = Builders<Guild>.Update.PullFilter(x => x.XpRewards, y => y.Id.ToString().Substring(18) == id);
+            UpdateDefinition<Guild> update = Builders<Guild>.Update.Unset(x => x.XpRewards[id]);
             return await GuildCollection.UpdateOneAsync(x => x.Id == guildId, update).ConfigureAwait(false);
         }
 
-        public async Task AddStoreItemAsync(ulong guildId, Listing item)
+        public async Task AddStoreItemAsync(ulong guildId, ObjectId id, Listing item)
         {
-            var update = Builders<Guild>.Update.Push(g => g.Store, item);
-            await GuildCollection.FindOneAndUpdateAsync(g => g.Id == guildId, update).ConfigureAwait(false);
+            UpdateDefinition<Guild> update = Builders<Guild>.Update.Set(g => g.Store[id], item);
+            await GuildCollection.UpdateOneAsync(g => g.Id == guildId, update).ConfigureAwait(false);
         }
 
-        public async Task<Listing> GetStoreItemByNameAsync(ulong guildId, string name)
+        public async Task<(ObjectId, Listing)> GetStoreItemByNameAsync(ulong guildId, string name)
         {
-            var guild = await GetGuildAsync(guildId).ConfigureAwait(false);
-            return guild.Store.FirstOrDefault(l => l.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            Guild guild = await GetGuildAsync(guildId).ConfigureAwait(false);
+            (ObjectId key, Listing value) = guild.Store.FirstOrDefault(l => l.Value.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            return (key, value);
         }
 
-        public async Task<Listing> GetStoreItemByObjectIdAsync(ulong guildId, ObjectId id)
+        public async Task<(ObjectId, Listing)> GetStoreItemByObjectIdAsync(ulong guildId, ObjectId id)
         {
-            var guild = await GetGuildAsync(guildId).ConfigureAwait(false);
-            return guild.Store.FirstOrDefault(l => l.Id == id);
+            Guild guild = await GetGuildAsync(guildId).ConfigureAwait(false);
+            (ObjectId key, Listing value) = guild.Store.FirstOrDefault(l => l.Key == id);
+            return (key, value);
         }
 
-        public async Task<Listing> GetStoreItemByIdAsync(ulong guildId, string id)
+        public async Task<(ObjectId, Listing)> GetStoreItemByIdAsync(ulong guildId, string id)
         {
             id = id.ToLowerInvariant();
-            var guild = await GetGuildAsync(guildId).ConfigureAwait(false);
-            return guild.Store.FirstOrDefault(l => l.Id.GetHexId() == id);
+            Guild guild = await GetGuildAsync(guildId).ConfigureAwait(false);
+            (ObjectId key, Listing value) = guild.Store.FirstOrDefault(l => l.Key.GetHexId() == id);
+            return (key, value);
         }
 
-        public async Task<List<Listing>> GetStoreCatalogueAsync(ulong guildId)
+        public async Task<Dictionary<ObjectId, Listing>> GetStoreCatalogueAsync(ulong guildId)
         {
-            var guild = await GetGuildAsync(guildId).ConfigureAwait(false);
+            Guild guild = await GetGuildAsync(guildId).ConfigureAwait(false);
             return guild.Store;
         }
 
         public async Task UpdateStoreItemAsync(ulong guildId, ObjectId id, int amount)
         {
-            var update = Builders<Guild>.Update.Inc(g => g.Store[-1].Quantity, amount);
-            await GuildCollection.FindOneAndUpdateAsync(g => g.Id == guildId && g.Store.Any(l => l.Id == id), update).ConfigureAwait(false);
+            UpdateDefinition<Guild> update = Builders<Guild>.Update.Inc(g => g.Store[id].Quantity, amount);
+            await GuildCollection.UpdateOneAsync(g => g.Id == guildId, update).ConfigureAwait(false);
         }
 
         public async Task AddMessageAsync(SocketMessage message)
@@ -703,21 +752,21 @@ namespace Roki.Services.Database
 
         public async Task AddMessageEditAsync(SocketMessage after)
         {
-            var update = Builders<Message>.Update.Push(m => m.Edits, new Edit
+            UpdateDefinition<Message> update = Builders<Message>.Update.Push(m => m.Edits, new Edit
             {
                 Content = after.Content,
                 Attachments = after.Attachments.Select(m => m.Url).ToList(),
                 EditedTimestamp = after.EditedTimestamp?.DateTime ?? after.Timestamp.DateTime
             });
 
-            await MessageCollection.FindOneAndUpdateAsync(m => m.Id == after.Id, update).ConfigureAwait(false);
+            await MessageCollection.UpdateOneAsync(m => m.Id == after.Id, update).ConfigureAwait(false);
         }
 
         public async Task MessageDeletedAsync(ulong messageId)
         {
-            var update = Builders<Message>.Update.Set(m => m.IsDeleted, true);
+            UpdateDefinition<Message> update = Builders<Message>.Update.Set(m => m.IsDeleted, true);
 
-            await MessageCollection.FindOneAndUpdateAsync(m => m.Id == messageId, update).ConfigureAwait(false);
+            await MessageCollection.UpdateOneAsync(m => m.Id == messageId, update).ConfigureAwait(false);
         }
 
         public async Task AddTrade(Trade trade)
@@ -740,26 +789,26 @@ namespace Roki.Services.Database
 
         public async Task<Dictionary<string, List<JClue>>> GetRandomJeopardyCategoriesAsync(int number)
         {
-            var query = JeopardyCollection.AsQueryable();
-            var categories = query.Sample(number * 5).Select(x => x.Category).ToHashSet();
+            IMongoQueryable<JeopardyClue> query = JeopardyCollection.AsQueryable();
+            HashSet<string> categories = query.Sample(number * 5).Select(x => x.Category).ToHashSet();
             while (categories.Count < number)
             {
                 categories = query.Sample(number * 5).Select(x => x.Category).ToHashSet();
             }
 
             var result = new Dictionary<string, List<JClue>>();
-            foreach (var category in categories.TakeWhile(category => result.Count != number))
+            foreach (string category in categories.TakeWhile(category => result.Count != number))
             {
                 try
                 {
-                    var all = await JeopardyCollection.Find(x => x.Category == category).ToListAsync();
+                    List<JeopardyClue> all = await JeopardyCollection.Find(x => x.Category == category).ToListAsync();
 
-                    var two = all.Where(x => x.Value == 200).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Clue, 200)).Single();
-                    var four = all.Where(x => x.Value == 400).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Clue, 400)).Single();
-                    var six = all.Where(x => x.Value == 600 || x.Value == 1200).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Clue, 600)).Single();
-                    var eight = all.Where(x => x.Value == 800 || x.Value == 1600).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Clue, 800)).Single();
-                    var ten = all.Where(x => x.Value == 1000 || x.Value == 2000).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Clue, 1000)).Single();
-                    
+                    JClue two = all.Where(x => x.Value == 200).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Clue, 200)).Single();
+                    JClue four = all.Where(x => x.Value == 400).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Clue, 400)).Single();
+                    JClue six = all.Where(x => x.Value == 600 || x.Value == 1200).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Clue, 600)).Single();
+                    JClue eight = all.Where(x => x.Value == 800 || x.Value == 1600).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Clue, 800)).Single();
+                    JClue ten = all.Where(x => x.Value == 1000 || x.Value == 2000).Take(1).Select(x => new JClue(x.Answer, x.Category, x.Clue, 1000)).Single();
+
                     result.Add(category, new List<JClue> {two, four, six, eight, ten});
                 }
                 catch (Exception)
@@ -767,13 +816,13 @@ namespace Roki.Services.Database
                     //
                 }
             }
-            
+
             return result;
         }
 
         public async Task<JClue> GetFinalJeopardyAsync()
         {
-            var clue = await JeopardyCollection.AsQueryable().Where(x => x.Value > 2000 || x.Value == null).Sample(1).SingleAsync();
+            JeopardyClue clue = await JeopardyCollection.AsQueryable().Where(x => x.Value > 2000 || x.Value == null).Sample(1).SingleAsync();
 
             return new JClue(clue.Answer, clue.Category, clue.Clue, 0);
         }
@@ -790,25 +839,25 @@ namespace Roki.Services.Database
 
         public async Task<List<Event>> GetActiveEventsAsync()
         {
-            var now = DateTime.UtcNow.AddMinutes(-15);
+            DateTime now = DateTime.UtcNow.AddMinutes(-15);
             return await EventCollection.Find(x => x.StartDate > now && !x.Deleted).ToListAsync();
         }
 
         public async Task<List<Event>> GetActiveEventsByHostAsync(ulong hostId)
         {
-            var now = DateTime.UtcNow;
+            DateTime now = DateTime.UtcNow;
             return await EventCollection.Find(x => x.Host == hostId && x.StartDate > now && !x.Deleted).ToListAsync();
         }
 
         public async Task<List<Event>> GetActiveEventsByGuild(ulong guildId)
         {
-            var now = DateTime.UtcNow;
+            DateTime now = DateTime.UtcNow;
             return await EventCollection.Find(x => x.GuildId == guildId && x.StartDate > now && !x.Deleted).ToListAsync();
         }
 
         public bool GetActiveEventAsync(ulong messageId, out Event e)
         {
-            var now = DateTime.UtcNow;
+            DateTime now = DateTime.UtcNow;
             e = EventCollection.Find(x => x.MessageId == messageId && x.StartDate > now && !x.Deleted).Limit(1).SingleOrDefault();
             return e != null;
         }

@@ -25,7 +25,6 @@ namespace Roki.Modules.Utility.Services
         private readonly SocketGuild _guild;
         private readonly IMongoService _mongo;
         private Timer _status;
-        private Timer _timer;
 
         public UtilityService(DiscordSocketClient client, IMongoService mongo)
         {
@@ -37,29 +36,7 @@ namespace Roki.Modules.Utility.Services
 
         private void StartTimers()
         {
-            _timer = new Timer(ChangeRoleColor, null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
             _status = new Timer(RotateStatus, null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
-        }
-
-        private async void ChangeRoleColor(object state)
-        {
-            // if no users has rainbow subscription, do not update
-            long users = await _mongo.Context.UserCollection.Find(x => x.Subscriptions.Any(y => y.Id == RainbowId)).Limit(1).CountDocumentsAsync()
-                .ConfigureAwait(false);
-            if (users == 0)
-            {
-                return;
-            }
-
-            List<SocketRole> roles = _guild.Roles.Where(r => r.Name.Contains("rainbow", StringComparison.OrdinalIgnoreCase)).ToList();
-            try
-            {
-                foreach (SocketRole role in roles) await role.ModifyAsync(r => r.Color = new Color(Rng.Next(256), Rng.Next(256), Rng.Next(256))).ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
         }
 
         private async void RotateStatus(object state)
@@ -67,14 +44,7 @@ namespace Roki.Modules.Utility.Services
             int random = Rng.Next(3);
             if (random == 0)
             {
-                // Task _ = Task.Run(async () =>
-                // {
-                //     for (var i = 0; i < 10; i++)
-                //     {
-                //         // await _client.SetGameAsync(await GetMCStatus().ConfigureAwait(false)).ConfigureAwait(false);
-                //         await Task.Delay(TimeSpan.FromSeconds(55)).ConfigureAwait(false);
-                //     }
-                // });
+                //
             }
             else if (random == 1)
             {

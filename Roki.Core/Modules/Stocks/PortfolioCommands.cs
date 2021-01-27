@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -5,6 +6,7 @@ using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Stocks.Services;
+using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Stocks
 {
@@ -16,28 +18,28 @@ namespace Roki.Modules.Stocks
             [RokiCommand, Usage, Description, Aliases]
             public async Task Portfolio(IUser optionalUser = null)
             {
-                var user = optionalUser ?? Context.User;
-                var portfolio = await Service.GetUserPortfolio(user.Id).ConfigureAwait(false);
+                IUser user = optionalUser ?? Context.User;
+                Dictionary<string, Investment> portfolio = await Service.GetUserPortfolio(user, Context.Guild.Id).ConfigureAwait(false);
                 if (portfolio == null || portfolio.Count < 1)
                 {
                     await Context.Channel.SendErrorAsync($"{user.Mention} You do not currently have a portfolio. Invest in some companies to create your portfolio.").ConfigureAwait(false);
                     return;
                 }
 
-                var value = await Service.GetPortfolioValue(portfolio).ConfigureAwait(false);
+                decimal value = await Service.GetPortfolioValue(portfolio).ConfigureAwait(false);
 
-                var itemsPP = 10;
+                const int itemsPP = 10;
                 await Context.SendPaginatedMessageAsync(0, p =>
                 {
-                    var startAt = itemsPP * p;
-                    var desc = string.Join("\n", portfolio
+                    int startAt = itemsPP * p;
+                    string desc = string.Join("\n", portfolio
                         .Skip(startAt)
                         .Take(itemsPP)
-                        .Select(i => $"`{i.Symbol.ToUpper()}` `{i.Position}` - `{i.Shares}` shares"));
+                        .Select(i => $"`{i.Key.ToUpper()}` `{i.Value.Position}` - `{i.Value.Shares}` shares"));
 
                     desc = $"Your current portfolio value:\n`{value:N2}` {Roki.Properties.CurrencyIcon}\n" + desc;
-                    
-                    var embed = new EmbedBuilder().WithDynamicColor(Context)
+
+                    EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle($"{user.Username}'s Portfolio")
                         .WithDescription(desc);
 
