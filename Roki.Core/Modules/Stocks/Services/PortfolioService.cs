@@ -23,7 +23,7 @@ namespace Roki.Modules.Stocks.Services
 
         public async Task<Dictionary<string, Investment>> GetUserPortfolio(IUser user, ulong guildId)
         {
-            return (await _mongo.Context.GetOrAddUserAsync(user, guildId).ConfigureAwait(false)).Data[guildId].Portfolio;
+            return (await _mongo.Context.GetOrAddUserAsync(user, guildId.ToString()).ConfigureAwait(false)).Data[guildId.ToString()].Portfolio;
         }
 
         public async Task<decimal> GetPortfolioValue(Dictionary<string, Investment> portfolio)

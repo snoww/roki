@@ -37,7 +37,6 @@ namespace Roki.Modules.Xp.Extensions
             var pfpOutline = new RectangleF(PfpOutlineX, PfpOutlineY, PfpLength + 20, PfpLength + 20);
 
             var xpBarOutline = new RectangleF(XpBarX, XpBarY, XpBarLength, XpBarHeight);
-            var xpBarProgress = new RectangleF(XpBarX + 5, XpBarY + 5, (XpBarLength - 10) * ((float) currentXp / xpCap), XpBarHeight - 10);
             image.Mutate(x => x
                 .Fill(new Color(transparentGray), grayBackground)
                 // profile pic
@@ -46,8 +45,13 @@ namespace Roki.Modules.Xp.Extensions
                 .Fill(Color.HotPink, new RectangleF(75, 50, 300, 300)) // profile pic
 
                 // xp bar
-                .Draw(Color.HotPink, 5, xpBarOutline)
-                .Fill(Color.HotPink, xpBarProgress));
+                .Draw(Color.HotPink, 5, xpBarOutline));
+
+            if (currentXp != 0)
+            {
+                var xpBarProgress = new RectangleF(XpBarX + 5, XpBarY + 5, (XpBarLength - 10) * ((float) currentXp / xpCap), XpBarHeight - 10);
+                image.Mutate(x => x.Fill(Color.HotPink, xpBarProgress));
+            }
 
             using (Image pfp = Image.Load(avatar))
             {
@@ -119,6 +123,8 @@ namespace Roki.Modules.Xp.Extensions
 
             var bodyOptions = new TextGraphicsOptions {TextOptions = {HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Bottom,}};
 
+            // need to use en-US since en-CA adds a . to month abbreviation (en-US -> Jan, en-CA -> Jan.)
+            string lastLevelUpString = lastLevelUp == DateTime.MinValue ? "Never" : lastLevelUp.ToString("MMM dd yyyy", new CultureInfo("en-US"));
             source.DrawText(headerOptions, "Rank", header, Color.HotPink, new PointF(603, y)) // (XpBarX + spacing) / 2
                 .DrawText(bodyOptions, rank, body, Color.DarkSlateGray, new PointF(603, 340))
                 .DrawText(headerOptions, "Level", header, Color.HotPink, new PointF(859, y)) // ((XpBarX + spacing) / 2 + (XpBarX + spacing * 2)) / 2
@@ -126,8 +132,7 @@ namespace Roki.Modules.Xp.Extensions
                 .DrawText(headerOptions, "Total XP", header, Color.HotPink, new PointF(1116, y))
                 .DrawText(bodyOptions, total, body, Color.DarkSlateGray, new PointF(1116, 340))
                 .DrawText(headerOptions, "Last Level Up", header, Color.HotPink, new PointF(1390, y))
-                // need to use en-US since en-CA adds a . to month abbreviation (en-US -> Jan, en-CA -> Jan.)
-                .DrawText(bodyOptions, lastLevelUp.ToString("MMM dd yyyy", new CultureInfo("en-US")), body, Color.DarkSlateGray, new PointF(1390, 340));
+                .DrawText(bodyOptions, lastLevelUpString, body, Color.DarkSlateGray, new PointF(1390, 340));
 
             return source;
         }

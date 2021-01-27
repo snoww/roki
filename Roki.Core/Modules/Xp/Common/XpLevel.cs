@@ -22,7 +22,7 @@ namespace Roki.Modules.Xp.Common
 
         public XpLevel AddXp(int xp)
         {
-            return new(TotalXp);
+            return new(TotalXp + xp);
         }
     }
 }

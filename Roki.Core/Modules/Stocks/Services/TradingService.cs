@@ -109,7 +109,7 @@ namespace Roki.Modules.Stocks.Services
             }
         }
 
-        public async Task<Status> ShortPositionAsync(User user, ulong guildId, string ticker, string action, decimal price, long amount)
+        public async Task<Status> ShortPositionAsync(User user, string guildId, string ticker, string action, decimal price, long amount)
         {
             Dictionary<string, Investment> portfolio = user.Data[guildId].Portfolio;
 
@@ -158,7 +158,7 @@ namespace Roki.Modules.Stocks.Services
             return Status.Success;
         }
 
-        public async Task<Status> LongPositionAsync(User user, ulong guildId, string ticker, string action, decimal price, long amount)
+        public async Task<Status> LongPositionAsync(User user, string guildId, string ticker, string action, decimal price, long amount)
         {
             Investment existing = user.Data[guildId].Portfolio.ContainsKey(ticker) ? user.Data[guildId].Portfolio[ticker] : null;
             if (existing != null && !existing.Position.Equals("long"))

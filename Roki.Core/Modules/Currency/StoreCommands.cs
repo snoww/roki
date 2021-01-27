@@ -37,6 +37,7 @@ namespace Roki.Modules.Currency
             public async Task Store([Leftover] string itemName = null)
             {
                 Dictionary<ObjectId, Listing> cat = await _mongo.Context.GetStoreCatalogueAsync(Context.Guild.Id).ConfigureAwait(false);
+                GuildConfig guildConfig = await _mongo.Context.GetGuildConfigAsync(Context.Guild.Id);
 
                 if (itemName == null)
                 {
@@ -51,13 +52,13 @@ namespace Roki.Modules.Currency
                             .Select(c =>
                             {
                                 string type = c.Value.Type == "Subscription" ? $"**{c.Value.SubscriptionDays}** Day {c.Value.Type}" : c.Value.Type;
-                                var desc = $"{Format.Bold(c.Value.Name)} | {type} | {(c.Value.Quantity > 0 ? $"**{c.Value.Quantity}** Remain" : "**Sold Out**")} | `{c.Value.Cost:N0}` {Roki.Properties.CurrencyIcon}";
+                                var desc = $"{Format.Bold(c.Value.Name)} | {type} | {(c.Value.Quantity > 0 ? $"**{c.Value.Quantity}** Remain" : "**Sold Out**")} | `{c.Value.Cost:N0}` {guildConfig.CurrencyIcon}";
                                 return $"`{c.Key.GetHexId()}` {desc}\n\t{c.Value.Description.TrimTo(120)}";
                             }));
                         return new EmbedBuilder().WithDynamicColor(Context)
                             .WithTitle("Stone Shop")
                             .WithDescription(catalogStr)
-                            .WithFooter($"Page {page + 1}/{Math.Ceiling((double) cat.Count / itemsPerPage)} Use {Roki.Properties.Prefix}buy <id> <quantity> to purchase items");
+                            .WithFooter($"Page {page + 1}/{Math.Ceiling((double) cat.Count / itemsPerPage)} Use {guildConfig.Prefix}buy <id> <quantity> to purchase items");
                     }
 
                     await Context.SendPaginatedMessageAsync(0, Catalog, cat.Count, 9).ConfigureAwait(false);
@@ -72,7 +73,7 @@ namespace Roki.Modules.Currency
                 }
 
                 EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
-                    .WithTitle($"`{listingId.GetHexId()}` | {listing.Name} | `{listing.Cost:N0}` {Roki.Properties.CurrencyIcon}")
+                    .WithTitle($"`{listingId.GetHexId()}` | {listing.Name} | `{listing.Cost:N0}` {guildConfig.CurrencyIcon}")
                     .WithDescription(listing.Description)
                     .AddField("Category", $"{listing.Category}", true)
                     .AddField("Quantity", $"{(listing.Quantity > 0 ? $"**{listing.Quantity}** Remaining" : "**Sold Out**")}")
@@ -140,6 +141,7 @@ namespace Roki.Modules.Currency
 
             private async Task InternalBuy(ObjectId id, Listing listing, int amount)
             {
+                GuildConfig guildConfig = await _mongo.Context.GetGuildConfigAsync(Context.Guild.Id);
                 if (listing.Quantity < amount || amount == 0)
                 {
                     amount = listing.Quantity;
@@ -152,7 +154,7 @@ namespace Roki.Modules.Currency
                     Context.Guild.Id, Context.Channel.Id, Context.Message.Id).ConfigureAwait(false);
                 if (!removed)
                 {
-                    await Context.Channel.SendErrorAsync($"You do not have enough {Roki.Properties.CurrencyIcon} to purchase this item.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync($"You do not have enough {guildConfig.CurrencyIcon} to purchase this item.").ConfigureAwait(false);
                     return;
                 }
 
@@ -168,7 +170,7 @@ namespace Roki.Modules.Currency
                             break;
                         }
 
-                        if (await _mongo.Context.AddOrUpdateUserSubscriptionAsync(buyer, Context.Guild.Id, id, listing.SubscriptionDays ?? 7))
+                        if (await _mongo.Context.AddOrUpdateUserSubscriptionAsync(buyer, Context.Guild.Id.ToString(), id, listing.SubscriptionDays ?? 7))
                         {
                             break;
                         }
@@ -177,10 +179,10 @@ namespace Roki.Modules.Currency
                         break;
                     case Category.Power:
                         Enum.TryParse<Power>(listing.Details, out _);
-                        await _mongo.Context.AddOrUpdateUserInventoryAsync(buyer, Context.Guild.Id, id, amount).ConfigureAwait(false);
+                        await _mongo.Context.AddOrUpdateUserInventoryAsync(buyer, Context.Guild.Id.ToString(), id, amount).ConfigureAwait(false);
                         break;
                     case Category.Boost:
-                        await _mongo.Context.AddOrUpdateUserSubscriptionAsync(buyer, Context.Guild.Id, id, listing.SubscriptionDays ?? 7);
+                        await _mongo.Context.AddOrUpdateUserSubscriptionAsync(buyer, Context.Guild.Id.ToString(), id, listing.SubscriptionDays ?? 7);
                         break;
                     case Category.Digital:
                     case Category.Virtual:
@@ -189,7 +191,7 @@ namespace Roki.Modules.Currency
                 }
 
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                        .WithDescription($"{buyer.Mention} Purchase Successful!\nYou bought `{amount}x` {listing.Name}\n`{cost}` {Roki.Properties.CurrencyIcon} has been billed to your account"))
+                        .WithDescription($"{buyer.Mention} Purchase Successful!\nYou bought `{amount}x` {listing.Name}\n`{cost}` {guildConfig.CurrencyIcon} has been billed to your account"))
                     .ConfigureAwait(false);
             }
 
@@ -204,7 +206,7 @@ namespace Roki.Modules.Currency
             [RequireContext(ContextType.Guild)]
             public async Task Subscriptions()
             {
-                Dictionary<ObjectId, Subscription> subs = (await _mongo.Context.GetOrAddUserAsync(Context.User, Context.Guild.Id).ConfigureAwait(false)).Data[Context.Guild.Id].Subscriptions;
+                Dictionary<ObjectId, Subscription> subs = (await _mongo.Context.GetOrAddUserAsync(Context.User, Context.Guild.Id.ToString()).ConfigureAwait(false)).Data[Context.Guild.Id.ToString()].Subscriptions;
 
                 EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle($"{Context.User.Username}'s Active Subscriptions");
                 if (subs.Count == 0)
@@ -228,7 +230,7 @@ namespace Roki.Modules.Currency
             [RequireContext(ContextType.Guild)]
             public async Task Inventory()
             {
-                Dictionary<ObjectId, Item> inv = (await _mongo.Context.GetOrAddUserAsync(Context.User, Context.Guild.Id).ConfigureAwait(false)).Data[Context.Guild.Id].Inventory;
+                Dictionary<ObjectId, Item> inv = (await _mongo.Context.GetOrAddUserAsync(Context.User, Context.Guild.Id.ToString()).ConfigureAwait(false)).Data[Context.Guild.Id.ToString()].Inventory;
 
                 EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle($"{Context.User.Username}'s Inventory");
                 string desc;

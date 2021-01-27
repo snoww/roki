@@ -25,26 +25,26 @@ namespace Roki.Services.Database
 
         #region Users
 
-        Task<User> GetOrAddUserAsync(IUser user, ulong guildId);
+        Task<User> GetOrAddUserAsync(IUser user, string guildId);
         Task<IAsyncCursor<User>> GetAllUserCursorAsync();
         Task<User> UpdateUserAsync(IUser after);
-        Task UpdateUserXpAsync(User user, ulong guildId, DateTime now, int increment, bool levelUp);
-        Task<int> GetUserXpRankAsync(User user, ulong guildId);
-        Task UpdateUserNotificationPreferenceAsync(ulong userId, ulong guildId, string location);
-        Task<bool> UpdateUserCurrencyAsync(User user, ulong guildId, long amount);
-        Task<bool> UpdateUserCurrencyAsync(IUser user, ulong guildId, long amount);
-        Task UpdateBotCurrencyAsync(long amount, ulong guildId);
-        Task<long> GetUserCurrency(IUser user, ulong guildId);
-        Task<decimal> GetUserInvesting(IUser user, ulong guildId);
-        Task<IEnumerable<User>> GetCurrencyLeaderboardAsync(ulong guildId, int page);
-        Task<IEnumerable<User>> GetXpLeaderboardAsync(ulong guildId, int page);
-        Task<bool> TransferCurrencyAsync(IUser user, ulong guildId, decimal amount);
-        Task<bool> AddOrUpdateUserSubscriptionAsync(IUser user, ulong guildId, ObjectId subId, int days);
-        Task<Dictionary<ulong, Dictionary<ulong, List<ObjectId>>>> RemoveExpiredSubscriptionsAsync();
-        Task<bool> AddOrUpdateUserInventoryAsync(IUser user, ulong guildId, ObjectId itemId, int quantity);
-        Task ChargeInterestAsync(User user, ulong guildId, decimal amount, string ticker);
-        Task<bool> UpdateUserInvestingAccountAsync(User user, ulong guildId, decimal amount);
-        Task<bool> UpdateUserPortfolioAsync(User user, ulong guildId, string ticker, string position, long shares);
+        Task UpdateUserXpAsync(User user, string guildId, DateTime now, int increment, bool levelUp);
+        Task<int> GetUserXpRankAsync(User user, string guildId);
+        Task UpdateUserNotificationPreferenceAsync(ulong userId, string guildId, string location);
+        Task<bool> UpdateUserCurrencyAsync(User user, string guildId, long amount);
+        Task<bool> UpdateUserCurrencyAsync(IUser user, string guildId, long amount);
+        Task UpdateBotCurrencyAsync(long amount, string guildId);
+        Task<long> GetUserCurrency(IUser user, string guildId);
+        Task<decimal> GetUserInvesting(IUser user, string guildId);
+        Task<IEnumerable<User>> GetCurrencyLeaderboardAsync(string guildId, int page);
+        Task<IEnumerable<User>> GetXpLeaderboardAsync(string guildId, int page);
+        Task<bool> TransferCurrencyAsync(IUser user, string guildId, decimal amount);
+        Task<bool> AddOrUpdateUserSubscriptionAsync(IUser user, string guildId, ObjectId subId, int days);
+        Task<Dictionary<ulong, Dictionary<string, List<ObjectId>>>> RemoveExpiredSubscriptionsAsync();
+        Task<bool> AddOrUpdateUserInventoryAsync(IUser user, string guildId, ObjectId itemId, int quantity);
+        Task ChargeInterestAsync(User user, string guildId, decimal amount, string ticker);
+        Task<bool> UpdateUserInvestingAccountAsync(User user, string guildId, decimal amount);
+        Task<bool> UpdateUserPortfolioAsync(User user, string guildId, string ticker, string position, long shares);
 
         #endregion
 
@@ -174,7 +174,7 @@ namespace Roki.Services.Database
         public IMongoCollection<Transaction> TransactionCollection { get; }
         public IMongoCollection<JeopardyClue> JeopardyCollection { get; }
 
-        public async Task<User> GetOrAddUserAsync(IUser user, ulong guildId)
+        public async Task<User> GetOrAddUserAsync(IUser user, string guildId)
         {
             User dbUser = await UserCollection.Find(u => u.Id == user.Id).FirstOrDefaultAsync().ConfigureAwait(false);
             if (dbUser != null)
@@ -188,7 +188,14 @@ namespace Roki.Services.Database
                 return dbUser;
             }
 
-            dbUser = new User {Id = user.Id, Discriminator = user.DiscriminatorValue, AvatarId = user.AvatarId, Username = user.Username};
+            dbUser = new User
+            {
+                Id = user.Id,
+                Discriminator = user.DiscriminatorValue,
+                AvatarId = user.AvatarId,
+                Username = user.Username,
+                Data = {[guildId] = new UserData()}
+            };
 
             await UserCollection.InsertOneAsync(dbUser);
             return dbUser;
@@ -210,7 +217,7 @@ namespace Roki.Services.Database
                 new FindOneAndUpdateOptions<User> {ReturnDocument = ReturnDocument.After, IsUpsert = true}).ConfigureAwait(false);
         }
 
-        public async Task UpdateUserXpAsync(User user, ulong guildId, DateTime now, int increment, bool levelUp)
+        public async Task UpdateUserXpAsync(User user, string guildId, DateTime now, int increment, bool levelUp)
         {
             if (levelUp)
             {
@@ -227,18 +234,18 @@ namespace Roki.Services.Database
             }
         }
 
-        public async Task<int> GetUserXpRankAsync(User user, ulong guildId)
+        public async Task<int> GetUserXpRankAsync(User user, string guildId)
         {
             return (int) await UserCollection.CountDocumentsAsync(x => x.Data[guildId].Xp > user.Data[guildId].Xp).ConfigureAwait(false) + 1;
         }
 
-        public async Task UpdateUserNotificationPreferenceAsync(ulong userId, ulong guildId, string location)
+        public async Task UpdateUserNotificationPreferenceAsync(ulong userId, string guildId, string location)
         {
             UpdateDefinition<User> update = Builders<User>.Update.Set(x => x.Data[guildId].Notification, location);
             await UserCollection.UpdateOneAsync(x => x.Id == userId, update).ConfigureAwait(false);
         }
 
-        public async Task<bool> UpdateUserCurrencyAsync(User user, ulong guildId, long amount)
+        public async Task<bool> UpdateUserCurrencyAsync(User user, string guildId, long amount)
         {
             if (user.Data[guildId].Currency + amount < 0)
             {
@@ -250,30 +257,30 @@ namespace Roki.Services.Database
             return true;
         }
 
-        public async Task<bool> UpdateUserCurrencyAsync(IUser user, ulong guildId, long amount)
+        public async Task<bool> UpdateUserCurrencyAsync(IUser user, string guildId, long amount)
         {
             User dbUser = await GetOrAddUserAsync(user, guildId).ConfigureAwait(false);
             return await UpdateUserCurrencyAsync(dbUser, guildId, amount).ConfigureAwait(false);
         }
 
-        public async Task UpdateBotCurrencyAsync(long amount, ulong guildId)
+        public async Task UpdateBotCurrencyAsync(long amount, string guildId)
         {
             UpdateDefinition<User> updateCurrency = Builders<User>.Update.Inc(u => u.Data[guildId].Currency, amount);
             // todo get bot id
             await UserCollection.UpdateOneAsync(u => u.Id == Roki.Properties.BotId, updateCurrency).ConfigureAwait(false);
         }
 
-        public async Task<long> GetUserCurrency(IUser user, ulong guildId)
+        public async Task<long> GetUserCurrency(IUser user, string guildId)
         {
             return (await GetOrAddUserAsync(user, guildId)).Data[guildId].Currency;
         }
 
-        public async Task<decimal> GetUserInvesting(IUser user, ulong guildId)
+        public async Task<decimal> GetUserInvesting(IUser user, string guildId)
         {
             return (await GetOrAddUserAsync(user, guildId)).Data[guildId].InvestingAccount;
         }
 
-        public async Task<IEnumerable<User>> GetCurrencyLeaderboardAsync(ulong guildId, int page)
+        public async Task<IEnumerable<User>> GetCurrencyLeaderboardAsync(string guildId, int page)
         {
             return await UserCollection.Aggregate()
                 // todo get botid
@@ -285,7 +292,7 @@ namespace Roki.Services.Database
                 .ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<User>> GetXpLeaderboardAsync(ulong guildId, int page)
+        public async Task<IEnumerable<User>> GetXpLeaderboardAsync(string guildId, int page)
         {
             return await UserCollection.Aggregate()
                 .Match(u => u.Data[guildId].Xp > 0 && u.Id != Roki.Properties.BotId)
@@ -296,7 +303,7 @@ namespace Roki.Services.Database
                 .ConfigureAwait(false);
         }
 
-        public async Task<bool> TransferCurrencyAsync(IUser user, ulong guildId, decimal amount)
+        public async Task<bool> TransferCurrencyAsync(IUser user, string guildId, decimal amount)
         {
             User dbUser = await GetOrAddUserAsync(user, guildId).ConfigureAwait(false);
             long cash = dbUser.Data[guildId].Currency;
@@ -314,7 +321,7 @@ namespace Roki.Services.Database
             return true;
         }
 
-        public async Task<bool> AddOrUpdateUserSubscriptionAsync(IUser user, ulong guildId, ObjectId subId, int days)
+        public async Task<bool> AddOrUpdateUserSubscriptionAsync(IUser user, string guildId, ObjectId subId, int days)
         {
             User dbUser = await GetOrAddUserAsync(user, guildId).ConfigureAwait(false);
             // if exists update then return true
@@ -335,18 +342,18 @@ namespace Roki.Services.Database
             return false;
         }
 
-        public async Task<Dictionary<ulong, Dictionary<ulong, List<ObjectId>>>> RemoveExpiredSubscriptionsAsync()
+        public async Task<Dictionary<ulong, Dictionary<string, List<ObjectId>>>> RemoveExpiredSubscriptionsAsync()
         {
             DateTime now = DateTime.UtcNow.Date;
-            var expired = new Dictionary<ulong, Dictionary<ulong, List<ObjectId>>>();
+            var expired = new Dictionary<ulong, Dictionary<string, List<ObjectId>>>();
 
             using IAsyncCursor<User> cursor = await UserCollection.FindAsync(FilterDefinition<User>.Empty);
             while (await cursor.MoveNextAsync())
             {
                 foreach (User user in cursor.Current)
                 {
-                    expired[user.Id] = new Dictionary<ulong, List<ObjectId>>();
-                    foreach ((ulong guildId, UserData data) in user.Data)
+                    expired[user.Id] = new Dictionary<string, List<ObjectId>>();
+                    foreach ((string guildId, UserData data) in user.Data)
                     {
                         expired[user.Id][guildId] = new List<ObjectId>();
                         foreach ((ObjectId id, Subscription subscription) in data.Subscriptions)
@@ -375,7 +382,7 @@ namespace Roki.Services.Database
             return expired;
         }
 
-        public async Task<bool> AddOrUpdateUserInventoryAsync(IUser user, ulong guildId, ObjectId itemId, int quantity)
+        public async Task<bool> AddOrUpdateUserInventoryAsync(IUser user, string guildId, ObjectId itemId, int quantity)
         {
             User dbUser = await GetOrAddUserAsync(user, guildId).ConfigureAwait(false);
             // if exists update then return true
@@ -395,7 +402,7 @@ namespace Roki.Services.Database
             return false;
         }
 
-        public async Task ChargeInterestAsync(User user, ulong guildId, decimal amount, string ticker)
+        public async Task ChargeInterestAsync(User user, string guildId, decimal amount, string ticker)
         {
             UpdateDefinition<User> update = user.Data[guildId].InvestingAccount > 0
                 ? Builders<User>.Update.Inc(x => x.Data[guildId].InvestingAccount, -amount)
@@ -408,7 +415,7 @@ namespace Roki.Services.Database
             await UserCollection.UpdateOneAsync(x => x.Id == user.Id, update).ConfigureAwait(false);
         }
 
-        public async Task<bool> UpdateUserInvestingAccountAsync(User user, ulong guildId, decimal amount)
+        public async Task<bool> UpdateUserInvestingAccountAsync(User user, string guildId, decimal amount)
         {
             if (user.Data[guildId].InvestingAccount + amount < 0)
             {
@@ -420,7 +427,7 @@ namespace Roki.Services.Database
             return true;
         }
 
-        public async Task<bool> UpdateUserPortfolioAsync(User user, ulong guildId, string ticker, string position, long shares)
+        public async Task<bool> UpdateUserPortfolioAsync(User user, string guildId, string ticker, string position, long shares)
         {
             Dictionary<string, Investment> portfolio = user.Data[guildId].Portfolio;
             DateTime? interestDate = null;
@@ -536,6 +543,7 @@ namespace Roki.Services.Database
         public async Task<List<Quote>> SearchQuotesByText(ulong guildId, string content)
         {
             FilterDefinition<Quote> filter = Builders<Quote>.Filter.Text(content);
+            filter &= Builders<Quote>.Filter.Eq(x => x.GuildId, guildId);
             return await QuoteCollection.Find(filter)
                 .Limit(9)
                 .ToListAsync()

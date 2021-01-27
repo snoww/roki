@@ -130,7 +130,7 @@ namespace Roki
 
                         foreach (SocketGuild guild in Client.Guilds)
                         {
-                            long botCurrency = await Mongo.Context.GetUserCurrency(Client.CurrentUser, guild.Id);
+                            long botCurrency = await Mongo.Context.GetUserCurrency(Client.CurrentUser, guild.Id.ToString());
                             await cache.StringSetAsync($"currency:{guild.Id}:{Properties.BotId}", botCurrency, flags: CommandFlags.FireAndForget)
                                 .ConfigureAwait(false);
 

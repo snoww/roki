@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.Options;
 
 namespace Roki.Services.Database.Maps
 {
@@ -17,7 +18,9 @@ namespace Roki.Services.Database.Maps
         public string RegionId { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
         public bool Available { get; set; } = true;
+        [BsonDictionaryOptions(DictionaryRepresentation.Document)]
         public Dictionary<ObjectId, XpReward> XpRewards { get; set; } = new();
+        [BsonDictionaryOptions(DictionaryRepresentation.Document)]
         public Dictionary<ObjectId, Listing> Store { get; set; } = new();
         public GuildConfig Config { get; set; } = new();
     }
@@ -49,7 +52,9 @@ namespace Roki.Services.Database.Maps
         public bool Logging { get; set; } = false;
         public bool CurrencyGeneration { get; set; } = true;
         public bool XpGain { get; set; } = true;
+        [BsonDictionaryOptions(DictionaryRepresentation.Document)]
         public Dictionary<string, bool> Modules { get; set; } = new();
+        [BsonDictionaryOptions(DictionaryRepresentation.Document)]
         public Dictionary<string, bool> Commands { get; set; } = new();
     }
 }
