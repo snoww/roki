@@ -52,6 +52,9 @@ namespace Roki.Modules.Moderation.Services
             if (category.HasFlag(ConfigCategory.Settings))
             {
                 configString.Append("```");
+                configString.Append("Prefix=").Append('"').Append(guildConfig.Prefix).AppendLine("\"");
+                configString.Append("OkColor=").AppendLine(guildConfig.OkColor.ToString("X"));
+                configString.Append("ErrorColor=").AppendLine(guildConfig.ErrorColor.ToString("X"));
                 configString.Append("Logging=").AppendLine(guildConfig.Logging.ToString());
                 configString.Append("CurrencyGeneration=").AppendLine(guildConfig.CurrencyGeneration.ToString());
                 configString.Append("XpGain=").AppendLine(guildConfig.XpGain.ToString());

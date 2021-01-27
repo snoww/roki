@@ -29,8 +29,7 @@ namespace Roki
         private IServiceProvider Services { get; set; }
 
         public static Properties Properties { get; } = new();
-        public static Color OkColor { get; private set; }
-        public static Color ErrorColor { get; private set; }
+        public const ulong BotId = 220678903432347650;
 
         public Roki()
         {
@@ -54,9 +53,6 @@ namespace Roki
                 CaseSensitiveCommands = false,
                 DefaultRunMode = RunMode.Async
             });
-
-            OkColor = Color.DarkGreen;
-            ErrorColor = Color.Red;
 
             Client.Log += Log;
         }
@@ -126,7 +122,7 @@ namespace Roki
                         foreach (SocketGuild guild in Client.Guilds)
                         {
                             long botCurrency = await Mongo.Context.GetUserCurrency(Client.CurrentUser, guild.Id.ToString());
-                            await cache.StringSetAsync($"currency:{guild.Id}:{Properties.BotId}", botCurrency, flags: CommandFlags.FireAndForget)
+                            await cache.StringSetAsync($"currency:{guild.Id}:{BotId}", botCurrency, flags: CommandFlags.FireAndForget)
                                 .ConfigureAwait(false);
 
                             SocketGuildUser bot = guild.CurrentUser;

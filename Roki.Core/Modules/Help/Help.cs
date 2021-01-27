@@ -31,9 +31,9 @@ namespace Roki.Modules.Help
         [RokiCommand, Description, Usage, Aliases]
         public async Task Modules()
         {
-            string prefix = Context.Guild != null ? (await _config.GetGuildConfigAsync(Context.Guild.Id)).Prefix : Roki.Properties.Prefix;
+            string prefix = Context.Channel is IDMChannel ? Roki.Properties.Prefix : (await _config.GetGuildConfigAsync(Context.Guild.Id)).Prefix;
             
-            EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
+            EmbedBuilder embed = new EmbedBuilder().WithOkColor()
                 .WithTitle("List of Modules")
                 .WithDescription(string.Join("\n",
                     _command.Modules.GroupBy(module => module.GetTopLevelModule())
@@ -54,7 +54,7 @@ namespace Roki.Modules.Help
                 return;
             }
             
-            string prefix = Context.Guild != null ? (await _config.GetGuildConfigAsync(Context.Guild.Id)).Prefix : Roki.Properties.Prefix;
+            string prefix = Context.Channel is IDMChannel ? Roki.Properties.Prefix : (await _config.GetGuildConfigAsync(Context.Guild.Id)).Prefix;
 
             List<CommandInfo> commands = _command.Commands.Where(c =>
                     c.Module.GetTopLevelModule().Name.ToUpperInvariant().StartsWith(moduleName, StringComparison.InvariantCulture))
@@ -97,7 +97,7 @@ namespace Roki.Modules.Help
                 return;
             }
 
-            EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
+            EmbedBuilder embed = new EmbedBuilder().WithOkColor()
                 .WithTitle($"{commands.First().Module.GetTopLevelModule().Name} Module Commands")
                 .WithFooter($"Use {prefix}h <command> to see the help for that command");
 
@@ -152,21 +152,20 @@ namespace Roki.Modules.Help
 
         private async Task H(CommandInfo command)
         {
-            IMessageChannel channel = Context.Channel;
-            string prefix = Context.Guild != null ? (await _config.GetGuildConfigAsync(Context.Guild.Id)).Prefix : Roki.Properties.Prefix;
+            string prefix = Context.Channel is IDMChannel ? Roki.Properties.Prefix : (await _config.GetGuildConfigAsync(Context.Guild.Id)).Prefix;
 
             if (command == null)
             {
-                EmbedBuilder helpEmbed = new EmbedBuilder().WithDynamicColor(Context)
+                EmbedBuilder helpEmbed = new EmbedBuilder().WithOkColor()
                     .WithTitle("Roki Help")
                     .WithDescription(string.Format(@"Simple guide to find a command:
 Use `{0}modules` command to see a list of all modules.
 Then use `{0}commands <module>` to see a list of all the commands in that module (e.g. `{0}commands searches`).
 After seeing the commands available in that module, you can use `{0}h <command>` to get help for a specific command (e.g. `{0}h weather`).", prefix));
 
-                if (channel is IDMChannel)
+                if (Context.Channel is IDMChannel)
                 {
-                    await channel.EmbedAsync(helpEmbed).ConfigureAwait(false);
+                    await Context.Channel.EmbedAsync(helpEmbed).ConfigureAwait(false);
                 }
                 else
                 {
@@ -177,12 +176,14 @@ After seeing the commands available in that module, you can use `{0}h <command>`
                     }
                     catch (Exception)
                     {
-                        await channel.EmbedAsync(helpEmbed).ConfigureAwait(false);
+                        await Context.Channel.EmbedAsync(helpEmbed).ConfigureAwait(false);
                     }
                 }
             }
-
-            await Service.SendCommandInfo(command, Context);
+            else
+            {
+                await HelpService.SendCommandInfo(command, Context, prefix);
+            }
         }
 
         private class CommandTextEqualityComparer : IEqualityComparer<CommandInfo>

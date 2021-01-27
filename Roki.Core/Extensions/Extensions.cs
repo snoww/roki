@@ -44,12 +44,12 @@ namespace Roki.Extensions
 
         public static EmbedBuilder WithOkColor(this EmbedBuilder embed)
         {
-            return embed.WithColor(Roki.OkColor);
+            return embed.WithColor(Roki.Properties.OkColor);
         }
 
         public static EmbedBuilder WithErrorColor(this EmbedBuilder embed)
         {
-            return embed.WithColor(Roki.ErrorColor);
+            return embed.WithColor(Roki.Properties.ErrorColor);
         }
 
         public static ModuleInfo GetTopLevelModule(this ModuleInfo module)

@@ -66,11 +66,12 @@ namespace Roki.Services
             Task _ = Task.Run(async () =>
             {
                 var textChannel = message.Channel as ITextChannel;
-                if (textChannel != null)
+                bool isDmChannel = message.Channel is IDMChannel;
+                if (!isDmChannel && textChannel != null)
                 {
                     await UpdateXp(message, textChannel).ConfigureAwait(false);
                 }
-                if (!(await _config.GetChannelConfigAsync(textChannel)).Logging)
+                if (isDmChannel || !(await _config.GetChannelConfigAsync(textChannel)).Logging)
                 {
                     return;
                 }
@@ -88,7 +89,7 @@ namespace Roki.Services
             if (after.EditedTimestamp == null) return Task.CompletedTask;
             Task _ = Task.Run(async () =>
             {
-                if (!(await _config.GetChannelConfigAsync(after.Channel as ITextChannel)).Logging)
+                if (channel is IDMChannel || !(await _config.GetChannelConfigAsync(channel as ITextChannel)).Logging)
                 {
                     return;
                 }
@@ -104,7 +105,7 @@ namespace Roki.Services
             if (cache.HasValue && cache.Value.Author.IsBot) return Task.CompletedTask;
             Task _ = Task.Run(async () =>
             {
-                if (!(await _config.GetChannelConfigAsync(channel as ITextChannel)).Logging)
+                if (channel is IDMChannel || !(await _config.GetChannelConfigAsync(channel as ITextChannel)).Logging)
                 {
                     return;
                 }
@@ -118,7 +119,7 @@ namespace Roki.Services
         {
             Task _ = Task.Run(async () =>
             {
-                if (!(await _config.GetChannelConfigAsync(channel as ITextChannel)).Logging)
+                if (channel is IDMChannel || !(await _config.GetChannelConfigAsync(channel as ITextChannel)).Logging)
                 {
                     return;
                 }
