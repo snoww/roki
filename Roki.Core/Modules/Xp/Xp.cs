@@ -128,8 +128,8 @@ namespace Roki.Modules.Xp
                 return;
             }
 
-            if (!notify.Equals("none", StringComparison.OrdinalIgnoreCase) ||
-                !notify.Equals("dm", StringComparison.OrdinalIgnoreCase) ||
+            if (!notify.Equals("none", StringComparison.OrdinalIgnoreCase) &&
+                !notify.Equals("dm", StringComparison.OrdinalIgnoreCase) &&
                 !notify.Equals("server", StringComparison.OrdinalIgnoreCase))
             {
                 await Context.Channel.SendErrorAsync("Not a valid option. Options are none, dm, or server.")
