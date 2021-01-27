@@ -6,18 +6,28 @@ using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Rsvp.Services;
+using Roki.Services;
+using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Rsvp
 {
     public class Rsvp : RokiTopLevelModule<RsvpService>
     {
+        private readonly IConfigurationService _config;
+
+        public Rsvp(IConfigurationService config)
+        {
+            _config = config;
+        }
+
         [RokiCommand, Description, Aliases, Usage]
         [RequireContext(ContextType.Guild)]
         public async Task Events([Leftover] string args = null)
         {
+            GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
             var err = string.Format("`{0}events new/create`: Create a new event\n" +
                                     "`{0}events edit`: Edits an event\n" +
-                                    "`{0}events list/ls <optional_page>`: Lists events in this server\n", Roki.Properties.Prefix);
+                                    "`{0}events list/ls <optional_page>`: Lists events in this server\n", guildConfig.Prefix);
             if (string.IsNullOrWhiteSpace(args))
             {
                 await Context.Channel.SendErrorAsync(err).ConfigureAwait(false);

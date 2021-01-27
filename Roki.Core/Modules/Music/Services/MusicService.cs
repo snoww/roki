@@ -11,6 +11,7 @@ using Discord.WebSocket;
 using Roki.Extensions;
 using Roki.Modules.Music.Extensions;
 using Roki.Services;
+using Roki.Services.Database.Maps;
 using Victoria;
 using Victoria.Enums;
 using Victoria.EventArgs;
@@ -21,12 +22,14 @@ namespace Roki.Modules.Music.Services
     public class MusicService : IRokiService
     {
         private readonly IGoogleApiService _google;
+        private readonly IConfigurationService _config;
         private readonly LavaNode _lavaNode;
 
-        public MusicService(LavaNode lavaNode, IGoogleApiService google)
+        public MusicService(LavaNode lavaNode, IGoogleApiService google, IConfigurationService config)
         {
             _lavaNode = lavaNode;
             _google = google;
+            _config = config;
             OnReadyAsync().Wait();
             _lavaNode.OnTrackEnded += TrackFinished;
         }
@@ -164,9 +167,11 @@ namespace Roki.Modules.Music.Services
                 return;
             }
 
+            GuildConfig guildConfig = await _config.GetGuildConfigAsync(ctx.Guild.Id);
+
             if (player.Queue.Count == 0)
             {
-                await ctx.Channel.SendErrorAsync($"There are no tracks in queue, use `{Roki.Properties.Prefix}q` to queue some tracks first.").ConfigureAwait(false);
+                await ctx.Channel.SendErrorAsync($"There are no tracks in queue, use `{guildConfig.Prefix}q` to queue some tracks first.").ConfigureAwait(false);
                 return;
             }
 
@@ -337,6 +342,8 @@ namespace Roki.Modules.Music.Services
                 await ctx.Channel.SendErrorAsync("No music player active.").ConfigureAwait(false);
                 return;
             }
+            
+            GuildConfig guildConfig = await _config.GetGuildConfigAsync(ctx.Guild.Id);
 
             LavaTrack[] queue = player.Queue.ToArray();
             if (queue.Length == 0)
@@ -345,7 +352,7 @@ namespace Roki.Modules.Music.Services
                 {
                     await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                             .WithAuthor("Player queue", "https://i.imgur.com/9ue01Qt.png")
-                            .WithDescription($"Queue is empty, `{Roki.Properties.Prefix}q <query>` to search and queue a track.")
+                            .WithDescription($"Queue is empty, `{guildConfig.Prefix}q <query>` to search and queue a track.")
                             .WithFooter(FormatAutoplayAndLoop(player, false)))
                         .ConfigureAwait(false);
                     return;
@@ -381,7 +388,7 @@ namespace Roki.Modules.Music.Services
                 string pStatus = null;
                 if (player.PlayerState == PlayerState.Paused)
                 {
-                    pStatus = Format.Bold($"Player is paused. Use {Format.Code($"{Roki.Properties.Prefix}resume")}` command to resume playback.");
+                    pStatus = Format.Bold($"Player is paused. Use {Format.Code($"{guildConfig.Prefix}resume")}` command to resume playback.");
                 }
 
                 if (!string.IsNullOrWhiteSpace(pStatus))

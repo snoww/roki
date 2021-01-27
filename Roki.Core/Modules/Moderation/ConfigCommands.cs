@@ -10,10 +10,11 @@ namespace Roki.Modules.Moderation
 {
     public partial class Moderation
     {
+        [Group]
+        [RequireContext(ContextType.Guild)]
         public class ConfigCommands : RokiSubmodule<ConfigService>
         {
             [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
             [RequireUserPermission(GuildPermission.Administrator)]
             public async Task GuildConfig(ConfigCategory category = ConfigCategory.All)
             {
@@ -25,7 +26,6 @@ namespace Roki.Modules.Moderation
             }
         
             [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
             [RequireUserPermission(GuildPermission.Administrator)]
             public async Task ChannelConfig()
             {

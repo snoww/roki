@@ -67,7 +67,6 @@ namespace Roki.Services.Database
         Task DeleteChannelAsync(ITextChannel channel);
         Task UpdateChannelAsync(ITextChannel after);
         Task<ChannelConfig> GetChannelConfigAsync(ITextChannel channel);
-        Task<bool> IsLoggingEnabled(ITextChannel channel);
         Task ChangeChannelProperty(Expression<Func<Channel, bool>> filter, UpdateDefinition<Channel> update, UpdateOptions options = null);
 
         #endregion
@@ -617,12 +616,6 @@ namespace Roki.Services.Database
             dbChannel.Config = channelConfig;
             await ChannelCollection.FindOneAndReplaceAsync(c => c.Id == channel.Id, dbChannel).ConfigureAwait(false);
             return channelConfig;
-        }
-
-        public async Task<bool> IsLoggingEnabled(ITextChannel channel)
-        {
-            // logging is enabled if message is from DM
-            return channel == null || (await GetChannelConfigAsync(channel)).Logging;
         }
 
         public async Task ChangeChannelProperty(Expression<Func<Channel, bool>> filter, UpdateDefinition<Channel> update, UpdateOptions options = null)

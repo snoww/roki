@@ -15,30 +15,42 @@ namespace Roki.Modules.Games
     public partial class Games
     {
         [Group]
+        [RequireContext(ContextType.Guild)]
         public class JeopardyCommands : RokiSubmodule<JeopardyService>
         {
             private readonly DiscordSocketClient _client;
             private readonly ICurrencyService _currency;
+            private readonly IConfigurationService _config;
 
-            public JeopardyCommands(DiscordSocketClient client, ICurrencyService currency)
+            public JeopardyCommands(DiscordSocketClient client, ICurrencyService currency, IConfigurationService config)
             {
                 _client = client;
                 _currency = currency;
+                _config = config;
             }
 
             [RokiCommand, Description, Aliases, Usage]
-            [RequireContext(ContextType.Guild)]
             [RokiOptions(typeof(JeopardyArgs))]
             public async Task Jeopardy(params string[] args)
             {
                 JeopardyArgs opts = OptionsParser.ParseFrom(new JeopardyArgs(), args);
 
-                var channel = (ITextChannel) Context.Channel;
+                if (Service.ActiveGames.TryGetValue(Context.Channel.Id, out Jeopardy activeGame))
+                {
+                    await Context.Channel.SendErrorAsync("Jeopardy game is already in progress in current channel.").ConfigureAwait(false);
+                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithColor(activeGame.Color)
+                            .WithAuthor("Jeopardy!")
+                            .WithTitle($"{activeGame.CurrentClue.Category} - ${activeGame.CurrentClue.Value}")
+                            .WithDescription(activeGame.CurrentClue.Clue))
+                        .ConfigureAwait(false);
+                    return;
+                }
+
                 Dictionary<string, List<JClue>> questions = await Service.GenerateGame(opts.NumCategories).ConfigureAwait(false);
 
-                var jeopardy = new Jeopardy(_client, questions, channel.Guild, channel, _currency, await Service.GenerateFinalJeopardy());
+                var jeopardy = new Jeopardy(_client, await _config.GetGuildConfigAsync(Context.Guild.Id),questions, Context.Guild, Context.Channel as ITextChannel, _currency, await Service.GenerateFinalJeopardy());
 
-                if (Service.ActiveGames.TryAdd(channel.Id, jeopardy))
+                if (Service.ActiveGames.TryAdd(Context.Channel.Id, jeopardy))
                 {
                     try
                     {
@@ -46,23 +58,13 @@ namespace Roki.Modules.Games
                     }
                     finally
                     {
-                        Service.ActiveGames.TryRemove(channel.Id, out jeopardy);
+                        Service.ActiveGames.TryRemove(Context.Channel.Id, out jeopardy);
                         if (jeopardy != null) await jeopardy.EnsureStopped().ConfigureAwait(false);
                     }
-
-                    return;
                 }
-
-                await Context.Channel.SendErrorAsync("Jeopardy game is already in progress in current channel.").ConfigureAwait(false);
-                await Context.Channel.EmbedAsync(new EmbedBuilder().WithColor(jeopardy.Color)
-                        .WithAuthor("Jeopardy!")
-                        .WithTitle($"{jeopardy.CurrentClue.Category} - ${jeopardy.CurrentClue.Value}")
-                        .WithDescription(jeopardy.CurrentClue.Clue))
-                    .ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Aliases, Usage]
-            [RequireContext(ContextType.Guild)]
             public async Task JeopardyLeaderboard()
             {
                 if (Service.ActiveGames.TryGetValue(Context.Channel.Id, out Jeopardy jeopardy))
@@ -78,7 +80,6 @@ namespace Roki.Modules.Games
             }
 
             [RokiCommand, Description, Aliases, Usage]
-            [RequireContext(ContextType.Guild)]
             public async Task JeopardyStop()
             {
                 if (Service.ActiveGames.TryGetValue(Context.Channel.Id, out Jeopardy jeopardy))
@@ -91,7 +92,6 @@ namespace Roki.Modules.Games
             }
 
             [RokiCommand, Description, Aliases, Usage]
-            [RequireContext(ContextType.Guild)]
             public async Task JeopardyVote()
             {
                 if (Service.ActiveGames.TryGetValue(Context.Channel.Id, out Jeopardy jeopardy))

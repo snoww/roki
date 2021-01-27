@@ -14,10 +14,10 @@ namespace Roki.Modules.Games
     public partial class Games
     {
         [Group]
+        [RequireContext(ContextType.Guild)]
         public class ChessCommands : RokiSubmodule<ChessService>
         {
             [RokiCommand, Description, Aliases, Usage]
-            [RequireContext(ContextType.Guild)]
             [RokiOptions(typeof(ChessArgs))]
             public async Task ChessChallenge(IGuildUser opponent, params string[] args)
             {

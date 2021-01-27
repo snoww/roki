@@ -23,10 +23,12 @@ namespace Roki.Modules.Stocks
             }
 
             private readonly IMongoService _mongo;
+            private readonly IConfigurationService _config;
 
-            public TradingCommands(IMongoService mongo)
+            public TradingCommands(IMongoService mongo, IConfigurationService config)
             {
                 _mongo = mongo;
+                _config = config;
             }
 
             [RokiCommand, Usage, Description, Aliases]
@@ -109,6 +111,7 @@ namespace Roki.Modules.Stocks
                 }
 
                 decimal cost = amount * price.Value;
+                GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
 
                 User user = await _mongo.Context.GetOrAddUserAsync(Context.User, Context.Guild.Id.ToString()).ConfigureAwait(false);
                 if (position == Position.LONG)
@@ -130,12 +133,12 @@ namespace Roki.Modules.Stocks
                     if (amount == 1)
                     {
                         embed.WithDescription($"{Context.User.Mention}\nYou've successfully purchased `1` share of `{ticker.ToUpper()}` at `{price.Value:N2}`\n" +
-                                              $"Total Cost: `{cost:N2}` {Roki.Properties.CurrencyIcon}");
+                                              $"Total Cost: `{cost:N2}` {guildConfig.CurrencyIcon}");
                     }
                     else
                     {
                         embed.WithDescription($"{Context.User.Mention}\nYou've successfully purchased `{amount}` shares of `{ticker.ToUpper()}` at `{price.Value:N2}`\n" +
-                                              $"Total Cost: `{cost:N2}` {Roki.Properties.CurrencyIcon}");
+                                              $"Total Cost: `{cost:N2}` {guildConfig.CurrencyIcon}");
                     }
 
                     await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
@@ -145,7 +148,7 @@ namespace Roki.Modules.Stocks
                     TradingService.Status status = await Service.ShortPositionAsync(user, Context.Guild.Id.ToString(), ticker, "buy", price.Value, amount).ConfigureAwait(false);
                     if (status == TradingService.Status.TooMuchLeverage)
                     {
-                        await Context.Channel.SendErrorAsync($"You have leveraged over `{100000:N2}` {Roki.Properties.CurrencyIcon}.\n" +
+                        await Context.Channel.SendErrorAsync($"You have leveraged over `{100000:N2}` {guildConfig.CurrencyIcon}.\n" +
                                                              "You cannot short any more stocks until they are returned.").ConfigureAwait(false);
                         return;
                     }
@@ -160,12 +163,12 @@ namespace Roki.Modules.Stocks
                     if (amount == 1)
                     {
                         embed.WithDescription($"{Context.User.Mention}\nYou've successfully sold `1` share of `{ticker.ToUpper()}` at `{price.Value}`\n" +
-                                              $"Total sold for: `{cost:N2}` {Roki.Properties.CurrencyIcon}");
+                                              $"Total sold for: `{cost:N2}` {guildConfig.CurrencyIcon}");
                     }
                     else
                     {
                         embed.WithDescription($"{Context.User.Mention}\nYou've successfully sold `{amount}` shares of `{ticker.ToUpper()}` at `{price.Value}`\n" +
-                                              $"Total sold for: `{cost:N2}` {Roki.Properties.CurrencyIcon}");
+                                              $"Total sold for: `{cost:N2}` {guildConfig.CurrencyIcon}");
                     }
 
                     embed.WithFooter("Short selling stocks charges a premium weekly");

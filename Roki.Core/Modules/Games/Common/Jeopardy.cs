@@ -11,6 +11,7 @@ using Discord.WebSocket;
 using NLog;
 using Roki.Extensions;
 using Roki.Services;
+using Roki.Services.Database.Maps;
 using static System.Int32;
 
 namespace Roki.Modules.Games.Common
@@ -20,6 +21,7 @@ namespace Roki.Modules.Games.Common
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly ITextChannel _channel;
         private readonly DiscordSocketClient _client;
+        private readonly GuildConfig _config;
         private readonly Dictionary<string, List<JClue>> _clues;
         private readonly ConcurrentBag<bool> _confirmed = new();
         private readonly ICurrencyService _currency;
@@ -40,9 +42,10 @@ namespace Roki.Modules.Games.Common
         private int _guessCount;
         private bool _stopGame;
 
-        public Jeopardy(DiscordSocketClient client, Dictionary<string, List<JClue>> clues, IGuild guild, ITextChannel channel, ICurrencyService currency, JClue finalJeopardy)
+        public Jeopardy(DiscordSocketClient client, GuildConfig config, Dictionary<string, List<JClue>> clues, IGuild guild, ITextChannel channel, ICurrencyService currency, JClue finalJeopardy)
         {
             _client = client;
+            _config = config;
             _clues = clues;
             _guild = guild;
             _channel = channel;
@@ -498,7 +501,7 @@ namespace Roki.Modules.Games.Common
             }
 
             var lb = new StringBuilder();
-            foreach ((IUser user, int value) in Users.OrderByDescending(k => k.Value)) lb.AppendLine($"{user.Username} `{value:N0}` {Roki.Properties.CurrencyIcon}");
+            foreach ((IUser user, int value) in Users.OrderByDescending(k => k.Value)) lb.AppendLine($"{user.Username} `{value:N0}` {_config.CurrencyIcon}");
 
             return lb.ToString();
         }

@@ -20,6 +20,7 @@ namespace Roki.Modules.Rsvp.Services
     {
         private readonly DiscordSocketClient _client;
         private readonly IMongoService _mongo;
+        private readonly IConfigurationService _config;
         private readonly ConcurrentDictionary<ObjectId, Event> _activeReminders = new();
         private Timer _timer;
 
@@ -39,10 +40,11 @@ namespace Roki.Modules.Rsvp.Services
             Uncertain
         };
 
-        public RsvpService(DiscordSocketClient client, IMongoService mongo)
+        public RsvpService(DiscordSocketClient client, IMongoService mongo, IConfigurationService config)
         {
             _client = client;
             _mongo = mongo;
+            _config = config;
             _client.ReactionAdded += ReactionHandler;
             EventTimer();
         }
@@ -721,6 +723,8 @@ namespace Roki.Modules.Rsvp.Services
 
         private async Task<SocketMessage> ReplyHandler(ICommandContext ctx, TimeSpan? timeout = null)
         {
+            GuildConfig guildConfig = await _config.GetGuildConfigAsync(ctx.Guild.Id);
+
             timeout ??= TimeSpan.FromMinutes(5);
             var eventTrigger = new TaskCompletionSource<SocketMessage>();
             var cancelTrigger = new TaskCompletionSource<bool>();
@@ -729,7 +733,7 @@ namespace Roki.Modules.Rsvp.Services
             {
                 if (message.Channel.Id != ctx.Channel.Id || message.Author.Id != ctx.User.Id) 
                     return Task.CompletedTask;
-                if (message.Content.StartsWith(Roki.Properties.Prefix)) // ignore commands
+                if (message.Content.StartsWith(guildConfig.Prefix)) // ignore commands
                     return Task.CompletedTask;
                 eventTrigger.SetResult(message);
                 return Task.CompletedTask;

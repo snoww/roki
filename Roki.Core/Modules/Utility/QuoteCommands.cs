@@ -15,17 +15,19 @@ namespace Roki.Modules.Utility
     public partial class Utility
     {
         [Group]
+        [RequireContext(ContextType.Guild)]
         public class QuoteCommands : RokiSubmodule
         {
             private readonly IMongoService _mongo;
+            private readonly IConfigurationService _config;
 
-            public QuoteCommands(IMongoService mongo)
+            public QuoteCommands(IMongoService mongo, IConfigurationService config)
             {
                 _mongo = mongo;
+                _config = config;
             }
 
             [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
             public async Task ListQuotes(int page = 1)
             {
                 page -= 1;
@@ -49,7 +51,6 @@ namespace Roki.Modules.Utility
             }
 
             [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
             public async Task ListQuotesId(int page = 1)
             {
                 page -= 1;
@@ -74,7 +75,6 @@ namespace Roki.Modules.Utility
             }
 
             [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
             public async Task ShowQuote(string keyword)
             {
                 keyword = keyword.ToUpperInvariant();
@@ -89,7 +89,6 @@ namespace Roki.Modules.Utility
             }
 
             [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
             public async Task QuoteId(string id)
             {
                 Quote quote = await _mongo.Context.GetQuoteByIdAsync(Context.Guild.Id, id).ConfigureAwait(false);
@@ -102,12 +101,12 @@ namespace Roki.Modules.Utility
             }
 
             [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
             public async Task AddQuote(string keyword, [Leftover] string text)
             {
+                GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
                 if (string.IsNullOrWhiteSpace(keyword) || string.IsNullOrWhiteSpace(text))
                 {
-                    await Context.Channel.SendErrorAsync($"You need to include the content of the quote.\n`{Roki.Properties.Prefix}addquote <quote_name> <quote_content>`")
+                    await Context.Channel.SendErrorAsync($"You need to include the content of the quote.\n`{guildConfig.Prefix}addquote <quote_name> <quote_content>`")
                         .ConfigureAwait(false);
                     return;
                 }
@@ -130,7 +129,6 @@ namespace Roki.Modules.Utility
             }
 
             [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
             public async Task QuoteDeleteId(string id)
             {
                 bool isAdmin = ((IGuildUser) Context.User).GuildPermissions.Administrator;
@@ -152,7 +150,6 @@ namespace Roki.Modules.Utility
             }
 
             [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
             public async Task QuoteDelete(string keyword)
             {
                 bool isAdmin = ((IGuildUser) Context.User).GuildPermissions.Administrator;
