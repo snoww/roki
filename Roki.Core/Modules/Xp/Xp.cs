@@ -71,15 +71,17 @@ namespace Roki.Modules.Xp
                 }
             }
 
-            User dbUser = await _mongo.Context.GetOrAddUserAsync(user, Context.Guild.Id);
-            var xp = new XpLevel(dbUser.Data[Context.Guild.Id].Xp);
-            int rank = await _mongo.Context.GetUserXpRankAsync(dbUser, Context.Guild.Id).ConfigureAwait(false);
-            bool doubleXp = dbUser.Data[Context.Guild.Id].Subscriptions.ContainsKey(DoubleXpId);
-            bool fastXp = dbUser.Data[Context.Guild.Id].Subscriptions.ContainsKey(FastXpId);
+            var guildId = Context.Guild.Id.ToString();
+
+            User dbUser = await _mongo.Context.GetOrAddUserAsync(user, guildId);
+            var xp = new XpLevel(dbUser.Data[guildId].Xp);
+            int rank = await _mongo.Context.GetUserXpRankAsync(dbUser, guildId).ConfigureAwait(false);
+            bool doubleXp = dbUser.Data[guildId].Subscriptions.ContainsKey(DoubleXpId);
+            bool fastXp = dbUser.Data[guildId].Subscriptions.ContainsKey(FastXpId);
 
             await using MemoryStream xpImage = XpDrawExtensions.GenerateXpBar(avatar, 
                 xp.ProgressXp, xp.RequiredXp, $"{xp.TotalXp}", $"{xp.Level}", $"{rank}", 
-                user.Username, user.Discriminator, dbUser.Data[Context.Guild.Id].LastLevelUp, doubleXp, fastXp);
+                user.Username, user.Discriminator, dbUser.Data[guildId].LastLevelUp, doubleXp, fastXp);
             await _cache.StringSetAsync($"xp:image:{user.Id}", xpImage.ToArray(), TimeSpan.FromMinutes(5), flags: CommandFlags.FireAndForget);
             await Context.Channel.SendFileAsync(xpImage, $"xp-{user.Id}.png").ConfigureAwait(false);
         }
@@ -91,13 +93,15 @@ namespace Roki.Modules.Xp
                 return;
             if (page > 0)
                 page -= 1;
-            IEnumerable<User> list = await _mongo.Context.GetXpLeaderboardAsync(Context.Guild.Id, page).ConfigureAwait(false);
+            var guildId = Context.Guild.Id.ToString();
+
+            IEnumerable<User> list = await _mongo.Context.GetXpLeaderboardAsync(guildId, page).ConfigureAwait(false);
             EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle("XP Leaderboard");
             int i = 9 * page + 1;
             foreach (User user in list)
             {
-                embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"Level `{new XpLevel(user.Data[Context.Guild.Id].Xp).Level:N0}` - `{user.Data[Context.Guild.Id].Xp:N0}` xp");
+                embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"Level `{new XpLevel(user.Data[guildId].Xp).Level:N0}` - `{user.Data[guildId].Xp:N0}` xp");
             }
 
             await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
@@ -135,11 +139,11 @@ namespace Roki.Modules.Xp
 
             if (!isAdmin)
             {
-                await _mongo.Context.UpdateUserNotificationPreferenceAsync(Context.User.Id, Context.Guild.Id, notify).ConfigureAwait(false);
+                await _mongo.Context.UpdateUserNotificationPreferenceAsync(Context.User.Id, Context.Guild.Id.ToString(), notify).ConfigureAwait(false);
             }
             else
             {
-                await _mongo.Context.UpdateUserNotificationPreferenceAsync(user.Id, Context.Guild.Id, notify).ConfigureAwait(false);
+                await _mongo.Context.UpdateUserNotificationPreferenceAsync(user.Id, Context.Guild.Id.ToString(), notify).ConfigureAwait(false);
             }
             
             await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)

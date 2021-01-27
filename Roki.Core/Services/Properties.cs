@@ -9,7 +9,6 @@ namespace Roki.Services
 
         public double CurrencyGenerationChance { get; set; } = 0.02;
         public int CurrencyGenerationCooldown { get; set; } = 10;
-        public ulong[] CurrencyGenIgnoredChannels { get; set; }
         public string CurrencyIcon { get; set; } = "<:stone:269130892100763649>";
         public string CurrencyName { get; set; } = "Stone";
         public string CurrencyNamePlural { get; set; } = "Stones";

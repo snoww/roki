@@ -49,7 +49,7 @@ namespace Roki.Modules.Currency
         {
             user ??= Context.User;
             await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                    .WithDescription($"{user.Mention}'s Investing Account:\n`{_mongo.Context.GetUserInvesting(user, Context.Guild.Id):N2}` {Roki.Properties.CurrencyIcon}")
+                    .WithDescription($"{user.Mention}'s Investing Account:\n`{_mongo.Context.GetUserInvesting(user, Context.Guild.Id.ToString()):N2}` {Roki.Properties.CurrencyIcon}")
                     .WithFooter(".$ for Cash Account"))
                 .ConfigureAwait(false);
         }
@@ -65,11 +65,11 @@ namespace Roki.Modules.Currency
 
             page -= 1;
 
-            IEnumerable<User> list = await _mongo.Context.GetCurrencyLeaderboardAsync(Context.Guild.Id, page).ConfigureAwait(false);
+            IEnumerable<User> list = await _mongo.Context.GetCurrencyLeaderboardAsync(Context.Guild.Id.ToString(), page).ConfigureAwait(false);
             EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle("Currency Leaderboard");
             int i = 9 * page + 1;
-            foreach (User user in list) embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"`{user.Data[Context.Guild.Id].Currency:N0}` {Roki.Properties.CurrencyIcon}");
+            foreach (User user in list) embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"`{user.Data[Context.Guild.Id.ToString()].Currency:N0}` {Roki.Properties.CurrencyIcon}");
 
             await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
@@ -89,10 +89,10 @@ namespace Roki.Modules.Currency
             var toAcc = "";
             if ((int) account == 0)
             {
-                success = await _mongo.Context.TransferCurrencyAsync(Context.User, Context.Guild.Id, -amount).ConfigureAwait(false);
+                success = await _mongo.Context.TransferCurrencyAsync(Context.User, Context.Guild.Id.ToString(), -amount).ConfigureAwait(false);
                 if (success)
                 {
-                    await _currency.CacheChangeAsync(Context.User, Context.Guild.Id, amount).ConfigureAwait(false);
+                    await _currency.CacheChangeAsync(Context.User, Context.Guild.Id.ToString(), amount).ConfigureAwait(false);
                 }
 
                 fromAcc = "Investing Account";
@@ -100,10 +100,10 @@ namespace Roki.Modules.Currency
             }
             else if ((int) account == 1)
             {
-                success = await _mongo.Context.TransferCurrencyAsync(Context.User, Context.Guild.Id, amount).ConfigureAwait(false);
+                success = await _mongo.Context.TransferCurrencyAsync(Context.User, Context.Guild.Id.ToString(), amount).ConfigureAwait(false);
                 if (success)
                 {
-                    await _currency.CacheChangeAsync(Context.User, Context.Guild.Id, -amount).ConfigureAwait(false);
+                    await _currency.CacheChangeAsync(Context.User, Context.Guild.Id.ToString(), -amount).ConfigureAwait(false);
                 }
 
                 fromAcc = "Cash Account";

@@ -46,8 +46,8 @@ namespace Roki.Modules.Stocks
                     return;
                 }
 
-                User user = await _mongo.Context.GetOrAddUserAsync(Context.User, Context.Guild.Id).ConfigureAwait(false);
-                Investment investment = user.Data[Context.Guild.Id].Portfolio.ContainsKey(ticker) ? user.Data[Context.Guild.Id].Portfolio[ticker] : null;
+                User user = await _mongo.Context.GetOrAddUserAsync(Context.User, Context.Guild.Id.ToString()).ConfigureAwait(false);
+                Investment investment = user.Data[Context.Guild.Id.ToString()].Portfolio.ContainsKey(ticker) ? user.Data[Context.Guild.Id.ToString()].Portfolio[ticker] : null;
                 if (investment == null)
                 {
                     await Context.Channel.SendErrorAsync($"You do not own any shares of `{ticker}`").ConfigureAwait(false);
@@ -63,7 +63,7 @@ namespace Roki.Modules.Stocks
                 var pos = Enum.Parse<Position>(investment.Position.ToUpper());
                 if (pos == Position.LONG)
                 {
-                    TradingService.Status status = await Service.LongPositionAsync(user, Context.Guild.Id, ticker, "sell", price.Value, amount).ConfigureAwait(false);
+                    TradingService.Status status = await Service.LongPositionAsync(user, Context.Guild.Id.ToString(), ticker, "sell", price.Value, amount).ConfigureAwait(false);
                     if (status == TradingService.Status.NotEnoughShares)
                     {
                         await Context.Channel.SendErrorAsync("You do not have enough in your Investing Account sell these shares").ConfigureAwait(false);
@@ -77,7 +77,7 @@ namespace Roki.Modules.Stocks
                 }
                 else if (pos == Position.SHORT)
                 {
-                    TradingService.Status status = await Service.ShortPositionAsync(user, Context.Guild.Id, ticker, "sell", price.Value, amount).ConfigureAwait(false);
+                    TradingService.Status status = await Service.ShortPositionAsync(user, Context.Guild.Id.ToString(), ticker, "sell", price.Value, amount).ConfigureAwait(false);
                     if (status == TradingService.Status.NotEnoughInvesting)
                     {
                         await Context.Channel.SendErrorAsync("You do not have enough in your Investing Account sell these shares").ConfigureAwait(false);
@@ -110,10 +110,10 @@ namespace Roki.Modules.Stocks
 
                 decimal cost = amount * price.Value;
 
-                User user = await _mongo.Context.GetOrAddUserAsync(Context.User, Context.Guild.Id).ConfigureAwait(false);
+                User user = await _mongo.Context.GetOrAddUserAsync(Context.User, Context.Guild.Id.ToString()).ConfigureAwait(false);
                 if (position == Position.LONG)
                 {
-                    TradingService.Status status = await Service.LongPositionAsync(user, Context.Guild.Id, ticker, "buy", price.Value, amount).ConfigureAwait(false);
+                    TradingService.Status status = await Service.LongPositionAsync(user, Context.Guild.Id.ToString(), ticker, "buy", price.Value, amount).ConfigureAwait(false);
                     if (status == TradingService.Status.NotEnoughInvesting)
                     {
                         await Context.Channel.SendErrorAsync("You do not have enough in your Investing Account to invest").ConfigureAwait(false);
@@ -142,7 +142,7 @@ namespace Roki.Modules.Stocks
                 }
                 else
                 {
-                    TradingService.Status status = await Service.ShortPositionAsync(user, Context.Guild.Id, ticker, "buy", price.Value, amount).ConfigureAwait(false);
+                    TradingService.Status status = await Service.ShortPositionAsync(user, Context.Guild.Id.ToString(), ticker, "buy", price.Value, amount).ConfigureAwait(false);
                     if (status == TradingService.Status.TooMuchLeverage)
                     {
                         await Context.Channel.SendErrorAsync($"You have leveraged over `{100000:N2}` {Roki.Properties.CurrencyIcon}.\n" +

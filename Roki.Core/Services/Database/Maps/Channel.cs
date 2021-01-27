@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.Options;
 
 namespace Roki.Services.Database.Maps
 {
@@ -22,7 +23,9 @@ namespace Roki.Services.Database.Maps
         public bool Logging { get; set; }
         public bool CurrencyGeneration { get; set; }
         public bool XpGain { get; set; }
+        [BsonDictionaryOptions(DictionaryRepresentation.Document)]
         public Dictionary<string, bool> Modules { get; set; } = new();
+        [BsonDictionaryOptions(DictionaryRepresentation.Document)]
         public Dictionary<string, bool> Commands { get; set; } = new();
     }
 }

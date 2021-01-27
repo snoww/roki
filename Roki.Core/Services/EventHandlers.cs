@@ -223,7 +223,7 @@ namespace Roki.Services
 
         private Task UserJoined(SocketGuildUser user)
         {
-            Task _ = Task.Run(async () => { await _context.GetOrAddUserAsync(user, 0); });
+            Task _ = Task.Run(async () => { await _context.GetOrAddUserAsync(user, user.Guild.Id.ToString()); });
             return Task.CompletedTask;
         }
 
@@ -279,30 +279,31 @@ namespace Roki.Services
             {
                 return;
             }
-            
-            User user = await _context.GetOrAddUserAsync(message.Author, channel.GuildId).ConfigureAwait(false);
+
+            var guildId = channel.GuildId.ToString();
+            User user = await _context.GetOrAddUserAsync(message.Author, guildId).ConfigureAwait(false);
 
             // temp
-            bool doubleXp = user.Data[channel.GuildId].Subscriptions.ContainsKey(DoubleXpId);
-            bool fastXp = user.Data[channel.GuildId].Subscriptions.ContainsKey(FastXpId);
+            bool doubleXp = user.Data[guildId].Subscriptions.ContainsKey(DoubleXpId);
+            bool fastXp = user.Data[guildId].Subscriptions.ContainsKey(FastXpId);
 
-            var oldXp = new XpLevel(user.Data[channel.GuildId].Xp);
+            var oldXp = new XpLevel(user.Data[guildId].Xp);
             XpLevel newXp = doubleXp ? oldXp.AddXp(guildConfig.XpPerMessage * 2) : oldXp.AddXp(guildConfig.XpPerMessage);
             bool levelUp = oldXp.Level < newXp.Level;
 
             DateTime now = DateTime.UtcNow;
-            if (fastXp && now - user.Data[channel.GuildId].LastXpGain >= TimeSpan.FromMinutes(guildConfig.XpFastCooldown))
+            if (fastXp && now - user.Data[guildId].LastXpGain >= TimeSpan.FromMinutes(guildConfig.XpFastCooldown))
             {
-                await _context.UpdateUserXpAsync(user, channel.GuildId, now, oldXp.TotalXp - newXp.TotalXp, levelUp).ConfigureAwait(false);
+                await _context.UpdateUserXpAsync(user, guildId, now, newXp.TotalXp - oldXp.TotalXp, levelUp).ConfigureAwait(false);
             }
-            else if (DateTime.UtcNow - user.Data[channel.GuildId].LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpCooldown))
+            else if (DateTime.UtcNow - user.Data[guildId].LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpCooldown))
             {
-                await _context.UpdateUserXpAsync(user, channel.GuildId, now, oldXp.TotalXp - newXp.TotalXp, levelUp).ConfigureAwait(false);
+                await _context.UpdateUserXpAsync(user, guildId, now, newXp.TotalXp - oldXp.TotalXp, levelUp).ConfigureAwait(false);
             }
 
             if (levelUp)
             {
-                await SendNotification(user, channel.GuildId, message, newXp.Level).ConfigureAwait(false);
+                await SendNotification(user, guildId, message, newXp.Level).ConfigureAwait(false);
                 Dictionary<ObjectId, XpReward> rewards = (await _context.GetOrAddGuildAsync(channel.Guild as SocketGuild).ConfigureAwait(false)).XpRewards;
                 if (rewards != null && rewards.Count != 0)
                 {
@@ -311,7 +312,7 @@ namespace Roki.Services
                         if (reward.Type == "currency")
                         {
                             int amount = int.Parse(reward.Reward);
-                            await _context.UpdateUserCurrencyAsync(user, channel.GuildId, amount).ConfigureAwait(false);
+                            await _context.UpdateUserCurrencyAsync(user, guildId, amount).ConfigureAwait(false);
                             await _context.AddTransaction(new Transaction
                             {
                                 Amount = amount,
@@ -353,7 +354,7 @@ namespace Roki.Services
             }
         }
 
-        private static async Task SendNotification(User user, ulong guildId, SocketMessage msg, int level)
+        private static async Task SendNotification(User user, string guildId, SocketMessage msg, int level)
         {
             if (user.Data[guildId].Notification.Equals("none", StringComparison.OrdinalIgnoreCase))
             {
