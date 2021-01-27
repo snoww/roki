@@ -266,7 +266,7 @@ namespace Roki.Services.Database
         {
             UpdateDefinition<User> updateCurrency = Builders<User>.Update.Inc(u => u.Data[guildId].Currency, amount);
             // todo get bot id
-            await UserCollection.UpdateOneAsync(u => u.Id == Roki.Properties.BotId, updateCurrency).ConfigureAwait(false);
+            await UserCollection.UpdateOneAsync(u => u.Id == Roki.BotId, updateCurrency).ConfigureAwait(false);
         }
 
         public async Task<long> GetUserCurrency(IUser user, string guildId)
@@ -283,7 +283,7 @@ namespace Roki.Services.Database
         {
             return await UserCollection.Aggregate()
                 // todo get botid
-                .Match(u => u.Data[guildId].Currency > 0 && u.Id != Roki.Properties.BotId)
+                .Match(u => u.Data[guildId].Currency > 0 && u.Id != Roki.BotId)
                 .SortByDescending(u => u.Data[guildId].Currency)
                 .Skip(page * 9)
                 .Limit(9)
@@ -294,7 +294,7 @@ namespace Roki.Services.Database
         public async Task<IEnumerable<User>> GetXpLeaderboardAsync(string guildId, int page)
         {
             return await UserCollection.Aggregate()
-                .Match(u => u.Data[guildId].Xp > 0 && u.Id != Roki.Properties.BotId)
+                .Match(u => u.Data[guildId].Xp > 0 && u.Id != Roki.BotId)
                 .SortByDescending(u => u.Data[guildId].Xp)
                 .Skip(page * 9)
                 .Limit(9)

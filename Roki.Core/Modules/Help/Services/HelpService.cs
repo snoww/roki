@@ -20,10 +20,8 @@ namespace Roki.Modules.Help.Services
             _command = command;
         }
 
-        public async Task SendCommandInfo(CommandInfo command, ICommandContext context)
+        public static async Task SendCommandInfo(CommandInfo command, ICommandContext context, string prefix)
         {
-            string prefix = _command.DefaultPrefix;
-
             var str = $"**`{prefix + command.Aliases[0]}`**";
             string aliases = string.Join("/", command.Aliases.Skip(1).Select(a => $"`{a}`"));
             if (!string.IsNullOrWhiteSpace(aliases))

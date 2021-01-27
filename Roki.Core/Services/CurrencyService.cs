@@ -119,12 +119,12 @@ namespace Roki.Services
             Task _ = Task.Run(async () =>
             {
                 // todo bot id
-                if (from.Id == Roki.Properties.BotId)
+                if (from.Id == Roki.BotId)
                 {
                     await _mongo.Context.UpdateBotCurrencyAsync(-amount, guildId).ConfigureAwait(false);
                     await _mongo.Context.UpdateUserCurrencyAsync(to, guildId, amount).ConfigureAwait(false);
                 }
-                else if (to.Id == Roki.Properties.BotId)
+                else if (to.Id == Roki.BotId)
                 {
                     await _mongo.Context.UpdateBotCurrencyAsync(-amount, guildId).ConfigureAwait(false);
                     await _mongo.Context.UpdateUserCurrencyAsync(from, guildId, amount).ConfigureAwait(false);
@@ -151,7 +151,7 @@ namespace Roki.Services
 
         private async Task ChangeBotCacheAsync(ulong guildId, long amount)
         {
-            await _cache.StringIncrementAsync($"currency:{guildId}:{Roki.Properties.BotId}", amount, CommandFlags.FireAndForget).ConfigureAwait(false);
+            await _cache.StringIncrementAsync($"currency:{guildId}:{Roki.BotId}", amount, CommandFlags.FireAndForget).ConfigureAwait(false);
         }
     }
 }
