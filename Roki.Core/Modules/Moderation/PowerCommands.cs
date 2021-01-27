@@ -13,6 +13,7 @@ namespace Roki.Modules.Moderation
     public partial class Moderation
     {
         [Group]
+        [RequireContext(ContextType.Guild)]
         public class PowerCommands : RokiSubmodule<PowersService>
         {
             // temp solution only applies to 1 guild
@@ -22,7 +23,6 @@ namespace Roki.Modules.Moderation
             private static readonly ObjectId NickId = ObjectId.Parse("5def9e9f03eb7230a1b5bba6");
             
             [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
             [RequireBotPermission(ChannelPermission.ManageRoles)]
             [Priority(0)]
             public async Task Mute(IUser user)
@@ -37,7 +37,6 @@ namespace Roki.Modules.Moderation
             }
 
             [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
             [RequireBotPermission(ChannelPermission.ManageRoles)]
             [Priority(0)]
             public async Task Block(IUser user)
@@ -51,7 +50,6 @@ namespace Roki.Modules.Moderation
             }
             
             [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
             [RequireBotPermission(ChannelPermission.ManageRoles)]
             [Priority(0)]
             public async Task Timeout(IUser user)
@@ -66,7 +64,6 @@ namespace Roki.Modules.Moderation
             }
 
             [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
             [RequireBotPermission(GuildPermission.ManageNicknames)]
             [Priority(0)]
             public async Task Nickname(IUser user, [Leftover] string nickname = null)

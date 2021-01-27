@@ -7,12 +7,14 @@ using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Services;
+using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Gambling
 {
     public partial class Gambling
     {
         [Group]
+        [RequireContext(ContextType.Guild)]
         public class CoinCommands : RokiSubmodule
         {
             public enum BetFlipGuess
@@ -26,20 +28,22 @@ namespace Roki.Modules.Gambling
             }
 
             private readonly ICurrencyService _currency;
+            private readonly IConfigurationService _config;
             private readonly Random _rng = new();
 
-            public CoinCommands(ICurrencyService currency)
+            public CoinCommands(ICurrencyService currency, IConfigurationService config)
             {
                 _currency = currency;
+                _config = config;
             }
 
             [RokiCommand, Description, Aliases, Usage]
             public async Task BetFlip(long amount, BetFlipGuess guess)
             {
-                // TODO min/max bet amounts
-                if (amount < Roki.Properties.BetFlipMin)
+                GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
+                if (amount < guildConfig.BetFlipMin)
                 {
-                    await Context.Channel.SendErrorAsync($"The minimum bet is `{Roki.Properties.BetFlipMin}` {Roki.Properties.CurrencyIcon}")
+                    await Context.Channel.SendErrorAsync($"The minimum bet is `{guildConfig.BetFlipMin}` {guildConfig.CurrencyIcon}")
                         .ConfigureAwait(false);
                     return;
                 }
@@ -50,7 +54,7 @@ namespace Roki.Modules.Gambling
 
                 if (!removed)
                 {
-                    await Context.Channel.SendErrorAsync($"Not enough {Roki.Properties.CurrencyIcon}\n" +
+                    await Context.Channel.SendErrorAsync($"Not enough {guildConfig.CurrencyIcon}\n" +
                                                          $"You have `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}`")
                         .ConfigureAwait(false);
                     return;
@@ -61,19 +65,19 @@ namespace Roki.Modules.Gambling
 
                 if (guess == result)
                 {
-                    var won = (long) Math.Ceiling(amount * Roki.Properties.BetFlipMultiplier);
+                    var won = (long) Math.Ceiling(amount * guildConfig.BetFlipMultiplier);
                     await _currency.AddAsync(Context.User, Context.Client.CurrentUser, "BetFlip Payout", won, Context.Guild.Id, Context.Channel.Id, Context.Message.Id).ConfigureAwait(false);
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithDescription(
-                                $"Result is: {result}\n{Context.User.Mention} Congratulations! You've won `{won:N0}` {Roki.Properties.CurrencyIcon}\n" +
-                                $"New Balance: `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}"))
+                                $"Result is: {result}\n{Context.User.Mention} Congratulations! You've won `{won:N0}` {guildConfig.CurrencyIcon}\n" +
+                                $"New Balance: `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}"))
                         .ConfigureAwait(false);
                     return;
                 }
 
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
                         .WithDescription($"Result is: {result}\n{Context.User.Mention} Better luck next time!\n" +
-                                         $"New Balance: `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}"))
+                                         $"New Balance: `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}"))
                     .ConfigureAwait(false);
             }
 
@@ -85,16 +89,18 @@ namespace Roki.Modules.Gambling
                     return;
                 }
 
-                if (guesses.Length < Roki.Properties.BetFlipMMinGuesses)
+                GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
+
+                if (guesses.Length < guildConfig.BetFlipMMinGuesses)
                 {
                     await Context.Channel.SendErrorAsync("Needs at least `5` guesses.").ConfigureAwait(false);
                     return;
                 }
 
                 int minAmount = guesses.Length * 2;
-                if (guesses.Length >= Roki.Properties.BetFlipMMinGuesses && amount < minAmount)
+                if (guesses.Length >= guildConfig.BetFlipMMinGuesses && amount < minAmount)
                 {
-                    await Context.Channel.SendErrorAsync($"`{guesses.Length}` guesses requires you to bet at least `{minAmount:N0}` {Roki.Properties.CurrencyIcon}.")
+                    await Context.Channel.SendErrorAsync($"`{guesses.Length}` guesses requires you to bet at least `{minAmount:N0}` {guildConfig.CurrencyIcon}.")
                         .ConfigureAwait(false);
                     return;
                 }
@@ -105,7 +111,7 @@ namespace Roki.Modules.Gambling
 
                 if (!removed)
                 {
-                    await Context.Channel.SendErrorAsync($"Not enough {Roki.Properties.CurrencyIcon}\n" +
+                    await Context.Channel.SendErrorAsync($"Not enough {guildConfig.CurrencyIcon}\n" +
                                                          $"You have `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}`")
                         .ConfigureAwait(false);
                     return;
@@ -116,22 +122,22 @@ namespace Roki.Modules.Gambling
 
                 int correct = guesses.Where((t, i) => t == results[i]).Count();
 
-                if ((float) correct / guesses.Length >= Roki.Properties.BetFlipMMinCorrect)
+                if ((float) correct / guesses.Length >= guildConfig.BetFlipMMinCorrect)
                 {
-                    var won = (long) Math.Ceiling(amount * Math.Pow(correct, Roki.Properties.BetFlipMMultiplier));
+                    var won = (long) Math.Ceiling(amount * Math.Pow(correct, guildConfig.BetFlipMMultiplier));
                     await _currency.AddAsync(Context.User, Context.Client.CurrentUser, "BetFlipMulti Payout", won, Context.Guild.Id, Context.Channel.Id, Context.Message.Id)
                         .ConfigureAwait(false);
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithDescription(
-                                $"Results are: {string.Join(", ", results)}\n{Context.User.Mention} Congratulations! You got `{correct}/{guesses.Length}` correct. You've won `{won:N0}` {Roki.Properties.CurrencyIcon}" +
-                                $"New Balance: `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}"))
+                                $"Results are: {string.Join(", ", results)}\n{Context.User.Mention} Congratulations! You got `{correct}/{guesses.Length}` correct. You've won `{won:N0}` {guildConfig.CurrencyIcon}" +
+                                $"New Balance: `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}"))
                         .ConfigureAwait(false);
                     return;
                 }
 
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
                         .WithDescription($"Results are: {string.Join(", ", results)}\n{Context.User.Mention} You got `{correct}/{guesses.Length}` correct. Better luck next time!\n" +
-                                         $"New Balance: `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}"))
+                                         $"New Balance: `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}"))
                     .ConfigureAwait(false);
             }
         }

@@ -6,6 +6,7 @@ using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Stocks.Services;
+using Roki.Services;
 using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Stocks
@@ -13,8 +14,16 @@ namespace Roki.Modules.Stocks
     public partial class Stocks
     {
         [Group]
+        [RequireContext(ContextType.Guild)]
         public class PortfolioCommands : RokiSubmodule<PortfolioService>
         {
+            private readonly IConfigurationService _config;
+
+            public PortfolioCommands(IConfigurationService config)
+            {
+                _config = config;
+            }
+
             [RokiCommand, Usage, Description, Aliases]
             public async Task Portfolio(IUser optionalUser = null)
             {
@@ -26,25 +35,26 @@ namespace Roki.Modules.Stocks
                     return;
                 }
 
+                GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
                 decimal value = await Service.GetPortfolioValue(portfolio).ConfigureAwait(false);
 
-                const int itemsPP = 10;
+                const int itemsPerPage = 10;
                 await Context.SendPaginatedMessageAsync(0, p =>
                 {
-                    int startAt = itemsPP * p;
+                    int startAt = itemsPerPage * p;
                     string desc = string.Join("\n", portfolio
                         .Skip(startAt)
-                        .Take(itemsPP)
+                        .Take(itemsPerPage)
                         .Select(i => $"`{i.Key.ToUpper()}` `{i.Value.Position}` - `{i.Value.Shares}` shares"));
 
-                    desc = $"Your current portfolio value:\n`{value:N2}` {Roki.Properties.CurrencyIcon}\n" + desc;
+                    desc = $"Your current portfolio value:\n`{value:N2}` {guildConfig.CurrencyIcon}\n" + desc;
 
                     EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle($"{user.Username}'s Portfolio")
                         .WithDescription(desc);
 
                     return embed;
-                }, portfolio.Count, itemsPP, false);
+                }, portfolio.Count, itemsPerPage, false);
             }
         }
     }

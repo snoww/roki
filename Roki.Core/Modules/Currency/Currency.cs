@@ -10,6 +10,7 @@ using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Currency
 {
+    [RequireContext(ContextType.Guild)]
     public partial class Currency : RokiTopLevelModule
     {
         public enum Account
@@ -24,38 +25,37 @@ namespace Roki.Modules.Currency
         }
 
         private readonly ICurrencyService _currency;
-        private readonly MongoService _mongo;
+        private readonly IMongoService _mongo;
+        private readonly IConfigurationService _config;
 
-        public Currency(ICurrencyService currency, MongoService mongo)
+        public Currency(ICurrencyService currency, IMongoService mongo, IConfigurationService config)
         {
             _currency = currency;
             _mongo = mongo;
+            _config = config;
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        [RequireContext(ContextType.Guild)]
         public async Task Cash([Leftover] IUser user = null)
         {
             user ??= Context.User;
             await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                    .WithDescription($"{user.Mention}'s Cash Account:\n`{await _currency.GetCurrency(user, Context.Guild.Id):N0}` {Roki.Properties.CurrencyIcon}")
+                    .WithDescription($"{user.Mention}'s Cash Account:\n`{await _currency.GetCurrency(user, Context.Guild.Id):N0}` {(await _config.GetGuildConfigAsync(Context.Guild.Id)).CurrencyIcon}")
                     .WithFooter(".$$ for Investing Account"))
                 .ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        [RequireContext(ContextType.Guild)]
         public async Task Investing([Leftover] IUser user = null)
         {
             user ??= Context.User;
             await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                    .WithDescription($"{user.Mention}'s Investing Account:\n`{_mongo.Context.GetUserInvesting(user, Context.Guild.Id.ToString()):N2}` {Roki.Properties.CurrencyIcon}")
+                    .WithDescription($"{user.Mention}'s Investing Account:\n`{_mongo.Context.GetUserInvesting(user, Context.Guild.Id.ToString()):N2}` {(await _config.GetGuildConfigAsync(Context.Guild.Id)).CurrencyIcon}")
                     .WithFooter(".$ for Cash Account"))
                 .ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        [RequireContext(ContextType.Guild)]
         public async Task Leaderboard([Leftover] int page = 1)
         {
             if (page <= 0)
@@ -69,18 +69,18 @@ namespace Roki.Modules.Currency
             EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle("Currency Leaderboard");
             int i = 9 * page + 1;
-            foreach (User user in list) embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"`{user.Data[Context.Guild.Id.ToString()].Currency:N0}` {Roki.Properties.CurrencyIcon}");
+            foreach (User user in list) embed.AddField($"#{i++} {user.Username}#{user.Discriminator}", $"`{user.Data[Context.Guild.Id.ToString()].Currency:N0}` {(await _config.GetGuildConfigAsync(Context.Guild.Id)).CurrencyIcon}");
 
             await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        [RequireContext(ContextType.Guild)]
         public async Task Transfer(Account account, long amount)
         {
+            GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
             if (amount == 0)
             {
-                await Context.Channel.SendErrorAsync($"You must transfer at least `1` {Roki.Properties.CurrencyIcon}").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync($"You must transfer at least `1` {guildConfig.CurrencyIcon}").ConfigureAwait(false);
                 return;
             }
 
@@ -112,7 +112,7 @@ namespace Roki.Modules.Currency
 
             if (!success)
             {
-                await Context.Channel.SendErrorAsync($"You do not have enough {Roki.Properties.CurrencyIcon} in your `{fromAcc}` to transfer.").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync($"You do not have enough {guildConfig.CurrencyIcon} in your `{fromAcc}` to transfer.").ConfigureAwait(false);
                 return;
             }
 
@@ -128,11 +128,10 @@ namespace Roki.Modules.Currency
             });
 
             await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                .WithDescription($"{Context.User.Mention} You've successfully transferred `{amount:N0}` {Roki.Properties.CurrencyIcon}\nFrom `{fromAcc}` ➡️ `{toAcc}`")).ConfigureAwait(false);
+                .WithDescription($"{Context.User.Mention} You've successfully transferred `{amount:N0}` {guildConfig.CurrencyIcon}\nFrom `{fromAcc}` ➡️ `{toAcc}`")).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        [RequireContext(ContextType.Guild)]
         public async Task Give(long amount, IGuildUser user, [Leftover] string message = null)
         {
             if (amount <= 0 || Context.User.Id == user.Id || user.IsBot)
@@ -148,15 +147,17 @@ namespace Roki.Modules.Currency
             message = $"Gift from {Context.User.Username} to {user.Username} - {message}";
             bool success = await _currency.TransferAsync(Context.User, user, message, amount, Context.Guild.Id, Context.Channel.Id, Context.Message.Id)
                 .ConfigureAwait(false);
+            
+            GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
 
             if (!success)
             {
-                await Context.Channel.SendErrorAsync($"You do not have enough {Roki.Properties.CurrencyNamePlural} to give.").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync($"You do not have enough {guildConfig.CurrencyNamePlural} to give.").ConfigureAwait(false);
                 return;
             }
 
             await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                .WithDescription($"{Context.User.Username} gifted `{amount:N0}` {Roki.Properties.CurrencyNamePlural} to {user.Mention}")).ConfigureAwait(false);
+                .WithDescription($"{Context.User.Username} gifted `{amount:N0}` {guildConfig.CurrencyNamePlural} to {user.Mention}")).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -191,6 +192,8 @@ namespace Roki.Modules.Currency
 
             EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle($"{user.Username}'s Transactions History");
+            
+            GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
 
             var desc = new StringBuilder();
             foreach (Transaction tran in trans)
@@ -204,7 +207,7 @@ namespace Roki.Modules.Currency
                 }
 
                 // var date = Format.Code($"{tran.Date:HH:mm yyyy-MM-dd}");
-                desc.AppendLine($"{type} - {tran.Reason?.Trim()} {Format.Code(amount)} {Roki.Properties.CurrencyIcon}");
+                desc.AppendLine($"{type} - {tran.Reason?.Trim()} {Format.Code(amount)} {guildConfig.CurrencyIcon}");
             }
 
             embed.WithDescription(desc.ToString()).WithFooter($"Page {page + 1}");

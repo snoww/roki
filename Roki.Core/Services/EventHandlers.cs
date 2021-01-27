@@ -23,11 +23,13 @@ namespace Roki.Services
         private readonly IDatabase _cache;
         private readonly DiscordSocketClient _client;
         private readonly IMongoContext _context;
+        private readonly IConfigurationService _config;
 
-        public EventHandlers(IMongoService service, DiscordSocketClient client, IRedisCache cache)
+        public EventHandlers(IMongoService service, DiscordSocketClient client, IRedisCache cache, IConfigurationService config)
         {
             _context = service.Context;
             _client = client;
+            _config = config;
             _cache = cache.Redis.GetDatabase();
         }
 
@@ -68,7 +70,7 @@ namespace Roki.Services
                 {
                     await UpdateXp(message, textChannel).ConfigureAwait(false);
                 }
-                if (!await _context.IsLoggingEnabled(textChannel))
+                if (!(await _config.GetChannelConfigAsync(textChannel)).Logging)
                 {
                     return;
                 }
@@ -86,7 +88,7 @@ namespace Roki.Services
             if (after.EditedTimestamp == null) return Task.CompletedTask;
             Task _ = Task.Run(async () =>
             {
-                if (!await _context.IsLoggingEnabled(after.Channel as ITextChannel))
+                if (!(await _config.GetChannelConfigAsync(after.Channel as ITextChannel)).Logging)
                 {
                     return;
                 }
@@ -102,7 +104,7 @@ namespace Roki.Services
             if (cache.HasValue && cache.Value.Author.IsBot) return Task.CompletedTask;
             Task _ = Task.Run(async () =>
             {
-                if (!await _context.IsLoggingEnabled(channel as ITextChannel))
+                if (!(await _config.GetChannelConfigAsync(channel as ITextChannel)).Logging)
                 {
                     return;
                 }
@@ -116,7 +118,7 @@ namespace Roki.Services
         {
             Task _ = Task.Run(async () =>
             {
-                if (!await _context.IsLoggingEnabled(channel as ITextChannel))
+                if (!(await _config.GetChannelConfigAsync(channel as ITextChannel)).Logging)
                 {
                     return;
                 }
@@ -273,8 +275,8 @@ namespace Roki.Services
 
         private async Task UpdateXp(SocketMessage message, ITextChannel channel)
         {
-            ChannelConfig channelConfig = await _context.GetChannelConfigAsync(channel);
-            GuildConfig guildConfig = await _context.GetGuildConfigAsync(channel.GuildId);
+            ChannelConfig channelConfig = await _config.GetChannelConfigAsync(channel);
+            GuildConfig guildConfig = await _config.GetGuildConfigAsync(channel.GuildId);
             if (!channelConfig.XpGain)
             {
                 return;
@@ -298,7 +300,7 @@ namespace Roki.Services
                 goto levelUp;
             }
 
-            if (DateTime.UtcNow - user.Data[guildId].LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpCooldown))
+            if (DateTime.UtcNow - user.Data[guildId].LastXpGain >= TimeSpan.FromMinutes(guildConfig.XpCooldown))
             {
                 await _context.UpdateUserXpAsync(user, guildId, now, newXp.TotalXp - oldXp.TotalXp, levelUp).ConfigureAwait(false);
                 goto levelUp;
@@ -344,7 +346,7 @@ namespace Roki.Services
                             .WithTitle($"Level `{newXp.Level}` Rewards")
                             .WithDescription("Here are your rewards:\n" + string.Join("\n", rewards
                                 .Select(r => r.Value.Type == "currency"
-                                    ? $"+ `{int.Parse(r.Value.Reward):N0}` {Roki.Properties.CurrencyIcon}"
+                                    ? $"+ `{int.Parse(r.Value.Reward):N0}` {guildConfig.CurrencyIcon}"
                                     : $"+ {r.Value.Reward}"))))
                         .ConfigureAwait(false);
                     await dm.CloseAsync().ConfigureAwait(false);

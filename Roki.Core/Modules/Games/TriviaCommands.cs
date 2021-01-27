@@ -11,12 +11,14 @@ using Roki.Extensions;
 using Roki.Modules.Games.Common;
 using Roki.Modules.Games.Services;
 using Roki.Services;
+using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Games
 {
     public partial class Games
     {
         [Group]
+        [RequireContext(ContextType.Guild)]
         public class TriviaCommands : RokiSubmodule<TriviaService>
         {
             private static readonly IEmote LetterA = new Emoji("🇦");
@@ -78,12 +80,14 @@ namespace Roki.Modules.Games
             };
 
             private readonly DiscordSocketClient _client;
+            private readonly IConfigurationService _config;
             private readonly ICurrencyService _currency;
 
-            public TriviaCommands(ICurrencyService currency, DiscordSocketClient client)
+            public TriviaCommands(ICurrencyService currency, DiscordSocketClient client, IConfigurationService config)
             {
                 _currency = currency;
                 _client = client;
+                _config = config;
             }
 
             [RokiCommand, Description, Usage, Aliases]
@@ -101,6 +105,8 @@ namespace Roki.Modules.Games
                     await Context.Channel.SendErrorAsync("Unknown Category, use `.tc` to checkout the trivia categories.").ConfigureAwait(false);
                     return;
                 }
+                
+                GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
 
                 Service.TriviaGames.TryAdd(Context.Channel.Id, Context.User.Id);
                 TriviaModel questions;
@@ -113,15 +119,15 @@ namespace Roki.Modules.Games
                     {
                         if (question.Difficulty == "easy")
                         {
-                            prizePool += Roki.Properties.TriviaEasy;
+                            prizePool += guildConfig.TriviaEasy;
                         }
                         else if (question.Difficulty == "medium")
                         {
-                            prizePool += Roki.Properties.TriviaMedium;
+                            prizePool += guildConfig.TriviaMedium;
                         }
                         else
                         {
-                            prizePool += Roki.Properties.TriviaHard;
+                            prizePool += guildConfig.TriviaHard;
                         }
                     }
                 }
@@ -136,7 +142,7 @@ namespace Roki.Modules.Games
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle($"Trivia Game - {category}")
                         .WithDescription(
-                            $"Starting new trivia game.\nYou can earn up to `{prizePool:N0}` {Roki.Properties.CurrencyNamePlural}!\nReact with the correct emote to answer questions.\nType `stop` to cancel game early"))
+                            $"Starting new trivia game.\nYou can earn up to `{prizePool:N0}` {guildConfig.CurrencyNamePlural}!\nReact with the correct emote to answer questions.\nType `stop` to cancel game early"))
                     .ConfigureAwait(false);
 
                 await Task.Delay(5000).ConfigureAwait(false);
@@ -167,15 +173,15 @@ namespace Roki.Modules.Games
                     int difficultyBonus;
                     if (q.Difficulty == "easy")
                     {
-                        difficultyBonus = Roki.Properties.TriviaEasy;
+                        difficultyBonus = guildConfig.TriviaEasy;
                     }
                     else if (q.Difficulty == "medium")
                     {
-                        difficultyBonus = Roki.Properties.TriviaMedium;
+                        difficultyBonus = guildConfig.TriviaMedium;
                     }
                     else
                     {
-                        difficultyBonus = Roki.Properties.TriviaHard;
+                        difficultyBonus = guildConfig.TriviaHard;
                     }
 
                     IUserMessage msg;
@@ -316,7 +322,7 @@ namespace Roki.Modules.Games
                     long before = await _currency.GetCurrency(Context.User, Context.Guild.Id);
                     await _currency.AddAsync(user, Context.Client.CurrentUser, "Trivia Reward", score.Amount, Context.Guild.Id, Context.Channel.Id, Context.Message.Id)
                         .ConfigureAwait(false);
-                    winStr += $"{user.Username} won `{score.Amount:N0}` {Roki.Properties.CurrencyIcon}\n" +
+                    winStr += $"{user.Username} won `{score.Amount:N0}` {guildConfig.CurrencyIcon}\n" +
                               $"\t`{before:N0}` ⇒ `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0:N0}`\n";
                     winners = true;
                 }

@@ -19,6 +19,7 @@ namespace Roki.Modules.Currency
     public partial class Currency
     {
         [Group]
+        [RequireContext(ContextType.Guild)]
         public class StoreCommands : RokiSubmodule<StoreService>
         {
             private readonly DiscordSocketClient _client;
@@ -33,7 +34,6 @@ namespace Roki.Modules.Currency
             }
 
             [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
             public async Task Store([Leftover] string itemName = null)
             {
                 Dictionary<ObjectId, Listing> cat = await _mongo.Context.GetStoreCatalogueAsync(Context.Guild.Id).ConfigureAwait(false);
@@ -91,7 +91,6 @@ namespace Roki.Modules.Currency
 //            }
 
             [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
             [Priority(0)]
             public async Task Buy(string quantity, [Leftover] string name)
             {
@@ -203,7 +202,6 @@ namespace Roki.Modules.Currency
 //            }
 
             [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
             public async Task Subscriptions()
             {
                 Dictionary<ObjectId, Subscription> subs = (await _mongo.Context.GetOrAddUserAsync(Context.User, Context.Guild.Id.ToString()).ConfigureAwait(false)).Data[Context.Guild.Id.ToString()].Subscriptions;
@@ -227,7 +225,6 @@ namespace Roki.Modules.Currency
             }
 
             [RokiCommand, Description, Usage, Aliases]
-            [RequireContext(ContextType.Guild)]
             public async Task Inventory()
             {
                 Dictionary<ObjectId, Item> inv = (await _mongo.Context.GetOrAddUserAsync(Context.User, Context.Guild.Id.ToString()).ConfigureAwait(false)).Data[Context.Guild.Id.ToString()].Inventory;

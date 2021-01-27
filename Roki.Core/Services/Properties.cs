@@ -2,6 +2,9 @@ namespace Roki.Services
 {
     public class Properties
     {
+        // global default properties
+        // guild properties are stored in database
+        
         public string Prefix { get; set; } = ".";
         public ulong BotId { get; set; } = 220678903432347650;
 

@@ -18,13 +18,15 @@ namespace Roki.Modules.Currency.Services
     {
         private readonly IDatabase _cache;
         private readonly IMongoService _mongo;
+        private readonly IConfigurationService _config;
         private readonly SemaphoreSlim _pickLock = new(1, 1);
         private readonly Random _rng = new();
 
 
-        public PickDropService(CommandHandler command, IRedisCache cache, IMongoService mongo)
+        public PickDropService(CommandHandler command, IRedisCache cache, IMongoService mongo, IConfigurationService config)
         {
             _mongo = mongo;
+            _config = config;
             _cache = cache.Redis.GetDatabase();
             command.OnMessageNoTrigger += CurrencyGeneration;
         }
@@ -38,13 +40,13 @@ namespace Roki.Modules.Currency.Services
                 return;
             }
 
-            ChannelConfig channelConfig = await _mongo.Context.GetChannelConfigAsync(channel);
+            ChannelConfig channelConfig = await _config.GetChannelConfigAsync(channel);
             if (!channelConfig.CurrencyGeneration)
             {
                 return;
             }
 
-            GuildConfig guildConfig = await _mongo.Context.GetGuildConfigAsync(channel.GuildId);
+            GuildConfig guildConfig = await _config.GetGuildConfigAsync(channel.GuildId);
 
             // impossible to drop if value is set below 0.01
             if (guildConfig.CurrencyGenerationChance < 0.01)

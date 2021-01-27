@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -9,11 +8,9 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Driver;
 using NLog;
 using Roki.Extensions;
 using Roki.Services;
-using Roki.Services.Database.Maps;
 using StackExchange.Redis;
 using Victoria;
 
@@ -22,18 +19,27 @@ namespace Roki
     public class Roki
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        
+        private RokiConfig RokiConfig { get; }
+        private DiscordSocketClient Client { get; }
+        private CommandService CommandService { get; }
+        private IMongoService Mongo { get; }
+        private IRedisCache Cache { get; }
+        private IConfigurationService Config { get; }
+        private IServiceProvider Services { get; set; }
+
+        public static Properties Properties { get; } = new();
+        public static Color OkColor { get; private set; }
+        public static Color ErrorColor { get; private set; }
 
         public Roki()
         {
             LogSetup.SetupLogger();
 
-            Config = new RokiConfig();
-            Mongo = new MongoService(Config.Db);
-            Cache = new RedisCache(Config.RedisConfig);
-
-            // global properties
-            // future: guild specific properties
-            Properties = File.ReadAllText("./data/properties.json").Deserialize<Properties>();
+            RokiConfig = new RokiConfig();
+            Mongo = new MongoService(RokiConfig.Db);
+            Cache = new RedisCache(RokiConfig.RedisConfig);
+            Config = new ConfigurationService(Mongo.Context, Cache);
 
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
@@ -55,17 +61,6 @@ namespace Roki
             Client.Log += Log;
         }
 
-        private RokiConfig Config { get; }
-        private DiscordSocketClient Client { get; }
-        private CommandService CommandService { get; }
-        private IMongoService Mongo { get; }
-        private IRedisCache Cache { get; }
-        private IServiceProvider Services { get; set; }
-
-        public static Properties Properties { get; private set; }
-        public static Color OkColor { get; private set; }
-        public static Color ErrorColor { get; private set; }
-
         public async Task RunAndBlockAsync()
         {
             await RunAsync().ConfigureAwait(false);
@@ -76,7 +71,7 @@ namespace Roki
         {
             var sw = Stopwatch.StartNew();
 
-            await LoginAsync(Config.Token).ConfigureAwait(false);
+            await LoginAsync(RokiConfig.Token).ConfigureAwait(false);
 
             Logger.Info("Loading services");
 
@@ -97,7 +92,7 @@ namespace Roki
             await Services.GetService<CommandHandler>()!.StartHandling().ConfigureAwait(false);
             await Services.GetService<CommandService>()!.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
 
-            await new EventHandlers(Mongo, Client, Cache).StartHandling().ConfigureAwait(false);
+            await new EventHandlers(Mongo, Client, Cache, Config).StartHandling().ConfigureAwait(false);
         }
 
         private async Task LoginAsync(string token)
@@ -179,9 +174,10 @@ namespace Roki
             var sw = Stopwatch.StartNew();
 
             IServiceCollection service = new ServiceCollection()
-                .AddSingleton<IRokiConfig>(Config)
+                .AddSingleton<IRokiConfig>(RokiConfig)
                 .AddSingleton(Mongo)
                 .AddSingleton(Cache)
+                .AddSingleton(Config)
                 .AddSingleton(Client)
                 .AddSingleton(CommandService)
                 .AddSingleton<LavaConfig>()

@@ -13,6 +13,7 @@ using NLog;
 using Roki.Extensions;
 using Roki.Modules.Games.Services;
 using Roki.Services;
+using Roki.Services.Database.Maps;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.PixelFormats;
@@ -42,6 +43,7 @@ namespace Roki.Modules.Games.Common
 
         private readonly ITextChannel _channel;
         private readonly DiscordSocketClient _client;
+        private readonly GuildConfig _config;
         private readonly ICurrencyService _currency;
 
         private readonly int _generation;
@@ -71,12 +73,13 @@ namespace Roki.Modules.Games.Common
         private Dictionary<string, List<string>> _teams;
         private Bet? _winner;
 
-        public Showdown(ICurrencyService currency, DiscordSocketClient client, ITextChannel channel, int generation,
+        public Showdown(ICurrencyService currency, DiscordSocketClient client, GuildConfig config, ITextChannel channel, int generation,
             ShowdownService service, IRedisCache cache)
         {
             _currency = currency;
             _cache = cache.Redis.GetDatabase();
             _client = client;
+            _config = config;
             _channel = channel;
             _generation = generation;
             _service = service;
@@ -179,7 +182,7 @@ namespace Roki.Modules.Games.Common
 
                 long won = value.Amount * value.Multiple * 2;
                 await _currency.AddAsync(key, _client.CurrentUser,"BetShowdown Payout", won, _channel.Guild.Id, _channel.Id, _game.Id).ConfigureAwait(false);
-                winners.AppendLine($"{key.Username} won `{won:N0}` {Roki.Properties.CurrencyIcon}\n\t`{before:N0} > {await GetCurrency(key):N0}`");
+                winners.AppendLine($"{key.Username} won `{won:N0}` {_config.CurrencyIcon}\n\t`{before:N0} > {await GetCurrency(key):N0}`");
             }
 
             EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(_channel.GuildId);
@@ -292,7 +295,7 @@ namespace Roki.Modules.Games.Common
                         {
                             IUserMessage notEnoughMsg = await _channel
                                 .SendErrorAsync(
-                                    $"<@{reaction.User.Value.Id}> You do not have enough {Roki.Properties.CurrencyIcon} to make that bet.")
+                                    $"<@{reaction.User.Value.Id}> You do not have enough {_config.CurrencyIcon} to make that bet.")
                                 .ConfigureAwait(false);
                             await _game.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
                             notEnoughMsg.DeleteAfter(5);

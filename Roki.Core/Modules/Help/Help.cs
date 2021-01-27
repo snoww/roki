@@ -10,6 +10,8 @@ using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Help.Common;
 using Roki.Modules.Help.Services;
+using Roki.Services;
+using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Help
 {
@@ -17,23 +19,27 @@ namespace Roki.Modules.Help
     {
         private readonly CommandService _command;
         private readonly IServiceProvider _services;
+        private readonly IConfigurationService _config;
 
-        public Help(CommandService command, IServiceProvider services)
+        public Help(CommandService command, IServiceProvider services, IConfigurationService config)
         {
             _command = command;
             _services = services;
+            _config = config;
         }
 
         [RokiCommand, Description, Usage, Aliases]
         public async Task Modules()
         {
+            string prefix = Context.Guild != null ? (await _config.GetGuildConfigAsync(Context.Guild.Id)).Prefix : Roki.Properties.Prefix;
+            
             EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle("List of Modules")
                 .WithDescription(string.Join("\n",
                     _command.Modules.GroupBy(module => module.GetTopLevelModule())
                         .Select(module => "• " + module.Key.Name)
                         .OrderBy(s => s)))
-                .WithFooter("Use .commands <module> to see commands of that module");
+                .WithFooter($"Use {prefix}commands <module> to see commands of that module");
             await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
@@ -47,6 +53,8 @@ namespace Roki.Modules.Help
             {
                 return;
             }
+            
+            string prefix = Context.Guild != null ? (await _config.GetGuildConfigAsync(Context.Guild.Id)).Prefix : Roki.Properties.Prefix;
 
             List<CommandInfo> commands = _command.Commands.Where(c =>
                     c.Module.GetTopLevelModule().Name.ToUpperInvariant().StartsWith(moduleName, StringComparison.InvariantCulture))
@@ -79,7 +87,7 @@ namespace Roki.Modules.Help
             {
                 if (opts.View != CommandArgs.ViewType.Hide)
                 {
-                    await Context.Channel.SendErrorAsync("Module not found, use `.modules` to see the list of modules.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync($"Module not found, use `{prefix}modules` to see the list of modules.").ConfigureAwait(false);
                 }
                 else
                 {
@@ -91,7 +99,7 @@ namespace Roki.Modules.Help
 
             EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle($"{commands.First().Module.GetTopLevelModule().Name} Module Commands")
-                .WithFooter($"Use {Roki.Properties.Prefix}h <command> to see the help for that command");
+                .WithFooter($"Use {prefix}h <command> to see the help for that command");
 
             foreach (IGrouping<string, CommandInfo> submodule in module)
             {
@@ -99,7 +107,7 @@ namespace Roki.Modules.Help
 
                 foreach (CommandInfo command in submodule)
                 {
-                    string commandName = Roki.Properties.Prefix + command.Aliases[0];
+                    string commandName = prefix + command.Aliases[0];
                     string aliases = "[" + string.Join("/", command.Aliases.Skip(1)) + "]";
                     // command names should be less than 30 characters
                     int padding = Math.Abs(30 - commandName.Length);
@@ -136,13 +144,16 @@ namespace Roki.Modules.Help
                 await H(cmd).ConfigureAwait(false);
                 return;
             }
+            
+            string prefix = Context.Guild != null ? (await _config.GetGuildConfigAsync(Context.Guild.Id)).Prefix : Roki.Properties.Prefix;
 
-            await Context.Channel.SendErrorAsync("Command not found.\nTry `.modules` to find the correct module, then `.commands <module>` to find the specific command.").ConfigureAwait(false);
+            await Context.Channel.SendErrorAsync($"Command not found.\nTry `{prefix}modules` to find the correct module, then `{prefix}commands <module>` to find the specific command.").ConfigureAwait(false);
         }
 
         private async Task H(CommandInfo command)
         {
             IMessageChannel channel = Context.Channel;
+            string prefix = Context.Guild != null ? (await _config.GetGuildConfigAsync(Context.Guild.Id)).Prefix : Roki.Properties.Prefix;
 
             if (command == null)
             {
@@ -151,7 +162,7 @@ namespace Roki.Modules.Help
                     .WithDescription(string.Format(@"Simple guide to find a command:
 Use `{0}modules` command to see a list of all modules.
 Then use `{0}commands <module>` to see a list of all the commands in that module (e.g. `{0}commands searches`).
-After seeing the commands available in that module, you can use `{0}h <command>` to get help for a specific command (e.g. `{0}h weather`).", Roki.Properties.Prefix));
+After seeing the commands available in that module, you can use `{0}h <command>` to get help for a specific command (e.g. `{0}h weather`).", prefix));
 
                 if (channel is IDMChannel)
                 {

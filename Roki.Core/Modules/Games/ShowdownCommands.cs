@@ -14,27 +14,36 @@ namespace Roki.Modules.Games
     public partial class Games
     {
         [Group]
+        [RequireContext(ContextType.Guild)]
         public class ShowdownCommands : RokiSubmodule<ShowdownService>
         {
             private readonly ICurrencyService _currency;
             private readonly DiscordSocketClient _client;
             private readonly IRedisCache _cache;
+            private readonly IConfigurationService _config;
 
-            public ShowdownCommands(ICurrencyService currency, DiscordSocketClient client, IRedisCache cache)
+            public ShowdownCommands(ICurrencyService currency, DiscordSocketClient client, IRedisCache cache, IConfigurationService config)
             {
                 _currency = currency;
                 _client = client;
                 _cache = cache;
+                _config = config;
             }
 
             [RokiCommand, Description, Aliases, Usage]
-            [RequireContext(ContextType.Guild)]
             public async Task BetPokemonGame(int gen = 8)
             {
                 if (gen > 8 || gen < 4) gen = 8;
                 
-                var showdown = new Showdown(_currency, _client, (ITextChannel)Context.Channel, gen, Service, _cache);
                 
+                if (Service.ActiveGames.ContainsKey(Context.Channel.Id))
+                {
+                    await Context.Channel.SendErrorAsync("Game already in progress in current channel.");
+                    return;
+                }
+                
+                var showdown = new Showdown(_currency, _client, await _config.GetGuildConfigAsync(Context.Guild.Id), (ITextChannel)Context.Channel, gen, Service, _cache);
+
                 if (Service.ActiveGames.TryAdd(Context.Channel.Id, showdown))
                 {
                     await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
@@ -51,11 +60,7 @@ namespace Roki.Modules.Games
                     {
                         Service.ActiveGames.TryRemove(Context.Channel.Id, out _);
                     }
-                    
-                    return;
                 }
-
-                await Context.Channel.SendErrorAsync("Game already in progress in current channel.");
             }
 
             // unavailable since running on custom showdown server

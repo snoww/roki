@@ -21,6 +21,7 @@ namespace Roki.Modules.Xp
     public partial class Xp : RokiTopLevelModule
     {
         private readonly IMongoService _mongo;
+        private readonly IConfigurationService _config;
         private readonly IHttpClientFactory _http;
         private readonly IDatabase _cache;
         
@@ -29,10 +30,11 @@ namespace Roki.Modules.Xp
         private static readonly ObjectId DoubleXpId = ObjectId.Parse("5db772de03eb7230a1b5bba1");
         private static readonly ObjectId FastXpId = ObjectId.Parse("5dbc2dd103eb7230a1b5bba5");
 
-        public Xp(IHttpClientFactory http, IMongoService mongo, IRedisCache cache)
+        public Xp(IHttpClientFactory http, IMongoService mongo, IRedisCache cache, IConfigurationService config)
         {
             _http = http;
             _mongo = mongo;
+            _config = config;
             _cache = cache.Redis.GetDatabase();
         }
         
@@ -183,6 +185,8 @@ namespace Roki.Modules.Xp
             EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle("XP Rewards")
                 .WithFooter($"Page {page + 1}/{totalPages + 1}");
+            
+            GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
 
             if (!id)
             {
@@ -190,7 +194,7 @@ namespace Roki.Modules.Xp
                     .Skip(page * 9)
                     .Take(9)
                     .Select(r => r.Value.Type == "currency"
-                        ? $"Level `{r.Value.Level}` - `{int.Parse(r.Value.Reward):N0}` {Roki.Properties.CurrencyIcon}"
+                        ? $"Level `{r.Value.Level}` - `{int.Parse(r.Value.Reward):N0}` {guildConfig.CurrencyIcon}"
                         : $"Level `{r.Value.Level}` - <@&{r.Value.Reward}>")));
             }
             else
@@ -199,7 +203,7 @@ namespace Roki.Modules.Xp
                     .Skip(page * 9)
                     .Take(9)
                     .Select(r => r.Value.Type == "currency"
-                        ? $"`{r.Key}` Level `{r.Value.Level}` - `{int.Parse(r.Value.Reward):N0}` {Roki.Properties.CurrencyIcon}"
+                        ? $"`{r.Key}` Level `{r.Value.Level}` - `{int.Parse(r.Value.Reward):N0}` {guildConfig.CurrencyIcon}"
                         : $"`{r.Key}` Level `{r.Value.Level}` - <@&{r.Value.Reward}>")));
             }
 
@@ -283,9 +287,11 @@ namespace Roki.Modules.Xp
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task XpRewardRemove(string rawId = null)
         {
+            GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
+
             if (string.IsNullOrWhiteSpace(rawId) || !ObjectId.TryParse(rawId, out ObjectId id))
             {
-                await Context.Channel.SendErrorAsync($"Please specify the correct XP reward ID. You can obtain the IDs by using `{Roki.Properties.Prefix}xpr <page_num>`.")
+                await Context.Channel.SendErrorAsync($"Please specify the correct XP reward ID. You can obtain the IDs by using `{guildConfig.Prefix}xpr <page_num>`.")
                     .ConfigureAwait(false);
                 return;
             }
