@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -8,6 +7,7 @@ using Roki.Extensions;
 using Roki.Modules.Stocks.Extensions;
 using Roki.Modules.Stocks.Services;
 using Roki.Services;
+using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Stocks
 {
@@ -16,6 +16,12 @@ namespace Roki.Modules.Stocks
         [Group]
         public class TradingCommands : RokiSubmodule<TradingService>
         {
+            public enum Position
+            {
+                LONG,
+                SHORT
+            }
+
             private readonly IMongoService _mongo;
 
             public TradingCommands(IMongoService mongo)
@@ -24,7 +30,7 @@ namespace Roki.Modules.Stocks
             }
 
             [RokiCommand, Usage, Description, Aliases]
-            public async Task StockSell(string symbol, long amount)
+            public async Task StockSell(string ticker, long amount)
             {
                 if (amount <= 0)
                 {
@@ -32,32 +38,32 @@ namespace Roki.Modules.Stocks
                     return;
                 }
 
-                symbol = symbol.ParseStockTicker();
-                var price = await Service.GetLatestPriceAsync(symbol).ConfigureAwait(false);
+                ticker = ticker.ParseStockTicker();
+                decimal? price = await Service.GetLatestPriceAsync(ticker).ConfigureAwait(false);
                 if (price == null)
                 {
-                    await Context.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("Unknown Ticker").ConfigureAwait(false);
                     return;
                 }
 
-                var user = await _mongo.Context.GetUserAsync(Context.User.Id).ConfigureAwait(false);
-                var investment = user.Portfolio.FirstOrDefault(x => x.Symbol == symbol);
+                User user = await _mongo.Context.GetOrAddUserAsync(Context.User, Context.Guild.Id).ConfigureAwait(false);
+                Investment investment = user.Data[Context.Guild.Id].Portfolio.ContainsKey(ticker) ? user.Data[Context.Guild.Id].Portfolio[ticker] : null;
                 if (investment == null)
                 {
-                    await Context.Channel.SendErrorAsync($"You do not own any shares of `{symbol}`").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync($"You do not own any shares of `{ticker}`").ConfigureAwait(false);
                     return;
                 }
 
                 if (amount > investment.Shares)
                 {
-                    await Context.Channel.SendErrorAsync($"You only have `{investment.Shares}` of `{symbol}`").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync($"You only have `{investment.Shares}` of `{ticker}`").ConfigureAwait(false);
                     return;
                 }
 
-                Enum.TryParse<Position>(investment.Position.ToUpper(), out var pos);
+                var pos = Enum.Parse<Position>(investment.Position.ToUpper());
                 if (pos == Position.LONG)
                 {
-                    var status = await Service.LongPositionAsync(user, symbol, "sell", price.Value, amount).ConfigureAwait(false);
+                    TradingService.Status status = await Service.LongPositionAsync(user, Context.Guild.Id, ticker, "sell", price.Value, amount).ConfigureAwait(false);
                     if (status == TradingService.Status.NotEnoughShares)
                     {
                         await Context.Channel.SendErrorAsync("You do not have enough in your Investing Account sell these shares").ConfigureAwait(false);
@@ -65,27 +71,28 @@ namespace Roki.Modules.Stocks
                     }
 
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription($"{Context.User.Mention}\nYou've successfully sold `{amount}` share{(amount == 1 ? string.Empty : "s")} of `{symbol}` at `{price.Value:N2}`\n" +
+                            .WithDescription($"{Context.User.Mention}\nYou've successfully sold `{amount}` share{(amount == 1 ? string.Empty : "s")} of `{ticker}` at `{price.Value:N2}`\n" +
                                              $"Total Revenue: `{price.Value * amount:N2}`"))
                         .ConfigureAwait(false);
                 }
                 else if (pos == Position.SHORT)
                 {
-                    var status = await Service.ShortPositionAsync(user, symbol, "sell", price.Value, amount).ConfigureAwait(false);
+                    TradingService.Status status = await Service.ShortPositionAsync(user, Context.Guild.Id, ticker, "sell", price.Value, amount).ConfigureAwait(false);
                     if (status == TradingService.Status.NotEnoughInvesting)
                     {
                         await Context.Channel.SendErrorAsync("You do not have enough in your Investing Account sell these shares").ConfigureAwait(false);
                         return;
                     }
+
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription($"{Context.User.Mention}\nYou've returned `{amount}` share{(amount == 1 ? string.Empty : "s")} of `{symbol}` back to the bank, at `{price.Value:N2}`\n" +
+                            .WithDescription($"{Context.User.Mention}\nYou've returned `{amount}` share{(amount == 1 ? string.Empty : "s")} of `{ticker}` back to the bank, at `{price.Value:N2}`\n" +
                                              $"Total Cost: `{price.Value * amount:N2}`"))
                         .ConfigureAwait(false);
                 }
             }
 
             [RokiCommand, Usage, Description, Aliases]
-            public async Task StockPosition(Position position, string symbol, long amount)
+            public async Task StockPosition(Position position, string ticker, long amount)
             {
                 if (amount <= 0)
                 {
@@ -93,70 +100,78 @@ namespace Roki.Modules.Stocks
                     return;
                 }
 
-                symbol = symbol.ParseStockTicker();
-                var price = await Service.GetLatestPriceAsync(symbol).ConfigureAwait(false);
+                ticker = ticker.ParseStockTicker();
+                decimal? price = await Service.GetLatestPriceAsync(ticker).ConfigureAwait(false);
                 if (price == null)
                 {
-                    await Context.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("Unknown Ticker").ConfigureAwait(false);
                     return;
                 }
-                var cost = amount * price.Value;
-                
-                var user = await _mongo.Context.GetUserAsync(Context.User.Id).ConfigureAwait(false);
+
+                decimal cost = amount * price.Value;
+
+                User user = await _mongo.Context.GetOrAddUserAsync(Context.User, Context.Guild.Id).ConfigureAwait(false);
                 if (position == Position.LONG)
                 {
-                    var status = await Service.LongPositionAsync(user, symbol, "buy", price.Value, amount).ConfigureAwait(false);
+                    TradingService.Status status = await Service.LongPositionAsync(user, Context.Guild.Id, ticker, "buy", price.Value, amount).ConfigureAwait(false);
                     if (status == TradingService.Status.NotEnoughInvesting)
                     {
                         await Context.Channel.SendErrorAsync("You do not have enough in your Investing Account to invest").ConfigureAwait(false);
                         return;
                     }
+
                     if (status == TradingService.Status.OwnsShortShares)
                     {
                         await Context.Channel.SendErrorAsync("You already own shorted shares of this company.").ConfigureAwait(false);
                         return;
                     }
-                    var embed = new EmbedBuilder().WithDynamicColor(Context);
+
+                    EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context);
                     if (amount == 1)
-                        embed.WithDescription($"{Context.User.Mention}\nYou've successfully purchased `1` share of `{symbol.ToUpper()}` at `{price.Value:N2}`\n" +
+                    {
+                        embed.WithDescription($"{Context.User.Mention}\nYou've successfully purchased `1` share of `{ticker.ToUpper()}` at `{price.Value:N2}`\n" +
                                               $"Total Cost: `{cost:N2}` {Roki.Properties.CurrencyIcon}");
+                    }
                     else
-                        embed.WithDescription($"{Context.User.Mention}\nYou've successfully purchased `{amount}` shares of `{symbol.ToUpper()}` at `{price.Value:N2}`\n" +
+                    {
+                        embed.WithDescription($"{Context.User.Mention}\nYou've successfully purchased `{amount}` shares of `{ticker.ToUpper()}` at `{price.Value:N2}`\n" +
                                               $"Total Cost: `{cost:N2}` {Roki.Properties.CurrencyIcon}");
+                    }
 
                     await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 }
                 else
                 {
-                    var status = await Service.ShortPositionAsync(user, symbol, "buy", price.Value, amount).ConfigureAwait(false);
+                    TradingService.Status status = await Service.ShortPositionAsync(user, Context.Guild.Id, ticker, "buy", price.Value, amount).ConfigureAwait(false);
                     if (status == TradingService.Status.TooMuchLeverage)
                     {
                         await Context.Channel.SendErrorAsync($"You have leveraged over `{100000:N2}` {Roki.Properties.CurrencyIcon}.\n" +
-                                                         "You cannot short any more stocks until they are returned.").ConfigureAwait(false);
+                                                             "You cannot short any more stocks until they are returned.").ConfigureAwait(false);
                         return;
                     }
+
                     if (status == TradingService.Status.OwnsLongShares)
                     {
                         await Context.Channel.SendErrorAsync("You already own long shares of this company.").ConfigureAwait(false);
                         return;
                     }
-                    var embed = new EmbedBuilder().WithDynamicColor(Context);
+
+                    EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context);
                     if (amount == 1)
-                        embed.WithDescription($"{Context.User.Mention}\nYou've successfully sold `1` share of `{symbol.ToUpper()}` at `{price.Value}`\n" +
+                    {
+                        embed.WithDescription($"{Context.User.Mention}\nYou've successfully sold `1` share of `{ticker.ToUpper()}` at `{price.Value}`\n" +
                                               $"Total sold for: `{cost:N2}` {Roki.Properties.CurrencyIcon}");
+                    }
                     else
-                        embed.WithDescription($"{Context.User.Mention}\nYou've successfully sold `{amount}` shares of `{symbol.ToUpper()}` at `{price.Value}`\n" +
+                    {
+                        embed.WithDescription($"{Context.User.Mention}\nYou've successfully sold `{amount}` shares of `{ticker.ToUpper()}` at `{price.Value}`\n" +
                                               $"Total sold for: `{cost:N2}` {Roki.Properties.CurrencyIcon}");
+                    }
+
                     embed.WithFooter("Short selling stocks charges a premium weekly");
 
                     await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
                 }
-            }
-            
-            public enum Position
-            {
-                LONG,
-                SHORT
             }
         }
     }

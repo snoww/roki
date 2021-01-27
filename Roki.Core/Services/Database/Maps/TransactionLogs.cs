@@ -22,7 +22,7 @@ namespace Roki.Services.Database.Maps
         [BsonId(IdGenerator = typeof(ObjectIdGenerator))]
         public ObjectId Id { get; set; }
         public ulong UserId { get; set; }
-        public string Symbol { get; set; }
+        public string Ticker { get; set; }
         public string Position { get; set; }
         public string Action { get; set; }
         public long Shares { get; set; }

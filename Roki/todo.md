@@ -10,7 +10,6 @@ stuff to do in no particular order:
     - update/improve db queries
     - finish store commands
     - fix currency system
-- add optional user presence event logging (i.e. user goes offline/online/joins/leaves)
 - add moderation commands
     - ban
     - temp ban
@@ -20,12 +19,16 @@ stuff to do in no particular order:
 - add reminder system
 - add repeating message system
 - add role commands
-- cache xp images
-- command permissions
-    - private message only commands
-    - channel only commands etc.
-    - certain commands only allowed in certain channels
-- channel permissions
+- ~~cache xp images~~
+- guild specific user data (e.g. xp and currency values should be specific to a guild)
+    - update xp image to show guild icon and or name
+- guild specific configuration
+    - add optional user presence event logging (i.e. user goes offline/online/joins/leaves)
+    - channel specific configuration
+    - command permissions
+        - private message only commands
+        - channel only commands etc.
+        - certain commands only allowed in certain channels
 - ~~change building process, and output directories~~
 - add docs for building
 - add build script

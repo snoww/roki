@@ -60,11 +60,15 @@ namespace Roki.Services
                 return Task.CompletedTask;
             }
             
-            UpdateXp(message).ConfigureAwait(false);
 
             Task _ = Task.Run(async () =>
             {
-                if (!await _context.IsLoggingEnabled(message.Channel as ITextChannel))
+                var textChannel = message.Channel as ITextChannel;
+                if (textChannel != null)
+                {
+                    await UpdateXp(message, textChannel).ConfigureAwait(false);
+                }
+                if (!await _context.IsLoggingEnabled(textChannel))
                 {
                     return;
                 }
@@ -219,7 +223,7 @@ namespace Roki.Services
 
         private Task UserJoined(SocketGuildUser user)
         {
-            Task _ = Task.Run(async () => { await _context.GetOrAddUserAsync(user); });
+            Task _ = Task.Run(async () => { await _context.GetOrAddUserAsync(user, 0); });
             return Task.CompletedTask;
         }
 
@@ -267,102 +271,95 @@ namespace Roki.Services
             return Task.CompletedTask;
         }
 
-        private Task UpdateXp(SocketMessage message)
+        private async Task UpdateXp(SocketMessage message, ITextChannel channel)
         {
-            Task _ = Task.Run(async () =>
+            ChannelConfig channelConfig = await _context.GetChannelConfigAsync(channel);
+            GuildConfig guildConfig = await _context.GetGuildConfigAsync(channel.GuildId);
+            if (!channelConfig.XpGain)
             {
-                ChannelConfig channelConfig = await _context.GetChannelConfigAsync(message.Channel as ITextChannel);
-                if (!channelConfig.XpGain)
-                {
-                    return;
-                }
-                
-                User user = await _context.GetOrAddUserAsync(message.Author).ConfigureAwait(false);
+                return;
+            }
+            
+            User user = await _context.GetOrAddUserAsync(message.Author, channel.GuildId).ConfigureAwait(false);
 
-                // temp
-                bool doubleXp = user.Subscriptions.Any(x => x.Id == DoubleXpId);
-                bool fastXp = user.Subscriptions.Any(x => x.Id == FastXpId);
+            // temp
+            bool doubleXp = user.Data[channel.GuildId].Subscriptions.ContainsKey(DoubleXpId);
+            bool fastXp = user.Data[channel.GuildId].Subscriptions.ContainsKey(FastXpId);
 
-                var oldLevel = new XpLevel(user.Xp);
-                var newLevel = new XpLevel(user.Xp);
-                if (fastXp)
-                {
-                    if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpFastCooldown))
-                    {
-                        newLevel = await _context.UpdateUserXpAsync(user, doubleXp).ConfigureAwait(false);
-                    }
-                }
-                else
-                {
-                    if (DateTime.UtcNow - user.LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpCooldown))
-                    {
-                        newLevel = await _context.UpdateUserXpAsync(user, doubleXp).ConfigureAwait(false);
-                    }
-                }
+            var oldXp = new XpLevel(user.Data[channel.GuildId].Xp);
+            XpLevel newXp = doubleXp ? oldXp.AddXp(guildConfig.XpPerMessage * 2) : oldXp.AddXp(guildConfig.XpPerMessage);
+            bool levelUp = oldXp.Level < newXp.Level;
 
-                if (newLevel.Level > oldLevel.Level)
+            DateTime now = DateTime.UtcNow;
+            if (fastXp && now - user.Data[channel.GuildId].LastXpGain >= TimeSpan.FromMinutes(guildConfig.XpFastCooldown))
+            {
+                await _context.UpdateUserXpAsync(user, channel.GuildId, now, oldXp.TotalXp - newXp.TotalXp, levelUp).ConfigureAwait(false);
+            }
+            else if (DateTime.UtcNow - user.Data[channel.GuildId].LastXpGain >= TimeSpan.FromMinutes(Roki.Properties.XpCooldown))
+            {
+                await _context.UpdateUserXpAsync(user, channel.GuildId, now, oldXp.TotalXp - newXp.TotalXp, levelUp).ConfigureAwait(false);
+            }
+
+            if (levelUp)
+            {
+                await SendNotification(user, channel.GuildId, message, newXp.Level).ConfigureAwait(false);
+                Dictionary<ObjectId, XpReward> rewards = (await _context.GetOrAddGuildAsync(channel.Guild as SocketGuild).ConfigureAwait(false)).XpRewards;
+                if (rewards != null && rewards.Count != 0)
                 {
-                    await SendNotification(user, message, newLevel.Level).ConfigureAwait(false);
-                    var textChannel = (SocketTextChannel) message.Channel;
-                    List<XpReward> rewards = (await _context.GetOrAddGuildAsync(textChannel.Guild).ConfigureAwait(false)).XpRewards;
-                    if (rewards != null && rewards.Count != 0)
+                    foreach ((ObjectId _, XpReward reward) in rewards)
                     {
-                        foreach (XpReward reward in rewards)
+                        if (reward.Type == "currency")
                         {
-                            if (reward.Type == "currency")
+                            int amount = int.Parse(reward.Reward);
+                            await _context.UpdateUserCurrencyAsync(user, channel.GuildId, amount).ConfigureAwait(false);
+                            await _context.AddTransaction(new Transaction
                             {
-                                int amount = int.Parse(reward.Reward);
-                                await _context.UpdateUserCurrencyAsync(user, amount).ConfigureAwait(false);
-                                await _context.AddTransaction(new Transaction
-                                {
-                                    Amount = amount,
-                                    Reason = "XP Level Up Reward",
-                                    To = user.Id,
-                                    From = 0,
-                                    GuildId = textChannel.Guild.Id,
-                                    ChannelId = textChannel.Id,
-                                    MessageId = message.Id
-                                });
-                            }
-                            else
-                            {
-                                SocketRole role = textChannel.Guild.GetRole(ulong.Parse(reward.Reward));
-                                if (role == null) continue;
-                                var guildUser = (IGuildUser) message.Author;
-                                await guildUser.AddRoleAsync(role).ConfigureAwait(false);
-                            }
+                                Amount = amount,
+                                Reason = "XP Level Up Reward",
+                                To = user.Id,
+                                From = 0,
+                                GuildId = channel.GuildId,
+                                ChannelId = channel.Id,
+                                MessageId = message.Id
+                            });
                         }
-
-                        IDMChannel dm = await message.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
-                        try
+                        else
                         {
-                            await dm.EmbedAsync(new EmbedBuilder().WithOkColor()
-                                    .WithTitle($"Level `{newLevel.Level}` Rewards")
-                                    .WithDescription("Here are your rewards:\n" + string.Join("\n", rewards
-                                        .Select(r => r.Type == "currency"
-                                            ? $"+ `{int.Parse(r.Reward):N0}` {Roki.Properties.CurrencyIcon}"
-                                            : $"+ {textChannel.Guild.GetRole(ulong.Parse(r.Reward)).Name ?? "N/A"} Role"))))
-                                .ConfigureAwait(false);
-                            await dm.CloseAsync().ConfigureAwait(false);
-                        }
-                        catch
-                        {
-                            // unable to send dm to user
-                            // ignored
+                            SocketRole role = (channel.Guild as SocketGuild)?.GetRole(ulong.Parse(reward.Reward));
+                            if (role == null) continue;
+                            var guildUser = (IGuildUser) message.Author;
+                            await guildUser.AddRoleAsync(role).ConfigureAwait(false);
                         }
                     }
-                }
-            });
 
-            return Task.CompletedTask;
+                    IDMChannel dm = await message.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
+                    try
+                    {
+                        await dm.EmbedAsync(new EmbedBuilder().WithOkColor()
+                                .WithTitle($"Level `{newXp.Level}` Rewards")
+                                .WithDescription("Here are your rewards:\n" + string.Join("\n", rewards
+                                    .Select(r => r.Value.Type == "currency"
+                                        ? $"+ `{int.Parse(r.Value.Reward):N0}` {Roki.Properties.CurrencyIcon}"
+                                        : $"+ {r.Value.Reward}"))))
+                            .ConfigureAwait(false);
+                        await dm.CloseAsync().ConfigureAwait(false);
+                    }
+                    catch
+                    {
+                        // unable to send dm to user
+                        // ignored
+                    }
+                }
+            }
         }
 
-        private static async Task SendNotification(User user, SocketMessage msg, int level)
+        private static async Task SendNotification(User user, ulong guildId, SocketMessage msg, int level)
         {
-            if (user.Notification.Equals("none", StringComparison.OrdinalIgnoreCase))
+            if (user.Data[guildId].Notification.Equals("none", StringComparison.OrdinalIgnoreCase))
             {
+                return;
             }
-            else if (user.Notification.Equals("dm", StringComparison.OrdinalIgnoreCase))
+            if (user.Data[guildId].Notification.Equals("dm", StringComparison.OrdinalIgnoreCase))
             {
                 IDMChannel dm = await msg.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
                 try
@@ -374,7 +371,7 @@ namespace Roki.Services
                     // user has disabled dms
                 }
             }
-            else if (user.Notification.Equals("server", StringComparison.OrdinalIgnoreCase))
+            else if (user.Data[guildId].Notification.Equals("server", StringComparison.OrdinalIgnoreCase))
             {
                 await msg.Channel.SendMessageAsync($"Congratulations {msg.Author.Mention}! You've reached Level {level}").ConfigureAwait(false);
             }

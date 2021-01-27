@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Discord;
 using Roki.Services;
 using Roki.Services.Database.Maps;
 
@@ -10,27 +11,27 @@ namespace Roki.Modules.Stocks.Services
     {
         private readonly IRokiConfig _config;
         private readonly IMongoService _mongo;
-        private readonly IHttpClientFactory _http;
+        private readonly IHttpClientFactory _factory;
         private const string IexStocksUrl = "https://cloud.iexapis.com/stable/stock/";
 
-        public PortfolioService(IHttpClientFactory http, IRokiConfig config, IMongoService mongo)
+        public PortfolioService(IHttpClientFactory factory, IRokiConfig config, IMongoService mongo)
         {
-            _http = http;
+            _factory = factory;
             _config = config;
             _mongo = mongo;
         }
 
-        public async Task<List<Investment>> GetUserPortfolio(ulong userId)
+        public async Task<Dictionary<string, Investment>> GetUserPortfolio(IUser user, ulong guildId)
         {
-            return (await _mongo.Context.GetUserAsync(userId).ConfigureAwait(false)).Portfolio;
+            return (await _mongo.Context.GetOrAddUserAsync(user, guildId).ConfigureAwait(false)).Data[guildId].Portfolio;
         }
 
-        public async Task<decimal> GetPortfolioValue(IEnumerable<Investment> portfolio)
+        public async Task<decimal> GetPortfolioValue(Dictionary<string, Investment> portfolio)
         {
             var value = 0m;
-            foreach (var investment in portfolio)
+            foreach ((string symbol, Investment investment) in portfolio)
             {
-                var price = await GetStockPrice(investment.Symbol).ConfigureAwait(false);
+                decimal price = await GetStockPrice(symbol).ConfigureAwait(false);
                 value += price * investment.Shares;
             }
 
@@ -39,10 +40,9 @@ namespace Roki.Modules.Stocks.Services
 
         private async Task<decimal> GetStockPrice(string symbol)
         {
-            using var http = _http.CreateClient();
-            var result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/quote/latestPrice?token={_config.IexToken}").ConfigureAwait(false);
-            decimal.TryParse(result, out var price);
-            return price;
+            using HttpClient http = _factory.CreateClient();
+            string result = await http.GetStringAsync($"{IexStocksUrl}/{symbol}/quote/latestPrice?token={_config.IexToken}").ConfigureAwait(false);
+            return decimal.Parse(result);
         }
     }
 }

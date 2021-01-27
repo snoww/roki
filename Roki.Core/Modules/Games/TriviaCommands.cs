@@ -19,16 +19,13 @@ namespace Roki.Modules.Games
         [Group]
         public class TriviaCommands : RokiSubmodule<TriviaService>
         {
-            private readonly ICurrencyService _currency;
-            private readonly DiscordSocketClient _client;
-            
             private static readonly IEmote LetterA = new Emoji("🇦");
             private static readonly IEmote LetterB = new Emoji("🇧");
             private static readonly IEmote LetterC = new Emoji("🇨");
             private static readonly IEmote LetterD = new Emoji("🇩");
             private static readonly IEmote Check = new Emoji("✔");
             private static readonly IEmote Cross = new Emoji("❌");
-            
+
             private static readonly IEmote[] MultipleChoice =
             {
                 LetterA,
@@ -42,8 +39,8 @@ namespace Roki.Modules.Games
                 Check,
                 Cross
             };
-            
-            private static readonly Dictionary<string, int> Categories = new Dictionary<string, int>
+
+            private static readonly Dictionary<string, int> Categories = new()
             {
                 {"All", 0},
                 {"General Knowledge", 9},
@@ -80,12 +77,8 @@ namespace Roki.Modules.Games
                 {"Animations", 32}
             };
 
-            private class PlayerScore
-            {
-                public int Correct { get; set; } = 0;
-                public int Incorrect { get; set; } = 0;
-                public long Amount { get; set; } = 0;
-            }
+            private readonly DiscordSocketClient _client;
+            private readonly ICurrencyService _currency;
 
             public TriviaCommands(ICurrencyService currency, DiscordSocketClient client)
             {
@@ -116,14 +109,20 @@ namespace Roki.Modules.Games
                 {
                     await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
                     questions = await Service.GetTriviaQuestionsAsync(Categories[category]).ConfigureAwait(false);
-                    foreach (var question in questions.Results)
+                    foreach (Results question in questions.Results)
                     {
                         if (question.Difficulty == "easy")
+                        {
                             prizePool += Roki.Properties.TriviaEasy;
+                        }
                         else if (question.Difficulty == "medium")
+                        {
                             prizePool += Roki.Properties.TriviaMedium;
+                        }
                         else
+                        {
                             prizePool += Roki.Properties.TriviaHard;
+                        }
                     }
                 }
                 catch (Exception e)
@@ -136,7 +135,8 @@ namespace Roki.Modules.Games
 
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle($"Trivia Game - {category}")
-                        .WithDescription($"Starting new trivia game.\nYou can earn up to `{prizePool:N0}` {Roki.Properties.CurrencyNamePlural}!\nReact with the correct emote to answer questions.\nType `stop` to cancel game early"))
+                        .WithDescription(
+                            $"Starting new trivia game.\nYou can earn up to `{prizePool:N0}` {Roki.Properties.CurrencyNamePlural}!\nReact with the correct emote to answer questions.\nType `stop` to cancel game early"))
                     .ConfigureAwait(false);
 
                 await Task.Delay(5000).ConfigureAwait(false);
@@ -144,32 +144,43 @@ namespace Roki.Modules.Games
                 var exit = false;
                 var toDelete = new List<IUserMessage>();
                 _client.MessageReceived += StopReceived;
+
                 Task StopReceived(SocketMessage message)
                 {
                     if (message.Channel.Id != Context.Channel.Id || message.Author.IsBot || !message.Content.Equals("stop", StringComparison.OrdinalIgnoreCase))
+                    {
                         return Task.CompletedTask;
+                    }
+
                     exit = true;
                     return Task.CompletedTask;
                 }
 
                 var count = 1;
                 var playerScore = new Dictionary<IUser, PlayerScore>();
-                foreach (var q in questions.Results)
+                foreach (Results q in questions.Results)
                 {
                     var playerChoice = new Dictionary<IUser, string>();
-                    var shuffledAnswers = Service.RandomizeAnswersOrder(q.Correct, q.Incorrect);
-                    var question = HttpUtility.HtmlDecode(q.Question);
-                    var answer = shuffledAnswers.First(s => s.Contains(HttpUtility.HtmlDecode(q.Correct) ?? ""));
+                    List<string> shuffledAnswers = Service.RandomizeAnswersOrder(q.Correct, q.Incorrect);
+                    string question = HttpUtility.HtmlDecode(q.Question);
+                    string answer = shuffledAnswers.First(s => s.Contains(HttpUtility.HtmlDecode(q.Correct) ?? ""));
                     int difficultyBonus;
                     if (q.Difficulty == "easy")
+                    {
                         difficultyBonus = Roki.Properties.TriviaEasy;
+                    }
                     else if (q.Difficulty == "medium")
+                    {
                         difficultyBonus = Roki.Properties.TriviaMedium;
+                    }
                     else
+                    {
                         difficultyBonus = Roki.Properties.TriviaHard;
+                    }
+
                     IUserMessage msg;
 
-                    var embed = new EmbedBuilder().WithDynamicColor(Context)
+                    EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle($"Question {count++}: {q.Category.ToTitleCase()} - {q.Difficulty.ToTitleCase()}")
                         .WithFooter("Type stop to stop trivia game.");
                     if (q.Type == "multiple")
@@ -184,6 +195,7 @@ namespace Roki.Modules.Games
                         msg = await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
                         await msg.AddReactionsAsync(TrueFalse).ConfigureAwait(false);
                     }
+
                     toDelete.Add(msg);
                     var answers = false;
                     using (msg.OnReaction(_client, AnswerAdded))
@@ -195,9 +207,14 @@ namespace Roki.Modules.Games
                     {
                         _client.MessageReceived -= StopReceived;
                         if (!answers)
+                        {
                             await Context.Channel.SendErrorAsync("Trivia stopped due to inactivity.").ConfigureAwait(false);
+                        }
                         else
+                        {
                             await Context.Channel.SendErrorAsync("Current trivia game stopped.").ConfigureAwait(false);
+                        }
+
                         Service.TriviaGames.TryRemove(Context.Channel.Id, out _);
                         await ((ITextChannel) Context.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
                         return;
@@ -205,18 +222,23 @@ namespace Roki.Modules.Games
 
                     var corrStr = "";
                     var incorrStr = "";
-                    
-                    foreach (var (user, score) in playerChoice)
+
+                    foreach ((IUser user, string score) in playerChoice)
                     {
                         if (score != answer)
                         {
                             if (playerScore.ContainsKey(user))
+                            {
                                 playerScore[user].Incorrect += 1;
+                            }
                             else
+                            {
                                 playerScore.Add(user, new PlayerScore
                                 {
                                     Incorrect = 1
                                 });
+                            }
+
                             incorrStr += user.Username + '\n';
                             continue;
                         }
@@ -227,15 +249,18 @@ namespace Roki.Modules.Games
                             playerScore[user].Correct += 1;
                         }
                         else
+                        {
                             playerScore.Add(user, new PlayerScore
                             {
                                 Amount = difficultyBonus,
                                 Correct = 1
                             });
+                        }
+
                         corrStr += user.Username + '\n';
                     }
-                    
-                    var ans = await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
+
+                    IUserMessage ans = await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithTitle("Answer")
                             .WithDescription($"{answer}")
                             .AddField("Correct", !string.IsNullOrWhiteSpace(corrStr) ? corrStr : "None", true)
@@ -246,22 +271,33 @@ namespace Roki.Modules.Games
 
                     async Task AnswerAdded(SocketReaction r)
                     {
-                        var mc = MultipleChoice.ToList();
+                        List<IEmote> mc = MultipleChoice.ToList();
                         if (r.Channel != Context.Channel || r.User.Value.IsBot || r.Message.Value.Id != msg.Id)
+                        {
                             return;
+                        }
+
                         if (mc.Contains(r.Emote))
                         {
                             if (playerChoice.ContainsKey(r.User.Value))
+                            {
                                 playerChoice[r.User.Value] = shuffledAnswers[mc.IndexOf(r.Emote)];
+                            }
                             else
+                            {
                                 playerChoice.Add(r.User.Value, shuffledAnswers[mc.IndexOf(r.Emote)]);
+                            }
                         }
                         else if (TrueFalse.Contains(r.Emote))
                         {
                             if (playerChoice.ContainsKey(r.User.Value))
+                            {
                                 playerChoice[r.User.Value] = r.Emote.Equals(Check) ? "True" : "False";
+                            }
                             else
+                            {
                                 playerChoice.Add(r.User.Value, r.Emote.Equals(Check) ? "True" : "False");
+                            }
                         }
 
                         answers = true;
@@ -274,23 +310,27 @@ namespace Roki.Modules.Games
                 var winStr = "";
                 var scoreStr = "";
                 var winners = false;
-                foreach (var (user, score) in playerScore)
+                foreach ((IUser user, PlayerScore score) in playerScore)
                 {
                     scoreStr += $"{user.Username} `{score.Correct}`/`{score.Incorrect + score.Correct}`\n";
-                    var before = await _currency.GetCurrency(Context.User.Id, Context.Guild.Id);
-                    await _currency.AddAsync(user.Id, "Trivia Reward", score.Amount, Context.Guild.Id, Context.Channel.Id, Context.Message.Id)
+                    long before = await _currency.GetCurrency(Context.User, Context.Guild.Id);
+                    await _currency.AddAsync(user, Context.Client.CurrentUser, "Trivia Reward", score.Amount, Context.Guild.Id, Context.Channel.Id, Context.Message.Id)
                         .ConfigureAwait(false);
                     winStr += $"{user.Username} won `{score.Amount:N0}` {Roki.Properties.CurrencyIcon}\n" +
-                              $"\t`{before:N0}` ⇒ `{await _currency.GetCurrency(Context.User.Id, Context.Guild.Id):N0:N0}`\n";
+                              $"\t`{before:N0}` ⇒ `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0:N0}`\n";
                     winners = true;
                 }
 
                 if (winners)
+                {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithDescription($"Congratulations!\n{winStr}\n{scoreStr}")).ConfigureAwait(false);
+                }
                 else
+                {
                     await Context.Channel.SendErrorAsync($"Better luck next time!\n{scoreStr}").ConfigureAwait(false);
-                
+                }
+
                 Service.TriviaGames.TryRemove(Context.Channel.Id, out _);
                 await Task.Delay(5000).ConfigureAwait(false);
                 await ((ITextChannel) Context.Channel).DeleteMessagesAsync(toDelete).ConfigureAwait(false);
@@ -303,6 +343,13 @@ namespace Roki.Modules.Games
                         .WithTitle("Trivia Categories")
                         .WithDescription(string.Join(", ", Categories.Keys)))
                     .ConfigureAwait(false);
+            }
+
+            private class PlayerScore
+            {
+                public int Correct { get; set; }
+                public int Incorrect { get; set; }
+                public long Amount { get; set; }
             }
         }
     }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using MongoDB.Bson;
 using NLog;
 using Roki.Extensions;
 using Roki.Services;
@@ -35,29 +36,32 @@ namespace Roki.Modules.Currency.Services
 
         private async void RemoveSubEvent(object state)
         {
-            var expired = await _mongo.Context.RemoveExpiredSubscriptionsAsync().ConfigureAwait(false);
-            foreach (var (userId, subs) in expired)
+            Dictionary<ulong, Dictionary<ulong, List<ObjectId>>> expired = await _mongo.Context.RemoveExpiredSubscriptionsAsync().ConfigureAwait(false);
+            foreach ((ulong userId, Dictionary<ulong, List<ObjectId>> subs) in expired)
             {
-                foreach (var sub in subs)
+                foreach ((ulong guildId, List<ObjectId> sub) in subs)
                 {
-                    var item = await _mongo.Context.GetStoreItemByObjectIdAsync(sub.GuildId, sub.Id).ConfigureAwait(false);
-                    if (item.Category.Equals("Boost", StringComparison.Ordinal)) 
-                        continue;
-                    try
+                    foreach (ObjectId id in sub)
                     {
-                        var guild = _client.GetGuild(sub.GuildId);
-                        if (!(guild.GetUser(userId) is IGuildUser user)) 
+                        (_, Listing listing) = await _mongo.Context.GetStoreItemByObjectIdAsync(guildId, id).ConfigureAwait(false);
+                        if (listing.Category.Equals("Boost", StringComparison.Ordinal)) 
                             continue;
+                        try
+                        {
+                            SocketGuild guild = _client.GetGuild(guildId);
+                            if (!(guild.GetUser(userId) is IGuildUser user)) 
+                                continue;
                     
-                        var role = user.GetRoles().FirstOrDefault(r => r.Name.Contains(item.Description, StringComparison.OrdinalIgnoreCase));
-                        if (role == null) 
-                            continue;
+                            IRole role = user.GetRoles().FirstOrDefault(r => r.Name.Contains(listing.Description, StringComparison.OrdinalIgnoreCase));
+                            if (role == null) 
+                                continue;
                     
-                        await user.RemoveRoleAsync(role).ConfigureAwait(false);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Warn(e, "Error while tyring to remove subscription role");
+                            await user.RemoveRoleAsync(role).ConfigureAwait(false);
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Warn(e, "Error while tyring to remove subscription role");
+                        }
                     }
                 }
             }
