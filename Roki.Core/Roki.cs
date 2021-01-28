@@ -170,7 +170,7 @@ namespace Roki
             var sw = Stopwatch.StartNew();
 
             IServiceCollection service = new ServiceCollection()
-                .AddSingleton<IRokiConfig>(RokiConfig)
+                .AddSingleton(RokiConfig)
                 .AddSingleton(Mongo)
                 .AddSingleton(Cache)
                 .AddSingleton(Config)
@@ -179,9 +179,8 @@ namespace Roki
                 .AddSingleton<LavaConfig>()
                 .AddSingleton<LavaNode>()
                 .AddSingleton(this)
-                .AddHttpClient();
-
-            service.LoadFrom(Assembly.GetAssembly(typeof(CommandHandler)));
+                .AddHttpClient()
+                .LoadFrom(Assembly.GetAssembly(typeof(CommandHandler)));
 
             Services = service.BuildServiceProvider();
             LoadTypeReaders(typeof(Roki).Assembly);

@@ -27,9 +27,9 @@ namespace Roki.Extensions
     public static class Extensions
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        private static readonly Random Rng = new Random();
+        private static readonly Random Rng = new();
         private static readonly IDatabase Cache = new RedisCache().Redis.GetDatabase();
-        private static readonly JsonSerializerOptions Options = new JsonSerializerOptions {PropertyNameCaseInsensitive = true};
+        private static readonly JsonSerializerOptions Options = new() {PropertyNameCaseInsensitive = true};
 
         public static EmbedBuilder WithDynamicColor(this EmbedBuilder embed, ICommandContext context)
         {
@@ -59,7 +59,7 @@ namespace Roki.Extensions
             return module;
         }
 
-        public static void LoadFrom(this IServiceCollection collection, Assembly assembly)
+        public static IServiceCollection LoadFrom(this IServiceCollection collection, Assembly assembly)
         {
             Type[] allTypes;
             try
@@ -69,7 +69,7 @@ namespace Roki.Extensions
             catch (ReflectionTypeLoadException e)
             {
                 Log.Warn(e);
-                return;
+                return collection;
             }
 
             var services = new Queue<Type>(allTypes.Where(x =>
@@ -90,6 +90,8 @@ namespace Roki.Extensions
                 Type interfaceType = interfaces.FirstOrDefault(x => serviceType.GetInterfaces().Contains(x));
                 collection.AddSingleton(interfaceType != null ? interfaceType : serviceType, serviceType);
             }
+
+            return collection;
         }
 
         public static void DeleteAfter(this IUserMessage msg, int seconds)
