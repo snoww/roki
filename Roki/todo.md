@@ -9,7 +9,7 @@ stuff to do in no particular order:
     - add music autoplay algorithm
     - update/improve db queries
     - finish store commands
-    - fix currency system
+    - ~~fix currency system~~
 - add moderation commands
     - ban
     - temp ban
@@ -20,14 +20,16 @@ stuff to do in no particular order:
 - add repeating message system
 - add role commands
 - ~~cache xp images~~
-- guild specific user data (e.g. xp and currency values should be specific to a guild)
+- ~~guild specific user data (e.g. xp and currency values should be specific to a guild)~~
     - update xp image to show guild icon and or name
-- guild specific configuration
+- ~~guild specific configuration~~
     - add optional user presence event logging (i.e. user goes offline/online/joins/leaves)
-    - channel specific configuration
+    - ~~using channel specific configuration~~
+    - updating channel configs
+    - updating guild configs  
     - command permissions
-        - private message only commands
-        - channel only commands etc.
+        - ~~private message only commands~~
+        - ~~channel only commands etc.~~
         - certain commands only allowed in certain channels
 - ~~change building process, and output directories~~
 - add docs for building
