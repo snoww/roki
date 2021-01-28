@@ -71,7 +71,7 @@ namespace Roki.Services
                 {
                     await UpdateXp(message, textChannel).ConfigureAwait(false);
                 }
-                if (isDmChannel || !(await _config.GetChannelConfigAsync(textChannel)).Logging)
+                if (isDmChannel || !await _config.LoggingEnabled(textChannel))
                 {
                     return;
                 }
@@ -89,7 +89,7 @@ namespace Roki.Services
             if (after.EditedTimestamp == null) return Task.CompletedTask;
             Task _ = Task.Run(async () =>
             {
-                if (channel is IDMChannel || !(await _config.GetChannelConfigAsync(channel as ITextChannel)).Logging)
+                if (channel is IDMChannel || !await _config.LoggingEnabled(channel as ITextChannel))
                 {
                     return;
                 }
@@ -105,7 +105,7 @@ namespace Roki.Services
             if (cache.HasValue && cache.Value.Author.IsBot) return Task.CompletedTask;
             Task _ = Task.Run(async () =>
             {
-                if (channel is IDMChannel || !(await _config.GetChannelConfigAsync(channel as ITextChannel)).Logging)
+                if (channel is IDMChannel || !await _config.LoggingEnabled(channel as ITextChannel))
                 {
                     return;
                 }
@@ -119,7 +119,7 @@ namespace Roki.Services
         {
             Task _ = Task.Run(async () =>
             {
-                if (channel is IDMChannel || !(await _config.GetChannelConfigAsync(channel as ITextChannel)).Logging)
+                if (channel is IDMChannel || !await _config.LoggingEnabled(channel as ITextChannel))
                 {
                     return;
                 }
@@ -276,12 +276,12 @@ namespace Roki.Services
 
         private async Task UpdateXp(SocketMessage message, ITextChannel channel)
         {
-            ChannelConfig channelConfig = await _config.GetChannelConfigAsync(channel);
-            GuildConfig guildConfig = await _config.GetGuildConfigAsync(channel.GuildId);
-            if (!channelConfig.XpGain)
+            if (!await _config.XpGainEnabled(channel))
             {
                 return;
             }
+            
+            GuildConfig guildConfig = await _config.GetGuildConfigAsync(channel.GuildId);
 
             var guildId = channel.GuildId.ToString();
             User user = await _context.GetOrAddUserAsync(message.Author, guildId).ConfigureAwait(false);

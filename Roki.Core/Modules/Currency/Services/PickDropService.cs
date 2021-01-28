@@ -40,8 +40,7 @@ namespace Roki.Modules.Currency.Services
                 return;
             }
 
-            ChannelConfig channelConfig = await _config.GetChannelConfigAsync(channel);
-            if (!channelConfig.CurrencyGeneration)
+            if (!await _config.CurrencyGenEnabled(channel))
             {
                 return;
             }

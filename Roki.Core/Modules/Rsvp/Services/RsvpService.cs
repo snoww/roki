@@ -723,7 +723,7 @@ namespace Roki.Modules.Rsvp.Services
 
         private async Task<SocketMessage> ReplyHandler(ICommandContext ctx, TimeSpan? timeout = null)
         {
-            GuildConfig guildConfig = await _config.GetGuildConfigAsync(ctx.Guild.Id);
+            string prefix = await _config.GetGuildPrefix(ctx.Guild.Id);
 
             timeout ??= TimeSpan.FromMinutes(5);
             var eventTrigger = new TaskCompletionSource<SocketMessage>();
@@ -733,7 +733,7 @@ namespace Roki.Modules.Rsvp.Services
             {
                 if (message.Channel.Id != ctx.Channel.Id || message.Author.Id != ctx.User.Id) 
                     return Task.CompletedTask;
-                if (message.Content.StartsWith(guildConfig.Prefix)) // ignore commands
+                if (message.Content.StartsWith(prefix)) // ignore commands
                     return Task.CompletedTask;
                 eventTrigger.SetResult(message);
                 return Task.CompletedTask;
