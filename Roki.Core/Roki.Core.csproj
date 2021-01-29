@@ -13,7 +13,6 @@
       <PackageReference Include="Discord.Net" Version="2.3.0-dev-20210121.1" />
       <PackageReference Include="Google.Apis.Customsearch.v1" Version="1.49.0.2084" />
       <PackageReference Include="Google.Apis.YouTube.v3" Version="1.49.0.2141" />
-      <PackageReference Include="HtmlAgilityPack" Version="1.11.30" />
       <PackageReference Include="linqtotwitter" Version="6.4.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="5.0.0" />
@@ -21,7 +20,6 @@
       <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
       <PackageReference Include="MongoDB.Driver" Version="2.11.4" />
       <PackageReference Include="NLog" Version="4.7.5" />
-      <PackageReference Include="PlaywrightSharp" Version="0.180.0" />
       <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta0013" />
       <PackageReference Include="SixLabors.ImageSharp" Version="1.0.2" />
       <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0010" />
