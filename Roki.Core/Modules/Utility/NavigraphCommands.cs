@@ -96,7 +96,7 @@ namespace Roki.Modules.Utility
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor().WithDescription("Updating chart database..."))
                     .ConfigureAwait(false);
                 await Service.Semaphore.WaitAsync();
-                await Service.DownloadAllCharts(Context, icao);
+                await Service.GetChartsAsync(Context, icao);
                 Service.Semaphore.Release();
             }
         }
