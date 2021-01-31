@@ -67,7 +67,7 @@ namespace Roki.Services.Database
         Task DeleteChannelAsync(ITextChannel channel);
         Task UpdateChannelAsync(ITextChannel after);
         Task<ChannelConfig> GetChannelConfigAsync(ITextChannel channel);
-        Task ChangeChannelProperty(Expression<Func<Channel, bool>> filter, UpdateDefinition<Channel> update, UpdateOptions options = null);
+        Task UpdateChannelConfigAsync(ITextChannel channel, ChannelConfig channelConfig);
 
         #endregion
 
@@ -76,6 +76,7 @@ namespace Roki.Services.Database
         Task<Guild> GetOrAddGuildAsync(SocketGuild guild);
         Task<Guild> GetGuildAsync(ulong guildId);
         Task<GuildConfig> GetGuildConfigAsync(ulong guildId);
+        Task UpdateGuildConfigAsync(ulong guildId, GuildConfig guildConfig);
         Task ChangeGuildAvailabilityAsync(SocketGuild guild, bool available);
         Task UpdateGuildAsync(SocketGuild after);
         Task AddXpRewardAsync(ulong guildId, ObjectId id, XpReward reward);
@@ -597,30 +598,12 @@ namespace Roki.Services.Database
 
         public async Task<ChannelConfig> GetChannelConfigAsync(ITextChannel channel)
         {
-            Channel dbChannel = await GetOrAddChannelAsync(channel).ConfigureAwait(false);
-            ChannelConfig config = dbChannel.Config;
-            if (config != null)
-            {
-                return config;
-            }
-
-            Guild guild = await GetGuildAsync(channel.GuildId).ConfigureAwait(false);
-            var channelConfig = new ChannelConfig
-            {
-                Logging = guild.Config.Logging,
-                CurrencyGeneration = guild.Config.CurrencyGeneration,
-                XpGain = guild.Config.XpGain,
-                Modules = guild.Config.Modules,
-                Commands = guild.Config.Commands
-            };
-            dbChannel.Config = channelConfig;
-            await ChannelCollection.FindOneAndReplaceAsync(c => c.Id == channel.Id, dbChannel).ConfigureAwait(false);
-            return channelConfig;
+            return (await GetOrAddChannelAsync(channel).ConfigureAwait(false)).Config;
         }
 
-        public async Task ChangeChannelProperty(Expression<Func<Channel, bool>> filter, UpdateDefinition<Channel> update, UpdateOptions options = null)
+        public async Task UpdateChannelConfigAsync(ITextChannel channel, ChannelConfig channelConfig)
         {
-            await ChannelCollection.UpdateOneAsync(filter, update, options).ConfigureAwait(false);
+            await ChannelCollection.UpdateOneAsync(x => x.Id == channel.Id, Builders<Channel>.Update.Set(x => x.Config, channelConfig));
         }
 
         public async Task<Guild> GetOrAddGuildAsync(SocketGuild guild)
@@ -664,11 +647,14 @@ namespace Roki.Services.Database
             return (await GuildCollection.Find(g => g.Id == guildId).FirstAsync().ConfigureAwait(false)).Config;
         }
 
+        public async Task UpdateGuildConfigAsync(ulong guildId, GuildConfig guildConfig)
+        {
+            await GuildCollection.UpdateOneAsync(x => x.Id == guildId, Builders<Guild>.Update.Set(x => x.Config, guildConfig));
+        }
+
         public async Task ChangeGuildAvailabilityAsync(SocketGuild guild, bool available)
         {
-            UpdateDefinition<Guild> update = Builders<Guild>.Update.Set(x => x.Available, available);
-
-            await GuildCollection.UpdateOneAsync(x => x.Id == guild.Id, update).ConfigureAwait(false);
+            await GuildCollection.UpdateOneAsync(x => x.Id == guild.Id, Builders<Guild>.Update.Set(x => x.Available, available)).ConfigureAwait(false);
         }
 
         public async Task UpdateGuildAsync(SocketGuild after)

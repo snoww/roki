@@ -18,8 +18,12 @@ namespace Roki.Services
         Task<bool> CurrencyGenEnabled(ITextChannel channel);
         Task<bool> XpGainEnabled(ITextChannel channel);
 
-        Task SetGuildConfigAsync(GuildConfig config);
-        Task SetChannelConfigAsync(ChannelConfig config);
+        Task UpdateGuildConfigAsync(ulong guildId, GuildConfig config);
+        Task UpdateChannelConfigAsync(ITextChannel channel, ChannelConfig config);
+        Task UpdatePrefix(ulong guildId, bool enable);
+        Task UpdateLogging(ulong channelId, bool enable);
+        Task UpdateCurGen(ulong channelId, bool enable);
+        Task UpdateXpGain(ulong channelId, bool enable);
     }
     
     public class ConfigurationService : IConfigurationService
@@ -112,14 +116,36 @@ namespace Roki.Services
         }
 
         // todo
-        public Task SetGuildConfigAsync(GuildConfig config)
+        public async Task UpdateGuildConfigAsync(ulong guildId, GuildConfig guildConfig)
         {
-            throw new NotImplementedException();
+            await _cache.StringSetAsync($"config:guild:{guildId}", JsonSerializer.Serialize(guildConfig), TimeSpan.FromDays(7));
+            await _context.UpdateGuildConfigAsync(guildId, guildConfig);
         }
 
-        public Task SetChannelConfigAsync(ChannelConfig config)
+        public async Task UpdateChannelConfigAsync(ITextChannel channel, ChannelConfig channelConfig)
         {
-            throw new NotImplementedException();
+            await _cache.StringSetAsync($"config:channel:{channel.Id}", JsonSerializer.Serialize(channelConfig), TimeSpan.FromDays(7));
+            await _context.UpdateChannelConfigAsync(channel, channelConfig);
+        }
+
+        public async Task UpdatePrefix(ulong guildId, bool enable)
+        {
+            await _cache.StringSetAsync($"config:guild:{guildId}:prefix", enable, TimeSpan.FromDays(7));
+        }
+
+        public async Task UpdateLogging(ulong channelId, bool enable)
+        {
+            await _cache.StringSetAsync($"config:channel:{channelId}:logging", enable, TimeSpan.FromDays(7));
+        }
+
+        public async Task UpdateCurGen(ulong channelId, bool enable)
+        {
+            await _cache.StringSetAsync($"config:channel:{channelId}:currency", enable, TimeSpan.FromDays(7));
+        }
+
+        public async Task UpdateXpGain(ulong channelId, bool enable)
+        {
+            await _cache.StringSetAsync($"config:channel:{channelId}:xp", enable, TimeSpan.FromDays(7));
         }
     }
 }

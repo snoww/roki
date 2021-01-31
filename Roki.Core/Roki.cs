@@ -18,6 +18,9 @@ namespace Roki
 {
     public class Roki
     {
+        public const uint OkColor = 0xFF00FF;
+        public const uint ErrorColor = 0xFF0000;
+        
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         
         private RokiConfig RokiConfig { get; }
