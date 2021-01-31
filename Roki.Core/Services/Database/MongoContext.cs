@@ -11,6 +11,8 @@ using MongoDB.Driver.Linq;
 using Roki.Extensions;
 using Roki.Modules.Games.Common;
 using Roki.Services.Database.Maps;
+using shortid;
+using shortid.Configuration;
 
 namespace Roki.Services.Database
 {
@@ -79,11 +81,11 @@ namespace Roki.Services.Database
         Task UpdateGuildConfigAsync(ulong guildId, GuildConfig guildConfig);
         Task ChangeGuildAvailabilityAsync(SocketGuild guild, bool available);
         Task UpdateGuildAsync(SocketGuild after);
+        Task<string> GenerateXpRewardIdAsync(ulong guildId);
         Task AddXpRewardAsync(ulong guildId, string id, XpReward reward);
         Task<UpdateResult> RemoveXpRewardAsync(ulong guildId, string id);
         Task AddStoreItemAsync(ulong guildId, string id, Listing item);
         Task<(string, Listing)> GetStoreItemByNameAsync(ulong guildId, string name);
-        Task<(string, Listing)> GetStoreItemByObjectIdAsync(ulong guildId, string id);
         Task<(string, Listing)> GetStoreItemByIdAsync(ulong guildId, string id);
         Task<Dictionary<string, Listing>> GetStoreCatalogueAsync(ulong guildId);
         Task UpdateStoreItemAsync(ulong guildId, string id, int amount);
@@ -670,6 +672,19 @@ namespace Roki.Services.Database
             await GuildCollection.UpdateOneAsync(g => g.Id == after.Id, updateGuild).ConfigureAwait(false);
         }
 
+        public async Task<string> GenerateXpRewardIdAsync(ulong guildId)
+        {
+            Guild guild = await GetGuildAsync(guildId);
+            string id;
+            // it is SUPER unlikely to contain a duplicate id, 1/2217471399 chance, but just in case
+            do
+            {
+                id = ShortId.Generate(new GenerationOptions {Length = 8, UseNumbers = true, UseSpecialCharacters = false});
+            } while (guild.XpRewards.ContainsKey(id));
+
+            return id;
+        }
+
         public async Task AddXpRewardAsync(ulong guildId, string id, XpReward reward)
         {
             UpdateDefinition<Guild> update = Builders<Guild>.Update.Set(x => x.XpRewards[id], reward);
@@ -692,13 +707,6 @@ namespace Roki.Services.Database
         {
             Guild guild = await GetGuildAsync(guildId).ConfigureAwait(false);
             (string key, Listing value) = guild.Store.FirstOrDefault(l => l.Value.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-            return (key, value);
-        }
-
-        public async Task<(string, Listing)> GetStoreItemByObjectIdAsync(ulong guildId, string id)
-        {
-            Guild guild = await GetGuildAsync(guildId).ConfigureAwait(false);
-            (string key, Listing value) = guild.Store.FirstOrDefault(l => l.Key == id);
             return (key, value);
         }
 

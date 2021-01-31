@@ -212,7 +212,7 @@ namespace Roki.Modules.Xp
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task XpRewardAdd(RewardType rewardType, int level, string reward)
         {
-            string id = ShortId.Generate(new GenerationOptions {Length = 8, UseNumbers = true, UseSpecialCharacters = false});
+            string id = await _mongo.Context.GenerateXpRewardIdAsync(Context.Guild.Id);
 
             if (rewardType == RewardType.Currency)
             {
