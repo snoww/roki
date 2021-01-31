@@ -191,7 +191,7 @@ namespace Roki.Services.Database
             dbUser = new User
             {
                 Id = user.Id,
-                Discriminator = user.DiscriminatorValue,
+                Discriminator = user.Discriminator,
                 AvatarId = user.AvatarId,
                 Username = user.Username,
                 Data = {[guildId] = new UserData()}
@@ -210,7 +210,7 @@ namespace Roki.Services.Database
         {
             UpdateDefinition<User> updateUser = Builders<User>.Update.Set(u => u.Id, after.Id)
                 .Set(u => u.Username, after.Username)
-                .Set(u => u.Discriminator, int.Parse(after.Discriminator))
+                .Set(u => u.Discriminator, after.Discriminator)
                 .Set(u => u.AvatarId, after.AvatarId);
 
             return await UserCollection.FindOneAndUpdateAsync<User>(u => u.Id == after.Id, updateUser,
