@@ -47,29 +47,38 @@ namespace Roki.Modules.Moderation
             }
             
             [RokiCommand, Description, Usage, Aliases]
-            public async Task DefaultPrefix(string prefix = "")
+            public async Task Prefix(string prefix = "")
             {
                 GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
                 if (string.IsNullOrWhiteSpace(prefix))
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                        .WithDescription($"The default prefix for this server is `{guildConfig.Prefix}`\n`{guildConfig.Prefix}defualtprefix <new_prefix>` to change prefix."));
+                        .WithDescription($"The prefix for this server is `{guildConfig.Prefix}`\nTo change prefix: `{guildConfig.Prefix}prefix <new_prefix>`\nTo reset to default: `{guildConfig.Prefix}prefix default`"));
                 }
-                else if (prefix.Length > 10)
+                else if (prefix.Equals("default", StringComparison.OrdinalIgnoreCase))
                 {
-                    await Context.Channel.SendErrorAsync("The maximum length for prefix is 10 characters (case insensitive).");
+                    guildConfig.Prefix = Roki.Properties.Prefix;
+                    await _config.UpdatePrefix(Context.Guild.Id, Roki.Properties.Prefix);
+                    await _config.UpdateGuildConfigAsync(Context.Guild.Id, guildConfig);
+                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
+                        .WithDescription($"The prefix for this server is now set to `{guildConfig.Prefix}`"));
+                }
+                else if (prefix.Length > 5)
+                {
+                    await Context.Channel.SendErrorAsync("The maximum length for prefix is 5 characters.");
                 }
                 else if (guildConfig.Prefix.Equals(prefix, StringComparison.OrdinalIgnoreCase))
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                        .WithDescription($"The default prefix for this server already is `{guildConfig.Prefix}`\n`{guildConfig.Prefix}defualtprefix <new_prefix>` to change prefix."));
+                        .WithDescription($"The prefix for this server already is `{guildConfig.Prefix}`\nTo change prefix: `{guildConfig.Prefix}prefix <new_prefix>`\nTo reset to default: `{guildConfig.Prefix}prefix default`"));
                 }
                 else
                 {
                     guildConfig.Prefix = prefix;
+                    await _config.UpdatePrefix(Context.Guild.Id, prefix);
                     await _config.UpdateGuildConfigAsync(Context.Guild.Id, guildConfig);
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                        .WithDescription($"The default prefix for this server is now set to `{guildConfig.Prefix}`"));
+                        .WithDescription($"The prefix for this server is now set to `{guildConfig.Prefix}`"));
                 }
             }
 
@@ -197,9 +206,9 @@ namespace Roki.Modules.Moderation
             }
             
             [RokiCommand, Description, Usage, Aliases]
-            public async Task Logging(string option = "")
+            public async Task Logging(string option = "", ITextChannel channel = null)
             {
-                ChannelConfig channelConfig = await _config.GetChannelConfigAsync(Context.Channel as ITextChannel);
+                ChannelConfig channelConfig = await _config.GetChannelConfigAsync(channel??Context.Channel as ITextChannel);
                 if (option.Equals("enable", StringComparison.OrdinalIgnoreCase))
                 {
                     if (channelConfig.Logging)
@@ -235,14 +244,15 @@ namespace Roki.Modules.Moderation
                 else
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                        .WithDescription($"Logging is **{(channelConfig.Logging ? "enabled" : "disabled")}** in this channel."));
+                        .WithDescription($"Logging is **{(channelConfig.Logging ? "enabled" : "disabled")}** in this channel.\n" +
+                                         $"To change: `{await _config.GetGuildPrefix(Context.Guild.Id)}logging enable/disable`"));
                 }
             }
             
             [RokiCommand, Description, Usage, Aliases]
-            public async Task CurrencyGeneration(string option = "")
+            public async Task CurrencyGeneration(string option = "", ITextChannel channel = null)
             {
-                ChannelConfig channelConfig = await _config.GetChannelConfigAsync(Context.Channel as ITextChannel);
+                ChannelConfig channelConfig = await _config.GetChannelConfigAsync(channel??Context.Channel as ITextChannel);
                 if (option.Equals("enable", StringComparison.OrdinalIgnoreCase))
                 {
                     if (channelConfig.CurrencyGeneration)
@@ -256,7 +266,7 @@ namespace Roki.Modules.Moderation
                         await _config.UpdateCurGen(Context.Channel.Id, true);
                         await _config.UpdateChannelConfigAsync(Context.Channel as ITextChannel, channelConfig);
                         await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription("CurrencyGeneration is now **enabled** in this channel. "));
+                            .WithDescription("CurrencyGeneration is now **enabled** in this channel."));
                     }
                 }
                 else if (option.Equals("disable", StringComparison.OrdinalIgnoreCase))
@@ -278,14 +288,15 @@ namespace Roki.Modules.Moderation
                 else
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                        .WithDescription($"CurrencyGeneration is **{(channelConfig.CurrencyGeneration ? "enabled" : "disabled")}** in this channel."));
+                        .WithDescription($"CurrencyGeneration is **{(channelConfig.CurrencyGeneration ? "enabled" : "disabled")}** in this channel.\n" +
+                                         $"To change: `{await _config.GetGuildPrefix(Context.Guild.Id)}currencygeneration enable/disable`"));
                 }
             }
             
             [RokiCommand, Description, Usage, Aliases]
-            public async Task XpGain(string option = "")
+            public async Task XpGain(string option = "", ITextChannel channel = null)
             {
-                ChannelConfig channelConfig = await _config.GetChannelConfigAsync(Context.Channel as ITextChannel);
+                ChannelConfig channelConfig = await _config.GetChannelConfigAsync(channel??Context.Channel as ITextChannel);
                 if (option.Equals("enable", StringComparison.OrdinalIgnoreCase))
                 {
                     if (channelConfig.XpGain)
@@ -299,7 +310,7 @@ namespace Roki.Modules.Moderation
                         await _config.UpdateXpGain(Context.Channel.Id, true);
                         await _config.UpdateChannelConfigAsync(Context.Channel as ITextChannel, channelConfig);
                         await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription("XpGain is now **enabled** in this channel. "));
+                            .WithDescription("XpGain is now **enabled** in this channel."));
                     }
                 }
                 else if (option.Equals("disable", StringComparison.OrdinalIgnoreCase))
@@ -321,7 +332,8 @@ namespace Roki.Modules.Moderation
                 else
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                        .WithDescription($"XpGain is **{(channelConfig.XpGain ? "enabled" : "disabled")}** in this channel."));
+                        .WithDescription($"XpGain is **{(channelConfig.XpGain ? "enabled" : "disabled")}** in this channel.\n" +
+                                         $"To change: `{await _config.GetGuildPrefix(Context.Guild.Id)}xpgain enable/disable`"));
                 }
             }
         }

@@ -96,9 +96,9 @@ namespace Roki.Modules.Moderation.Services
                 configString.Clear();
             }
 
-            if (!category.HasFlag(ConfigCategory.All))
+            if (category != ConfigCategory.All)
             {
-                builder.WithFooter($"{guildConfig.Prefix}guildconfig ALL to only see show all categories");
+                builder.WithFooter($"To show all categories: {guildConfig.Prefix}guildconfig ALL");
             }
 
             return builder;

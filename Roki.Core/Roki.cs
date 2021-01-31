@@ -23,7 +23,7 @@ namespace Roki
         
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         
-        private RokiConfig RokiConfig { get; }
+        private IRokiConfig RokiConfig { get; }
         private DiscordSocketClient Client { get; }
         private CommandService CommandService { get; }
         private IMongoService Mongo { get; }
