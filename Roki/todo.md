@@ -25,8 +25,9 @@ stuff to do in no particular order:
 - ~~guild specific configuration~~
     - add optional user presence event logging (i.e. user goes offline/online/joins/leaves)
     - ~~using channel specific configuration~~
-    - updating channel configs
-    - updating guild configs  
+    - ~~updating channel configs~~
+    - ~~updating guild configs~~
+  - updating module configs
     - command permissions
         - ~~private message only commands~~
         - ~~channel only commands etc.~~
