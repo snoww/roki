@@ -19,7 +19,7 @@ namespace Roki.Modules.Xp.Common
             var levelFloor = (int) Math.Pow(Level * factor, 2);
             ProgressXp = xp - levelFloor;
             RequiredXp = (int) Math.Pow((Level + 1) * factor, 2) - levelFloor;
-            TotalRequiredXp = xp + RequiredXp;
+            TotalRequiredXp = levelFloor + RequiredXp;
         }
 
         public XpLevel AddXp(int xp)
