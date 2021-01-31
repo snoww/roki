@@ -20,7 +20,7 @@ namespace Roki.Services
 
         Task UpdateGuildConfigAsync(ulong guildId, GuildConfig config);
         Task UpdateChannelConfigAsync(ITextChannel channel, ChannelConfig config);
-        Task UpdatePrefix(ulong guildId, bool enable);
+        Task UpdatePrefix(ulong guildId, string prefix);
         Task UpdateLogging(ulong channelId, bool enable);
         Task UpdateCurGen(ulong channelId, bool enable);
         Task UpdateXpGain(ulong channelId, bool enable);
@@ -128,9 +128,9 @@ namespace Roki.Services
             await _context.UpdateChannelConfigAsync(channel, channelConfig);
         }
 
-        public async Task UpdatePrefix(ulong guildId, bool enable)
+        public async Task UpdatePrefix(ulong guildId, string prefix)
         {
-            await _cache.StringSetAsync($"config:guild:{guildId}:prefix", enable, TimeSpan.FromDays(7));
+            await _cache.StringSetAsync($"config:guild:{guildId}:prefix", prefix, TimeSpan.FromDays(7));
         }
 
         public async Task UpdateLogging(ulong channelId, bool enable)
