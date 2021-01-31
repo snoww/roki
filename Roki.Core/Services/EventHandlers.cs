@@ -298,18 +298,22 @@ namespace Roki.Services
             if (fastXp && now - user.Data[guildId].LastXpGain >= TimeSpan.FromMinutes(guildConfig.XpFastCooldown))
             {
                 await _context.UpdateUserXpAsync(user, guildId, now, newXp.TotalXp - oldXp.TotalXp, levelUp).ConfigureAwait(false);
-                goto levelUp;
+                goto xpGained;
             }
 
             if (DateTime.UtcNow - user.Data[guildId].LastXpGain >= TimeSpan.FromMinutes(guildConfig.XpCooldown))
             {
                 await _context.UpdateUserXpAsync(user, guildId, now, newXp.TotalXp - oldXp.TotalXp, levelUp).ConfigureAwait(false);
-                goto levelUp;
+                goto xpGained;
             }
 
             return;
             
-            levelUp:
+            xpGained:
+            if (!levelUp)
+            {
+                return;
+            }
             await SendNotification(user, guildId, message, newXp.Level).ConfigureAwait(false);
             Dictionary<ObjectId, XpReward> rewards = (await _context.GetOrAddGuildAsync(channel.Guild as SocketGuild).ConfigureAwait(false)).XpRewards;
             if (rewards != null && rewards.Count != 0)
