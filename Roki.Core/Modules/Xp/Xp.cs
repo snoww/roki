@@ -78,8 +78,7 @@ namespace Roki.Modules.Xp
             bool doubleXp = dbUser.Data[guildId].Subscriptions.ContainsKey("DoubleXp");
             bool fastXp = dbUser.Data[guildId].Subscriptions.ContainsKey("FastXp");
 
-            await using MemoryStream xpImage = XpDrawExtensions.GenerateXpBar(avatar, 
-                xp.ProgressXp, xp.RequiredXp, $"{xp.TotalXp}", $"{xp.Level}", $"{rank}", 
+            await using MemoryStream xpImage = XpDrawExtensions.GenerateXpBar(avatar, xp, $"{rank}", 
                 user.Username, user.Discriminator, dbUser.Data[guildId].LastLevelUp, doubleXp, fastXp);
             await _cache.StringSetAsync($"xp:image:{user.Id}", xpImage.ToArray(), TimeSpan.FromMinutes(5), flags: CommandFlags.FireAndForget);
             await Context.Channel.SendFileAsync(xpImage, $"xp-{user.Id}.png").ConfigureAwait(false);

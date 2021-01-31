@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using Roki.Modules.Xp.Common;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing;
@@ -24,7 +25,7 @@ namespace Roki.Modules.Xp.Extensions
 
         private const int MaxUsernameLength = 965;
 
-        public static MemoryStream GenerateXpBar(Stream avatar, int currentXp, int xpCap, string totalXp, string level, string rank,
+        public static MemoryStream GenerateXpBar(Stream avatar, XpLevel xp, string rank,
             string username, string discriminator, DateTime date, bool doubleXp, bool fastXp)
         {
             using Image image = Image.Load("./data/xp/roki_xp.png");
@@ -47,9 +48,9 @@ namespace Roki.Modules.Xp.Extensions
                 // xp bar
                 .Draw(Color.HotPink, 5, xpBarOutline));
 
-            if (currentXp != 0)
+            if (xp.TotalXp != 0)
             {
-                var xpBarProgress = new RectangleF(XpBarX + 5, XpBarY + 5, (XpBarLength - 10) * ((float) currentXp / xpCap), XpBarHeight - 10);
+                var xpBarProgress = new RectangleF(XpBarX + 5, XpBarY + 5, (XpBarLength - 10) * ((float) xp.ProgressXp / xp.RequiredXp), XpBarHeight - 10);
                 image.Mutate(x => x.Fill(Color.HotPink, xpBarProgress));
             }
 
@@ -70,8 +71,8 @@ namespace Roki.Modules.Xp.Extensions
             image.Mutate(x => x
                 .DrawUsername(usernameFont, discriminatorFont, username, $"#{discriminator}", new PointF(XpBarX, 100)) // username + discrim
                 .DrawText(new TextGraphicsOptions {TextOptions = {HorizontalAlignment = HorizontalAlignment.Center}},
-                    $"XP: {currentXp} / {xpCap}", xpFont, Color.DarkSlateGray, new PointF(XpBarX + XpBarLength / 2, 139)) // xp progress
-                .DrawStats(headerFont, bodyFont, $"#{rank}", level, totalXp, date)
+                    $"XP: {xp.TotalXp:N0} / {xp.TotalRequiredXp:N0}", xpFont, Color.DarkSlateGray, new PointF(XpBarX + XpBarLength / 2, 132)) // xp progress
+                .DrawStats(headerFont, bodyFont, $"#{rank}", xp.Level.ToString("N0"), xp.TotalXp.ToString("N0"), date)
                 .DrawBoosts(doubleXp, fastXp));
 
             var stream = new MemoryStream();
