@@ -10,7 +10,7 @@ namespace Roki.Services.Database.Maps
     {
         public ulong Id { get; set; }
         public string Username { get; set; }
-        public int Discriminator { get; set; }
+        public string Discriminator { get; set; }
         public string AvatarId { get; set; }
         [BsonDictionaryOptions(DictionaryRepresentation.Document)]
         public Dictionary<string, UserData> Data = new();
