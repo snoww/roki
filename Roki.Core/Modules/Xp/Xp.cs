@@ -14,6 +14,8 @@ using Roki.Modules.Xp.Common;
 using Roki.Modules.Xp.Extensions;
 using Roki.Services;
 using Roki.Services.Database.Maps;
+using shortid;
+using shortid.Configuration;
 using StackExchange.Redis;
 
 namespace Roki.Modules.Xp
@@ -24,11 +26,6 @@ namespace Roki.Modules.Xp
         private readonly IConfigurationService _config;
         private readonly IHttpClientFactory _http;
         private readonly IDatabase _cache;
-        
-        // hard-coding xp boosts
-        // needs fixing in future
-        private static readonly ObjectId DoubleXpId = ObjectId.Parse("5db772de03eb7230a1b5bba1");
-        private static readonly ObjectId FastXpId = ObjectId.Parse("5dbc2dd103eb7230a1b5bba5");
 
         public Xp(IHttpClientFactory http, IMongoService mongo, IRedisCache cache, IConfigurationService config)
         {
@@ -78,8 +75,8 @@ namespace Roki.Modules.Xp
             User dbUser = await _mongo.Context.GetOrAddUserAsync(user, guildId);
             var xp = new XpLevel(dbUser.Data[guildId].Xp);
             int rank = await _mongo.Context.GetUserXpRankAsync(dbUser, guildId).ConfigureAwait(false);
-            bool doubleXp = dbUser.Data[guildId].Subscriptions.ContainsKey(DoubleXpId);
-            bool fastXp = dbUser.Data[guildId].Subscriptions.ContainsKey(FastXpId);
+            bool doubleXp = dbUser.Data[guildId].Subscriptions.ContainsKey("DoubleXp");
+            bool fastXp = dbUser.Data[guildId].Subscriptions.ContainsKey("FastXp");
 
             await using MemoryStream xpImage = XpDrawExtensions.GenerateXpBar(avatar, 
                 xp.ProgressXp, xp.RequiredXp, $"{xp.TotalXp}", $"{xp.Level}", $"{rank}", 
@@ -167,14 +164,14 @@ namespace Roki.Modules.Xp
                 page--;
             }
             
-            Dictionary<ObjectId, XpReward> rewards = (await _mongo.Context.GetGuildAsync(Context.Guild.Id).ConfigureAwait(false)).XpRewards;
+            Dictionary<string, XpReward> rewards = (await _mongo.Context.GetGuildAsync(Context.Guild.Id).ConfigureAwait(false)).XpRewards;
             if (rewards == null || rewards.Count == 0)
             {
                 await Context.Channel.SendErrorAsync("There are currently no XP rewards setup for this server.").ConfigureAwait(false);
                 return;
             }
 
-            List<KeyValuePair<ObjectId, XpReward>> sorted = rewards.OrderByDescending(r => r.Value.Level).ToList();
+            List<KeyValuePair<string, XpReward>> sorted = rewards.OrderByDescending(r => r.Value.Level).ToList();
             
             int totalPages = sorted.Count / 9;
             if (page > totalPages)
@@ -215,7 +212,7 @@ namespace Roki.Modules.Xp
         [RequireUserPermission(GuildPermission.Administrator)]
         public async Task XpRewardAdd(RewardType rewardType, int level, string reward)
         {
-            var id = ObjectId.GenerateNewId();
+            string id = ShortId.Generate(new GenerationOptions {Length = 8, UseNumbers = true, UseSpecialCharacters = false});
 
             if (rewardType == RewardType.Currency)
             {
@@ -237,7 +234,7 @@ namespace Roki.Modules.Xp
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithTitle("XP Reward Added")
                         .WithDescription("Successfully added a new XP reward.\n" +
-                                         $"Reward ID: `{id.GetHexId()}`\n" +
+                                         $"Reward ID: `{id}`\n" +
                                          $"XP Level: `{level}`\n" +
                                          "Reward Type: currency\n" +
                                          $"Reward Amount: `{rewardAmount:N0}`"))
@@ -275,7 +272,7 @@ namespace Roki.Modules.Xp
             await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                     .WithTitle("XP Reward Added")
                     .WithDescription("Successfully added a new XP reward.\n" +
-                                     $"Reward ID: `{id.GetHexId()}`\n" +
+                                     $"Reward ID: `{id}`\n" +
                                      $"XP Level: `{level}`\n" +
                                      "Reward Type: role\n" +
                                      $"Reward Role: <@&{role.Id}>"))
@@ -285,11 +282,11 @@ namespace Roki.Modules.Xp
         [RokiCommand, Description, Usage, Aliases]
         [RequireContext(ContextType.Guild)]
         [RequireUserPermission(GuildPermission.Administrator)]
-        public async Task XpRewardRemove(string rawId = null)
+        public async Task XpRewardRemove(string id = null)
         {
             GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
 
-            if (string.IsNullOrWhiteSpace(rawId) || !ObjectId.TryParse(rawId, out ObjectId id))
+            if (string.IsNullOrWhiteSpace(id))
             {
                 await Context.Channel.SendErrorAsync($"Please specify the correct XP reward ID. You can obtain the IDs by using `{guildConfig.Prefix}xpr <page_num>`.")
                     .ConfigureAwait(false);

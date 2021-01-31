@@ -39,9 +39,9 @@ namespace Roki.Services.Database
         Task<IEnumerable<User>> GetCurrencyLeaderboardAsync(string guildId, int page);
         Task<IEnumerable<User>> GetXpLeaderboardAsync(string guildId, int page);
         Task<bool> TransferCurrencyAsync(IUser user, string guildId, decimal amount);
-        Task<bool> AddOrUpdateUserSubscriptionAsync(IUser user, string guildId, ObjectId subId, int days);
-        Task<Dictionary<ulong, Dictionary<string, List<ObjectId>>>> RemoveExpiredSubscriptionsAsync();
-        Task<bool> AddOrUpdateUserInventoryAsync(IUser user, string guildId, ObjectId itemId, int quantity);
+        Task<bool> AddOrUpdateUserSubscriptionAsync(IUser user, string guildId, string subId, int days);
+        Task<Dictionary<ulong, Dictionary<string, List<string>>>> RemoveExpiredSubscriptionsAsync();
+        Task<bool> AddOrUpdateUserInventoryAsync(IUser user, string guildId, string itemId, int quantity);
         Task ChargeInterestAsync(User user, string guildId, decimal amount, string ticker);
         Task<bool> UpdateUserInvestingAccountAsync(User user, string guildId, decimal amount);
         Task<bool> UpdateUserPortfolioAsync(User user, string guildId, string ticker, string position, long shares);
@@ -79,14 +79,14 @@ namespace Roki.Services.Database
         Task UpdateGuildConfigAsync(ulong guildId, GuildConfig guildConfig);
         Task ChangeGuildAvailabilityAsync(SocketGuild guild, bool available);
         Task UpdateGuildAsync(SocketGuild after);
-        Task AddXpRewardAsync(ulong guildId, ObjectId id, XpReward reward);
-        Task<UpdateResult> RemoveXpRewardAsync(ulong guildId, ObjectId id);
-        Task AddStoreItemAsync(ulong guildId, ObjectId id, Listing item);
-        Task<(ObjectId, Listing)> GetStoreItemByNameAsync(ulong guildId, string name);
-        Task<(ObjectId, Listing)> GetStoreItemByObjectIdAsync(ulong guildId, ObjectId id);
-        Task<(ObjectId, Listing)> GetStoreItemByIdAsync(ulong guildId, string id);
-        Task<Dictionary<ObjectId, Listing>> GetStoreCatalogueAsync(ulong guildId);
-        Task UpdateStoreItemAsync(ulong guildId, ObjectId id, int amount);
+        Task AddXpRewardAsync(ulong guildId, string id, XpReward reward);
+        Task<UpdateResult> RemoveXpRewardAsync(ulong guildId, string id);
+        Task AddStoreItemAsync(ulong guildId, string id, Listing item);
+        Task<(string, Listing)> GetStoreItemByNameAsync(ulong guildId, string name);
+        Task<(string, Listing)> GetStoreItemByObjectIdAsync(ulong guildId, string id);
+        Task<(string, Listing)> GetStoreItemByIdAsync(ulong guildId, string id);
+        Task<Dictionary<string, Listing>> GetStoreCatalogueAsync(ulong guildId);
+        Task UpdateStoreItemAsync(ulong guildId, string id, int amount);
 
         #endregion
 
@@ -321,7 +321,7 @@ namespace Roki.Services.Database
             return true;
         }
 
-        public async Task<bool> AddOrUpdateUserSubscriptionAsync(IUser user, string guildId, ObjectId subId, int days)
+        public async Task<bool> AddOrUpdateUserSubscriptionAsync(IUser user, string guildId, string subId, int days)
         {
             User dbUser = await GetOrAddUserAsync(user, guildId).ConfigureAwait(false);
             // if exists update then return true
@@ -342,21 +342,21 @@ namespace Roki.Services.Database
             return false;
         }
 
-        public async Task<Dictionary<ulong, Dictionary<string, List<ObjectId>>>> RemoveExpiredSubscriptionsAsync()
+        public async Task<Dictionary<ulong, Dictionary<string, List<string>>>> RemoveExpiredSubscriptionsAsync()
         {
             DateTime now = DateTime.UtcNow.Date;
-            var expired = new Dictionary<ulong, Dictionary<string, List<ObjectId>>>();
+            var expired = new Dictionary<ulong, Dictionary<string, List<string>>>();
 
             using IAsyncCursor<User> cursor = await UserCollection.FindAsync(FilterDefinition<User>.Empty);
             while (await cursor.MoveNextAsync())
             {
                 foreach (User user in cursor.Current)
                 {
-                    expired[user.Id] = new Dictionary<string, List<ObjectId>>();
+                    expired[user.Id] = new Dictionary<string, List<string>>();
                     foreach ((string guildId, UserData data) in user.Data)
                     {
-                        expired[user.Id][guildId] = new List<ObjectId>();
-                        foreach ((ObjectId id, Subscription subscription) in data.Subscriptions)
+                        expired[user.Id][guildId] = new List<string>();
+                        foreach ((string id, Subscription subscription) in data.Subscriptions)
                         {
                             if (now >= subscription.EndDate)
                             {
@@ -382,7 +382,7 @@ namespace Roki.Services.Database
             return expired;
         }
 
-        public async Task<bool> AddOrUpdateUserInventoryAsync(IUser user, string guildId, ObjectId itemId, int quantity)
+        public async Task<bool> AddOrUpdateUserInventoryAsync(IUser user, string guildId, string itemId, int quantity)
         {
             User dbUser = await GetOrAddUserAsync(user, guildId).ConfigureAwait(false);
             // if exists update then return true
@@ -670,53 +670,53 @@ namespace Roki.Services.Database
             await GuildCollection.UpdateOneAsync(g => g.Id == after.Id, updateGuild).ConfigureAwait(false);
         }
 
-        public async Task AddXpRewardAsync(ulong guildId, ObjectId id, XpReward reward)
+        public async Task AddXpRewardAsync(ulong guildId, string id, XpReward reward)
         {
             UpdateDefinition<Guild> update = Builders<Guild>.Update.Set(x => x.XpRewards[id], reward);
             await GuildCollection.UpdateOneAsync(x => x.Id == guildId, update).ConfigureAwait(false);
         }
 
-        public async Task<UpdateResult> RemoveXpRewardAsync(ulong guildId, ObjectId id)
+        public async Task<UpdateResult> RemoveXpRewardAsync(ulong guildId, string id)
         {
             UpdateDefinition<Guild> update = Builders<Guild>.Update.Unset(x => x.XpRewards[id]);
             return await GuildCollection.UpdateOneAsync(x => x.Id == guildId, update).ConfigureAwait(false);
         }
 
-        public async Task AddStoreItemAsync(ulong guildId, ObjectId id, Listing item)
+        public async Task AddStoreItemAsync(ulong guildId, string id, Listing item)
         {
             UpdateDefinition<Guild> update = Builders<Guild>.Update.Set(g => g.Store[id], item);
             await GuildCollection.UpdateOneAsync(g => g.Id == guildId, update).ConfigureAwait(false);
         }
 
-        public async Task<(ObjectId, Listing)> GetStoreItemByNameAsync(ulong guildId, string name)
+        public async Task<(string, Listing)> GetStoreItemByNameAsync(ulong guildId, string name)
         {
             Guild guild = await GetGuildAsync(guildId).ConfigureAwait(false);
-            (ObjectId key, Listing value) = guild.Store.FirstOrDefault(l => l.Value.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            (string key, Listing value) = guild.Store.FirstOrDefault(l => l.Value.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
             return (key, value);
         }
 
-        public async Task<(ObjectId, Listing)> GetStoreItemByObjectIdAsync(ulong guildId, ObjectId id)
+        public async Task<(string, Listing)> GetStoreItemByObjectIdAsync(ulong guildId, string id)
         {
             Guild guild = await GetGuildAsync(guildId).ConfigureAwait(false);
-            (ObjectId key, Listing value) = guild.Store.FirstOrDefault(l => l.Key == id);
+            (string key, Listing value) = guild.Store.FirstOrDefault(l => l.Key == id);
             return (key, value);
         }
 
-        public async Task<(ObjectId, Listing)> GetStoreItemByIdAsync(ulong guildId, string id)
+        public async Task<(string, Listing)> GetStoreItemByIdAsync(ulong guildId, string id)
         {
             id = id.ToLowerInvariant();
             Guild guild = await GetGuildAsync(guildId).ConfigureAwait(false);
-            (ObjectId key, Listing value) = guild.Store.FirstOrDefault(l => l.Key.GetHexId() == id);
+            (string key, Listing value) = guild.Store.FirstOrDefault(l => l.Key == id);
             return (key, value);
         }
 
-        public async Task<Dictionary<ObjectId, Listing>> GetStoreCatalogueAsync(ulong guildId)
+        public async Task<Dictionary<string, Listing>> GetStoreCatalogueAsync(ulong guildId)
         {
             Guild guild = await GetGuildAsync(guildId).ConfigureAwait(false);
             return guild.Store;
         }
 
-        public async Task UpdateStoreItemAsync(ulong guildId, ObjectId id, int amount)
+        public async Task UpdateStoreItemAsync(ulong guildId, string id, int amount)
         {
             UpdateDefinition<Guild> update = Builders<Guild>.Update.Inc(g => g.Store[id].Quantity, amount);
             await GuildCollection.UpdateOneAsync(g => g.Id == guildId, update).ConfigureAwait(false);

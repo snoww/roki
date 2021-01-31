@@ -36,12 +36,12 @@ namespace Roki.Modules.Currency.Services
 
         private async void RemoveSubEvent(object state)
         {
-            Dictionary<ulong, Dictionary<string, List<ObjectId>>> expired = await _mongo.Context.RemoveExpiredSubscriptionsAsync().ConfigureAwait(false);
-            foreach ((ulong userId, Dictionary<string, List<ObjectId>> subs) in expired)
+            Dictionary<ulong, Dictionary<string, List<string>>> expired = await _mongo.Context.RemoveExpiredSubscriptionsAsync().ConfigureAwait(false);
+            foreach ((ulong userId, Dictionary<string, List<string>> subs) in expired)
             {
-                foreach ((string guildId, List<ObjectId> sub) in subs)
+                foreach ((string guildId, List<string> sub) in subs)
                 {
-                    foreach (ObjectId id in sub)
+                    foreach (string id in sub)
                     {
                         (_, Listing listing) = await _mongo.Context.GetStoreItemByObjectIdAsync(ulong.Parse(guildId), id).ConfigureAwait(false);
                         if (listing.Category.Equals("Boost", StringComparison.Ordinal)) 

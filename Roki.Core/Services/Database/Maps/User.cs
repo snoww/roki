@@ -24,9 +24,9 @@ namespace Roki.Services.Database.Maps
         public string Notification { get; set; } = "dm";
         public long Currency { get; set; } = 1000;
         [BsonDictionaryOptions(DictionaryRepresentation.Document)]
-        public Dictionary<ObjectId, Item> Inventory { get; set; } = new();
+        public Dictionary<string, Item> Inventory { get; set; } = new();
         [BsonDictionaryOptions(DictionaryRepresentation.Document)]
-        public Dictionary<ObjectId, Subscription> Subscriptions { get; set; } = new();
+        public Dictionary<string, Subscription> Subscriptions { get; set; } = new();
         public decimal InvestingAccount { get; set; } = 1000;
         [BsonDictionaryOptions(DictionaryRepresentation.Document)]
         public Dictionary<string, Investment> Portfolio { get; set; } = new();
