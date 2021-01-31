@@ -32,7 +32,7 @@ namespace Roki
         private IServiceProvider Services { get; set; }
 
         public static Properties Properties { get; } = new();
-        public const ulong BotId = 220678903432347650;
+        public static ulong BotId { get; set; }
 
         public Roki()
         {
@@ -118,6 +118,7 @@ namespace Roki
                 {
                     try
                     {
+                        BotId = Client.CurrentUser.Id;
                         IDatabase cache = Cache.Redis.GetDatabase();
                         Logger.Info("Loading cache");
                         var sw = Stopwatch.StartNew();
