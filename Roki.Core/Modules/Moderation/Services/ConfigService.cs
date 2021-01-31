@@ -2,7 +2,6 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Discord;
 using Roki.Services;
 using Roki.Services.Database.Maps;
@@ -11,39 +10,6 @@ namespace Roki.Modules.Moderation.Services
 {
     public class ConfigService : IRokiService
     {
-        private readonly IMongoService _mongo;
-
-        public ConfigService(IMongoService mongo)
-        {
-            _mongo = mongo;
-        }
-
-        public async Task<GuildConfig> GetGuildConfigAsync(ulong guildId)
-        {
-            Guild guild = await _mongo.Context.GetGuildAsync(guildId).ConfigureAwait(false);
-            return guild.Config ?? new GuildConfig();
-        }
-        
-        public async Task<ChannelConfig> GetChannelConfigAsync(ITextChannel channel)
-        {
-            Channel dbChannel = await _mongo.Context.GetOrAddChannelAsync(channel).ConfigureAwait(false);
-            ChannelConfig config = dbChannel.Config;
-            if (config == null)
-            {
-                Guild guild = await _mongo.Context.GetGuildAsync(channel.GuildId).ConfigureAwait(false);
-                return new ChannelConfig
-                {
-                    Logging = guild.Config.Logging,
-                    CurrencyGeneration = guild.Config.CurrencyGeneration,
-                    XpGain = guild.Config.XpGain,
-                    Modules = guild.Config.Modules,
-                    Commands = guild.Config.Commands
-                };
-            }
-
-            return config;
-        }
-
         public static EmbedBuilder PrintGuildConfig(ConfigCategory category, GuildConfig guildConfig)
         {
             var configString = new StringBuilder();
@@ -53,8 +19,6 @@ namespace Roki.Modules.Moderation.Services
             {
                 configString.Append("```");
                 configString.Append("Prefix=").Append('"').Append(guildConfig.Prefix).AppendLine("\"");
-                configString.Append("OkColor=").AppendLine(guildConfig.OkColor.ToString("X"));
-                configString.Append("ErrorColor=").AppendLine(guildConfig.ErrorColor.ToString("X"));
                 configString.Append("Logging=").AppendLine(guildConfig.Logging.ToString());
                 configString.Append("CurrencyGeneration=").AppendLine(guildConfig.CurrencyGeneration.ToString());
                 configString.Append("XpGain=").AppendLine(guildConfig.XpGain.ToString());
@@ -132,6 +96,11 @@ namespace Roki.Modules.Moderation.Services
                 configString.Clear();
             }
 
+            if (!category.HasFlag(ConfigCategory.All))
+            {
+                builder.WithFooter($"{guildConfig.Prefix}guildconfig ALL to only see show all categories");
+            }
+
             return builder;
         }
 
@@ -150,7 +119,6 @@ namespace Roki.Modules.Moderation.Services
         }
     }
 
-    
     [Flags]
     public enum ConfigCategory
     {

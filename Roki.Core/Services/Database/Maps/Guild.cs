@@ -49,7 +49,7 @@ namespace Roki.Services.Database.Maps
     {
         // default settings for guild
         // i.e. when a new channel is created, these settings are inherited
-        public bool Logging { get; set; } = false;
+        public bool Logging { get; set; }
         public bool CurrencyGeneration { get; set; } = true;
         public bool XpGain { get; set; } = true;
         [BsonDictionaryOptions(DictionaryRepresentation.Document)]

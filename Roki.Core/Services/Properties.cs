@@ -6,8 +6,6 @@ namespace Roki.Services
         // guild properties are stored in database
         
         public string Prefix { get; set; } = ".";
-        public uint OkColor { get; set; } = 0xFF00FF;
-        public uint ErrorColor { get; set; } = 0xFF0000;
 
         #region Currency
 

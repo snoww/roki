@@ -32,6 +32,7 @@ stuff to do in no particular order:
         - ~~channel only commands etc.~~
         - certain commands only allowed in certain channels
 - ~~change building process, and output directories~~
+- module descriptions
 - add docs for building
 - add build script
 
