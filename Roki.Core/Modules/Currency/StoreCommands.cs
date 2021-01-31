@@ -225,7 +225,7 @@ namespace Roki.Modules.Currency
                 DateTime now = DateTime.UtcNow.Date;
                 foreach ((string id, Subscription sub) in subs)
                 {
-                    (_, Listing listing) = await _mongo.Context.GetStoreItemByObjectIdAsync(Context.Guild.Id, id);
+                    (_, Listing listing) = await _mongo.Context.GetStoreItemByIdAsync(Context.Guild.Id, id);
                     desc.AppendLine($"{listing.Name} - Expires in `{(sub.EndDate - now).ToReadableString()}`");
                 }
 
@@ -246,7 +246,7 @@ namespace Roki.Modules.Currency
                 else
                 {
                     desc = string.Join("\n", inv
-                        .Select(i => $"{_mongo.Context.GetStoreItemByObjectIdAsync(Context.Guild.Id, i.Key).Result.Item2.Name.ToTitleCase()}: {i.Value.Quantity}"));
+                        .Select(i => $"{_mongo.Context.GetStoreItemByIdAsync(Context.Guild.Id, i.Key).Result.Item2.Name.ToTitleCase()}: {i.Value.Quantity}"));
                 }
 
                 embed.WithDescription(desc);
