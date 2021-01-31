@@ -16,9 +16,6 @@ namespace Roki.Services
 {
     public class EventHandlers : IRokiService
     {
-        private static readonly ObjectId DoubleXpId = ObjectId.Parse("5db772de03eb7230a1b5bba1");
-        private static readonly ObjectId FastXpId = ObjectId.Parse("5dbc2dd103eb7230a1b5bba5");
-
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly IDatabase _cache;
         private readonly DiscordSocketClient _client;
@@ -287,8 +284,8 @@ namespace Roki.Services
             User user = await _context.GetOrAddUserAsync(message.Author, guildId).ConfigureAwait(false);
 
             // temp
-            bool doubleXp = user.Data[guildId].Subscriptions.ContainsKey(DoubleXpId);
-            bool fastXp = user.Data[guildId].Subscriptions.ContainsKey(FastXpId);
+            bool doubleXp = user.Data[guildId].Subscriptions.ContainsKey("DoubleXp");
+            bool fastXp = user.Data[guildId].Subscriptions.ContainsKey("FastXp");
 
             var oldXp = new XpLevel(user.Data[guildId].Xp);
             XpLevel newXp = doubleXp ? oldXp.AddXp(guildConfig.XpPerMessage * 2) : oldXp.AddXp(guildConfig.XpPerMessage);
@@ -315,10 +312,10 @@ namespace Roki.Services
                 return;
             }
             await SendNotification(user, guildId, message, newXp.Level).ConfigureAwait(false);
-            Dictionary<ObjectId, XpReward> rewards = (await _context.GetOrAddGuildAsync(channel.Guild as SocketGuild).ConfigureAwait(false)).XpRewards;
+            Dictionary<string, XpReward> rewards = (await _context.GetOrAddGuildAsync(channel.Guild as SocketGuild).ConfigureAwait(false)).XpRewards;
             if (rewards != null && rewards.Count != 0)
             {
-                foreach ((ObjectId _, XpReward reward) in rewards)
+                foreach ((string _, XpReward reward) in rewards)
                 {
                     if (reward.Type == "currency")
                     {

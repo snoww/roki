@@ -25,12 +25,12 @@ namespace Roki.Modules.Moderation.Services
             _mongo = mongo;
         }
 
-        public async Task<bool> ConsumePower(IUser user, ulong guildId, ObjectId power)
+        public async Task<bool> ConsumePower(IUser user, ulong guildId, string power)
         {
-            Dictionary<ObjectId, Item> inv = (await _mongo.Context.GetOrAddUserAsync(user, guildId.ToString()).ConfigureAwait(false)).Data[guildId.ToString()].Inventory;
-            foreach ((ObjectId id, Item _) in inv)
+            Dictionary<string, Item> inv = (await _mongo.Context.GetOrAddUserAsync(user, guildId.ToString()).ConfigureAwait(false)).Data[guildId.ToString()].Inventory;
+            foreach ((string id, Item _) in inv)
             {
-                (ObjectId listingId, _) = await _mongo.Context.GetStoreItemByObjectIdAsync(guildId, id).ConfigureAwait(false);
+                (string listingId, _) = await _mongo.Context.GetStoreItemByObjectIdAsync(guildId, id).ConfigureAwait(false);
                 if (listingId != power) continue;
 
                 await _mongo.Context.AddOrUpdateUserInventoryAsync(user, guildId.ToString(), power, -1).ConfigureAwait(false);

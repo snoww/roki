@@ -19,9 +19,9 @@ namespace Roki.Services.Database.Maps
         public DateTimeOffset CreatedAt { get; set; }
         public bool Available { get; set; } = true;
         [BsonDictionaryOptions(DictionaryRepresentation.Document)]
-        public Dictionary<ObjectId, XpReward> XpRewards { get; set; } = new();
+        public Dictionary<string, XpReward> XpRewards { get; set; } = new();
         [BsonDictionaryOptions(DictionaryRepresentation.Document)]
-        public Dictionary<ObjectId, Listing> Store { get; set; } = new();
+        public Dictionary<string, Listing> Store { get; set; } = new();
         public GuildConfig Config { get; set; } = new();
     }
     
