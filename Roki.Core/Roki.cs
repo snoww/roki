@@ -134,7 +134,7 @@ namespace Roki
 
                             if (role == null || role.IsEveryone)
                             {
-                                await cache.StringSetAsync($"color:{bot.Guild.Id}", Color.Magenta.RawValue).ConfigureAwait(false);
+                                await cache.StringSetAsync($"color:{bot.Guild.Id}", OkColor).ConfigureAwait(false);
                             }
                             else
                             {

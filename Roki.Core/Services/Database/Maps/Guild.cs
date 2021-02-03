@@ -52,6 +52,7 @@ namespace Roki.Services.Database.Maps
         public bool Logging { get; set; }
         public bool CurrencyGeneration { get; set; } = true;
         public bool XpGain { get; set; } = true;
+        public string MuteRole { get; set; }
         [BsonDictionaryOptions(DictionaryRepresentation.Document)]
         public Dictionary<string, bool> Modules { get; set; } = new();
         [BsonDictionaryOptions(DictionaryRepresentation.Document)]

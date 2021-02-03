@@ -15,8 +15,8 @@ namespace Roki.Services
         public string CurrencyName { get; set; } = "Stone";
         public string CurrencyNamePlural { get; set; } = "Stones";
         public int CurrencyDropAmount { get; set; } = 1;
-        public int? CurrencyDropAmountMax { get; set; } = 5;
-        public int? CurrencyDropAmountRare { get; set; } = 100;
+        public int CurrencyDropAmountMax { get; set; } = 5;
+        public int CurrencyDropAmountRare { get; set; } = 100;
 
         #endregion
 

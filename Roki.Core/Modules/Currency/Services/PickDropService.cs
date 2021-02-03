@@ -72,7 +72,7 @@ namespace Roki.Modules.Currency.Services
 
                 if (_rng.Next(0, 101) == 100)
                 {
-                    drop = guildConfig.CurrencyDropAmountRare ?? 100;
+                    drop = guildConfig.CurrencyDropAmountRare;
                 }
 
                 if (drop > 0)

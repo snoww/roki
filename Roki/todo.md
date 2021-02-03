@@ -7,15 +7,16 @@ stuff to do in no particular order:
 - update/maintain/fix existing modules
     - maybe go back to api based pokedex data instead of local data (easier to maintain)
     - add music autoplay algorithm
-    - update/improve db queries
+    - ~~update/improve db queries~~
     - finish store commands
     - ~~fix currency system~~
 - add moderation commands
     - ban
     - temp ban
-    - kick
+    - ~~kick~~
     - prune
     - filters
+    - mute/timeout
 - add reminder system
 - add repeating message system
 - add role commands
@@ -27,11 +28,11 @@ stuff to do in no particular order:
     - ~~using channel specific configuration~~
     - ~~updating channel configs~~
     - ~~updating guild configs~~
-  - updating module configs
-    - command permissions
-        - ~~private message only commands~~
-        - ~~channel only commands etc.~~
-        - certain commands only allowed in certain channels
+    - updating module configs
+        - command permissions
+            - ~~private message only commands~~
+            - ~~channel only commands etc.~~
+            - certain commands only allowed in certain channels
 - ~~change building process, and output directories~~
 - module descriptions
 - add docs for building
@@ -42,10 +43,17 @@ maybe:
 - create channels with commands?
 - custom commands (also maybe custom reactions)
 - upload emotes
+- welcome module
+    - pm welcome message? rules?
+    - welcome role
+    - rules channel with reaction to get role
 
 long term stuff:
 
 - sharding
 - setup website roki.sh for bot
-- web interface to interact with bot settings
+- web interface
+    - interact with bot configuration
+    - view logs
 - new art
+- automod
