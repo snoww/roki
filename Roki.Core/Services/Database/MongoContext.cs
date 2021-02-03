@@ -268,7 +268,6 @@ namespace Roki.Services.Database
         public async Task UpdateBotCurrencyAsync(long amount, string guildId)
         {
             UpdateDefinition<User> updateCurrency = Builders<User>.Update.Inc(u => u.Data[guildId].Currency, amount);
-            // todo get bot id
             await UserCollection.UpdateOneAsync(u => u.Id == Roki.BotId, updateCurrency).ConfigureAwait(false);
         }
 
@@ -285,7 +284,6 @@ namespace Roki.Services.Database
         public async Task<IEnumerable<User>> GetCurrencyLeaderboardAsync(string guildId, int page)
         {
             return await UserCollection.Aggregate()
-                // todo get botid
                 .Match(u => u.Data[guildId].Currency > 0 && u.Id != Roki.BotId)
                 .SortByDescending(u => u.Data[guildId].Currency)
                 .Skip(page * 9)

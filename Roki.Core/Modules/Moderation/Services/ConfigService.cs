@@ -38,8 +38,8 @@ namespace Roki.Modules.Moderation.Services
                 configString.Append("CurrencyName=").AppendLine(guildConfig.CurrencyName);
                 configString.Append("CurrencyNamePlural=").AppendLine(guildConfig.CurrencyNamePlural);
                 configString.Append("CurrencyDropAmount=").AppendLine(guildConfig.CurrencyDropAmount.ToString(CultureInfo.InvariantCulture));
-                configString.Append("CurrencyDropAmountMax=").AppendLine(guildConfig.CurrencyDropAmountMax?.ToString(CultureInfo.InvariantCulture));
-                configString.Append("CurrencyDropAmountRare=").AppendLine(guildConfig.CurrencyDropAmountRare?.ToString(CultureInfo.InvariantCulture));
+                configString.Append("CurrencyDropAmountMax=").AppendLine(guildConfig.CurrencyDropAmountMax.ToString(CultureInfo.InvariantCulture));
+                configString.Append("CurrencyDropAmountRare=").AppendLine(guildConfig.CurrencyDropAmountRare.ToString(CultureInfo.InvariantCulture));
                 configString.AppendLine("```");
                 builder.AddField(ConfigCategory.Currency.ToString(), configString.ToString());
                 configString.Clear();
