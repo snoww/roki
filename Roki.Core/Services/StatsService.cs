@@ -29,7 +29,7 @@ namespace Roki.Services
     {
         private const long Megabyte = 1000000;
 
-        public const string BotVersion = "1.0.0-beta.1";
+        public const string BotVersion = "1.0.0-beta.2";
         private readonly DiscordSocketClient _client;
         private readonly DateTime _started;
         private long _commandsRan;
