@@ -825,7 +825,7 @@
     ]
   },
   "serverlogging": {
-    "Aliases": "guildlogging",
+    "Aliases": "slogging",
     "Description": "Sets the default logging behavior when a new channel is created in the server. Default is disabled.",
     "Usage": [
       "{0}serverlogging enable"
