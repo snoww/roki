@@ -91,14 +91,14 @@ namespace Roki.Modules.Moderation
                     if (guildConfig.Logging)
                     {
                         await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription("Server Logging is already **enabled**. All new channels created will have logging **enabled** by default."));
+                            .WithDescription("Server Logging is already **enabled**.\nAll new channels created will have logging **enabled** by default."));
                     }
                     else
                     {
                         guildConfig.Logging = true;
                         await _config.UpdateGuildConfigAsync(Context.Guild.Id, guildConfig);
                         await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription("Server Logging is **enabled**. All new channels created will have logging **enabled** by default."));
+                            .WithDescription("Server Logging is **enabled**.\nAll new channels created will have logging **enabled** by default."));
                     }
                 }
                 else if (option.Equals("disable", StringComparison.OrdinalIgnoreCase))
@@ -108,18 +108,18 @@ namespace Roki.Modules.Moderation
                         guildConfig.Logging = false;
                         await _config.UpdateGuildConfigAsync(Context.Guild.Id, guildConfig);
                         await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription("Server Logging is **disabled**. All new channels created will have logging **disabled** by default."));
+                            .WithDescription("Server Logging is **disabled**.\nAll new channels created will have logging **disabled** by default."));
                     }
                     else
                     {
                         await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription("Server Logging is already **disabled**. All new channels created will have logging **disabled** by default."));
+                            .WithDescription("Server Logging is already **disabled**.\nAll new channels created will have logging **disabled** by default."));
                     }
                 }
                 else
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                        .WithDescription(string.Format("Server Logging is **{0}**. All new channels created will have logging **{0}** by default.", guildConfig.Logging ? "enabled" : "disabled")));
+                        .WithDescription(string.Format("Server Logging is **{0}**.\nAll new channels created will have logging **{0}** by default.", guildConfig.Logging ? "enabled" : "disabled")));
                 }
             }
             
@@ -132,14 +132,14 @@ namespace Roki.Modules.Moderation
                     if (guildConfig.CurrencyGeneration)
                     {
                         await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription("Server CurrencyGeneration is already **enabled**. All new channels created will have CurrencyGeneration **enabled** by default."));
+                            .WithDescription("Server CurrencyGeneration is already **enabled**.\nAll new channels created will have CurrencyGeneration **enabled** by default."));
                     }
                     else
                     {
                         guildConfig.CurrencyGeneration = true;
                         await _config.UpdateGuildConfigAsync(Context.Guild.Id, guildConfig);
                         await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription("Server CurrencyGeneration is **enabled**. All new channels created will have CurrencyGeneration **enabled** by default."));
+                            .WithDescription("Server CurrencyGeneration is **enabled**.\nAll new channels created will have CurrencyGeneration **enabled** by default."));
                     }
                 }
                 else if (option.Equals("disable", StringComparison.OrdinalIgnoreCase))
@@ -149,18 +149,18 @@ namespace Roki.Modules.Moderation
                         guildConfig.CurrencyGeneration = false;
                         await _config.UpdateGuildConfigAsync(Context.Guild.Id, guildConfig);
                         await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription("Server CurrencyGeneration is **disabled**. All new channels created will have CurrencyGeneration **disabled** by default."));
+                            .WithDescription("Server CurrencyGeneration is **disabled**.\nAll new channels created will have CurrencyGeneration **disabled** by default."));
                     }
                     else
                     {
                         await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription("Server CurrencyGeneration is already **disabled**. All new channels created will have CurrencyGeneration **disabled** by default."));
+                            .WithDescription("Server CurrencyGeneration is already **disabled**.\nAll new channels created will have CurrencyGeneration **disabled** by default."));
                     }
                 }
                 else
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                        .WithDescription(string.Format("Server CurrencyGeneration is **{0}**. All new channels created will have CurrencyGeneration **{0}** by default.", guildConfig.Logging ? "enabled" : "disabled")));
+                        .WithDescription(string.Format("Server CurrencyGeneration is **{0}**.\nAll new channels created will have CurrencyGeneration **{0}** by default.", guildConfig.CurrencyGeneration ? "enabled" : "disabled")));
                 }
             }
             
@@ -173,14 +173,14 @@ namespace Roki.Modules.Moderation
                     if (guildConfig.XpGain)
                     {
                         await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription("Server XpGain is already **enabled**. All new channels created will have XpGain **enabled** by default."));
+                            .WithDescription("Server XpGain is already **enabled**.\nAll new channels created will have XpGain **enabled** by default."));
                     }
                     else
                     {
                         guildConfig.XpGain = true;
                         await _config.UpdateGuildConfigAsync(Context.Guild.Id, guildConfig);
                         await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription("Server XpGain is **enabled**. All new channels created will have XpGain **enabled** by default."));
+                            .WithDescription("Server XpGain is **enabled**.\nAll new channels created will have XpGain **enabled** by default."));
                     }
                 }
                 else if (option.Equals("disable", StringComparison.OrdinalIgnoreCase))
@@ -190,18 +190,18 @@ namespace Roki.Modules.Moderation
                         guildConfig.XpGain = false;
                         await _config.UpdateGuildConfigAsync(Context.Guild.Id, guildConfig);
                         await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription("Server XpGain is **disabled**. All new channels created will have XpGain **disabled** by default."));
+                            .WithDescription("Server XpGain is **disabled**.\nAll new channels created will have XpGain **disabled** by default."));
                     }
                     else
                     {
                         await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription("Server XpGain is already **disabled**. All new channels created will have XpGain **disabled** by default."));
+                            .WithDescription("Server XpGain is already **disabled**.\nAll new channels created will have XpGain **disabled** by default."));
                     }
                 }
                 else
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                        .WithDescription(string.Format("Server XpGain is **{0}**. All new channels created will have XpGain **{0}** by default.", guildConfig.Logging ? "enabled" : "disabled")));
+                        .WithDescription(string.Format("Server XpGain is **{0}**.\nAll new channels created will have XpGain **{0}** by default.", guildConfig.XpGain ? "enabled" : "disabled")));
                 }
             }
             
@@ -222,7 +222,7 @@ namespace Roki.Modules.Moderation
                         await _config.UpdateLogging(Context.Channel.Id, true);
                         await _config.UpdateChannelConfigAsync(Context.Channel as ITextChannel, channelConfig);
                         await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                            .WithDescription("Logging is now **enabled** in this channel. All messages will be logged."));
+                            .WithDescription("Logging is now **enabled** in this channel.\nAll messages will be logged."));
                     }
                 }
                 else if (option.Equals("disable", StringComparison.OrdinalIgnoreCase))
