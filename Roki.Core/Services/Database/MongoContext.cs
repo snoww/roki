@@ -862,7 +862,8 @@ namespace Roki.Services.Database
 
         public async Task<Pokemon> GetPokemonByNumberAsync(int id)
         {
-            return await PokedexCollection.Find(x => x.Num == id).FirstOrDefaultAsync();
+            List<Pokemon> pokemon = await PokedexCollection.Find(x => x.Num == id).ToListAsync();
+            return pokemon?.OrderBy(x => x.Species).First();
         }
 
         public async Task<Pokemon> GetPokemonAsync(string name)
