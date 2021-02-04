@@ -27,7 +27,7 @@ namespace Roki.Modules.Searches
                 {
                     if (num <= 0 || num >= 898)
                     {
-                        await Context.Channel.SendErrorAsync("Please enter a valid pokemon number (1-898).").ConfigureAwait(false);
+                        await Context.Channel.SendErrorAsync("Please enter a valid Pokémon number (1-898).").ConfigureAwait(false);
                         return;
                     }
                     pokemon = await Service.GetPokemonByIdAsync(num).ConfigureAwait(false);
@@ -39,7 +39,7 @@ namespace Roki.Modules.Searches
 
                 if (pokemon == null)
                 {
-                    await Context.Channel.SendErrorAsync("No Pokémon of that name/id found.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync("No Pokémon of that name found.").ConfigureAwait(false);
                     return;
                 }
 
