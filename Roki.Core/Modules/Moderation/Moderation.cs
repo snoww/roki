@@ -58,7 +58,30 @@ namespace Roki.Modules.Moderation
 
             await Context.Channel.EmbedAsync(embed);
         }
-        
-        
+
+        [RokiCommand, Description, Usage, Aliases]
+        [RequireContext(ContextType.Guild)]
+        [RequireUserPermission(GuildPermission.ManageMessages)]
+        public async Task Prune(IGuildUser user, int messages = 0)
+        {
+            if (messages == 0)
+            {
+                await Context.Channel.SendErrorAsync("Please specify the number of messages to prune");
+                return;
+            }
+
+            if (messages >= 100)
+            {
+                await Context.Channel.SendErrorAsync("You can only prune up to 100 messages at a time.");
+            }
+            
+            if (!await ModerationService.ValidPermissions(Context, Context.User as IGuildUser, user, "prune"))
+            {
+                return;
+            }
+
+            int prunedCount = await ModerationService.PruneMessagesAsync(Context, user, messages);
+            await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context).WithDescription($"Pruned {prunedCount} messages from {user} in {Context.Guild.Name}."));
+        }
     }
 }

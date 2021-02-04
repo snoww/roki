@@ -635,22 +635,6 @@
       "{0}events list"
     ]
   },
-  "logging": {
-    "Aliases": "log",
-    "Description": "Enables or disables logging of a channel. Logging is disabled by default in channels.",
-    "Usage": [
-      "{0}log",
-      "{0}log disable",
-      "{0}logging enable"
-    ]
-  },
-  "stalk": {
-    "Aliases": "",
-    "Description": "**BROKEN** Searches all of discord for a user by their username and discriminator.",
-    "Usage": [
-      "{0}stalk Snow#7777"
-    ]
-  },
   "uwu": {
     "Aliases": "",
     "Description": "UwUizes the message. If no message is provided, UwUizes the previous message in the channel.",
@@ -796,5 +780,90 @@
       "{0}cc @snow -t 3 -c white",
       "{0}cc @snow -c 10"
     ]
-  }
+  },
+  "kick": {
+    "Aliases": "",
+    "Description": "Kick a user from the server.",
+    "Usage": [
+      "{0}kick @snow"
+    ]
+  },
+  "ban": {
+    "Aliases": "",
+    "Description": "Ban a user from the server.",
+    "Usage": [
+      "{0}ban @snow"
+    ]
+  },
+  "prune": {
+    "Aliases": "purge",
+    "Description": "Deletes up to the specified number of messages of the mentioned user (not guaranteed to delete the exact specified number). Only searches up to the past 500 total messages.",
+    "Usage": [
+      "{0}prune @snow 50"
+    ]
+  },
+  "guildconfig": {
+    "Aliases": "serverconfig sconfig",
+    "Description": "Lists the server's configuration for the bot.",
+    "Usage": [
+      "{0}serverconfig"
+    ]
+  },
+  "channelconfig": {
+    "Aliases": "chconfig",
+    "Description": "Lists the current channel's configuration.",
+    "Usage": [
+      "{0}chconfig"
+    ]
+  },
+  "prefix": {
+    "Aliases": "defaultprefix",
+    "Description": "Sets the prefix for the bot. Up to 5 characters. Use 'default' argument to reset prefix.",
+    "Usage": [
+      "{0}prefix $",
+      "{0}prefix default"
+    ]
+  },
+  "serverlogging": {
+    "Aliases": "guildlogging",
+    "Description": "Sets the default logging behavior when a new channel is created in the server. Default is disabled.",
+    "Usage": [
+      "{0}serverlogging enable"
+    ]
+  },
+  "servercurrencygeneration": {
+    "Aliases": "scg",
+    "Description": "Sets the default currency generation behavior when a new channel is created in the server. Default is enabled.",
+    "Usage": [
+      "{0}scg disable"
+    ]
+  },
+  "serverxpgain": {
+    "Aliases": "sxpg",
+    "Description": "Sets the default XP gain behavior when a new channel is created in the server. Default is enabled.",
+    "Usage": [
+      "{0}sxp disable"
+    ]
+  },
+  "logging": {
+    "Aliases": "",
+    "Description": "Sets logging behavior in current channel. If enabled, all user messages in the current channel will be logged. Inherits server logging settings by default.",
+    "Usage": [
+      "{0}logging enable"
+    ]
+  },
+  "currencygeneration": {
+    "Aliases": "cg",
+    "Description": "Sets currency generation behavior in current channel. Inherits server logging settings by default.",
+    "Usage": [
+      "{0}cg disable"
+    ]
+  },
+  "xpgain": {
+    "Aliases": "xpg",
+    "Description": "Sets XP gain behavior in current channel. Inherits server logging settings by default.",
+    "Usage": [
+      "{0}xpg disable"
+    ]
+  }  
 }

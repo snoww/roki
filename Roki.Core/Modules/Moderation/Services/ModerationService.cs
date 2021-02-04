@@ -1,22 +1,14 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using MongoDB.Driver;
 using Roki.Extensions;
 using Roki.Services;
-using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Moderation.Services
 {
     public class ModerationService : IRokiService
     {
-        private readonly IMongoService _mongo;
-
-        public ModerationService(IMongoService mongo)
-        {
-            _mongo = mongo;
-        }
-
         public static async Task<bool> ValidPermissions(ICommandContext ctx, IGuildUser self, IGuildUser target, string task)
         {
             if (target.IsBot)
@@ -38,6 +30,29 @@ namespace Roki.Modules.Moderation.Services
             }
 
             return true;
+        }
+
+        public static async Task<int> PruneMessagesAsync(ICommandContext ctx, IGuildUser user, int count)
+        {
+            IEnumerable<IMessage> messages = await ctx.Channel.GetMessagesAsync(count * 5).FlattenAsync();
+            var toRemove = new List<IMessage>();
+            foreach (IMessage message in messages)
+            {
+                if (message.Author.Id != user.Id)
+                {
+                    continue;
+                }
+                
+                toRemove.Add(message);
+
+                if (toRemove.Count >= count)
+                {
+                    break;
+                }
+            }
+            await ((ITextChannel) ctx.Channel).DeleteMessagesAsync(toRemove);
+
+            return toRemove.Count;
         }
     }
 }
