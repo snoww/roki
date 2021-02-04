@@ -99,7 +99,7 @@ namespace Roki.Modules.Moderation.Services
 
             if (category != ConfigCategory.All)
             {
-                builder.WithFooter($"To show all categories: {guildConfig.Prefix}guildconfig ALL");
+                builder.WithFooter($"To show all categories: {guildConfig.Prefix}sconfig ALL");
             }
 
             return builder;
