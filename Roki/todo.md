@@ -6,15 +6,17 @@ stuff to do in no particular order:
 
 - update/maintain/fix existing modules
     - maybe go back to api based pokedex data instead of local data (easier to maintain)
+      - maybe hybrid system  
     - add music autoplay algorithm
+    - fix stocks  
     - ~~update/improve db queries~~
     - finish store commands
     - ~~fix currency system~~
 - add moderation commands
-    - ban
+    - ~~ban~~
     - temp ban
     - ~~kick~~
-    - prune
+    - ~~prune~~
     - filters
     - mute/timeout
 - add reminder system
