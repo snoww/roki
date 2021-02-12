@@ -73,8 +73,7 @@ namespace Roki.Modules.Games.Common
         private Dictionary<string, List<string>> _teams;
         private Bet? _winner;
 
-        public Showdown(ICurrencyService currency, DiscordSocketClient client, GuildConfig config, ITextChannel channel, int generation,
-            ShowdownService service, IRedisCache cache)
+        public Showdown(ICurrencyService currency, DiscordSocketClient client, GuildConfig config, ITextChannel channel, int generation, ShowdownService service, IRedisCache cache)
         {
             _currency = currency;
             _cache = cache.Redis.GetDatabase();
@@ -496,6 +495,7 @@ namespace Roki.Modules.Games.Common
             frames /= sprites.Count + team2.Count;
 
             // average the width
+            // todo fix teams with big differences in size
             width = (width + width2) / 2;
 
             // setup canvas
