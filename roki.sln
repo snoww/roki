@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2071134F-A30
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Roki.Core", "Roki.Core\Roki.Core.csproj", "{1AC72B9C-16F6-4123-99EA-A6A05ADE3835}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roki.Web", "Roki.Web\Roki.Web.csproj", "{42111CBC-6B5F-44A9-BC10-A7BC42CB9018}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,10 @@ Global
 		{1AC72B9C-16F6-4123-99EA-A6A05ADE3835}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AC72B9C-16F6-4123-99EA-A6A05ADE3835}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AC72B9C-16F6-4123-99EA-A6A05ADE3835}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42111CBC-6B5F-44A9-BC10-A7BC42CB9018}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42111CBC-6B5F-44A9-BC10-A7BC42CB9018}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42111CBC-6B5F-44A9-BC10-A7BC42CB9018}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42111CBC-6B5F-44A9-BC10-A7BC42CB9018}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -30,6 +36,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{C16685EF-368B-4849-9B8F-18EC6364F379} = {2071134F-A308-4809-9770-D2E0E35334D8}
 		{1AC72B9C-16F6-4123-99EA-A6A05ADE3835} = {2071134F-A308-4809-9770-D2E0E35334D8}
+		{42111CBC-6B5F-44A9-BC10-A7BC42CB9018} = {2071134F-A308-4809-9770-D2E0E35334D8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9DC1465E-C923-4CE8-8BE3-50122B1AD993}
