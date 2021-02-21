@@ -7,7 +7,7 @@ namespace Roki.Web.Models
     {
         public ulong Id { get; set; }
         public string Name { get; set; }
-        public string IconId { get; set; }
+        public string IconUrl { get; set; }
         public ulong OwnerId { get; set; }
         public int ChannelCount { get; set; }
         public int MemberCount { get; set; }
