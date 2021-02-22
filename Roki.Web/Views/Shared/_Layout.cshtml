@@ -27,7 +27,7 @@
                         <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-area="" asp-controller="Guild" asp-action="Manage">Manage Servers</a>
+                        <a class="nav-link" href="/manage">Manage Servers</a>
                     </li>
                 </ul>
                 @if (User?.Identity?.IsAuthenticated ?? false)

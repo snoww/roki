@@ -5,15 +5,15 @@ namespace Roki.Web.Models
 {
     public class DiscordGuild
     {
-        public string GuildId { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
-        public string IconUrl { get; set; }
+        public string Icon { get; set; }
     }
     public class Guild
     {
         public ulong Id { get; set; }
         public string Name { get; set; }
-        public string Icon { get; set; }
+        public string IconId { get; set; }
         public ulong OwnerId { get; set; }
         public int ChannelCount { get; set; }
         public int MemberCount { get; set; }

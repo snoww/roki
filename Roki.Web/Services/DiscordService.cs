@@ -29,13 +29,13 @@ namespace Roki.Web.Services
             var guilds = new List<DiscordGuild>();
             foreach (JsonElement element in json.Result.RootElement.EnumerateArray())
             {
-                if (element.GetProperty("owner").GetBoolean() || (uint.Parse(element.GetProperty("permissions").GetString()!) & 0x40) == 0x40)
+                if (element.GetProperty("owner").GetBoolean() || (uint.Parse(element.GetProperty("permissions").GetString()!) & 0x20) == 0x20)
                 {
-                    
                     guilds.Add(new DiscordGuild
                     {
-                        GuildId = element.GetProperty("id").GetString(),
-                        Name = element.GetProperty("name").GetString()
+                        Id = element.GetProperty("id").GetString(),
+                        Name = element.GetProperty("name").GetString(),
+                        Icon = element.GetProperty("icon").GetString()
                     });
                 }
             }
