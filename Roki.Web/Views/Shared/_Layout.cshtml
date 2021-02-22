@@ -21,13 +21,23 @@
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                 <ul class="navbar-nav flex-grow-1">
                     <li class="nav-item">
-                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        <a class="nav-link" href="/">Home</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-area="" asp-controller="Guild" asp-action="Manage">Manage Servers</a>
+                    </li>
                 </ul>
-                <a class="btn btn-primary" asp-area="" asp-controller="Authentication" asp-action="Login">Login with Discord</a>
+                @if (User?.Identity?.IsAuthenticated ?? false)
+                {
+                    <a class="btn btn-primary" asp-area="" asp-controller="Authentication" asp-action="Logout">Logout</a>
+                }
+                else
+                {
+                    <a class="btn btn-primary" asp-area="" asp-controller="Authentication" asp-action="Login">Login with Discord</a>
+                }
             </div>
         </div>
     </nav>

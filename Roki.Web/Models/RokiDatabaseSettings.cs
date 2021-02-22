@@ -1,12 +1,12 @@
 namespace Roki.Web.Models
 {
-    public interface IDiscordDatabaseSettings
+    public interface IRokiDatabaseSettings
     {
         string DatabaseName { get; set; }
         string ConnectionString { get; set; }
     }
     
-    public class DiscordDatabaseSettings : IDiscordDatabaseSettings
+    public class RokiDatabaseSettings : IRokiDatabaseSettings
     {
         public string DatabaseName { get; set; }
         public string ConnectionString { get; set; }

@@ -1,0 +1,4 @@
+@using System.Text.Json
+@model Guild
+
+<pre>@Html.Raw(JsonSerializer.Serialize(Model, new JsonSerializerOptions {WriteIndented = true}))</pre>

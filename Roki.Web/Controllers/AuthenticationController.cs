@@ -1,24 +1,30 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Roki.Web.Extensions;
 
 namespace Roki.Web.Controllers
 {
+    [Authorize]
     public class AuthenticationController : Controller
     {
+        [AllowAnonymous]
         [Route("login")]
-        public IActionResult Login()
+        public IActionResult Login(string redirect)
         {
-            return Challenge(new AuthenticationProperties { RedirectUri = "/" }, "Discord");
+            if (string.IsNullOrWhiteSpace(redirect))
+            {
+                redirect = "/";
+            }
+            return Challenge(new AuthenticationProperties { RedirectUri = redirect }, "Discord");
         }
 
         [Route("logout")]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
-            return SignOut(new AuthenticationProperties { RedirectUri = "/" }, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync();
+            return Redirect("/");
         }
     }
 }

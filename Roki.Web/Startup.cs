@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Roki.Web.Models;
+using Roki.Web.Services;
 
 namespace Roki.Web
 {
@@ -31,20 +32,28 @@ namespace Roki.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpClient();
             services.AddRouting(options => options.LowercaseUrls = true);
-            services.Configure<DiscordDatabaseSettings>(Configuration.GetSection(nameof(DiscordDatabaseSettings)));
-            services.AddSingleton<IDiscordDatabaseSettings>(sp => sp.GetRequiredService<IOptions<DiscordDatabaseSettings>>().Value);
-
+            services.Configure<RokiDatabaseSettings>(Configuration.GetSection(nameof(RokiDatabaseSettings)));
+            services.AddSingleton<IRokiDatabaseSettings>(sp => sp.GetRequiredService<IOptions<RokiDatabaseSettings>>().Value);
+            services.AddSingleton<RokiService>();
+            services.AddSingleton<DiscordService>();
             services.AddAuthentication(options =>
                 {
                     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 })
-                .AddCookie()
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/login";
+                    options.ReturnUrlParameter = "redirect";
+                })
                 .AddDiscord(options =>
                 {
                     options.ClientId = Config["ClientId"];
                     options.ClientSecret = Config["ClientSecret"];
                     options.Scope.Add("guilds");
+                    options.SaveTokens = true;
+                    options.AccessDeniedPath = "/";
                 });
 
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
