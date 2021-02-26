@@ -1,23 +1,28 @@
 @model List<DiscordGuild>
+
+@{
+    ViewData["Title"] = "Manage Servers";
+}
+
 <h3>My Servers</h3>
 
 <div class="container">
     <div class="row justify-content-start">
         @foreach (DiscordGuild guild in Model)
         {
-            <div class="col-auto">
+            <div class="col-auto gy-2">
                 <a href="/manage/@guild.Id" class="guild-card">
-                    <div class="card">
-                        @if (string.IsNullOrWhiteSpace(guild.Icon))
-                        {
-                            <img src="https://ui-avatars.com/api/?name=@guild.Name[..4]" class="card-img-top rounded" alt="@guild.Name">
-                        }
-                        else
-                        {
-                            <img src="https://cdn.discordapp.com/icons/@guild.Id/@guild.Icon" class="card-img-top rounded" alt="@guild.Name">
-                        }
-                        <div class="card-body p-2 text-center">
-                            <p class="mb-0">@guild.Name</p>
+                    <div class="card hover-shadow ripple shadow-1-strong">
+                        <div class="card-body p-2 guild-card-body">
+                            @if (string.IsNullOrWhiteSpace(guild.Icon))
+                            {
+                                <img src="https://ui-avatars.com/api/?name=@guild.Name" class="rounded" alt="@guild.Name">
+                            }
+                            else
+                            {
+                                <img src="https://cdn.discordapp.com/icons/@guild.Id/@guild.Icon" class="rounded" alt="@guild.Name">
+                            }
+                            <p class="mb-0 pt-1">@guild.Name</p>
                         </div>
                     </div>
                 </a>

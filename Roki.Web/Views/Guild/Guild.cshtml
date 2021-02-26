@@ -1,4 +1,337 @@
-@using System.Text.Json
 @model Guild
 
-<pre>@Html.Raw(JsonSerializer.Serialize(Model, new JsonSerializerOptions {WriteIndented = true}))</pre>
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="container">
+<h1 class="display-6">@Model.Name</h1>
+<div class="container">
+<div class="container mt-4 pt-3 pb-1">
+    <div class="row">
+        <div class="col">
+            <h6 class="pb-2">Basic Statistics</h6>
+            <div class="row mb-1">
+                <div class="col">Member Count</div>
+                <div class="col">
+                    <div class="float-end">
+                        <code>@Model.MemberCount.ToString("N0")</code>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-1">
+                <div class="col">Channel Count</div>
+                <div class="col">
+                    <div class="float-end">
+                        <code>@Model.ChannelCount.ToString("N0")</code>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-1">
+                <div class="col">Emote Count</div>
+                <div class="col">
+                    <div class="float-end">
+                        <code>@Model.EmoteCount.ToString("N0")</code>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-1">
+                <div class="col">Server Region</div>
+                <div class="col">
+                    <div class="float-end">
+                        <code>@Model.RegionId</code>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-1">
+                <div class="col">Creation Date</div>
+                <div class="col">
+                    <div class="float-end">
+                        <code>@Model.CreatedAt.ToUniversalTime().ToString("g")</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <h6 class="pb-2">Other Statistics (TODO)</h6>
+            <div class="row mb-1">
+                <div class="col">Messages Today</div>
+                <div class="col">
+                    <div class="float-end">
+                        <code>157</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+<div class="row mb-4">
+    <div class="col-lg-6">
+        <div class="container shadow-1-strong rounded-3 pt-3 pb-1">
+            <h6 class="pb-2">Core</h6>
+            <div class="row mb-3">
+                <div class="col-6">Prefix</div>
+                <div class="col">
+                    <div class="form-outline float-end">
+                        <input type="text" class="form-control" data-mdb-showcounter="true" maxlength="5" id="prefix" name="prefix" value="@Model.Config.Prefix"/>
+                        <div class="form-helper"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-6">Logging</div>
+                <div class="col">
+                    <div class="form-check form-switch float-end">
+                        <input class="form-check-input" type="checkbox" name="logging" @(Model.Config.Logging ? "checked" : "")/>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-6">Currency Generation</div>
+                <div class="col">
+                    <div class="form-check form-switch float-end">
+                        <input class="form-check-input" type="checkbox" name="logging" @(Model.Config.CurrencyGeneration ? "checked" : "")/>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-6">XP Gain</div>
+                <div class="col">
+                    <div class="form-check form-switch float-end">
+                        <input class="form-check-input" type="checkbox" name="logging" @(Model.Config.XpGain ? "checked" : "")/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mb-3">
+    <div class="col">
+        <div class="container shadow-1-strong rounded-3 pt-3 pb-1">
+            <h6 class="pb-2">Currency</h6>
+            <div class="row mb-2">
+                <div class="col-6">Name</div>
+                <div class="col">
+                    <input type="text" class="form-control" name="curr_name" value="@Model.Config.CurrencyName">
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">Name Plural</div>
+                <div class="col">
+                    <input type="text" class="form-control" name="curr_name_plural" value="@Model.Config.CurrencyNamePlural">
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">Drop Chance</div>
+                <div class="col">
+                    <div class="input-group">
+                        <input type="number" class="form-control" name="generation_chance" value="@(Model.Config.CurrencyGenerationChance * 100)" min="0" max="100">
+                        <span class="input-group-text">%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">Drop Cooldown</div>
+                <div class="col">
+                    <div class="input-group">
+                        <input type="number" class="form-control" name="generation_cooldown" value="@Model.Config.CurrencyGenerationCooldown" min="0" max="120">
+                        <span class="input-group-text">min</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">Drop Amount Min</div>
+                <div class="col">
+                    <input type="number" class="form-control" name="drop_min" value="@Model.Config.CurrencyDropAmount" min="0">
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">Drop Amount Max</div>
+                <div class="col">
+                    <input type="number" class="form-control" name="drop_max" value="@Model.Config.CurrencyDropAmountMax" min="0">
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">Drop Amount Rare</div>
+                <div class="col">
+                    <input type="number" class="form-control" name="drop_rare" value="@Model.Config.CurrencyDropAmountRare" min="0">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="container shadow-1-strong rounded-3 pt-3 pb-1">
+            <h6 class="pb-2">Experience</h6>
+            <div class="row mb-2">
+                <div class="col-6">XP per Message</div>
+                <div class="col">
+                    <input type="number" class="form-control" name="xp_per" value="@Model.Config.XpPerMessage" min="0">
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">XP Cooldown</div>
+                <div class="col">
+                    <div class="input-group">
+                        <input type="number" class="form-control" name="xp_cd" value="@Model.Config.XpCooldown" min="0" max="120">
+                        <span class="input-group-text">min</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">XP Cooldown Fast</div>
+                <div class="col">
+                    <div class="input-group">
+                        <input type="number" class="form-control" name="xp_cd_fast" value="@Model.Config.XpFastCooldown" min="0" max="120" step="0.5">
+                        <span class="input-group-text">min</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mb-3">
+    <div class="col-lg-4">
+        <div class="container shadow-1-strong rounded-3 pt-3 pb-1">
+            <h6 class="pb-2">Bet Flip</h6>
+            <div class="row mb-2">
+                <div class="col-6">Minimum Bet</div>
+                <div class="col">
+                    <input type="number" class="form-control" name="bf_min" value="@Model.Config.BetFlipMin" min="1">
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">Win Multiplier</div>
+                <div class="col">
+                    <div class="input-group">
+                        <input type="number" class="form-control" name="bf_multi" value="@Model.Config.BetFlipMultiplier" min="0" max="100" step="0.1">
+                        <span class="input-group-text">×</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="container shadow-1-strong rounded-3 pt-3 pb-1">
+            <h6 class="pb-2">Bet Flip Multi</h6>
+            <div class="row mb-2">
+                <div class="col-6">Minimum Bet</div>
+                <div class="col">
+                    <input type="number" class="form-control" name="bfm_min" value="@Model.Config.BetFlipMin" min="1">
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">Minimum Coins</div>
+                <div class="col">
+                    <input type="number" class="form-control" name="bfm_min_guess" value="@Model.Config.BetFlipMMinGuesses" min="2">
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">Minimum Correct</div>
+                <div class="col">
+                    <div class="input-group">
+                        <input type="number" class="form-control" name="bfm_min_correct" value="@(Model.Config.BetFlipMMinCorrect * 100)" min="1" max="100">
+                        <span class="input-group-text">%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">Win Multiplier</div>
+                <div class="col">
+                    <div class="input-group">
+                        <input type="number" class="form-control" name="bfm_multi" value="@Model.Config.BetFlipMMultiplier" min="0" max="100" step="0.1">
+                        <span class="input-group-text">×</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="container shadow-1-strong rounded-3 pt-3 pb-1">
+            <h6 class="pb-2">Bet Dice</h6>
+            <div class="row mb-2">
+                <div class="col-6">Minimum Bet</div>
+                <div class="col">
+                    <input type="number" class="form-control" name="bd_min" value="@Model.Config.BetDieMin" min="1">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mb-3">
+    <div class="col-lg-4">
+        <div class="container shadow-1-strong rounded-3 pt-3 pb-1">
+            <h6 class="pb-2">Bet Roll</h6>
+            <div class="row mb-2">
+                <div class="col-6">Minimum Bet</div>
+                <div class="col">
+                    <input type="number" class="form-control" name="br_min" value="@Model.Config.BetRollMin" min="1">
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">≥ 71 Multiplier</div>
+                <div class="col">
+                    <div class="input-group">
+                        <input type="number" class="form-control" name="br_71" value="@Model.Config.BetRoll71Multiplier" min="0" max="100" step="0.5">
+                        <span class="input-group-text">×</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">≥ 92 Multiplier</div>
+                <div class="col">
+                    <div class="input-group">
+                        <input type="number" class="form-control" name="br_92" value="@Model.Config.BetRoll92Multiplier" min="0" max="100" step="0.5">
+                        <span class="input-group-text">×</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">100 Multiplier</div>
+                <div class="col">
+                    <div class="input-group">
+                        <input type="number" class="form-control" name="br_100" value="@Model.Config.BetRoll100Multiplier" min="0" max="100" step="0.5">
+                        <span class="input-group-text">×</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="container shadow-1-strong rounded-3 pt-3 pb-1">
+            <h6 class="pb-2">Trivia</h6>
+            <div class="row mb-2">
+                <div class="col-6">Minimum Correct</div>
+                <div class="col">
+                    <div class="input-group">
+                        <input type="number" class="form-control" name="trivia_min_correct" value="@(Model.Config.TriviaMinCorrect * 100)" min="1" max="100">
+                        <span class="input-group-text">%</span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">Easy Reward</div>
+                <div class="col">
+                    <input type="number" class="form-control" name="bfm_multi" value="@Model.Config.TriviaEasy" min="0" max="500" step="10">
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">Medium Reward</div>
+                <div class="col">
+                    <input type="number" class="form-control" name="bfm_multi" value="@Model.Config.TriviaMedium" min="0" max="500" step="10">
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-6">Hard Reward</div>
+                <div class="col">
+                    <input type="number" class="form-control" name="bfm_multi" value="@Model.Config.TriviaHard" min="1" max="500" step="10">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+</div>

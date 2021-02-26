@@ -1,4 +1,4 @@
-﻿html * {
+﻿body {
   font-family: 'Roboto', sans-serif;
 }
 
@@ -25,8 +25,7 @@ a.navbar-brand {
   border-color: #1861ac;
 }
 
-/* Sticky footer styles
--------------------------------------------------- */
+
 html {
   font-size: 14px;
 }
@@ -71,7 +70,7 @@ body {
   line-height: 60px; /* Vertically center the text there */
 }
 
-.card-img-top {
+.guild-card img {
   width: 64px;
   height: 64px;
   object-fit: cover;
@@ -79,4 +78,16 @@ body {
 
 .guild-card:hover {
   color: inherit;
+}
+
+body > div > main > div > div > p {
+  margin-bottom: 0;
+}
+
+.settings-table td {
+  padding: 0;
+}
+
+#prefix {
+  font-family: monospace;
 }
