@@ -3,27 +3,23 @@
 @{
     ViewData["Title"] = "Manage Servers";
 }
-
-<h3>My Servers</h3>
-
-<div class="container">
-    <div class="row justify-content-start">
+<div class="container w-full md:max-w-3xl mx-auto pt-20">
+    <h1 class="pl-2 mb-6 text-2xl font-medium tracking-tight">My Servers</h1>
+    <div class="flex flex-row">
         @foreach (DiscordGuild guild in Model)
         {
-            <div class="col-auto gy-2">
-                <a href="/manage/@guild.Id" class="guild-card">
-                    <div class="card hover-shadow ripple shadow-1-strong">
-                        <div class="card-body p-2 guild-card-body">
-                            @if (string.IsNullOrWhiteSpace(guild.Icon))
-                            {
-                                <img src="https://ui-avatars.com/api/?name=@guild.Name" class="rounded" alt="@guild.Name">
-                            }
-                            else
-                            {
-                                <img src="https://cdn.discordapp.com/icons/@guild.Id/@guild.Icon" class="rounded" alt="@guild.Name">
-                            }
-                            <p class="mb-0 pt-1">@guild.Name</p>
-                        </div>
+            <div class="w-24 rounded bg-gray-300 hover:bg-gray-400 mx-2">
+                <a href="/manage/@guild.Id">
+                    <div>
+                        @if (string.IsNullOrWhiteSpace(guild.Icon))
+                        {
+                            <img class="w-20 rounded mx-2 mt-2" src="https://ui-avatars.com/api/?name=@guild.Name" alt="@guild.Name">
+                        }
+                        else
+                        {
+                            <img class="w-20 rounded mx-2 mt-2" src="https://cdn.discordapp.com/icons/@guild.Id/@guild.Icon" alt="@guild.Name">
+                        }
+                        <p class="text-center truncate px-2 my-1">@guild.Name</p>
                     </div>
                 </a>
             </div>
