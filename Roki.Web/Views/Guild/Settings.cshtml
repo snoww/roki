@@ -1,0 +1,33 @@
+@model GuildChannelModel
+
+@{
+    ViewData["Title"] = Model.Guild.Name;
+}
+
+<div class="container w-full md:max-w-5xl mx-auto pt-20 dark:text-white mb-12">
+    <h1 class="pl-2 mb-6 text-2xl font-medium tracking-tight ">@Model.Guild.Name - Manage</h1>
+    <div class="flex">
+        <div class="w-60">
+            @await Html.PartialAsync("_GuildNav", Model)
+        </div>
+        <div class="w-full">
+            @await Html.PartialAsync(Model.Section, Model)
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        // enable/disable save button when there are changes detected
+        const form = document.getElementById("form-data");
+        const data = new FormData(form);
+        const dataString = JSON.stringify([...data.entries()]);
+        
+        function checkForm() {
+            const newForm = document.getElementById("form-data");
+            const newData = new FormData(newForm);
+            document.getElementById("save-form").disabled = dataString === JSON.stringify([...newData.entries()]);
+        }
+    </script>
+}

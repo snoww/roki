@@ -10,6 +10,7 @@ using Roki.Web.Services;
 namespace Roki.Web.Controllers
 {
     [Authorize]
+    [Route("manage")]
     public class GuildController : Controller
     {
         private readonly RokiService _rokiService;
@@ -21,7 +22,7 @@ namespace Roki.Web.Controllers
             _discordService = discordService;
         }
 
-        [Route("manage")]
+        [Route("")]
         public async Task<IActionResult> Manage()
         {
             string accessToken = await HttpContext.GetTokenAsync("Discord", "access_token");
@@ -29,8 +30,8 @@ namespace Roki.Web.Controllers
             return View(response);
         }
         
-        [Route("manage/{guildId}")]
-        public async Task<IActionResult> Manage(ulong guildId)
+        [Route("{guildId}")]
+        public async Task<IActionResult> GuildSettings(ulong guildId)
         {
             // if (!(User?.Identity?.IsAuthenticated ?? false))
             // {
@@ -39,10 +40,46 @@ namespace Roki.Web.Controllers
             Guild guild = await _rokiService.GetRokiGuild(guildId);
             if (guild == null)
             {
-                return View();
+                return View("Manage");
             }
 
-            return View("Guild", guild);
+            List<ChannelSummary> channels = await _rokiService.GetGuildChannels(guildId);
+
+            return View("Settings", new GuildChannelModel{Section = "_CoreSettings", Guild = guild, Channels = channels});
+        }
+
+        [Route("{guildId}/modules")]
+        public async Task<IActionResult> ModuleSettings(ulong guildId)
+        {
+            Guild guild = await _rokiService.GetRokiGuild(guildId);
+            if (guild == null)
+            {
+                return View("Manage");
+            }
+
+            List<ChannelSummary> channels = await _rokiService.GetGuildChannels(guildId);
+
+            return View("Settings", new GuildChannelModel{Section = "_ModuleSettings", Guild = guild, Channels = channels});
+        }
+        
+        [Route("{guildId}/{channelId}")]
+        public async Task<IActionResult> ChannelSettings(ulong guildId, ulong channelId)
+        {
+            Guild guild = await _rokiService.GetRokiGuild(guildId);
+            if (guild == null)
+            {
+                return View("Manage");
+            }
+            
+            Channel channel = await _rokiService.GetGuildChannel(guildId, channelId);
+            if (channel == null)
+            {
+                // todo show 404
+            }
+            
+            List<ChannelSummary> channels = await _rokiService.GetGuildChannels(guildId);
+
+            return View("Settings", new GuildChannelModel{Section = "_ChannelSettings", ChannelId = channelId, Guild = guild, Channels = channels, Channel = channel});
         }
     }
 }
