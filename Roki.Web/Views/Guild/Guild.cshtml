@@ -4,16 +4,16 @@
     ViewData["Title"] = Model.Name;
 }
 
-<div class="container w-full md:max-w-5xl mx-auto pt-20">
-    <h1 class="pl-2 mb-6 text-2xl font-medium tracking-tight">@Model.Name - Manage</h1>
+<div class="container w-full md:max-w-5xl mx-auto pt-20 dark:text-white">
+    <h1 class="pl-2 mb-6 text-2xl font-medium tracking-tight ">@Model.Name - Manage</h1>
     <div class="flex">
         <div class="w-60">
             <nav class="mr-2">
-                <div class="flex flex-col bg-gray-400 rounded">
+                <div class="flex flex-col bg-gray-400 dark:bg-gray-700 rounded">
                     <div class="py-2 pl-2 font-medium">Server Settings</div>
                     <a class="py-2 pl-4 bg-gray-500 text-sm" href="#">Core</a>
                     <a class="py-2 pl-4 hover:bg-gray-500 text-sm" href="#">Modlues</a>
-                    <div class="py-2 pl-2 font-medium">Channel Settings</div>
+                    <div class="py-2 pl-2 font-medium ">Channel Settings</div>
                     <a class="py-2 pl-4 hover:bg-gray-500 text-sm" href="#">#channel1</a>
                     <a class="py-2 pl-4 hover:bg-gray-500 text-sm rounded-b" href="#">#channel2</a>
                 </div>
@@ -21,9 +21,70 @@
             </nav>
         </div>
         <div class="w-full">
-            <div class="container ml-2">
-                Content
+            <div class="container ml-4">
+                <h1 class="text-3xl font-medium tracking-tight">Core Settings</h1>
+                <div class="hidden sm:block" aria-hidden="true">
+                    <div class="py-5">
+                        <div class="border-t border-gray-200"></div>
+                    </div>
+                </div>
+                <form id="form-core" onchange="checkForm()" action="#" method="post">
+                    <div class="rounded-md overflow-hidden bg-grey-100 dark:bg-gray-900 px-4 py-4">
+                        <div>
+                            <label for="prefix" class="block text-sm font-medium dark:text-gray-200">Prefix</label>
+                            <div class="">
+                                <input type="text" onkeyup="checkForm()" id="prefix" name="prefix" value="@Model.Config.Prefix" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 mt-1 flex rounded-md block w-20 font-mono" maxlength="5" placeholder=".">
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-between">
+                            <label class="block text-sm font-medium dark:text-gray-200">Default Logging Behavior</label>
+                            <label for="guild-logging" class="cursor-pointer mr-2">
+                                <div class="relative">
+                                    <input id="guild-logging" type="checkbox" class="hidden" name="guild-logging" @(Model.Config.Logging ? "checked" : "")>
+                                    <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
+                                    <div class="toggle -top-1 -left-1 transition duration-300 ease-in-out absolute w-6 h-6 bg-white rounded-full inset-y-0 left-0"></div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="mt-4 flex justify-between">
+                            <label class="block text-sm font-medium dark:text-gray-200">Default Currency Generation</label>
+                            <label for="guild-curr-gen" class="cursor-pointer mr-2">
+                                <div class="relative">
+                                    <input id="guild-curr-gen" type="checkbox" class="hidden" name="guild-curr" @(Model.Config.CurrencyGeneration ? "checked" : "")>
+                                    <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
+                                    <div class="toggle -top-1 -left-1 transition duration-300 ease-in-out absolute w-6 h-6 bg-white rounded-full inset-y-0 left-0"></div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="mt-4 flex justify-between">
+                            <label class="block text-sm font-medium dark:text-gray-200">Default XP Gain</label>
+                            <label for="guild-xp" class="cursor-pointer mr-2">
+                                <div class="relative">
+                                    <input id="guild-xp" type="checkbox" class="hidden" name="guild-xp" @(Model.Config.XpGain ? "checked" : "")>
+                                    <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
+                                    <div class="toggle -top-1 -left-1 transition duration-300 ease-in-out absolute w-6 h-6 bg-white rounded-full inset-y-0 left-0"></div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="mt-6 text-right">
+                            <button id="save-core" class="rounded-lg dark:bg-pink-800 focus:outline-none focus:ring dark:focus:ring-pink-600 py-1.5 px-3 disabled:opacity-50" disabled>Save</button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    // enable/disable save button when there are changes detected
+    const form = document.getElementById("form-core");
+    const data = new FormData(form);
+    const dataString = JSON.stringify([...data.entries()]);
+    
+    function checkForm() {
+        const newForm = document.getElementById("form-core");
+        const newData = new FormData(newForm);
+        document.getElementById("save-core").disabled = dataString === JSON.stringify([...newData.entries()]);
+    }
+</script>

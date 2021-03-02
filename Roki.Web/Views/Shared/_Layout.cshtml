@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+<body class="bg-gray-100 dark:bg-gray-800 dark:text-white font-sans leading-normal tracking-normal">
 @*<header>
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3 px-4">
         <a class="navbar-brand" href="/">Roki</a>
@@ -41,10 +41,10 @@
         </div>
     </nav>
 </header>*@
-<nav class="fixed w-full z-10 top-0 bg-gray-400">
+<nav class="fixed w-full z-10 top-0 bg-gray-400 dark:bg-gray-900">
     <div class="w-full mx-auto flex flex-wrap items-center justify-between mt-0 py-3">
         <div class="pl-4">
-            <a class="text-gray-900 text-base no-underline hover:no-underline hover:text-pink-500 font-extrabold text-xl" href="/">Roki</a>
+            <a class="text-base no-underline hover:no-underline hover:text-pink-500 dark:hover:text-pink-800 font-extrabold text-xl" href="/">Roki</a>
         </div>
         <div class="block lg:hidden pr-4">
             <button id="nav-toggle" class="flex items-center px-3 py-2 border rounded text-gray-500 border-gray-600 hover:text-gray-900 hover:border-green-500 appearance-none focus:outline-none">
@@ -58,16 +58,16 @@
         <div class="w-full flex-grow lg:flex lg:items-center lg:w-auto hidden lg:block mt-2 lg:mt-0 bg-gray-100 md:bg-transparent z-20" id="nav-content">
             <ul class="list-reset lg:flex justify-end flex-1 items-center">
                 <li class="mr-3">
-                    <a class="inline-block text-gray-600 no-underline hover:text-pink-500 hover:text-underline py-2 px-4" href="/manage">Manage</a>
+                    <a class="inline-block no-underline hover:text-pink-500 dark:hover:text-pink-800 hover:text-underline py-2 px-4" href="/manage">Manage</a>
                 </li>
                 <li class="mr-3">
                     @if (User?.Identity?.IsAuthenticated ?? false)
                     {
-                        <a class="inline-block text-gray-600 no-underline hover:text-pink-500 hover:text-underline py-2 px-4" asp-controller="Authentication" asp-action="Logout">Logout</a>
+                        <a class="inline-block no-underline hover:text-pink-500 dark:hover:text-pink-800 hover:text-underline py-2 px-4" asp-controller="Authentication" asp-action="Logout">Logout</a>
                     }
                     else
                     {
-                        <a class="inline-block text-gray-600 no-underline hover:text-pink-500 hover:text-underline py-2 px-4" asp-controller="Authentication" asp-action="Login">Login with Discord</a>
+                        <a class="inline-block no-underline hover:text-pink-500 dark:hover:text-pink-800 hover:text-underline py-2 px-4" asp-controller="Authentication" asp-action="Login">Login with Discord</a>
                     }
                 </li>
             </ul>
