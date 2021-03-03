@@ -4,8 +4,18 @@
     ViewData["Title"] = Model.Guild.Name;
 }
 
-<div class="container w-full md:max-w-5xl mx-auto pt-20 dark:text-white mb-12">
-    <h1 class="pl-2 mb-6 text-2xl font-medium tracking-tight ">@Model.Guild.Name - Manage</h1>
+<div class="container w-full lg:max-w-5xl mx-auto pt-4 dark:text-white mb-12">
+    <div class="flex mb-4 items-center">
+        @if (string.IsNullOrWhiteSpace(Model.Guild.IconId))
+        {
+            <img class="w-20 rounded-full" src="https://ui-avatars.com/api/?name=@Model.Guild.Name" alt="=@Model.Guild.Name">
+        }
+        else
+        {
+            <img class="w-20 rounded-full" src="https://cdn.discordapp.com/icons/@Model.Guild.Id/@Model.Guild.IconId" alt="=@Model.Guild.Name">
+        }
+        <h1 class="pl-2 text-2xl font-medium tracking-tight">@Model.Guild.Name - Manage</h1>
+    </div>
     <div class="flex">
         <div class="w-60">
             @await Html.PartialAsync("_GuildNav", Model)

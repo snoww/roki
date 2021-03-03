@@ -11,9 +11,7 @@
         <div class="rounded-md overflow-hidden bg-grey-100 dark:bg-gray-900 px-4 py-4">
             <div>
                 <label for="prefix" class="block text-sm font-medium dark:text-gray-200">Prefix</label>
-                <div class="">
-                    <input type="text" onkeyup="checkForm()" id="prefix" name="prefix" value="@Model.Guild.Config.Prefix" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 mt-1 flex rounded-md block w-20 font-mono" maxlength="5" placeholder=".">
-                </div>
+                <input type="text" id="prefix" name="prefix" value="@Model.Guild.Config.Prefix" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 mt-1 flex rounded-md block w-20 font-mono" maxlength="5" placeholder=".">
             </div>
             <div class="mt-4 flex justify-between">
                 <label class="block text-sm font-medium dark:text-gray-200">Default Logging Behavior</label>

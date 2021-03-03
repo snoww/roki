@@ -7,6 +7,67 @@
             <div class="border-t border-gray-200"></div>
         </div>
     </div>
-    <form id="form-module" onchange="checkForm()" action="#" method="post">
+    <form id="form-data" onchange="checkForm()" action="#" method="post">
+        <div class="rounded-md overflow-hidden bg-grey-100 dark:bg-gray-900 px-4 py-4">
+            <h1 class="text-xl font-normal tracking-tight">Currency</h1>
+            <div class="flex space-x-12 mt-2">
+                <div class="rounded-md">
+                    <label for="guild_curr_name" class="block text-sm font-medium dark:text-gray-200">Currency Name</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="text" name="guild_curr_name" id="guild_curr_name" value="@Model.Guild.Config.CurrencyName" maxlength="50" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32 text-sm">
+                    </div>
+                </div>
+                <div class="rounded-md">
+                    <label for="guild_curr_name_p" class="block text-sm font-medium dark:text-gray-200">Plural Name</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="text" name="guild_curr_name_p" id="guild_curr_name_p" value="@Model.Guild.Config.CurrencyNamePlural" maxlength="50" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border rounded-md block w-32 text-sm">
+                    </div>
+                </div>
+            </div>
+            <div class="mt-2 rounded-md">
+                <label for="guild_curr_icon" class="block text-sm font-medium dark:text-gray-200">Icon</label>
+                <div class="mt-1 flex rounded-md">
+                    @* TODO get image *@
+                    <input type="text" name="guild_curr_icon" id="guild_curr_icon" value="@Model.Guild.Config.CurrencyIcon" maxlength="54" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border rounded-md block w-32 text-sm font-mono">
+                </div>
+            </div>
+            <div class="mt-4 rounded-md">
+                <label for="guild_curr_prob" class="block text-sm font-medium dark:text-gray-200">Generation Probability</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_curr_prob" id="guild_curr_prob" value="@(Model.Guild.Config.CurrencyGenerationChance * 100)" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-40">
+                    <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">%</span>
+                </div>
+            </div>
+            <div class="mt-4 rounded-md">
+                <label for="guild_curr_cd" class="block text-sm font-medium dark:text-gray-200">Generation Cooldown</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_curr_cd" id="guild_curr_cd" value="@Model.Guild.Config.CurrencyGenerationCooldown" min="0" max="120" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-40">
+                    <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">min</span>
+                </div>
+            </div>
+            <div class="flex space-x-12 mt-4">
+                <div class="rounded-md">
+                    <label for="guild_curr_drop" class="block text-sm font-medium dark:text-gray-200">Drop Minimum</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_curr_drop" id="guild_curr_drop" value="@Model.Guild.Config.CurrencyDropAmount" min="1" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32 text-sm">
+                    </div>
+                </div>
+                <div class="rounded-md">
+                    <label for="guild_curr_drop_max" class="block text-sm font-medium dark:text-gray-200">Drop Maximum</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_curr_drop_max" id="guild_curr_drop_max" value="@Model.Guild.Config.CurrencyDropAmountMax" min="1" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32 text-sm">
+                    </div>
+                </div>
+                <div class="rounded-md">
+                    <label for="guild_curr_drop_rare" class="block text-sm font-medium dark:text-gray-200">Drop Rare</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_curr_drop_rare" id="guild_curr_drop_rare" value="@Model.Guild.Config.CurrencyDropAmountRare" min="1" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32 text-sm">
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 text-right">
+                <button id="save-form" class="rounded-lg dark:bg-pink-800 focus:outline-none focus:ring dark:focus:ring-pink-600 py-1.5 px-3 disabled:opacity-50" disabled>Save</button>
+            </div>
+        </div>
     </form>
 </div>
