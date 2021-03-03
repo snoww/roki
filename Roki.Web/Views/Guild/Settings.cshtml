@@ -8,13 +8,13 @@
     <div class="flex mb-4 items-center">
         @if (string.IsNullOrWhiteSpace(Model.Guild.IconId))
         {
-            <img class="w-20 rounded-full" src="https://ui-avatars.com/api/?name=@Model.Guild.Name" alt="=@Model.Guild.Name">
+            <img class="w-10 rounded-full" src="https://ui-avatars.com/api/?name=@Model.Guild.Name" alt="=@Model.Guild.Name">
         }
         else
         {
-            <img class="w-20 rounded-full" src="https://cdn.discordapp.com/icons/@Model.Guild.Id/@Model.Guild.IconId" alt="=@Model.Guild.Name">
+            <img class="w-10 rounded-full" src="https://cdn.discordapp.com/icons/@Model.Guild.Id/@Model.Guild.IconId" alt="=@Model.Guild.Name">
         }
-        <h1 class="pl-2 text-2xl font-medium tracking-tight">@Model.Guild.Name - Manage</h1>
+        <h1 class="pl-4 text-2xl font-medium tracking-tight">@Model.Guild.Name - Manage</h1>
     </div>
     <div class="flex">
         <div class="w-60">
@@ -35,9 +35,10 @@
         const dataString = JSON.stringify([...data.entries()]);
         
         function checkForm() {
-            const newForm = document.getElementById("form-data");
-            const newData = new FormData(newForm);
+            const newData = new FormData(document.getElementById("form-data"));
             document.getElementById("save-form").disabled = dataString === JSON.stringify([...newData.entries()]);
         }
+        
+        form.addEventListener("keyup", checkForm);
     </script>
 }

@@ -10,3 +10,19 @@
     <form id="form-data" onchange="checkForm()" action="#" method="post">
     </form>
 </div>
+
+@section Scripts
+{
+    <script>
+        // enable/disable save button when there are changes detected
+        const form = document.getElementById("form-data");
+        const data = new FormData(form);
+        const dataString = JSON.stringify([...data.entries()]);
+        
+        function checkForm() {
+            const newForm = document.getElementById("form-data");
+            const newData = new FormData(newForm);
+            document.getElementById("save-form").disabled = dataString === JSON.stringify([...newData.entries()]);
+        }
+    </script>
+}

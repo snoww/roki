@@ -33,10 +33,6 @@ namespace Roki.Web.Controllers
         [Route("{guildId}")]
         public async Task<IActionResult> GuildSettings(ulong guildId)
         {
-            // if (!(User?.Identity?.IsAuthenticated ?? false))
-            // {
-            //     return Redirect("/login?redirect");
-            // }
             Guild guild = await _rokiService.GetRokiGuild(guildId);
             if (guild == null)
             {
@@ -60,6 +56,34 @@ namespace Roki.Web.Controllers
             List<ChannelSummary> channels = await _rokiService.GetGuildChannels(guildId);
 
             return View("Settings", new GuildChannelModel{Section = "_ModuleSettings", Guild = guild, Channels = channels});
+        }
+        
+        [Route("{guildId}/currency")]
+        public async Task<IActionResult> CurrencySettings(ulong guildId)
+        {
+            Guild guild = await _rokiService.GetRokiGuild(guildId);
+            if (guild == null)
+            {
+                return View("Manage");
+            }
+
+            List<ChannelSummary> channels = await _rokiService.GetGuildChannels(guildId);
+
+            return View("Settings", new GuildChannelModel{Section = "_CurrencySettings", Guild = guild, Channels = channels});
+        }
+        
+        [Route("{guildId}/xp")]
+        public async Task<IActionResult> XpSettings(ulong guildId)
+        {
+            Guild guild = await _rokiService.GetRokiGuild(guildId);
+            if (guild == null)
+            {
+                return View("Manage");
+            }
+
+            List<ChannelSummary> channels = await _rokiService.GetGuildChannels(guildId);
+
+            return View("Settings", new GuildChannelModel{Section = "_XpSettings", Guild = guild, Channels = channels});
         }
         
         [Route("{guildId}/{channelId}")]

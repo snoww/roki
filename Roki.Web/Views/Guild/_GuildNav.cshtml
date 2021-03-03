@@ -3,21 +3,10 @@
 <nav class="mr-2">
     <div class="flex flex-none flex-col bg-gray-400 dark:bg-gray-700 rounded max-w-20">
         <div class="py-2 pl-2 font-medium">Server Settings</div>
-        @if (Model.Section == "_CoreSettings")
-        {
-            <a class="py-2 pl-4 hover:bg-gray-500 bg-gray-500 active:bg-pink-900 border-l-2 border-pink-500 text-sm" href="/manage/@Model.Guild.Id">Core</a>
-            <a class="py-2 pl-4 hover:bg-gray-500 active:bg-pink-900 text-sm" href="/manage/@Model.Guild.Id/modules">Modules</a>
-        } 
-        else if (Model.Section == "_ModuleSettings")
-        {
-            <a class="py-2 pl-4 hover:bg-gray-500 active:bg-pink-900 text-sm" href="/manage/@Model.Guild.Id">Core</a>
-            <a class="py-2 pl-4 hover:bg-gray-500 bg-gray-500 active:bg-pink-900 border-l-2 border-pink-500 text-sm" href="/manage/@Model.Guild.Id/modules">Modules</a>
-        }
-        else
-        {
-            <a class="py-2 pl-4 hover:bg-gray-500 active:bg-pink-900 text-sm" href="/manage/@Model.Guild.Id">Core</a>
-            <a class="py-2 pl-4 hover:bg-gray-500 active:bg-pink-900 text-sm" href="/manage/@Model.Guild.Id/modules">Modules</a>
-        }
+        <a class="py-2 pl-4 hover:bg-gray-500 active:bg-pink-900 text-sm @(Model.Section == "_CoreSettings" ? "bg-gray-500 border-l-2 border-pink-500" : "")" href="/manage/@Model.Guild.Id">Core</a>
+        <a class="py-2 pl-4 hover:bg-gray-500 active:bg-pink-900 text-sm @(Model.Section == "_CurrencySettings" ? "bg-gray-500 border-l-2 border-pink-500" : "")" href="/manage/@Model.Guild.Id/currency">Currency</a>
+        <a class="py-2 pl-4 hover:bg-gray-500 active:bg-pink-900 text-sm @(Model.Section == "_XpSettings" ? "bg-gray-500 border-l-2 border-pink-500" : "")" href="/manage/@Model.Guild.Id/xp">Experience</a>
+
         @if (Model.Channels.Count != 0)
         {
             <div class="py-2 pl-2 font-medium">Channel Settings</div>

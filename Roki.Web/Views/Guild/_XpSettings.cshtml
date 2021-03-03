@@ -1,0 +1,38 @@
+@model GuildChannelModel
+
+<div class="container ml-4">
+    <h1 class="text-3xl font-medium tracking-tight">Experience Settings</h1>
+    <div class="hidden sm:block" aria-hidden="true">
+        <div class="py-5">
+            <div class="border-t border-gray-200"></div>
+        </div>
+    </div>
+    <form id="form-data" action="#" method="post">
+        <div class="rounded-md overflow-hidden bg-grey-100 dark:bg-gray-900 px-4 py-4">
+            <div class="rounded-md">
+                <label for="guild_xp_pm" class="block text-sm font-medium dark:text-gray-200">XP Per Message</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_xp_pm" id="guild_xp_pm" value="@Model.Guild.Config.XpPerMessage" min="0" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32 text-sm">
+                </div>
+            </div>
+            <div class="mt-4 rounded-md">
+                <label for="guild_xp_cd" class="block text-sm font-medium dark:text-gray-200">XP Cooldown</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_xp_cd" id="guild_xp_cd" value="@Model.Guild.Config.XpCooldown" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-40">
+                    <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">min</span>
+                </div>
+            </div>
+            <div class="mt-4 rounded-md">
+                <label for="guild_xp_cd_fast" class="block text-sm font-medium dark:text-gray-200">XP Fast Cooldown</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_xp_cd_fast" id="guild_xp_cd_fast" value="@Model.Guild.Config.XpFastCooldown" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-40">
+                    <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">min</span>
+                </div>
+            </div>
+            <div class="mt-6 text-right">
+                <button id="save-form" class="rounded-lg dark:bg-pink-800 focus:outline-none focus:ring dark:focus:ring-pink-600 py-1.5 px-3 disabled:opacity-50" disabled>Save</button>
+            </div>
+        </div>
+    </form>
+
+</div>
