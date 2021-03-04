@@ -14,7 +14,7 @@
                 <input type="text" id="prefix" name="prefix" value="@Model.Guild.Config.Prefix" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 mt-1 flex rounded-md block w-20 font-mono" maxlength="5" placeholder=".">
             </div>
             <div class="mt-4 flex justify-between">
-                <label class="block text-sm font-medium dark:text-gray-200">Default Logging Behavior</label>
+                <label class="block text-sm font-medium dark:text-gray-200">Default Message Logging Behavior</label>
                 <label for="guild-logging" class="cursor-pointer mr-2">
                     <div class="relative">
                         <input id="guild-logging" type="checkbox" class="hidden" name="guild-logging" @(Model.Guild.Config.Logging ? "checked" : "")>

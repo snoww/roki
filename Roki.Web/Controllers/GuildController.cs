@@ -86,6 +86,34 @@ namespace Roki.Web.Controllers
             return View("Settings", new GuildChannelModel{Section = "_XpSettings", Guild = guild, Channels = channels});
         }
         
+        [Route("{guildId}/gamble")]
+        public async Task<IActionResult> GambleSettings(ulong guildId)
+        {
+            Guild guild = await _rokiService.GetRokiGuild(guildId);
+            if (guild == null)
+            {
+                return View("Manage");
+            }
+
+            List<ChannelSummary> channels = await _rokiService.GetGuildChannels(guildId);
+
+            return View("Settings", new GuildChannelModel{Section = "_GambleSettings", Guild = guild, Channels = channels});
+        }
+        
+        [Route("{guildId}/games")]
+        public async Task<IActionResult> GameSettings(ulong guildId)
+        {
+            Guild guild = await _rokiService.GetRokiGuild(guildId);
+            if (guild == null)
+            {
+                return View("Manage");
+            }
+
+            List<ChannelSummary> channels = await _rokiService.GetGuildChannels(guildId);
+
+            return View("Settings", new GuildChannelModel{Section = "_GameSettings", Guild = guild, Channels = channels});
+        }
+        
         [Route("{guildId}/{channelId}")]
         public async Task<IActionResult> ChannelSettings(ulong guildId, ulong channelId)
         {

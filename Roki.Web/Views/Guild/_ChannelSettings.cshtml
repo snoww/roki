@@ -8,21 +8,41 @@
         </div>
     </div>
     <form id="form-data" onchange="checkForm()" action="#" method="post">
+        <div class="rounded-md overflow-hidden bg-grey-100 dark:bg-gray-900 px-4 py-4">
+            <div class="mt-1 flex justify-between">
+                <label class="block text-sm font-medium dark:text-gray-200">Message Logging</label>
+                <label for="guild-logging" class="cursor-pointer mr-2">
+                    <div class="relative">
+                        <input id="guild-logging" type="checkbox" class="hidden" name="guild-logging" @(Model.Channel.Config.Logging ? "checked" : "")>
+                        <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
+                        <div class="toggle -top-1 -left-1 transition duration-300 ease-in-out absolute w-6 h-6 bg-white rounded-full inset-y-0 left-0"></div>
+                    </div>
+                </label>
+            </div>
+            <div class="mt-4 flex justify-between">
+                <label class="block text-sm font-medium dark:text-gray-200">Currency Generation</label>
+                <label for="guild-curr-gen" class="cursor-pointer mr-2">
+                    <div class="relative">
+                        <input id="guild-curr-gen" type="checkbox" class="hidden" name="guild-curr" @(Model.Channel.Config.CurrencyGeneration ? "checked" : "")>
+                        <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
+                        <div class="toggle -top-1 -left-1 transition duration-300 ease-in-out absolute w-6 h-6 bg-white rounded-full inset-y-0 left-0"></div>
+                    </div>
+                </label>
+            </div>
+            <div class="mt-4 flex justify-between">
+                <label class="block text-sm font-medium dark:text-gray-200">XP Gain</label>
+                <label for="guild-xp" class="cursor-pointer mr-2">
+                    <div class="relative">
+                        <input id="guild-xp" type="checkbox" class="hidden" name="guild-xp" @(Model.Channel.Config.XpGain ? "checked" : "")>
+                        <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
+                        <div class="toggle -top-1 -left-1 transition duration-300 ease-in-out absolute w-6 h-6 bg-white rounded-full inset-y-0 left-0"></div>
+                    </div>
+                </label>
+            </div>
+            <div class="mt-6 text-right">
+                <button id="save-form" class="rounded-lg dark:bg-pink-800 focus:outline-none focus:ring dark:focus:ring-pink-600 py-1.5 px-3 disabled:opacity-50" disabled>Save</button>
+            </div>
+        </div>
+        
     </form>
 </div>
-
-@section Scripts
-{
-    <script>
-        // enable/disable save button when there are changes detected
-        const form = document.getElementById("form-data");
-        const data = new FormData(form);
-        const dataString = JSON.stringify([...data.entries()]);
-        
-        function checkForm() {
-            const newForm = document.getElementById("form-data");
-            const newData = new FormData(newForm);
-            document.getElementById("save-form").disabled = dataString === JSON.stringify([...newData.entries()]);
-        }
-    </script>
-}

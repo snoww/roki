@@ -6,6 +6,8 @@
         <a class="py-2 pl-4 hover:bg-gray-500 active:bg-pink-900 text-sm @(Model.Section == "_CoreSettings" ? "bg-gray-500 border-l-2 border-pink-500" : "")" href="/manage/@Model.Guild.Id">Core</a>
         <a class="py-2 pl-4 hover:bg-gray-500 active:bg-pink-900 text-sm @(Model.Section == "_CurrencySettings" ? "bg-gray-500 border-l-2 border-pink-500" : "")" href="/manage/@Model.Guild.Id/currency">Currency</a>
         <a class="py-2 pl-4 hover:bg-gray-500 active:bg-pink-900 text-sm @(Model.Section == "_XpSettings" ? "bg-gray-500 border-l-2 border-pink-500" : "")" href="/manage/@Model.Guild.Id/xp">Experience</a>
+        <a class="py-2 pl-4 hover:bg-gray-500 active:bg-pink-900 text-sm @(Model.Section == "_GambleSettings" ? "bg-gray-500 border-l-2 border-pink-500" : "")" href="/manage/@Model.Guild.Id/gamble">Gambling</a>
+        <a class="py-2 pl-4 hover:bg-gray-500 active:bg-pink-900 text-sm @(Model.Section == "_GameSettings" ? "bg-gray-500 border-l-2 border-pink-500" : "")" href="/manage/@Model.Guild.Id/games">Games</a>
 
         @if (Model.Channels.Count != 0)
         {

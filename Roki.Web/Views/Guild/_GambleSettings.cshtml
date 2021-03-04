@@ -1,0 +1,94 @@
+@model GuildChannelModel
+
+<div class="container ml-4">
+    <h1 class="text-3xl font-medium tracking-tight">Gambling Settings</h1>
+    <div class="hidden sm:block" aria-hidden="true">
+        <div class="py-5">
+            <div class="border-t border-gray-200"></div>
+        </div>
+    </div>
+    <form id="form-data" action="#" method="post">
+        <div class="rounded-md overflow-hidden bg-grey-100 dark:bg-gray-900 px-4 py-4">
+            <h1 class="text-xl font-normal tracking-tight">Bet Flip</h1>
+            <div class="flex flex-wrap mt-4">
+                <div class="rounded-md mr-8">
+                    <label for="guild_bf_min" class="block text-sm font-medium dark:text-gray-200">Minimum Bet</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_bf_min" id="guild_bf_min" value="@Model.Guild.Config.BetFlipMin" min="1" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32 text-sm">
+                    </div>
+                </div>
+                <div class="rounded-md">
+                    <label for="guild_bf_mult" class="block text-sm font-medium dark:text-gray-200">Payout Multiplier</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_bf_mult" id="guild_bf_mult" value="@Model.Guild.Config.BetFlipMultiplier" min="1.1" step="0.1" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-40">
+                        <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">×</span>
+                    </div>
+                </div>
+            </div>
+            <h1 class="text-xl font-normal tracking-tight mt-4">Bet Flip Multi</h1>
+            <div class="flex flex-wrap mt-4">
+                <div class="rounded-md mr-8">
+                    <label for="guild_bfm_min" class="block text-sm font-medium dark:text-gray-200">Minimum Guesses</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_bfm_min" id="guild_bfm_min" value="@Model.Guild.Config.BetFlipMMinGuesses" min="2" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32 text-sm">
+                    </div>
+                </div>
+                <div class="rounded-md mr-8">
+                    <label for="guild_bfm_min_correct" class="block text-sm font-medium dark:text-gray-200">Minimum Correct</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_bfm_min_correct" id="guild_bfm_min_correct" value="@(Model.Guild.Config.BetFlipMMinCorrect * 100)" min="1" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-40">
+                        <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">%</span>
+                    </div>
+                </div>
+                <div class="rounded-md">
+                    <label for="guild_bfm_mult" class="block text-sm font-medium dark:text-gray-200">Payout Multiplier</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_bfm_mult" id="guild_bfm_mult" value="@Model.Guild.Config.BetFlipMMultiplier" min="1.1" step="0.1" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-40">
+                        <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">×</span>
+                    </div>
+                </div>
+            </div>
+            <h1 class="text-xl font-normal tracking-tight mt-4">Bet Dice (6d6)</h1>
+            <div class="rounded-md mt-4">
+                <label for="guild_bd_min" class="block text-sm font-medium dark:text-gray-200">Minimum Bet</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_bd_min" id="guild_bd_min" value="@Model.Guild.Config.BetDieMin" min="1" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20 text-sm">
+                </div>
+            </div>
+            
+            <h1 class="text-xl font-normal tracking-tight mt-4">Bet Roll (1d100)</h1>
+            <div class="rounded-md mt-4">
+                <label for="guild_br_min" class="block text-sm font-medium dark:text-gray-200">Minimum Bet</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_br_min" id="guild_br_min" value="@Model.Guild.Config.BetRollMin" min="1" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20 text-sm">
+                </div>
+            </div>
+            <div class="flex flex-wrap mt-4">
+                <div class="rounded-md mr-8">
+                    <label for="guild_br_71" class="block text-sm font-medium dark:text-gray-200">≥ 71</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_br_71" id="guild_br_71" value="@Model.Guild.Config.BetRoll71Multiplier" min="1" step="0.1" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-40">
+                        <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">×</span>
+                    </div>
+                </div>
+                <div class="rounded-md mr-8">
+                    <label for="guild_br_92" class="block text-sm font-medium dark:text-gray-200">≥ 92</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_br_92" id="guild_br_92" value="@Model.Guild.Config.BetRoll92Multiplier" min="1" step="0.1" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-40">                        
+                        <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">×</span>
+                    </div>
+                </div>
+                <div class="rounded-md">
+                    <label for="guild_br_100" class="block text-sm font-medium dark:text-gray-200">= 100</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_br_100" id="guild_br_100" value="@Model.Guild.Config.BetRoll100Multiplier" min="1.1" step="0.1" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-40">
+                        <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">×</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6 text-right">
+                <button id="save-form" class="rounded-lg dark:bg-pink-800 focus:outline-none focus:ring dark:focus:ring-pink-600 py-1.5 px-3 disabled:opacity-50" disabled>Save</button>
+            </div>
+        </div>
+    </form>
+</div>
