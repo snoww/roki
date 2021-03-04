@@ -1,7 +1,7 @@
 @model GuildChannelModel
 
 <nav class="mr-2">
-    <div class="flex flex-none flex-col bg-gray-400 dark:bg-gray-700 rounded max-w-20">
+    <div class="flex flex-none flex-col bg-gray-400 dark:bg-gray-700 rounded w-52">
         <div class="py-2 pl-2 font-medium">Server Settings</div>
         <a class="py-2 pl-4 hover:bg-gray-500 active:bg-pink-900 text-sm @(Model.Section == "_CoreSettings" ? "bg-gray-500 border-l-2 border-pink-500" : "")" href="/manage/@Model.Guild.Id">Core</a>
         <a class="py-2 pl-4 hover:bg-gray-500 active:bg-pink-900 text-sm @(Model.Section == "_CurrencySettings" ? "bg-gray-500 border-l-2 border-pink-500" : "")" href="/manage/@Model.Guild.Id/currency">Currency</a>
