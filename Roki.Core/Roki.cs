@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Extensions;
 using Roki.Services;
+using Roki.Services.Database;
 using StackExchange.Redis;
 using Victoria;
 
@@ -174,6 +176,7 @@ namespace Roki
             var sw = Stopwatch.StartNew();
 
             IServiceCollection service = new ServiceCollection()
+                .AddDbContext<RokiContext>(options => options.UseNpgsql("connection string"))
                 .AddSingleton(RokiConfig)
                 .AddSingleton(Mongo)
                 .AddSingleton(Cache)

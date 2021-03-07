@@ -1,39 +1,41 @@
 create table users
 (
     id            bigint primary key,
-    username      varchar(32) not null,
-    discriminator varchar(4)  not null,
-    avatar        varchar(50) not null
+    username      text not null,
+    discriminator text not null,
+    avatar        text
 );
 
 create table guild
 (
     id         bigint primary key,
-    name       varchar(100) not null,
-    icon       varchar(50),
-    owner_id   bigint       not null references users (id),
-    moderators bigint[]
+    name       text   not null,
+    icon       text,
+    owner_id   bigint not null references users (id),
+    moderators bigint[],
+    available  bool
 );
 
 create table channel
 (
     id           bigint primary key,
-    guild_id     bigint references guild (id),
-    name         varchar(100) not null,
+    guild_id     bigint not null references guild (id),
+    name         text   not null,
     deleted_date date
 );
 
 create table guild_config
 (
     guild_id              bigint primary key references guild (id),
+    prefix                text             not null,
     logging               bool             not null,
     currency              bool             not null,
     xp                    bool             not null,
     currency_chance       double precision not null,
     currency_cd           int              not null,
-    currency_icon         varchar(50)      not null,
-    currency_name         varchar(20)      not null,
-    currency_plural       varchar(20)      not null,
+    currency_icon         text             not null,
+    currency_name         text             not null,
+    currency_plural       text             not null,
     currency_drop         int              not null,
     currency_drop_max     int              not null,
     currency_drop_rare    int              not null,
@@ -66,18 +68,18 @@ create table channel_config
     xp         bool not null
 );
 
-create table store
+create table store_item
 (
     id          serial primary key,
-    guild_id    bigint      not null references guild (id),
-    seller_id   bigint      not null references users (id),
-    name        varchar(50) not null,
+    guild_id    bigint not null references guild (id),
+    seller_id   bigint not null references users (id),
+    name        text   not null,
     description text,
-    details     varchar(100),
-    category    varchar(50),
+    details     text,
+    category    text,
     duration    int,
-    price       int         not null,
-    quantity    int         not null
+    price       int,
+    quantity    int
 );
 
 create table xp_reward
@@ -85,27 +87,28 @@ create table xp_reward
     id       serial primary key,
     guild_id bigint not null references guild (id),
     level    int    not null,
-    type     varchar(20),
-    reward   varchar(50)
+    type     text,
+    reward   text
 );
 
 create table user_data
 (
-    uid                   bigint                   not null references users (id),
-    guild_id              bigint                   not null references guild (id),
-    xp                    int                      not null,
-    last_level_up         timestamp with time zone not null,
-    notification_location int                      not null,
-    currency              bigint                   not null,
-    investing             decimal                  not null,
+    uid                   bigint    not null references users (id),
+    guild_id              bigint    not null references guild (id),
+    xp                    bigint    not null,
+    last_level_up         timestamp not null,
+    last_xp_gain          timestamp not null,
+    notification_location int       not null,
+    currency              bigint    not null,
+    investing             decimal   not null,
     primary key (uid, guild_id)
 );
 
-create table inventory
+create table inventory_item
 (
     uid      bigint not null references users (id),
     guild_id bigint not null references guild (id),
-    item_id  int references store (id),
+    item_id  int references store_item (id),
     quantity int    not null,
     primary key (uid, guild_id, item_id)
 );
@@ -114,19 +117,86 @@ create table subscription
 (
     uid      bigint not null references users (id),
     guild_id bigint not null references guild (id),
-    item_id  int references store (id),
-    expiry   date,
+    item_id  int references store_item (id),
+    expiry   date   not null,
     primary key (uid, guild_id, item_id)
+);
+
+create table trade
+(
+    id       serial primary key,
+    guild_id bigint  not null references guild (id),
+    uid      bigint  not null references users (id),
+    symbol   text    not null,
+    position text    not null,
+    action   text    not null,
+    amount   bigint  not null,
+    price    decimal not null
 );
 
 create table investment
 (
-    uid           bigint      not null references users (id),
-    guild_id      bigint      not null references guild (id),
-    symbol        varchar(10) not null,
-    shares        bigint      not null,
+    uid           bigint not null references users (id),
+    guild_id      bigint not null references guild (id),
+    symbol        text   not null,
+    shares        bigint not null,
+    trades        int[]  not null,
     interest_date date,
     primary key (uid, guild_id, symbol)
 );
 
+create table message
+(
+    id          bigint primary key,
+    channel_id  bigint,
+    guild_id    bigint,
+    author_id   bigint not null,
+    content     text,
+    replied_to  bigint,
+    edits       jsonb,
+    attachments text[],
+    deleted     bool   not null
+);
 
+create table event
+(
+    id           serial primary key,
+    guild_id     bigint    not null references guild (id),
+    name         text      not null,
+    description  text,
+    host_id      bigint    not null references users (id),
+    start_date   timestamp not null,
+    channel_id   bigint    not null references channel (id),
+    message_id   bigint    not null references message (id),
+    participants bigint[],
+    undecided    bigint[],
+    deleted      bool      not null
+);
+
+create table quote
+(
+    id        serial primary key,
+    guild_id  bigint    not null references guild (id),
+    author_id bigint    not null references users (id),
+    keyword   text      not null,
+    text      text      not null,
+    context   text,
+    use_count int       not null,
+    date      timestamp not null
+);
+
+create table transaction
+(
+    id          serial primary key,
+    guild_id    bigint    not null references guild (id),
+    sender      bigint    not null references users (id),
+    recipient   bigint    not null references users (id),
+    amount      bigint    not null,
+    description text,
+    channel_id  bigint references channel (id),
+    message_id  bigint references message (id),
+    date        timestamp not null
+);
+
+-- todo pokemon
+-- todo jeopardy
