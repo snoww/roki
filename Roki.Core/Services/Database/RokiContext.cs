@@ -69,7 +69,7 @@ namespace Roki.Services.Database
                     .ValueGeneratedNever()
                     .HasColumnName("channel_id");
 
-                entity.Property(e => e.Currency).HasColumnName("currency");
+                entity.Property(e => e.CurrencyGen).HasColumnName("currency");
 
                 entity.Property(e => e.Logging).HasColumnName("logging");
 
@@ -195,7 +195,7 @@ namespace Roki.Services.Database
                 entity.Property(e => e.CurrencyNamePlural)
                     .IsRequired()
                     .HasColumnName("currency_plural");
-                
+
                 entity.Property(e => e.Prefix)
                     .IsRequired()
                     .HasColumnName("prefix");
@@ -220,6 +220,10 @@ namespace Roki.Services.Database
 
                 entity.Property(e => e.XpPerMessage).HasColumnName("xp_per_message");
 
+                entity.Property(e => e.CurrencyDefault).HasColumnName("currency_default");
+
+                entity.Property(e => e.InvestingDefault).HasColumnName("investing_default");
+
                 entity.HasOne(d => d.Guild)
                     .WithOne(p => p.GuildConfig)
                     .HasForeignKey<GuildConfig>(d => d.GuildId)
@@ -229,7 +233,7 @@ namespace Roki.Services.Database
 
             modelBuilder.Entity<InventoryItem>(entity =>
             {
-                entity.HasKey(e => new {Uid = e.UserId, e.GuildId, e.ItemId })
+                entity.HasKey(e => new {Uid = e.UserId, e.GuildId, e.ItemId})
                     .HasName("inventory_item_pkey");
 
                 entity.ToTable("inventory_item");
@@ -245,7 +249,7 @@ namespace Roki.Services.Database
 
             modelBuilder.Entity<Investment>(entity =>
             {
-                entity.HasKey(e => new {Uid = e.UserId, e.GuildId, e.Symbol })
+                entity.HasKey(e => new {Uid = e.UserId, e.GuildId, e.Symbol})
                     .HasName("investment_pkey");
 
                 entity.ToTable("investment");
@@ -350,7 +354,7 @@ namespace Roki.Services.Database
 
             modelBuilder.Entity<Subscription>(entity =>
             {
-                entity.HasKey(e => new {Uid = e.UserId, e.GuildId, e.ItemId })
+                entity.HasKey(e => new {Uid = e.UserId, e.GuildId, e.ItemId})
                     .HasName("subscription_pkey");
 
                 entity.ToTable("subscription");
@@ -390,6 +394,10 @@ namespace Roki.Services.Database
                     .IsRequired()
                     .HasColumnName("symbol");
 
+                entity.Property(e => e.Date)
+                    .HasColumnType("timestamp")
+                    .HasColumnName("date");
+
                 entity.Property(e => e.UserId).HasColumnName("uid");
             });
 
@@ -402,10 +410,6 @@ namespace Roki.Services.Database
                 entity.Property(e => e.Amount).HasColumnName("amount");
 
                 entity.Property(e => e.ChannelId).HasColumnName("channel_id");
-
-                entity.Property(e => e.Date)
-                    .HasColumnType("timestamp")
-                    .HasColumnName("date");
 
                 entity.Property(e => e.Description).HasColumnName("description");
 
@@ -441,7 +445,7 @@ namespace Roki.Services.Database
 
             modelBuilder.Entity<UserData>(entity =>
             {
-                entity.HasKey(e => new {Uid = e.UserId, e.GuildId })
+                entity.HasKey(e => new {Uid = e.UserId, e.GuildId})
                     .HasName("user_data_pkey");
 
                 entity.ToTable("user_data");
@@ -457,7 +461,7 @@ namespace Roki.Services.Database
                 entity.Property(e => e.LastLevelUp)
                     .HasColumnType("timestamp")
                     .HasColumnName("last_level_up");
-                
+
                 entity.Property(e => e.LastXpGain)
                     .HasColumnType("timestamp")
                     .HasColumnName("last_xp_gain");
@@ -487,7 +491,6 @@ namespace Roki.Services.Database
 
                 entity.Property(e => e.Type).HasColumnName("type");
             });
-
         }
     }
 }

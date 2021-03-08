@@ -31,6 +31,8 @@ create table guild_config
     logging               bool             not null,
     currency              bool             not null,
     xp                    bool             not null,
+    currency_default      bigint           not null,
+    investing_default     bigint           not null,
     currency_chance       double precision not null,
     currency_cd           int              not null,
     currency_icon         text             not null,
@@ -125,13 +127,14 @@ create table subscription
 create table trade
 (
     id       serial primary key,
-    guild_id bigint  not null references guild (id),
-    uid      bigint  not null references users (id),
-    symbol   text    not null,
-    position text    not null,
-    action   text    not null,
-    amount   bigint  not null,
-    price    decimal not null
+    guild_id bigint    not null references guild (id),
+    uid      bigint    not null references users (id),
+    symbol   text      not null,
+    position text      not null,
+    action   text      not null,
+    amount   bigint    not null,
+    price    decimal   not null,
+    date     timestamp not null,
 );
 
 create table investment
@@ -148,8 +151,8 @@ create table investment
 create table message
 (
     id          bigint primary key,
-    channel_id  bigint,
-    guild_id    bigint,
+    channel_id  bigint not null,
+    guild_id    bigint not null,
     author_id   bigint not null,
     content     text,
     replied_to  bigint,
@@ -188,14 +191,13 @@ create table quote
 create table transaction
 (
     id          serial primary key,
-    guild_id    bigint    not null references guild (id),
-    sender      bigint    not null references users (id),
-    recipient   bigint    not null references users (id),
-    amount      bigint    not null,
+    guild_id    bigint not null references guild (id),
+    sender      bigint not null references users (id),
+    recipient   bigint not null references users (id),
+    amount      bigint not null,
     description text,
-    channel_id  bigint references channel (id),
-    message_id  bigint references message (id),
-    date        timestamp not null
+    channel_id  bigint not null references channel (id),
+    message_id  bigint not null references message (id),
 );
 
 -- todo pokemon

@@ -7,13 +7,13 @@ namespace Roki.Services.Database.Models
     public class Message
     {
         public ulong Id { get; set; }
-        public ulong? ChannelId { get; set; }
-        public ulong? GuildId { get; set; }
+        public ulong ChannelId { get; set; }
+        public ulong GuildId { get; set; }
         public ulong AuthorId { get; set; }
         public string Content { get; set; }
         public ulong? RepliedTo { get; set; }
-        public List<Edit> Edits { get; set; } = new();
-        public List<string> Attachments { get; set; } = new();
+        public List<Edit> Edits { get; set; }
+        public List<string> Attachments { get; set; }
         public bool Deleted { get; set; } = false;
     }
 
