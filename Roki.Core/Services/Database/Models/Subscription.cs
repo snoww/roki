@@ -9,5 +9,7 @@ namespace Roki.Services.Database.Models
         public ulong GuildId { get; set; }
         public int ItemId { get; set; }
         public DateTime Expiry { get; set; }
+        
+        public virtual StoreItem Item { get; set; }
     }
 }

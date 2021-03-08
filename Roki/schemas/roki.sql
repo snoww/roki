@@ -77,7 +77,7 @@ create table store_item
     seller_id   bigint not null references users (id),
     name        text   not null,
     description text,
-    details     text,
+    details     text unique,
     category    text,
     duration    int,
     price       int,
@@ -86,11 +86,11 @@ create table store_item
 
 create table xp_reward
 (
-    id       serial primary key,
-    guild_id bigint not null references guild (id),
-    level    int    not null,
-    type     text,
-    reward   text
+    id          serial primary key,
+    guild_id    bigint not null references guild (id),
+    level       int    not null,
+    details     text   not null unique,
+    description text
 );
 
 create table user_data

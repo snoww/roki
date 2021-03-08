@@ -245,6 +245,12 @@ namespace Roki.Services.Database
                 entity.Property(e => e.ItemId).HasColumnName("item_id");
 
                 entity.Property(e => e.Quantity).HasColumnName("quantity");
+                
+                entity.HasOne(d => d.Item)
+                    .WithMany(p => p.Inventory)
+                    .HasForeignKey(d => d.ItemId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("inventory_item_item_id_fkey");
             });
 
             modelBuilder.Entity<Investment>(entity =>
@@ -295,7 +301,7 @@ namespace Roki.Services.Database
 
                 entity.Property(e => e.Quantity).HasColumnName("quantity");
 
-                entity.Property(e => e.SellerId).HasColumnName("seller_id");
+                entity.Property(e => e.SellerId).HasColumnName("seller_id");                              
             });
 
             modelBuilder.Entity<Message>(entity =>
@@ -368,6 +374,12 @@ namespace Roki.Services.Database
                 entity.Property(e => e.Expiry)
                     .HasColumnType("date")
                     .HasColumnName("expiry");
+                    
+                entity.HasOne(d => d.Item)
+                    .WithMany(p => p.Subscriptions)
+                    .HasForeignKey(d => d.ItemId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("subscription_item_id_fkey");
             });
 
             modelBuilder.Entity<Trade>(entity =>
@@ -482,12 +494,14 @@ namespace Roki.Services.Database
                 entity.ToTable("xp_reward");
 
                 entity.Property(e => e.Id).HasColumnName("id");
+                
+                entity.Property(e => e.Details).HasColumnName("details");
 
                 entity.Property(e => e.GuildId).HasColumnName("guild_id");
 
                 entity.Property(e => e.Level).HasColumnName("level");
 
-                entity.Property(e => e.Reward).HasColumnName("reward");
+                entity.Property(e => e.Description).HasColumnName("description");
 
                 entity.Property(e => e.Type).HasColumnName("type");
             });

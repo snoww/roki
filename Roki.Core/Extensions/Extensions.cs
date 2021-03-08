@@ -88,7 +88,7 @@ namespace Roki.Extensions
                 }
 
                 Type interfaceType = interfaces.FirstOrDefault(x => serviceType.GetInterfaces().Contains(x));
-                collection.AddSingleton(interfaceType != null ? interfaceType : serviceType, serviceType);
+                collection.AddSingleton(interfaceType ?? serviceType, serviceType);
             }
 
             return collection;

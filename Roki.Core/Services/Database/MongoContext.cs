@@ -735,7 +735,7 @@ namespace Roki.Services.Database
                 Id = message.Id,
                 AuthorId = message.Author.Id,
                 ChannelId = message.Channel.Id,
-                GuildId = message.Channel is ITextChannel channelId ? channelId.GuildId : (ulong?) null,
+                GuildId = message.Channel is ITextChannel channelId ? channelId.GuildId : 0,
                 Content = message.Content,
                 MessageReference = message.Reference?.MessageId.GetValueOrDefault(),
                 Attachments = message.Attachments?.Select(a => a.Url).ToList(),
