@@ -209,6 +209,10 @@ namespace Roki.Services
                 if (dbGuild == null)
                 {
                     await service.AddGuildIfNotExistsAsync(after);
+                    foreach (SocketTextChannel channel in after.TextChannels)
+                    {
+                        await service.AddChannelIfNotExistsAsync(channel);
+                    }
                 }
                 else
                 {
@@ -290,6 +294,10 @@ namespace Roki.Services
                 using IServiceScope scope = _scopeFactory.CreateScope();
                 var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
                 await service.AddGuildIfNotExistsAsync(guild);
+                foreach (SocketTextChannel channel in guild.TextChannels)
+                {
+                    await service.AddChannelIfNotExistsAsync(channel);
+                }
                 await service.SaveChangesAsync();
             });
 
@@ -354,7 +362,7 @@ namespace Roki.Services
                 var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
                 await service.GetOrAddUserAsync(user, user.Guild.Id);
                 // add user data separately in case user is already in another server with bot
-                await service.GetOrCreateUserDataAsync(user, user.Guild.Id);
+                await service.GetOrCreateUserDataAsync(user.Id, user.Guild.Id);
                 await service.SaveChangesAsync();
             });
             return Task.CompletedTask;
@@ -417,7 +425,7 @@ namespace Roki.Services
             GuildConfig guildConfig = await _config.GetGuildConfigAsync(channel.GuildId);
 
             await service.AddUserIfNotExistsAsync(message.Author);
-            UserData data = await service.GetOrCreateUserDataAsync(message.Author, channel.GuildId);
+            UserData data = await service.GetOrCreateUserDataAsync(message.Author.Id, channel.GuildId);
 
             // temp
             // these are always false
@@ -451,14 +459,14 @@ namespace Roki.Services
             data.LastLevelUp = now;
 
             await SendNotification(data, message, newXp.Level).ConfigureAwait(false);
-            List<XpReward> rewards = await service.GetXpRewards(channel.GuildId, newXp.Level);
+            List<XpReward> rewards = await service.GetXpRewardsAsync(channel.GuildId, newXp.Level);
             if (rewards.Count > 0)
             {
                 foreach (XpReward reward in rewards)
                 {
                     if (reward.Type == "currency")
                     {
-                        long amount = long.Parse(reward.Reward);
+                        long amount = long.Parse(reward.Description);
                         // todo cache
                         data.Currency += amount;
                         await service.Context.Transactions.AddAsync(new Transaction
@@ -474,7 +482,7 @@ namespace Roki.Services
                     }
                     else
                     {
-                        SocketRole role = (channel.Guild as SocketGuild)?.GetRole(ulong.Parse(reward.Reward));
+                        SocketRole role = (channel.Guild as SocketGuild)?.GetRole(ulong.Parse(reward.Description));
                         if (role == null) continue;
                         var guildUser = (IGuildUser) message.Author;
                         await guildUser.AddRoleAsync(role).ConfigureAwait(false);
@@ -488,8 +496,8 @@ namespace Roki.Services
                             .WithTitle($"Level `{newXp.Level}` Rewards")
                             .WithDescription("Here are your rewards:\n" + string.Join("\n", rewards
                                 .Select(r => r.Type == "currency"
-                                    ? $"+ `{long.Parse(r.Reward):N0}` {guildConfig.CurrencyIcon}"
-                                    : $"+ {r.Reward}"))))
+                                    ? $"+ `{long.Parse(r.Description):N0}` {guildConfig.CurrencyIcon}"
+                                    : $"+ {r.Description}"))))
                         .ConfigureAwait(false);
                     await dm.CloseAsync().ConfigureAwait(false);
                 }

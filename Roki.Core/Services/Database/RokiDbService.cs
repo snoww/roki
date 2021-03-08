@@ -1,7 +1,10 @@
-using System.Collections.Generic;
+using System;
 using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Roki.Services.Database.Models;
 
 namespace Roki.Services.Database
@@ -16,8 +19,10 @@ namespace Roki.Services.Database
 
         Task AddUserIfNotExistsAsync(IUser user);
         Task<User> GetOrAddUserAsync(IUser user, ulong guildId);
-        Task<UserData> GetOrCreateUserDataAsync(IUser user, ulong guildId);
-        
+        Task<UserData> GetOrCreateUserDataAsync(ulong userId, ulong guildId);
+        Task<int> GetUserXpRankAsync(ulong userId, ulong guildId);
+        Task<List<Subscription>> GetUserSubscriptionsAsync(ulong userId, ulong guildId);
+
         #endregion
 
         #region Guilds
@@ -45,7 +50,7 @@ namespace Roki.Services.Database
 
         #region XpRewards
 
-        Task<List<XpReward>> GetXpRewards(ulong guildId, int level);
+        Task<List<XpReward>> GetXpRewardsAsync(ulong guildId, int level);
 
         #endregion
 
@@ -64,7 +69,7 @@ namespace Roki.Services.Database
 
         public async Task AddUserIfNotExistsAsync(IUser user)
         {
-            if (await Context.Users.AnyAsync(x => x.Id == user.Id))
+            if (await Context.Users.AsNoTracking().AsAsyncEnumerable().AnyAsync(x => x.Id == user.Id))
             {
                 return;
             }
@@ -82,7 +87,7 @@ namespace Roki.Services.Database
 
         public async Task<User> GetOrAddUserAsync(IUser user, ulong guildId)
         {
-            User dbUser = await Context.Users.SingleOrDefaultAsync(x => x.Id == user.Id);
+            User dbUser = await Context.Users.AsAsyncEnumerable().SingleOrDefaultAsync(x => x.Id == user.Id);
             if (dbUser != null)
             {
                 return dbUser;
@@ -119,9 +124,9 @@ namespace Roki.Services.Database
             return dbUser;
         }
 
-        public async Task<UserData> GetOrCreateUserDataAsync(IUser user, ulong guildId)
+        public async Task<UserData> GetOrCreateUserDataAsync(ulong userId, ulong guildId)
         {
-            UserData data = await Context.UserData.SingleOrDefaultAsync(x => x.UserId == user.Id && x.GuildId == guildId);
+            UserData data = await Context.UserData.AsAsyncEnumerable().SingleOrDefaultAsync(x => x.UserId == userId && x.GuildId == guildId);
             if (data != null)
             {
                 return data;
@@ -132,7 +137,7 @@ namespace Roki.Services.Database
             {
                 data = new UserData
                 {
-                    UserId = user.Id,
+                    UserId = userId,
                     GuildId = guildId,
                     NotificationLocation = guildConfig.NotificationLocation,
                     Currency = guildConfig.CurrencyDefault,
@@ -143,7 +148,7 @@ namespace Roki.Services.Database
             {
                 data = new UserData
                 {
-                    UserId = user.Id,
+                    UserId = userId,
                     GuildId = guildId
                 };
             }
@@ -151,9 +156,27 @@ namespace Roki.Services.Database
             return data;
         }
 
+        public async Task<int> GetUserXpRankAsync(ulong userId, ulong guildId)
+        {
+            var conn = (NpgsqlConnection) Context.Database.GetDbConnection();
+            await conn.OpenAsync();
+            await using var cmd = new NpgsqlCommand("select r.rank from (select d.uid, d.xp, rank() over (order by d.xp desc) rank from user_data d where d.guild_id = (@guild_id)) r where r.uid = (@uid)", conn);
+            cmd.Parameters.AddWithValue("guild_id", guildId);
+            cmd.Parameters.AddWithValue("uid", userId);
+            await cmd.PrepareAsync();
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
+            await reader.ReadAsync();
+            return reader.GetInt32(0);
+        }
+
+        public async Task<List<Subscription>> GetUserSubscriptionsAsync(ulong userId, ulong guildId)
+        {
+            return await Context.Subscriptions.AsNoTracking().Include(x => x.Item).AsAsyncEnumerable().Where(x => x.UserId == userId && x.GuildId == guildId).ToListAsync();
+        }
+
         public async Task AddGuildIfNotExistsAsync(IGuild guild)
         {
-            if (await Context.Guilds.AnyAsync(x => x.Id == guild.Id))
+            if (await Context.Guilds.AsNoTracking().AsAsyncEnumerable().AnyAsync(x => x.Id == guild.Id))
             {
                 return;
             }
@@ -168,17 +191,12 @@ namespace Roki.Services.Database
                 GuildConfig = new GuildConfig()
             };
 
-            foreach (ITextChannel channel in await guild.GetTextChannelsAsync())
-            {
-                await AddChannelIfNotExistsAsync(channel, dbGuild.GuildConfig);
-            }
-            
             await Context.Guilds.AddAsync(dbGuild);
         }
 
         public async Task<GuildConfig> GetGuildConfigAsync(ulong guildId)
         {
-            return await Context.GuildConfigs.SingleOrDefaultAsync(x => x.GuildId == guildId);
+            return await Context.GuildConfigs.AsAsyncEnumerable().SingleOrDefaultAsync(x => x.GuildId == guildId);
         }
 
         public async Task AddChannelIfNotExistsAsync(ITextChannel channel)
@@ -188,7 +206,7 @@ namespace Roki.Services.Database
 
         private async Task AddChannelIfNotExistsAsync(IChannel channel, GuildConfig guildConfig)
         {
-            if (await Context.Channels.AnyAsync(x => x.Id == channel.Id))
+            if (await Context.Channels.AsNoTracking().AsAsyncEnumerable().AnyAsync(x => x.Id == channel.Id))
             {
                 return;
             }
@@ -211,24 +229,24 @@ namespace Roki.Services.Database
 
         public async Task<ChannelConfig> GetChannelConfigAsync(ulong channelId)
         {
-            return await Context.ChannelConfigs.SingleOrDefaultAsync(x => x.ChannelId == channelId);
+            return await Context.ChannelConfigs.AsAsyncEnumerable().SingleOrDefaultAsync(x => x.ChannelId == channelId);
         }
 
         public async Task<long> GetUserCurrencyAsync(ulong userId, ulong guildId)
         {
-            return await Context.UserData.AsAsyncEnumerable().Where(x => x.UserId == userId && x.GuildId == guildId).Select(x => x.Currency).SingleAsync();
+            return await Context.UserData.AsNoTracking().AsAsyncEnumerable().Where(x => x.UserId == userId && x.GuildId == guildId).Select(x => x.Currency).SingleAsync();
         }
 
         public async Task<bool> RemoveCurrencyAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount)
         {
-            UserData data = await Context.UserData.SingleAsync(x => x.UserId == userId && x.GuildId == guildId);
+            UserData data = await Context.UserData.AsAsyncEnumerable().SingleAsync(x => x.UserId == userId && x.GuildId == guildId);
             if (data.Currency - amount < 0)
             {
                 return false;
             }
             data.Currency -= amount;
 
-            UserData botData = await Context.UserData.SingleAsync(x => x.UserId == Roki.BotId && x.GuildId == guildId);
+            UserData botData = await Context.UserData.AsAsyncEnumerable().SingleAsync(x => x.UserId == Roki.BotId && x.GuildId == guildId);
             botData.Currency += amount;
 
             await Context.Transactions.AddAsync(new Transaction
@@ -247,10 +265,10 @@ namespace Roki.Services.Database
 
         public async Task AddCurrencyAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount)
         {
-            UserData data = await Context.UserData.SingleAsync(x => x.UserId == userId && x.GuildId == guildId);
+            UserData data = await Context.UserData.AsAsyncEnumerable().SingleAsync(x => x.UserId == userId && x.GuildId == guildId);
             data.Currency += amount;
             
-            UserData botData = await Context.UserData.SingleAsync(x => x.UserId == Roki.BotId && x.GuildId == guildId);
+            UserData botData = await Context.UserData.AsAsyncEnumerable().SingleAsync(x => x.UserId == Roki.BotId && x.GuildId == guildId);
             botData.Currency -= amount;
 
             await Context.Transactions.AddAsync(new Transaction
@@ -267,14 +285,14 @@ namespace Roki.Services.Database
 
         public async Task<bool> TransferCurrencyAsync(ulong senderId, ulong recipientId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount)
         {
-            UserData sender = await Context.UserData.SingleAsync(x => x.UserId == senderId && x.GuildId == guildId);
+            UserData sender = await Context.UserData.AsAsyncEnumerable().SingleAsync(x => x.UserId == senderId && x.GuildId == guildId);
             if (sender.Currency - amount < 0)
             {
                 return false;
             }
             sender.Currency -= amount;
 
-            UserData recipient = await Context.UserData.SingleAsync(x => x.UserId == recipientId && x.GuildId == guildId);
+            UserData recipient = await Context.UserData.AsAsyncEnumerable().SingleAsync(x => x.UserId == recipientId && x.GuildId == guildId);
             recipient.Currency += amount;
 
             await Context.Transactions.AddAsync(new Transaction
@@ -291,9 +309,9 @@ namespace Roki.Services.Database
             return true;
         }
 
-        public async Task<List<XpReward>> GetXpRewards(ulong guildId, int level)
+        public async Task<List<XpReward>> GetXpRewardsAsync(ulong guildId, int level)
         {
-            return await Context.XpRewards.AsAsyncEnumerable().Where(x => x.GuildId == guildId && x.Level == level).ToListAsync();
+            return await Context.XpRewards.AsNoTracking().AsAsyncEnumerable().Where(x => x.GuildId == guildId && x.Level == level).ToListAsync();
         }
     }
 }

@@ -7,5 +7,7 @@ namespace Roki.Services.Database.Models
         public ulong GuildId { get; set; }
         public int ItemId { get; set; }
         public int Quantity { get; set; }
+        
+        public virtual StoreItem Item { get; set; }
     }
 }

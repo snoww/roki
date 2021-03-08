@@ -28,9 +28,7 @@ namespace Roki
         private IRokiConfig RokiConfig { get; }
         private DiscordSocketClient Client { get; }
         private CommandService CommandService { get; }
-        private IMongoService Mongo { get; }
         private IRedisCache Cache { get; }
-        private IConfigurationService Config { get; }
         private IServiceProvider Services { get; set; }
 
         public static Properties Properties { get; } = new();
@@ -41,9 +39,7 @@ namespace Roki
             LogSetup.SetupLogger();
 
             RokiConfig = new RokiConfig();
-            Mongo = new MongoService(RokiConfig.Db);
             Cache = new RedisCache(RokiConfig.RedisConfig);
-            Config = new ConfigurationService(Mongo.Context, Cache);
 
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
@@ -71,13 +67,10 @@ namespace Roki
         private async Task RunAsync()
         {
             var sw = Stopwatch.StartNew();
-
-            await LoginAsync(RokiConfig.Token).ConfigureAwait(false);
-
-            Logger.Info("Loading services");
-
+            
             try
             {
+                Logger.Info("Loading services");
                 AddServices();
             }
             catch (Exception e)
@@ -86,14 +79,41 @@ namespace Roki
                 throw;
             }
 
+            await LoginAsync(RokiConfig.Token).ConfigureAwait(false);
+
             sw.Stop();
             Logger.Info("Roki connected in {Elapsed} ms", sw.ElapsedMilliseconds);
 
-            Services.GetService<IStatsService>()!.Initialize();
-            await Services.GetService<CommandHandler>()!.StartHandling().ConfigureAwait(false);
-            await Services.GetService<CommandService>()!.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
+            Services.GetRequiredService<IStatsService>().Initialize();
+            await Services.GetRequiredService<CommandHandler>().StartHandling().ConfigureAwait(false);
+            await Services.GetRequiredService<CommandService>().AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
+            await Services.GetRequiredService<EventHandlers>().StartHandling().ConfigureAwait(false);
+        }
+        
+        private void AddServices()
+        {
+            var sw = Stopwatch.StartNew();
 
-            await new EventHandlers(Mongo, Client, Cache, Config).StartHandling().ConfigureAwait(false);
+            IServiceCollection service = new ServiceCollection()
+                .AddSingleton<IServiceScopeFactory>()
+                .AddDbContext<RokiContext>(options => options.UseNpgsql("Host=192.168.1.100;Database=roki_test;Username=roki;Password=roki-snow;"))
+                .AddSingleton<IRokiDbService, RokiDbService>()
+                .AddSingleton<IConfigurationService, ConfigurationService>()
+                .AddSingleton(RokiConfig)
+                .AddSingleton(Cache)
+                .AddSingleton(Client)
+                .AddSingleton(CommandService)
+                .AddSingleton<LavaConfig>()
+                .AddSingleton<LavaNode>()
+                .AddSingleton(this)
+                .AddHttpClient()
+                .LoadFrom(Assembly.GetAssembly(typeof(CommandHandler)));
+
+            Services = service.BuildServiceProvider();
+            LoadTypeReaders(typeof(Roki).Assembly);
+
+            sw.Stop();
+            Logger.Info("All services loaded in {Elapsed} ms", sw.ElapsedMilliseconds);
         }
 
         private async Task LoginAsync(string token)
@@ -118,6 +138,8 @@ namespace Roki
 
                 Task _ = Task.Run(async () =>
                 {
+                    using IServiceScope scope = Services.CreateScope();
+                    var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
                     try
                     {
                         BotId = Client.CurrentUser.Id;
@@ -127,10 +149,6 @@ namespace Roki
 
                         foreach (SocketGuild guild in Client.Guilds)
                         {
-                            long botCurrency = await Mongo.Context.GetUserCurrency(Client.CurrentUser, guild.Id.ToString());
-                            await cache.StringSetAsync($"currency:{guild.Id}:{BotId}", botCurrency, flags: CommandFlags.FireAndForget)
-                                .ConfigureAwait(false);
-
                             SocketGuildUser bot = guild.CurrentUser;
                             SocketRole role = bot.Roles.OrderByDescending(r => r.Position).FirstOrDefault();
 
@@ -142,19 +160,20 @@ namespace Roki
                             {
                                 await cache.StringSetAsync($"color:{bot.Guild.Id}", role.Color.RawValue).ConfigureAwait(false);
                             }
-                            
-                            await Mongo.Context.GetOrAddGuildAsync(guild).ConfigureAwait(false);
 
+                            await service.AddGuildIfNotExistsAsync(guild);
                             foreach (SocketGuildChannel channel in guild.Channels)
                             {
-                                if (!(channel is SocketTextChannel textChannel))
+                                if (channel is not SocketTextChannel textChannel)
                                 {
                                     continue;
                                 }
 
-                                await Mongo.Context.GetOrAddChannelAsync(textChannel).ConfigureAwait(false);
+                                await service.AddChannelIfNotExistsAsync(textChannel);
                             }
                         }
+
+                        await service.SaveChangesAsync();
 
                         sw.Stop();
                         Logger.Info("Cache loaded in {Elapsed} ms", sw.ElapsedMilliseconds);
@@ -169,33 +188,6 @@ namespace Roki
 
                 return Task.CompletedTask;
             }
-        }
-
-        private void AddServices()
-        {
-            var sw = Stopwatch.StartNew();
-
-            IServiceCollection service = new ServiceCollection()
-                .AddSingleton<IServiceScopeFactory>()
-                .AddDbContext<RokiContext>(options => options.UseNpgsql("Host=192.168.1.100;Database=roki_test;Username=roki;Password=roki-snow;"))
-                .AddSingleton<IRokiDbService, RokiDbService>()
-                .AddSingleton(RokiConfig)
-                .AddSingleton(Mongo)
-                .AddSingleton(Cache)
-                .AddSingleton(Config)
-                .AddSingleton(Client)
-                .AddSingleton(CommandService)
-                .AddSingleton<LavaConfig>()
-                .AddSingleton<LavaNode>()
-                .AddSingleton(this)
-                .AddHttpClient()
-                .LoadFrom(Assembly.GetAssembly(typeof(CommandHandler)));
-
-            Services = service.BuildServiceProvider();
-            LoadTypeReaders(typeof(Roki).Assembly);
-
-            sw.Stop();
-            Logger.Info("All services loaded in {Elapsed} ms", sw.ElapsedMilliseconds);
         }
 
         private void LoadTypeReaders(Assembly assembly)
