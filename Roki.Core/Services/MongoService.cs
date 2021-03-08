@@ -10,7 +10,7 @@ namespace Roki.Services
     public interface IMongoService
     {
         public IMongoDatabase Database { get; }
-        public IMongoContext Context { get; }
+        // public IMongoContext Context { get; }
     }
     
     public sealed class MongoService : IMongoService

@@ -13,5 +13,6 @@ namespace Roki.Services.Database.Models
         public string Action { get; set; }
         public long Amount { get; set; }
         public decimal Price { get; set; }
+        public DateTime Date { get; set; }
     }
 }

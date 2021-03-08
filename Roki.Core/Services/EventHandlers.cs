@@ -4,12 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using MongoDB.Bson;
+using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Extensions;
 using Roki.Modules.Xp.Common;
 using Roki.Services.Database;
-using Roki.Services.Database.Maps;
+using Roki.Services.Database.Models;
 using StackExchange.Redis;
 
 namespace Roki.Services
@@ -18,13 +18,13 @@ namespace Roki.Services
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly IDatabase _cache;
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly DiscordSocketClient _client;
-        private readonly IMongoContext _context;
         private readonly IConfigurationService _config;
 
-        public EventHandlers(IMongoService service, DiscordSocketClient client, IRedisCache cache, IConfigurationService config)
+        public EventHandlers(IServiceScopeFactory scopeFactory, DiscordSocketClient client, IRedisCache cache, IConfigurationService config)
         {
-            _context = service.Context;
+            _scopeFactory = scopeFactory;
             _client = client;
             _config = config;
             _cache = cache.Redis.GetDatabase();
@@ -58,22 +58,31 @@ namespace Roki.Services
             {
                 return Task.CompletedTask;
             }
-            
+
 
             Task _ = Task.Run(async () =>
             {
-                var textChannel = message.Channel as ITextChannel;
-                bool isDmChannel = message.Channel is IDMChannel;
-                if (!isDmChannel && textChannel != null)
-                {
-                    await UpdateXp(message, textChannel).ConfigureAwait(false);
-                }
-                if (isDmChannel || !await _config.LoggingEnabled(textChannel))
+                if (message.Channel is not IGuildChannel channel || !await _config.LoggingEnabled(channel.Id))
                 {
                     return;
                 }
 
-                await _context.AddMessageAsync(message).ConfigureAwait(false);
+                await UpdateXp(message, channel).ConfigureAwait(false);
+
+                using IServiceScope scope = _scopeFactory.CreateScope();
+                var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
+
+                await service.Context.Messages.AddAsync(new Message
+                {
+                    Id = message.Id,
+                    AuthorId = message.Author.Id,
+                    ChannelId = channel.Id,
+                    GuildId = channel.GuildId,
+                    Content = message.Content,
+                    RepliedTo = message.Reference.MessageId.GetValueOrDefault(),
+                    Attachments = message.Attachments?.Select(x => x.Url).ToList()
+                });
+                await service.SaveChangesAsync();
             });
 
             return Task.CompletedTask;
@@ -86,12 +95,28 @@ namespace Roki.Services
             if (after.EditedTimestamp == null) return Task.CompletedTask;
             Task _ = Task.Run(async () =>
             {
-                if (channel is IDMChannel || !await _config.LoggingEnabled(channel as ITextChannel))
+                if (channel is not IGuildChannel || !await _config.LoggingEnabled(channel.Id))
+                {
+                    return;
+                }
+                
+                using IServiceScope scope = _scopeFactory.CreateScope();
+                var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
+
+                Message message = await service.Context.Messages.SingleOrDefaultAsync(x => x.Id == after.Id);
+                if (message == null)
                 {
                     return;
                 }
 
-                await _context.AddMessageEditAsync(after).ConfigureAwait(false);
+                message.Edits ??= new List<Edit>();
+                message.Edits.Add(new Edit
+                {
+                    Content = after.Content,
+                    Attachments = after.Attachments?.Select(x => x.Url).ToList(),
+                    Timestamp = DateTime.UtcNow
+                });
+                await service.SaveChangesAsync();
             });
 
             return Task.CompletedTask;
@@ -102,12 +127,23 @@ namespace Roki.Services
             if (cache.HasValue && cache.Value.Author.IsBot) return Task.CompletedTask;
             Task _ = Task.Run(async () =>
             {
-                if (channel is IDMChannel || !await _config.LoggingEnabled(channel as ITextChannel))
+                if (channel is not IGuildChannel || !await _config.LoggingEnabled(channel.Id))
+                {
+                    return;
+                }
+                
+                using IServiceScope scope = _scopeFactory.CreateScope();
+                var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
+
+                Message message = await service.Context.Messages.SingleOrDefaultAsync(x => x.Id == cache.Id);
+                if (message == null)
                 {
                     return;
                 }
 
-                await _context.MessageDeletedAsync(cache.Id).ConfigureAwait(false);
+                message.Deleted = true;
+                
+                await service.SaveChangesAsync();
             });
             return Task.CompletedTask;
         }
@@ -116,17 +152,22 @@ namespace Roki.Services
         {
             Task _ = Task.Run(async () =>
             {
-                if (channel is IDMChannel || !await _config.LoggingEnabled(channel as ITextChannel))
+                if (channel is not IGuildChannel || !await _config.LoggingEnabled(channel.Id))
                 {
                     return;
                 }
-
+                
+                using IServiceScope scope = _scopeFactory.CreateScope();
+                var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
+                
                 foreach (Cacheable<IMessage, ulong> cache in caches)
                 {
                     if (cache.HasValue && cache.Value.Author.IsBot) continue;
-
-                    await _context.MessageDeletedAsync(cache.Id).ConfigureAwait(false);
+                    Message message = await service.Context.Messages.SingleOrDefaultAsync(x => x.Id == cache.Id);
+                    message.Deleted = true;
                 }
+
+                await service.SaveChangesAsync();
             });
 
             return Task.CompletedTask;
@@ -134,41 +175,104 @@ namespace Roki.Services
 
         private Task GuildAvailable(SocketGuild guild)
         {
-            Task _ = Task.Run(async () => { await _context.ChangeGuildAvailabilityAsync(guild, true).ConfigureAwait(false); });
+            Task _ = Task.Run(async () =>
+            {
+                using IServiceScope scope = _scopeFactory.CreateScope();
+                var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
+                Guild dbGuild = await service.Context.Guilds.SingleAsync(x => x.Id == guild.Id);
+                dbGuild.Available = true;
+                await service.SaveChangesAsync();
+            });
             return Task.CompletedTask;
         }
 
         private Task GuildUnavailable(SocketGuild guild)
         {
-            Task _ = Task.Run(async () => { await _context.ChangeGuildAvailabilityAsync(guild, false).ConfigureAwait(false); });
+            Task _ = Task.Run(async () =>
+            {
+                using IServiceScope scope = _scopeFactory.CreateScope();
+                var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
+                Guild dbGuild = await service.Context.Guilds.SingleAsync(x => x.Id == guild.Id);
+                dbGuild.Available = false;
+                await service.SaveChangesAsync();
+            });
             return Task.CompletedTask;
         }
 
         private Task GuildUpdated(SocketGuild before, SocketGuild after)
         {
-            Task _ = Task.Run(async () => { await _context.UpdateGuildAsync(after).ConfigureAwait(false); });
+            Task _ = Task.Run(async () =>
+            {
+                using IServiceScope scope = _scopeFactory.CreateScope();
+                var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
+                Guild dbGuild = await service.Context.Guilds.SingleOrDefaultAsync(x => x.Id == after.Id);
+                if (dbGuild == null)
+                {
+                    await service.AddGuildIfNotExistsAsync(after);
+                }
+                else
+                {
+                    dbGuild.Name = after.Name;
+                    dbGuild.Icon = after.IconId;
+                    dbGuild.OwnerId = after.OwnerId;
+                }
+
+                await service.SaveChangesAsync();
+            });
             return Task.CompletedTask;
         }
 
         private Task ChannelDestroyed(SocketChannel channel)
         {
-            if (!(channel is SocketTextChannel textChannel)) return Task.CompletedTask;
-            Task _ = Task.Run(async () => { await _context.DeleteChannelAsync(textChannel).ConfigureAwait(false); });
+            if (channel is not SocketTextChannel) return Task.CompletedTask;
+            Task _ = Task.Run(async () =>
+            {
+                using IServiceScope scope = _scopeFactory.CreateScope();
+                var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
+                Channel dbChannel = await service.Context.Channels.SingleOrDefaultAsync(x => x.Id == channel.Id);
+                if (dbChannel != null)
+                {
+                    dbChannel.DeletedDate = DateTime.UtcNow;
+                }
+
+                await service.SaveChangesAsync();
+            });
             return Task.CompletedTask;
         }
 
         private Task ChannelUpdated(SocketChannel before, SocketChannel after)
         {
-            if (!(before is SocketTextChannel textChannel)) return Task.CompletedTask;
-            Task _ = Task.Run(async () => { await _context.UpdateChannelAsync(textChannel).ConfigureAwait(false); });
+            if (after is not SocketTextChannel textChannel) return Task.CompletedTask;
+            Task _ = Task.Run(async () =>
+            {
+                using IServiceScope scope = _scopeFactory.CreateScope();
+                var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
+                Channel dbChannel = await service.Context.Channels.SingleOrDefaultAsync(x => x.Id == after.Id);
+                if (dbChannel == null)
+                {
+                    await service.AddChannelIfNotExistsAsync(textChannel);
+                }
+                else
+                {
+                    dbChannel.Name = textChannel.Name;
+                }
+
+                await service.SaveChangesAsync();
+            });
 
             return Task.CompletedTask;
         }
 
         private Task ChannelCreated(SocketChannel channel)
         {
-            if (!(channel is SocketTextChannel textChannel)) return Task.CompletedTask;
-            Task _ = Task.Run(async () => { await _context.GetOrAddChannelAsync(textChannel).ConfigureAwait(false); });
+            if (channel is not SocketTextChannel textChannel) return Task.CompletedTask;
+            Task _ = Task.Run(async () =>
+            {
+                using IServiceScope scope = _scopeFactory.CreateScope();
+                var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
+                await service.AddChannelIfNotExistsAsync(textChannel);
+                await service.SaveChangesAsync();
+            });
             return Task.CompletedTask;
         }
 
@@ -183,17 +287,10 @@ namespace Roki.Services
 
                 Logger.Info("Joined server: {guild} [{guildid}]", guild.Name, guild.Id);
 
-                await _context.GetOrAddGuildAsync(guild).ConfigureAwait(false);
-
-                foreach (SocketGuildChannel channel in guild.Channels)
-                {
-                    if (!(channel is SocketTextChannel textChannel))
-                    {
-                        continue;
-                    }
-
-                    await _context.GetOrAddChannelAsync(textChannel).ConfigureAwait(false);
-                }
+                using IServiceScope scope = _scopeFactory.CreateScope();
+                var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
+                await service.AddGuildIfNotExistsAsync(guild);
+                await service.SaveChangesAsync();
             });
 
             return Task.CompletedTask;
@@ -210,20 +307,56 @@ namespace Roki.Services
 
                 Logger.Info("Left server: {guild} [{guildid}]", guild.Name, guild.Id);
 
-                await _context.ChangeGuildAvailabilityAsync(guild, false);
+                using IServiceScope scope = _scopeFactory.CreateScope();
+                var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
+                Guild dbGuild = await service.Context.Guilds.SingleOrDefaultAsync(x => x.Id == guild.Id);
+                dbGuild.Available = false;
+                await service.SaveChangesAsync();
             });
             return Task.CompletedTask;
         }
 
         private Task UserUpdated(SocketUser before, SocketUser after)
         {
-            Task _ = Task.Run(async () => { await _context.UpdateUserAsync(after).ConfigureAwait(false); });
+            Task _ = Task.Run(async () =>
+            {
+                using IServiceScope scope = _scopeFactory.CreateScope();
+                var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
+                User dbUser = await service.Context.Users.SingleOrDefaultAsync(x => x.Id == after.Id);
+                if (dbUser == null)
+                {
+                    await service.Context.Users.AddAsync(new User
+                    {
+                        Id = after.Id,
+                        Username = after.Username,
+                        Discriminator = after.Discriminator,
+                        Avatar = after.AvatarId,
+                    });
+                }
+                else
+                {
+                    dbUser.Id = after.Id;
+                    dbUser.Username = after.Username;
+                    dbUser.Discriminator = after.Discriminator;
+                    dbUser.Avatar = after.AvatarId;
+                }
+                
+                await service.SaveChangesAsync();
+            });
             return Task.CompletedTask;
         }
 
         private Task UserJoined(SocketGuildUser user)
         {
-            Task _ = Task.Run(async () => { await _context.GetOrAddUserAsync(user, user.Guild.Id.ToString()); });
+            Task _ = Task.Run(async () =>
+            {
+                using IServiceScope scope = _scopeFactory.CreateScope();
+                var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
+                await service.GetOrAddUserAsync(user, user.Guild.Id);
+                // add user data separately in case user is already in another server with bot
+                await service.GetOrCreateUserDataAsync(user, user.Guild.Id);
+                await service.SaveChangesAsync();
+            });
             return Task.CompletedTask;
         }
 
@@ -271,62 +404,69 @@ namespace Roki.Services
             return Task.CompletedTask;
         }
 
-        private async Task UpdateXp(SocketMessage message, ITextChannel channel)
+        private async Task UpdateXp(SocketMessage message, IGuildChannel channel)
         {
-            if (!await _config.XpGainEnabled(channel))
+            if (!await _config.XpGainEnabled(channel.Id))
             {
                 return;
             }
             
+            using IServiceScope scope = _scopeFactory.CreateScope();
+            var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
+
             GuildConfig guildConfig = await _config.GetGuildConfigAsync(channel.GuildId);
 
-            var guildId = channel.GuildId.ToString();
-            User user = await _context.GetOrAddUserAsync(message.Author, guildId).ConfigureAwait(false);
+            await service.AddUserIfNotExistsAsync(message.Author);
+            UserData data = await service.GetOrCreateUserDataAsync(message.Author, channel.GuildId);
 
             // temp
-            bool doubleXp = user.Data[guildId].Subscriptions.ContainsKey("DoubleXp");
-            bool fastXp = user.Data[guildId].Subscriptions.ContainsKey("FastXp");
+            // these are always false
+            bool doubleXp = data.Xp < 0;
+            bool fastXp = data.Xp < 0;
 
-            var oldXp = new XpLevel(user.Data[guildId].Xp);
-            XpLevel newXp = doubleXp ? oldXp.AddXp(guildConfig.XpPerMessage * 2) : oldXp.AddXp(guildConfig.XpPerMessage);
-            bool levelUp = oldXp.Level < newXp.Level;
+            var oldXp = new XpLevel(data.Xp);
 
             DateTime now = DateTime.UtcNow;
-            if (fastXp && now - user.Data[guildId].LastXpGain >= TimeSpan.FromMinutes(guildConfig.XpFastCooldown))
+            if (fastXp && now - data.LastXpGain >= TimeSpan.FromSeconds(guildConfig.XpFastCooldown))
             {
-                await _context.UpdateUserXpAsync(user, guildId, now, newXp.TotalXp - oldXp.TotalXp, levelUp).ConfigureAwait(false);
-                goto xpGained;
+                data.Xp += doubleXp ? guildConfig.XpPerMessage * 2 : guildConfig.XpPerMessage;
             }
-
-            if (DateTime.UtcNow - user.Data[guildId].LastXpGain >= TimeSpan.FromMinutes(guildConfig.XpCooldown))
+            else if (DateTime.UtcNow - data.LastXpGain >= TimeSpan.FromSeconds(guildConfig.XpCooldown))
             {
-                await _context.UpdateUserXpAsync(user, guildId, now, newXp.TotalXp - oldXp.TotalXp, levelUp).ConfigureAwait(false);
-                goto xpGained;
+                data.Xp += doubleXp ? guildConfig.XpPerMessage * 2 : guildConfig.XpPerMessage;
             }
-
-            return;
-            
-            xpGained:
-            if (!levelUp)
+            else
             {
                 return;
             }
-            await SendNotification(user, guildId, message, newXp.Level).ConfigureAwait(false);
-            Dictionary<string, XpReward> rewards = (await _context.GetOrAddGuildAsync(channel.Guild as SocketGuild).ConfigureAwait(false)).XpRewards;
-            if (rewards != null && rewards.Count != 0)
+
+            data.LastLevelUp = now;
+            var newXp = new XpLevel(data.Xp);
+            if (oldXp.Level == newXp.Level)
             {
-                foreach ((string _, XpReward reward) in rewards)
+                await service.SaveChangesAsync();
+                return;
+            }
+            
+            data.LastLevelUp = now;
+
+            await SendNotification(data, message, newXp.Level).ConfigureAwait(false);
+            List<XpReward> rewards = await service.GetXpRewards(channel.GuildId, newXp.Level);
+            if (rewards.Count > 0)
+            {
+                foreach (XpReward reward in rewards)
                 {
                     if (reward.Type == "currency")
                     {
-                        int amount = int.Parse(reward.Reward);
-                        await _context.UpdateUserCurrencyAsync(user, guildId, amount).ConfigureAwait(false);
-                        await _context.AddTransaction(new Transaction
+                        long amount = long.Parse(reward.Reward);
+                        // todo cache
+                        data.Currency += amount;
+                        await service.Context.Transactions.AddAsync(new Transaction
                         {
                             Amount = amount,
-                            Reason = "XP Level Up Reward",
-                            To = user.Id,
-                            From = 0,
+                            Description = "XP Level Up Reward",
+                            Recipient = data.UserId,
+                            Sender = Roki.BotId,
                             GuildId = channel.GuildId,
                             ChannelId = channel.Id,
                             MessageId = message.Id
@@ -347,9 +487,9 @@ namespace Roki.Services
                     await dm.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithTitle($"Level `{newXp.Level}` Rewards")
                             .WithDescription("Here are your rewards:\n" + string.Join("\n", rewards
-                                .Select(r => r.Value.Type == "currency"
-                                    ? $"+ `{int.Parse(r.Value.Reward):N0}` {guildConfig.CurrencyIcon}"
-                                    : $"+ {r.Value.Reward}"))))
+                                .Select(r => r.Type == "currency"
+                                    ? $"+ `{long.Parse(r.Reward):N0}` {guildConfig.CurrencyIcon}"
+                                    : $"+ {r.Reward}"))))
                         .ConfigureAwait(false);
                     await dm.CloseAsync().ConfigureAwait(false);
                 }
@@ -359,29 +499,30 @@ namespace Roki.Services
                     // ignored
                 }
             }
+
+            await service.SaveChangesAsync();
         }
 
-        private static async Task SendNotification(User user, string guildId, SocketMessage msg, int level)
+        private static async Task SendNotification(UserData data, SocketMessage msg, int level)
         {
-            if (user.Data[guildId].Notification.Equals("none", StringComparison.OrdinalIgnoreCase))
+            switch (data.NotificationLocation)
             {
-                return;
-            }
-            if (user.Data[guildId].Notification.Equals("dm", StringComparison.OrdinalIgnoreCase))
-            {
-                IDMChannel dm = await msg.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
-                try
-                {
-                    await dm.EmbedAsync(new EmbedBuilder().WithDynamicColor(ulong.Parse(guildId)).WithDescription($"Congratulations {msg.Author.Mention}! You've reached Level {level}"));
-                }
-                catch
-                {
-                    // user has disabled dms
-                }
-            }
-            else if (user.Data[guildId].Notification.Equals("server", StringComparison.OrdinalIgnoreCase))
-            {
-                await msg.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ulong.Parse(guildId)).WithDescription($"Congratulations {msg.Author.Mention}! You've reached Level {level}"));
+                case 0:
+                    return;
+                case 1:
+                    await msg.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(data.GuildId).WithDescription($"Congratulations {msg.Author.Mention}! You've reached Level {level}"));
+                    break;
+                case 2:
+                    IDMChannel dm = await msg.Author.GetOrCreateDMChannelAsync().ConfigureAwait(false);
+                    try
+                    {
+                        await dm.EmbedAsync(new EmbedBuilder().WithDynamicColor(data.GuildId).WithDescription($"Congratulations {msg.Author.Mention}! You've reached Level {level}"));
+                    }
+                    catch
+                    {
+                        // user has disabled dms
+                    }
+                    break;
             }
         }
     }

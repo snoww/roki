@@ -10,7 +10,7 @@ namespace Roki.Services
         #region Currency
 
         public double CurrencyGenerationChance { get; set; } = 0.02;
-        public int CurrencyGenerationCooldown { get; set; } = 10;
+        public int CurrencyGenerationCooldown { get; set; } = 60;
         public string CurrencyIcon { get; set; } = "<:stone:269130892100763649>";
         public string CurrencyName { get; set; } = "Stone";
         public string CurrencyNamePlural { get; set; } = "Stones";
@@ -23,8 +23,10 @@ namespace Roki.Services
         #region Xp
 
         public int XpPerMessage { get; set; } = 5;
-        public int XpCooldown { get; set; } = 5;
-        public double XpFastCooldown { get; set; } = 2.5; 
+        public int XpCooldown { get; set; } = 300;
+        public int XpFastCooldown { get; set; } = 150; 
+        public int NotificationLocation { get; set; } = 1;
+
 
         #endregion
 
@@ -32,11 +34,13 @@ namespace Roki.Services
 
         public int BetFlipMin { get; set; } = 2;
         public double BetFlipMultiplier { get; set; } = 1.95;
+
+        #endregion
+        
+        public int BetFlipMMin { get; set; } = 2;
         public int BetFlipMMinGuesses { get; set; } = 5;
         public double BetFlipMMinCorrect { get; set; } = 0.75;
         public double BetFlipMMultiplier { get; set; } = 1.1;
-
-        #endregion
 
         #region BetDie
 
@@ -48,8 +52,8 @@ namespace Roki.Services
 
         public int BetRollMin { get; set; } = 1;
         public double BetRoll71Multiplier { get; set; } = 2.5;
-        public int BetRoll92Multiplier { get; set; } = 4;
-        public int BetRoll100Multiplier { get; set; } = 10;
+        public double BetRoll92Multiplier { get; set; } = 4;
+        public double BetRoll100Multiplier { get; set; } = 10;
 
         #endregion
 

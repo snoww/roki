@@ -11,7 +11,7 @@ namespace Roki.Services.Database.Maps
         public ulong Id { get; set; }
         public ulong AuthorId { get; set; }
         public ulong ChannelId { get; set; }
-        public ulong? GuildId { get; set; }
+        public ulong GuildId { get; set; }
         public string Content { get; set; }
         [BsonIgnoreIfNull]
         public ulong? MessageReference { get; set; }
