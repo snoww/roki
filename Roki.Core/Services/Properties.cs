@@ -37,7 +37,7 @@ namespace Roki.Services
 
         #endregion
         
-        public int BetFlipMMin { get; set; } = 2;
+        public double BetFlipMMinMultiplier { get; set; } = 2;
         public int BetFlipMMinGuesses { get; set; } = 5;
         public double BetFlipMMinCorrect { get; set; } = 0.75;
         public double BetFlipMMultiplier { get; set; } = 1.1;

@@ -43,7 +43,9 @@ namespace Roki.Services.Database
         Task<long> GetUserCurrencyAsync(ulong userId, ulong guildId);
         Task<decimal> GetUserInvestingAsync(ulong userId, ulong guildId);
         Task<bool> RemoveCurrencyAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount);
+        Task<bool> RemoveCurrencyAsync(UserData data, UserData botData, ulong guildId, ulong channelId, ulong messageId, string reason, long amount);
         Task AddCurrencyAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount);
+        Task AddCurrencyAsync(UserData data, UserData botData, ulong guildId, ulong channelId, ulong messageId, string reason, long amount);
         Task<bool> TransferCurrencyAsync(ulong senderId, ulong recipientId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount);
 
         #endregion
@@ -263,6 +265,29 @@ namespace Roki.Services.Database
             return true;
         }
 
+        public async Task<bool> RemoveCurrencyAsync(UserData data, UserData botData, ulong guildId, ulong channelId, ulong messageId, string reason, long amount)
+        {
+            if (data.Currency - amount < 0)
+            {
+                return false;
+            }
+            data.Currency -= amount;
+            botData.Currency += amount;
+            
+            await Context.Transactions.AddAsync(new Transaction
+            {
+                GuildId = guildId,
+                Sender = data.UserId,
+                Recipient = Roki.BotId,
+                Amount = amount,
+                ChannelId = channelId,
+                MessageId = messageId,
+                Description = reason
+            });
+
+            return true;
+        }
+
         public async Task AddCurrencyAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount)
         {
             UserData data = await Context.UserData.AsAsyncEnumerable().SingleAsync(x => x.UserId == userId && x.GuildId == guildId);
@@ -276,6 +301,23 @@ namespace Roki.Services.Database
                 GuildId = guildId,
                 Sender = Roki.BotId,
                 Recipient = userId,
+                Amount = amount,
+                ChannelId = channelId,
+                MessageId = messageId,
+                Description = reason
+            });
+        }
+
+        public async Task AddCurrencyAsync(UserData data, UserData botData, ulong guildId, ulong channelId, ulong messageId, string reason, long amount)
+        {
+            data.Currency += amount;
+            botData.Currency -= amount;
+
+            await Context.Transactions.AddAsync(new Transaction
+            {
+                GuildId = guildId,
+                Sender = Roki.BotId,
+                Recipient = data.UserId,
                 Amount = amount,
                 ChannelId = channelId,
                 MessageId = messageId,
