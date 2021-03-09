@@ -44,7 +44,7 @@ create table guild_config
     xp_per_message        int              not null,
     xp_cd                 int              not null,
     xp_fast_cd            int              not null,
-    bf_min                int              not null,
+    bf_min                double precision not null,
     bf_multiplier         double precision not null,
     bfm_min               int              not null,
     bfm_min_guess         int              not null,

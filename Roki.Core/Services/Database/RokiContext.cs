@@ -156,7 +156,7 @@ namespace Roki.Services.Database
 
                 entity.Property(e => e.BetFlipMultiplier).HasColumnName("bf_multiplier");
 
-                entity.Property(e => e.BetFlipMMin).HasColumnName("bfm_min");
+                entity.Property(e => e.BetFlipMMinMultiplier).HasColumnName("bfm_min");
 
                 entity.Property(e => e.BetFlipMMinCorrect).HasColumnName("bfm_min_correct");
 
