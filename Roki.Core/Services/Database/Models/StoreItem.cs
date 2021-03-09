@@ -11,7 +11,7 @@ namespace Roki.Services.Database.Models
         public string Description { get; set; }
         public string Details { get; set; }
         public string Category { get; set; }
-        public int? Duration { get; set; }
+        public int Duration { get; set; }
         public int? Price { get; set; }
         public int? Quantity { get; set; }
 

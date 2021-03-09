@@ -17,7 +17,7 @@ namespace Roki.Services.Database
         public virtual DbSet<Event> Events { get; set; }
         public virtual DbSet<Guild> Guilds { get; set; }
         public virtual DbSet<GuildConfig> GuildConfigs { get; set; }
-        public virtual DbSet<InventoryItem> Inventories { get; set; }
+        public virtual DbSet<InventoryItem> Inventory { get; set; }
         public virtual DbSet<Investment> Investments { get; set; }
         public virtual DbSet<StoreItem> Items { get; set; }
         public virtual DbSet<Message> Messages { get; set; }
