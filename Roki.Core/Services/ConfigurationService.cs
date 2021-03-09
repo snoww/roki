@@ -1,7 +1,9 @@
 using System;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Discord;
+using Microsoft.EntityFrameworkCore;
 using Roki.Services.Database;
 using Roki.Services.Database.Models;
 using StackExchange.Redis;
@@ -51,7 +53,7 @@ namespace Roki.Services
                 return JsonSerializer.Deserialize<ChannelConfig>(cacheChannelConfig.ToString());
             }
 
-            ChannelConfig channelConfig = await _service.GetChannelConfigAsync(channelId);
+            ChannelConfig channelConfig = await _service.Context.ChannelConfigs.AsNoTracking().AsAsyncEnumerable().SingleOrDefaultAsync(x => x.ChannelId == channelId);
             await _cache.StringSetAsync($"config:{channelId}", JsonSerializer.Serialize(channelConfig), TimeSpan.FromDays(7));
             return channelConfig;
         }

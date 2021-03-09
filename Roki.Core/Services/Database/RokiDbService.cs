@@ -35,13 +35,13 @@ namespace Roki.Services.Database
         #region Channels
 
         Task AddChannelIfNotExistsAsync(ITextChannel channel);
-        Task<ChannelConfig> GetChannelConfigAsync(ulong channelId);
 
         #endregion
 
         #region Currency
 
         Task<long> GetUserCurrencyAsync(ulong userId, ulong guildId);
+        Task<decimal> GetUserInvestingAsync(ulong userId, ulong guildId);
         Task<bool> RemoveCurrencyAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount);
         Task AddCurrencyAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount);
         Task<bool> TransferCurrencyAsync(ulong senderId, ulong recipientId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount);
@@ -196,7 +196,7 @@ namespace Roki.Services.Database
 
         public async Task<GuildConfig> GetGuildConfigAsync(ulong guildId)
         {
-            return await Context.GuildConfigs.AsAsyncEnumerable().SingleOrDefaultAsync(x => x.GuildId == guildId);
+            return await Context.GuildConfigs.AsNoTracking().AsAsyncEnumerable().SingleOrDefaultAsync(x => x.GuildId == guildId);
         }
 
         public async Task AddChannelIfNotExistsAsync(ITextChannel channel)
@@ -227,14 +227,14 @@ namespace Roki.Services.Database
             await Context.Channels.AddAsync(dbChannel);
         }
 
-        public async Task<ChannelConfig> GetChannelConfigAsync(ulong channelId)
-        {
-            return await Context.ChannelConfigs.AsAsyncEnumerable().SingleOrDefaultAsync(x => x.ChannelId == channelId);
-        }
-
         public async Task<long> GetUserCurrencyAsync(ulong userId, ulong guildId)
         {
             return await Context.UserData.AsNoTracking().AsAsyncEnumerable().Where(x => x.UserId == userId && x.GuildId == guildId).Select(x => x.Currency).SingleAsync();
+        }
+
+        public async Task<decimal> GetUserInvestingAsync(ulong userId, ulong guildId)
+        {
+            return await Context.UserData.AsNoTracking().AsAsyncEnumerable().Where(x => x.UserId == userId && x.GuildId == guildId).Select(x => x.Investing).SingleAsync();
         }
 
         public async Task<bool> RemoveCurrencyAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount)

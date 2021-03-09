@@ -25,7 +25,7 @@ namespace Roki.Modules.Currency
             public async Task Pick()
             {
                 await Context.Message.DeleteAsync().ConfigureAwait(false);
-                long picked = await Service.PickAsync((ITextChannel) Context.Channel, Context.User).ConfigureAwait(false);
+                long picked = await Service.PickAsync((ITextChannel) Context.Channel, Context.User.Id, Context.Message.Id).ConfigureAwait(false);
 
                 if (picked > 0)
                 {
