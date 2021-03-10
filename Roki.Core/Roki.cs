@@ -8,13 +8,15 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Extensions;
 using Roki.Services;
 using Roki.Services.Database;
-using StackExchange.Redis;
+using Roki.Services.Database.Models;
 using Victoria;
+using IDatabase = StackExchange.Redis.IDatabase;
 
 namespace Roki
 {
@@ -32,14 +34,14 @@ namespace Roki
         private IServiceProvider Services { get; set; }
 
         public static Properties Properties { get; } = new();
-        public static ulong BotId { get; set; }
+        public static ulong BotId { get; private set; }
 
         public Roki()
         {
             LogSetup.SetupLogger();
 
             RokiConfig = new RokiConfig();
-            Cache = new RedisCache(RokiConfig.RedisConfig);
+            Cache = new RedisCache();
 
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
@@ -82,7 +84,7 @@ namespace Roki
             await LoginAsync(RokiConfig.Token).ConfigureAwait(false);
 
             sw.Stop();
-            Logger.Info("Roki connected in {Elapsed} ms", sw.ElapsedMilliseconds);
+            Logger.Info("Roki connected in {Elapsed} s", sw.Elapsed.TotalSeconds);
 
             Services.GetRequiredService<IStatsService>().Initialize();
             await Services.GetRequiredService<CommandHandler>().StartHandling().ConfigureAwait(false);
@@ -95,10 +97,9 @@ namespace Roki
             var sw = Stopwatch.StartNew();
 
             IServiceCollection service = new ServiceCollection()
-                .AddSingleton<IServiceScopeFactory>()
-                .AddDbContext<RokiContext>(options => options.UseNpgsql("Host=192.168.1.100;Database=roki_test;Username=roki;Password=roki-snow;"))
-                .AddSingleton<IRokiDbService, RokiDbService>()
+                .AddDbContext<RokiContext>(options => options.UseNpgsql("Host=192.168.1.100;Database=roki_test;Username=roki;Password=roki-snow;Include Error Detail=true").EnableSensitiveDataLogging())
                 .AddSingleton<IConfigurationService, ConfigurationService>()
+                .AddSingleton<ICurrencyService, CurrencyService>()
                 .AddSingleton(RokiConfig)
                 .AddSingleton(Cache)
                 .AddSingleton(Client)
@@ -113,7 +114,7 @@ namespace Roki
             LoadTypeReaders(typeof(Roki).Assembly);
 
             sw.Stop();
-            Logger.Info("All services loaded in {Elapsed} ms", sw.ElapsedMilliseconds);
+            Logger.Info("Loaded {count} services in {elapsed} ms", service.Count, sw.ElapsedMilliseconds);
         }
 
         private async Task LoginAsync(string token)
@@ -121,6 +122,7 @@ namespace Roki
             var ready = new TaskCompletionSource<bool>();
 
             Logger.Info("Logging in ...");
+            var dbSw = Stopwatch.StartNew();
             Client.Ready += UpdateDatabase;
 
             await Client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
@@ -135,17 +137,21 @@ namespace Roki
             Task UpdateDatabase()
             {
                 ready.TrySetResult(true);
+                Logger.Info("Loading database and cache");
 
                 Task _ = Task.Run(async () =>
                 {
                     using IServiceScope scope = Services.CreateScope();
-                    var service = scope.ServiceProvider.GetRequiredService<IRokiDbService>();
+                    var context = scope.ServiceProvider.GetRequiredService<RokiContext>();
+                    await using IDbContextTransaction trans = await context.Database.BeginTransactionAsync();
                     try
                     {
                         BotId = Client.CurrentUser.Id;
                         IDatabase cache = Cache.Redis.GetDatabase();
-                        Logger.Info("Loading cache");
-                        var sw = Stopwatch.StartNew();
+                        if (!await context.Users.AsQueryable().AnyAsync(x => x.Id == BotId))
+                        {
+                            await context.Users.AddAsync(new User(Client.CurrentUser.Id, Client.CurrentUser.Username, Client.CurrentUser.Discriminator, Client.CurrentUser.AvatarId));
+                        }
 
                         foreach (SocketGuild guild in Client.Guilds)
                         {
@@ -161,22 +167,30 @@ namespace Roki
                                 await cache.StringSetAsync($"color:{bot.Guild.Id}", role.Color.RawValue).ConfigureAwait(false);
                             }
 
-                            await service.AddGuildIfNotExistsAsync(guild);
-                            foreach (SocketGuildChannel channel in guild.Channels)
+                            if (!await context.Guilds.AsQueryable().AnyAsync(x => x.Id == guild.Id))
                             {
-                                if (channel is not SocketTextChannel textChannel)
+                                if (!await context.Users.AsQueryable().AnyAsync(x => x.Id == guild.OwnerId))
                                 {
-                                    continue;
+                                    await context.Users.AddAsync(new User(guild.OwnerId, guild.Owner.Username, guild.Owner.Discriminator, guild.Owner.AvatarId));
+                                    await context.SaveChangesAsync();
                                 }
 
-                                await service.AddChannelIfNotExistsAsync(textChannel);
+                                await context.Guilds.AddAsync(new Guild(guild.Id, guild.Name, guild.IconId, guild.OwnerId)
+                                {
+                                    GuildConfig = new GuildConfig()
+                                });
+                                
+                                await context.UserData.AddRangeAsync(new UserData(BotId, guild.Id), new UserData(guild.OwnerId, guild.Id));
+                                await context.SaveChangesAsync();
+                                await context.Channels.AddRangeAsync(guild.TextChannels.Select(channel => new Channel(channel.Id, guild.Id, channel.Name) { ChannelConfig = new ChannelConfig()}).ToList());
                             }
                         }
 
-                        await service.SaveChangesAsync();
+                        await context.SaveChangesAsync();
+                        await trans.CommitAsync();
 
-                        sw.Stop();
-                        Logger.Info("Cache loaded in {Elapsed} ms", sw.ElapsedMilliseconds);
+                        dbSw.Stop();
+                        Logger.Info("Finished loading database and cache in {Elapsed} s", dbSw.Elapsed.TotalSeconds);
                     }
                     catch (Exception e)
                     {

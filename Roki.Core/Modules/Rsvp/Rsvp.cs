@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -7,7 +8,7 @@ using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Rsvp.Services;
 using Roki.Services;
-using Roki.Services.Database.Maps;
+using Roki.Services.Database.Models;
 
 namespace Roki.Modules.Rsvp
 {
@@ -25,9 +26,9 @@ namespace Roki.Modules.Rsvp
         public async Task Events([Leftover] string args = null)
         {
             GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
-            var err = string.Format("`{0}events new/create`: Create a new event\n" +
-                                    "`{0}events edit`: Edits an event\n" +
-                                    "`{0}events list/ls <optional_page>`: Lists events in this server\n", guildConfig.Prefix);
+            string err = string.Format("`{0}events new/create`: Create a new event\n" +
+                                       "`{0}events edit`: Edits an event\n" +
+                                       "`{0}events list/ls <optional_page>`: Lists events in this server\n", guildConfig.Prefix);
             if (string.IsNullOrWhiteSpace(args))
             {
                 await Context.Channel.SendErrorAsync(err).ConfigureAwait(false);
@@ -44,13 +45,13 @@ namespace Roki.Modules.Rsvp
             }
             else if (args.StartsWith("list", StringComparison.OrdinalIgnoreCase) || args.Equals("ls", StringComparison.OrdinalIgnoreCase))
             {
-                var events = await Service.GetActiveGuildEvents(Context.Guild.Id).ConfigureAwait(false);
+                List<Event> events = await Service.GetActiveGuildEvents(Context.Guild.Id).ConfigureAwait(false);
                 if (events.Count == 0)
                 {
                     await Context.Channel.SendErrorAsync("No active events on this server.").ConfigureAwait(false);
                 }
                 
-                var split = args.Split();
+                string[] split = args.Split();
                 var page = 0;
                 if (split.Length > 1)
                 {
@@ -66,13 +67,13 @@ namespace Roki.Modules.Rsvp
                     }
                 }
 
-                var eventMessage = events
+                IEnumerable<string> eventMessage = events
                     .Skip(page * 9)
                     .Take(5)
                     .Select(e =>
-                        $"`{e.Id.GetHexId()}` **{e.Name}** in `{(e.StartDate - DateTimeOffset.UtcNow).ToReadableString()}` https://discordapp.com/channels/{e.GuildId}/{e.ChannelId}/{e.MessageId}");
+                        $"`{e.Id}` **{e.Name}** in `{(e.StartDate - DateTimeOffset.UtcNow).ToReadableString()}` https://discordapp.com/channels/{e.GuildId}/{e.ChannelId}/{e.MessageId}");
                 
-                var embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle("List of Events")
+                EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle("List of Events")
                     .WithDescription($"{string.Join("\n", eventMessage)}");
 
                 await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);

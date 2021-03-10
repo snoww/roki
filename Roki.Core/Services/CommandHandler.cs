@@ -81,7 +81,7 @@ namespace Roki.Services
             {
                 var sw = Stopwatch.StartNew();
                 (bool success, string error, CommandInfo info) = await ExecuteCommandAsync(new CommandContext(_client, message),
-                        message.Content.Substring(DefaultPrefix.Length), _services, MultiMatchHandling.Best)
+                        message.Content[DefaultPrefix.Length..], _services, MultiMatchHandling.Best)
                     .ConfigureAwait(false);
 
                 sw.Stop();
@@ -109,7 +109,7 @@ namespace Roki.Services
             {
                 var sw = Stopwatch.StartNew();
                 (bool success, string error, CommandInfo info) = await ExecuteCommandAsync(new CommandContext(_client, message),
-                        message.Content.Substring(prefix.Length), _services, MultiMatchHandling.Best)
+                        message.Content[prefix.Length..], _services, MultiMatchHandling.Best)
                     .ConfigureAwait(false);
 
                 sw.Stop();
@@ -208,7 +208,7 @@ namespace Roki.Services
             (CommandMatch key, ParseResult value) = successfulParses[0];
             var result = (ExecuteResult) await key.ExecuteAsync(context, value, services).ConfigureAwait(false);
 
-            if (result.Exception != null && (result.Exception is not HttpException httpException || httpException.DiscordCode != 50013))
+            if (result.Exception != null && result.Exception is not HttpException {DiscordCode: 50013})
             {
                 Logger.Error(result.Exception, "Command execute exception");
             }

@@ -5,13 +5,12 @@ using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Searches.Services;
-using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Searches
 {
     public partial class Searches
     {
-        [Group]
+        /*[Group]
         public class PokemonCommands : RokiSubmodule<PokemonService>
         {
             [RokiCommand, Usage, Description, Aliases]
@@ -148,6 +147,6 @@ namespace Roki.Modules.Searches
 
                 await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
-        }
+        }*/
     }
 }

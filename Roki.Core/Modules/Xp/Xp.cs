@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
-using MongoDB.Driver;
+using Npgsql;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Xp.Common;
@@ -23,13 +23,13 @@ namespace Roki.Modules.Xp
     {
         private readonly IConfigurationService _config;
         private readonly IHttpClientFactory _http;
-        private readonly IRokiDbService _dbService;
+        private readonly RokiContext _context;
         private readonly IDatabase _cache;
 
-        public Xp(IHttpClientFactory http, IRokiDbService dbService, IRedisCache cache, IConfigurationService config)
+        public Xp(IHttpClientFactory http, RokiContext context, IRedisCache cache, IConfigurationService config)
         {
             _http = http;
-            _dbService = dbService;
+            _context = context;
             _config = config;
             _cache = cache.Redis.GetDatabase();
         }
@@ -69,18 +69,18 @@ namespace Roki.Modules.Xp
                 }
             }
 
-            var data = await _dbService.Context.UserData.AsNoTracking()
-                .AsAsyncEnumerable()
+            var data = await _context.UserData.AsNoTracking()
+                .AsQueryable()
                 .Where(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id)
                 .Select(x => new { x.Xp, x.LastLevelUp})
                 .SingleAsync();
             
             var xp = new XpLevel(data.Xp);
-            int rank = await _dbService.GetUserXpRankAsync(Context.User.Id, Context.Guild.Id);
-            bool doubleXp = await _dbService.Context.Subscriptions.AsNoTracking()
+            int rank = await GetUserXpRank(Context.User.Id, Context.Guild.Id);
+            bool doubleXp = await _context.Subscriptions.AsNoTracking()
                 .Where(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id && x.Item.Details == "doublexp")
                 .AnyAsync();
-            bool fastXp = await _dbService.Context.Subscriptions.AsNoTracking()
+            bool fastXp = await _context.Subscriptions.AsNoTracking()
                 .Where(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id && x.Item.Details == "fastxp")
                 .AnyAsync();
 
@@ -98,10 +98,10 @@ namespace Roki.Modules.Xp
             if (page > 0)
                 page -= 1;
 
-            var list = await _dbService.Context.UserData.AsNoTracking()
+            var list = await _context.UserData.AsNoTracking()
                 .Include(x => x.User)
-                .Where(x => x.GuildId == Context.Guild.Id)
-                .OrderByDescending(x => x.Currency)
+                .Where(x => x.GuildId == Context.Guild.Id && x.UserId != Roki.BotId)
+                .OrderByDescending(x => x.Xp)
                 .Skip(page * 9)
                 .Take(9)
                 .Select(x => new
@@ -166,16 +166,16 @@ namespace Roki.Modules.Xp
             // todo limit notif locations in guild config
             if (!isAdmin)
             {
-                UserData data = await _dbService.Context.UserData.AsAsyncEnumerable().SingleAsync(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id);
+                UserData data = await _context.UserData.AsQueryable().SingleAsync(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id);
                 data.NotificationLocation = location;
             }
             else
             {
-                UserData data = await _dbService.Context.UserData.AsAsyncEnumerable().SingleAsync(x => x.UserId == user.Id && x.GuildId == Context.Guild.Id);
+                UserData data = await _context.UserData.AsQueryable().SingleAsync(x => x.UserId == user.Id && x.GuildId == Context.Guild.Id);
                 data.NotificationLocation = location;
             }
 
-            await _dbService.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             
             await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                     .WithDescription("Successfully changed xp notification preferences."))
@@ -196,7 +196,7 @@ namespace Roki.Modules.Xp
                 page--;
             }
 
-            List<XpReward> rewards = await _dbService.Context.XpRewards.AsAsyncEnumerable().Where(x => x.GuildId == Context.Guild.Id).OrderByDescending(x => x.Level).ToListAsync();
+            List<XpReward> rewards = await _context.XpRewards.AsQueryable().Where(x => x.GuildId == Context.Guild.Id).OrderByDescending(x => x.Level).ToListAsync();
             if (rewards.Count == 0)
             {
                 await Context.Channel.SendErrorAsync("There are currently no XP rewards setup for this server.").ConfigureAwait(false);
@@ -224,6 +224,19 @@ namespace Roki.Modules.Xp
                     : $"Level `{r.Level}` - <@&{r.Description}>")));
 
             await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
+        }
+
+        private async Task<int> GetUserXpRank(ulong userId, ulong guildId)
+        {
+            var conn = (NpgsqlConnection) _context.Database.GetDbConnection();
+            await conn.OpenAsync();
+            await using var cmd = new NpgsqlCommand("select r.rank from (select d.uid, d.xp, rank() over (order by d.xp desc) rank from user_data d where d.guild_id = (@guild_id)) r where r.uid = (@uid)", conn);
+            cmd.Parameters.AddWithValue("guild_id", (long) guildId);
+            cmd.Parameters.AddWithValue("uid", (long) userId);
+            await cmd.PrepareAsync();
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
+            await reader.ReadAsync();
+            return reader.GetInt32(0);
         }
     }
 }

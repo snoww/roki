@@ -14,13 +14,13 @@ namespace Roki.Modules.Gambling
     [RequireContext(ContextType.Guild)]
     public partial class Gambling : RokiTopLevelModule
     {
-        private readonly IRokiDbService _dbService;
+        private readonly ICurrencyService _currency;
         private readonly IConfigurationService _config;
         private readonly Random _rng = new();
 
-        public Gambling(IRokiDbService dbService, IConfigurationService config)
+        public Gambling(ICurrencyService currency, IConfigurationService config)
         {
-            _dbService = dbService;
+            _currency = currency;
             _config = config;
         }
 
@@ -34,14 +34,12 @@ namespace Roki.Modules.Gambling
                 return;
             }
             
-            UserData userData = await _dbService.Context.UserData.AsAsyncEnumerable().SingleAsync(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id);
-            UserData botData = await _dbService.Context.UserData.AsAsyncEnumerable().SingleAsync(x => x.UserId == Roki.BotId && x.GuildId == Context.Guild.Id);
 
-            bool removed = await _dbService.RemoveCurrencyAsync(userData, botData, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, "BetRoll Entry", amount).ConfigureAwait(false);
+            bool removed = await _currency.RemoveCurrencyAsync(Context.User.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, "BetRoll Entry", amount).ConfigureAwait(false);
             if (!removed)
             {
                 await Context.Channel.SendErrorAsync($"Not enough {guildConfig.CurrencyIcon}\n" +
-                                                     $"You have `{userData.Currency:N0}`")
+                                                     $"You have `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}`")
                     .ConfigureAwait(false);
                 return;
             }
@@ -51,7 +49,7 @@ namespace Roki.Modules.Gambling
             if (roll < 70)
             {
                 await Context.Channel.SendErrorAsync($"{rollStr}\nBetter luck next time.\n" +
-                                                     $"New Balance: `{userData.Currency:N0}` {guildConfig.CurrencyIcon}")
+                                                     $"New Balance: `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}")
                     .ConfigureAwait(false);
             }
             else
@@ -70,14 +68,12 @@ namespace Roki.Modules.Gambling
                     payout = amount * guildConfig.BetRoll100Multiplier;
                 }
 
-                await _dbService.AddCurrencyAsync(userData, botData, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, "BetRoll Payout", (long) Math.Ceiling(payout)).ConfigureAwait(false);
+                await _currency.AddCurrencyAsync(Context.User.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, "BetRoll Payout", (long) Math.Ceiling(payout)).ConfigureAwait(false);
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                         .WithDescription($"{rollStr}\nCongratulations, you won `{payout:N0}` {guildConfig.CurrencyIcon}\n" +
-                                         $"New Balance: `{userData.Currency:N0}` {guildConfig.CurrencyIcon}"))
+                                         $"New Balance: `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}"))
                     .ConfigureAwait(false);
             }
-
-            await _dbService.SaveChangesAsync();
         }
     }
 }

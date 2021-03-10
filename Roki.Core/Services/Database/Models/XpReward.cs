@@ -5,7 +5,6 @@
         public int Id { get; set; }
         public ulong GuildId { get; set; }
         public int Level { get; set; }
-        public string Type { get; set; }
         public string Description { get; set; }
         
         // will be the delimited by colons

@@ -11,8 +11,7 @@ using Discord.WebSocket;
 using NLog;
 using Roki.Extensions;
 using Roki.Services;
-using Roki.Services.Database.Maps;
-using static System.Int32;
+using Roki.Services.Database.Models;
 
 namespace Roki.Modules.Games.Common
 {
@@ -20,11 +19,11 @@ namespace Roki.Modules.Games.Common
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly ITextChannel _channel;
+        private readonly ICurrencyService _currency;
         private readonly DiscordSocketClient _client;
         private readonly GuildConfig _config;
         private readonly Dictionary<string, List<JClue>> _clues;
         private readonly ConcurrentBag<bool> _confirmed = new();
-        private readonly ICurrencyService _currency;
         private readonly JClue _finalJeopardy;
         private readonly Dictionary<ulong, string> _finalJeopardyAnswers = new();
         private readonly SemaphoreSlim _guess = new(1, 1);
@@ -166,7 +165,7 @@ namespace Roki.Modules.Games.Common
             if (!Users.Any()) return;
             foreach ((IUser user, int winnings) in Users)
             {
-                await _currency.AddAsync(user, _client.CurrentUser,"Jeopardy Winnings", winnings, _guild.Id, _channel.Id, msg.Id)
+                await _currency.AddCurrencyAsync(user.Id, _guild.Id, _channel.Id, msg.Id,"Jeopardy Winnings", winnings)
                     .ConfigureAwait(false);
             }
         }
@@ -201,9 +200,9 @@ namespace Roki.Modules.Games.Common
             if (msg == null) return CategoryStatus.NoResponse;
 
             string message = msg.Content.SanitizeStringFull().ToLowerInvariant();
-            string category = message.Substring(0, message.LastIndexOf("for", StringComparison.OrdinalIgnoreCase));
-            string price = message.Substring(message.LastIndexOf("for", StringComparison.OrdinalIgnoreCase));
-            if (!TryParse(new string(price.Where(char.IsDigit).ToArray()), out int amount))
+            string category = message[..message.LastIndexOf("for", StringComparison.OrdinalIgnoreCase)];
+            string price = message[message.LastIndexOf("for", StringComparison.OrdinalIgnoreCase)..];
+            if (!int.TryParse(new string(price.Where(char.IsDigit).ToArray()), out int amount))
             {
                 // shouldn't ever reach here, since message is retrieved from regex pattern which needs a number
                 return CategoryStatus.WrongAmount;
@@ -360,7 +359,7 @@ namespace Roki.Modules.Games.Common
                             return;
                         }
 
-                        TryParse(new string(response.Content.Where(char.IsDigit).ToArray()), out wager);
+                        int.TryParse(new string(response.Content.Where(char.IsDigit).ToArray()), out wager);
                         if (wager <= amount) continue;
                         wager = -1;
                         await dm.SendErrorAsync($"You cannot wager more than your score.\nThe maximum you can wager is: `${amount:N0}`")
@@ -539,7 +538,7 @@ namespace Roki.Modules.Games.Common
             WrongAmount = -1,
             WrongCategory = -2,
             UnavailableClue = -3,
-            NoResponse = MinValue
+            NoResponse = int.MinValue
         }
     }
 }

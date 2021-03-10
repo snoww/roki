@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Discord;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Roki.Services.Database;
 using Roki.Services.Database.Models;
 using StackExchange.Redis;
@@ -23,12 +24,12 @@ namespace Roki.Services
     
     public class ConfigurationService : IConfigurationService
     {
-        private readonly IRokiDbService _service;
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly IDatabase _cache;
         
-        public ConfigurationService(IRokiDbService service, IRedisCache cache)
+        public ConfigurationService(IServiceScopeFactory scopeFactory, IRedisCache cache)
         {
-            _service = service;
+            _scopeFactory = scopeFactory;
             _cache = cache.Redis.GetDatabase();
         }
 
@@ -40,8 +41,11 @@ namespace Roki.Services
                 return JsonSerializer.Deserialize<GuildConfig>(cacheGuildConfig.ToString());
             }
 
-            GuildConfig guildConfig = await _service.GetGuildConfigAsync(guildId);
-            await _cache.StringSetAsync($"config:{guildId}", JsonSerializer.Serialize(guildConfig), TimeSpan.FromDays(7));
+            using IServiceScope scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<RokiContext>();
+
+            GuildConfig guildConfig = await context.GuildConfigs.AsNoTracking().SingleOrDefaultAsync(x => x.GuildId == guildId);
+            await _cache.StringSetAsync($"config:{guildId}", JsonSerializer.Serialize(guildConfig), TimeSpan.FromDays(1));
             return guildConfig;
         } 
         
@@ -52,9 +56,12 @@ namespace Roki.Services
             {
                 return JsonSerializer.Deserialize<ChannelConfig>(cacheChannelConfig.ToString());
             }
+            
+            using IServiceScope scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<RokiContext>();
 
-            ChannelConfig channelConfig = await _service.Context.ChannelConfigs.AsNoTracking().AsAsyncEnumerable().SingleOrDefaultAsync(x => x.ChannelId == channelId);
-            await _cache.StringSetAsync($"config:{channelId}", JsonSerializer.Serialize(channelConfig), TimeSpan.FromDays(7));
+            ChannelConfig channelConfig = await context.ChannelConfigs.AsNoTracking().SingleOrDefaultAsync(x => x.ChannelId == channelId);
+            await _cache.StringSetAsync($"config:{channelId}", JsonSerializer.Serialize(channelConfig), TimeSpan.FromDays(1));
             return channelConfig;
         }
 
@@ -67,7 +74,7 @@ namespace Roki.Services
             }
 
             GuildConfig guildConfig = await GetGuildConfigAsync(guildId);
-            await _cache.StringSetAsync($"config:{guildId}:prefix", guildConfig.Prefix, TimeSpan.FromDays(7));
+            await _cache.StringSetAsync($"config:{guildId}:prefix", guildConfig.Prefix, TimeSpan.FromDays(1));
             return guildConfig.Prefix;
         }
 
@@ -80,7 +87,7 @@ namespace Roki.Services
             }
 
             ChannelConfig channelConfig = await GetChannelConfigAsync(channelId);
-            await _cache.StringSetAsync($"config:{channelId}:logging", channelConfig.Logging, TimeSpan.FromDays(7));
+            await _cache.StringSetAsync($"config:{channelId}:logging", channelConfig.Logging, TimeSpan.FromDays(1));
             return channelConfig.Logging;
         }
 
@@ -93,7 +100,7 @@ namespace Roki.Services
             }
 
             ChannelConfig channelConfig = await GetChannelConfigAsync(channelId);
-            await _cache.StringSetAsync($"config:{channelId}:currency", channelConfig.CurrencyGen, TimeSpan.FromDays(7));
+            await _cache.StringSetAsync($"config:{channelId}:currency", channelConfig.CurrencyGen, TimeSpan.FromDays(1));
             return channelConfig.CurrencyGen;
         }
 
@@ -106,8 +113,8 @@ namespace Roki.Services
             }
 
             ChannelConfig channelConfig = await GetChannelConfigAsync(channelId);
-            await _cache.StringSetAsync($"config:{channelId}:xp", channelConfig.Xp, TimeSpan.FromDays(7));
-            return channelConfig.Xp;
+            await _cache.StringSetAsync($"config:{channelId}:xp", channelConfig.XpGain, TimeSpan.FromDays(1));
+            return channelConfig.XpGain;
         }
     }
 }

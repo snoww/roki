@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
-using MongoDB.Bson;
-using MongoDB.Driver;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Services;
@@ -21,12 +19,12 @@ namespace Roki.Modules.Utility
         [RequireContext(ContextType.Guild)]
         public class QuoteCommands : RokiSubmodule
         {
-            private readonly IRokiDbService _dbService;
+            private readonly RokiContext _context;
             private readonly IConfigurationService _config;
 
-            public QuoteCommands(IRokiDbService dbService, IConfigurationService config)
+            public QuoteCommands(RokiContext context, IConfigurationService config)
             {
-                _dbService = dbService;
+                _context = context;
                 _config = config;
             }
 
@@ -39,23 +37,31 @@ namespace Roki.Modules.Utility
                     page = 0;
                 }
 
-                List<Quote> quotes = await _dbService.Context.Quotes.AsAsyncEnumerable()
+                List<Quote> quotes = await _context.Quotes.AsQueryable()
                     .Where(x => x.GuildId == Context.Guild.Id)
                     .OrderBy(x => x.Id)
                     .Skip(page * 15)
                     .Take(15)
                     .ToListAsync();
-                
+
                 if (quotes.Count > 0)
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithTitle("Quote List")
-                            .WithDescription(string.Join("\n", quotes.Select(x => $"`{x.Id}` **{x.Keyword}** by {Context.Guild.GetUserAsync(x.AuthorId).Result}"))))
+                            .WithDescription(string.Join("\n", quotes.Select(x => $"`{x.Id}` **{x.Keyword}** by {Context.Guild.GetUserAsync(x.AuthorId).Result}")))
+                            .WithFooter($"Page {page + 1}"))
+                        .ConfigureAwait(false);
+                }
+                else if (quotes.Count == 0 && page == 0)
+                {
+                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
+                            .WithTitle("Quote List")
+                            .WithDescription($"There are no quotes on this server yet.\nAdd quotes using `{await _config.GetGuildPrefix(Context.Guild.Id)}..`\nUse quotes using `{await _config.GetGuildPrefix(Context.Guild.Id)}.`"))
                         .ConfigureAwait(false);
                 }
                 else
                 {
-                    await Context.Channel.SendErrorAsync("No quotes found on that page.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync($"No quotes found on page {page + 1}.").ConfigureAwait(false);
                 }
             }
             
@@ -63,7 +69,7 @@ namespace Roki.Modules.Utility
             [RokiCommand, Description, Usage, Aliases]
             public async Task ShowQuote(string keyword)
             {
-                string quote = await _dbService.Context.Quotes.AsAsyncEnumerable()
+                string quote = await _context.Quotes.AsQueryable()
                     .Where(x => x.Keyword == keyword.ToUpper() && x.GuildId == Context.Guild.Id)
                     .OrderBy(_ => Guid.NewGuid())
                     .Take(1)
@@ -81,7 +87,7 @@ namespace Roki.Modules.Utility
             [RokiCommand, Description, Usage, Aliases]
             public async Task QuoteId(long id)
             {
-                string quote = await _dbService.Context.Quotes.AsAsyncEnumerable()
+                string quote = await _context.Quotes.AsQueryable()
                     .Where(x => x.Id == id && x.GuildId == Context.Guild.Id)
                     .Select(x => x.Text)
                     .SingleOrDefaultAsync();
@@ -114,8 +120,8 @@ namespace Roki.Modules.Utility
                     Text = text
                 };
 
-                await _dbService.Context.Quotes.AddAsync(quote);
-                await _dbService.SaveChangesAsync();
+                await _context.Quotes.AddAsync(quote);
+                await _context.SaveChangesAsync();
 
                 await Context.Channel.SendMessageAsync($"Quote `{quote.Id}` **{keyword}** added.").ConfigureAwait(false);
             }
@@ -128,17 +134,17 @@ namespace Roki.Modules.Utility
                 Quote quote;
                 if (isAdmin)
                 {
-                     quote = await _dbService.Context.Quotes.AsAsyncEnumerable().SingleOrDefaultAsync(x => x.Id == id && x.GuildId == Context.Guild.Id);
+                     quote = await _context.Quotes.AsQueryable().SingleOrDefaultAsync(x => x.Id == id && x.GuildId == Context.Guild.Id);
                 }
                 else
                 {
-                    quote = await _dbService.Context.Quotes.AsAsyncEnumerable().SingleOrDefaultAsync(x => x.Id == id && x.GuildId == Context.Guild.Id && x.AuthorId == Context.User.Id);
+                    quote = await _context.Quotes.AsQueryable().SingleOrDefaultAsync(x => x.Id == id && x.GuildId == Context.Guild.Id && x.AuthorId == Context.User.Id);
                 }
 
                 if (quote != null)
                 {
-                    _dbService.Context.Quotes.Remove(quote);
-                    await _dbService.SaveChangesAsync();
+                    _context.Quotes.Remove(quote);
+                    await _context.SaveChangesAsync();
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithDescription($"Quote `{id}` deleted"))
                         .ConfigureAwait(false);
@@ -157,11 +163,11 @@ namespace Roki.Modules.Utility
                 Quote quote;
                 if (isAdmin)
                 {
-                    quote = await _dbService.Context.Quotes.AsAsyncEnumerable().SingleOrDefaultAsync(x => x.Keyword == keyword.ToUpper() && x.GuildId == Context.Guild.Id);
+                    quote = await _context.Quotes.AsQueryable().SingleOrDefaultAsync(x => x.Keyword == keyword.ToUpper() && x.GuildId == Context.Guild.Id);
                 }
                 else
                 {
-                    quote = await _dbService.Context.Quotes.AsAsyncEnumerable().SingleOrDefaultAsync(x => x.Keyword == keyword.ToUpper() && x.GuildId == Context.Guild.Id && x.AuthorId == Context.User.Id);
+                    quote = await _context.Quotes.AsQueryable().SingleOrDefaultAsync(x => x.Keyword == keyword.ToUpper() && x.GuildId == Context.Guild.Id && x.AuthorId == Context.User.Id);
                 }
 
                 if (quote != null)
@@ -184,7 +190,7 @@ namespace Roki.Modules.Utility
                     return;
                 }
 
-                List<Quote> quotes = await _dbService.Context.Quotes.AsAsyncEnumerable()
+                List<Quote> quotes = await _context.Quotes.AsQueryable()
                     .Where(x => x.GuildId == Context.Guild.Id && 
                         (EF.Functions.ILike(x.Keyword, $"%{query}%") 
                          || EF.Functions.ILike(x.Text, $"%{query}%")))

@@ -11,5 +11,12 @@ namespace Roki.Services.Database.Models
         public DateTime? DeletedDate { get; set; }
 
         public virtual ChannelConfig ChannelConfig { get; set; }
+
+        public Channel(ulong id, ulong guildId, string name)
+        {
+            Id = id;
+            GuildId = guildId;
+            Name = name;
+        }
     }
 }
