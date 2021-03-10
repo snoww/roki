@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -11,9 +12,9 @@ using Discord;
 using Discord.WebSocket;
 using NLog;
 using Roki.Extensions;
-using Roki.Modules.Games.Services;
 using Roki.Services;
-using Roki.Services.Database.Maps;
+using Roki.Services.Database;
+using Roki.Services.Database.Models;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.PixelFormats;
@@ -42,9 +43,9 @@ namespace Roki.Modules.Games.Common
         private readonly IDatabase _cache;
 
         private readonly ITextChannel _channel;
+        private readonly ICurrencyService _currency;
         private readonly DiscordSocketClient _client;
         private readonly GuildConfig _config;
-        private readonly ICurrencyService _currency;
 
         private readonly int _generation;
 
@@ -66,22 +67,20 @@ namespace Roki.Modules.Games.Common
             {TimesTen, 0}
         };
 
-        private readonly Dictionary<IUser, PlayerBet> _scores = new();
-        private readonly ShowdownService _service;
+        private readonly ConcurrentDictionary<IUser, PlayerBet> _scores = new();
         private IUserMessage _game;
 
         private Dictionary<string, List<string>> _teams;
         private Bet? _winner;
 
-        public Showdown(ICurrencyService currency, DiscordSocketClient client, GuildConfig config, ITextChannel channel, int generation, ShowdownService service, IRedisCache cache)
+        public Showdown(ICurrencyService currency, DiscordSocketClient client, GuildConfig config, ITextChannel channel, int generation, IRedisCache cache)
         {
-            _currency = currency;
             _cache = cache.Redis.GetDatabase();
+            _currency = currency;
             _client = client;
             _config = config;
             _channel = channel;
             _generation = generation;
-            _service = service;
             GameId = $"{_generation}{Guid.NewGuid().ToSubGuid()}";
             _player1Id = Guid.NewGuid().ToSubGuid();
             _player2Id = Guid.NewGuid().ToSubGuid();
@@ -144,14 +143,7 @@ namespace Roki.Modules.Games.Common
                 await _game.RemoveAllReactionsAsync().ConfigureAwait(false);
                 return;
             }
-
-            foreach ((IUser key, PlayerBet value) in _scores)
-            {
-                await _currency
-                    .RemoveAsync(key, _client.CurrentUser,"BetShowdown Entry", value.Amount * value.Multiple, _channel.Guild.Id, _channel.Id, _game.Id)
-                    .ConfigureAwait(false);
-            }
-
+            
             // block until game is finished
             var counter = 0;
             while (_winner == null)
@@ -168,23 +160,32 @@ namespace Roki.Modules.Games.Common
 
             var winners = new StringBuilder();
             var losers = new StringBuilder();
-
-            // doing this in two loops instead of one to create two transactions (bet entry and bet payout)
+            
             foreach ((IUser key, PlayerBet value) in _scores)
             {
-                long before = await GetCurrency(key) + value.Amount * value.Multiple;
-                if (_winner != value.Player)
+                if (await _currency.RemoveCurrencyAsync(key.Id, _channel.Guild.Id, _channel.Id, _game.Id, "BetShowdown Entry", value.Amount * value.Multiple))
                 {
-                    losers.AppendLine($"{key.Username} `{before:N0} > {await GetCurrency(key):N0}`");
-                    continue;
+                    long before = await _currency.GetCurrencyAsync(key.Id, _config.GuildId) + value.Amount * value.Multiple;
+                    if (_winner != value.Player)
+                    {
+                        losers.AppendLine($"{key.Username} `{before:N0} > {_currency.GetCurrencyAsync(key.Id, _config.GuildId):N0}`");
+                    }
+                    else
+                    {
+                        long won = value.Amount * value.Multiple * 2;
+                        await _currency.AddCurrencyAsync(key.Id, _channel.Guild.Id, _channel.Id, _game.Id, "BetShowdown Payout", won).ConfigureAwait(false);
+                        winners.AppendLine($"{key.Username} won `{won:N0}` {_config.CurrencyIcon}\n\t`{before:N0} > {await _currency.GetCurrencyAsync(key.Id, _config.GuildId):N0}`");
+                    }
                 }
-
-                long won = value.Amount * value.Multiple * 2;
-                await _currency.AddAsync(key, _client.CurrentUser,"BetShowdown Payout", won, _channel.Guild.Id, _channel.Id, _game.Id).ConfigureAwait(false);
-                winners.AppendLine($"{key.Username} won `{won:N0}` {_config.CurrencyIcon}\n\t`{before:N0} > {await GetCurrency(key):N0}`");
+                else
+                {
+                    losers.AppendLine($"{key.Username} Not enough {_config.CurrencyIcon} for bet.");
+                }
             }
 
+
             EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(_channel.GuildId);
+            
             if (winners.Length > 1)
             {
                 embed.WithDescription($"{_winner} has won the battle!\nCongratulations!\n{winners}\n");
@@ -229,11 +230,11 @@ namespace Roki.Modules.Games.Common
                     {
                         if (Equals(reaction.Emote, Player1))
                         {
-                            _scores.Add(user, new PlayerBet {Player = Bet.P1, Amount = 0});
+                            _scores.TryAdd(user, new PlayerBet {Player = Bet.P1, Amount = 0});
                         }
                         else if (Equals(reaction.Emote, Player2))
                         {
-                            _scores.Add(user, new PlayerBet {Player = Bet.P2, Amount = 0});
+                            _scores.TryAdd(user, new PlayerBet {Player = Bet.P2, Amount = 0});
                         }
                         else
                         {
@@ -265,7 +266,7 @@ namespace Roki.Modules.Games.Common
                     // If user exists in dictionary and reacted with any other emote in the reactionMap
                     if (_reactionMap.ContainsKey(reaction.Emote))
                     {
-                        long currency = await GetCurrency(user);
+                        long currency = await _currency.GetCurrencyAsync(user.Id, _config.GuildId);
                         if (reaction.Emote.Equals(AllIn))
                         {
                             _scores[user].Amount = currency;
@@ -551,10 +552,10 @@ namespace Roki.Modules.Games.Common
             return stream;
         }
 
-        private async Task<long> GetCurrency(IUser user)
-        {
-            return await _currency.GetCurrency(user, _channel.GuildId);
-        }
+        // private async Task<long> GetCurrency(IUser user)
+        // {
+        //     return await _currency.GetCurrency(user, _channel.GuildId);
+        // }
 
         private enum Bet
         {

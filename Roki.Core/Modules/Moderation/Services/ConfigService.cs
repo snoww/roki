@@ -1,11 +1,10 @@
 using System;
 using System.Globalization;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text;
 using Discord;
 using Roki.Services;
-using Roki.Services.Database.Maps;
+using Roki.Services.Database.Models;
 
 namespace Roki.Modules.Moderation.Services
 {
@@ -21,10 +20,10 @@ namespace Roki.Modules.Moderation.Services
                 configString.Append("```");
                 configString.Append("Prefix=").Append('"').Append(guildConfig.Prefix).AppendLine("\"");
                 configString.Append("Logging=").AppendLine(guildConfig.Logging.ToString());
-                configString.Append("CurrencyGeneration=").AppendLine(guildConfig.CurrencyGeneration.ToString());
+                configString.Append("CurrencyGeneration=").AppendLine(guildConfig.CurrencyGen.ToString());
                 configString.Append("XpGain=").AppendLine(guildConfig.XpGain.ToString());
-                configString.Append("Modules=").AppendLine(string.Join(";", guildConfig.Modules.Select(x => x.Key + "=" + x.Value)));
-                configString.Append("Commands=").AppendLine(string.Join(";", guildConfig.Commands.Select(x => x.Key + "=" + x.Value)));
+                // configString.Append("Modules=").AppendLine(string.Join(";", guildConfig.Modules.Select(x => x.Key + "=" + x.Value)));
+                // configString.Append("Commands=").AppendLine(string.Join(";", guildConfig.Commands.Select(x => x.Key + "=" + x.Value)));
                 configString.AppendLine("```");
                 builder.AddField(ConfigCategory.Settings.ToString(), configString.ToString());
                 configString.Clear();
@@ -69,7 +68,7 @@ namespace Roki.Modules.Moderation.Services
             if (category.HasFlag(ConfigCategory.BetDie))
             {
                 configString.Append("```");
-                configString.Append("BetDieMin=").AppendLine(guildConfig.BetDieMin.ToString(CultureInfo.InvariantCulture));
+                configString.Append("BetDieMin=").AppendLine(guildConfig.BetDiceMin.ToString(CultureInfo.InvariantCulture));
                 configString.AppendLine("```");
                 builder.AddField(ConfigCategory.BetDie.ToString(), configString.ToString());
                 configString.Clear();
@@ -110,10 +109,10 @@ namespace Roki.Modules.Moderation.Services
             var configString = new StringBuilder();
             configString.Append("```");
             configString.Append("Logging=").AppendLine(channelConfig.Logging.ToString());
-            configString.Append("CurrencyGeneration=").AppendLine(channelConfig.CurrencyGeneration.ToString());
+            configString.Append("CurrencyGeneration=").AppendLine(channelConfig.CurrencyGen.ToString());
             configString.Append("XpGain=").AppendLine(channelConfig.XpGain.ToString());
-            configString.Append("Modules=").AppendLine(string.Join(";", channelConfig.Modules.Select(x => x.Key + "=" + x.Value)));
-            configString.Append("Commands=").AppendLine(string.Join(";", channelConfig.Commands.Select(x => x.Key + "=" + x.Value)));
+            // configString.Append("Modules=").AppendLine(string.Join(";", channelConfig.Modules.Select(x => x.Key + "=" + x.Value)));
+            // configString.Append("Commands=").AppendLine(string.Join(";", channelConfig.Commands.Select(x => x.Key + "=" + x.Value)));
             configString.AppendLine("```");
 
             return new EmbedBuilder().AddField(ConfigCategory.Settings.ToString(), configString.ToString());

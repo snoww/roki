@@ -7,10 +7,8 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.EntityFrameworkCore;
 using Roki.Extensions;
 using Roki.Services;
-using Roki.Services.Database;
 using Roki.Services.Database.Models;
 using StackExchange.Redis;
 
@@ -19,15 +17,15 @@ namespace Roki.Modules.Currency.Services
     public class PickDropService : IRokiService
     {
         private readonly IDatabase _cache;
-        private readonly IRokiDbService _dbService;
+        private readonly ICurrencyService _currency;
         private readonly IConfigurationService _config;
         private readonly SemaphoreSlim _pickLock = new(1, 1);
         private readonly Random _rng = new();
 
 
-        public PickDropService(CommandHandler command, IRedisCache cache, IRokiDbService dbService, IConfigurationService config)
+        public PickDropService(CommandHandler command, IRedisCache cache, ICurrencyService currency, IConfigurationService config)
         {
-            _dbService = dbService;
+            _currency = currency;
             _config = config;
             _cache = cache.Redis.GetDatabase();
             command.OnMessageNoTrigger += CurrencyGeneration;
@@ -108,20 +106,8 @@ namespace Roki.Modules.Currency.Services
 
                 var amount = (long) rawAmount;
 
-                UserData data = await _dbService.Context.UserData.AsAsyncEnumerable().SingleAsync(x => x.UserId == userId && x.GuildId == channel.Guild.Id);
-                data.Currency += amount;
+                await _currency.AddCurrencyAsync(userId, channel.Guild.Id, channel.Id, messageId, "Picked currency", amount);
                 
-                await _dbService.Context.Transactions.AddAsync(new Transaction
-                {
-                    GuildId = channel.Guild.Id,
-                    Sender = userId,
-                    Recipient = Roki.BotId,
-                    Amount = amount,
-                    ChannelId = channel.Id,
-                    MessageId = messageId,
-                    Description = "Picked currency"
-                });
-
                 try
                 {
                     List<ulong> ids = ((string) messages).Split(',')
@@ -137,7 +123,6 @@ namespace Roki.Modules.Currency.Services
                 }
                 finally
                 {
-                    await _dbService.SaveChangesAsync();
                     _cache.KeyDelete($"gen:{channel.Id}");
                     _cache.KeyDelete($"gen:{channel.Id}");
                 }
@@ -152,14 +137,14 @@ namespace Roki.Modules.Currency.Services
 
         public async Task<bool> DropAsync(ICommandContext ctx, long amount)
         {
-            UserData data = await _dbService.Context.UserData.AsAsyncEnumerable().SingleAsync(x => x.UserId == ctx.User.Id && x.GuildId == ctx.Guild.Id);
-            if (data.Currency < amount)
+            long balance = await _currency.GetCurrencyAsync(ctx.User.Id, ctx.Guild.Id);
+            if (balance < amount)
             {
                 return false;
             }
 
+            await _currency.RemoveCurrencyAsync(ctx.User.Id, ctx.Guild.Id, ctx.Channel.Id, ctx.Message.Id, "Dropped currency", amount);
             await _cache.StringIncrementAsync($"gen:{ctx.Channel.Id}", amount).ConfigureAwait(false);
-            data.Currency -= amount;
 
             GuildConfig guildConfig = await _config.GetGuildConfigAsync(ctx.Guild.Id);
 
@@ -168,19 +153,7 @@ namespace Roki.Modules.Currency.Services
                     .WithFooter($"Use {guildConfig.Prefix}pick to pick it up"))
                 .ConfigureAwait(false);
             
-            await _dbService.Context.Transactions.AddAsync(new Transaction
-            {
-                GuildId = ctx.Guild.Id,
-                Sender = ctx.User.Id,
-                Recipient = Roki.BotId,
-                Amount = amount,
-                ChannelId = ctx.Channel.Id,
-                MessageId = ctx.Message.Id,
-                Description = "Dropped currency"
-            });
-
             await _cache.StringAppendAsync($"gen:log:{ctx.Channel.Id}", $"{msg.Id},").ConfigureAwait(false);
-            await _dbService.SaveChangesAsync();
             return true;
         }
     }

@@ -11,7 +11,7 @@ using Discord.WebSocket;
 using Roki.Extensions;
 using Roki.Modules.Music.Extensions;
 using Roki.Services;
-using Roki.Services.Database.Maps;
+using Roki.Services.Database.Models;
 using Victoria;
 using Victoria.Enums;
 using Victoria.EventArgs;

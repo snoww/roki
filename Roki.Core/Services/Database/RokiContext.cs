@@ -7,9 +7,8 @@ namespace Roki.Services.Database
     {
         private readonly string _connectionString;
 
-        public RokiContext(string connectionString)
+        public RokiContext(DbContextOptions options) : base(options)
         {
-            _connectionString = connectionString;
         }
 
         public virtual DbSet<Channel> Channels { get; set; }
@@ -28,14 +27,6 @@ namespace Roki.Services.Database
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<UserData> UserData { get; set; }
         public virtual DbSet<XpReward> XpRewards { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseNpgsql(_connectionString);
-            }
-        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -73,7 +64,7 @@ namespace Roki.Services.Database
 
                 entity.Property(e => e.Logging).HasColumnName("logging");
 
-                entity.Property(e => e.Xp).HasColumnName("xp");
+                entity.Property(e => e.XpGain).HasColumnName("xp");
 
                 entity.HasOne(d => d.Channel)
                     .WithOne(p => p.ChannelConfig)
@@ -89,8 +80,6 @@ namespace Roki.Services.Database
                 entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.ChannelId).HasColumnName("channel_id");
-
-                entity.Property(e => e.Deleted).HasColumnName("deleted");
 
                 entity.Property(e => e.Description).HasColumnName("description");
 
@@ -150,7 +139,7 @@ namespace Roki.Services.Database
                     .ValueGeneratedNever()
                     .HasColumnName("guild_id");
 
-                entity.Property(e => e.BetDieMin).HasColumnName("bd_min");
+                entity.Property(e => e.BetDiceMin).HasColumnName("bd_min");
 
                 entity.Property(e => e.BetFlipMin).HasColumnName("bf_min");
 
@@ -172,7 +161,7 @@ namespace Roki.Services.Database
 
                 entity.Property(e => e.BetRollMin).HasColumnName("br_min");
 
-                entity.Property(e => e.Currency).HasColumnName("currency");
+                entity.Property(e => e.CurrencyGen).HasColumnName("currency");
 
                 entity.Property(e => e.CurrencyGenerationCooldown).HasColumnName("currency_cd");
 
@@ -212,7 +201,7 @@ namespace Roki.Services.Database
 
                 entity.Property(e => e.TriviaMinCorrect).HasColumnName("trivia_min_correct");
 
-                entity.Property(e => e.Xp).HasColumnName("xp");
+                entity.Property(e => e.XpGain).HasColumnName("xp");
 
                 entity.Property(e => e.XpCooldown).HasColumnName("xp_cd");
 
@@ -502,8 +491,6 @@ namespace Roki.Services.Database
                 entity.Property(e => e.Level).HasColumnName("level");
 
                 entity.Property(e => e.Description).HasColumnName("description");
-
-                entity.Property(e => e.Type).HasColumnName("type");
             });
         }
     }

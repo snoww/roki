@@ -11,7 +11,7 @@ using Roki.Extensions;
 using Roki.Modules.Games.Common;
 using Roki.Modules.Games.Services;
 using Roki.Services;
-using Roki.Services.Database.Maps;
+using Roki.Services.Database.Models;
 
 namespace Roki.Modules.Games
 {
@@ -319,11 +319,11 @@ namespace Roki.Modules.Games
                 foreach ((IUser user, PlayerScore score) in playerScore)
                 {
                     scoreStr += $"{user.Username} `{score.Correct}`/`{score.Incorrect + score.Correct}`\n";
-                    long before = await _currency.GetCurrency(Context.User, Context.Guild.Id);
-                    await _currency.AddAsync(user, Context.Client.CurrentUser, "Trivia Reward", score.Amount, Context.Guild.Id, Context.Channel.Id, Context.Message.Id)
+                    long before = await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id);
+                    await _currency.AddCurrencyAsync(user.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, "Trivia Reward", score.Amount)
                         .ConfigureAwait(false);
                     winStr += $"{user.Username} won `{score.Amount:N0}` {guildConfig.CurrencyIcon}\n" +
-                              $"\t`{before:N0}` ⇒ `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0:N0}`\n";
+                              $"\t`{before:N0}` ⇒ `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0:N0}`\n";
                     winners = true;
                 }
 

@@ -9,7 +9,6 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Bson;
 using NLog;
 using Roki.Common;
 using Roki.Services;
@@ -38,8 +37,8 @@ namespace Roki.Extensions
 
         public static EmbedBuilder WithDynamicColor(this EmbedBuilder embed, ulong guildId)
         {
-            var color = (uint) Cache.StringGet($"color:{guildId}");
-            return embed.WithColor(new Color(color));
+            RedisValue color = Cache.StringGet($"color:{guildId}");
+            return embed.WithColor(color.IsNull ? new Color(Roki.OkColor) : new Color((uint) color));
         }
 
         public static EmbedBuilder WithOkColor(this EmbedBuilder embed)
@@ -245,11 +244,6 @@ namespace Roki.Extensions
             return JsonSerializer.Deserialize<T>(json, Options);
         }
 
-        public static string GetHexId(this ObjectId objectId)
-        {
-            return objectId.ToString().Substring(18);
-        }
-        
         public static string ToSubGuid(this Guid guid)
         {
             return guid.ToString().Substring(0, 7);

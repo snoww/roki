@@ -11,7 +11,6 @@ using Roki.Extensions;
 using Roki.Modules.Help.Common;
 using Roki.Modules.Help.Services;
 using Roki.Services;
-using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Help
 {

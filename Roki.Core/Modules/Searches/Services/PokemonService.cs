@@ -8,14 +8,13 @@ using System.Threading.Tasks;
 using Discord;
 using Roki.Extensions;
 using Roki.Services;
-using Roki.Services.Database;
-using Roki.Services.Database.Maps;
+using Roki.Services.Database.Models;
 
 namespace Roki.Modules.Searches.Services
 {
     public class PokemonService : IRokiService
     {
-        private readonly IMongoService _mongo;
+        /*private readonly IMongoService _mongo;
 
         public PokemonService(IMongoService mongo)
         {
@@ -178,6 +177,6 @@ namespace Roki.Modules.Searches.Services
         {
             query = query.SanitizeStringFull().ToLower();
             return await _mongo.Context.GetItemAsync(query).ConfigureAwait(false);
-        }
+        }*/
     }
 }

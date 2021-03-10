@@ -8,24 +8,24 @@ namespace Roki.Modules.Games.Services
 {
     public class JeopardyService : IRokiService
     {
-        private readonly IMongoService _mongo;
 
         public readonly ConcurrentDictionary<ulong, Jeopardy> ActiveGames = new();
 
-        public JeopardyService(IMongoService mongo)
-        {
-            _mongo = mongo;
-        }
+        // public JeopardyService(IMongoService mongo)
+        // {
+        // }
 
         public async Task<Dictionary<string, List<JClue>>> GenerateGame(int number)
         {
-            Dictionary<string, List<JClue>> game = await _mongo.Context.GetRandomJeopardyCategoriesAsync(number).ConfigureAwait(false);
-            return game;
+            // Dictionary<string, List<JClue>> game = await _mongo.Context.GetRandomJeopardyCategoriesAsync(number).ConfigureAwait(false);
+            // return game;
+            return null;
         }
 
         public async Task<JClue> GenerateFinalJeopardy()
         {
-            return await _mongo.Context.GetFinalJeopardyAsync().ConfigureAwait(false);
+            // return await _mongo.Context.GetFinalJeopardyAsync().ConfigureAwait(false);
+            return null;
         }
     }
 }

@@ -1,42 +1,28 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using MongoDB.Bson;
 using Roki.Extensions;
 using Roki.Services;
-using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Moderation.Services
 {
     public class PowersService : IRokiService
     {
         private readonly ConcurrentDictionary<ulong, DateTime> _blocked = new();
-        private readonly IMongoService _mongo;
         private readonly ConcurrentDictionary<ulong, DateTime> _muted = new();
         private readonly ConcurrentDictionary<ulong, DateTime> _timeout = new();
 
 
-        public PowersService(IMongoService mongo)
+        public PowersService()
         {
-            _mongo = mongo;
         }
 
         public async Task<bool> ConsumePower(IUser user, ulong guildId, string power)
         {
-            Dictionary<string, Item> inv = (await _mongo.Context.GetOrAddUserAsync(user, guildId.ToString()).ConfigureAwait(false)).Data[guildId.ToString()].Inventory;
-            foreach ((string id, Item _) in inv)
-            {
-                (string listingId, _) = await _mongo.Context.GetStoreItemByIdAsync(guildId, id).ConfigureAwait(false);
-                if (listingId != power) continue;
-
-                await _mongo.Context.AddOrUpdateUserInventoryAsync(user, guildId.ToString(), power, -1).ConfigureAwait(false);
-                return true;
-            }
-
+            // todo
             return false;
         }
 
@@ -45,7 +31,7 @@ namespace Roki.Modules.Moderation.Services
             IRole muted = ctx.Guild.Roles.First(r => r.Name.Contains("mute", StringComparison.OrdinalIgnoreCase));
             DateTime time = DateTime.UtcNow + TimeSpan.FromMinutes(5);
             DateTime updatedTime = time;
-            _muted.AddOrUpdate(user.Id, time, (key, oldTime) => updatedTime += TimeSpan.FromMinutes(5));
+            _muted.AddOrUpdate(user.Id, time, (_, _) => updatedTime += TimeSpan.FromMinutes(5));
             await user.AddRoleAsync(muted).ConfigureAwait(false);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
                     .WithTitle($"🔇 {ctx.User.Username} used a Mute Power on {user.Username}")
@@ -69,7 +55,7 @@ namespace Roki.Modules.Moderation.Services
             IRole blocked = ctx.Guild.Roles.First(r => r.Name.Contains("blocked", StringComparison.OrdinalIgnoreCase));
             DateTime time = DateTime.UtcNow + TimeSpan.FromMinutes(5);
             DateTime updatedTime = time;
-            _blocked.AddOrUpdate(user.Id, time, (key, oldTime) => updatedTime += TimeSpan.FromMinutes(5));
+            _blocked.AddOrUpdate(user.Id, time, (_, _) => updatedTime += TimeSpan.FromMinutes(5));
             await user.AddRoleAsync(blocked).ConfigureAwait(false);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
                     .WithTitle($"🔇 {ctx.User.Username} used a Block Power on {user.Username}")
@@ -93,7 +79,7 @@ namespace Roki.Modules.Moderation.Services
             IRole timeout = ctx.Guild.Roles.First(r => r.Name.Contains("timeout", StringComparison.OrdinalIgnoreCase));
             DateTime time = DateTime.UtcNow + TimeSpan.FromMinutes(5);
             DateTime updatedTime = time;
-            _timeout.AddOrUpdate(user.Id, time, (key, oldTime) => updatedTime += TimeSpan.FromMinutes(5));
+            _timeout.AddOrUpdate(user.Id, time, (_, _) => updatedTime += TimeSpan.FromMinutes(5));
             await user.AddRoleAsync(timeout).ConfigureAwait(false);
             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
                     .WithTitle($"🔇 {ctx.User.Username} used a Timeout Power on {user.Username}")

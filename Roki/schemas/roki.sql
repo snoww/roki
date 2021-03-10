@@ -44,7 +44,7 @@ create table guild_config
     xp_per_message        int              not null,
     xp_cd                 int              not null,
     xp_fast_cd            int              not null,
-    bf_min                double precision not null,
+    bf_min                int              not null,
     bf_multiplier         double precision not null,
     bfm_min               int              not null,
     bfm_min_guess         int              not null,
@@ -134,7 +134,7 @@ create table trade
     action   text      not null,
     amount   bigint    not null,
     price    decimal   not null,
-    date     timestamp not null,
+    date     timestamp not null
 );
 
 create table investment
@@ -170,10 +170,9 @@ create table event
     host_id      bigint    not null references users (id),
     start_date   timestamp not null,
     channel_id   bigint    not null references channel (id),
-    message_id   bigint    not null references message (id),
-    participants bigint[],
-    undecided    bigint[],
-    deleted      bool      not null
+    message_id   bigint    not null,
+    participants text[],
+    undecided    text[]
 );
 
 create table quote
@@ -197,7 +196,7 @@ create table transaction
     amount      bigint not null,
     description text,
     channel_id  bigint not null references channel (id),
-    message_id  bigint not null references message (id),
+    message_id  bigint not null references message (id)
 );
 
 -- todo pokemon

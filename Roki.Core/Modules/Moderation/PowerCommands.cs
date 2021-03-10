@@ -2,8 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
-using MongoDB.Bson;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Moderation.Services;
@@ -80,7 +78,7 @@ namespace Roki.Modules.Moderation
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    Log.Warn(e, "Unable to change {user} nickname", user);
                     await Context.Channel.SendErrorAsync("You cannot change that person's nickname").ConfigureAwait(false);
                 }
             }

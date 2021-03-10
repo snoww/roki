@@ -597,7 +597,7 @@
   },
   "transfer": {
     "Aliases": "",
-    "Description": "Transfers stones to/from your investing account and cash account. Note: you will lose your cents on your transfer (rounded up)",
+    "Description": "Transfers currency FROM the specified (cash or investing) account TO the other account.",
     "Usage": [
       "{0}transfer cash 5000",
       "{0}transfer investing 20000"

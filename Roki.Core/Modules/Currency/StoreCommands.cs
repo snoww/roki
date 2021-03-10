@@ -24,20 +24,22 @@ namespace Roki.Modules.Currency
         public class StoreCommands : RokiSubmodule<StoreService>
         {
             private readonly DiscordSocketClient _client;
-            private readonly IRokiDbService _dbService;
+            private readonly RokiContext _context;
+            private readonly ICurrencyService _currency;
             private readonly IConfigurationService _config;
 
-            private StoreCommands(DiscordSocketClient client, IRokiDbService dbService, IConfigurationService config)
+            private StoreCommands(DiscordSocketClient client, RokiContext context, ICurrencyService currency, IConfigurationService config)
             {
                 _client = client;
-                _dbService = dbService;
+                _context = context;
+                _currency = currency;
                 _config = config;
             }
 
             [RokiCommand, Description, Usage, Aliases]
             public async Task Store()
             {
-                List<StoreItem> cat = await _dbService.Context.Items.AsNoTracking().AsAsyncEnumerable()
+                List<StoreItem> cat = await _context.Items.AsNoTracking()
                     .Where(x => x.GuildId == Context.Guild.Id && x.Quantity != null)
                     // soft limit of 100
                     .Take(100)
@@ -79,7 +81,7 @@ namespace Roki.Modules.Currency
             [RokiCommand, Description, Usage, Aliases]
             public async Task Store(string itemName)
             {
-                StoreItem listing = await _dbService.Context.Items.AsNoTracking().AsAsyncEnumerable()
+                StoreItem listing = await _context.Items.AsNoTracking()
                     .Where(x => x.GuildId == Context.Guild.Id && x.Name.ToLower() == itemName.ToLower() && x.Quantity != null)
                     .FirstOrDefaultAsync();
                 
@@ -124,7 +126,7 @@ namespace Roki.Modules.Currency
                     }
                 }
                 
-                StoreItem listing = await _dbService.Context.Items.AsAsyncEnumerable()
+                StoreItem listing = await _context.Items.AsQueryable()
                     .Where(x => x.GuildId == Context.Guild.Id && x.Name.ToLower() == name.ToLower())
                     .FirstOrDefaultAsync();
                 
@@ -161,8 +163,8 @@ namespace Roki.Modules.Currency
                 IUser buyer = Context.User;
                 var seller = _client.GetUser(listing.SellerId) as IUser;
                 long price = listing.Price * amount ?? 0;
-                bool removed = await _dbService.TransferCurrencyAsync(buyer.Id, seller.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id,
-                    $"Store Purchase - ID {listing.Id} x{amount}", price).ConfigureAwait(false);
+                bool removed = await _currency.TransferCurrencyAsync(buyer.Id, seller.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id,
+                    $"Store Purchase - #{listing.Id} x{amount}", price).ConfigureAwait(false);
                 if (!removed)
                 {
                     await Context.Channel.SendErrorAsync($"You do not have enough {guildConfig.CurrencyIcon} to purchase this item.").ConfigureAwait(false);
@@ -180,7 +182,7 @@ namespace Roki.Modules.Currency
                             break;
                         }
 
-                        await _dbService.Context.Subscriptions.AddAsync(new Subscription
+                        await _context.Subscriptions.AddAsync(new Subscription
                         {
                             UserId = buyer.Id,
                             GuildId = Context.Guild.Id,
@@ -214,7 +216,7 @@ namespace Roki.Modules.Currency
 
                 page -= 1;
                 
-                var subs = await _dbService.Context.Subscriptions.Include(x => x.Item).AsNoTracking().AsAsyncEnumerable()
+                var subs = await _context.Subscriptions.Include(x => x.Item).AsNoTracking()
                     .Where(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id)
                     .Select(x => new
                     {
@@ -251,7 +253,7 @@ namespace Roki.Modules.Currency
                 }
 
                 page -= 1;
-                var inv = await _dbService.Context.Inventory.Include(x => x.Item).AsNoTracking().AsAsyncEnumerable()
+                var inv = await _context.Inventory.Include(x => x.Item).AsNoTracking()
                     .Where(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id)
                     .Select(x => new
                     {
@@ -262,10 +264,10 @@ namespace Roki.Modules.Currency
                     .Take(15)
                     .ToListAsync();
 
-                EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle($"{Context.User.Username}'s Inventory").WithFooter($"Page {page + 1}");
+                EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle($"{Context.User.Username}'s Inventory");
                 if (inv.Count == 0)
                 {
-                    await Context.Channel.EmbedAsync(embed.WithDescription($"Your inventory is empty\nUse {_config.GetGuildPrefix(Context.Guild.Id)}store to buy some.")).ConfigureAwait(false);
+                    await Context.Channel.EmbedAsync(embed.WithDescription($"Your inventory is empty\nUse `{await _config.GetGuildPrefix(Context.Guild.Id)}store` to buy some items.")).ConfigureAwait(false);
                     return;
                 }
 
@@ -275,7 +277,7 @@ namespace Roki.Modules.Currency
                     desc.AppendLine($"{item.Name}: {item.Quantity}");
                 }
 
-                embed.WithDescription(desc.ToString());
+                embed.WithDescription(desc.ToString()).WithFooter($"Page {page + 1}");
 
                 await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }

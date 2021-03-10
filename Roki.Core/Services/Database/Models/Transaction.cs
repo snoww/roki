@@ -13,5 +13,16 @@ namespace Roki.Services.Database.Models
         public string Description { get; set; }
         public ulong ChannelId { get; set; }
         public ulong MessageId { get; set; }
+        
+        public Transaction(ulong sender, ulong recipient, ulong guildId, ulong channelId, ulong messageId, long amount, string description)
+        {
+            GuildId = guildId;
+            Sender = sender;
+            Recipient = recipient;
+            Amount = amount;
+            Description = description;
+            ChannelId = channelId;
+            MessageId = messageId;
+        }
     }
 }

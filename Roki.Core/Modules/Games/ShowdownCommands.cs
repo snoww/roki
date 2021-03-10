@@ -42,7 +42,7 @@ namespace Roki.Modules.Games
                     return;
                 }
                 
-                var showdown = new Showdown(_currency, _client, await _config.GetGuildConfigAsync(Context.Guild.Id), (ITextChannel)Context.Channel, gen, Service, _cache);
+                var showdown = new Showdown(_currency, _client, await _config.GetGuildConfigAsync(Context.Guild.Id), (ITextChannel)Context.Channel, gen, _cache);
 
                 if (Service.ActiveGames.TryAdd(Context.Channel.Id, showdown))
                 {

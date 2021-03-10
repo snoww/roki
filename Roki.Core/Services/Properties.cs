@@ -42,9 +42,9 @@ namespace Roki.Services
         public double BetFlipMMinCorrect { get; set; } = 0.75;
         public double BetFlipMMultiplier { get; set; } = 1.1;
 
-        #region BetDie
+        #region BetDice
 
-        public int BetDieMin { get; set; } = 10;
+        public int BetDiceMin { get; set; } = 10;
 
         #endregion
 

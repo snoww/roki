@@ -5,8 +5,18 @@ namespace Roki.Services.Database.Models
 {
     public class UserData
     {
-        public ulong UserId { get; set; }
-        public ulong GuildId { get; set; }
+        public UserData(ulong userId, ulong guildId)
+        {
+            UserId = userId;
+            GuildId = guildId;
+        }
+
+        public UserData()
+        {
+        }
+
+        public ulong UserId { get; }
+        public ulong GuildId { get; }
         public long Xp { get; set; } = 0;
         public DateTime LastLevelUp { get; set; } = DateTime.MinValue;
         public DateTime LastXpGain { get; set; } = DateTime.MinValue;

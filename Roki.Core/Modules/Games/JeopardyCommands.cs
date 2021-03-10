@@ -29,8 +29,9 @@ namespace Roki.Modules.Games
                 _config = config;
             }
 
-            [RokiCommand, Description, Aliases, Usage]
-            [RokiOptions(typeof(JeopardyArgs))]
+            // temp disabled
+            // [RokiCommand, Description, Aliases, Usage]
+            // [RokiOptions(typeof(JeopardyArgs))]
             public async Task Jeopardy(params string[] args)
             {
                 JeopardyArgs opts = OptionsParser.ParseFrom(new JeopardyArgs(), args);

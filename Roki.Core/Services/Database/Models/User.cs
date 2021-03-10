@@ -5,6 +5,21 @@ namespace Roki.Services.Database.Models
 {
     public class User
     {
+        public User(ulong id, string username, string discriminator, string avatar)
+        {
+            Id = id;
+            Username = username;
+            Discriminator = discriminator;
+            Avatar = avatar;
+        }
+        
+        public User(string username, string discriminator, string avatar)
+        {
+            Username = username;
+            Discriminator = discriminator;
+            Avatar = avatar;
+        }
+
         public ulong Id { get; set; }
         public string Username { get; set; }
         public string Discriminator { get; set; }

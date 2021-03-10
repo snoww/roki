@@ -22,13 +22,13 @@ namespace Roki.Modules.Gambling
         public class DiceCommands : RokiSubmodule
         {
             private const string DicePath = "data/dice/";
-            private readonly IRokiDbService _dbService;
+            private readonly ICurrencyService _currency;
             private readonly IConfigurationService _config;
             private readonly Random _rng = new();
 
-            public DiceCommands(IRokiDbService dbService, IConfigurationService config)
+            public DiceCommands(ICurrencyService currency, IConfigurationService config)
             {
-                _dbService = dbService;
+                _currency = currency;
                 _config = config;
             }
 
@@ -37,22 +37,19 @@ namespace Roki.Modules.Gambling
             {
                 GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
 
-                if (amount < guildConfig.BetDieMin)
+                if (amount < guildConfig.BetDiceMin)
                 {
                     await Context.Channel
-                        .SendErrorAsync($"The minimum bet for this game is `{guildConfig.BetDieMin:N0}` {guildConfig.CurrencyIcon}")
+                        .SendErrorAsync($"The minimum bet for this game is `{guildConfig.BetDiceMin:N0}` {guildConfig.CurrencyIcon}")
                         .ConfigureAwait(false);
                     return;
                 }
 
-                UserData userData = await _dbService.Context.UserData.AsAsyncEnumerable().SingleAsync(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id);
-                UserData botData = await _dbService.Context.UserData.AsAsyncEnumerable().SingleAsync(x => x.UserId == Roki.BotId && x.GuildId == Context.Guild.Id);
-
-                bool removed = await _dbService.RemoveCurrencyAsync(userData, botData, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, "BetDice Entry", amount).ConfigureAwait(false);
+                bool removed = await _currency.RemoveCurrencyAsync(Context.User.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, "BetDice Entry", amount).ConfigureAwait(false);
                 if (!removed)
                 {
                     await Context.Channel.SendErrorAsync($"Not enough {guildConfig.CurrencyIcon}\n" +
-                                                         $"You have `{userData.Currency:N0}`")
+                                                         $"You have `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}`")
                         .ConfigureAwait(false);
                     return;
                 }
@@ -135,20 +132,19 @@ namespace Roki.Modules.Gambling
 
                 if (payout > 0)
                 {
-                    await _dbService.AddCurrencyAsync(userData, botData, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, "BetDice Payout", payout).ConfigureAwait(false);
+                    await _currency.AddCurrencyAsync(Context.User.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, "BetDice Payout", payout).ConfigureAwait(false);
                     embed.WithDynamicColor(Context)
                         .WithDescription(
                             $"{Context.User.Mention} You rolled a total of `{total}`\nCongratulations! You've won `{payout:N0}` {guildConfig.CurrencyIcon}\n" +
-                            $"New Balance: `{userData.Currency:N0}` {guildConfig.CurrencyIcon}");
+                            $"New Balance: `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}");
                 }
                 else
                 {
                     embed.WithErrorColor()
                         .WithDescription($"{Context.User.Mention} You rolled a total of `{total}`\nBetter luck next time!\n" +
-                                         $"New Balance: `{userData.Currency:N0}` {guildConfig.CurrencyIcon}");
+                                         $"New Balance: `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}");
                 }
 
-                await _dbService.SaveChangesAsync();
                 await Context.Channel.SendFileAsync(stream, "dice.png", embed: embed.Build()).ConfigureAwait(false);
             }
 
