@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using NLog;
 
 namespace Roki.Extensions
@@ -26,13 +27,19 @@ namespace Roki.Extensions
                 return str;
 
             if (hideDots)
-                return str.Substring(0, maxLength);
-            return str.Substring(0, maxLength - 3) + "...";
+                return str[..maxLength];
+            return str[..(maxLength - 3)] + "...";
         }
 
         public static string SanitizeStringFull(this string dirtyString)
         {
-            return new string(dirtyString.Where(char.IsLetterOrDigit).ToArray());
+            return new(dirtyString.Where(char.IsLetterOrDigit).ToArray());
+        }
+
+        public static string EscapeMarkdown(this string str)
+        {
+            // note this doesn't remove \
+            return Regex.Replace(str, "(\\*|_|`|~)", "\\$1");
         }
     }
 }

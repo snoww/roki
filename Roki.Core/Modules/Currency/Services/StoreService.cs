@@ -28,9 +28,7 @@ namespace Roki.Modules.Currency.Services
         }
 
         private void CheckSubscriptions()
-        {
-            _timer = new Timer(RemoveSubEvent, null, TimeSpan.Zero, TimeSpan.FromHours(3));
-            
+        {           
             DateTime current = DateTime.UtcNow;
             TimeSpan timeToGo = new TimeSpan(24, 0, 0) - current.TimeOfDay;
             if (timeToGo < TimeSpan.Zero)
@@ -47,6 +45,11 @@ namespace Roki.Modules.Currency.Services
             using IServiceScope scope = _scopeFactory.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<RokiContext>();
             DateTime now = DateTime.UtcNow.Date;
+            if (!await context.Subscriptions.AsNoTracking().AnyAsync(x => x.Expiry <= now))
+            {
+                return;
+            }
+            
             foreach (var expired in context.Subscriptions.AsNoTracking().Include(x => x.Item)
                 .Where(x => x.Expiry <= now)
                 .Select(x => new { x.UserId, x.GuildId, x.Item.Details }))

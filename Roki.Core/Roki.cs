@@ -230,11 +230,9 @@ namespace Roki
                 }
 
                 var typeReader = (TypeReader) Activator.CreateInstance(type, Client, CommandService);
-                Type baseType = type.BaseType;
-                Type[] typeArgs = baseType?.GetGenericArguments();
                 try
                 {
-                    CommandService.AddTypeReader(typeArgs[0], typeReader);
+                    CommandService.AddTypeReader(type.BaseType?.GetGenericArguments()[0], typeReader);
                 }
                 catch (Exception e)
                 {
