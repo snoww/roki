@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using NLog;
+using Roki.Common;
 using Roki.Extensions;
 using Roki.Services;
 using Roki.Services.Database.Models;
@@ -27,7 +28,7 @@ namespace Roki.Modules.Games.Common
         private readonly Category _finalJeopardy;
         private readonly Dictionary<ulong, string> _finalJeopardyAnswers = new();
         private readonly SemaphoreSlim _guess = new(1, 1);
-        private readonly SemaphoreSlim _voteSkip = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim _voteSkip = new(1, 1);
 
         private readonly IGuild _guild;
 
@@ -108,7 +109,7 @@ namespace Roki.Modules.Games.Common
                         .WithAuthor("Jeopardy!")
                         .WithTitle($"{CurrentClue.Category.Name.EscapeMarkdown()} - ${CurrentClue.Value}")
                         .WithDescription(CurrentClue.Text.EscapeMarkdown())
-                        .WithFooter($"#{CurrentClue.Id}"))
+                        .WithFooter($"#{CurrentClue.Id} | answer with a question, e.g. what's x, who's x"))
                     .ConfigureAwait(false);
 
                 try
@@ -213,7 +214,18 @@ namespace Roki.Modules.Games.Common
                 string price = message[message.LastIndexOf(" for ", StringComparison.Ordinal)..];
                 int amount = int.Parse(new string(price.Where(char.IsDigit).ToArray()));
 
+                var cLev = new Levenshtein(userCategory);
                 Category category = _categories.FirstOrDefault(c => c.Name.SanitizeStringFull().ToLowerInvariant().Contains(userCategory, StringComparison.Ordinal));
+                
+                if (category == null)
+                {
+                    foreach (Category c in _categories.Where(c => c.Name.Split().Any(cName => cLev.DistanceFrom(cName.SanitizeStringFull().ToLowerInvariant()) <= Math.Round(cName.Length * 0.2))))
+                    {
+                        category = c;
+                        break;
+                    }
+                }
+                
                 if (category == null)
                 {
                     return CategoryStatus.WrongCategory;
@@ -229,23 +241,32 @@ namespace Roki.Modules.Games.Common
             else
             {
                 // this section is to parse category choice if they didn't include 'for' in reply
-                string[] cat = message.Split();
+                string[] userCategory = message.Split();
                 Category category = null;
-                foreach (string c in cat)
+                foreach (string userCat in userCategory[..^1])
                 {
-                    foreach (Category ca in _categories.Where(ca => ca.Name.SanitizeStringFull().Contains(c.SanitizeStringFull(), StringComparison.OrdinalIgnoreCase)))
+                    foreach (Category cat in _categories.Where(cat => cat.Name.SanitizeStringFull().Contains(userCat.SanitizeStringFull(), StringComparison.OrdinalIgnoreCase)))
                     {
-                        category = ca;
-                        break;
+                        category = cat;
+                        goto found;
+                    }
+                    
+                    var cLev = new Levenshtein(userCat.SanitizeStringFull());
+                    foreach (Category cat in _categories.Where(cat => cat.Name.Split().Any(cName => cLev.DistanceFrom(cName.SanitizeStringFull().ToLowerInvariant()) <= Math.Round(cName.Length * 0.2))))
+                    {
+                        category = cat;
+                        goto found;
                     }
                 }
+                
+                found:
 
                 if (category == null)
                 {
                     return CategoryStatus.FalsePositiveInput;
                 }
 
-                if (!int.TryParse(cat[^1], out int amount))
+                if (!int.TryParse(userCategory[^1], out int amount))
                 {
                     return CategoryStatus.WrongAmount;
                 }
@@ -305,7 +326,7 @@ namespace Roki.Modules.Games.Common
                                     .WithAuthor("Jeopardy!")
                                     .WithTitle($"{CurrentClue.Category.Name.EscapeMarkdown()} - ${CurrentClue.Value}")
                                     .WithDescription(CurrentClue.Text.EscapeMarkdown())
-                                    .WithFooter($"#{CurrentClue.Id}"))
+                                    .WithFooter($"#{CurrentClue.Id} | answer with a question, e.g. what's x, who's x"))
                                 .ConfigureAwait(false);
                         }
 
@@ -334,7 +355,7 @@ namespace Roki.Modules.Games.Common
                     .WithAuthor("Jeopardy!")
                     .WithTitle("Final Jeopardy!")
                     .WithDescription("Please go to your DMs to play the Final Jeopardy!")
-                    .WithFooter("You must have a score to participate in the Final Jeopardy!"))
+                    .WithFooter("You must have a score to participate."))
                 .ConfigureAwait(false);
 
             foreach ((IUser user, int amount) in Users)
@@ -345,16 +366,16 @@ namespace Roki.Modules.Games.Common
 
             while (!_confirmed.IsEmpty) await Task.Delay(1000).ConfigureAwait(false);
 
-            await Task.Delay(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromSeconds(10)).ConfigureAwait(false);
 
             await _channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithAuthor("Final Jeopardy!")
                     .WithTitle($"{_finalJeopardy.Name}")
-                    .WithDescription(_finalJeopardy.Clues.Single().Text.EscapeMarkdown())
-                    .WithFooter($"#{_finalJeopardy.Id} | Note: your answers will NOT be checked here"))
+                    .WithDescription(_finalJeopardy.Clues.Single().Text.EscapeMarkdown()+ "\n\nContestants have 60 seconds to answer the question.")
+                    .WithFooter($"#{_finalJeopardy.Id} | answers will NOT be checked here"))
                 .ConfigureAwait(false);
 
-            await Task.Delay(TimeSpan.FromSeconds(35)).ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromSeconds(60)).ConfigureAwait(false);
 
             await _channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithAuthor("Final Jeopardy!")
@@ -366,7 +387,7 @@ namespace Roki.Modules.Games.Common
             await _channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithAuthor("Final Jeopardy!")
                     .WithTitle("Results")
-                    .WithDescription(_finalJeopardyAnswers.Count > 0 ? string.Join("\n", _finalJeopardyAnswers.Values) : "No wagers."))
+                    .WithDescription(_finalJeopardyAnswers.Count > 0 ? string.Join("\n", _finalJeopardyAnswers.Values).TrimTo(2048) : "No wagers."))
                 .ConfigureAwait(false);
 
             await Task.Delay(TimeSpan.FromSeconds(3)).ConfigureAwait(false);
@@ -418,16 +439,16 @@ namespace Roki.Modules.Games.Common
                     await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
                             .WithAuthor("Final Jeopardy!")
                             .WithTitle($"{_finalJeopardy.Name}")
-                            .WithDescription(_finalJeopardy.Clues.Single().Text.EscapeMarkdown())
+                            .WithDescription(_finalJeopardy.Clues.Single().Text.EscapeMarkdown() + "\n\nYou have 60 seconds to answer your question. You can submit as many times as you want, however, only the LATEST message is recorded.")
                             .WithFooter($"Your wager is ${wager:N0}. Submit your answer now."))
                         .ConfigureAwait(false);
 
-                    _finalJeopardyAnswers.Add(user.Id, $"{user.Username}: `${wager:N0}` - `No Answer`");
+                    _finalJeopardyAnswers.Add(user.Id, $"{user}: `${wager:N0}` - `No Answer`");
                     var cancel = new CancellationTokenSource();
                     try
                     {
                         _client.MessageReceived += FinalJeopardyGuessHandler;
-                        await Task.Delay(TimeSpan.FromSeconds(35), cancel.Token).ConfigureAwait(false);
+                        await Task.Delay(TimeSpan.FromSeconds(60), cancel.Token).ConfigureAwait(false);
                     }
                     catch (TaskCanceledException)
                     {
@@ -491,7 +512,7 @@ namespace Roki.Modules.Games.Common
 
         private async Task<SocketMessage> ReplyHandler(ulong channelId, bool isFinal = false, TimeSpan? timeout = null)
         {
-            timeout ??= TimeSpan.FromSeconds(35);
+            timeout ??= TimeSpan.FromSeconds(45);
             var eventTrigger = new TaskCompletionSource<SocketMessage>();
             var cancelTrigger = new TaskCompletionSource<bool>();
 
@@ -564,6 +585,7 @@ namespace Roki.Modules.Games.Common
                 await _voteSkip.WaitAsync();
                 if (_canVote)
                 {
+                    _voteSkip.Release();
                     return;
                 }
                 

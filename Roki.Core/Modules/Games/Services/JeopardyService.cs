@@ -37,7 +37,7 @@ namespace Roki.Modules.Games.Services
             {
                 Parallel.ForEach(category.Clues, clue =>
                 {
-                    clue.SanitizeAnswer();
+                    clue.PrepareAnswer();
                     if (category.Round == 2)
                     {
                         // no double jeopardy's yet
@@ -52,11 +52,13 @@ namespace Roki.Modules.Games.Services
 
         public async Task<Category> GenerateFinalJeopardy()
         {
-            return await _context.Categories.Include(x => x.Clues).AsNoTracking()
+            Category final = await _context.Categories.Include(x => x.Clues).AsNoTracking()
                 .Where(x => x.Round == 3)
                 .OrderBy(x => Guid.NewGuid())
                 .Take(1)
                 .SingleAsync();
+            final.Clues.Single().PrepareAnswer();
+            return final;
         }
     }
 }

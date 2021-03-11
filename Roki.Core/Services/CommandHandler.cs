@@ -103,6 +103,11 @@ namespace Roki.Services
 
                 return;
             }
+            
+            if (channel is IDMChannel)
+            {
+                return;
+            }
 
             string prefix = await _config.GetGuildPrefix(guild.Id);
             if (message.Content.StartsWith(prefix, StringComparison.Ordinal))
