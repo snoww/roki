@@ -97,7 +97,7 @@ namespace Roki
             var sw = Stopwatch.StartNew();
 
             IServiceCollection service = new ServiceCollection()
-                .AddDbContext<RokiContext>(options => options.UseNpgsql("Host=192.168.1.100;Database=roki_test;Username=roki;Password=roki-snow;Include Error Detail=true").EnableSensitiveDataLogging())
+                .AddDbContext<RokiContext>(options => options.UseNpgsql(RokiConfig.Db.ToString()))
                 .AddSingleton<IConfigurationService, ConfigurationService>()
                 .AddSingleton<ICurrencyService, CurrencyService>()
                 .AddSingleton(RokiConfig)
