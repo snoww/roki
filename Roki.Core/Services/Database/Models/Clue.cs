@@ -33,7 +33,7 @@ public class Clue
         private readonly HashSet<string> _acceptedAnswers = new();
         private string _minAnswer;
 
-        public void SanitizeAnswer()
+        public void PrepareAnswer()
         {
             string minAnswer = ConvertASCII.FoldToASCII(Answer.ToCharArray(), Answer.Length);
 

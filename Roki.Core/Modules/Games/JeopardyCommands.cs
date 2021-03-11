@@ -41,8 +41,9 @@ namespace Roki.Modules.Games
                     await Context.Channel.SendErrorAsync("Jeopardy game is already in progress in current channel.").ConfigureAwait(false);
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithColor(activeGame.Color)
                             .WithAuthor("Jeopardy!")
-                            .WithTitle($"{activeGame.CurrentClue.Category} - ${activeGame.CurrentClue.Value}")
-                            .WithDescription(activeGame.CurrentClue.Text))
+                            .WithTitle($"{activeGame.CurrentClue.Category.Name} - ${activeGame.CurrentClue.Value}")
+                            .WithDescription(activeGame.CurrentClue.Text)
+                            .WithFooter($"#{activeGame.CurrentClue.Id} | answer with a question, e.g. what's x, who's x"))
                         .ConfigureAwait(false);
                     return;
                 }
