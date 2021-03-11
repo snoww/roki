@@ -10,7 +10,6 @@ namespace Roki.Services
 {
     public interface IRokiConfig
     {
-        ulong ClientId { get; }
         string Token { get; }
         string GoogleApi { get; }
         string OmdbApi { get; }
@@ -21,8 +20,6 @@ namespace Roki.Services
         string TwitterAccessSecret { get; }
         string IexToken { get; }
         string WolframAlphaApi { get; }
-        string NavigraphUsername { get; }
-        string NavigraphPassword { get; }
 
         ImmutableArray<ulong> OwnerIds { get; }
 
@@ -37,7 +34,6 @@ namespace Roki.Services
         private readonly string _config = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public ulong ClientId { get; }
         public string Token { get; }
         public string GoogleApi { get; }
         public string OmdbApi { get; }
@@ -48,8 +44,6 @@ namespace Roki.Services
         public string TwitterAccessSecret { get; }
         public string IexToken { get; }
         public string WolframAlphaApi { get; }
-        public string NavigraphUsername { get; }
-        public string NavigraphPassword { get; }
         public ImmutableArray<ulong> OwnerIds { get; }
 
         public string RedisConfig { get; }
@@ -87,12 +81,6 @@ namespace Roki.Services
                 TwitterAccessSecret = data[nameof(TwitterAccessSecret)];
                 IexToken = data[nameof(IexToken)];
                 WolframAlphaApi = data[nameof(WolframAlphaApi)];
-                NavigraphUsername = data[nameof(NavigraphUsername)];
-                NavigraphPassword = data[nameof(NavigraphPassword)];
-
-                if (!ulong.TryParse(data[nameof(ClientId)], out var clId))
-                    clId = 0;
-                ClientId = clId;
 
                 IConfigurationSection dbSection = data.GetSection("db");
                 Db = new DbConfig(dbSection["Username"], dbSection["Password"], dbSection["Database"], dbSection["Host"]);
@@ -117,9 +105,14 @@ namespace Roki.Services
             Host = host;
         }
 
-        public string Username { get; }
-        public string Password { get; }
-        public string Database { get; }
-        public string Host { get; set; }
+        private string Username { get; }
+        private string Password { get; }
+        private string Database { get; }
+        private string Host { get; }
+        
+        public override string ToString()
+        {
+            return $"Host={Host};Database={Database};Username={Username};Password={Password}";
+        }
     }
 }

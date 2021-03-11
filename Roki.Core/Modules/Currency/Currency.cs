@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -181,18 +182,21 @@ namespace Roki.Modules.Currency
                 .WithTitle($"{user.Username}'s Transactions History");
             
             var desc = new StringBuilder();
+            desc.AppendLine("```diff");
             // todo better formatting
             foreach (var trans in transactions)
             {
                 if (trans.Sender == user.Id)
                 {
-                    desc.Append("+ ").Append(trans.Amount.ToString("N0")).Append(" #").Append(trans.Id).AppendLine();
+                    desc.AppendLine(trans.Amount >= 0 ? $"-{trans.Amount, -8:N0}{$"#{trans.Id}",18}".Replace(' ', '.') : $"+{Math.Abs(trans.Amount), -8:N0}{$"#{trans.Id}",18}".Replace(' ', '.'));
                 }
                 else
                 {
-                    desc.Append("- ").Append(trans.Amount.ToString("N0")).Append(" #").Append(trans.Id).AppendLine();
+                    desc.AppendLine(trans.Amount >= 0 ? $"+{trans.Amount, -8:N0}{$"#{trans.Id}",18}".Replace(' ', '.') : $"-{Math.Abs(trans.Amount), -8:N0}{$"#{trans.Id}",18}".Replace(' ', '.'));
                 }
             }
+
+            desc.Append("```");
 
             embed.WithDescription(desc.ToString()).WithFooter($"Page {page + 1}");
 
