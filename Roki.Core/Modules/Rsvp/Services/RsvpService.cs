@@ -839,6 +839,7 @@ namespace Roki.Modules.Rsvp.Services
 
         private async Task ReactionHandler(Cacheable<IUserMessage, ulong> cache, ISocketMessageChannel channel, SocketReaction r)
         {
+            // todo remove this
             Logger.Warn("New Reaction Handler added");
             if (r.User.Value.IsBot || !Choices.Contains(r.Emote) || await _cache.KeyExistsAsync($"event:{cache.Id}"))
             {

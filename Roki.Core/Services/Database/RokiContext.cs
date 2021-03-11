@@ -27,6 +27,9 @@ namespace Roki.Services.Database
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<UserData> UserData { get; set; }
         public virtual DbSet<XpReward> XpRewards { get; set; }
+        public virtual DbSet<Category> Categories { get; set; }
+        public virtual DbSet<Clue> Clues { get; set; }
+        public virtual DbSet<Round> Rounds { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -491,6 +494,58 @@ namespace Roki.Services.Database
                 entity.Property(e => e.Level).HasColumnName("level");
 
                 entity.Property(e => e.Description).HasColumnName("description");
+            });
+            
+            modelBuilder.Entity<Category>(entity =>
+            {
+                entity.ToTable("category", "jeopardy");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasColumnName("name");
+
+                entity.Property(e => e.Round).HasColumnName("round");
+            });
+
+            modelBuilder.Entity<Clue>(entity =>
+            {
+                entity.ToTable("clues", "jeopardy");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Answer)
+                    .IsRequired()
+                    .HasColumnName("answer");
+
+                entity.Property(e => e.CategoryId)
+                    .IsRequired()
+                    .HasColumnName("category_id");
+
+                entity.Property(e => e.Text)
+                    .IsRequired()
+                    .HasColumnName("text");
+
+                entity.Property(e => e.Value)
+                    .IsRequired()
+                    .HasColumnName("value");
+
+                entity.HasOne(d => d.Category)
+                    .WithMany(p => p.Clues)
+                    .HasForeignKey(d => d.CategoryId)
+                    .HasConstraintName("clues_category_id_fkey");
+            });
+
+            modelBuilder.Entity<Round>(entity =>
+            {
+                entity.ToTable("round", "jeopardy");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasColumnName("name");
             });
         }
     }

@@ -9,6 +9,7 @@ using Roki.Extensions;
 using Roki.Modules.Games.Common;
 using Roki.Modules.Games.Services;
 using Roki.Services;
+using Roki.Services.Database.Models;
 
 namespace Roki.Modules.Games
 {
@@ -29,9 +30,8 @@ namespace Roki.Modules.Games
                 _config = config;
             }
 
-            // temp disabled
-            // [RokiCommand, Description, Aliases, Usage]
-            // [RokiOptions(typeof(JeopardyArgs))]
+            [RokiCommand, Description, Aliases, Usage]
+            [RokiOptions(typeof(JeopardyArgs))]
             public async Task Jeopardy(params string[] args)
             {
                 JeopardyArgs opts = OptionsParser.ParseFrom(new JeopardyArgs(), args);
@@ -42,14 +42,14 @@ namespace Roki.Modules.Games
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithColor(activeGame.Color)
                             .WithAuthor("Jeopardy!")
                             .WithTitle($"{activeGame.CurrentClue.Category} - ${activeGame.CurrentClue.Value}")
-                            .WithDescription(activeGame.CurrentClue.Clue))
+                            .WithDescription(activeGame.CurrentClue.Text))
                         .ConfigureAwait(false);
                     return;
                 }
 
-                Dictionary<string, List<JClue>> questions = await Service.GenerateGame(opts.NumCategories).ConfigureAwait(false);
+                List<Category> categories = await Service.GenerateGame(opts.NumCategories).ConfigureAwait(false);
 
-                var jeopardy = new Jeopardy(_client, await _config.GetGuildConfigAsync(Context.Guild.Id),questions, Context.Guild, Context.Channel as ITextChannel, _currency, await Service.GenerateFinalJeopardy());
+                var jeopardy = new Jeopardy(_client, await _config.GetGuildConfigAsync(Context.Guild.Id), categories, Context.Guild, Context.Channel as ITextChannel, _currency, await Service.GenerateFinalJeopardy());
 
                 if (Service.ActiveGames.TryAdd(Context.Channel.Id, jeopardy))
                 {
@@ -60,7 +60,11 @@ namespace Roki.Modules.Games
                     finally
                     {
                         Service.ActiveGames.TryRemove(Context.Channel.Id, out jeopardy);
-                        if (jeopardy != null) await jeopardy.EnsureStopped().ConfigureAwait(false);
+                        if (jeopardy != null)
+                        {
+                            await jeopardy.EnsureStopped().ConfigureAwait(false);
+                            jeopardy.Dispose();
+                        }
                     }
                 }
             }
