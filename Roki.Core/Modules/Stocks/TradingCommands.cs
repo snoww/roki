@@ -42,6 +42,8 @@ namespace Roki.Modules.Stocks
                     return;
                 }
 
+                decimal cost = shares * price.Value;
+
                 Investment investment = await Service.GetUserInvestment(Context.User.Id, Context.Guild.Id, symbol);
                 
                 // doesn't hold any shares - wants to short
@@ -50,6 +52,7 @@ namespace Roki.Modules.Stocks
                 if (investment is not {Shares: > 0})
                 {
                     // short selling not implemented
+                    await Context.Channel.SendErrorAsync("Short selling is not implemented yet.").ConfigureAwait(false);
                     return;
                     // todo check if they have enough collateral and margin
                     // await Service.SellShares(Context.User.Id, Context.Guild.Id, symbol, shares, price.Value);
@@ -57,15 +60,47 @@ namespace Roki.Modules.Stocks
                 }
 
                 // currently holding long - want to sell shares
-                if (investment.Shares > 0)
+                if (investment.Shares < shares)
                 {
-                    if (investment.Shares < shares)
+                    await Context.Channel.SendErrorAsync($"You only own `{investment.Shares}` shares of `{symbol}`").ConfigureAwait(false);
+                    return;
+                }
+                
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
+                    .WithTitle($"Confirm sell order - {Context.User.Username}")
+                    .WithDescription($"`{shares:N0}x` share(s) of `{symbol}` at `{price:N2}`\nTotal value: `{cost:N2}` {(await _config.GetGuildConfigAsync(Context.Guild.Id)).CurrencyIcon}")
+                    .WithFooter("yes/no"));
+
+                IMessage reply = await GetUserReply(TimeSpan.FromSeconds(30));
+                var tries = 0;
+                while (true)
+                {
+                    if (reply == null)
                     {
-                        await Context.Channel.SendErrorAsync($"You only own `{investment.Shares}` shares of `{symbol}`").ConfigureAwait(false);
+                        await Context.Channel.SendErrorAsync("Sell order cancelled, no confirmation received.");
                         return;
                     }
-                    await Service.SellShares(Context.User.Id, Context.Guild.Id, symbol, shares, price.Value);
+
+                    if (++tries > 2 || reply.Content.Equals("no", StringComparison.OrdinalIgnoreCase) && !reply.Content.Equals("n", StringComparison.OrdinalIgnoreCase))
+                    {
+                        await Context.Channel.SendErrorAsync("Sell order cancelled.");
+                        return;
+                    }
+                        
+                    if (reply.Content.Equals("yes") || !reply.Content.Equals("y"))
+                    {
+                        break;
+                    }
+                        
+                    reply = await GetUserReply(TimeSpan.FromSeconds(30));
                 }
+                
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
+                    .WithTitle($"Sell order successful - {Context.User.Username}")
+                    .WithDescription($"Sold `{shares:N0}x {symbol}`\n" + 
+                                     $"Total value: `{cost:N2}` {(await _config.GetGuildConfigAsync(Context.Guild.Id)).CurrencyIcon}"));
+                
+                await Service.SellShares(Context.User.Id, Context.Guild.Id, symbol, shares, price.Value);
             }
 
             [RokiCommand, Usage, Description, Aliases]
@@ -89,8 +124,9 @@ namespace Roki.Modules.Stocks
                 decimal investing = await Service.GetInvestingAccount(Context.User.Id, Context.Guild.Id);
                 if (investing < cost)
                 {
-                    await Context.Channel.SendErrorAsync("You do not have enough in your investing account to make that trade.\n" +
-                                                         $"You can transfer from your cash account `{_config.GetGuildPrefix(Context.Guild.Id)}transfer to investing {Math.Ceiling(cost - investing):N0}`")
+                    await Context.Channel.SendErrorAsync("Not enough in your investing account to make that trade.\n" +
+                                                         "You can transfer from your cash account\n" +
+                                                         $"`{await _config.GetGuildPrefix(Context.Guild.Id)}transfer to investing {Math.Ceiling(cost - investing)}`")
                         .ConfigureAwait(false);
                     return;
                 }
@@ -103,8 +139,8 @@ namespace Roki.Modules.Stocks
                 if (investment is not {Shares: < 0})
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                        .WithTitle("Confirm order?")
-                        .WithDescription($"`{shares:N0}x` share(s) of `{symbol}`\nTotal cost: `{cost:N2}` {(await _config.GetGuildConfigAsync(Context.Guild.Id)).CurrencyIcon}")
+                        .WithTitle($"Confirm buy order - {Context.User.Username}")
+                        .WithDescription($"`{shares:N0}x` share(s) of `{symbol}` at `{price:N0}`\nTotal cost: `{cost:N2}` {(await _config.GetGuildConfigAsync(Context.Guild.Id)).CurrencyIcon}")
                         .WithFooter("yes/no"));
 
                     IMessage reply = await GetUserReply(TimeSpan.FromSeconds(30));
@@ -133,8 +169,8 @@ namespace Roki.Modules.Stocks
 
                     await Service.BuyShares(Context.User.Id, Context.Guild.Id, symbol, shares, price.Value);
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                        .WithTitle("Order successful")
-                        .WithDescription($"`{shares:N0}x {symbol}` for `{cost:N2}`"));
+                        .WithTitle($"Buy order successful - {Context.User.Username}")
+                        .WithDescription($"Bought `{shares:N0}x {symbol}`\nTotal Cost: `{cost:N2}` {(await _config.GetGuildConfigAsync(Context.Guild.Id)).CurrencyIcon}"));
                     return;
                 }
                 
