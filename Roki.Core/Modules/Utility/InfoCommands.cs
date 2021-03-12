@@ -43,19 +43,18 @@ namespace Roki.Modules.Utility
             [RokiCommand, Description, Usage, Aliases]
             public async Task Stats()
             {
-                string ownerId = string.Join("\n", _config.OwnerIds);
-                if (string.IsNullOrWhiteSpace(ownerId)) ownerId = "-";
-
                 await Context.Channel.EmbedAsync(
                     new EmbedBuilder().WithDynamicColor(Context)
-                        .WithAuthor($"Roki v{StatsService.BotVersion}", Context.Client.CurrentUser.GetAvatarUrl())
-                        .AddField("Bot ID", _client.CurrentUser.Id, true)
-                        .AddField("Owner ID", ownerId, true)
-                        .AddField("Commands ran", _stats.CommandsRan, true)
-                        .AddField("Messages", _stats.MessageCounter, true)
+                        .WithAuthor($"Roki v{StatsService.BotVersion}")
+                        // todo
+                        .WithThumbnailUrl("https://cdn.discordapp.com/avatars/220678903432347650/892917d0b520b72b33bb59851b057e5f.png")
+                        .AddField("Bot Name", _client.CurrentUser, true)
+                        .AddField("Owner", _stats.AuthorUsername, true)
                         .AddField("Memory", $"{_stats.Heap} MB", true)
-                        .AddField("Uptime", _stats.GetUptimeString("\n"), true)
-                        .AddField("Presence", $"{_stats.TextChannels} Text Channels\n{_stats.VoiceChannels} Voice Channels", true));
+                        .AddField("Messages", _stats.MessageCounter, true)
+                        .AddField("Commands ran", _stats.CommandsRan, true)
+                        .AddField("Uptime", _stats.GetUptimeString(", "))
+                        .AddField("Presence", $"{_stats.TextChannels:N0} Text Channels\n{_stats.Guilds:N0} Servers"));
             }
 
             [RokiCommand, Usage, Description, Aliases, RequireContext(ContextType.Guild)]
@@ -148,8 +147,8 @@ namespace Roki.Modules.Utility
                 }
 
                 embed.AddField("ID", usr.Id, true)
-                    .AddField("Joined server", $"{usr.JoinedAt?.ToString("MM/dd/yyyy HH:mm") ?? "?"}", true)
-                    .AddField("Joined Discord", $"{usr.CreatedAt:MM/dd/yyyy HH:mm}", true)
+                    .AddField("Joined server", $"{usr.JoinedAt?.ToString("MM/dd/yyyy HH:mm") ?? "?"}")
+                    .AddField("Joined Discord", $"{usr.CreatedAt:MM/dd/yyyy HH:mm}")
                     .AddField("Roles", $"{string.Join("\n", usr.GetRoles().Take(10).Where(r => r.Id != r.Guild.EveryoneRole.Id).Select(r => r.Mention))}", true);
 
                 string avatar = usr.GetAvatarUrl();

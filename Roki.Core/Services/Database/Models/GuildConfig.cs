@@ -13,5 +13,8 @@ namespace Roki.Services.Database.Models
 
         [JsonIgnore]
         public virtual Guild Guild { get; set; }
+        
+        
+        // todo add: help on command error option
     }
 }
