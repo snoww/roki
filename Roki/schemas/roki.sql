@@ -126,24 +126,24 @@ create table subscription
 
 create table investment
 (
+    id            serial primary key,
     uid           bigint not null references users (id),
     guild_id      bigint not null references guild (id),
     symbol        text   not null,
     shares        bigint not null,
-    interest_date date,
-    primary key (uid, guild_id, symbol)
+    interest_date date
 );
 
 create table trade
 (
-    id       serial primary key,
-    guild_id bigint    not null references guild (id),
-    uid      bigint    not null references users (id),
-    symbol   text      not null,
-    shares   bigint    not null,
-    price    decimal   not null,
-    date     timestamp not null,
-    foreign key (uid, guild_id, symbol) references investment (uid, guild_id, symbol)
+    id            serial primary key,
+    investment_id int       not null references investment (id),
+    guild_id      bigint    not null references guild (id),
+    uid           bigint    not null references users (id),
+    symbol        text      not null,
+    shares        bigint    not null,
+    price         decimal   not null,
+    date          timestamp not null
 );
 
 create table message
