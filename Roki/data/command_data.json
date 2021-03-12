@@ -543,21 +543,6 @@
       "{0}inventory"
     ]
   },
-  "stockstats": {
-    "Aliases": "sst",
-    "Description": "Shows the statistics of the specified stock, optional all details",
-    "Usage": [
-      "{0}stockstats AAPL",
-      "{0}sst AAPL true"
-    ]
-  },
-  "stockquote": {
-    "Aliases": "sq",
-    "Description": "Shows current quote of the specified stock",
-    "Usage": [
-      "{0}stockquote AAPL"
-    ]
-  },
   "stocknews": {
     "Aliases": "sn",
     "Description": "Shows the current news about the specified company",
@@ -573,26 +558,26 @@
     ]
   },
   "stockprice": {
-    "Aliases": "price sp",
+    "Aliases": "price sp sq",
     "Description": "Shows the current price of the stock for the specified company",
     "Usage": [
-      "{0}stockprice AAPL"
+      "{0}stockprice MSFT"
     ]
   },
-  "stockposition": {
-    "Aliases": "position sb",
-    "Description": "Long or short shares of a company. Shorted shares will be charged a premium every week.",
+  "stockbuy": {
+    "Aliases": "sb",
+    "Description": "Purchase shares of a company. Funds are taken from investing account",
     "Usage": [
-      "{0}stockbuy long AAPL 50",
-      "{0}position short AAPL 15"
+      "{0}stockbuy 50 AAPL",
+      "{0}sb 100 GME"
     ]
   },
   "stocksell": {
     "Aliases": "ss",
-    "Description": "Sell a specified amount of shares.",
+    "Description": "Sells shares of a company. Funds are deposited into your investing account",
     "Usage": [
-      "{0}stocksell AAPL 50",
-      "{0}ss AAPL 20"
+      "{0}stocksell TSLA 50",
+      "{0}ss DIS 20"
     ]
   },
   "transfer": {
@@ -611,17 +596,9 @@
       "{0}portfolio @snow"
     ]
   },
-  "stockchart": {
-    "Aliases": "chart sc",
-    "Description": "Shows the chart for the specified company, default is 1m. Options are `5y` `2y` `1y` `ytd` `6m` `3m` `1m` `5d` `today`",
-    "Usage": [
-      "{0}chart aapl",
-      "{0}chart goog today"
-    ]
-  },
   "userdetails": {
     "Aliases": "",
-    "Description": "Shows the users userid, username, discriminator, and avatarid/",
+    "Description": "Shows the users userid, username, discriminator, and avatar id",
     "Usage": [
       "{0}userdetails @snow"
     ]
@@ -641,13 +618,6 @@
     "Usage": [
       "{0}uwu hey how are you",
       "{0}uwu"
-    ]
-  },
-  "nickname": {
-    "Aliases": "nick",
-    "Description": "Changes the target users nickname. Lasts forever or until user changes back. Must be a moderator or have an available power (Consumes the power).",
-    "Usage": [
-      "{0}nick @snow snowww"
     ]
   },
   "jeopardy": {

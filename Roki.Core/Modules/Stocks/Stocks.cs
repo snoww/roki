@@ -60,43 +60,11 @@ namespace Roki.Modules.Stocks
                     .WithAuthor(article.Source, url: article.Url)
                     .WithDescription($"{article.Summary}\nSource: [{article.Source}]({article.Url})".TrimTo(2048))
                     .WithImageUrl(article.Image)
-                    .WithFooter($"{article.DateTime.ToEasternStandardTime():yyyy-MM-dd h:mm:ss tt} EST");
+                    .WithFooter($"{article.DateTime.ToEasternStandardTime():yyyy/MM/dd h:mm tt} EST");
                 if (article.HasPayWall)
                     embed.WithDescription("NOTE: article has paywall\n\n" + article.Summary);
                 return embed;
             }, news.Length, 1, false).ConfigureAwait(false);
-        }
-        
-        [RokiCommand, Usage, Description, Aliases]
-        public async Task StockQuote(string symbol)
-        {
-            symbol = symbol.ParseStockTicker();
-            Quote quote = await Service.GetQuoteAsync(symbol).ConfigureAwait(false);
-            if (quote == null)
-            {
-                await Context.Channel.SendErrorAsync("Unknown Symbol").ConfigureAwait(false);
-                return;
-            }
-            string logo = await Service.GetLogoAsync(symbol).ConfigureAwait(false);
-
-            EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
-                .WithAuthor(quote.Symbol, logo)
-                .WithTitle(quote.CompanyName)
-                .AddField("Primary Exchange", quote.PrimaryExchange)
-                .AddField("Latest Price", quote.LatestPrice.ToString("N2"))
-                .AddField("Change", quote.Change.ToString("N2"), true)
-                .AddField("Change %", quote.ChangePercent.ToString("P2"), true)
-                .WithFooter($"Latest Time {quote.LatestUpdate.ToEasternStandardTime():yyyy-MM-dd h:mm:ss tt} EST");
-            if (quote.Open != null)
-                embed.AddField("Open", quote.Open.Value.ToString("N2"), true);
-            if (quote.Close != null)
-                embed.AddField("Close", quote.Close.Value.ToString("N2"), true);
-            if (quote.High != null)
-                embed.AddField("High", quote.High.Value.ToString("N2"), true);
-            if (quote.Low != null)
-                embed.AddField("Low", quote.Low.Value.ToString("N2"), true);
-            
-            await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         [RokiCommand, Usage, Description, Aliases]
@@ -118,13 +86,12 @@ namespace Roki.Modules.Stocks
                 .AppendLine(quote.LatestPrice.ToString("N2"));
             if (quote.Change >= 0)
             {
-                sb.AppendLine("Change").Append('+').AppendLine(quote.Change.ToString("N2"))
-                    .AppendLine("Change %").Append('+').AppendLine(quote.ChangePercent.ToString("P2"));
+                sb.AppendLine("Change:").Append('+').AppendLine(quote.Change.ToString("N2"))
+                    .Append('+').AppendLine(quote.ChangePercent.ToString("P2"));
             }
             else
             {
-                sb.AppendLine("Change").AppendLine(quote.Change.ToString("N2"))
-                    .AppendLine("Change %")
+                sb.AppendLine("Change:").AppendLine(quote.Change.ToString("N2"))
                     .AppendLine(quote.ChangePercent.ToString("P2"));
             }
 
@@ -134,7 +101,7 @@ namespace Roki.Modules.Stocks
                     .WithTitle(quote.CompanyName)
                     .WithAuthor(symbol, logo)
                     .WithDescription(sb.ToString())
-                    .AddField("Last Updated", $"{quote.LatestUpdate.ToEasternStandardTime():yyyy-MM-dd h:mm:ss tt} EST")
+                    .AddField("Last Updated", $"{quote.LatestUpdate.ToEasternStandardTime():h:mm:ss tt} EST")
                     .WithFooter(quote.LatestSource))
                 .ConfigureAwait(false);
         }
