@@ -248,5 +248,10 @@ namespace Roki.Extensions
         {
             return guid.ToString().Substring(0, 7);
         }
+
+        public static double ToDouble(this decimal d)
+        {
+            return decimal.ToDouble(d);
+        }
     }
 }

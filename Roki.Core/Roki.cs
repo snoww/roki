@@ -85,6 +85,7 @@ namespace Roki
 
             sw.Stop();
             Logger.Info("Roki connected in {Elapsed} s", sw.Elapsed.TotalSeconds);
+            Logger.Info("Loading database and cache");
 
             Services.GetRequiredService<IStatsService>().Initialize();
             await Services.GetRequiredService<CommandHandler>().StartHandling().ConfigureAwait(false);
@@ -137,7 +138,6 @@ namespace Roki
             Task UpdateDatabase()
             {
                 ready.TrySetResult(true);
-                Logger.Info("Loading database and cache");
 
                 Task _ = Task.Run(async () =>
                 {
@@ -181,6 +181,7 @@ namespace Roki
                                 });
                                 
                                 await context.UserData.AddRangeAsync(new UserData(BotId, guild.Id), new UserData(guild.OwnerId, guild.Id));
+                                
                                 await context.SaveChangesAsync();
                                 await context.Channels.AddRangeAsync(guild.TextChannels.Select(channel => new Channel(channel.Id, guild.Id, channel.Name) { ChannelConfig = new ChannelConfig()}).ToList());
                             }

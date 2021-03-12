@@ -5,6 +5,7 @@ namespace Roki.Services.Database.Models
 {
     public class UserData
     {
+        // todo user data guild defaults
         public UserData(ulong userId, ulong guildId)
         {
             UserId = userId;

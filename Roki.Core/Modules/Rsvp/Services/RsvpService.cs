@@ -839,8 +839,6 @@ namespace Roki.Modules.Rsvp.Services
 
         private async Task ReactionHandler(Cacheable<IUserMessage, ulong> cache, ISocketMessageChannel channel, SocketReaction r)
         {
-            // todo remove this
-            Logger.Warn("New Reaction Handler added");
             if (r.User.Value.IsBot || !Choices.Contains(r.Emote) || await _cache.KeyExistsAsync($"event:{cache.Id}"))
             {
                 return;
@@ -852,10 +850,21 @@ namespace Roki.Modules.Rsvp.Services
             var key = (int) await _cache.StringGetAsync($"event:{cache.Id}");
             Event ev = await context.Events.AsQueryable().SingleAsync(x => x.Id == key);
 
-            IUserMessage msg = await cache.DownloadAsync().ConfigureAwait(false);
-            IEmbed old = msg.Embeds.First();
-            if (old == null)
+            IUserMessage msg;
+            IEmbed old;
+            try
             {
+                msg = await cache.DownloadAsync().ConfigureAwait(false);
+                old = msg.Embeds.First();
+                if (old == null)
+                {
+                    return;
+                }
+            }
+            catch (Exception)
+            {
+                _activeReminders.TryRemove((int) await _cache.StringGetAsync($"event:{cache.Id}"), out _);
+                await _cache.KeyDeleteAsync($"event:{cache.Id}");
                 return;
             }
 

@@ -8,6 +8,7 @@ using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
+using Roki.Extensions;
 using Roki.Modules.Currency;
 using Roki.Services.Database;
 using Roki.Services.Database.Models;
@@ -23,8 +24,10 @@ namespace Roki.Services
         Task AddCurrencyAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount);
         Task<bool> TransferCurrencyAsync(ulong senderId, ulong recipientId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount);
         Task<bool> TransferAccountAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, long amount, int fromAccount);
+        Task AddInvestingAsync(ulong userId, ulong guildId, decimal amount);
+        Task<bool> RemoveInvestingAsync(ulong userId, ulong guildId, decimal amount);
     }
-    
+
     public class CurrencyService : ICurrencyService
     {
         private readonly DiscordSocketClient _client;
@@ -38,19 +41,51 @@ namespace Roki.Services
             _scopeFactory = scopeFactory;
             _cache = cache.Redis.GetDatabase();
         }
-        
+
         public async Task<long> GetCurrencyAsync(ulong userId, ulong guildId)
         {
             RedisValue cur = await _cache.StringGetAsync($"$c:{userId}:{guildId}");
             if (cur.IsNull)
             {
-                UserData data = await GetOrCreateUserDataAsync(userId, guildId);
-                if (data == null)
+                using IServiceScope scope = _scopeFactory.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<RokiContext>();
+
+                var accounts = await context.UserData.AsNoTracking().AsQueryable()
+                    .Where(x => x.UserId == userId && x.GuildId == guildId)
+                    .Select(x => new {x.Currency})
+                    .SingleOrDefaultAsync();
+
+                if (accounts == null)
                 {
-                    return 0;
+                    UserData data;
+
+                    if (await context.Users.AsNoTracking().AnyAsync(x => x.Id == userId))
+                    {
+                        data = new UserData(userId, guildId);
+                    }
+                    else
+                    {
+                        IUser user = _client.GetUser(userId);
+                        if (user == null)
+                        {
+                            Log.Warn("User {userid} not found.", userId);
+                            return 0;
+                        }
+
+                        data = new UserData(userId, guildId)
+                        {
+                            User = new User(user.Username, user.Discriminator, user.AvatarId)
+                        };
+                    }
+
+                    await context.UserData.AddAsync(data);
+                    await context.SaveChangesAsync();
+                    await _cache.StringSetAsync($"$c:{userId}:{guildId}", data.Currency, TimeSpan.FromDays(1));
+                    return data.Currency;
                 }
-                await _cache.StringSetAsync($"$c:{userId}:{guildId}", data.Currency, TimeSpan.FromDays(1));
-                return data.Currency;
+
+                await _cache.StringSetAsync($"$c:{userId}:{guildId}", accounts.Currency, TimeSpan.FromDays(1));
+                return accounts.Currency;
             }
 
             await _cache.KeyExpireAsync($"$c:{userId}:{guildId}", TimeSpan.FromDays(1));
@@ -62,30 +97,78 @@ namespace Roki.Services
             RedisValue cur = await _cache.StringGetAsync($"$i:{userId}:{guildId}");
             if (cur.IsNull)
             {
-                UserData data = await GetOrCreateUserDataAsync(userId, guildId);
-                if (data == null)
+                using IServiceScope scope = _scopeFactory.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<RokiContext>();
+
+                var accounts = await context.UserData.AsNoTracking().AsQueryable()
+                    .Where(x => x.UserId == userId && x.GuildId == guildId)
+                    .Select(x => new {x.Investing})
+                    .SingleOrDefaultAsync();
+
+                if (accounts == null)
                 {
-                    return 0;
+                    UserData data;
+
+                    if (await context.Users.AsNoTracking().AnyAsync(x => x.Id == userId))
+                    {
+                        data = new UserData(userId, guildId);
+                    }
+                    else
+                    {
+                        IUser user = _client.GetUser(userId);
+                        if (user == null)
+                        {
+                            Log.Warn("User {userid} not found.", userId);
+                            return 0;
+                        }
+
+                        data = new UserData(userId, guildId)
+                        {
+                            User = new User(user.Username, user.Discriminator, user.AvatarId)
+                        };
+                    }
+
+                    await context.UserData.AddAsync(data);
+                    await context.SaveChangesAsync();
+                    await _cache.StringSetAsync($"$i:{userId}:{guildId}", data.Investing.ToDouble(), TimeSpan.FromDays(1));
+                    return data.Investing;
                 }
-                
-                await _cache.StringSetAsync($"$i:{userId}:{guildId}", data.Investing.ToString(CultureInfo.InvariantCulture));
-                return data.Investing;
+
+                await _cache.StringSetAsync($"$i:{userId}:{guildId}", accounts.Investing.ToDouble(), TimeSpan.FromDays(1));
+                return accounts.Investing;
             }
 
-            return decimal.Parse(cur, NumberStyles.AllowDecimalPoint);
+            await _cache.KeyExpireAsync($"$i:{userId}:{guildId}", TimeSpan.FromDays(1));
+            return (decimal) cur;
+        }
+
+        private async Task SetBotAccountsCache(ulong guildId)
+        {
+            RedisKey[] keys = {new($"$i:{Roki.BotId}:{guildId}"), new($"$i:{Roki.BotId}:{guildId}")};
+            if (await _cache.KeyExistsAsync(keys) == 2)
+            {
+                return;
+            }
+
+            using IServiceScope scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<RokiContext>();
+            var accounts = await context.UserData.AsQueryable().Where(x => x.UserId == Roki.BotId && x.GuildId == guildId).Select(x => new {x.Currency, x.Investing}).SingleAsync();
+
+            _cache.StringSet($"$c:{Roki.BotId}:{guildId}", accounts.Currency, TimeSpan.FromDays(1));
+            _cache.StringSet($"$i:{Roki.BotId}:{guildId}", accounts.Investing.ToDouble(), TimeSpan.FromDays(1));
         }
 
         public async Task<bool> RemoveCurrencyAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount)
         {
-            long currency = await GetCurrencyAsync(userId, guildId);
-            if (amount <= 0 || currency - amount < 0)
+            if (amount <= 0 || await GetCurrencyAsync(userId, guildId) < amount)
             {
                 return false;
             }
 
+            await SetBotAccountsCache(guildId);
             await _cache.StringIncrementAsync($"$c:{userId}:{guildId}", -amount);
             await _cache.StringIncrementAsync($"$c:{Roki.BotId}:{guildId}", amount);
-            await DbAddRemoveAsync(userId, guildId, channelId, messageId, reason, -amount);
+            await DbAddRemoveCashAsync(userId, guildId, channelId, messageId, reason, -amount);
             return true;
         }
 
@@ -93,18 +176,19 @@ namespace Roki.Services
         {
             // make sure it exists in cache
             await GetCurrencyAsync(userId, guildId);
+            await SetBotAccountsCache(guildId);
             await _cache.StringIncrementAsync($"$c:{userId}:{guildId}", amount);
             await _cache.StringIncrementAsync($"$c:{Roki.BotId}:{guildId}", -amount);
-            await DbAddRemoveAsync(userId, guildId, channelId, messageId, reason, amount);
+            await DbAddRemoveCashAsync(userId, guildId, channelId, messageId, reason, amount);
         }
 
         public async Task<bool> TransferCurrencyAsync(ulong senderId, ulong recipientId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount)
         {
-            long senderCurrency = await GetCurrencyAsync(senderId, guildId);
-            if (amount <= 0 || senderCurrency - amount < 0)
+            if (amount <= 0 || await GetCurrencyAsync(senderId, guildId) < amount)
             {
                 return false;
             }
+
             // make sure recipient exists in cache
             await GetCurrencyAsync(recipientId, guildId);
             await _cache.StringIncrementAsync($"$c:{senderId}:{guildId}", -amount);
@@ -119,69 +203,56 @@ namespace Roki.Services
             // 1 = investing
             if (fromAccount == 0)
             {
-                long currency = await GetCurrencyAsync(userId, guildId);
-                if (amount <= 0 || currency - amount < 0)
+                if (amount <= 0 || await GetCurrencyAsync(userId, guildId) < amount)
                 {
                     return false;
                 }
+
                 await _cache.StringIncrementAsync($"$c:{userId}:{guildId}", -amount);
-                decimal investing = await GetInvestingAsync(userId, guildId);
-                investing += amount;
-                await _cache.StringSetAsync($"$i:{userId}:{guildId}", investing.ToString(CultureInfo.InvariantCulture));
+                await _cache.StringIncrementAsync($"$i:{userId}:{guildId}", amount);
                 await DbTransferAccountAsync(userId, guildId, channelId, messageId, amount, fromAccount, "Transfer from cash to investing account");
             }
             else
             {
-                decimal investing = await GetInvestingAsync(userId, guildId);
-                if (amount <= 0 || investing - amount < 0)
+                if (amount <= 0 || await GetInvestingAsync(userId, guildId) < amount)
                 {
                     return false;
                 }
+
                 await _cache.StringIncrementAsync($"$c:{userId}:{guildId}", amount);
-                investing -= amount;
-                await _cache.StringSetAsync($"$i:{userId}:{guildId}", investing.ToString(CultureInfo.InvariantCulture));
+                await _cache.StringIncrementAsync($"$i:{userId}:{guildId}", -amount);
                 await DbTransferAccountAsync(userId, guildId, channelId, messageId, amount, fromAccount, "Transfer from investing to cash account");
             }
 
             return true;
         }
 
-        private async Task<UserData> GetOrCreateUserDataAsync(ulong userId, ulong guildId)
+        public async Task AddInvestingAsync(ulong userId, ulong guildId, decimal amount)
         {
-            using IServiceScope scope = _scopeFactory.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<RokiContext>();
+            await SetBotAccountsCache(guildId);
+            await _cache.StringIncrementAsync($"$i:{userId}:{guildId}", amount.ToDouble());
+            await _cache.StringIncrementAsync($"$i:{Roki.BotId}:{guildId}", -amount.ToDouble());
 
-            UserData data = await context.UserData.AsQueryable().Where(x => x.UserId == userId && x.GuildId == guildId).SingleOrDefaultAsync();
-            if (data == null)
+            await DbAddRemoveInvestingAsync(userId, guildId, amount);
+        }
+
+        public async Task<bool> RemoveInvestingAsync(ulong userId, ulong guildId, decimal amount)
+        {
+            if (await GetInvestingAsync(userId, guildId) < amount)
             {
-                if (await context.Users.AsNoTracking().AnyAsync(x => x.Id == userId))
-                {
-                    data = new UserData(userId, guildId);
-                }
-                else
-                {
-                    IUser user = _client.GetUser(userId);
-                    if (user == null)
-                    {
-                        Log.Warn("User {userid} not found.", userId);
-                        return null;
-                    }
-                    data = new UserData(userId, guildId)
-                    {
-                        User = new User(user.Username, user.Discriminator, user.AvatarId)
-                    };
-                }
-
-                await context.UserData.AddAsync(data);
-                await context.SaveChangesAsync();
+                return false;
             }
-            
-            return data;
+
+            await SetBotAccountsCache(guildId);
+            await _cache.StringIncrementAsync($"$i:{userId}:{guildId}", -amount.ToDouble());
+            await _cache.StringIncrementAsync($"$i:{Roki.BotId}:{guildId}", amount.ToDouble());
+            await DbAddRemoveInvestingAsync(userId, guildId, -amount);
+            return true;
         }
 
         // if positive amount: add to user's currency
         // if negative amount: remove user's currency
-        private Task DbAddRemoveAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount)
+        private Task DbAddRemoveCashAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount)
         {
             Task _ = Task.Run(async () =>
             {
@@ -212,10 +283,39 @@ namespace Roki.Services
                 {
                     await context.Transactions.AddAsync(new Transaction(userId, Roki.BotId, guildId, channelId, messageId, amount, reason));
                 }
-                
+
                 await context.SaveChangesAsync();
             });
-            
+
+            return Task.CompletedTask;
+        }
+
+        private Task DbAddRemoveInvestingAsync(ulong userId, ulong guildId, decimal amount)
+        {
+            Task _ = Task.Run(async () =>
+            {
+                using IServiceScope scope = _scopeFactory.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<RokiContext>();
+                List<UserData> data = await context.UserData.AsQueryable().Where(x => (x.UserId == userId || x.UserId == Roki.BotId) && x.GuildId == guildId).ToListAsync();
+                if (data.Count != 2)
+                {
+                    Log.Error("Something went wrong when trying to add/remove currency from user: {userid}", userId);
+                }
+
+                if (data[0].UserId == Roki.BotId)
+                {
+                    data[0].Investing -= amount;
+                    data[1].Investing += amount;
+                }
+                else
+                {
+                    data[0].Investing += amount;
+                    data[1].Investing -= amount;
+                }
+
+                await context.SaveChangesAsync();
+            });
+
             return Task.CompletedTask;
         }
 
@@ -230,6 +330,7 @@ namespace Roki.Services
                 {
                     Log.Error("Something went wrong when trying to transfer currency from user: {senderid} to: {recipientid}", senderId, recipientId);
                 }
+
                 if (data[0].UserId == senderId)
                 {
                     data[0].Currency -= amount;
@@ -244,7 +345,7 @@ namespace Roki.Services
                 await context.Transactions.AddAsync(new Transaction(senderId, recipientId, guildId, channelId, messageId, amount, reason));
                 await context.SaveChangesAsync();
             });
-            
+
             return Task.CompletedTask;
         }
 
@@ -265,12 +366,12 @@ namespace Roki.Services
                     data.Currency += amount;
                     data.Investing -= amount;
                 }
-                
+
                 await context.Transactions.AddAsync(new Transaction(userId, userId, guildId, channelId, messageId, amount, description));
 
                 await context.SaveChangesAsync();
             });
-            
+
             return Task.CompletedTask;
         }
     }

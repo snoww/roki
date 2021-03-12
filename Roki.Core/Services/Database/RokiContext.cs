@@ -263,10 +263,12 @@ namespace Roki.Services.Database
                     .HasColumnName("interest_date");
 
                 entity.Property(e => e.Shares).HasColumnName("shares");
-
-                entity.Property(e => e.Trades)
-                    .IsRequired()
-                    .HasColumnName("trades");
+                
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Investments)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("investment_uid_fkey");
             });
 
             modelBuilder.Entity<StoreItem>(entity =>
@@ -379,18 +381,10 @@ namespace Roki.Services.Database
                 entity.ToTable("trade");
 
                 entity.Property(e => e.Id).HasColumnName("id");
-
-                entity.Property(e => e.Action)
-                    .IsRequired()
-                    .HasColumnName("action");
-
-                entity.Property(e => e.Amount).HasColumnName("amount");
+                
+                entity.Property(e => e.Shares).HasColumnName("shares");
 
                 entity.Property(e => e.GuildId).HasColumnName("guild_id");
-
-                entity.Property(e => e.Position)
-                    .IsRequired()
-                    .HasColumnName("position");
 
                 entity.Property(e => e.Price).HasColumnName("price");
 
@@ -403,6 +397,12 @@ namespace Roki.Services.Database
                     .HasColumnName("date");
 
                 entity.Property(e => e.UserId).HasColumnName("uid");
+                
+                entity.HasOne(d => d.Investment)
+                    .WithMany(p => p.Trades)
+                    .HasForeignKey(d => new { d.UserId, d.GuildId, d.Symbol })
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("trade_uid_guild_id_symbol_fkey");
             });
 
             modelBuilder.Entity<Transaction>(entity =>
