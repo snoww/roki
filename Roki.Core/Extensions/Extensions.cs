@@ -32,7 +32,7 @@ namespace Roki.Extensions
 
         public static EmbedBuilder WithDynamicColor(this EmbedBuilder embed, ICommandContext context)
         {
-            return embed.WithDynamicColor(context.Guild.Id);
+            return context.Channel is IDMChannel ? embed.WithOkColor() : embed.WithDynamicColor(context.Guild.Id);
         }
 
         public static EmbedBuilder WithDynamicColor(this EmbedBuilder embed, ulong guildId)
@@ -138,7 +138,7 @@ namespace Roki.Extensions
 
         public static string FormatRemarks(this CommandInfo command, string prefix)
         {
-            return string.Join("\n", command.Remarks.Deserialize<string[]>().Select(x => Format.Code(string.Format(x, prefix))));
+            return string.Join("\n", command.Remarks.Deserialize<string[]>().Select(x => string.Format(x, prefix)));
         }
 
         public static Stream ToStream(this Image<Rgba32> img, IImageFormat format = null)

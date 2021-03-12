@@ -23,17 +23,80 @@ namespace Roki.Modules.Help.Services
 
         private async Task CommandOnError(ExecuteCommandResult result)
         {
-            if (result.Result.Error == CommandError.BadArgCount || result.Result.Error == CommandError.ParseFailed)
+            string errorMessage;
+            var showUsage = true;
+            Console.WriteLine(result.Result.Error);
+            switch (result.Result.Error)
             {
-                if (result.Context.Channel is IDMChannel)
+                case CommandError.UnmetPrecondition:
+                    showUsage = false;
+                    if (result.Result.ErrorReason.Contains("context", StringComparison.Ordinal))
+                    {
+                        errorMessage = "This command can only be ran in Servers";
+                    }
+                    else if (result.Result.ErrorReason.Contains("permissions"))
+                    {
+                        errorMessage = result.Result.ErrorReason.Replace("guild", "server", StringComparison.Ordinal);
+                    }
+                    else
+                    {
+                        errorMessage = result.Result.ErrorReason;
+                    }
+                    break;
+                case CommandError.BadArgCount:
+                    errorMessage = result.Result.ErrorReason;
+                    break;
+                case CommandError.ObjectNotFound:
+                    showUsage = false;
+                    errorMessage = result.Result.ErrorReason;
+                    break;
+                case CommandError.ParseFailed:
+                    errorMessage = "Invalid arguments provided.";
+                    break;
+                default:
+                    return;
+            }
+            
+            if (result.Context.Channel is IDMChannel)
+            {
+                await SendErrorInfo(result, Roki.Properties.Prefix, errorMessage, showUsage);
+            }
+            else
+            {
+                await SendErrorInfo(result, await _config.GetGuildPrefix(result.Context.Guild.Id), errorMessage, showUsage);
+            }
+        }
+        
+        private static async Task SendErrorInfo(ExecuteCommandResult result, string prefix, string customError, bool showUsage)
+        {
+            var str = $"**`{prefix + result.CommandInfo.Aliases[0]}`**";
+            string aliases = string.Join("/", result.CommandInfo.Aliases.Skip(1).Select(a => $"`{a}`"));
+            if (!string.IsNullOrWhiteSpace(aliases))
+            {
+                str += $"/{aliases}";
+            }
+            
+            EmbedBuilder embed = new EmbedBuilder().WithTitle(str)
+                .WithErrorColor()
+                .WithDescription($"```Error: {customError}```")
+                .WithFooter($"Module: {result.CommandInfo.Module.GetTopLevelModule().Name}");
+
+            if (showUsage)
+            {
+                embed.AddField("Correct Usage", "```" + result.CommandInfo.FormatRemarks(prefix) + "```");
+            }
+
+            Type options = ((RokiOptions) result.CommandInfo.Attributes.FirstOrDefault(x => x is RokiOptions))?.OptionType;
+            if (options != null)
+            {
+                string optionsHelp = GetCommandOptions(options);
+                if (!string.IsNullOrWhiteSpace(optionsHelp))
                 {
-                    await SendCommandInfo(result.CommandInfo, result.Context, Roki.Properties.Prefix);
-                }
-                else
-                {
-                    await SendCommandInfo(result.CommandInfo, result.Context, await _config.GetGuildPrefix(result.Context.Guild.Id));
+                    embed.AddField("Options", optionsHelp);
                 }
             }
+
+            await result.Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
         public static async Task SendCommandInfo(CommandInfo command, ICommandContext context, string prefix)
@@ -45,9 +108,19 @@ namespace Roki.Modules.Help.Services
                 str += $"/{aliases}";
             }
 
-            EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(context).AddField(str, command.FormatSummary(prefix), true)
-                .AddField("Examples", command.FormatRemarks(prefix))
+            EmbedBuilder embed = new EmbedBuilder().WithTitle(str)
+                .WithDescription(command.FormatSummary(prefix))
+                .AddField("Examples", "```" + command.FormatRemarks(prefix) + "```")
                 .WithFooter($"Module: {command.Module.GetTopLevelModule().Name}");
+            
+            if (context.Channel is IDMChannel)
+            {
+                embed.WithOkColor();
+            }
+            else
+            {
+                embed.WithDynamicColor(context);
+            }
 
             string requirements = GetCommandRequirements(command);
             if (!string.IsNullOrWhiteSpace(requirements))
