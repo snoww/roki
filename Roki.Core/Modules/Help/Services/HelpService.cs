@@ -13,11 +13,27 @@ namespace Roki.Modules.Help.Services
 {
     public class HelpService : IRokiService
     {
-        private readonly CommandHandler _command;
+        private readonly IConfigurationService _config;
 
-        public HelpService(CommandHandler command)
+        public HelpService(CommandHandler command, IConfigurationService config)
         {
-            _command = command;
+            _config = config;
+            command.CommandOnError += CommandOnError;
+        }
+
+        private async Task CommandOnError(ExecuteCommandResult result)
+        {
+            if (result.Result.Error == CommandError.BadArgCount || result.Result.Error == CommandError.ParseFailed)
+            {
+                if (result.Context.Channel is IDMChannel)
+                {
+                    await SendCommandInfo(result.CommandInfo, result.Context, Roki.Properties.Prefix);
+                }
+                else
+                {
+                    await SendCommandInfo(result.CommandInfo, result.Context, await _config.GetGuildPrefix(result.Context.Guild.Id));
+                }
+            }
         }
 
         public static async Task SendCommandInfo(CommandInfo command, ICommandContext context, string prefix)
@@ -30,7 +46,7 @@ namespace Roki.Modules.Help.Services
             }
 
             EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(context).AddField(str, command.FormatSummary(prefix), true)
-                .AddField("Usage", command.FormatRemarks(prefix), true)
+                .AddField("Examples", command.FormatRemarks(prefix))
                 .WithFooter($"Module: {command.Module.GetTopLevelModule().Name}");
 
             string requirements = GetCommandRequirements(command);

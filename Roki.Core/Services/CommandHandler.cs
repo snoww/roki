@@ -34,8 +34,8 @@ namespace Roki.Services
 
         private string DefaultPrefix { get; }
 
-        public event Func<IUserMessage, CommandInfo, Task> CommonOnSuccess = delegate { return Task.CompletedTask; };
-        public event Func<CommandInfo, ITextChannel, string, Task> CommonOnError = delegate { return Task.CompletedTask; };
+        public event Func<IUserMessage, CommandInfo, Task> CommandOnSuccess = delegate { return Task.CompletedTask; };
+        public event Func<ExecuteCommandResult, Task> CommandOnError = delegate { return Task.CompletedTask; };
         public event Func<IUserMessage, Task> OnMessageNoTrigger = delegate { return Task.CompletedTask; };
 
         public Task StartHandling()
@@ -53,7 +53,7 @@ namespace Roki.Services
         {
             try
             {
-                if (message.Author.IsBot || !(message is SocketUserMessage userMessage))
+                if (message.Author.IsBot || message is not SocketUserMessage userMessage)
                 {
                     return;
                 }
@@ -80,24 +80,24 @@ namespace Roki.Services
             if (channel is IDMChannel && message.Content.StartsWith(DefaultPrefix, StringComparison.Ordinal))
             {
                 var sw = Stopwatch.StartNew();
-                (bool success, string error, CommandInfo info) = await ExecuteCommandAsync(new CommandContext(_client, message),
+                ExecuteCommandResult result = await ExecuteCommandAsync(new CommandContext(_client, message),
                         message.Content[DefaultPrefix.Length..], _services, MultiMatchHandling.Best)
                     .ConfigureAwait(false);
 
                 sw.Stop();
-                if (success)
+                if (result.Success)
                 {
                     await LogSuccess(message, channel as ITextChannel, sw.ElapsedMilliseconds).ConfigureAwait(false);
-                    await CommonOnSuccess(message, info).ConfigureAwait(false);
+                    await CommandOnSuccess(message, result.CommandInfo).ConfigureAwait(false);
                     return;
                 }
 
-                if (error != null)
+                if (result.Result != null)
                 {
-                    LogError(error, message, channel as ITextChannel, sw.ElapsedMilliseconds);
+                    LogError(result.Result.ErrorReason, message, channel as ITextChannel, sw.ElapsedMilliseconds);
                     if (guild != null)
                     {
-                        await CommonOnError(info, channel as ITextChannel, error).ConfigureAwait(false);
+                        await CommandOnError(result).ConfigureAwait(false);
                     }
                 }
 
@@ -113,22 +113,22 @@ namespace Roki.Services
             if (message.Content.StartsWith(prefix, StringComparison.Ordinal))
             {
                 var sw = Stopwatch.StartNew();
-                (bool success, string error, CommandInfo info) = await ExecuteCommandAsync(new CommandContext(_client, message),
+                ExecuteCommandResult result = await ExecuteCommandAsync(new CommandContext(_client, message),
                         message.Content[prefix.Length..], _services, MultiMatchHandling.Best)
                     .ConfigureAwait(false);
 
                 sw.Stop();
-                if (success)
+                if (result.Success)
                 {
                     await LogSuccess(message, channel as ITextChannel, sw.ElapsedMilliseconds).ConfigureAwait(false);
-                    await CommonOnSuccess(message, info).ConfigureAwait(false);
+                    await CommandOnSuccess(message, result.CommandInfo).ConfigureAwait(false);
                     return;
                 }
 
-                if (error != null)
+                if (result.Result != null)
                 {
-                    LogError(error, message, channel as ITextChannel, sw.ElapsedMilliseconds);
-                    await CommonOnError(info, channel as ITextChannel, error).ConfigureAwait(false);
+                    LogError(result.Result.ErrorReason, message, channel as ITextChannel, sw.ElapsedMilliseconds);
+                    await CommandOnError(result).ConfigureAwait(false);
                 }
             }
             else
@@ -137,13 +137,13 @@ namespace Roki.Services
             }
         }
 
-        private async Task<(bool Success, string Error, CommandInfo Info)> ExecuteCommandAsync(ICommandContext context, string input,
+        private async Task<ExecuteCommandResult> ExecuteCommandAsync(ICommandContext context, string input,
             IServiceProvider services, MultiMatchHandling multiMatchHandling)
         {
             SearchResult searchResult = _commandService.Search(context, input);
             if (!searchResult.IsSuccess)
             {
-                return (false, null, null);
+                return new ExecuteCommandResult(false, null, null, context);
             }
 
             IReadOnlyList<CommandMatch> commands = searchResult.Commands;
@@ -159,7 +159,7 @@ namespace Roki.Services
             if (successes.Length == 0)
             {
                 KeyValuePair<CommandMatch, PreconditionResult> bestMatch = preconditions.OrderByDescending(x => x.Key.Command.Priority).FirstOrDefault(x => !x.Value.IsSuccess);
-                return (false, bestMatch.Value.ErrorReason, commands[0].Command);
+                return new ExecuteCommandResult(false, bestMatch.Value, commands[0].Command, context);
             }
 
             var parseResultDict = new Dictionary<CommandMatch, ParseResult>();
@@ -206,7 +206,7 @@ namespace Roki.Services
             {
                 KeyValuePair<CommandMatch, ParseResult> bestMatch = orderedResults
                     .FirstOrDefault(x => !x.Value.IsSuccess);
-                return (false, bestMatch.Value.ErrorReason, commands[0].Command);
+                return new ExecuteCommandResult(false, bestMatch.Value, commands[0].Command, context);
             }
 
             CommandInfo command = successfulParses[0].Key.Command;
@@ -218,7 +218,7 @@ namespace Roki.Services
                 Logger.Error(result.Exception, "Command execute exception");
             }
 
-            return (true, null, command);
+            return new ExecuteCommandResult(true, null, command, context);
         }
 
         private static Task LogSuccess(IMessage message, IGuildChannel channel, long seconds)
@@ -271,6 +271,22 @@ namespace Roki.Services
                     message.Author, message.Author.Id, message.Content, error
                 );
             }
+        }
+    }
+
+    public struct ExecuteCommandResult
+    {
+        public bool Success { get; }
+        public IResult Result { get; }
+        public CommandInfo CommandInfo { get; }
+        public ICommandContext Context { get; }
+
+        public ExecuteCommandResult(bool success, IResult result, CommandInfo commandInfo, ICommandContext context)
+        {
+            Success = success;
+            Result = result;
+            CommandInfo = commandInfo;
+            Context = context;
         }
     }
 }

@@ -5,10 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Roki.Common;
 using Roki.Common.Attributes;
 using Roki.Extensions;
-using Roki.Modules.Help.Common;
 using Roki.Modules.Help.Services;
 using Roki.Services;
 
@@ -42,11 +40,9 @@ namespace Roki.Modules.Help
             await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
-        [RokiCommand, Description, Usage, Aliases, RokiOptions(typeof(CommandArgs))]
-        public async Task Commands(string moduleName = null, params string[] args)
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task Commands(string moduleName = null)
         {
-            CommandArgs opts = OptionsParser.ParseFrom(new CommandArgs(), args);
-
             moduleName = moduleName?.Trim().ToUpperInvariant();
             if (string.IsNullOrWhiteSpace(moduleName))
             {
@@ -61,22 +57,15 @@ namespace Roki.Modules.Help
                 .Distinct(new CommandTextEqualityComparer())
                 .ToList();
 
-            var success = new HashSet<CommandInfo>();
-            if (opts.View != CommandArgs.ViewType.All)
-            {
-                success = new HashSet<CommandInfo>((await Task.WhenAll(commands.Select(async x =>
-                    {
-                        PreconditionResult precondition = await x.CheckPreconditionsAsync(Context, _services).ConfigureAwait(false);
-                        return (Command: x, Success: precondition.IsSuccess);
-                    })).ConfigureAwait(false))
-                    .Where(x => x.Success)
-                    .Select(x => x.Command));
-
-                if (opts.View == CommandArgs.ViewType.Hide)
+            var success = new HashSet<CommandInfo>((await Task.WhenAll(commands.Select(async x =>
                 {
-                    commands = commands.Where(x => success.Contains(x)).ToList();
-                }
-            }
+                    PreconditionResult precondition = await x.CheckPreconditionsAsync(Context, _services).ConfigureAwait(false);
+                    return (Command: x, Success: precondition.IsSuccess);
+                })).ConfigureAwait(false))
+                .Where(x => x.Success)
+                .Select(x => x.Command));
+            
+            commands = commands.Where(x => success.Contains(x)).ToList();
 
             List<IGrouping<string, CommandInfo>> module = commands.GroupBy(c => c.Module.Name.Replace("Commands", "", StringComparison.Ordinal))
                 .OrderBy(x => x.Key == x.First().Module.Name ? int.MaxValue : x.Count())
@@ -84,15 +73,7 @@ namespace Roki.Modules.Help
 
             if (!commands.Any())
             {
-                if (opts.View != CommandArgs.ViewType.Hide)
-                {
-                    await Context.Channel.SendErrorAsync($"Module not found, use `{prefix}modules` to see the list of modules.").ConfigureAwait(false);
-                }
-                else
-                {
-                    await Context.Channel.SendErrorAsync("Module not found or you do not have permission to execute commands in that module.").ConfigureAwait(false);
-                }
-
+                await Context.Channel.SendErrorAsync($"Module not found, use `{prefix}modules` to see the list of modules.").ConfigureAwait(false);
                 return;
             }
 
@@ -110,15 +91,7 @@ namespace Roki.Modules.Help
                     string aliases = "[" + string.Join("/", command.Aliases.Skip(1)) + "]";
                     // command names should be less than 30 characters
                     int padding = Math.Abs(30 - commandName.Length);
-
-                    if (opts.View == CommandArgs.ViewType.Cross)
-                    {
-                        formatted.AppendLine($"{(success.Contains(command) ? "✅" : "❌")}" + commandName + aliases.PadLeft(padding - 1, ' '));
-                    }
-                    else
-                    {
-                        formatted.AppendLine(commandName + aliases.PadLeft(padding, ' '));
-                    }
+                    formatted.AppendLine(commandName + aliases.PadLeft(padding, ' '));
                 }
 
                 embed.AddField(submodule.Key, $"```css\n{string.Join("\n", formatted)}\n```");
