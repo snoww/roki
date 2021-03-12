@@ -34,7 +34,7 @@ namespace Roki.Modules.Currency
             user ??= Context.User;
             await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                     .WithTitle($"{user.Username}'s Cash Account")
-                    .WithDescription($"`{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}` {(await _config.GetGuildConfigAsync(Context.Guild.Id)).CurrencyIcon}")
+                    .WithDescription($"`{await _currency.GetCurrencyAsync(user.Id, Context.Guild.Id):N0}` {(await _config.GetGuildConfigAsync(Context.Guild.Id)).CurrencyIcon}")
                     .WithFooter($"{await _config.GetGuildPrefix(Context.Guild.Id)}$$ for Investing Account"))
                 .ConfigureAwait(false);
         }
@@ -45,7 +45,7 @@ namespace Roki.Modules.Currency
             user ??= Context.User;
             await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                     .WithTitle($"{user.Username}'s Investing Account")
-                    .WithDescription($"`{await _currency.GetInvestingAsync(Context.User.Id, Context.Guild.Id):N2}` {(await _config.GetGuildConfigAsync(Context.Guild.Id)).CurrencyIcon}")
+                    .WithDescription($"`{await _currency.GetInvestingAsync(user.Id, Context.Guild.Id):N2}` {(await _config.GetGuildConfigAsync(Context.Guild.Id)).CurrencyIcon}")
                     .WithFooter($"{await _config.GetGuildPrefix(Context.Guild.Id)}$ for Cash Account"))
                 .ConfigureAwait(false);
         }

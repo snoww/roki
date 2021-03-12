@@ -144,7 +144,7 @@ namespace Roki.Services
 
         private async Task SetBotAccountsCache(ulong guildId)
         {
-            RedisKey[] keys = {new($"$i:{Roki.BotId}:{guildId}"), new($"$i:{Roki.BotId}:{guildId}")};
+            RedisKey[] keys = {new($"$c:{Roki.BotId}:{guildId}"), new($"$i:{Roki.BotId}:{guildId}")};
             if (await _cache.KeyExistsAsync(keys) == 2)
             {
                 return;
