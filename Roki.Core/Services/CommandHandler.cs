@@ -95,10 +95,7 @@ namespace Roki.Services
                 if (result.Result != null)
                 {
                     LogError(result.Result.ErrorReason, message, channel as ITextChannel, sw.ElapsedMilliseconds);
-                    if (guild != null)
-                    {
-                        await CommandOnError(result).ConfigureAwait(false);
-                    }
+                    await CommandOnError(result).ConfigureAwait(false);
                 }
 
                 return;

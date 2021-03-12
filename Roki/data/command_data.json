@@ -6,6 +6,13 @@
     "{0}about"
   ]
 },
+  "invite": {
+    "Aliases": "",
+    "Description": "Invite link for Roki to join your server.",
+    "Usage": [
+      "{0}invite"
+    ]
+  },
   "stats": {
     "Aliases": "",
     "Description": "Basic stats for Roki.",
@@ -477,7 +484,7 @@
   },
   "trivia": {
     "Aliases": "t",
-    "Description": "Starts a new 10 question trivia game with optional category (use `.tc` to check categories). Default is all categories. Awards currency based on difficulty. Needs at least 60% to get rewards.",
+    "Description": "Starts a new 10 question trivia game with optional category (use `{0}tc` to check categories). Default is all categories. Awards currency based on difficulty. Needs at least 60% to get rewards.",
     "Usage": [
       "{0}trivia optional_category",
       "{0}t",
