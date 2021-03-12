@@ -26,7 +26,7 @@ namespace Roki.Modules.Stocks.Services
         public async Task<List<Investment>> GetUserPortfolio(ulong userId, ulong guildId)
         {
             return await _context.Investments.AsNoTracking()
-                .Where(x => x.UserId == userId && x.GuildId == guildId)
+                .Where(x => x.UserId == userId && x.GuildId == guildId && x.Shares != 0)
                 .ToListAsync();
         }
 
