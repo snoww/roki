@@ -4,7 +4,7 @@ using Roki.Common;
 
 namespace Roki.Modules.Games.Common
 {
-    public class ChessArgs : ICommandArgs
+    public class ChessOptions : ICommandOptions
     {
         [Option('t', "time", Required = false, Default = 10, HelpText = "Maximum time for chess game in minutes. Default is 10 min.")]
         public int Time { get; set; }
@@ -17,7 +17,7 @@ namespace Roki.Modules.Games.Common
         
         public IGuildUser ChallengeTo { get; set; }
 
-        public void NormalizeArgs()
+        public void NormalizeOptions()
         {
             if (Time <= 0 || Time > 180)
             {

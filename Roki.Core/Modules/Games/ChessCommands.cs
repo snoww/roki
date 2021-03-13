@@ -18,7 +18,7 @@ namespace Roki.Modules.Games
         public class ChessCommands : RokiSubmodule<ChessService>
         {
             [RokiCommand, Description, Aliases, Usage]
-            [RokiOptions(typeof(ChessArgs))]
+            [RokiOptions(typeof(ChessOptions))]
             public async Task ChessChallenge(IGuildUser opponent, params string[] args)
             {
                 if (opponent == Context.User)
@@ -32,7 +32,7 @@ namespace Roki.Modules.Games
                     await Context.Channel.SendErrorAsync("You cannot challenge a bot (yet)!").ConfigureAwait(false);
                     return;
                 }
-                var opts = OptionsParser.ParseFrom(new ChessArgs(), args);
+                var opts = OptionsParser.ParseFrom(new ChessOptions(), args);
                 opts.ChallengeTo = opponent;
 
                 var response = await Service.CreateChessChallenge(opts).ConfigureAwait(false);

@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
+using Roki.Common;
 using Roki.Common.Attributes;
 using Roki.Extensions;
+using Roki.Modules.Currency.Common;
 using Roki.Services;
 using Roki.Services.Database;
 using Roki.Services.Database.Models;
@@ -79,38 +81,44 @@ namespace Roki.Modules.Currency
             await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
-        [RokiCommand, Description, Usage, Aliases]
-        public async Task Transfer(Account account, decimal amount)
+        [RokiCommand, Description, Usage, Aliases, RokiOptions(typeof(TransferOptions))]
+        public async Task Transfer(params string[] args)
         {
-            // todo specify from to
+            TransferOptions options = OptionsParser.ParseFrom(new TransferOptions(), args);
+            if (options == null)
+            {
+                // idk how to throw error to go to command error
+                await Context.Channel.SendErrorAsync($"```Error: Invalid arguments provided.```\nCorrect Usage:\n`{await _config.GetGuildPrefix(Context.Guild.Id)} <amount> <to/from> <cash/investing>`").ConfigureAwait(false);
+                return;
+            }
             GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
-            if (amount <= 0)
+            if (options.Amount <= 0)
             {
                 await Context.Channel.SendErrorAsync($"You must transfer at least `1` {guildConfig.CurrencyIcon}").ConfigureAwait(false);
                 return;
             }
 
-            string fromAcc;
-            string toAcc;
-            if ((int) account == 0)
+            if (options.Direction == Direction.To && options.Account == Account.Investing || options.Direction == Direction.From && options.Account == Account.Cash)
             {
-                fromAcc = "Cash";
-                toAcc = "Investing";
+                if (!await _currency.TransferAccountAsync(Context.User.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, options.Amount, Account.Cash))
+                {
+                    await Context.Channel.SendErrorAsync($"You do not have enough {guildConfig.CurrencyIcon} in your `{Account.Cash}` account to transfer.").ConfigureAwait(false);
+                    return;
+                }
+                
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
+                    .WithDescription($"{Context.User.Mention} You've successfully transferred `{options.Amount:N0}` {guildConfig.CurrencyIcon}\nFrom `{Account.Cash}` to `{Account.Investing}`")).ConfigureAwait(false);
             }
             else
             {
-                fromAcc = "Investing";
-                toAcc = "Cash";
+                if (!await _currency.TransferAccountAsync(Context.User.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, options.Amount, Account.Investing))
+                {
+                    await Context.Channel.SendErrorAsync($"You do not have enough {guildConfig.CurrencyIcon} in your `{Account.Investing}` account to transfer.").ConfigureAwait(false);
+                    return;
+                }
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
+                    .WithDescription($"{Context.User.Mention} You've successfully transferred `{options.Amount:N0}` {guildConfig.CurrencyIcon}\nFrom `{Account.Investing}` to `{Account.Cash}`")).ConfigureAwait(false);
             }
-
-            if (!await _currency.TransferAccountAsync(Context.User.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, (long) amount, (int) account))
-            {
-                await Context.Channel.SendErrorAsync($"You do not have enough {guildConfig.CurrencyIcon} in your `{fromAcc}` to transfer.").ConfigureAwait(false);
-                return;
-            }
-            
-            await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                .WithDescription($"{Context.User.Mention} You've successfully transferred `{amount:N0}` {guildConfig.CurrencyIcon}\nFrom `{fromAcc}` to `{toAcc}`")).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
@@ -208,12 +216,13 @@ namespace Roki.Modules.Currency
     
     public enum Account
     {
-        Cash = 0,
-        Stone = 0,
-        Debit = 0,
-        Investing = 1,
-        Invest = 1,
-        Inv = 1,
-        Trading = 1
+        Cash,
+        Investing
+    }
+
+    public enum Direction
+    {
+        To,
+        From
     }
 }
