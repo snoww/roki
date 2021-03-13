@@ -59,7 +59,9 @@ create table guild_config
     trivia_easy           int              not null,
     trivia_med            int              not null,
     trivia_hard           int              not null,
-    notification_location int              not null
+    notification_location int              not null,
+    show_help bool not null ,
+    jeopardy_multiplier double precision not null ,
 );
 
 create table channel_config

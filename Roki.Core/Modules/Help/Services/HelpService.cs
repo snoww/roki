@@ -26,14 +26,16 @@ namespace Roki.Modules.Help.Services
         {
             string errorMessage;
             var showUsage = true;
+            var showOptions = true;
             Console.WriteLine(result.Result.Error);
             switch (result.Result.Error)
             {
                 case CommandError.UnmetPrecondition:
                     showUsage = false;
+                    showOptions = false;
                     if (result.Result.ErrorReason.Contains("context", StringComparison.Ordinal))
                     {
-                        errorMessage = "This command can only be ran in Servers";
+                        errorMessage = "This command can only be run in Servers";
                     }
                     else if (result.Result.ErrorReason.Contains("permissions"))
                     {
@@ -49,6 +51,7 @@ namespace Roki.Modules.Help.Services
                     break;
                 case CommandError.ObjectNotFound:
                     showUsage = false;
+                    showOptions = false;
                     errorMessage = result.Result.ErrorReason;
                     break;
                 case CommandError.ParseFailed:
@@ -60,15 +63,15 @@ namespace Roki.Modules.Help.Services
             
             if (result.Context.Channel is IDMChannel)
             {
-                await SendErrorInfo(result, Roki.Properties.Prefix, errorMessage, showUsage);
+                await SendErrorInfo(result, Roki.Properties.Prefix, errorMessage, showUsage, showOptions);
             }
             else
             {
-                await SendErrorInfo(result, await _config.GetGuildPrefix(result.Context.Guild.Id), errorMessage, showUsage);
+                await SendErrorInfo(result, await _config.GetGuildPrefix(result.Context.Guild.Id), errorMessage, showUsage, showOptions);
             }
         }
         
-        private static async Task SendErrorInfo(ExecuteCommandResult result, string prefix, string customError, bool showUsage)
+        private static async Task SendErrorInfo(ExecuteCommandResult result, string prefix, string customError, bool showUsage, bool showOptions)
         {
             var str = $"**`{prefix + result.CommandInfo.Aliases[0]}`**";
             string aliases = string.Join("/", result.CommandInfo.Aliases.Skip(1).Select(a => $"`{a}`"));
@@ -87,16 +90,19 @@ namespace Roki.Modules.Help.Services
                 embed.AddField("Correct Usage", "```" + result.CommandInfo.FormatRemarks(prefix) + "```");
             }
 
-            Type options = ((RokiOptions) result.CommandInfo.Attributes.FirstOrDefault(x => x is RokiOptions))?.OptionType;
-            if (options != null)
+            if (showOptions)
             {
-                string optionsHelp = GetCommandOptions(options);
-                if (!string.IsNullOrWhiteSpace(optionsHelp))
+                Type options = ((RokiOptions) result.CommandInfo.Attributes.FirstOrDefault(x => x is RokiOptions))?.OptionType;
+                if (options != null)
                 {
-                    embed.AddField("Options", optionsHelp);
+                    string optionsHelp = GetCommandOptions(options);
+                    if (!string.IsNullOrWhiteSpace(optionsHelp))
+                    {
+                        embed.AddField("Options", optionsHelp);
+                    }
                 }
             }
-
+            
             await result.Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
 
@@ -153,11 +159,11 @@ namespace Roki.Modules.Help.Services
                 {
                     if (string.IsNullOrWhiteSpace(optionAttribute.ShortName))
                     {
-                        helpOptions.Append($"`--{optionAttribute.LongName} ").AppendLine(optionAttribute.HelpText);
+                        helpOptions.Append($"`--{optionAttribute.LongName}` ").AppendLine(optionAttribute.HelpText);
                     }
                     else
                     {
-                        helpOptions.Append($"`--{optionAttribute.ShortName}, --{optionAttribute.LongName} ").AppendLine(optionAttribute.HelpText);
+                        helpOptions.Append($"`--{optionAttribute.ShortName}, --{optionAttribute.LongName}` ").AppendLine(optionAttribute.HelpText);
                     }
                 }
                 else if (attribute is ValueAttribute valueAttribute)

@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -22,6 +24,7 @@ namespace Roki.Modules.Games
             private readonly DiscordSocketClient _client;
             private readonly ICurrencyService _currency;
             private readonly IConfigurationService _config;
+            private readonly SemaphoreSlim _semaphore = new(1, 1);
 
             public JeopardyCommands(DiscordSocketClient client, ICurrencyService currency, IConfigurationService config)
             {
@@ -48,12 +51,26 @@ namespace Roki.Modules.Games
                     return;
                 }
 
-                List<Category> categories = await Service.GenerateGame(opts.NumCategories).ConfigureAwait(false);
+                await _semaphore.WaitAsync();
 
-                var jeopardy = new Jeopardy(_client, await _config.GetGuildConfigAsync(Context.Guild.Id), categories, Context.Guild, Context.Channel as ITextChannel, _currency, await Service.GenerateFinalJeopardy());
+                Jeopardy jeopardy;
+                try
+                {
+                    List<Category> categories = await Service.GenerateGame(opts.NumCategories).ConfigureAwait(false);
+
+                    jeopardy = new Jeopardy(_client, await _config.GetGuildConfigAsync(Context.Guild.Id), categories, Context.Guild, Context.Channel as ITextChannel, _currency, await Service.GenerateFinalJeopardy());
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Could not start jeopardy game");
+                    _semaphore.Release();
+                    return;
+                }
+                
 
                 if (Service.ActiveGames.TryAdd(Context.Channel.Id, jeopardy))
                 {
+                    _semaphore.Release();
                     try
                     {
                         await jeopardy.StartGame().ConfigureAwait(false);
@@ -67,6 +84,12 @@ namespace Roki.Modules.Games
                             jeopardy.Dispose();
                         }
                     }
+                }
+                else
+                {
+                    _semaphore.Release();
+                    Log.Error("Could not start jeopardy game");
+                    jeopardy.Dispose();
                 }
             }
 

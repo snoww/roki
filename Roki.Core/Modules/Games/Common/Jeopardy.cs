@@ -372,7 +372,7 @@ namespace Roki.Modules.Games.Common
             await _channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithAuthor("Final Jeopardy!")
                     .WithTitle($"{_finalJeopardy.Name}")
-                    .WithDescription(_finalJeopardy.Clues.Single().Text.EscapeMarkdown()+ "\n\nContestants have 60 seconds to answer the question.")
+                    .WithDescription(_finalJeopardy.Clues[0].Text.EscapeMarkdown()+ "\n\nContestants have 60 seconds to answer the question.")
                     .WithFooter($"#{_finalJeopardy.Id} | answers will NOT be checked here"))
                 .ConfigureAwait(false);
 
@@ -380,7 +380,7 @@ namespace Roki.Modules.Games.Common
 
             await _channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
                     .WithAuthor("Final Jeopardy!")
-                    .WithDescription($"The correct answer is:\n`{_finalJeopardy.Clues.Single().Answer}`"))
+                    .WithDescription($"The correct answer is:\n`{_finalJeopardy.Clues[0].Answer}`"))
                 .ConfigureAwait(false);
 
             await Task.Delay(TimeSpan.FromSeconds(3)).ConfigureAwait(false);
@@ -432,7 +432,7 @@ namespace Roki.Modules.Games.Common
                                 $"You successfully wagered `${wager:N0}`\nPlease wait until all other participants have submitted their wager."))
                         .ConfigureAwait(false);
 
-                    Users.AddOrUpdate(user, -wager, (u, old) => old - wager);
+                    Users.AddOrUpdate(user, -wager, (_, old) => old - wager);
                     _confirmed.TryTake(out bool _);
                     while (!_confirmed.IsEmpty) await Task.Delay(1000).ConfigureAwait(false);
 
@@ -440,11 +440,11 @@ namespace Roki.Modules.Games.Common
                     await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
                             .WithAuthor("Final Jeopardy!")
                             .WithTitle($"{_finalJeopardy.Name}")
-                            .WithDescription(_finalJeopardy.Clues.Single().Text.EscapeMarkdown() + "\n\nYou have 60 seconds to answer your question. You can submit as many times as you want, however, only the LATEST message is recorded.")
-                            .WithFooter($"Your wager is ${wager:N0}. Submit your answer now."))
+                            .WithDescription(_finalJeopardy.Clues[0].Text.EscapeMarkdown() + "\n\nYou have 60 seconds to answer your question. You can submit as many times as you want, however, only the LAST message is recorded.")
+                            .WithFooter($"#{_finalJeopardy.Clues[0].Id} | Your wager is ${wager:N0}. Submit your answer now."))
                         .ConfigureAwait(false);
 
-                    _finalJeopardyAnswers.Add(user.Id, $"{user}: `${wager:N0}` - `No Answer`");
+                    _finalJeopardyAnswers.Add(user.Id, $"{user} `${wager:N0}` - `No Answer`");
                     var cancel = new CancellationTokenSource();
                     try
                     {
@@ -471,16 +471,16 @@ namespace Roki.Modules.Games.Common
                             {
                                 if (msg.Author.IsBot || msg.Channel.Id != dm.Id || !Regex.IsMatch(msg.Content.ToLowerInvariant(), "^what|where|who")) return;
                                 var guess = false;
-                                if (_finalJeopardy.Clues.Single().CheckAnswer(msg.Content) && !cancel.IsCancellationRequested)
+                                if (_finalJeopardy.Clues[0].CheckAnswer(msg.Content) && !cancel.IsCancellationRequested)
                                 {
-                                    Users.AddOrUpdate(user, wager * 2, (u, old) => old + wager * 2);
-                                    _finalJeopardyAnswers[user.Id] = $"{user.Username}: `${wager:N0}` - {msg.Content}";
+                                    Users.AddOrUpdate(user, wager * 2, (_, old) => old + wager * 2);
+                                    _finalJeopardyAnswers[user.Id] = $"{user.Username} `{wager:N0}` {_config.CurrencyIcon} - `{msg.Content.Replace("\n", "").TrimTo(100)}`";
                                     guess = true;
                                 }
 
                                 if (!guess)
                                 {
-                                    _finalJeopardyAnswers[user.Id] = $"{user.Username}: `${wager:N0}` - {msg.Content.TrimTo(100)}";
+                                    _finalJeopardyAnswers[user.Id] = $"{user.Username} `{wager:N0}` {_config.CurrencyIcon} - `{msg.Content.Replace("\n", "").TrimTo(100)}`";
                                     return;
                                 }
 
@@ -489,7 +489,7 @@ namespace Roki.Modules.Games.Common
                                 await dm.EmbedAsync(new EmbedBuilder().WithColor(Color)
                                         .WithAuthor("Final Jeopardy!")
                                         .WithTitle($"{_finalJeopardy.Name}")
-                                        .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was:\n`{_finalJeopardy.Clues.Single().Answer}`\n" +
+                                        .WithDescription($"{msg.Author.Mention} Correct.\nThe correct answer was:\n`{_finalJeopardy.Clues[0].Answer}`\n" +
                                                          $"Your total score is: `{Users[user]:N0}`"))
                                     .ConfigureAwait(false);
                             }
