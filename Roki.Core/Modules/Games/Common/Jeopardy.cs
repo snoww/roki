@@ -29,6 +29,9 @@ namespace Roki.Modules.Games.Common
         private readonly Dictionary<ulong, string> _finalJeopardyAnswers = new();
         private readonly SemaphoreSlim _guess = new(1, 1);
         private readonly SemaphoreSlim _voteSkip = new(1, 1);
+        private readonly JaroWinkler _jw = new();
+
+        private const double MinSimilarity = 0.95;
 
         private readonly IGuild _guild;
 
@@ -214,12 +217,11 @@ namespace Roki.Modules.Games.Common
                 string price = message[message.LastIndexOf(" for ", StringComparison.Ordinal)..];
                 int amount = int.Parse(new string(price.Where(char.IsDigit).ToArray()));
 
-                var cLev = new Levenshtein(userCategory);
                 Category category = _categories.FirstOrDefault(c => c.Name.SanitizeStringFull().ToLowerInvariant().Contains(userCategory, StringComparison.Ordinal));
                 
                 if (category == null)
                 {
-                    foreach (Category c in _categories.Where(c => c.Name.Split().Any(cName => cLev.DistanceFrom(cName.SanitizeStringFull().ToLowerInvariant()) <= Math.Round(cName.Length * 0.2))))
+                    foreach (Category c in _categories.Where(c => c.Name.Split().Any(cName => _jw.Similarity(cName.SanitizeStringFull().ToLowerInvariant(), message) >= MinSimilarity)))
                     {
                         category = c;
                         break;
@@ -251,8 +253,7 @@ namespace Roki.Modules.Games.Common
                         goto found;
                     }
                     
-                    var cLev = new Levenshtein(userCat.SanitizeStringFull());
-                    foreach (Category cat in _categories.Where(cat => cat.Name.Split().Any(cName => cLev.DistanceFrom(cName.SanitizeStringFull().ToLowerInvariant()) <= Math.Round(cName.Length * 0.2))))
+                    foreach (Category cat in _categories.Where(cat => cat.Name.ToLowerInvariant().Split().Any(cName => _jw.Similarity(cName.SanitizeStringFull(), userCat) >= MinSimilarity)))
                     {
                         category = cat;
                         goto found;

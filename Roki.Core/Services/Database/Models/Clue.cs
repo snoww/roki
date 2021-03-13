@@ -11,7 +11,7 @@ using Roki.Modules.Games.Common;
 
 namespace Roki.Services.Database.Models
 {
-public class Clue
+    public class Clue
     {
         public int Id { get; set; }
         public int CategoryId { get; set; }
@@ -33,11 +33,16 @@ public class Clue
         private readonly HashSet<string> _acceptedAnswers = new();
         private string _minAnswer;
 
+        private readonly JaroWinkler _jw = new();
+
+        // need to fine tune this
+        private const double MinSimilarity = 0.95;
+
         public void PrepareAnswer()
         {
             string minAnswer = ConvertASCII.FoldToASCII(Answer.ToCharArray(), Answer.Length);
 
-            minAnswer = Regex.Replace(minAnswer.ToLowerInvariant(), "^(the |a |an )", "")
+            minAnswer = Regex.Replace(minAnswer.ToLowerInvariant().Replace("\"", "").Replace("'", ""), "^(the |a |an )", "")
                 .Replace(" the ", " ")
                 .Replace(" an ", " ")
                 .Replace(" a ", " ");
@@ -173,25 +178,13 @@ public class Clue
         public bool CheckAnswer(string answer)
         {
             answer = ConvertASCII.FoldToASCII(answer.ToCharArray(), answer.Length);
+            answer = answer.ToLowerInvariant().Replace("\"", "").Replace("'", "");
 
             if (Answer.StartsWith("(2 of)", StringComparison.Ordinal) || Answer.StartsWith("(3 of)", StringComparison.Ordinal))
             {
                 List<string> answers = SanitizeAnswerToList(answer);
                 if (answers == null) return false;
-                var correct = 0;
-                foreach (string optionalAnswer in _acceptedAnswers)
-                {
-                    var ansLev = new Levenshtein(optionalAnswer);
-                    foreach (string ans in answers)
-                    {
-                        if (ansLev.DistanceFrom(ans) <= Math.Round(optionalAnswer.Length * 0.1))
-                        {
-                            correct++;
-                            // so they don't get points for submitting the same answer multiple times
-                            break;
-                        }
-                    }
-                }
+                int correct = _acceptedAnswers.Count(optionalAnswer => answers.Any(ans => _jw.Similarity(optionalAnswer, ans) >= MinSimilarity));
 
                 if (Answer.StartsWith("(2 of)", StringComparison.Ordinal))
                 {
@@ -213,19 +206,7 @@ public class Clue
                     List<string> answers = SanitizeAnswerToList(answer);
                     if (answers != null)
                     {
-                        var correct = 0;
-                        foreach (string optionalAnswer in _acceptedAnswers)
-                        {
-                            var ansLev = new Levenshtein(optionalAnswer);
-                            foreach (string ans in answers)
-                            {
-                                if (!(ansLev.DistanceFrom(ans) <= Math.Round(optionalAnswer.Length * 0.1))) continue;
-                                correct++;
-                                // so they don't get points for submitting the same answer multiple times
-                                break;
-                            }
-                        }
-
+                        int correct = _acceptedAnswers.Count(optionalAnswer => answers.Any(ans => _jw.Similarity(optionalAnswer, ans) >= MinSimilarity));
                         if (answers.Count == correct)
                         {
                             return true;
@@ -242,34 +223,20 @@ public class Clue
                 }
             }
 
-            var minLev = new Levenshtein(_minAnswer);
-            int distance = minLev.DistanceFrom(sanitizedAnswer);
-            // exact answer
-            if (distance == 0)
+            double similarity = _jw.Similarity(_minAnswer, sanitizedAnswer);
+            // pretty much exact answer
+            if (_minAnswer.Length <= 5 && similarity >= 0.99)
             {
                 return true;
             }
 
-            // if min answer is less than 5 characters long, you need to have distance of 0 (i.e. exact answer)
-            if (_minAnswer.Length <= 5)
-            {
-                return false;
-            }
-
-            // if min answer is less than 9 characters long, you can have a distance of 1
-            if (_minAnswer.Length <= 9)
-            {
-                return distance <= 1;
-            }
-
             // otherwise calculate min distance by length
-            return distance <= Math.Round(_minAnswer.Length * 0.15);
+            return similarity >= 0.90;
         }
 
         private static string SanitizeAnswer(string answer)
         {
             //remove all the?
-            answer = answer.ToLowerInvariant();
             answer = Regex.Replace(answer, "^(what |whats |where |wheres |who |whos )", "");
             answer = Regex.Replace(answer, "^(is |are |was |were )", "");
             return Regex.Replace(answer, "^(the |a |an )", "").Replace(" and ", "", StringComparison.Ordinal).Replace(" the ", "").SanitizeStringFull();
@@ -277,7 +244,6 @@ public class Clue
 
         private static List<string> SanitizeAnswerToList(string answer)
         {
-            answer = answer.ToLowerInvariant();
             answer = Regex.Replace(answer, "^(what |whats |where |wheres |who |whos )", "");
             answer = Regex.Replace(answer, "^(is |are |was |were )", "");
             string[] guesses;
@@ -311,4 +277,5 @@ public class Clue
 
             return answers;
         }
-    }}
+    }
+}
