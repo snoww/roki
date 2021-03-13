@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using CommandLine;
 using Discord;
@@ -143,20 +144,29 @@ namespace Roki.Modules.Help.Services
 
         private static string GetCommandOptions(Type option)
         {
-            IEnumerable<string> options = option.GetProperties()
-                .Select(x => x.GetCustomAttributes(true).FirstOrDefault(a => a is OptionAttribute))
-                .Where(x => x != null)
-                .Cast<OptionAttribute>()
-                .Select(x =>
+            var helpOptions = new StringBuilder();
+            foreach (object attribute in option.GetProperties()
+                .Select(x => x.GetCustomAttributes(true).FirstOrDefault(a => a is OptionAttribute || a is ValueAttribute))
+                .Where(x => x != null))
+            {
+                if (attribute is OptionAttribute optionAttribute)
                 {
-                    string optionString = !string.IsNullOrWhiteSpace(x.ShortName) 
-                        ? $"`-{x.ShortName}`, `--{x.LongName}`" 
-                        : $"`--{x.LongName}`";
-
-                    optionString += $" {x.HelpText}";
-                    return optionString;
-                });
-            return string.Join("\n", options);
+                    if (string.IsNullOrWhiteSpace(optionAttribute.ShortName))
+                    {
+                        helpOptions.Append($"`--{optionAttribute.LongName} ").AppendLine(optionAttribute.HelpText);
+                    }
+                    else
+                    {
+                        helpOptions.Append($"`--{optionAttribute.ShortName}, --{optionAttribute.LongName} ").AppendLine(optionAttribute.HelpText);
+                    }
+                }
+                else if (attribute is ValueAttribute valueAttribute)
+                {
+                    helpOptions.Append($"`{valueAttribute.MetaValue}` ").AppendLine(valueAttribute.HelpText);
+                }
+            }
+            
+            return string.Join("\n", helpOptions.ToString());
         }
 
         private static string GetCommandRequirements(CommandInfo command)

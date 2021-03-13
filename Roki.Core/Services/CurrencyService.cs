@@ -23,7 +23,7 @@ namespace Roki.Services
         Task<bool> RemoveCurrencyAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount);
         Task AddCurrencyAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount);
         Task<bool> TransferCurrencyAsync(ulong senderId, ulong recipientId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount);
-        Task<bool> TransferAccountAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, long amount, int fromAccount);
+        Task<bool> TransferAccountAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, long amount, Account fromAccount);
         Task AddInvestingAsync(ulong userId, ulong guildId, decimal amount);
         Task<bool> RemoveInvestingAsync(ulong userId, ulong guildId, decimal amount);
     }
@@ -130,16 +130,16 @@ namespace Roki.Services
 
                     await context.UserData.AddAsync(data);
                     await context.SaveChangesAsync();
-                    await _cache.StringSetAsync($"$i:{userId}:{guildId}", data.Investing.ToDouble(), TimeSpan.FromDays(1));
+                    await _cache.StringSetAsync($"$i:{userId}:{guildId}", data.Investing.ToString(CultureInfo.InvariantCulture), TimeSpan.FromDays(1));
                     return data.Investing;
                 }
 
-                await _cache.StringSetAsync($"$i:{userId}:{guildId}", accounts.Investing.ToDouble(), TimeSpan.FromDays(1));
+                await _cache.StringSetAsync($"$i:{userId}:{guildId}", accounts.Investing.ToString(CultureInfo.InvariantCulture), TimeSpan.FromDays(1));
                 return accounts.Investing;
             }
 
             await _cache.KeyExpireAsync($"$i:{userId}:{guildId}", TimeSpan.FromDays(1));
-            return (decimal) cur;
+            return decimal.Parse(cur);
         }
 
         private async Task SetBotAccountsCache(ulong guildId)
@@ -155,7 +155,7 @@ namespace Roki.Services
             var accounts = await context.UserData.AsQueryable().Where(x => x.UserId == Roki.BotId && x.GuildId == guildId).Select(x => new {x.Currency, x.Investing}).SingleAsync();
 
             _cache.StringSet($"$c:{Roki.BotId}:{guildId}", accounts.Currency, TimeSpan.FromDays(1));
-            _cache.StringSet($"$i:{Roki.BotId}:{guildId}", accounts.Investing.ToDouble(), TimeSpan.FromDays(1));
+            _cache.StringSet($"$i:{Roki.BotId}:{guildId}", accounts.Investing.ToString(CultureInfo.InvariantCulture), TimeSpan.FromDays(1));
         }
 
         public async Task<bool> RemoveCurrencyAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, string reason, long amount)
@@ -197,11 +197,10 @@ namespace Roki.Services
             return true;
         }
 
-        public async Task<bool> TransferAccountAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, long amount, int fromAccount)
+        public async Task<bool> TransferAccountAsync(ulong userId, ulong guildId, ulong channelId, ulong messageId, long amount, Account fromAccount)
         {
-            // 0 = currency
-            // 1 = investing
-            if (fromAccount == 0)
+            decimal investing = await GetInvestingAsync(userId, guildId);
+            if (fromAccount == Account.Cash)
             {
                 if (amount <= 0 || await GetCurrencyAsync(userId, guildId) < amount)
                 {
@@ -209,19 +208,19 @@ namespace Roki.Services
                 }
 
                 await _cache.StringIncrementAsync($"$c:{userId}:{guildId}", -amount);
-                await _cache.StringIncrementAsync($"$i:{userId}:{guildId}", amount);
-                await DbTransferAccountAsync(userId, guildId, channelId, messageId, amount, fromAccount, "Transfer from cash to investing account");
+                await _cache.StringSetAsync($"$i:{userId}:{guildId}", (investing + amount).ToString(CultureInfo.InvariantCulture));
+                await DbTransferAccountAsync(userId, guildId, channelId, messageId, amount, 0, "Transfer from cash to investing account");
             }
             else
             {
-                if (amount <= 0 || await GetInvestingAsync(userId, guildId) < amount)
+                if (amount <= 0 || investing < amount)
                 {
                     return false;
                 }
 
                 await _cache.StringIncrementAsync($"$c:{userId}:{guildId}", amount);
-                await _cache.StringIncrementAsync($"$i:{userId}:{guildId}", -amount);
-                await DbTransferAccountAsync(userId, guildId, channelId, messageId, amount, fromAccount, "Transfer from investing to cash account");
+                await _cache.StringSetAsync($"$i:{userId}:{guildId}", (investing - amount).ToString(CultureInfo.InvariantCulture));
+                await DbTransferAccountAsync(userId, guildId, channelId, messageId, amount, 1, "Transfer from investing to cash account");
             }
 
             return true;
@@ -230,8 +229,10 @@ namespace Roki.Services
         public async Task AddInvestingAsync(ulong userId, ulong guildId, decimal amount)
         {
             await SetBotAccountsCache(guildId);
-            await _cache.StringIncrementAsync($"$i:{userId}:{guildId}", amount.ToDouble());
-            await _cache.StringIncrementAsync($"$i:{Roki.BotId}:{guildId}", -amount.ToDouble());
+            decimal investing = await GetInvestingAsync(userId, guildId);
+            decimal bot = decimal.Parse(await _cache.StringGetAsync($"$i:{Roki.BotId}:{guildId}"));
+            await _cache.StringSetAsync($"$i:{userId}:{guildId}", (investing + amount).ToString(CultureInfo.InvariantCulture));
+            await _cache.StringSetAsync($"$i:{Roki.BotId}:{guildId}", (bot - amount).ToString(CultureInfo.InvariantCulture));
 
             await DbAddRemoveInvestingAsync(userId, guildId, amount);
         }
@@ -244,8 +245,10 @@ namespace Roki.Services
             }
 
             await SetBotAccountsCache(guildId);
-            await _cache.StringIncrementAsync($"$i:{userId}:{guildId}", -amount.ToDouble());
-            await _cache.StringIncrementAsync($"$i:{Roki.BotId}:{guildId}", amount.ToDouble());
+            decimal investing = await GetInvestingAsync(userId, guildId);
+            decimal bot = decimal.Parse(await _cache.StringGetAsync($"$i:{Roki.BotId}:{guildId}"));
+            await _cache.StringSetAsync($"$i:{userId}:{guildId}", (investing - amount).ToString(CultureInfo.InvariantCulture));
+            await _cache.StringSetAsync($"$i:{Roki.BotId}:{guildId}", (bot + amount).ToString(CultureInfo.InvariantCulture));
             await DbAddRemoveInvestingAsync(userId, guildId, -amount);
             return true;
         }

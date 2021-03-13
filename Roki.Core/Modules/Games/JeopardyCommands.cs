@@ -31,10 +31,10 @@ namespace Roki.Modules.Games
             }
 
             [RokiCommand, Description, Aliases, Usage]
-            [RokiOptions(typeof(JeopardyArgs))]
+            [RokiOptions(typeof(JeopardyOptions))]
             public async Task Jeopardy(params string[] args)
             {
-                JeopardyArgs opts = OptionsParser.ParseFrom(new JeopardyArgs(), args);
+                JeopardyOptions opts = OptionsParser.ParseFrom(new JeopardyOptions(), args);
 
                 if (Service.ActiveGames.TryGetValue(Context.Channel.Id, out Jeopardy activeGame))
                 {

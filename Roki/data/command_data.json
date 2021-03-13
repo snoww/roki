@@ -589,10 +589,10 @@
   },
   "transfer": {
     "Aliases": "",
-    "Description": "Transfers currency FROM the specified (cash/investing) account TO the other account.",
+    "Description": "Transfers currency the specified amount of currency to or from your (cash/investing) account.",
     "Usage": [
-      "{0}transfer cash 5000",
-      "{0}transfer investing 20000"
+      "{0}transfer 500 to cash",
+      "{0}transfer 2000 from investing"
     ]
   },
   "portfolio": {
