@@ -134,8 +134,7 @@ namespace Roki.Services
             }
         }
 
-        private async Task<ExecuteCommandResult> ExecuteCommandAsync(ICommandContext context, string input,
-            IServiceProvider services, MultiMatchHandling multiMatchHandling)
+        private async Task<ExecuteCommandResult> ExecuteCommandAsync(ICommandContext context, string input, IServiceProvider services, MultiMatchHandling multiMatchHandling)
         {
             SearchResult searchResult = _commandService.Search(context, input);
             if (!searchResult.IsSuccess)

@@ -82,16 +82,18 @@ namespace Roki.Modules.Currency
         }
 
         [RokiCommand, Description, Usage, Aliases, RokiOptions(typeof(TransferOptions))]
-        public async Task Transfer(params string[] args)
+        public async Task Transfer(long amount, params string[] location)
         {
-            TransferOptions options = OptionsParser.ParseFrom(new TransferOptions(), args);
+            var args = new List<string> {amount.ToString()};
+            args.AddRange(location);
+            TransferOptions options = OptionsParser.ParseFrom(new TransferOptions(), args.ToArray());
+            GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
             if (options == null)
             {
                 // idk how to throw error to go to command error
-                await Context.Channel.SendErrorAsync($"```Error: Invalid arguments provided.```\nCorrect Usage:\n`{await _config.GetGuildPrefix(Context.Guild.Id)} <amount> <to/from> <cash/investing>`").ConfigureAwait(false);
+                await Context.Channel.SendErrorAsync($"```\nError: Invalid arguments provided.```\n`{guildConfig.Prefix}h transfer` to check correct usage.").ConfigureAwait(false);
                 return;
             }
-            GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
             if (options.Amount <= 0)
             {
                 await Context.Channel.SendErrorAsync($"You must transfer at least `1` {guildConfig.CurrencyIcon}").ConfigureAwait(false);

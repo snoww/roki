@@ -86,16 +86,16 @@ namespace Roki.Modules.Help.Services
             
             EmbedBuilder embed = new EmbedBuilder().WithTitle(str)
                 .WithErrorColor()
-                .WithDescription($"```Error: {customError}```")
+                .WithDescription($"```\nError: {customError}```")
                 .WithFooter($"Module: {result.CommandInfo.Module.GetTopLevelModule().Name}");
 
             if (showUsage)
             {
                 string[] remarks = result.CommandInfo.Remarks.Deserialize<string[]>().Select(x => string.Format(x, prefix)).ToArray();
-                embed.AddField("Correct Usage", $"```{remarks[0]}```");
+                embed.AddField("Correct Usage", $"```\n{remarks[0]}```");
                 if (remarks.Length > 1)
                 {
-                    embed.AddField("Examples", $"```{string.Join('\n', remarks[1..])}```");
+                    embed.AddField("Examples", $"```\n{string.Join('\n', remarks[1..])}```");
                 }
             }
 
@@ -127,12 +127,12 @@ namespace Roki.Modules.Help.Services
             string[] remarks = command.Remarks.Deserialize<string[]>().Select(x => string.Format(x, prefix)).ToArray();
             EmbedBuilder embed = new EmbedBuilder().WithTitle(str)
                 .WithDescription(command.FormatSummary(prefix))
-                .AddField("Usage", $"```{remarks[0]}```")
+                .AddField("Usage", $"```\n{remarks[0]}```")
                 .WithFooter($"Module: {command.Module.GetTopLevelModule().Name}");
 
             if (remarks.Length > 1)
             {
-                embed.AddField("Examples", $"```{string.Join('\n', remarks[1..])}```");
+                embed.AddField("Examples", $"```\n{string.Join('\n', remarks[1..])}```");
             }
 
             if (context.Channel is IDMChannel)
@@ -166,7 +166,7 @@ namespace Roki.Modules.Help.Services
         private static string GetCommandOptions(Type option)
         {
             var helpOptions = new StringBuilder();
-            helpOptions.Append("```");
+            helpOptions.Append("```").AppendLine();
             foreach (object attribute in option.GetProperties()
                 .Select(x => x.GetCustomAttributes(true).FirstOrDefault(a => a is OptionAttribute || a is ValueAttribute))
                 .Where(x => x != null))
