@@ -136,11 +136,6 @@ namespace Roki.Extensions
             return string.Format(command.Summary, prefix);
         }
 
-        public static string FormatRemarks(this CommandInfo command, string prefix)
-        {
-            return string.Join("\n", command.Remarks.Deserialize<string[]>().Select(x => string.Format(x, prefix)));
-        }
-
         public static Stream ToStream(this Image<Rgba32> img, IImageFormat format = null)
         {
             var imageStream = new MemoryStream();

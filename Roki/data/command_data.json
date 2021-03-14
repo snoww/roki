@@ -1,11 +1,11 @@
 {
   "about": {
-  "Aliases": "info",
-  "Description": "Basic information about Roki.",
-  "Usage": [
-    "{0}about"
-  ]
-},
+    "Aliases": "info",
+    "Description": "Basic information about Roki.",
+    "Usage": [
+      "{0}about"
+    ]
+  },
   "invite": {
     "Aliases": "",
     "Description": "Invite link for Roki to join your server.",
@@ -24,7 +24,6 @@
     "Aliases": "server",
     "Description": "Shows information about current server.",
     "Usage": [
-      "{0}serverinfo",
       "{0}server"
     ]
   },
@@ -32,16 +31,18 @@
     "Aliases": "channel",
     "Description": "Shows information about the current channel/mentioned channel.",
     "Usage": [
-      "{0}channelinfo",
-      "{0}channel channel"
+      "{0}channel [#channel]",
+      "{0}channel",
+      "{0}channel #general"
     ]
   },
   "userinfo": {
     "Aliases": "user",
     "Description": "Shows information about yourself/another user.",
     "Usage": [
-      "{0}userinfo",
-      "{0}user @user"
+      "{0}user [@user]",
+      "{0}user",
+      "{0}user @snow"
     ]
   },
   "ping": {
@@ -53,54 +54,56 @@
   },
   "modules": {
     "Aliases": "",
-    "Description": "Lists all bot modules.",
+    "Description": "Lists all of Roki's modules.",
     "Usage": [
       "{0}modules"
     ]
   },
   "commands": {
     "Aliases": "cmds aliases",
-    "Description": "List all of the bot's commands and their aliases from a module. You can either specify the full/the first few letters of the module name.",
+    "Description": "List all commands and their aliases from a module. You can either specify the full/the first few letters of the module name.",
     "Usage": [
-      "{0}commands stocks"
+      "{0}commands <module_name>",
+      "{0}commands games"
     ]
   },
   "h": {
     "Aliases": "help",
-    "Description": "Either shows a help for a single Aliases,/DMs you help link if no parameters are specified.",
+    "Description": "Shows help details regarding specific commands. If no command is specified, DM's you more information about commands in general.",
     "Usage": [
-      "{0}help {0}weather",
-      "{0}h"
+      "{0}help [command]",
+      "{0}h",
+      "{0}h jeopardy"
     ]
   },
   "time": {
     "Aliases": "date",
-    "Description": "Shows the current date and time for the specified location. Also includes date and time in local culture if exists.",
+    "Description": "Shows the current date and time for the specified location. Also includes date and time in local culture if exists. If no location specified, defaults to Toronto, ON, Canada.",
     "Usage": [
-      "{0}time Tokyo, JP"
+      "{0}time [location]"
     ]
   },
   "youtube": {
     "Aliases": "yt",
-    "Description": "Searches Youtube with specified query.",
+    "Description": "Searches Youtube with specified query. Returns the top result.",
     "Usage": [
-      "{0}youtube Jebaited",
+      "{0}youtube <query>",
       "{0}yt hello"
     ]
   },
   "image": {
     "Aliases": "img",
-    "Description": "Searches Google Images with the specified query, returns first result.",
+    "Description": "Searches Google Images with the specified query. Returns top result.",
     "Usage": [
-      "{0}image cats",
+      "{0}image <query>",
       "{0}img dogs"
     ]
   },
   "randomimage": {
     "Aliases": "rimg",
-    "Description": "Searches Google Images with the specified query, returns a random result.",
+    "Description": "Searches Google Images with the specified query. Returns a random result.",
     "Usage": [
-      "{0}randomimage cats",
+      "{0}rimg <query>",
       "{0}rimg dogs"
     ]
   },
@@ -108,113 +111,121 @@
     "Aliases": "imdb omdb",
     "Description": "Searches omdb with the specified query, returns first result.",
     "Usage": [
-      "{0}imdb avengers endgame"
+      "{0}imdb <query>",
+      "{0}imdb inception"
     ]
   },
   "weather": {
     "Aliases": "w",
-    "Description": "Looks up weather of specified city using Dark Sky's api.",
+    "Description": "Looks up weather of specified location using wttr.in. If no location is specified, defaults to Toronto, ON, Canada.",
     "Usage": [
-      "{0}weather toronto"
+      "{0}weather [location]",
+      "{0}w paris"
     ]
   },
   "urbandict": {
     "Aliases": "urban ud",
-    "Description": "Searches urban dictionary for with the specified query.",
+    "Description": "Searches urban dictionary for with the specified query. Returns top results.",
     "Usage": [
+      "{0}urban <query>",
       "{0}urban malding"
     ]
   },
   "addquote": {
     "Aliases": ".",
-    "Description": "Adds a new quote with the specified name and message.",
+    "Description": "Adds a new quote with the specified name and message. (quote name isn't required to be unique)",
     "Usage": [
-      "{0}. sayhi Hi"
+      "{0}. <quote_name> <quote_message>",
+      "{0}. einstein Imagination is more important than knowledge."
     ]
   },
   "showquote": {
     "Aliases": "..",
-    "Description": "Shows a random quote with a specified name",
+    "Description": "Shows a quote with the specified quote name. If there are multiple quotes with the same name, one is chosen at random.",
     "Usage": [
-      "{0}.. abc"
+      "{0}.. <quote_name>",
+      "{0}.. einstein"
     ]
   },
   "quotesearch": {
     "Aliases": "qsearch",
-    "Description": "Shows a random quote for a keyword that contains any text specified in the search.",
+    "Description": "Shows a random quote that contains the specified word.",
     "Usage": [
-      "{0}qsearch keyword text"
+      "{0}qsearch <query>",
+      "{0}qsearch imagination"
     ]
   },
   "quoteid": {
     "Aliases": "qid",
-    "Description": "Displays the quote with the specified ID number. Quote ID numbers can be found by typing `{0}liqu [num]` where `[num]` is a number of a page which contains 15 quotes.",
+    "Description": "Displays the quote with the specified ID. Quote IDs can be found by typing `{0}liqu [page]`.",
     "Usage": [
-      "{0}qid 123456"
+      "{0}qid <id>",
+      "{0}qid 21"
     ]
   },
   "quotedelete": {
     "Aliases": "quotedel qdel",
-    "Description": "Deletes a quote with the specified Keyword. You have to be either server Administrator/the creator of the quote to delete it.",
+    "Description": "Deletes a quote with the specified ID. Use `{0}qdk` to delete by quote name. You must be the creator of the quote or a moderator to delete it.",
     "Usage": [
-      "{0}qdel 123456"
+      "{0}qdel <id>",
+      "{0}qdel 92"
     ]
   },
-  "quotedeleteid": {
-    "Aliases": "quotedelid qdelid",
-    "Description": "Deletes a quote with the specified ID. You have to be either server Administrator/the creator of the quote to delete it.",
+  "quotedeletekeyword": {
+    "Aliases": "qdk",
+    "Description": "Deletes a quote with the specified name. You must be the creator of the quote or a moderator to delete it.",
     "Usage": [
-      "{0}qdel 123456"
+      "{0}qdel <quote_name>",
+      "{0}qdel einstein"
     ]
   },
   "listquotes": {
     "Aliases": "liqu",
-    "Description": "Lists all quotes on the server ordered alphabetically. 15 Per page.",
+    "Description": "Lists all quotes on the server ordered alphabetically. 15 quotes per page.",
     "Usage": [
+      "{0}liqu [page]",
       "{0}liqu",
-      "{0}liqu 3"
-    ]
-  },
-  "listquotesid": {
-    "Aliases": "liquid",
-    "Description": "Lists all quotes on the server ordered by creation date. 15 Per page.",
-    "Usage": [
-      "{0}liquid",
-      "{0}liquid 3"
+      "{0}liqu 4"
     ]
   },
   "textoimage": {
     "Aliases": "latex tex",
-    "Description": "Returns an image showing the specified mathematical formula, using the TeX language.",
+    "Description": "Returns an image with the rendered LaTeX.",
     "Usage": [
+      "{0}tex <latex_text>",
       "{0}tex y=mx+b"
     ]
   },
   "pokedex": {
     "Aliases": "pokemon dex",
-    "Description": "Returns a short summary of the specified Pokémon.",
+    "Description": "Returns the Pokédex entry of the specified Pokémon's name or ID. (TEMP REMOVED)",
     "Usage": [
-      "{0}pokedex decidueye"
+      "{0}pokedex <pokemon|id>",
+      "{0}dex pikachu",
+      "{0}dex 25"
     ]
   },
   "ability": {
     "Aliases": "ab",
-    "Description": "Returns the description of the specified ability.",
+    "Description": "Returns the description of the specified ability. (TEMP REMOVED)",
     "Usage": [
+      "{0}ability <name>",
       "{0}ability moxie"
     ]
   },
   "move": {
     "Aliases": "",
-    "Description": "Returns the description of the specified move.",
+    "Description": "Returns the description of the specified move. (TEMP REMOVED)",
     "Usage": [
+      "{0}move <name>",
       "{0}move bubble"
     ]
   },
   "item": {
     "Aliases": "",
-    "Description": "Returns the description of the specified item.",
+    "Description": "Returns the description of the specified item. (TEMP REMOVED)",
     "Usage": [
+      "{0}item <name>",
       "{0}item master ball"
     ]
   },
@@ -227,24 +238,28 @@
   },
   "xkcd": {
     "Aliases": "",
-    "Description": "Returns the specified xkcd comic, if no comic is specified, latest comic is shown.",
+    "Description": "Returns the specified xkcd comic. If no comic is specified, latest comic is shown.",
     "Usage": [
+      "{0}xkcd [id]",
       "{0}xkcd",
-      "{0}xkcd 912"
+      "{0}xkcd 244"
     ]
   },
   "queue": {
     "Aliases": "q",
-    "Description": "Searches and plays the query for the specified song,/plays the url provided. If the url is a playlist, it adds all tracks in the playlist into the queue. Must be in a voice channel.",
+    "Description": "Searches and adds the specified song to the music queue. If the queue is empty, plays the song instead. Able load youtube urls and playlists. Must be in a voice channel.",
     "Usage": [
-      "{0}q hello",
-      "{0}q https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      "{0}q <query|youtube_url>",
+      "{0}q pokemon cynthia theme",
+      "{0}q https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "{0}q https://www.youtube.com/watch?v=9iltlMCj3Lw&list=PLrnb8c3hFJatjyJ-wFMuFGANNoo7-LZsG"
     ]
   },
   "play": {
     "Aliases": "play",
-    "Description": "Plays a specific track # in the queue.",
+    "Description": "Plays a specific track # in the queue. Must be in a voice channel.",
     "Usage": [
+      "{0}play <num>",
       "{0}play 12"
     ]
   },
@@ -257,7 +272,7 @@
   },
   "queueloop": {
     "Aliases": "qloop",
-    "Description": "Enables/Disables loop for the current player. Restarts the player queue from the beginning. Mutually exclusive with autoplay (i.e. only one can be enabled). Must be in a voice channel.",
+    "Description": "Enables/Disables loop for the current player. Restarts the player queue from the beginning once reached the end. Mutually exclusive with autoplay (i.e. only one can be enabled). Must be in a voice channel.",
     "Usage": [
       "{0}qloop"
     ]
@@ -273,22 +288,23 @@
     "Command": "resume unpause",
     "Description": "Un-pauses the current paused track. Must be in a voice channel.",
     "Usage": [
-      "{0}resume",
-      "{0}unpause"
+      "{0}resume"
     ]
   },
   "destroy": {
     "Aliases": "d",
-    "Description": "Stops the bot from playing music. Must be in a voice channel.",
+    "Description": "Stops Roki from playing music, removes her from the voice channel. Must be in a voice channel.",
     "Usage": [
       "{0}d"
     ]
   },
   "volume": {
     "Aliases": "vol",
-    "Description": "Sets the volume for the music player. Between 0-100. Must be in a voice channel",
+    "Description": "Shows the current volume set. Specify a new volume for the music player to change it. Between 0-100. Must be in a voice channel",
     "Usage": [
-      "{0}vol 50"
+      "{0}vol [volume]",
+      "{0}vol",
+      "{0}vol 23"
     ]
   },
   "listqueue": {
@@ -307,30 +323,34 @@
   },
   "songremove": {
     "Aliases": "srm",
-    "Description": "Removes the specified track in the queue.",
+    "Description": "Removes the specified track # in the queue. Must be in voice channel.",
     "Usage": [
-      "{0}srm 5"
+      "{0}srm <num>",
+      "{0}srm 3"
     ]
   },
   "songseek": {
-    "Aliases": "seek",
-    "Description": "Seeks the given number of seconds forward in the current track.",
+    "Aliases": "seek ffw",
+    "Description": "Seeks the given number of seconds forward in the current track. Must be in voice channel.",
     "Usage": [
-      "{0}seek 15"
+      "{0}seek <seconds>",
+      "{0}ffw 15"
     ]
   },
   "twitter": {
     "Aliases": "tweet",
     "Description": "Returns the latest tweets by the specified user.",
     "Usage": [
+      "{0}twitter <@twitter_user>",
       "{0}twitter xqc"
     ]
   },
   "twittersearch": {
-    "Aliases": "tsearch",
+    "Aliases": "tws",
     "Description": "Searches twitter with the specified query, and returns the top 5 results.",
     "Usage": [
-      "{0}tsearch pokemon sword shield"
+      "{0}tws <query>",
+      "{0}tws cool stuff"
     ]
   },
   "randomcat": {
@@ -356,32 +376,36 @@
   },
   "anime": {
     "Aliases": "",
-    "Description": "Returns top 5 anime results provided from the query.",
+    "Description": "Searches anilist for the specified query. Returns top 5 results.",
     "Usage": [
-      "{0}anime sao"
+      "{0}anime <query>",
+      "{0}anime attack on titan"
     ]
   },
   "experience": {
     "Aliases": "xp",
-    "Description": "Shows the current XP and Level of the current user. Optional: mention another user to see their XP and Level.",
+    "Description": "Shows your or the specified user's XP card.",
     "Usage": [
+      "{0}xp [@user]",
       "{0}xp",
       "{0}xp @snow"
     ]
   },
   "xpleaderboard": {
     "Aliases": "xplb",
-    "Description": "Shows the current xp leaderboard, you can specify the page, default is the top 9.",
+    "Description": "Shows the server's XP leaderboard. Default is the top 9.",
     "Usage": [
+      "{0}xplb [page]",
       "{0}xplb",
-      "{0}xplb 1"
+      "{0}xplb 2"
     ]
   },
   "xpnotification": {
     "Aliases": "xpnotif",
-    "Description": "Sets the preferred location of xp level up notifications (Server, Dm,/None).",
+    "Description": "Sets the preferred location of level up notifications.",
     "Usage": [
-      "{0}xpnotif server"
+      "{0}xpnotif {dm|server|none}",
+      "{0}xpnotif dm"
     ]
   },
   "pick": {
@@ -393,42 +417,46 @@
   },
   "leaderboard": {
     "Aliases": "lb",
-    "Description": "Shows the current currency leaderboard. you can specify the page, default is the top 9.",
+    "Description": "Shows the current currency leaderboard. Default is the top 9.",
     "Usage": [
+      "{0}lb [page]",
       "{0}lb",
-      "{0}lb 1"
+      "{0}lb 2"
     ]
   },
   "drop": {
     "Aliases": "",
-    "Description": "Drops the specified number of currency, default is 1. Must have enough in your balance to drop.",
+    "Description": "Drops the specified number of currency in the current channel, default is 1. Must have enough in your balance to drop.",
     "Usage": [
-      "{0}drop",
-      "{0}drop 3"
+      "{0}drop [amount]",
+      "{0}drop 300"
     ]
   },
   "betflip": {
     "Aliases": "bf",
-    "Description": "Bet to guess result if heads/tails. Guessing correctly awards you currency.",
+    "Description": "Bet to guess result of a coin flip.",
     "Usage": [
-      "{0}bf 10 h",
-      "{0}bf 5 tails"
+      "{0}bf <amount> <heads|tails>",
+      "{0}bf 100 t",
+      "{0}bf 26 h"
     ]
   },
   "give": {
     "Aliases": "",
     "Description": "Transfers currency to the specified user, optionally with a message. Must have sufficient balance.",
     "Usage": [
-      "{0}give 5 @snow",
-      "{0}give 10 @user a nice message"
+      "{0}give <amount> <@user> [message]",
+      "{0}give 10 @snow a nice message",
+      "{0}give 15 @user"
     ]
   },
   "cash": {
     "Aliases": "currency $",
-    "Description": "Shows how much cash the user has.",
+    "Description": "Shows your or the specified players cash balance.",
     "Usage": [
+      "{0}$ [@user]",
       "{0}$",
-      "{0}$ @user"
+      "{0}$ @snow"
     ]
   },
   "investing": {
@@ -441,54 +469,62 @@
   },
   "betroll": {
     "Aliases": "br",
-    "Description": "Bet to roll a dice. Rolling over 70 yields x2.5, over 90 yields x4, and 100 yields x10.",
+    "Description": "Bet to roll `1d100`. Rolling over 70 yields rewards. The higher the roll the better the payout.",
     "Usage": [
-      "{0}br 10"
+      "{0}br <amount>",
+      "{0}br 200"
     ]
   },
   "currencytransactions": {
-    "Aliases": "transactions trs",
-    "Description": "Shows your currency transactions on the specified page.",
+    "Aliases": "transactions",
+    "Description": "Shows your latest cash transactions.",
     "Usage": [
-      "{0}trs 2"
+      "{0}transactions [page]",
+      "{0}transactions",
+      "{0}transactions 2"
     ]
   },
   "betdice": {
     "Aliases": "bd",
     "Description": "Bet to roll `6d6`, rarer combinations yield bigger payouts.\n```18-24: 0x\n17/25: x1.25, 16/26: x1.5, 15/27: x2, 14/28: x2.5, 13/29: x3, 12/30: x5, 11/31: x7, 10/32: x10, 9/33: x17, 8/34: x25, 7/35: x50, 6/36: x100```",
     "Usage": [
-      "{0}bd 10"
+      "{0}bd <amount>",
+      "{0}bd 100"
     ]
   },
   "betflipmulti": {
     "Aliases": "bfm",
-    "Description": "Bet to guess multiple coin flips. You need to bet at least twice the amount of guesses in stones. Needs 3/4 to be correct. The more correct guess rewards more currency. (amount * correct ^ 1.1)",
+    "Description": "Bet to guess multiple coin flips. You need to bet at least twice as much as the number of guesses. The more correct guesses pays out more.",
     "Usage": [
+      "{0}bfm <amount> <h|t>...",
       "{0}bfm 10 h h t h t",
       "{0}bfm 10 tails h heads tails t"
     ]
   },
   "betpokemongame": {
     "Aliases": "betpokemon bp",
-    "Description": "Bet on an AI vs AI game of pokemon. Default is Generation 8 (Available Generations: 4-8). If guessed winner correctly, win stones.",
+    "Description": "Bet on an AI vs AI game of pokemon. Default is Generation 8 (Available Generations: 4-8). Correct guess results in payout.",
     "Usage": [
-      "{0}bp"
+      "{0}bp [4|5|6|7|8]",
+      "{0}bp",
+      "{0}bp 4"
     ]
   },
   "betpokemonreplay": {
     "Aliases": "replay",
     "Description": "Gets the replay of a bet pokemon game.",
     "Usage": [
-      "{0}replay xxxxxxx"
+      "{0}replay <id>",
+      "{0}replay 8123"
     ]
   },
   "trivia": {
-    "Aliases": "t",
-    "Description": "Starts a new 10 question trivia game with optional category (use `{0}tc` to check categories). Default is all categories. Awards currency based on difficulty. Needs at least 60% to get rewards.",
+    "Aliases": "tr",
+    "Description": "Starts a new 10 question trivia game with optional category (use `{0}tc` to check categories). Default is all categories. Awards currency based on difficulty.",
     "Usage": [
-      "{0}trivia optional_category",
-      "{0}t",
-      "{0}t geography"
+      "{0}trivia [category]",
+      "{0}trivia",
+      "{0}trivia geography"
     ]
   },
   "triviacategories": {
@@ -500,138 +536,152 @@
   },
   "store": {
     "Aliases": "",
-    "Description": "Shows the Stone store. 9 items per page./specify specific name/id to see that item.",
+    "Description": "Shows the server's item store. Specify item name or id to see details of item.",
     "Usage": [
+      "{0}store [name|id]",
       "{0}store",
-      "{0}store 8"
+      "{0}store 3",
+      "{0}store double xp"
     ]
   },
   "buy": {
     "Aliases": "",
-    "Description": "Buy an item from the store using its name/id, must specify amount/all",
+    "Description": "Buy the specified amount of an item from the store using its name or id",
     "Usage": [
-      "{0}buy 1 ffffff",
-      "{0}buy all pizza"
+      "{0}buy <amount|all> <name|id>",
+      "{0}buy 12 double xp",
+      "{0}buy all blue role"
     ]
   },
   "subscriptions": {
     "Aliases": "subs",
     "Description": "Shows your active subscriptions.",
     "Usage": [
-      "{0}subscriptions",
       "{0}subs"
     ]
   },
   "mute": {
     "Aliases": "",
-    "Description": "Mutes the specified user (Prevents them from speaking in voice). Must be a moderator/have an available power (Consumes the power).",
+    "Description": "Mutes the specified user (Prevents them from speaking in voice). Must be a moderator/have an available power (Consumes the power). (TEMP DISABLED)",
     "Usage": [
+      "{0}mute <@user>",
       "{0}mute @snow"
     ]
   },
   "block": {
     "Aliases": "",
-    "Description": "Blocks the specified user (Prevents them from typing in chat). Must be a moderator/have an available power (Consumes the power).",
+    "Description": "Blocks the specified user (Prevents them from typing in chat). Must be a moderator/have an available power (Consumes the power). (TEMP DISABLED)",
     "Usage": [
+      "{0}block <@user>",
       "{0}block @snow"
     ]
   },
   "timeout": {
     "Aliases": "",
-    "Description": "Times out the specified user (Prevents them from typing and speaking). Must be a moderator/have an available power (Consumes the power). Does not stack with `.mute` and `.block`.",
+    "Description": "Times out the specified user (Prevents them from typing and speaking). Must be a moderator/have an available power (Consumes the power). Does not stack with `.mute` and `.block`. (TEMP DISABLED)",
     "Usage": [
+      "{0}timeout <@user>",
       "{0}timeout @snow"
     ]
   },
   "inventory": {
     "Aliases": "inv",
-    "Description": "Shows the items in your inventory",
+    "Description": "Shows the items in your inventory.",
     "Usage": [
       "{0}inventory"
     ]
   },
   "stocknews": {
     "Aliases": "sn",
-    "Description": "Shows the current news about the specified company",
+    "Description": "Shows the current news regarding the specified ticker.",
     "Usage": [
+      "{0}stocknews <symbol>",
       "{0}stocknews AAPL"
     ]
   },
   "stockcompany": {
     "Aliases": "sc",
-    "Description": "Shows details about the specified company",
+    "Description": "Shows details about the company of the specified ticker.",
     "Usage": [
+      "{0}stockcompany <symbol>",
       "{0}stockcompany AAPL"
     ]
   },
   "stockprice": {
     "Aliases": "price sp sq",
-    "Description": "Shows the current price of the stock for the specified company",
+    "Description": "Shows the current price of the specified ticker.",
     "Usage": [
+      "{0}sp <symbol>",
       "{0}stockprice MSFT"
     ]
   },
   "stockbuy": {
     "Aliases": "sb",
-    "Description": "Purchase shares of a company. Funds are taken from investing account",
+    "Description": "Purchase shares of a company at market price. Funds are taken from investing account.",
     "Usage": [
-      "{0}stockbuy 50 AAPL",
+      "{0}stockbuy <amount> <symbol>",
       "{0}sb 100 GME"
     ]
   },
   "stocksell": {
     "Aliases": "ss",
-    "Description": "Sells shares of a company. Funds are deposited into your investing account",
+    "Description": "Sells shares of a company at market price. Funds are deposited into your investing account",
     "Usage": [
-      "{0}stocksell TSLA 50",
+      "{0}stocksell <amount> <symbol>",
       "{0}ss DIS 20"
     ]
   },
   "transfer": {
     "Aliases": "",
-    "Description": "Transfers currency the specified amount of currency to or from your (cash/investing) account.",
+    "Description": "Transfers currency the specified amount of currency to or from your cash or investing account.",
     "Usage": [
-      "{0}transfer 500 to cash",
-      "{0}transfer 2000 from investing"
+      "{0}transfer <amount> <to|from> <cash|investing>",
+      "{0}transfer 2000 to investing",
+      "{0}transfer 2000 from cash"
     ]
   },
   "portfolio": {
     "Aliases": "",
-    "Description": "Shows your/the specified user's portfolio.",
+    "Description": "Shows your or the specified user's investing portfolio.",
     "Usage": [
+      "{0}portfolio [@user]",
       "{0}portfolio",
       "{0}portfolio @snow"
     ]
   },
   "userdetails": {
     "Aliases": "",
-    "Description": "Shows the users userid, username, discriminator, and avatar id",
+    "Description": "Shows the mentioned user's UserID, Username, Discriminator, and Avatar ID",
     "Usage": [
+      "{0}userdetails <@user>",
       "{0}userdetails @snow"
     ]
   },
   "events": {
     "Aliases": "event",
-    "Description": "Create, edit, show events in the current server.",
+    "Description": "Create, edit, or lists current events in the server.",
     "Usage": [
-      "{0}events new",
+      "{0}events <new|edit|list>",
       "{0}events edit",
       "{0}events list"
     ]
   },
   "uwu": {
     "Aliases": "",
-    "Description": "UwUizes the message. If no message is provided, UwUizes the previous message in the channel.",
+    "Description": "UwUizes the message. If no message is provided, UwUizes the last message in the channel.",
     "Usage": [
-      "{0}uwu hey how are you",
-      "{0}uwu"
+      "{0}uwu [message]",
+      "{0}uwu",
+      "{0}uwu how are you today"
     ]
   },
   "jeopardy": {
     "Aliases": "jp",
     "Description": "Starts a Jeopardy! game in the current channel. Choose a price from the categories, and give the correct answer to win.\nIf a game is active in the current channel, the current question will be sent again.",
     "Usage": [
-      "{0}jp"
+      "{0}jp [options]",
+      "{0}jp",
+      "{0}jp -c 6"
     ]
   },
   "jeopardyleaderboard": {
@@ -645,7 +695,7 @@
     "Aliases": "jstop jq",
     "Description": "Stops current Jeopardy! game after the current question.",
     "Usage": [
-      "{0}js"
+      "{0}jq"
     ]
   },
   "jeopardyvote": {
@@ -657,25 +707,26 @@
   },
   "wikipedia": {
     "Aliases": "wiki",
-    "Description": "Searches Wikipedia for an article. Shows most relevant article. Can add `-q` to end of Aliases show top 5 results instead.",
+    "Description": "Searches Wikipedia for an article. Can also specify top search results.",
     "Usage": [
-      "{0}wiki apple",
-      "{0}wikipedia alphabet -q"
+      "{0}wiki <query>",
+      "{0}wikipedia apple"
     ]
   },
   "ask": {
     "Aliases": "",
-    "Description": "Asks roki a question. Uses Wolfram|Alpha to get answers.",
+    "Description": "Asks Roki a question. Uses Wolfram|Alpha to get answers.",
     "Usage": [
+      "{0}ask <query>",
       "{0}ask what is the tallest building in the world"
     ]
   },
   "xprewards": {
     "Aliases": "xpr",
-    "Description": "Shows the XP rewards for the current server. Optional: specify page number, show reward id",
+    "Description": "Shows the XP rewards for the current server.",
     "Usage": [
-      "{0}xpr",
-      "{0}xpr 2 true"
+      "{0}xpr [page]",
+      "{0}xpr 2"
     ]
   },
   "notsafeforwork": {
@@ -735,10 +786,11 @@
     ]
   },
   "chesschallenge": {
-    "Aliases": "chessc cc",
+    "Aliases": "chess cc",
     "Description": "Challenge a user to a chess game by mentioning them.",
     "Usage": [
-      "{0}chessc @snow",
+      "{0}chess <@user> [options]",
+      "{0}chess @snow",
       "{0}cc @snow -t 3 -c white",
       "{0}cc @snow -c 10"
     ]
@@ -747,6 +799,7 @@
     "Aliases": "",
     "Description": "Kick a user from the server.",
     "Usage": [
+      "{0}kick <@user>",
       "{0}kick @snow"
     ]
   },
@@ -754,6 +807,7 @@
     "Aliases": "",
     "Description": "Ban a user from the server.",
     "Usage": [
+      "{0}ban <@user>",
       "{0}ban @snow"
     ]
   },
@@ -761,6 +815,7 @@
     "Aliases": "purge",
     "Description": "Deletes up to the specified number of messages of the mentioned user (not guaranteed to delete the exact specified number). Only searches up to the past 500 total messages.",
     "Usage": [
+      "{0}prune <@user> <amount>",
       "{0}prune @snow 50"
     ]
   }

@@ -6,13 +6,13 @@ namespace Roki.Modules.Games.Common
 {
     public class ChessOptions : ICommandOptions
     {
-        [Option('t', "time", Required = false, Default = 10, HelpText = "Maximum time for chess game in minutes. Default is 10 min.")]
+        [Option('t', "time", MetaValue = "MINUTES", Required = false, Default = 10, HelpText = "Maximum time for chess game in minutes. Default is 10 min.")]
         public int Time { get; set; }
         
-        [Option('i', "inc", Required = false, Default = 0, HelpText = "Increment for chess game in seconds. Default is 0.")]
+        [Option('i', "inc", MetaValue = "SECONDS", Required = false, Default = 0, HelpText = "Increment for chess game in seconds. Default is 0.")]
         public int Increment { get; set; }
         
-        [Option('c', "color", Required = false, Default = ChessColor.Random, HelpText = "Choose what color you'd wish to play as. White/Black/Random. Default is random.")]
+        [Option('c', "color", MetaValue = "COLOR", Required = false, Default = ChessColor.Random, HelpText = "Choose what color you'd wish to play as. White/Black/Random. Default is random.")]
         public ChessColor Color { get; set; }
         
         public IGuildUser ChallengeTo { get; set; }

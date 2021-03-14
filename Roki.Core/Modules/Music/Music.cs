@@ -13,7 +13,7 @@ namespace Roki.Modules.Music
     public partial class Music : RokiTopLevelModule<MusicService>
     {
         [RokiCommand, Description, Usage, Aliases]
-        public async Task Queue([Leftover] string query = null)
+        public async Task Queue([Leftover] string query)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
             {
@@ -27,7 +27,7 @@ namespace Roki.Modules.Music
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task Play(int trackNum = 0)
+        public async Task Play(int trackNum)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
             {
@@ -118,16 +118,11 @@ namespace Roki.Modules.Music
         [RokiCommand, Description, Usage, Aliases]
         public async Task ListQueue()
         {
-            if (!await IsUserInVoice().ConfigureAwait(false))
-            {
-                return;
-            }
-
             await Service.ListQueueAsync(Context).ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task SongRemove(int index = 0)
+        public async Task SongRemove(int index)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
             {
@@ -174,7 +169,7 @@ namespace Roki.Modules.Music
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task Seek(int seconds = 0)
+        public async Task Seek(int seconds)
         {
             if (!await IsUserInVoice().ConfigureAwait(false))
             {

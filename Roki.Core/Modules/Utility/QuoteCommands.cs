@@ -123,8 +123,9 @@ namespace Roki.Modules.Utility
             }
 
             [RokiCommand, Description, Usage, Aliases]
-            public async Task QuoteDeleteId(long id)
+            public async Task QuoteDelete(int id)
             {
+                // todo moderators
                 bool isAdmin = ((IGuildUser) Context.User).GuildPermissions.Administrator;
 
                 Quote quote;
@@ -152,7 +153,7 @@ namespace Roki.Modules.Utility
             }
 
             [RokiCommand, Description, Usage, Aliases]
-            public async Task QuoteDelete(string keyword)
+            public async Task QuoteDeleteKeyword(string keyword)
             {
                 bool isAdmin = ((IGuildUser) Context.User).GuildPermissions.Administrator;
 

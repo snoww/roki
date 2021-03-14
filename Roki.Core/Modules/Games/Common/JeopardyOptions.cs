@@ -5,7 +5,7 @@ namespace Roki.Modules.Games.Common
 {
     public class JeopardyOptions : ICommandOptions
     {
-        [Option('c', "categories", Required = false, Default = 2, HelpText = "Choose the number of categories in the Jeopardy! game. Default is 2, max is 6.")]
+        [Option('c', "categories", MetaValue = "NUMBER", Required = false, Default = 2, HelpText = "Choose the number of categories in the Jeopardy! game. Default is 2, max is 6.")]
         public int NumCategories { get; set; } = 2;
         
         public void NormalizeOptions()

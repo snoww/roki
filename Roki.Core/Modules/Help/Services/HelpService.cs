@@ -91,7 +91,12 @@ namespace Roki.Modules.Help.Services
 
             if (showUsage)
             {
-                embed.AddField("Correct Usage", "```" + result.CommandInfo.FormatRemarks(prefix) + "```");
+                string[] remarks = result.CommandInfo.Remarks.Deserialize<string[]>().Select(x => string.Format(x, prefix)).ToArray();
+                embed.AddField("Correct Usage", $"```{remarks[0]}```");
+                if (remarks.Length > 1)
+                {
+                    embed.AddField("Examples", $"```{string.Join('\n', remarks[1..])}```");
+                }
             }
 
             if (showOptions)
@@ -118,12 +123,18 @@ namespace Roki.Modules.Help.Services
             {
                 str += $"/{aliases}";
             }
-
+            
+            string[] remarks = command.Remarks.Deserialize<string[]>().Select(x => string.Format(x, prefix)).ToArray();
             EmbedBuilder embed = new EmbedBuilder().WithTitle(str)
                 .WithDescription(command.FormatSummary(prefix))
-                .AddField("Examples", "```" + command.FormatRemarks(prefix) + "```")
+                .AddField("Usage", $"```{remarks[0]}```")
                 .WithFooter($"Module: {command.Module.GetTopLevelModule().Name}");
-            
+
+            if (remarks.Length > 1)
+            {
+                embed.AddField("Examples", $"```{string.Join('\n', remarks[1..])}```");
+            }
+
             if (context.Channel is IDMChannel)
             {
                 embed.WithOkColor();
@@ -155,6 +166,7 @@ namespace Roki.Modules.Help.Services
         private static string GetCommandOptions(Type option)
         {
             var helpOptions = new StringBuilder();
+            helpOptions.Append("```");
             foreach (object attribute in option.GetProperties()
                 .Select(x => x.GetCustomAttributes(true).FirstOrDefault(a => a is OptionAttribute || a is ValueAttribute))
                 .Where(x => x != null))
@@ -163,20 +175,20 @@ namespace Roki.Modules.Help.Services
                 {
                     if (string.IsNullOrWhiteSpace(optionAttribute.ShortName))
                     {
-                        helpOptions.Append($"`--{optionAttribute.LongName}` ").AppendLine(optionAttribute.HelpText);
+                        helpOptions.Append($"--{optionAttribute.LongName} {optionAttribute.MetaValue}").Append("\n\t").AppendLine(optionAttribute.HelpText);
                     }
                     else
                     {
-                        helpOptions.Append($"`--{optionAttribute.ShortName}, --{optionAttribute.LongName}` ").AppendLine(optionAttribute.HelpText);
+                        helpOptions.Append($"--{optionAttribute.ShortName}, --{optionAttribute.LongName} {optionAttribute.MetaValue}").Append("\n\t").AppendLine(optionAttribute.HelpText);
                     }
                 }
                 else if (attribute is ValueAttribute valueAttribute)
                 {
-                    helpOptions.Append($"`{valueAttribute.MetaValue}` ").AppendLine(valueAttribute.HelpText);
+                    helpOptions.Append($"{valueAttribute.MetaValue}").Append("\n\t").AppendLine(valueAttribute.HelpText);
                 }
             }
-            
-            return string.Join("\n", helpOptions.ToString());
+            helpOptions.Append("```");
+            return helpOptions.ToString();
         }
 
         private static string GetCommandRequirements(CommandInfo command)
