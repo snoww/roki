@@ -71,7 +71,7 @@ namespace Roki.Modules.Rsvp
                     .Skip(page * 9)
                     .Take(5)
                     .Select(e =>
-                        $"`{e.Id}` **{e.Name}** in `{(e.StartDate - DateTimeOffset.UtcNow).ToReadableString()}` https://discordapp.com/channels/{e.GuildId}/{e.ChannelId}/{e.MessageId}");
+                        $"`{e.Id}` **{e.Name}** in `{(e.StartDate - DateTimeOffset.UtcNow).ToReadableString()}` https://discord.com/channels/{e.GuildId}/{e.ChannelId}/{e.MessageId}");
                 
                 EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle("List of Events")
                     .WithDescription($"{string.Join("\n", eventMessage)}");

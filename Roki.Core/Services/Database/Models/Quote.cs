@@ -13,5 +13,14 @@ namespace Roki.Services.Database.Models
         public string Context { get; set; }
         public int UseCount { get; set; } = 1;
         public DateTime Date { get; set; } = DateTime.UtcNow;
+
+        public Quote(ulong guildId, ulong authorId, string keyword, string text, string context)
+        {
+            GuildId = guildId;
+            AuthorId = authorId;
+            Keyword = keyword;
+            Text = text;
+            Context = context;
+        }
     }
 }

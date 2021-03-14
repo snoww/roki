@@ -114,17 +114,8 @@ namespace Roki.Modules.Utility
                         .ConfigureAwait(false);
                     return;
                 }
-                
-                var quote = new Quote
-                {
-                    AuthorId = Context.User.Id,
-                    GuildId = Context.Guild.Id,
-                    Keyword = keyword.ToUpper(),
-                    Context = $"https://discordapp.com/channels/{Context.Guild.Id}/{Context.Channel.Id}/{Context.Message.Id}",
-                    Text = text
-                };
 
-                await _context.Quotes.AddAsync(quote);
+                await _context.Quotes.AddAsync(new Quote(Context.User.Id, Context.Guild.Id, keyword.ToUpperInvariant(), $"https://discord.com/channels/{Context.Guild.Id}/{Context.Channel.Id}/{Context.Message.Id}", text));
                 await _context.SaveChangesAsync();
 
                 await Context.Channel.SendMessageAsync($"Quote `{quote.Id}` **{keyword}** added.").ConfigureAwait(false);

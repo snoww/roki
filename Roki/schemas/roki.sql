@@ -1,6 +1,9 @@
 create schema if not exists roki;
 set search_path = roki;
 
+drop extension "uuid-ossp";
+create extension "uuid-ossp";
+
 create table users
 (
     id            bigint primary key,
