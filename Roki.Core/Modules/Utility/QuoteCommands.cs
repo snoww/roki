@@ -69,35 +69,39 @@ namespace Roki.Modules.Utility
             [RokiCommand, Description, Usage, Aliases]
             public async Task ShowQuote(string keyword)
             {
-                string quote = await _context.Quotes.AsQueryable()
+                Quote quote = await _context.Quotes.AsQueryable()
                     .Where(x => x.Keyword == keyword.ToUpper() && x.GuildId == Context.Guild.Id)
                     .OrderBy(_ => Guid.NewGuid())
                     .Take(1)
-                    .Select(x => x.Text)
                     .SingleOrDefaultAsync();
                 
-                if (string.IsNullOrEmpty(quote))
+                if (quote == null)
                 {
                     return;
                 }
 
-                await Context.Channel.SendMessageAsync(quote).ConfigureAwait(false);
+                quote.UseCount++;
+                await _context.SaveChangesAsync();
+
+                await Context.Channel.SendMessageAsync(quote.Text).ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]
             public async Task QuoteId(long id)
             {
-                string quote = await _context.Quotes.AsQueryable()
+                Quote quote = await _context.Quotes.AsQueryable()
                     .Where(x => x.Id == id && x.GuildId == Context.Guild.Id)
-                    .Select(x => x.Text)
                     .SingleOrDefaultAsync();
                 
-                if (string.IsNullOrEmpty(quote))
+                if (quote == null)
                 {
                     return;
                 }
 
-                await Context.Channel.SendMessageAsync(quote).ConfigureAwait(false);
+                quote.UseCount++;
+                await _context.SaveChangesAsync();
+
+                await Context.Channel.SendMessageAsync(quote.Text).ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]
