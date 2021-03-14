@@ -228,10 +228,8 @@ namespace Roki.Services.Database
                 entity.ToTable("quote", "roki");
                 entity.Property(e => e.Id).HasColumnName("id");
                 entity.Property(e => e.AuthorId).HasColumnName("author_id");
-                entity.Property(e => e.Context).HasColumnName("context");
-                entity.Property(e => e.Date)
-                    .HasColumnType("timestamp")
-                    .HasColumnName("date");
+                entity.Property(e => e.ChannelId).HasColumnName("channel_id");
+                entity.Property(e => e.MessageId).HasColumnName("message_id");
                 entity.Property(e => e.GuildId).HasColumnName("guild_id");
                 entity.Property(e => e.Keyword)
                     .IsRequired()

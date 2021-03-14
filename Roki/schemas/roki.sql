@@ -183,14 +183,14 @@ create table event
 
 create table quote
 (
-    id        serial primary key,
-    guild_id  bigint    not null references guild (id),
-    author_id bigint    not null references users (id),
-    keyword   text      not null,
-    text      text      not null,
-    context   text,
-    use_count int       not null,
-    date      timestamp not null
+    id         serial primary key,
+    guild_id   bigint    not null references guild (id),
+    channel_id bigint    not null,
+    message_id bigint    not null,
+    author_id  bigint    not null references users (id),
+    keyword    text      not null,
+    text       text      not null,
+    use_count  int       not null
 );
 
 create table transaction
