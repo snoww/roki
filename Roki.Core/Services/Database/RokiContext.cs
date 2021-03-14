@@ -33,7 +33,7 @@ namespace Roki.Services.Database
         {
             modelBuilder.Entity<Channel>(entity =>
             {
-                entity.ToTable("channel");
+                entity.ToTable("channel", "roki");
                 entity.Property(e => e.Id)
                     .ValueGeneratedNever()
                     .HasColumnName("id");
@@ -49,7 +49,7 @@ namespace Roki.Services.Database
             {
                 entity.HasKey(e => e.ChannelId)
                     .HasName("channel_config_pkey");
-                entity.ToTable("channel_config");
+                entity.ToTable("channel_config", "roki");
                 entity.Property(e => e.ChannelId)
                     .ValueGeneratedNever()
                     .HasColumnName("channel_id");
@@ -64,7 +64,7 @@ namespace Roki.Services.Database
             });
             modelBuilder.Entity<Event>(entity =>
             {
-                entity.ToTable("event");
+                entity.ToTable("event", "roki");
                 entity.Property(e => e.Id).HasColumnName("id");
                 entity.Property(e => e.ChannelId).HasColumnName("channel_id");
                 entity.Property(e => e.Description).HasColumnName("description");
@@ -87,7 +87,7 @@ namespace Roki.Services.Database
             });
             modelBuilder.Entity<Guild>(entity =>
             {
-                entity.ToTable("guild");
+                entity.ToTable("guild", "roki");
                 entity.Property(e => e.Id)
                     .ValueGeneratedNever()
                     .HasColumnName("id");
@@ -103,7 +103,7 @@ namespace Roki.Services.Database
             {
                 entity.HasKey(e => e.GuildId)
                     .HasName("guild_config_pkey");
-                entity.ToTable("guild_config");
+                entity.ToTable("guild_config", "roki");
                 entity.Property(e => e.GuildId)
                     .ValueGeneratedNever()
                     .HasColumnName("guild_id");
@@ -161,7 +161,7 @@ namespace Roki.Services.Database
             {
                 entity.HasKey(e => new {Uid = e.UserId, e.GuildId, e.ItemId})
                     .HasName("inventory_item_pkey");
-                entity.ToTable("inventory_item");
+                entity.ToTable("inventory_item", "roki");
                 entity.Property(e => e.UserId).HasColumnName("uid");
                 entity.Property(e => e.GuildId).HasColumnName("guild_id");
                 entity.Property(e => e.ItemId).HasColumnName("item_id");
@@ -176,7 +176,7 @@ namespace Roki.Services.Database
             {
                 entity.HasKey(e => new {Uid = e.UserId, e.GuildId, e.Symbol})
                     .HasName("investment_pkey");
-                entity.ToTable("investment");
+                entity.ToTable("investment", "roki");
                 entity.Property(e => e.UserId).HasColumnName("uid");
                 entity.Property(e => e.GuildId).HasColumnName("guild_id");
                 entity.Property(e => e.Symbol).HasColumnName("symbol");
@@ -192,7 +192,7 @@ namespace Roki.Services.Database
             });
             modelBuilder.Entity<StoreItem>(entity =>
             {
-                entity.ToTable("store_item");
+                entity.ToTable("store_item", "roki");
                 entity.Property(e => e.Id).HasColumnName("id");
                 entity.Property(e => e.Category).HasColumnName("category");
                 entity.Property(e => e.Description).HasColumnName("description");
@@ -208,7 +208,7 @@ namespace Roki.Services.Database
             });
             modelBuilder.Entity<Message>(entity =>
             {
-                entity.ToTable("message");
+                entity.ToTable("message", "roki");
                 entity.Property(e => e.Id)
                     .ValueGeneratedNever()
                     .HasColumnName("id");
@@ -225,7 +225,7 @@ namespace Roki.Services.Database
             });
             modelBuilder.Entity<Quote>(entity =>
             {
-                entity.ToTable("quote");
+                entity.ToTable("quote", "roki");
                 entity.Property(e => e.Id).HasColumnName("id");
                 entity.Property(e => e.AuthorId).HasColumnName("author_id");
                 entity.Property(e => e.Context).HasColumnName("context");
@@ -245,7 +245,7 @@ namespace Roki.Services.Database
             {
                 entity.HasKey(e => new {Uid = e.UserId, e.GuildId, e.ItemId})
                     .HasName("subscription_pkey");
-                entity.ToTable("subscription");
+                entity.ToTable("subscription", "roki");
                 entity.Property(e => e.UserId).HasColumnName("uid");
                 entity.Property(e => e.GuildId).HasColumnName("guild_id");
                 entity.Property(e => e.ItemId).HasColumnName("item_id");
@@ -260,7 +260,7 @@ namespace Roki.Services.Database
             });
             modelBuilder.Entity<Trade>(entity =>
             {
-                entity.ToTable("trade");
+                entity.ToTable("trade", "roki");
                 entity.Property(e => e.Id).HasColumnName("id");
                 entity.Property(e => e.Shares).HasColumnName("shares");
                 entity.Property(e => e.GuildId).HasColumnName("guild_id");
@@ -280,7 +280,7 @@ namespace Roki.Services.Database
             });
             modelBuilder.Entity<Transaction>(entity =>
             {
-                entity.ToTable("transaction");
+                entity.ToTable("transaction", "roki");
                 entity.Property(e => e.Id).HasColumnName("id");
                 entity.Property(e => e.Amount).HasColumnName("amount");
                 entity.Property(e => e.ChannelId).HasColumnName("channel_id");
@@ -292,7 +292,7 @@ namespace Roki.Services.Database
             });
             modelBuilder.Entity<User>(entity =>
             {
-                entity.ToTable("users");
+                entity.ToTable("users", "roki");
                 entity.Property(e => e.Id)
                     .ValueGeneratedNever()
                     .HasColumnName("id");
@@ -310,7 +310,7 @@ namespace Roki.Services.Database
             {
                 entity.HasKey(e => new {Uid = e.UserId, e.GuildId})
                     .HasName("user_data_pkey");
-                entity.ToTable("user_data");
+                entity.ToTable("user_data", "roki");
                 entity.Property(e => e.UserId).HasColumnName("uid");
                 entity.Property(e => e.GuildId).HasColumnName("guild_id");
                 entity.Property(e => e.Currency).HasColumnName("currency");
@@ -331,7 +331,7 @@ namespace Roki.Services.Database
             });
             modelBuilder.Entity<XpReward>(entity =>
             {
-                entity.ToTable("xp_reward");
+                entity.ToTable("xp_reward", "roki");
                 entity.Property(e => e.Id).HasColumnName("id");
                 entity.Property(e => e.Details).HasColumnName("details");
                 entity.Property(e => e.GuildId).HasColumnName("guild_id");
