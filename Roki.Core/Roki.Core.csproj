@@ -10,7 +10,7 @@
 
     <ItemGroup>
       <PackageReference Include="CommandLineParser" Version="2.8.0" />
-      <PackageReference Include="Discord.Net" Version="2.3.0" />
+      <PackageReference Include="Discord.Net" Version="2.3.1" />
       <PackageReference Include="Google.Apis.Customsearch.v1" Version="1.49.0.2084" />
       <PackageReference Include="Google.Apis.YouTube.v3" Version="1.49.0.2141" />
       <PackageReference Include="linqtotwitter" Version="6.4.0" />
