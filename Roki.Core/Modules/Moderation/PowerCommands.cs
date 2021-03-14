@@ -14,7 +14,8 @@ namespace Roki.Modules.Moderation
         [RequireContext(ContextType.Guild)]
         public class PowerCommands : RokiSubmodule<PowersService>
         {
-            [RokiCommand, Description, Usage, Aliases]
+            // todo
+            /*[RokiCommand, Description, Usage, Aliases]
             [RequireBotPermission(ChannelPermission.ManageRoles)]
             [Priority(0)]
             public async Task Mute(IUser user)
@@ -81,7 +82,7 @@ namespace Roki.Modules.Moderation
                     Log.Warn(e, "Unable to change {user} nickname", user);
                     await Context.Channel.SendErrorAsync("You cannot change that person's nickname").ConfigureAwait(false);
                 }
-            }
+            }*/
         }
     }
 }

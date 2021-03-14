@@ -20,11 +20,11 @@ namespace Roki.Modules.Moderation.Services
         {
         }
 
-        public async Task<bool> ConsumePower(IUser user, ulong guildId, string power)
-        {
-            // todo
-            return false;
-        }
+        // public async Task<bool> ConsumePower(IUser user, ulong guildId, string power)
+        // {
+        //     // todo
+        //     return false;
+        // }
 
         public async Task MuteUser(ICommandContext ctx, IGuildUser user)
         {
