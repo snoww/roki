@@ -1,11 +1,13 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Services;
-using Roki.Services.Database.Maps;
+using Roki.Services.Database;
+using Roki.Services.Database.Models;
 
 namespace Roki.Modules.Gambling
 {
@@ -31,14 +33,13 @@ namespace Roki.Modules.Gambling
             {
                 return;
             }
+            
 
-            bool removed = await _currency
-                .RemoveAsync(Context.User, Context.Client.CurrentUser, "BetRoll Entry", amount, Context.Guild.Id, Context.Channel.Id, Context.Message.Id)
-                .ConfigureAwait(false);
+            bool removed = await _currency.RemoveCurrencyAsync(Context.User.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, "BetRoll Entry", amount).ConfigureAwait(false);
             if (!removed)
             {
                 await Context.Channel.SendErrorAsync($"Not enough {guildConfig.CurrencyIcon}\n" +
-                                                     $"You have `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}`")
+                                                     $"You have `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}`")
                     .ConfigureAwait(false);
                 return;
             }
@@ -48,30 +49,31 @@ namespace Roki.Modules.Gambling
             if (roll < 70)
             {
                 await Context.Channel.SendErrorAsync($"{rollStr}\nBetter luck next time.\n" +
-                                                     $"New Balance: `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}")
+                                                     $"New Balance: `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}")
                     .ConfigureAwait(false);
-                return;
-            }
-
-            long win;
-            if (roll < 91)
-            {
-                win = (long) Math.Ceiling(amount * guildConfig.BetRoll71Multiplier);
-            }
-            else if (roll < 100)
-            {
-                win = amount * guildConfig.BetRoll92Multiplier;
             }
             else
             {
-                win = amount * guildConfig.BetRoll100Multiplier;
-            }
+                double payout;
+                if (roll < 91)
+                {
+                    payout = amount * guildConfig.BetRoll71Multiplier;
+                }
+                else if (roll < 100)
+                {
+                    payout = amount * guildConfig.BetRoll92Multiplier;
+                }
+                else
+                {
+                    payout = amount * guildConfig.BetRoll100Multiplier;
+                }
 
-            await _currency.AddAsync(Context.User, Context.Client.CurrentUser, "BetRoll Payout", win, Context.Guild.Id, Context.Channel.Id, Context.Message.Id).ConfigureAwait(false);
-            await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                    .WithDescription($"{rollStr}\nCongratulations, you won `{win:N0}` {guildConfig.CurrencyIcon}\n" +
-                                     $"New Balance: `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}"))
-                .ConfigureAwait(false);
+                await _currency.AddCurrencyAsync(Context.User.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, "BetRoll Payout", (long) Math.Ceiling(payout)).ConfigureAwait(false);
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
+                        .WithDescription($"{rollStr}\nCongratulations, you won `{payout:N0}` {guildConfig.CurrencyIcon}\n" +
+                                         $"New Balance: `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}"))
+                    .ConfigureAwait(false);
+            }
         }
     }
 }

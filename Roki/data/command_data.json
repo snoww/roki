@@ -6,6 +6,13 @@
     "{0}about"
   ]
 },
+  "invite": {
+    "Aliases": "",
+    "Description": "Invite link for Roki to join your server.",
+    "Usage": [
+      "{0}invite"
+    ]
+  },
   "stats": {
     "Aliases": "",
     "Description": "Basic stats for Roki.",
@@ -23,7 +30,7 @@
   },
   "channelinfo": {
     "Aliases": "channel",
-    "Description": "Shows information about the current channel or mentioned channel.",
+    "Description": "Shows information about the current channel/mentioned channel.",
     "Usage": [
       "{0}channelinfo",
       "{0}channel channel"
@@ -31,7 +38,7 @@
   },
   "userinfo": {
     "Aliases": "user",
-    "Description": "Shows information about yourself or another user.",
+    "Description": "Shows information about yourself/another user.",
     "Usage": [
       "{0}userinfo",
       "{0}user @user"
@@ -53,14 +60,14 @@
   },
   "commands": {
     "Aliases": "cmds aliases",
-    "Description": "List all of the bot's commands and their aliases from a module. You can either specify the full or the first few letters of the module name.",
+    "Description": "List all of the bot's commands and their aliases from a module. You can either specify the full/the first few letters of the module name.",
     "Usage": [
       "{0}commands stocks"
     ]
   },
   "h": {
     "Aliases": "help",
-    "Description": "Either shows a help for a single Aliases, or DMs you help link if no parameters are specified.",
+    "Description": "Either shows a help for a single Aliases,/DMs you help link if no parameters are specified.",
     "Usage": [
       "{0}help {0}weather",
       "{0}h"
@@ -148,14 +155,14 @@
   },
   "quotedelete": {
     "Aliases": "quotedel qdel",
-    "Description": "Deletes a quote with the specified Keyword. You have to be either server Administrator or the creator of the quote to delete it.",
+    "Description": "Deletes a quote with the specified Keyword. You have to be either server Administrator/the creator of the quote to delete it.",
     "Usage": [
       "{0}qdel 123456"
     ]
   },
   "quotedeleteid": {
     "Aliases": "quotedelid qdelid",
-    "Description": "Deletes a quote with the specified ID. You have to be either server Administrator or the creator of the quote to delete it.",
+    "Description": "Deletes a quote with the specified ID. You have to be either server Administrator/the creator of the quote to delete it.",
     "Usage": [
       "{0}qdel 123456"
     ]
@@ -228,7 +235,7 @@
   },
   "queue": {
     "Aliases": "q",
-    "Description": "Searches and plays the query for the specified song, or plays the url provided. If the url is a playlist, it adds all tracks in the playlist into the queue. Must be in a voice channel.",
+    "Description": "Searches and plays the query for the specified song,/plays the url provided. If the url is a playlist, it adds all tracks in the playlist into the queue. Must be in a voice channel.",
     "Usage": [
       "{0}q hello",
       "{0}q https://www.youtube.com/watch?v=dQw4w9WgXcQ"
@@ -372,7 +379,7 @@
   },
   "xpnotification": {
     "Aliases": "xpnotif",
-    "Description": "Sets the preferred location of xp level up notifications (Server, Dm, or None).",
+    "Description": "Sets the preferred location of xp level up notifications (Server, Dm,/None).",
     "Usage": [
       "{0}xpnotif server"
     ]
@@ -402,7 +409,7 @@
   },
   "betflip": {
     "Aliases": "bf",
-    "Description": "Bet to guess result if heads or tails. Guessing correctly awards you currency.",
+    "Description": "Bet to guess result if heads/tails. Guessing correctly awards you currency.",
     "Usage": [
       "{0}bf 10 h",
       "{0}bf 5 tails"
@@ -446,9 +453,9 @@
       "{0}trs 2"
     ]
   },
-  "betdie": {
+  "betdice": {
     "Aliases": "bd",
-    "Description": "Bet an amount to roll 6 die. Rolling 17/25 yields x1.25 stones, 16/26 x1.5, 15/27 x2, 14/28 x2.5, 13/29 x3, 12/30 x5, 11/31 x7, 10/32 x10, 9/33 x17, 8/34 x25, 7/35 x50, 6/36 x100",
+    "Description": "Bet to roll `6d6`, rarer combinations yield bigger payouts.\n```18-24: 0x\n17/25: x1.25, 16/26: x1.5, 15/27: x2, 14/28: x2.5, 13/29: x3, 12/30: x5, 11/31: x7, 10/32: x10, 9/33: x17, 8/34: x25, 7/35: x50, 6/36: x100```",
     "Usage": [
       "{0}bd 10"
     ]
@@ -477,7 +484,7 @@
   },
   "trivia": {
     "Aliases": "t",
-    "Description": "Starts a new 10 question trivia game with optional category (use `.tc` to check categories). Default is all categories. Awards currency based on difficulty. Needs at least 60% to get rewards.",
+    "Description": "Starts a new 10 question trivia game with optional category (use `{0}tc` to check categories). Default is all categories. Awards currency based on difficulty. Needs at least 60% to get rewards.",
     "Usage": [
       "{0}trivia optional_category",
       "{0}t",
@@ -493,7 +500,7 @@
   },
   "store": {
     "Aliases": "",
-    "Description": "Shows the Stone store. 9 items per page. Or specify specific name or id to see that item.",
+    "Description": "Shows the Stone store. 9 items per page./specify specific name/id to see that item.",
     "Usage": [
       "{0}store",
       "{0}store 8"
@@ -501,7 +508,7 @@
   },
   "buy": {
     "Aliases": "",
-    "Description": "Buy an item from the store using its name or id, must specify amount or all",
+    "Description": "Buy an item from the store using its name/id, must specify amount/all",
     "Usage": [
       "{0}buy 1 ffffff",
       "{0}buy all pizza"
@@ -517,21 +524,21 @@
   },
   "mute": {
     "Aliases": "",
-    "Description": "Mutes the specified user (Prevents them from speaking in voice). Must be a moderator or have an available power (Consumes the power).",
+    "Description": "Mutes the specified user (Prevents them from speaking in voice). Must be a moderator/have an available power (Consumes the power).",
     "Usage": [
       "{0}mute @snow"
     ]
   },
   "block": {
     "Aliases": "",
-    "Description": "Blocks the specified user (Prevents them from typing in chat). Must be a moderator or have an available power (Consumes the power).",
+    "Description": "Blocks the specified user (Prevents them from typing in chat). Must be a moderator/have an available power (Consumes the power).",
     "Usage": [
       "{0}block @snow"
     ]
   },
   "timeout": {
     "Aliases": "",
-    "Description": "Times out the specified user (Prevents them from typing and speaking). Must be a moderator or have an available power (Consumes the power). Does not stack with `.mute` and `.block`.",
+    "Description": "Times out the specified user (Prevents them from typing and speaking). Must be a moderator/have an available power (Consumes the power). Does not stack with `.mute` and `.block`.",
     "Usage": [
       "{0}timeout @snow"
     ]
@@ -541,21 +548,6 @@
     "Description": "Shows the items in your inventory",
     "Usage": [
       "{0}inventory"
-    ]
-  },
-  "stockstats": {
-    "Aliases": "sst",
-    "Description": "Shows the statistics of the specified stock, optional all details",
-    "Usage": [
-      "{0}stockstats AAPL",
-      "{0}sst AAPL true"
-    ]
-  },
-  "stockquote": {
-    "Aliases": "sq",
-    "Description": "Shows current quote of the specified stock",
-    "Usage": [
-      "{0}stockquote AAPL"
     ]
   },
   "stocknews": {
@@ -573,55 +565,47 @@
     ]
   },
   "stockprice": {
-    "Aliases": "price sp",
+    "Aliases": "price sp sq",
     "Description": "Shows the current price of the stock for the specified company",
     "Usage": [
-      "{0}stockprice AAPL"
+      "{0}stockprice MSFT"
     ]
   },
-  "stockposition": {
-    "Aliases": "position sb",
-    "Description": "Long or short shares of a company. Shorted shares will be charged a premium every week.",
+  "stockbuy": {
+    "Aliases": "sb",
+    "Description": "Purchase shares of a company. Funds are taken from investing account",
     "Usage": [
-      "{0}stockbuy long AAPL 50",
-      "{0}position short AAPL 15"
+      "{0}stockbuy 50 AAPL",
+      "{0}sb 100 GME"
     ]
   },
   "stocksell": {
     "Aliases": "ss",
-    "Description": "Sell a specified amount of shares.",
+    "Description": "Sells shares of a company. Funds are deposited into your investing account",
     "Usage": [
-      "{0}stocksell AAPL 50",
-      "{0}ss AAPL 20"
+      "{0}stocksell TSLA 50",
+      "{0}ss DIS 20"
     ]
   },
   "transfer": {
     "Aliases": "",
-    "Description": "Transfers stones to/from your investing account and cash account. Note: you will lose your cents on your transfer (rounded up)",
+    "Description": "Transfers currency the specified amount of currency to or from your (cash/investing) account.",
     "Usage": [
-      "{0}transfer cash 5000",
-      "{0}transfer investing 20000"
+      "{0}transfer 500 to cash",
+      "{0}transfer 2000 from investing"
     ]
   },
   "portfolio": {
     "Aliases": "",
-    "Description": "Shows your or the specified user's portfolio.",
+    "Description": "Shows your/the specified user's portfolio.",
     "Usage": [
       "{0}portfolio",
       "{0}portfolio @snow"
     ]
   },
-  "stockchart": {
-    "Aliases": "chart sc",
-    "Description": "Shows the chart for the specified company, default is 1m. Options are `5y` `2y` `1y` `ytd` `6m` `3m` `1m` `5d` `today`",
-    "Usage": [
-      "{0}chart aapl",
-      "{0}chart goog today"
-    ]
-  },
   "userdetails": {
     "Aliases": "",
-    "Description": "Shows the users userid, username, discriminator, and avatarid/",
+    "Description": "Shows the users userid, username, discriminator, and avatar id",
     "Usage": [
       "{0}userdetails @snow"
     ]
@@ -643,13 +627,6 @@
       "{0}uwu"
     ]
   },
-  "nickname": {
-    "Aliases": "nick",
-    "Description": "Changes the target users nickname. Lasts forever or until user changes back. Must be a moderator or have an available power (Consumes the power).",
-    "Usage": [
-      "{0}nick @snow snowww"
-    ]
-  },
   "jeopardy": {
     "Aliases": "jp",
     "Description": "Starts a Jeopardy! game in the current channel. Choose a price from the categories, and give the correct answer to win.\nIf a game is active in the current channel, the current question will be sent again.",
@@ -658,21 +635,21 @@
     ]
   },
   "jeopardyleaderboard": {
-    "Aliases": "jl",
+    "Aliases": "jlb jl",
     "Description": "Shows the score leaderboard for the current Jeopardy! game.",
     "Usage": [
       "{0}jl"
     ]
   },
   "jeopardystop": {
-    "Aliases": "js jq",
+    "Aliases": "jstop jq",
     "Description": "Stops current Jeopardy! game after the current question.",
     "Usage": [
       "{0}js"
     ]
   },
   "jeopardyvote": {
-    "Aliases": "jvote jv",
+    "Aliases": "jvote jskip jv",
     "Description": "Votes to skip the current question. Can vote if you have a score in the current game. Voting opens 12 seconds after clue is shown.",
     "Usage": [
       "{0}jv"
@@ -699,21 +676,6 @@
     "Usage": [
       "{0}xpr",
       "{0}xpr 2 true"
-    ]
-  },
-  "xprewardadd": {
-    "Aliases": "xpradd",
-    "Description": "Adds an XP reward. Must have Administrator permissions.\nParameters: rewardType: `role` or `currency`, level: `number`, reward: `number` if type is `currency`, `roleID` or `@role` if type is `role`",
-    "Usage": [
-      "{0}xpradd currency 25 2500",
-      "{0}xpradd role 25 @Role"
-    ]
-  },
-  "xprewardremove": {
-    "Aliases": "xprr",
-    "Description": "Removes an XP reward by ID. Must have Administrator permissions.",
-    "Usage": [
-      "{0}xprr xxxxxxx"
     ]
   },
   "notsafeforwork": {
@@ -801,69 +763,5 @@
     "Usage": [
       "{0}prune @snow 50"
     ]
-  },
-  "guildconfig": {
-    "Aliases": "serverconfig sconfig",
-    "Description": "Lists the server's configuration for the bot.",
-    "Usage": [
-      "{0}serverconfig"
-    ]
-  },
-  "channelconfig": {
-    "Aliases": "chconfig",
-    "Description": "Lists the current channel's configuration.",
-    "Usage": [
-      "{0}chconfig"
-    ]
-  },
-  "prefix": {
-    "Aliases": "defaultprefix",
-    "Description": "Sets the prefix for the bot. Up to 5 characters. Use 'default' argument to reset prefix.",
-    "Usage": [
-      "{0}prefix $",
-      "{0}prefix default"
-    ]
-  },
-  "serverlogging": {
-    "Aliases": "slogging",
-    "Description": "Sets the default logging behavior when a new channel is created in the server. Default is disabled.",
-    "Usage": [
-      "{0}serverlogging enable"
-    ]
-  },
-  "servercurrencygeneration": {
-    "Aliases": "scg",
-    "Description": "Sets the default currency generation behavior when a new channel is created in the server. Default is enabled.",
-    "Usage": [
-      "{0}scg disable"
-    ]
-  },
-  "serverxpgain": {
-    "Aliases": "sxpg",
-    "Description": "Sets the default XP gain behavior when a new channel is created in the server. Default is enabled.",
-    "Usage": [
-      "{0}sxp disable"
-    ]
-  },
-  "logging": {
-    "Aliases": "",
-    "Description": "Sets logging behavior in current channel. If enabled, all user messages in the current channel will be logged. Inherits server logging settings by default.",
-    "Usage": [
-      "{0}logging enable"
-    ]
-  },
-  "currencygeneration": {
-    "Aliases": "cg",
-    "Description": "Sets currency generation behavior in current channel. Inherits server logging settings by default.",
-    "Usage": [
-      "{0}cg disable"
-    ]
-  },
-  "xpgain": {
-    "Aliases": "xpg",
-    "Description": "Sets XP gain behavior in current channel. Inherits server logging settings by default.",
-    "Usage": [
-      "{0}xpg disable"
-    ]
-  }  
+  }
 }

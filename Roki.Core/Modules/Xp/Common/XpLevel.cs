@@ -5,12 +5,12 @@ namespace Roki.Modules.Xp.Common
     public struct XpLevel
     {
         public int Level { get; }
-        public int ProgressXp { get; }
-        public int RequiredXp { get; }
-        public int TotalXp { get; }
-        public int TotalRequiredXp { get; }
+        public long ProgressXp { get; }
+        public long RequiredXp { get; }
+        public long TotalXp { get; }
+        public long TotalRequiredXp { get; }
 
-        public XpLevel(int xp)
+        public XpLevel(long xp)
         {
             TotalXp = xp;
             const double factor = 2.5;
@@ -18,11 +18,11 @@ namespace Roki.Modules.Xp.Common
             Level = (int) Math.Floor(Math.Sqrt(xp) / factor);
             var levelFloor = (int) Math.Pow(Level * factor, 2);
             ProgressXp = xp - levelFloor;
-            RequiredXp = (int) Math.Pow((Level + 1) * factor, 2) - levelFloor;
+            RequiredXp = (long) Math.Pow((Level + 1) * factor, 2) - levelFloor;
             TotalRequiredXp = levelFloor + RequiredXp;
         }
 
-        public XpLevel AddXp(int xp)
+        public XpLevel AddXp(long xp)
         {
             return new(TotalXp + xp);
         }

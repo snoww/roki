@@ -1,9 +1,11 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
-namespace Roki.Services.Database.Maps
+namespace Roki.Modules.Searches.Models
 {
     public class Pokemon
     {
+        [JsonPropertyName("_id")]
         public string Id { get; set; }
         public int Num { get; set; }
         public string Species { get; set; }
@@ -18,18 +20,10 @@ namespace Roki.Services.Database.Maps
         public List<string> Evos { get; set; }
         public List<string> EggGroups { get; set; }
     }
-
-    public class PokemonItem
-    {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public int Gen { get; set; }
-        public string Desc { get; set; }
-        public Dictionary<string, object> Fling { get; set; }
-    }
-
+    
     public class Ability
     {
+        [JsonPropertyName("_id")]
         public string Id { get; set; }
         public string Name { get; set; }
         public string Desc { get; set; }
@@ -39,6 +33,7 @@ namespace Roki.Services.Database.Maps
 
     public class Move
     {
+        [JsonPropertyName("_id")]
         public string Id { get; set; }
         public string Name { get; set; }
         public string Desc { get; set; }

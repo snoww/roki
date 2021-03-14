@@ -1,70 +1,87 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Discord;
-using Discord.Commands;
 using Discord.WebSocket;
-using MongoDB.Bson;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Extensions;
 using Roki.Services;
-using Roki.Services.Database.Maps;
+using Roki.Services.Database;
 
 namespace Roki.Modules.Currency.Services
 {
     public class StoreService : IRokiService
     {
-        private readonly IMongoService _mongo;
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly DiscordSocketClient _client;
         private Timer _timer;
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         
-        public StoreService(DiscordSocketClient client, IMongoService mongo)
+        public StoreService(DiscordSocketClient client, IServiceScopeFactory scopeFactory)
         {
             _client = client;
-            _mongo = mongo;
+            _scopeFactory = scopeFactory;
             CheckSubscriptions();
         }
 
         private void CheckSubscriptions()
-        {
-            _timer = new Timer(RemoveSubEvent, null, TimeSpan.Zero, TimeSpan.FromHours(3));
+        {           
+            DateTime current = DateTime.UtcNow;
+            TimeSpan timeToGo = new TimeSpan(24, 0, 0) - current.TimeOfDay;
+            if (timeToGo < TimeSpan.Zero)
+            {
+                //time already passed
+                return;
+            }
+            
+            _timer = new Timer(RemoveSubEvent, null, timeToGo, Timeout.InfiniteTimeSpan);
         }
 
         private async void RemoveSubEvent(object state)
         {
-            Dictionary<ulong, Dictionary<string, List<string>>> expired = await _mongo.Context.RemoveExpiredSubscriptionsAsync().ConfigureAwait(false);
-            foreach ((ulong userId, Dictionary<string, List<string>> subs) in expired)
+            using IServiceScope scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<RokiContext>();
+            DateTime now = DateTime.UtcNow.Date;
+            if (!await context.Subscriptions.AsNoTracking().AnyAsync(x => x.Expiry <= now))
             {
-                foreach ((string guildId, List<string> sub) in subs)
+                return;
+            }
+            
+            foreach (var expired in context.Subscriptions.AsNoTracking().Include(x => x.Item)
+                .Where(x => x.Expiry <= now)
+                .Select(x => new { x.UserId, x.GuildId, x.Item.Details }))
+            {
+                string[] details = expired.Details.Split(';');
+                if (details[0].Equals("boost", StringComparison.Ordinal))
                 {
-                    foreach (string id in sub)
+                    continue;
+                }
+
+                if (details[0].Equals("role", StringComparison.Ordinal))
+                {
+                    try
                     {
-                        (_, Listing listing) = await _mongo.Context.GetStoreItemByIdAsync(ulong.Parse(guildId), id).ConfigureAwait(false);
-                        if (listing.Category.Equals("Boost", StringComparison.Ordinal)) 
+                        IGuildUser user = _client.GetGuild(expired.GuildId)?.GetUser(expired.UserId);
+                        IRole role = user?.GetRoles().FirstOrDefault(r => r.Id.ToString() == details[1]);
+                        if (role == null)
+                        {
                             continue;
-                        try
-                        {
-                            SocketGuild guild = _client.GetGuild(ulong.Parse(guildId));
-                            if (!(guild.GetUser(userId) is IGuildUser user)) 
-                                continue;
-                    
-                            IRole role = user.GetRoles().FirstOrDefault(r => r.Name.Contains(listing.Description, StringComparison.OrdinalIgnoreCase));
-                            if (role == null) 
-                                continue;
-                    
-                            await user.RemoveRoleAsync(role).ConfigureAwait(false);
                         }
-                        catch (Exception e)
-                        {
-                            Logger.Warn(e, "Error while tyring to remove subscription role");
-                        }
+
+                        await user.RemoveRoleAsync(role);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Warn(e, "Error while tyring to remove subscription role <@&{roleid}>", details[1]);
                     }
                 }
             }
+
+            int rows = await context.Database.ExecuteSqlRawAsync("delete from subscription where expiry < current_date");
+            Logger.Info("Removed {rows} expired subscription(s)", rows);
         }
     }
 }

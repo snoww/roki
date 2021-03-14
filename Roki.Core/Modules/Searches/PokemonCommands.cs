@@ -4,12 +4,12 @@ using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Extensions;
+using Roki.Modules.Searches.Models;
 using Roki.Modules.Searches.Services;
-using Roki.Services.Database.Maps;
 
 namespace Roki.Modules.Searches
 {
-    public partial class Searches
+    /*public partial class Searches
     {
         [Group]
         public class PokemonCommands : RokiSubmodule<PokemonService>
@@ -30,11 +30,11 @@ namespace Roki.Modules.Searches
                         await Context.Channel.SendErrorAsync("Please enter a valid Pokémon number (1-898).").ConfigureAwait(false);
                         return;
                     }
-                    pokemon = await Service.GetPokemonByIdAsync(num).ConfigureAwait(false);
+                    pokemon = PokemonService.GetPokemonByIdAsync(num);
                 }
                 else
                 {
-                    pokemon = await Service.GetPokemonByNameAsync(query).ConfigureAwait(false);
+                    pokemon = await PokemonService.GetPokemonByNameAsync(query).ConfigureAwait(false);
                 }
 
                 if (pokemon == null)
@@ -60,7 +60,7 @@ namespace Roki.Modules.Searches
                     .AddField("Height", $"{pokemon.Height:N1} m", true)
                     .AddField("Weight", $"{pokemon.Weight} kg", true)
                     .AddField("Egg Groups", string.Join("\n", pokemon.EggGroups), true)
-                    .AddField("Evolution", $"```less\n{await Service.GetEvolution(pokemon).ConfigureAwait(false)}```");
+                    .AddField("Evolution", $"```less\n{Service.GetEvolution(pokemon)}```");
 
                 string sprite = PokemonService.GetSprite(pokemon.Id, pokemon.Num);
                 embed.WithThumbnailUrl($"attachment://{sprite.Split("/").Last()}");
@@ -78,7 +78,7 @@ namespace Roki.Modules.Searches
 
                 await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
 
-                Ability ability = await Service.GetAbilityAsync(query).ConfigureAwait(false);
+                Ability ability = Service.GetAbilityAsync(query);
                 if (ability == null)
                 {
                     await Context.Channel.SendErrorAsync("No ability of that name found.").ConfigureAwait(false);
@@ -101,7 +101,7 @@ namespace Roki.Modules.Searches
                 }
 
                 await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
-                Move move = await Service.GetMoveAsync(query).ConfigureAwait(false);
+                Move move = await PokemonService.GetMoveAsync(query).ConfigureAwait(false);
                 if (move == null)
                 {
                     await Context.Channel.SendErrorAsync("No move of that name found.").ConfigureAwait(false);
@@ -119,35 +119,6 @@ namespace Roki.Modules.Searches
                         .AddField("Priority", move.Priority, true))
                     .ConfigureAwait(false);
             }
-
-            [RokiCommand, Usage, Description, Aliases]
-            public async Task Item([Leftover] string query)
-            {
-                if (string.IsNullOrWhiteSpace(query))
-                {
-                    return;
-                }
-
-                await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
-                PokemonItem item = await Service.GetItemAsync(query);
-
-                if (item == null)
-                {
-                    await Context.Channel.SendErrorAsync("Item not found.").ConfigureAwait(false);
-                    return;
-                }
-
-                EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
-                    .WithAuthor(item.Name)
-                    .WithDescription(item.Desc)
-                    .AddField("Introduced in", $"Generation {item.Gen}", true);
-                if (item.Fling != null)
-                {
-                    embed.AddField("Fling Power", string.Join("\n", item.Fling.Select(x => x.Key == "basePower" ? $"Base Power: `{x.Value}`" : $"{x.Key}: `{x.Value}`")), true);
-                }
-
-                await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
-            }
         }
-    }
+    }*/
 }

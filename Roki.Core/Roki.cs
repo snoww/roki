@@ -7,12 +7,16 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Roki.Extensions;
 using Roki.Services;
-using StackExchange.Redis;
+using Roki.Services.Database;
+using Roki.Services.Database.Models;
 using Victoria;
+using IDatabase = StackExchange.Redis.IDatabase;
 
 namespace Roki
 {
@@ -26,22 +30,18 @@ namespace Roki
         private IRokiConfig RokiConfig { get; }
         private DiscordSocketClient Client { get; }
         private CommandService CommandService { get; }
-        private IMongoService Mongo { get; }
         private IRedisCache Cache { get; }
-        private IConfigurationService Config { get; }
         private IServiceProvider Services { get; set; }
 
         public static Properties Properties { get; } = new();
-        public static ulong BotId { get; set; }
+        public static ulong BotId { get; private set; }
 
         public Roki()
         {
             LogSetup.SetupLogger();
 
             RokiConfig = new RokiConfig();
-            Mongo = new MongoService(RokiConfig.Db);
-            Cache = new RedisCache(RokiConfig.RedisConfig);
-            Config = new ConfigurationService(Mongo.Context, Cache);
+            Cache = new RedisCache();
 
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
@@ -69,13 +69,10 @@ namespace Roki
         private async Task RunAsync()
         {
             var sw = Stopwatch.StartNew();
-
-            await LoginAsync(RokiConfig.Token).ConfigureAwait(false);
-
-            Logger.Info("Loading services");
-
+            
             try
             {
+                Logger.Info("Loading services");
                 AddServices();
             }
             catch (Exception e)
@@ -84,14 +81,41 @@ namespace Roki
                 throw;
             }
 
+            await LoginAsync(RokiConfig.Token).ConfigureAwait(false);
+
             sw.Stop();
-            Logger.Info("Roki connected in {Elapsed} ms", sw.ElapsedMilliseconds);
+            Logger.Info("Roki connected in {Elapsed} s", sw.Elapsed.TotalSeconds);
+            Logger.Info("Loading database and cache");
 
-            Services.GetService<IStatsService>()!.Initialize();
-            await Services.GetService<CommandHandler>()!.StartHandling().ConfigureAwait(false);
-            await Services.GetService<CommandService>()!.AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
+            Services.GetRequiredService<IStatsService>().Initialize();
+            await Services.GetRequiredService<CommandHandler>().StartHandling().ConfigureAwait(false);
+            await Services.GetRequiredService<CommandService>().AddModulesAsync(GetType().GetTypeInfo().Assembly, Services).ConfigureAwait(false);
+            await Services.GetRequiredService<EventHandlers>().StartHandling().ConfigureAwait(false);
+        }
+        
+        private void AddServices()
+        {
+            var sw = Stopwatch.StartNew();
 
-            await new EventHandlers(Mongo, Client, Cache, Config).StartHandling().ConfigureAwait(false);
+            IServiceCollection service = new ServiceCollection()
+                .AddDbContext<RokiContext>(options => options.UseNpgsql(RokiConfig.Db.ToString()))
+                .AddSingleton<IConfigurationService, ConfigurationService>()
+                .AddSingleton<ICurrencyService, CurrencyService>()
+                .AddSingleton(RokiConfig)
+                .AddSingleton(Cache)
+                .AddSingleton(Client)
+                .AddSingleton(CommandService)
+                .AddSingleton<LavaConfig>()
+                .AddSingleton<LavaNode>()
+                .AddSingleton(this)
+                .AddHttpClient()
+                .LoadFrom(Assembly.GetAssembly(typeof(CommandHandler)));
+
+            Services = service.BuildServiceProvider();
+            LoadTypeReaders(typeof(Roki).Assembly);
+
+            sw.Stop();
+            Logger.Info("Loaded {count} services in {elapsed} ms", service.Count, sw.ElapsedMilliseconds);
         }
 
         private async Task LoginAsync(string token)
@@ -99,6 +123,7 @@ namespace Roki
             var ready = new TaskCompletionSource<bool>();
 
             Logger.Info("Logging in ...");
+            var dbSw = Stopwatch.StartNew();
             Client.Ready += UpdateDatabase;
 
             await Client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
@@ -116,19 +141,20 @@ namespace Roki
 
                 Task _ = Task.Run(async () =>
                 {
+                    using IServiceScope scope = Services.CreateScope();
+                    var context = scope.ServiceProvider.GetRequiredService<RokiContext>();
+                    await using IDbContextTransaction trans = await context.Database.BeginTransactionAsync();
                     try
                     {
                         BotId = Client.CurrentUser.Id;
                         IDatabase cache = Cache.Redis.GetDatabase();
-                        Logger.Info("Loading cache");
-                        var sw = Stopwatch.StartNew();
+                        if (!await context.Users.AsQueryable().AnyAsync(x => x.Id == BotId))
+                        {
+                            await context.Users.AddAsync(new User(Client.CurrentUser.Id, Client.CurrentUser.Username, Client.CurrentUser.Discriminator, Client.CurrentUser.AvatarId));
+                        }
 
                         foreach (SocketGuild guild in Client.Guilds)
                         {
-                            long botCurrency = await Mongo.Context.GetUserCurrency(Client.CurrentUser, guild.Id.ToString());
-                            await cache.StringSetAsync($"currency:{guild.Id}:{BotId}", botCurrency, flags: CommandFlags.FireAndForget)
-                                .ConfigureAwait(false);
-
                             SocketGuildUser bot = guild.CurrentUser;
                             SocketRole role = bot.Roles.OrderByDescending(r => r.Position).FirstOrDefault();
 
@@ -140,22 +166,32 @@ namespace Roki
                             {
                                 await cache.StringSetAsync($"color:{bot.Guild.Id}", role.Color.RawValue).ConfigureAwait(false);
                             }
-                            
-                            await Mongo.Context.GetOrAddGuildAsync(guild).ConfigureAwait(false);
 
-                            foreach (SocketGuildChannel channel in guild.Channels)
+                            if (!await context.Guilds.AsQueryable().AnyAsync(x => x.Id == guild.Id))
                             {
-                                if (!(channel is SocketTextChannel textChannel))
+                                if (!await context.Users.AsQueryable().AnyAsync(x => x.Id == guild.OwnerId))
                                 {
-                                    continue;
+                                    await context.Users.AddAsync(new User(guild.OwnerId, guild.Owner.Username, guild.Owner.Discriminator, guild.Owner.AvatarId));
+                                    await context.SaveChangesAsync();
                                 }
 
-                                await Mongo.Context.GetOrAddChannelAsync(textChannel).ConfigureAwait(false);
+                                await context.Guilds.AddAsync(new Guild(guild.Id, guild.Name, guild.IconId, guild.OwnerId)
+                                {
+                                    GuildConfig = new GuildConfig()
+                                });
+                                
+                                await context.UserData.AddRangeAsync(new UserData(BotId, guild.Id), new UserData(guild.OwnerId, guild.Id));
+                                
+                                await context.SaveChangesAsync();
+                                await context.Channels.AddRangeAsync(guild.TextChannels.Select(channel => new Channel(channel.Id, guild.Id, channel.Name) { ChannelConfig = new ChannelConfig()}).ToList());
                             }
                         }
 
-                        sw.Stop();
-                        Logger.Info("Cache loaded in {Elapsed} ms", sw.ElapsedMilliseconds);
+                        await context.SaveChangesAsync();
+                        await trans.CommitAsync();
+
+                        dbSw.Stop();
+                        Logger.Info("Finished loading database and cache in {Elapsed} s", dbSw.Elapsed.TotalSeconds);
                     }
                     catch (Exception e)
                     {
@@ -167,30 +203,6 @@ namespace Roki
 
                 return Task.CompletedTask;
             }
-        }
-
-        private void AddServices()
-        {
-            var sw = Stopwatch.StartNew();
-
-            IServiceCollection service = new ServiceCollection()
-                .AddSingleton(RokiConfig)
-                .AddSingleton(Mongo)
-                .AddSingleton(Cache)
-                .AddSingleton(Config)
-                .AddSingleton(Client)
-                .AddSingleton(CommandService)
-                .AddSingleton<LavaConfig>()
-                .AddSingleton<LavaNode>()
-                .AddSingleton(this)
-                .AddHttpClient()
-                .LoadFrom(Assembly.GetAssembly(typeof(CommandHandler)));
-
-            Services = service.BuildServiceProvider();
-            LoadTypeReaders(typeof(Roki).Assembly);
-
-            sw.Stop();
-            Logger.Info("All services loaded in {Elapsed} ms", sw.ElapsedMilliseconds);
         }
 
         private void LoadTypeReaders(Assembly assembly)
@@ -219,11 +231,9 @@ namespace Roki
                 }
 
                 var typeReader = (TypeReader) Activator.CreateInstance(type, Client, CommandService);
-                Type baseType = type.BaseType;
-                Type[] typeArgs = baseType?.GetGenericArguments();
                 try
                 {
-                    CommandService.AddTypeReader(typeArgs[0], typeReader);
+                    CommandService.AddTypeReader(type.BaseType?.GetGenericArguments()[0], typeReader);
                 }
                 catch (Exception e)
                 {

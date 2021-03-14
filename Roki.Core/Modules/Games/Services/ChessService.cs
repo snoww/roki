@@ -23,13 +23,13 @@ namespace Roki.Modules.Games.Services
             _http = http;
         }
 
-        public async Task<string> CreateChessChallenge(ChessArgs args)
+        public async Task<string> CreateChessChallenge(ChessOptions options)
         {
             using var http = _http.CreateClient();
             var opts = new Dictionary<string, string>
             {
-                {"clock.limit", (args.Time * 60).ToString()},
-                {"clock.increment", args.Increment.ToString()}
+                {"clock.limit", (options.Time * 60).ToString()},
+                {"clock.increment", options.Increment.ToString()}
             };
             
             var response = await http.PostAsync(LichessApi + "challenge/open", new FormUrlEncodedContent(opts)).ConfigureAwait(false);
@@ -40,7 +40,7 @@ namespace Roki.Modules.Games.Services
             return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
 
-        public void PollGame(ICommandContext ctx, ChessArgs opts, string challengeUrl, string speed)
+        public void PollGame(ICommandContext ctx, ChessOptions opts, string challengeUrl, string speed)
         {
             var _ = Task.Run(async () =>
             {

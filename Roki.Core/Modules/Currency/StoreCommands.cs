@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using MongoDB.Bson;
+using Microsoft.EntityFrameworkCore;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Modules.Currency.Services;
 using Roki.Services;
-using Roki.Services.Database.Maps;
+using Roki.Services.Database;
+using Roki.Services.Database.Models;
 
 namespace Roki.Modules.Currency
 {
@@ -23,20 +24,27 @@ namespace Roki.Modules.Currency
         public class StoreCommands : RokiSubmodule<StoreService>
         {
             private readonly DiscordSocketClient _client;
+            private readonly RokiContext _context;
             private readonly ICurrencyService _currency;
-            private readonly IMongoService _mongo;
+            private readonly IConfigurationService _config;
 
-            private StoreCommands(DiscordSocketClient client, ICurrencyService currency, IMongoService mongo)
+            private StoreCommands(DiscordSocketClient client, RokiContext context, ICurrencyService currency, IConfigurationService config)
             {
                 _client = client;
+                _context = context;
                 _currency = currency;
-                _mongo = mongo;
+                _config = config;
             }
 
             [RokiCommand, Description, Usage, Aliases]
-            public async Task Store([Leftover] string itemName = null)
+            public async Task Store()
             {
-                Dictionary<string, Listing> cat = await _mongo.Context.GetStoreCatalogueAsync(Context.Guild.Id).ConfigureAwait(false);
+                List<StoreItem> cat = await _context.Items.AsNoTracking()
+                    .Where(x => x.GuildId == Context.Guild.Id && x.Quantity != null)
+                    // soft limit of 100
+                    .Take(100)
+                    .ToListAsync();
+                
                 if (cat.Count == 0)
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
@@ -45,58 +53,56 @@ namespace Roki.Modules.Currency
                     return;
                 }
                 
-                GuildConfig guildConfig = await _mongo.Context.GetGuildConfigAsync(Context.Guild.Id);
+                GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
 
-                if (itemName == null)
+                const int itemsPerPage = 9;
+
+                EmbedBuilder Catalog(int page)
                 {
-                    const int itemsPerPage = 9;
-
-                    EmbedBuilder Catalog(int page)
-                    {
-                        int startAt = itemsPerPage * page;
-                        string catalogStr = string.Join("\n", cat
-                            .Skip(startAt)
-                            .Take(itemsPerPage)
-                            .Select(c =>
-                            {
-                                string type = c.Value.Type == "Subscription" ? $"**{c.Value.SubscriptionDays}** Day {c.Value.Type}" : c.Value.Type;
-                                var desc = $"{Format.Bold(c.Value.Name)} | {type} | {(c.Value.Quantity > 0 ? $"**{c.Value.Quantity}** Remain" : "**Sold Out**")} | `{c.Value.Cost:N0}` {guildConfig.CurrencyIcon}";
-                                return $"`{c.Key}` {desc}\n\t{c.Value.Description.TrimTo(120)}";
-                            }));
-                        return new EmbedBuilder().WithDynamicColor(Context)
-                            .WithTitle("Stone Shop")
-                            .WithDescription(catalogStr)
-                            .WithFooter($"Page {page + 1}/{Math.Ceiling((double) cat.Count / itemsPerPage)} Use {guildConfig.Prefix}buy <id> <quantity> to purchase items");
-                    }
-
-                    await Context.SendPaginatedMessageAsync(0, Catalog, cat.Count, 9).ConfigureAwait(false);
-                    return;
+                    int startAt = itemsPerPage * page;
+                    string catalogStr = string.Join("\n", cat
+                        .Skip(startAt)
+                        .Take(itemsPerPage)
+                        .Select(c =>
+                        {
+                            string type = c.Category == "Subscription" ? $"**{c.Duration}** Day {c.Category}" : c.Category;
+                            string desc = $"{Format.Bold(c.Name)} | {type} | {(c.Quantity > 0 ? $"**{c.Quantity}** Remain" : "**Sold Out**")} | `{c.Price:N0}` {guildConfig.CurrencyIcon}";
+                            return $"`{c.Id}` {desc}\n\t{c.Description.TrimTo(120)}";
+                        }));
+                    return new EmbedBuilder().WithDynamicColor(Context)
+                        .WithTitle("Stone Shop")
+                        .WithDescription(catalogStr)
+                        .WithFooter($"Page {page + 1}/{Math.Ceiling((double) cat.Count / itemsPerPage)} Use {guildConfig.Prefix}buy <id> <quantity> to purchase items");
                 }
 
-                (string listingId, Listing listing) = cat.FirstOrDefault(i => i.Value.Name.Equals(itemName, StringComparison.OrdinalIgnoreCase));
+                await Context.SendPaginatedMessageAsync(0, Catalog, cat.Count, 9).ConfigureAwait(false);
+            }
+            
+            [RokiCommand, Description, Usage, Aliases]
+            public async Task Store(string itemName)
+            {
+                StoreItem listing = await _context.Items.AsNoTracking()
+                    .Where(x => x.GuildId == Context.Guild.Id && x.Name.ToLower() == itemName.ToLower() && x.Quantity != null)
+                    .FirstOrDefaultAsync();
+                
+                GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
+
                 if (listing == null)
                 {
-                    await Context.Channel.SendErrorAsync("Cannot find the specified item.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync($"Cannot find the specified item.\nUse {guildConfig.Prefix}store to check out store items").ConfigureAwait(false);
                     return;
                 }
 
+                // todo handle null quantities
                 EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
-                    .WithTitle($"`{listingId}` | {listing.Name} | `{listing.Cost:N0}` {guildConfig.CurrencyIcon}")
+                    .WithTitle($"`{listing.Id}` | {listing.Name} | `{listing.Price:N0}` {guildConfig.CurrencyIcon}")
                     .WithDescription(listing.Description)
                     .AddField("Category", $"{listing.Category}", true)
                     .AddField("Quantity", $"{(listing.Quantity > 0 ? $"**{listing.Quantity}** Remaining" : "**Sold Out**")}")
-                    .AddField("Type", listing.Type == "Subscription" ? $"**{listing.SubscriptionDays}** Day {listing.Type}" : $"{listing.Type}", true);
+                    .AddField("Type", listing.Category == "Subscription" ? $"**{listing.Duration}** Day {listing.Duration}" : $"{listing.Category}", true);
 
                 await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
-
-//            [RokiCommand, Description, Usage, Aliases]
-//            [RequireContext(ContextType.Guild)]
-//            [RequireUserPermission(GuildPermission.Administrator)]
-//            public async Task Sell()
-//            {
-//                
-//            }
 
             [RokiCommand, Description, Usage, Aliases]
             [Priority(0)]
@@ -119,78 +125,76 @@ namespace Roki.Modules.Currency
                         amount = 1;
                     }
                 }
-
-                (string, Listing) listing;
-                if (Regex.IsMatch(name, "^[a-fA-F0-9]{6}"))
-                {
-                    listing = await _mongo.Context.GetStoreItemByIdAsync(Context.Guild.Id, name)
-                        .ConfigureAwait(false);
-                }
-                else
-                {
-                    listing = await _mongo.Context.GetStoreItemByNameAsync(Context.Guild.Id, name).ConfigureAwait(false);
-                }
-
-                if (listing.Item2 == null)
+                
+                StoreItem listing = await _context.Items.AsQueryable()
+                    .Where(x => x.GuildId == Context.Guild.Id && x.Name.ToLower() == name.ToLower())
+                    .FirstOrDefaultAsync();
+                
+                if (listing == null)
                 {
                     await Context.Channel.SendErrorAsync("Cannot find this item. Use the ID of the item preferably.").ConfigureAwait(false);
                     return;
                 }
 
-                if (listing.Item2.Quantity <= 0)
+                if (listing.Quantity == null)
+                {
+                    await Context.Channel.SendErrorAsync("Sorry. This item is not for sale, please check again later.").ConfigureAwait(false);
+                    return;
+                }
+
+                if (listing.Quantity <= 0)
                 {
                     await Context.Channel.SendErrorAsync("Sorry. This item is out of stock, please check again later.").ConfigureAwait(false);
                     return;
                 }
 
-                await InternalBuy(listing.Item1, listing.Item2, amount).ConfigureAwait(false);
+                await InternalBuy(listing, amount).ConfigureAwait(false);
             }
 
-            private async Task InternalBuy(string id, Listing listing, int amount)
+            private async Task InternalBuy(StoreItem listing, int amount)
             {
-                GuildConfig guildConfig = await _mongo.Context.GetGuildConfigAsync(Context.Guild.Id);
+                GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
+
                 if (listing.Quantity < amount || amount == 0)
                 {
-                    amount = listing.Quantity;
+                    amount = listing.Quantity!.Value;
                 }
 
                 IUser buyer = Context.User;
                 var seller = _client.GetUser(listing.SellerId) as IUser;
-                long cost = listing.Cost * amount;
-                bool removed = await _currency.TransferAsync(buyer, seller, $"Store Purchase - ID {id} x{amount}", cost,
-                    Context.Guild.Id, Context.Channel.Id, Context.Message.Id).ConfigureAwait(false);
+                long price = listing.Price * amount ?? 0;
+                bool removed = await _currency.TransferCurrencyAsync(buyer.Id, seller.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id,
+                    $"Store Purchase - #{listing.Id} x{amount}", price).ConfigureAwait(false);
                 if (!removed)
                 {
                     await Context.Channel.SendErrorAsync($"You do not have enough {guildConfig.CurrencyIcon} to purchase this item.").ConfigureAwait(false);
                     return;
                 }
 
-                await _mongo.Context.UpdateStoreItemAsync(Context.Guild.Id, id, -amount);
+                listing.Quantity -= 1;
                 var category = Enum.Parse<Category>(listing.Category);
-                var type = Enum.Parse<Type>(listing.Type);
                 switch (category)
                 {
                     case Category.Role:
-                        if (type == Type.OneTime)
+                        if (listing.Duration == 0)
                         {
                             await ((IGuildUser) buyer).AddRoleAsync(await GetRoleAsync(listing.Details).ConfigureAwait(false));
                             break;
                         }
 
-                        if (await _mongo.Context.AddOrUpdateUserSubscriptionAsync(buyer, Context.Guild.Id.ToString(), id, listing.SubscriptionDays ?? 7))
+                        await _context.Subscriptions.AddAsync(new Subscription
                         {
-                            break;
-                        }
-
+                            UserId = buyer.Id,
+                            GuildId = Context.Guild.Id,
+                            ItemId = listing.Id,
+                            Expiry = DateTime.UtcNow.AddDays(listing.Duration + 1)
+                        });
+                        
                         await ((IGuildUser) buyer).AddRoleAsync(await GetRoleAsync(listing.Details).ConfigureAwait(false));
                         break;
+                    // todo
                     case Category.Power:
-                        Enum.TryParse<Power>(listing.Details, out _);
-                        await _mongo.Context.AddOrUpdateUserInventoryAsync(buyer, Context.Guild.Id.ToString(), id, amount).ConfigureAwait(false);
-                        break;
                     case Category.Boost:
-                        await _mongo.Context.AddOrUpdateUserSubscriptionAsync(buyer, Context.Guild.Id.ToString(), id, listing.SubscriptionDays ?? 7);
-                        break;
                     case Category.Digital:
                     case Category.Virtual:
                     case Category.Irl:
@@ -198,58 +202,82 @@ namespace Roki.Modules.Currency
                 }
 
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                        .WithDescription($"{buyer.Mention} Purchase Successful!\nYou bought `{amount}x` {listing.Name}\n`{cost}` {guildConfig.CurrencyIcon} has been billed to your account"))
+                        .WithDescription($"{buyer.Mention} Purchase Successful!\nYou bought `{amount}x` {listing.Name}\n`{price}` {guildConfig.CurrencyIcon} has been billed to your account"))
                     .ConfigureAwait(false);
             }
 
-//            [RokiCommand, Description, Usage, Aliases]
-//            [RequireContext(ContextType.Guild)]
-//            public async Task Modify()
-//            {
-//            
-//            }
-
             [RokiCommand, Description, Usage, Aliases]
-            public async Task Subscriptions()
+            public async Task Subscriptions(int page = 1)
             {
-                Dictionary<string, Subscription> subs = (await _mongo.Context.GetOrAddUserAsync(Context.User, Context.Guild.Id.ToString()).ConfigureAwait(false)).Data[Context.Guild.Id.ToString()].Subscriptions;
+                if (page <= 0)
+                {
+                    page = 1;
+                }
 
-                EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle($"{Context.User.Username}'s Active Subscriptions");
+                page -= 1;
+                
+                var subs = await _context.Subscriptions.Include(x => x.Item).AsNoTracking()
+                    .Where(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id)
+                    .Select(x => new
+                    {
+                        x.Item.Name,
+                        x.Expiry
+                    })
+                    .Skip(page * 15)
+                    .Take(15)
+                    .ToListAsync();
+
+                EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle($"{Context.User.Username}'s Active Subscriptions").WithFooter($"Page {page + 1}");
                 if (subs.Count == 0)
                 {
-                    await Context.Channel.EmbedAsync(embed.WithDescription("No active subscriptions.")).ConfigureAwait(false);
+                    await Context.Channel.EmbedAsync(embed.WithDescription($"No active subscriptions.\nUse {_config.GetGuildPrefix(Context.Guild.Id)}store to buy some.")).ConfigureAwait(false);
                     return;
                 }
 
                 var desc = new StringBuilder();
                 DateTime now = DateTime.UtcNow.Date;
-                foreach ((string id, Subscription sub) in subs)
+                foreach (var sub in subs)
                 {
-                    (_, Listing listing) = await _mongo.Context.GetStoreItemByIdAsync(Context.Guild.Id, id);
-                    desc.AppendLine($"{listing.Name} - Expires in `{(sub.EndDate - now).ToReadableString()}`");
+                    desc.AppendLine($"{sub.Name} - Expires in `{(sub.Expiry - now).ToReadableString()}`");
                 }
 
                 await Context.Channel.EmbedAsync(embed.WithDescription(desc.ToString())).ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]
-            public async Task Inventory()
+            public async Task Inventory(int page = 1)
             {
-                Dictionary<string, Item> inv = (await _mongo.Context.GetOrAddUserAsync(Context.User, Context.Guild.Id.ToString()).ConfigureAwait(false)).Data[Context.Guild.Id.ToString()].Inventory;
+                if (page <= 0)
+                {
+                    page = 1;
+                }
+
+                page -= 1;
+                var inv = await _context.Inventory.Include(x => x.Item).AsNoTracking()
+                    .Where(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id)
+                    .Select(x => new
+                    {
+                        x.Item.Name,
+                        x.Quantity
+                    })
+                    .Skip(page * 15)
+                    .Take(15)
+                    .ToListAsync();
 
                 EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle($"{Context.User.Username}'s Inventory");
-                string desc;
                 if (inv.Count == 0)
                 {
-                    desc = "Your inventory is empty";
-                }
-                else
-                {
-                    desc = string.Join("\n", inv
-                        .Select(i => $"{_mongo.Context.GetStoreItemByIdAsync(Context.Guild.Id, i.Key).Result.Item2.Name.ToTitleCase()}: {i.Value.Quantity}"));
+                    await Context.Channel.EmbedAsync(embed.WithDescription($"Your inventory is empty\nUse `{await _config.GetGuildPrefix(Context.Guild.Id)}store` to buy some items.")).ConfigureAwait(false);
+                    return;
                 }
 
-                embed.WithDescription(desc);
+                var desc = new StringBuilder();
+                foreach (var item in inv)
+                {
+                    desc.AppendLine($"{item.Name}: {item.Quantity}");
+                }
+
+                embed.WithDescription(desc.ToString()).WithFooter($"Page {page + 1}");
 
                 await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }

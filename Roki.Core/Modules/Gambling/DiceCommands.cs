@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Services;
-using Roki.Services.Database.Maps;
+using Roki.Services.Database;
+using Roki.Services.Database.Models;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using Image = SixLabors.ImageSharp.Image;
@@ -31,25 +33,23 @@ namespace Roki.Modules.Gambling
             }
 
             [RokiCommand, Description, Aliases, Usage]
-            public async Task BetDie(long amount)
+            public async Task BetDice(long amount)
             {
                 GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
 
-                if (amount < guildConfig.BetDieMin)
+                if (amount < guildConfig.BetDiceMin)
                 {
                     await Context.Channel
-                        .SendErrorAsync($"The minimum bet for this game is `{guildConfig.BetDieMin:N0}` {guildConfig.CurrencyIcon}")
+                        .SendErrorAsync($"The minimum bet for this game is `{guildConfig.BetDiceMin:N0}` {guildConfig.CurrencyIcon}")
                         .ConfigureAwait(false);
                     return;
                 }
 
-                bool removed = await _currency
-                    .RemoveAsync(Context.User, Context.Client.CurrentUser, "BetDie Entry", amount, Context.Guild.Id, Context.Channel.Id, Context.Message.Id)
-                    .ConfigureAwait(false);
+                bool removed = await _currency.RemoveCurrencyAsync(Context.User.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, "BetDice Entry", amount).ConfigureAwait(false);
                 if (!removed)
                 {
                     await Context.Channel.SendErrorAsync($"Not enough {guildConfig.CurrencyIcon}\n" +
-                                                         $"You have `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}`")
+                                                         $"You have `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}`")
                         .ConfigureAwait(false);
                     return;
                 }
@@ -65,10 +65,10 @@ namespace Roki.Modules.Gambling
                     rolls += 1;
                 }
 
-                long won;
+                long payout;
                 if (total >= 18 && total <= 24)
                 {
-                    won = 0;
+                    payout = 0;
                 }
                 else
                 {
@@ -76,50 +76,50 @@ namespace Roki.Modules.Gambling
                     {
                         case 17:
                         case 25:
-                            won = (long) Math.Ceiling(amount * 1.25);
+                            payout = (long) Math.Ceiling(amount * 1.25);
                             break;
                         case 16:
                         case 26:
-                            won = (long) Math.Ceiling(amount * 1.5);
+                            payout = (long) Math.Ceiling(amount * 1.5);
                             break;
                         case 15:
                         case 27:
-                            won = amount * 2;
+                            payout = amount * 2;
                             break;
                         case 14:
                         case 28:
-                            won = (long) Math.Ceiling(amount * 2.5);
+                            payout = (long) Math.Ceiling(amount * 2.5);
                             break;
                         case 13:
                         case 29:
-                            won = amount * 3;
+                            payout = amount * 3;
                             break;
                         case 12:
                         case 30:
-                            won = amount * 5;
+                            payout = amount * 5;
                             break;
                         case 11:
                         case 31:
-                            won = amount * 7;
+                            payout = amount * 7;
                             break;
                         case 10:
                         case 32:
-                            won = amount * 10;
+                            payout = amount * 10;
                             break;
                         case 9:
                         case 33:
-                            won = amount * 17;
+                            payout = amount * 17;
                             break;
                         case 8:
                         case 34:
-                            won = amount * 25;
+                            payout = amount * 25;
                             break;
                         case 7:
                         case 35:
-                            won = amount * 50;
+                            payout = amount * 50;
                             break;
                         default:
-                            won = amount * 100;
+                            payout = amount * 100;
                             break;
                     }
                 }
@@ -130,19 +130,19 @@ namespace Roki.Modules.Gambling
 
                 EmbedBuilder embed = new EmbedBuilder().WithImageUrl("attachment://dice.png");
 
-                if (won > 0)
+                if (payout > 0)
                 {
-                    await _currency.AddAsync(Context.User, Context.Client.CurrentUser, "BetDie Payout", won, Context.Guild.Id, Context.Channel.Id, Context.Message.Id);
+                    await _currency.AddCurrencyAsync(Context.User.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, "BetDice Payout", payout).ConfigureAwait(false);
                     embed.WithDynamicColor(Context)
                         .WithDescription(
-                            $"{Context.User.Mention} You rolled a total of `{total}`\nCongratulations! You've won `{won:N0}` {guildConfig.CurrencyIcon}\n" +
-                            $"New Balance: `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}");
+                            $"{Context.User.Mention} You rolled a total of `{total}`\nCongratulations! You've won `{payout:N0}` {guildConfig.CurrencyIcon}\n" +
+                            $"New Balance: `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}");
                 }
                 else
                 {
                     embed.WithErrorColor()
                         .WithDescription($"{Context.User.Mention} You rolled a total of `{total}`\nBetter luck next time!\n" +
-                                         $"New Balance: `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}");
+                                         $"New Balance: `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}");
                 }
 
                 await Context.Channel.SendFileAsync(stream, "dice.png", embed: embed.Build()).ConfigureAwait(false);

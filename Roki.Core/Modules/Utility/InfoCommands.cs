@@ -25,37 +25,45 @@ namespace Roki.Modules.Utility
                 _stats = stats;
                 _config = config;
             }
+            
+            [RokiCommand, Description, Usage, Aliases]
+            public async Task Invite()
+            {
+                // todo mabye link to web interface
+                await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
+                        .WithTitle("Roki Invite Link")
+                        .WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl())
+                        .WithDescription($"https://discord.com/oauth2/authorize?client_id={Context.Client.CurrentUser.Id}&permissions=3724016759&scope=bot"))
+                    .ConfigureAwait(false);
+            }
 
             [RokiCommand, Description, Usage, Aliases]
             public async Task About()
             {
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                        .WithAuthor("Snow#7777")
                         .WithTitle($"Roki v{StatsService.BotVersion}")
-                        .WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl())
-                        .WithDescription($"Roki is an general purpose discord bot, made by {_stats.Author}. The bot is open source on [GitHub](https://github.com/snoww/roki). " +
-                                         $"Written in C# using Discord.Net v{DiscordConfig.Version} and inspired by NadekoBot and yagpdb. " +
+                        .WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl() ?? Context.Client.CurrentUser.GetDefaultAvatarUrl())
+                        .WithDescription($"Roki `/ˈräkē/` is a general purpose discord bot for small communities, made by {_stats.AuthorUsername}. The bot is open source on [GitHub](https://github.com/snoww/roki).\n\n" +
+                                         $"Written in C# using Discord.Net v{DiscordConfig.Version} and inspired by NadekoBot and YAGPDB.\n\n" +
                                          "Roki has many features, including but not limited to: XP system, Currency system, Event system, Jeopardy!, and many more. " +
-                                         $"If you have any questions/issues, feel free to send a DM {_stats.Author}"))
+                                         $"If you have any questions/issues, feel free to send a DM to {_stats.Author}"))
                     .ConfigureAwait(false);
             }
 
             [RokiCommand, Description, Usage, Aliases]
             public async Task Stats()
             {
-                string ownerId = string.Join("\n", _config.OwnerIds);
-                if (string.IsNullOrWhiteSpace(ownerId)) ownerId = "-";
-
                 await Context.Channel.EmbedAsync(
                     new EmbedBuilder().WithDynamicColor(Context)
-                        .WithAuthor($"Roki v{StatsService.BotVersion}", Context.Client.CurrentUser.GetAvatarUrl())
-                        .AddField("Bot ID", _client.CurrentUser.Id, true)
-                        .AddField("Owner ID", ownerId, true)
-                        .AddField("Commands ran", _stats.CommandsRan, true)
-                        .AddField("Messages", _stats.MessageCounter, true)
+                        .WithAuthor($"Roki v{StatsService.BotVersion}")
+                        .WithThumbnailUrl(Context.Client.CurrentUser.GetAvatarUrl() ?? Context.Client.CurrentUser.GetDefaultAvatarUrl())
+                        .AddField("Bot Name", _client.CurrentUser, true)
+                        .AddField("Owner", _stats.AuthorUsername, true)
                         .AddField("Memory", $"{_stats.Heap} MB", true)
-                        .AddField("Uptime", _stats.GetUptimeString("\n"), true)
-                        .AddField("Presence", $"{_stats.TextChannels} Text Channels\n{_stats.VoiceChannels} Voice Channels", true));
+                        .AddField("Messages", _stats.MessageCounter, true)
+                        .AddField("Commands ran", _stats.CommandsRan, true)
+                        .AddField("Uptime", _stats.GetUptimeString(", "))
+                        .AddField("Presence", $"{_stats.TextChannels:N0} Text Channels\n{_stats.Guilds:N0} Servers"));
             }
 
             [RokiCommand, Usage, Description, Aliases, RequireContext(ContextType.Guild)]
@@ -97,7 +105,7 @@ namespace Roki.Modules.Utility
                     .AddField("Members", guild.MemberCount, true)
                     .AddField("Text Channels", textChannels, true)
                     .AddField("Voice Channels", voiceChannels, true)
-                    .AddField("Created on", $"{guild.CreatedAt:MM/dd/yyyy HH:mm}", true)
+                    .AddField("Created on", $"{guild.CreatedAt:yyyy-MM-dd HH:mm} UTC", true)
                     .AddField("Region", guild.VoiceRegionId, true)
                     .AddField("Roles", guild.Roles.Count - 1, true)
                     .AddField("Features", features, true);
@@ -123,9 +131,9 @@ namespace Roki.Modules.Utility
                 EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                     .WithTitle(channel.Name)
                     .WithDescription(channel.Topic)
-                    .AddField("ID", channel.Id, true)
-                    .AddField("Created on", $"{channel.CreatedAt:MM/dd/yyyy HH:mm}", true)
-                    .AddField("Users", userCount, true);
+                    .AddField("ID", channel.Id)
+                    .AddField("Created on", $"{channel.CreatedAt:yyyy-MM-dd HH:mm} UTC")
+                    .AddField("Users", userCount);
 
                 await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
@@ -140,44 +148,19 @@ namespace Roki.Modules.Utility
                 }
 
                 EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
-                    .AddField("Name", $"**{usr.Username}**#{usr.Discriminator}", true);
+                    .AddField("Name", user, true);
 
                 if (!string.IsNullOrWhiteSpace(usr.Nickname))
                 {
                     embed.AddField("Nickname", usr.Nickname, true);
                 }
 
-                embed.AddField("ID", usr.Id, true)
-                    .AddField("Joined server", $"{usr.JoinedAt?.ToString("MM/dd/yyyy HH:mm") ?? "?"}", true)
-                    .AddField("Joined Discord", $"{usr.CreatedAt:MM/dd/yyyy HH:mm}", true)
+                embed.AddField("ID", usr.Id)
+                    .AddField("Joined server", $"{usr.JoinedAt?.ToString("yyyy-MM-dd HH:mm HH:mm") ?? "unknown"} UTC")
+                    .AddField("Joined Discord", $"{usr.CreatedAt:yyyy-MM-dd HH:mm} UTC")
                     .AddField("Roles", $"{string.Join("\n", usr.GetRoles().Take(10).Where(r => r.Id != r.Guild.EveryoneRole.Id).Select(r => r.Mention))}", true);
 
                 string avatar = usr.GetAvatarUrl();
-                if (avatar != null)
-                {
-                    embed.WithThumbnailUrl(avatar);
-                }
-
-                await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
-            }
-
-            [RokiCommand, Description, Usage, Aliases, RequireContext(ContextType.Guild)]
-            public async Task Stalk([Leftover] string username)
-            {
-                var client = (IDiscordClient) _client;
-                string[] usr = username.Split("#");
-                IUser user = await client.GetUserAsync(usr[0], usr[1]).ConfigureAwait(false);
-                if (user == null)
-                {
-                    await Context.Channel.SendErrorAsync("No such user found").ConfigureAwait(false);
-                    return;
-                }
-
-                EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
-                    .AddField("Name", $"**{user.Username}**#{user.Discriminator}", true)
-                    .AddField("Joined Discord", $"{user.CreatedAt:MM/dd/yyyy HH:mm}", true);
-
-                string avatar = user.GetAvatarUrl();
                 if (avatar != null)
                 {
                     embed.WithThumbnailUrl(avatar);
@@ -191,19 +174,11 @@ namespace Roki.Modules.Utility
             {
                 user ??= (IGuildUser) Context.User;
 
-                string avatarUrl = user.GetAvatarUrl();
-
-                if (avatarUrl == null)
-                {
-                    await Context.Channel.SendErrorAsync($"{user} does not have an avatar set").ConfigureAwait(false);
-                    return;
-                }
-
+                string avatarUrl = user.GetAvatarUrl() ?? user.GetDefaultAvatarUrl();
                 EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                     .WithThumbnailUrl(avatarUrl)
-                    .WithImageUrl(avatarUrl)
-                    .AddField("Username", user.ToString(), true)
-                    .AddField("Avatar Url", avatarUrl, true);
+                    .WithTitle($"{user}'s Avatar")
+                    .AddField("Link", avatarUrl);
 
                 await Context.Channel.EmbedAsync(embed, Context.User.Mention).ConfigureAwait(false);
             }

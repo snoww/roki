@@ -1,37 +1,41 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Discord;
+using Microsoft.EntityFrameworkCore;
 using Roki.Services;
-using Roki.Services.Database.Maps;
+using Roki.Services.Database;
+using Roki.Services.Database.Models;
 
 namespace Roki.Modules.Stocks.Services
 {
     public class PortfolioService : IRokiService
     {
         private readonly IRokiConfig _config;
-        private readonly IMongoService _mongo;
+        private readonly RokiContext _context;
         private readonly IHttpClientFactory _factory;
         private const string IexStocksUrl = "https://cloud.iexapis.com/stable/stock/";
 
-        public PortfolioService(IHttpClientFactory factory, IRokiConfig config, IMongoService mongo)
+        public PortfolioService(IHttpClientFactory factory, IRokiConfig config, RokiContext context)
         {
             _factory = factory;
             _config = config;
-            _mongo = mongo;
+            _context = context;
         }
 
-        public async Task<Dictionary<string, Investment>> GetUserPortfolio(IUser user, ulong guildId)
+        public async Task<List<Investment>> GetUserPortfolio(ulong userId, ulong guildId)
         {
-            return (await _mongo.Context.GetOrAddUserAsync(user, guildId.ToString()).ConfigureAwait(false)).Data[guildId.ToString()].Portfolio;
+            return await _context.Investments.AsNoTracking()
+                .Where(x => x.UserId == userId && x.GuildId == guildId && x.Shares != 0)
+                .ToListAsync();
         }
 
-        public async Task<decimal> GetPortfolioValue(Dictionary<string, Investment> portfolio)
+        public async Task<decimal> GetPortfolioValue(IEnumerable<Investment> portfolio)
         {
             var value = 0m;
-            foreach ((string symbol, Investment investment) in portfolio)
+            foreach (Investment investment in portfolio)
             {
-                decimal price = await GetStockPrice(symbol).ConfigureAwait(false);
+                decimal price = await GetStockPrice(investment.Symbol).ConfigureAwait(false);
                 value += price * investment.Shares;
             }
 

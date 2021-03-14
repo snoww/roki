@@ -7,7 +7,8 @@ using Discord.Commands;
 using Roki.Common.Attributes;
 using Roki.Extensions;
 using Roki.Services;
-using Roki.Services.Database.Maps;
+using Roki.Services.Database;
+using Roki.Services.Database.Models;
 
 namespace Roki.Modules.Gambling
 {
@@ -47,15 +48,13 @@ namespace Roki.Modules.Gambling
                         .ConfigureAwait(false);
                     return;
                 }
-
-                bool removed = await _currency
-                    .RemoveAsync(Context.User, Context.Client.CurrentUser, "BetFlip Entry", amount, Context.Guild.Id, Context.Channel.Id, Context.Message.Id)
-                    .ConfigureAwait(false);
+                
+                bool removed = await _currency.RemoveCurrencyAsync(Context.User.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, "BetFlip Entry", amount).ConfigureAwait(false);
 
                 if (!removed)
                 {
                     await Context.Channel.SendErrorAsync($"Not enough {guildConfig.CurrencyIcon}\n" +
-                                                         $"You have `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}`")
+                                                         $"You have `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}`")
                         .ConfigureAwait(false);
                     return;
                 }
@@ -65,80 +64,75 @@ namespace Roki.Modules.Gambling
 
                 if (guess == result)
                 {
-                    var won = (long) Math.Ceiling(amount * guildConfig.BetFlipMultiplier);
-                    await _currency.AddAsync(Context.User, Context.Client.CurrentUser, "BetFlip Payout", won, Context.Guild.Id, Context.Channel.Id, Context.Message.Id).ConfigureAwait(false);
+                    var payout = (long) Math.Ceiling(amount * guildConfig.BetFlipMultiplier);
+                    await _currency.AddCurrencyAsync(Context.User.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, "BetFlip Payout", payout).ConfigureAwait(false);
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithDescription(
-                                $"Result is: {result}\n{Context.User.Mention} Congratulations! You've won `{won:N0}` {guildConfig.CurrencyIcon}\n" +
-                                $"New Balance: `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}"))
+                                $"Result is: {result}\n{Context.User.Mention} Congratulations! You've won `{payout:N0}` {guildConfig.CurrencyIcon}\n" +
+                                $"New Balance: `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}"))
                         .ConfigureAwait(false);
-                    return;
                 }
-
-                await Context.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                        .WithDescription($"Result is: {result}\n{Context.User.Mention} Better luck next time!\n" +
-                                         $"New Balance: `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}"))
-                    .ConfigureAwait(false);
+                else
+                {
+                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
+                            .WithDescription($"Result is: {result}\n{Context.User.Mention} Better luck next time!\n" +
+                                             $"New Balance: `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}"))
+                        .ConfigureAwait(false);
+                }
             }
 
             [RokiCommand, Description, Aliases, Usage]
             public async Task BetFlipMulti(long amount, params BetFlipGuess[] guesses)
             {
-                if (amount <= 0)
-                {
-                    return;
-                }
-
                 GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
 
                 if (guesses.Length < guildConfig.BetFlipMMinGuesses)
                 {
-                    await Context.Channel.SendErrorAsync("Needs at least `5` guesses.").ConfigureAwait(false);
+                    await Context.Channel.SendErrorAsync($"Needs at least `{guildConfig.BetFlipMMinGuesses}` guesses.").ConfigureAwait(false);
                     return;
                 }
 
-                int minAmount = guesses.Length * 2;
+                int minAmount = (int) Math.Floor(guesses.Length * guildConfig.BetFlipMMinMultiplier);
                 if (guesses.Length >= guildConfig.BetFlipMMinGuesses && amount < minAmount)
                 {
                     await Context.Channel.SendErrorAsync($"`{guesses.Length}` guesses requires you to bet at least `{minAmount:N0}` {guildConfig.CurrencyIcon}.")
                         .ConfigureAwait(false);
                     return;
                 }
-
-                bool removed = await _currency
-                    .RemoveAsync(Context.User, Context.Client.CurrentUser, "BetFlipMulti Entry", amount, Context.Guild.Id, Context.Channel.Id, Context.Message.Id)
-                    .ConfigureAwait(false);
+                
+                bool removed = await _currency.RemoveCurrencyAsync(Context.User.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, "BetFlipMulti Entry", amount).ConfigureAwait(false);
 
                 if (!removed)
                 {
                     await Context.Channel.SendErrorAsync($"Not enough {guildConfig.CurrencyIcon}\n" +
-                                                         $"You have `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}`")
+                                                         $"You have `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}`")
                         .ConfigureAwait(false);
                     return;
                 }
 
-                var results = new List<BetFlipGuess>();
+                var results = new List<BetFlipGuess>(guesses.Length);
                 for (var i = 0; i < guesses.Length; i++) results.Add(_rng.Next(0, 2) == 1 ? BetFlipGuess.Heads : BetFlipGuess.Tails);
 
                 int correct = guesses.Where((t, i) => t == results[i]).Count();
+                double percentage = (double) correct / guesses.Length;
 
-                if ((float) correct / guesses.Length >= guildConfig.BetFlipMMinCorrect)
+                if (percentage >= guildConfig.BetFlipMMinCorrect)
                 {
-                    var won = (long) Math.Ceiling(amount * Math.Pow(correct, guildConfig.BetFlipMMultiplier));
-                    await _currency.AddAsync(Context.User, Context.Client.CurrentUser, "BetFlipMulti Payout", won, Context.Guild.Id, Context.Channel.Id, Context.Message.Id)
-                        .ConfigureAwait(false);
+                    var payout = (long) Math.Ceiling(amount * Math.Pow(correct, guildConfig.BetFlipMMultiplier));
+                    await _currency.AddCurrencyAsync(Context.User.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, "BetFlipMulti Payout", payout).ConfigureAwait(false);
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
                             .WithDescription(
-                                $"Results are: {string.Join(", ", results)}\n{Context.User.Mention} Congratulations! You got `{correct}/{guesses.Length}` correct. You've won `{won:N0}` {guildConfig.CurrencyIcon}" +
-                                $"New Balance: `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}"))
+                                $"Results are: {string.Join(", ", results)}\n{Context.User.Mention} Congratulations! You got `{correct}/{guesses.Length} ({percentage:P0})` correct. You've won `{payout:N0}` {guildConfig.CurrencyIcon}" +
+                                $"New Balance: `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}"))
                         .ConfigureAwait(false);
-                    return;
                 }
-
-                await Context.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
-                        .WithDescription($"Results are: {string.Join(", ", results)}\n{Context.User.Mention} You got `{correct}/{guesses.Length}` correct. Better luck next time!\n" +
-                                         $"New Balance: `{await _currency.GetCurrency(Context.User, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}"))
-                    .ConfigureAwait(false);
+                else
+                {
+                    await Context.Channel.EmbedAsync(new EmbedBuilder().WithErrorColor()
+                            .WithDescription($"Results are: {string.Join(", ", results)}\n{Context.User.Mention} You got `{correct}/{guesses.Length} ({percentage:P2})` correct. You need at least `{guildConfig.BetFlipMMinCorrect:P0}`. Better luck next time!\n" +
+                                             $"New Balance: `{await _currency.GetCurrencyAsync(Context.User.Id, Context.Guild.Id):N0}` {guildConfig.CurrencyIcon}"))
+                        .ConfigureAwait(false);    
+                }
             }
         }
     }

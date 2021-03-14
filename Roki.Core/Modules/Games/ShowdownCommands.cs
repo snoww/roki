@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -21,6 +22,7 @@ namespace Roki.Modules.Games
             private readonly DiscordSocketClient _client;
             private readonly IRedisCache _cache;
             private readonly IConfigurationService _config;
+            private readonly SemaphoreSlim _semaphore = new(1, 1);
 
             public ShowdownCommands(ICurrencyService currency, DiscordSocketClient client, IRedisCache cache, IConfigurationService config)
             {
@@ -41,11 +43,23 @@ namespace Roki.Modules.Games
                     await Context.Channel.SendErrorAsync("Game already in progress in current channel.");
                     return;
                 }
-                
-                var showdown = new Showdown(_currency, _client, await _config.GetGuildConfigAsync(Context.Guild.Id), (ITextChannel)Context.Channel, gen, Service, _cache);
+
+                await _semaphore.WaitAsync();
+                Showdown showdown;
+                try
+                {
+                    showdown = new Showdown(_currency, _client, await _config.GetGuildConfigAsync(Context.Guild.Id), (ITextChannel)Context.Channel, gen, _cache);
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Could not start showdown game.");
+                    _semaphore.Release();
+                    return;
+                }
 
                 if (Service.ActiveGames.TryAdd(Context.Channel.Id, showdown))
                 {
+                    _semaphore.Release();
                     await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
                     try
                     {
@@ -60,6 +74,10 @@ namespace Roki.Modules.Games
                     {
                         Service.ActiveGames.TryRemove(Context.Channel.Id, out _);
                     }
+                }
+                else
+                {
+                    _semaphore.Release();
                 }
             }
 

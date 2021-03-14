@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -9,6 +11,7 @@ using Roki.Extensions;
 using Roki.Modules.Games.Common;
 using Roki.Modules.Games.Services;
 using Roki.Services;
+using Roki.Services.Database.Models;
 
 namespace Roki.Modules.Games
 {
@@ -21,6 +24,7 @@ namespace Roki.Modules.Games
             private readonly DiscordSocketClient _client;
             private readonly ICurrencyService _currency;
             private readonly IConfigurationService _config;
+            private readonly SemaphoreSlim _semaphore = new(1, 1);
 
             public JeopardyCommands(DiscordSocketClient client, ICurrencyService currency, IConfigurationService config)
             {
@@ -30,28 +34,43 @@ namespace Roki.Modules.Games
             }
 
             [RokiCommand, Description, Aliases, Usage]
-            [RokiOptions(typeof(JeopardyArgs))]
+            [RokiOptions(typeof(JeopardyOptions))]
             public async Task Jeopardy(params string[] args)
             {
-                JeopardyArgs opts = OptionsParser.ParseFrom(new JeopardyArgs(), args);
+                JeopardyOptions opts = OptionsParser.ParseFrom(new JeopardyOptions(), args);
 
                 if (Service.ActiveGames.TryGetValue(Context.Channel.Id, out Jeopardy activeGame))
                 {
                     await Context.Channel.SendErrorAsync("Jeopardy game is already in progress in current channel.").ConfigureAwait(false);
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithColor(activeGame.Color)
                             .WithAuthor("Jeopardy!")
-                            .WithTitle($"{activeGame.CurrentClue.Category} - ${activeGame.CurrentClue.Value}")
-                            .WithDescription(activeGame.CurrentClue.Clue))
+                            .WithTitle($"{activeGame.CurrentClue.Category.Name} - ${activeGame.CurrentClue.Value}")
+                            .WithDescription(activeGame.CurrentClue.Text)
+                            .WithFooter($"#{activeGame.CurrentClue.Id} | answer with a question, e.g. what's x, who's x"))
                         .ConfigureAwait(false);
                     return;
                 }
 
-                Dictionary<string, List<JClue>> questions = await Service.GenerateGame(opts.NumCategories).ConfigureAwait(false);
+                await _semaphore.WaitAsync();
 
-                var jeopardy = new Jeopardy(_client, await _config.GetGuildConfigAsync(Context.Guild.Id),questions, Context.Guild, Context.Channel as ITextChannel, _currency, await Service.GenerateFinalJeopardy());
+                Jeopardy jeopardy;
+                try
+                {
+                    List<Category> categories = await Service.GenerateGame(opts.NumCategories).ConfigureAwait(false);
+
+                    jeopardy = new Jeopardy(_client, await _config.GetGuildConfigAsync(Context.Guild.Id), categories, Context.Guild, Context.Channel as ITextChannel, _currency, await Service.GenerateFinalJeopardy());
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Could not start jeopardy game");
+                    _semaphore.Release();
+                    return;
+                }
+                
 
                 if (Service.ActiveGames.TryAdd(Context.Channel.Id, jeopardy))
                 {
+                    _semaphore.Release();
                     try
                     {
                         await jeopardy.StartGame().ConfigureAwait(false);
@@ -59,8 +78,18 @@ namespace Roki.Modules.Games
                     finally
                     {
                         Service.ActiveGames.TryRemove(Context.Channel.Id, out jeopardy);
-                        if (jeopardy != null) await jeopardy.EnsureStopped().ConfigureAwait(false);
+                        if (jeopardy != null)
+                        {
+                            await jeopardy.EnsureStopped().ConfigureAwait(false);
+                            jeopardy.Dispose();
+                        }
                     }
+                }
+                else
+                {
+                    _semaphore.Release();
+                    Log.Error("Could not start jeopardy game");
+                    jeopardy.Dispose();
                 }
             }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -5,7 +6,7 @@ namespace Roki.Modules.Stocks.Extensions
 {
     public static class StockExtensions
     {
-        private static readonly Dictionary<string, string> ExchangeMap = new Dictionary<string, string>
+        private static readonly Dictionary<string, string> ExchangeMap = new()
         {
             {"ADS", "-DH"},
             {"TAE", "-IT"},
@@ -26,13 +27,19 @@ namespace Roki.Modules.Stocks.Extensions
         {
             symbol = symbol.Trim();
             var rgx = new Regex(@"^\w{3}:\w+$");
-            if (!rgx.IsMatch(symbol)) return symbol;
-            var parsed = symbol.Split(":");
-            var exchange = parsed[0];
-            var ticker = parsed[1];
-            if (ExchangeMap.ContainsKey(exchange.ToUpper()))
-                return ticker.ToUpper() + ExchangeMap[exchange.ToUpper()];
-            return ticker.ToUpper();
+            if (!rgx.IsMatch(symbol)) return symbol.ToUpperInvariant();
+            string[] parsed = symbol.Split(":");
+            string exchange = parsed[0];
+            string ticker = parsed[1];
+            if (ExchangeMap.ContainsKey(exchange.ToUpperInvariant()))
+                return ticker.ToUpperInvariant() + ExchangeMap[exchange.ToUpperInvariant()];
+            return ticker.ToUpperInvariant();
+        }
+
+        public static DateTimeOffset ToEasternStandardTime(this long timestamp)
+        {
+            PlatformID system = Environment.OSVersion.Platform;
+            return TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTimeOffset.FromUnixTimeMilliseconds(timestamp), system == PlatformID.Unix ? "America/Toronto" : "Eastern Standard Time");
         }
     }
 }

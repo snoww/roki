@@ -9,7 +9,6 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Bson;
 using NLog;
 using Roki.Common;
 using Roki.Services;
@@ -33,13 +32,13 @@ namespace Roki.Extensions
 
         public static EmbedBuilder WithDynamicColor(this EmbedBuilder embed, ICommandContext context)
         {
-            return embed.WithDynamicColor(context.Guild.Id);
+            return context.Channel is IDMChannel ? embed.WithOkColor() : embed.WithDynamicColor(context.Guild.Id);
         }
 
         public static EmbedBuilder WithDynamicColor(this EmbedBuilder embed, ulong guildId)
         {
-            var color = (uint) Cache.StringGet($"color:{guildId}");
-            return embed.WithColor(new Color(color));
+            RedisValue color = Cache.StringGet($"color:{guildId}");
+            return embed.WithColor(color.IsNull ? new Color(Roki.OkColor) : new Color((uint) color));
         }
 
         public static EmbedBuilder WithOkColor(this EmbedBuilder embed)
@@ -88,7 +87,7 @@ namespace Roki.Extensions
                 }
 
                 Type interfaceType = interfaces.FirstOrDefault(x => serviceType.GetInterfaces().Contains(x));
-                collection.AddSingleton(interfaceType != null ? interfaceType : serviceType, serviceType);
+                collection.AddSingleton(interfaceType ?? serviceType, serviceType);
             }
 
             return collection;
@@ -139,7 +138,7 @@ namespace Roki.Extensions
 
         public static string FormatRemarks(this CommandInfo command, string prefix)
         {
-            return string.Join("\n", command.Remarks.Deserialize<string[]>().Select(x => Format.Code(string.Format(x, prefix))));
+            return string.Join("\n", command.Remarks.Deserialize<string[]>().Select(x => string.Format(x, prefix)));
         }
 
         public static Stream ToStream(this Image<Rgba32> img, IImageFormat format = null)
@@ -245,11 +244,6 @@ namespace Roki.Extensions
             return JsonSerializer.Deserialize<T>(json, Options);
         }
 
-        public static string GetHexId(this ObjectId objectId)
-        {
-            return objectId.ToString().Substring(18);
-        }
-        
         public static string ToSubGuid(this Guid guid)
         {
             return guid.ToString().Substring(0, 7);
