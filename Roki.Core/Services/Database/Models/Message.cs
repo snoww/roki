@@ -24,23 +24,22 @@ namespace Roki.Services.Database.Models
         public string Content { get; }
         public ulong? RepliedTo { get; }
         public List<Edit> Edits { get; set; }
-        public List<string> Attachments { get; }
+        public List<string> Attachments { get; set; }
         public bool Deleted { get; set; }
     }
 
     public class Edit
     {
         [JsonPropertyName("content")]
-        public string Content { get; init; }
+        public string Content { get; }
         [JsonPropertyName("attachments")]
-        public List<string> Attachments { get; init; }
+        public List<string> Attachments { get; set; }
         [JsonPropertyName("timestamp")]
-        public DateTime Timestamp { get; init; }
+        public DateTime Timestamp { get; }
 
-        public Edit(string content, List<string> attachments, DateTime timestamp)
+        public Edit(string content, DateTime timestamp)
         {
             Content = content;
-            Attachments = attachments;
             Timestamp = timestamp;
         }
     }

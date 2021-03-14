@@ -75,9 +75,12 @@ namespace Roki.Services
 
                 using IServiceScope scope = _scopeFactory.CreateScope();
                 var context = scope.ServiceProvider.GetRequiredService<RokiContext>();
-
-                await context.Messages.AddAsync(new Message(message.Id, channel.Id, channel.GuildId, message.Author.Id, message.Content, message.Reference?.MessageId.GetValueOrDefault(),
-                    message.Attachments?.Select(x => x.Url).ToList()));
+                var dbMessage = new Message(message.Id, channel.Id, channel.GuildId, message.Author.Id, message.Content, message.Reference?.MessageId.GetValueOrDefault());
+                if (message.Attachments.Count > 0)
+                {
+                    dbMessage.Attachments = message.Attachments?.Select(x => x.Url).ToList();
+                }
+                await context.Messages.AddAsync(dbMessage);
                 await context.SaveChangesAsync();
             });
 
@@ -106,7 +109,12 @@ namespace Roki.Services
                 }
 
                 message.Edits ??= new List<Edit>();
-                message.Edits.Add(new Edit(after.Content, after.Attachments?.Select(x => x.Url).ToList(), DateTime.UtcNow));
+                var edit = new Edit(after.Content, DateTime.UtcNow);
+                if (message.Attachments.Count > 0)
+                {
+                    edit.Attachments = after.Attachments?.Select(x => x.Url).ToList();
+                }
+                message.Edits.Add(edit);
                 await context.SaveChangesAsync();
             });
 
