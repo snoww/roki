@@ -1,3 +1,6 @@
+create schema if not exists roki;
+set search_path = roki;
+
 create table users
 (
     id            bigint primary key,
@@ -32,7 +35,7 @@ create table guild_config
     currency              bool             not null,
     xp                    bool             not null,
     currency_default      bigint           not null,
-    investing_default     bigint           not null,
+    investing_default     decimal          not null,
     currency_chance       double precision not null,
     currency_cd           int              not null,
     currency_icon         text             not null,
@@ -60,8 +63,8 @@ create table guild_config
     trivia_med            int              not null,
     trivia_hard           int              not null,
     notification_location int              not null,
-    show_help bool not null ,
-    jeopardy_multiplier double precision not null ,
+    show_help             bool             not null,
+    jeopardy_multiplier   double precision not null
 );
 
 create table channel_config
@@ -195,8 +198,8 @@ create table transaction
     recipient   bigint not null references users (id),
     amount      bigint not null,
     description text,
-    channel_id  bigint not null references channel (id),
-    message_id  bigint not null references message (id)
+    channel_id  bigint not null,
+    message_id  bigint not null
 );
 
 -- todo pokemon

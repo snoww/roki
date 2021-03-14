@@ -24,10 +24,14 @@ namespace Roki.Modules.Help.Services
 
         private async Task CommandOnError(ExecuteCommandResult result)
         {
+            if (result.Context.Channel is not IDMChannel && !(await _config.GetGuildConfigAsync(result.Context.Guild.Id)).ShowHelpOnError)
+            {
+                return;
+            }
+            
             string errorMessage;
             var showUsage = true;
             var showOptions = true;
-            Console.WriteLine(result.Result.Error);
             switch (result.Result.Error)
             {
                 case CommandError.UnmetPrecondition:
