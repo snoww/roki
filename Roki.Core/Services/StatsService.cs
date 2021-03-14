@@ -88,7 +88,7 @@ namespace Roki.Services
             {
                 Task _ = Task.Run(() =>
                 {
-                    int tc = guild.Channels.Count(cx => cx is ITextChannel);
+                    int tc = guild.Channels.Count(x => x is ITextChannel);
                     int vc = guild.Channels.Count - tc;
                     Interlocked.Add(ref _textChannels, tc);
                     Interlocked.Add(ref _voiceChannels, vc);
@@ -101,7 +101,7 @@ namespace Roki.Services
             {
                 Task _ = Task.Run(() =>
                 {
-                    int tc = guild.Channels.Count(cx => cx is ITextChannel);
+                    int tc = guild.Channels.Count(x => x is ITextChannel);
                     int vc = guild.Channels.Count - tc;
                     Interlocked.Add(ref _textChannels, tc);
                     Interlocked.Add(ref _voiceChannels, vc);
@@ -114,7 +114,7 @@ namespace Roki.Services
             {
                 Task _ = Task.Run(() =>
                 {
-                    int tc = guild.Channels.Count(cx => cx is ITextChannel);
+                    int tc = guild.Channels.Count(x => x is ITextChannel);
                     int vc = guild.Channels.Count - tc;
                     Interlocked.Add(ref _textChannels, -tc);
                     Interlocked.Add(ref _voiceChannels, -vc);
@@ -128,7 +128,7 @@ namespace Roki.Services
             {
                 Task _ = Task.Run(() =>
                 {
-                    int tc = guild.Channels.Count(cx => cx is ITextChannel);
+                    int tc = guild.Channels.Count(x => x is ITextChannel);
                     int vc = guild.Channels.Count - tc;
                     Interlocked.Add(ref _textChannels, -tc);
                     Interlocked.Add(ref _voiceChannels, -vc);

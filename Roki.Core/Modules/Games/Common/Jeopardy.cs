@@ -29,6 +29,7 @@ namespace Roki.Modules.Games.Common
         private readonly Dictionary<ulong, string> _finalJeopardyAnswers = new();
         private readonly SemaphoreSlim _guess = new(1, 1);
         private readonly SemaphoreSlim _voteSkip = new(1, 1);
+        private readonly SemaphoreSlim _stopSem = new(1, 1);
         private readonly JaroWinkler _jw = new();
 
         private const double MinSimilarity = 0.95;
@@ -37,7 +38,7 @@ namespace Roki.Modules.Games.Common
 
         public readonly Color Color = Color.DarkBlue;
 
-        public readonly ConcurrentDictionary<IUser, int> Users = new();
+        public ConcurrentDictionary<IUser, int> Users { get; set; } = new();
 
         private CancellationTokenSource _cancel;
 
@@ -168,14 +169,23 @@ namespace Roki.Modules.Games.Common
         public async Task EnsureStopped()
         {
             _stopGame = true;
-            IUserMessage msg = await _channel.EmbedAsync(new EmbedBuilder().WithColor(Color)
-                    .WithAuthor("Jeopardy!")
-                    .WithTitle("Final Winnings")
-                    .WithDescription(GetLeaderboard()))
-                .ConfigureAwait(false);
+            EmbedBuilder embed = new EmbedBuilder().WithColor(Color)
+                .WithAuthor("Jeopardy!")
+                .WithDescription(GetLeaderboard());
+            if (_config.JeopardyWinMultiplier >= 0.999)
+            {
+                embed.WithTitle("Final Winnings")
+                    .WithDescription(GetLeaderboard());
+            }
+            else
+            {
+                embed.WithTitle($"Final Winnings (reduced multiplier {_config.JeopardyWinMultiplier:N2}x)")
+                    .WithDescription(GetAdjustedLeaderboard());
+            }
+            
+            IUserMessage msg = await _channel.EmbedAsync(embed).ConfigureAwait(false);
 
             if (!Users.Any()) return;
-            // todo maybe require at least x many questions answered correctly in order to get winnings
             foreach ((IUser user, int winnings) in Users)
             {
                 await _currency.AddCurrencyAsync(user.Id, _guild.Id, _channel.Id, msg.Id,"Jeopardy Winnings", winnings)
@@ -185,12 +195,15 @@ namespace Roki.Modules.Games.Common
 
         public async Task StopJeopardyGame()
         {
-            bool old = _stopGame;
-            _stopGame = true;
-            if (!old)
+            await _stopSem.WaitAsync();
+            
+            if (!_stopGame)
             {
+                _stopGame = true;
                 await _channel.SendErrorAsync("Jeopardy! game stopping after this question.").ConfigureAwait(false);
             }
+
+            _stopSem.Release();
         }
 
         private async Task ShowCategories()
@@ -557,6 +570,26 @@ namespace Roki.Modules.Games.Common
                 return "No one is on the leaderboard.";
             }
 
+            var lb = new StringBuilder();
+            foreach ((IUser user, int value) in Users.OrderByDescending(k => k.Value)) lb.AppendLine($"{user.Username} `{value:N0}` {_config.CurrencyIcon}");
+
+            return lb.ToString();
+        }
+        
+        public string GetAdjustedLeaderboard()
+        {
+            if (Users.IsEmpty)
+            {
+                return "No one is on the leaderboard.";
+            }
+
+            var adjustedUsers = new ConcurrentDictionary<IUser, int>();
+            foreach ((IUser user, int value) in Users)
+            {
+                adjustedUsers[user] = (int) Math.Round(value * _config.JeopardyWinMultiplier);
+            }
+
+            Users = adjustedUsers;
             var lb = new StringBuilder();
             foreach ((IUser user, int value) in Users.OrderByDescending(k => k.Value)) lb.AppendLine($"{user.Username} `{value:N0}` {_config.CurrencyIcon}");
 
