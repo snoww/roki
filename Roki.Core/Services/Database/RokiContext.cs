@@ -5,8 +5,6 @@ namespace Roki.Services.Database
 {
     public class RokiContext : DbContext
     {
-        private readonly string _connectionString;
-
         public RokiContext(DbContextOptions options) : base(options)
         {
         }
