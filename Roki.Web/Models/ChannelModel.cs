@@ -1,31 +1,41 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Roki.Web.Models
 {
-    public class ChannelSummary
-    {
-        public ulong Id { get; set; }
-        public string Name { get; set; }
-    }
-    
     public class Channel
     {
-        public ulong Id { get; set; }
-        public string Name { get; set; }
-        public ulong GuildId { get; set; }
-        public bool IsNsfw { get; set; }
-        public bool IsDeleted { get; set; } = false;
-        public DateTimeOffset CreatedAt { get; set; }
-        public ChannelConfig Config { get; set; }
-    }
+        public ulong Id { get; }
+        public ulong GuildId { get; }
+        public string Name { get; }
+        public DateTime? DeletedDate { get; set; }
 
+        public virtual ChannelConfig ChannelConfig { get; set; }
+
+        public Channel(ulong id, ulong guildId, string name)
+        {
+            Id = id;
+            GuildId = guildId;
+            Name = name;
+        }
+    }
+    
     public class ChannelConfig
     {
-        public bool Logging { get; set; }
-        public bool CurrencyGeneration { get; set; }
-        public bool XpGain { get; set; }
-        public Dictionary<string, bool> Modules { get; set; } = new();
-        public Dictionary<string, bool> Commands { get; set; } = new();
+        public ulong ChannelId { get; set; }
+        public bool Logging { get; }
+        public bool CurrencyGen { get; }
+        public bool XpGain { get; }
+
+        [JsonIgnore]
+        public virtual Channel Channel { get; set; }
+
+        public ChannelConfig(bool logging, bool currencyGen, bool xpGain)
+        {
+            Logging = logging;
+            CurrencyGen = currencyGen;
+            XpGain = xpGain;
+        }
     }
 }

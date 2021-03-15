@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Roki.Web.Models;
 using Roki.Web.Services;
 
@@ -13,12 +15,12 @@ namespace Roki.Web.Controllers
     [Route("manage")]
     public class GuildController : Controller
     {
-        private readonly RokiService _rokiService;
+        private readonly RokiContext _context;
         private readonly DiscordService _discordService;
 
-        public GuildController(RokiService rokiService, DiscordService discordService)
+        public GuildController(RokiContext context, DiscordService discordService)
         {
-            _rokiService = rokiService;
+            _context = context;
             _discordService = discordService;
         }
 
@@ -33,105 +35,35 @@ namespace Roki.Web.Controllers
         [Route("{guildId}")]
         public async Task<IActionResult> GuildSettings(ulong guildId)
         {
-            Guild guild = await _rokiService.GetRokiGuild(guildId);
-            if (guild == null)
+            GuildConfig config = await _context.GuildConfigs.AsNoTracking().Include(x => x.Guild).Where(x => x.GuildId == guildId).SingleOrDefaultAsync();
+            if (config == null)
             {
                 return View("Manage");
             }
 
-            List<ChannelSummary> channels = await _rokiService.GetGuildChannels(guildId);
+            List<Channel> channels = await _context.Channels.AsNoTracking().Where(x => x.GuildId == guildId).ToListAsync();
 
-            return View("Settings", new GuildChannelModel{Section = "_CoreSettings", Guild = guild, Channels = channels});
+            return View("Settings", new GuildChannelModel{GuildConfig = config, Channels = channels});
         }
 
-        [Route("{guildId}/modules")]
-        public async Task<IActionResult> ModuleSettings(ulong guildId)
-        {
-            Guild guild = await _rokiService.GetRokiGuild(guildId);
-            if (guild == null)
-            {
-                return View("Manage");
-            }
-
-            List<ChannelSummary> channels = await _rokiService.GetGuildChannels(guildId);
-
-            return View("Settings", new GuildChannelModel{Section = "_ModuleSettings", Guild = guild, Channels = channels});
-        }
-        
-        [Route("{guildId}/currency")]
-        public async Task<IActionResult> CurrencySettings(ulong guildId)
-        {
-            Guild guild = await _rokiService.GetRokiGuild(guildId);
-            if (guild == null)
-            {
-                return View("Manage");
-            }
-
-            List<ChannelSummary> channels = await _rokiService.GetGuildChannels(guildId);
-
-            return View("Settings", new GuildChannelModel{Section = "_CurrencySettings", Guild = guild, Channels = channels});
-        }
-        
-        [Route("{guildId}/xp")]
-        public async Task<IActionResult> XpSettings(ulong guildId)
-        {
-            Guild guild = await _rokiService.GetRokiGuild(guildId);
-            if (guild == null)
-            {
-                return View("Manage");
-            }
-
-            List<ChannelSummary> channels = await _rokiService.GetGuildChannels(guildId);
-
-            return View("Settings", new GuildChannelModel{Section = "_XpSettings", Guild = guild, Channels = channels});
-        }
-        
-        [Route("{guildId}/gamble")]
-        public async Task<IActionResult> GambleSettings(ulong guildId)
-        {
-            Guild guild = await _rokiService.GetRokiGuild(guildId);
-            if (guild == null)
-            {
-                return View("Manage");
-            }
-
-            List<ChannelSummary> channels = await _rokiService.GetGuildChannels(guildId);
-
-            return View("Settings", new GuildChannelModel{Section = "_GambleSettings", Guild = guild, Channels = channels});
-        }
-        
-        [Route("{guildId}/games")]
-        public async Task<IActionResult> GameSettings(ulong guildId)
-        {
-            Guild guild = await _rokiService.GetRokiGuild(guildId);
-            if (guild == null)
-            {
-                return View("Manage");
-            }
-
-            List<ChannelSummary> channels = await _rokiService.GetGuildChannels(guildId);
-
-            return View("Settings", new GuildChannelModel{Section = "_GameSettings", Guild = guild, Channels = channels});
-        }
-        
-        [Route("{guildId}/{channelId}")]
-        public async Task<IActionResult> ChannelSettings(ulong guildId, ulong channelId)
-        {
-            Guild guild = await _rokiService.GetRokiGuild(guildId);
-            if (guild == null)
-            {
-                return View("Manage");
-            }
-            
-            Channel channel = await _rokiService.GetGuildChannel(guildId, channelId);
-            if (channel == null)
-            {
-                // todo show 404
-            }
-            
-            List<ChannelSummary> channels = await _rokiService.GetGuildChannels(guildId);
-
-            return View("Settings", new GuildChannelModel{Section = "_ChannelSettings", ChannelId = channelId, Guild = guild, Channels = channels, Channel = channel});
-        }
+        // [Route("{guildId}/{channelId}")]
+        // public async Task<IActionResult> ChannelSettings(ulong guildId, ulong channelId)
+        // {
+        //     Guild guild = await _context.GetRokiGuild(guildId);
+        //     if (guild == null)
+        //     {
+        //         return View("Manage");
+        //     }
+        //     
+        //     Channel channel = await _context.GetGuildChannel(guildId, channelId);
+        //     if (channel == null)
+        //     {
+        //         // todo show 404
+        //     }
+        //     
+        //     List<ChannelSummary> channels = await _context.GetGuildChannels(guildId);
+        //
+        //     return View("Settings", new GuildChannelModel{Section = "_ChannelSettings", ChannelId = channelId, Guild = guild, Channels = channels, Channel = channel});
+        // }
     }
 }

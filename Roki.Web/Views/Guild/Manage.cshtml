@@ -8,7 +8,7 @@
     <div class="flex flex-row flex-wrap justify-start">
         @foreach (DiscordGuild guild in Model.OrderBy(x => x.Name))
         {
-            <div class="w-24 rounded bg-gray-300 dark:bg-gray-900 hover:bg-gray-400 dark:hover:bg-gray-700 m-1.5">
+            <div class="w-24 rounded bg-gray-300 dark:bg-gray-900 hover:bg-gray-400 dark:hover:bg-gray-700 m-1.5 shadow-lg">
                 <a href="/manage/@guild.Id">
                     <div>
                         @if (string.IsNullOrWhiteSpace(guild.Icon))

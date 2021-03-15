@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -32,11 +33,9 @@ namespace Roki.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<RokiContext>(options => options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
             services.AddHttpClient();
             services.AddRouting(options => options.LowercaseUrls = true);
-            services.Configure<RokiDatabaseSettings>(Configuration.GetSection(nameof(RokiDatabaseSettings)));
-            services.AddSingleton<IRokiDatabaseSettings>(sp => sp.GetRequiredService<IOptions<RokiDatabaseSettings>>().Value);
-            services.AddSingleton<RokiService>();
             services.AddSingleton<DiscordService>();
             services.AddAuthentication(options =>
                 {

@@ -17,4 +17,12 @@
     input[type=number] {
         -moz-appearance:textfield;
     }
+    
+    .sidenav-active {
+        @apply bg-gray-500 border-l-2 border-pink-500
+    }
+
+    html {
+        scroll-padding-top: 64px; /* height of sticky header */
+    }
 }

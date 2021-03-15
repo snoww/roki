@@ -4,10 +4,8 @@ namespace Roki.Web.Models
 {
     public class GuildChannelModel
     {
-        public string Section { get; set; }
-        public ulong ChannelId { get; set; }
-        public Guild Guild { get; set; }
-        public List<ChannelSummary> Channels { get; set; }
-        public Channel Channel { get; set; }
+        // public string Section { get; set; }
+        public GuildConfig GuildConfig { get; set; }
+        public List<Channel> Channels { get; set; }
     }
 }
