@@ -91,14 +91,64 @@ namespace Roki.Modules.Xp
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task XpLeaderboard(int page = 0)
+        public async Task XpLeaderboard(IUser user = null)
+        {
+            user ??= Context.User;
+            var leaderboard = await _context.UserData.AsNoTracking()
+                .Include(x => x.User)
+                .Where(x => x.GuildId == Context.Guild.Id && x.UserId != Roki.BotId)
+                .OrderByDescending(x => x.Xp)
+                .Take(9)
+                .Select(x => new
+                {
+                    x.Xp,
+                    x.User.Username,
+                    x.User.Discriminator
+                })
+                .ToListAsync();
+            
+            EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
+                .WithTitle("XP Leaderboard")
+                .WithFooter($"To show other pages: {await _config.GetGuildPrefix(Context.Guild.Id)}xplb <page>");
+
+            if (leaderboard.Any(x => x.Username == user.Username && x.Discriminator == user.Discriminator))
+            {
+                int i = 1;
+                foreach (var u in leaderboard)
+                {
+                    if (u.Username == user.Username && u.Discriminator == user.Discriminator)
+                    {
+                        embed.AddField($"#{i++} __{u.Username}#{u.Discriminator}__", $"Level `{new XpLevel(u.Xp).Level:N0}` - `{u.Xp:N0}` xp");
+                    }
+                    else
+                    {
+                        embed.AddField($"#{i++} {u.Username}#{u.Discriminator}", $"Level `{new XpLevel(u.Xp).Level:N0}` - `{u.Xp:N0}` xp");
+                    }
+                }
+            }
+            else
+            {
+                (long rank, string username, string discriminator, long xp) = await GetUserXpRankWithXp(user.Id, Context.Guild.Id);
+                int i = 1;
+                foreach (var u in leaderboard.Take(8))
+                {
+                    embed.AddField($"#{i++} {u.Username}#{u.Discriminator}", $"Level `{new XpLevel(u.Xp).Level:N0}` - `{u.Xp:N0}` xp");
+                }
+                embed.AddField($"#{rank} __{username}#{discriminator}__", $"Level `{new XpLevel(xp).Level:N0}` - `{xp:N0}` xp");
+            }
+            
+            await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
+        }
+
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task XpLeaderboard(int page)
         {
             if (page < 0)
                 return;
             if (page > 0)
                 page -= 1;
 
-            var list = await _context.UserData.AsNoTracking()
+            var leaderboard = await _context.UserData.AsNoTracking()
                 .Include(x => x.User)
                 .Where(x => x.GuildId == Context.Guild.Id && x.UserId != Roki.BotId)
                 .OrderByDescending(x => x.Xp)
@@ -112,9 +162,11 @@ namespace Roki.Modules.Xp
                 })
                 .ToListAsync();
             
-            EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context).WithTitle("XP Leaderboard");
+            EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
+                .WithTitle("XP Leaderboard")
+                .WithFooter($"Page {page+1} | To show other pages: {await _config.GetGuildPrefix(Context.Guild.Id)}xplb <page>");
             int i = 9 * page + 1;
-            foreach (var data in list)
+            foreach (var data in leaderboard)
             {
                 embed.AddField($"#{i++} {data.Username}#{data.Discriminator}", $"Level `{new XpLevel(data.Xp).Level:N0}` - `{data.Xp:N0}` xp");
             }
@@ -237,6 +289,26 @@ namespace Roki.Modules.Xp
             await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
             await reader.ReadAsync();
             return reader.GetInt32(0);
+        }
+        
+        private async Task<(long, string, string, long)> GetUserXpRankWithXp(ulong userId, ulong guildId)
+        {
+            var conn = (NpgsqlConnection) _context.Database.GetDbConnection();
+            await conn.OpenAsync();
+            await using var cmd = new NpgsqlCommand(@"
+                select r.rank, r.username, r.discriminator, r.xp
+                from (select u.username, u.discriminator, ud.uid, ud.xp, rank() over (order by ud.xp desc) rank
+                      from user_data ud
+                               inner join users as u on ud.uid = u.id
+                      where ud.guild_id = (@guild_id)) r
+                where r.uid = (@uid);", conn);
+            cmd.Parameters.AddWithValue("guild_id", (long) guildId);
+            cmd.Parameters.AddWithValue("uid", (long) userId);
+            await cmd.PrepareAsync();
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
+            await reader.ReadAsync();
+            // rank | username | discriminator | xp
+            return (reader.GetInt64(0), reader.GetString(1), reader.GetString(2), reader.GetInt64(3));
         }
     }
 }

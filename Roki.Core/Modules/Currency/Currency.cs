@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Roki.Common;
 using Roki.Common.Attributes;
 using Roki.Extensions;
@@ -53,7 +54,51 @@ namespace Roki.Modules.Currency
         }
 
         [RokiCommand, Description, Usage, Aliases]
-        public async Task Leaderboard(int page = 1)
+        public async Task Leaderboard(IUser user = null)
+        {
+            user ??= Context.User;
+
+            var leaderboard = await _context.UserData.AsNoTracking().Include(x => x.User)
+                .Where(x => x.GuildId == Context.Guild.Id && x.UserId != Roki.BotId)
+                .OrderByDescending(x => x.Currency)
+                .Take(9)
+                .Select(x => new {x.User.Username, x.User.Discriminator, x.Currency})
+                .ToListAsync();
+
+            EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
+                .WithTitle("Currency Leaderboard")
+                .WithFooter($"To show other pages: {await _config.GetGuildPrefix(Context.Guild.Id)}lb <page>");
+            if (leaderboard.Any(x => x.Username == user.Username && x.Discriminator == user.Discriminator))
+            {
+                int i = 1;
+                foreach (var u in leaderboard)
+                {
+                    if (u.Username == user.Username && u.Discriminator == user.Discriminator)
+                    {
+                        embed.AddField($"#{i++} __{u.Username}#{u.Discriminator}__", $"`{u.Currency:N0}` {(await _config.GetGuildConfigAsync(Context.Guild.Id)).CurrencyIcon}");
+                    }
+                    else
+                    {
+                        embed.AddField($"#{i++} {u.Username}#{u.Discriminator}", $"`{u.Currency:N0}` {(await _config.GetGuildConfigAsync(Context.Guild.Id)).CurrencyIcon}");
+                    }
+                }
+            }
+            else
+            {
+                (long rank, string username, string discriminator, long currency) = await GetUserCurrencyLeaderboard(user.Id, Context.Guild.Id);
+                int i = 1;
+                foreach (var u in leaderboard.Take(8))
+                {
+                    embed.AddField($"#{i++} {u.Username}#{u.Discriminator}", $"`{u.Currency:N0}` {(await _config.GetGuildConfigAsync(Context.Guild.Id)).CurrencyIcon}");
+                }
+                embed.AddField($"#{rank} __{username}#{discriminator}__", $"`{currency:N0}` {(await _config.GetGuildConfigAsync(Context.Guild.Id)).CurrencyIcon}");
+            }
+            
+            await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
+        }
+
+        [RokiCommand, Description, Usage, Aliases]
+        public async Task Leaderboard(int page)
         {
             if (page <= 0)
             {
@@ -67,11 +112,12 @@ namespace Roki.Modules.Currency
                 .OrderByDescending(x => x.Currency)
                 .Skip(page * 9)
                 .Take(9)
-                .Select(x => new { x.User.Username, x.User.Discriminator, x.Currency})
+                .Select(x => new {x.User.Username, x.User.Discriminator, x.Currency})
                 .ToListAsync();
-            
+
             EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
-                .WithTitle("Currency Leaderboard");
+                .WithTitle("Currency Leaderboard")
+                .WithFooter($"Page {page+1} | To show other pages: {await _config.GetGuildPrefix(Context.Guild.Id)}lb <page>");
             int i = 9 * page + 1;
             foreach (var user in leaderboard)
             {
@@ -94,6 +140,7 @@ namespace Roki.Modules.Currency
                 await Context.Channel.SendErrorAsync($"```\nError: Invalid arguments provided.```\n`{guildConfig.Prefix}h transfer` to check correct usage.").ConfigureAwait(false);
                 return;
             }
+
             if (options.Amount <= 0)
             {
                 await Context.Channel.SendErrorAsync($"You must transfer at least `1` {guildConfig.CurrencyIcon}").ConfigureAwait(false);
@@ -107,9 +154,10 @@ namespace Roki.Modules.Currency
                     await Context.Channel.SendErrorAsync($"You do not have enough {guildConfig.CurrencyIcon} in your `{Account.Cash}` account to transfer.").ConfigureAwait(false);
                     return;
                 }
-                
+
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                    .WithDescription($"{Context.User.Mention} You've successfully transferred `{options.Amount:N0}` {guildConfig.CurrencyIcon}\nFrom `{Account.Cash}` to `{Account.Investing}`")).ConfigureAwait(false);
+                        .WithDescription($"{Context.User.Mention} You've successfully transferred `{options.Amount:N0}` {guildConfig.CurrencyIcon}\nFrom `{Account.Cash}` to `{Account.Investing}`"))
+                    .ConfigureAwait(false);
             }
             else
             {
@@ -118,8 +166,10 @@ namespace Roki.Modules.Currency
                     await Context.Channel.SendErrorAsync($"You do not have enough {guildConfig.CurrencyIcon} in your `{Account.Investing}` account to transfer.").ConfigureAwait(false);
                     return;
                 }
+
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                    .WithDescription($"{Context.User.Mention} You've successfully transferred `{options.Amount:N0}` {guildConfig.CurrencyIcon}\nFrom `{Account.Investing}` to `{Account.Cash}`")).ConfigureAwait(false);
+                        .WithDescription($"{Context.User.Mention} You've successfully transferred `{options.Amount:N0}` {guildConfig.CurrencyIcon}\nFrom `{Account.Investing}` to `{Account.Cash}`"))
+                    .ConfigureAwait(false);
             }
         }
 
@@ -138,7 +188,7 @@ namespace Roki.Modules.Currency
 
             var giveMsg = $"Gift from {Context.User.Username} to {user.Username} - {message}";
 
-                bool success = await _currency.TransferCurrencyAsync(Context.User.Id, user.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, giveMsg, amount);
+            bool success = await _currency.TransferCurrencyAsync(Context.User.Id, user.Id, Context.Guild.Id, Context.Channel.Id, Context.Message.Id, giveMsg, amount);
             GuildConfig guildConfig = await _config.GetGuildConfigAsync(Context.Guild.Id);
 
             if (!success)
@@ -192,7 +242,7 @@ namespace Roki.Modules.Currency
 
             EmbedBuilder embed = new EmbedBuilder().WithDynamicColor(Context)
                 .WithTitle($"{user.Username}'s Transactions History");
-            
+
             var desc = new StringBuilder();
             desc.AppendLine("```diff");
             // todo better formatting
@@ -200,11 +250,11 @@ namespace Roki.Modules.Currency
             {
                 if (trans.Sender == user.Id)
                 {
-                    desc.AppendLine(trans.Amount >= 0 ? $"-{trans.Amount, -8:N0}{$"#{trans.Id}",18}".Replace(' ', '.') : $"+{Math.Abs(trans.Amount), -8:N0}{$"#{trans.Id}",18}".Replace(' ', '.'));
+                    desc.AppendLine(trans.Amount >= 0 ? $"-{trans.Amount,-8:N0}{$"#{trans.Id}",18}".Replace(' ', '.') : $"+{Math.Abs(trans.Amount),-8:N0}{$"#{trans.Id}",18}".Replace(' ', '.'));
                 }
                 else
                 {
-                    desc.AppendLine(trans.Amount >= 0 ? $"+{trans.Amount, -8:N0}{$"#{trans.Id}",18}".Replace(' ', '.') : $"-{Math.Abs(trans.Amount), -8:N0}{$"#{trans.Id}",18}".Replace(' ', '.'));
+                    desc.AppendLine(trans.Amount >= 0 ? $"+{trans.Amount,-8:N0}{$"#{trans.Id}",18}".Replace(' ', '.') : $"-{Math.Abs(trans.Amount),-8:N0}{$"#{trans.Id}",18}".Replace(' ', '.'));
                 }
             }
 
@@ -214,8 +264,28 @@ namespace Roki.Modules.Currency
 
             await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
         }
+
+        private async Task<(long, string, string, long)> GetUserCurrencyLeaderboard(ulong userId, ulong guildId)
+        {
+            var conn = (NpgsqlConnection) _context.Database.GetDbConnection();
+            await conn.OpenAsync();
+            await using var cmd = new NpgsqlCommand(@"
+                select r.rank, r.username, r.discriminator, r.currency
+                from (select u.username, u.discriminator, ud.uid, ud.currency, rank() over (order by ud.currency desc) rank
+                      from user_data ud
+                               inner join users as u on ud.uid = u.id
+                      where ud.guild_id = (@guild_id)) r
+                where r.uid = (@uid);", conn);
+            cmd.Parameters.AddWithValue("guild_id", (long) guildId);
+            cmd.Parameters.AddWithValue("uid", (long) userId);
+            await cmd.PrepareAsync();
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
+            await reader.ReadAsync();
+            // rank | username | discriminator | currency
+            return (reader.GetInt64(0), reader.GetString(1), reader.GetString(2), reader.GetInt64(3));
+        }
     }
-    
+
     public enum Account
     {
         Cash,

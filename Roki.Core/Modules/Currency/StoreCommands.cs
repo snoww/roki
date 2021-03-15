@@ -48,7 +48,7 @@ namespace Roki.Modules.Currency
                 if (cat.Count == 0)
                 {
                     await Context.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(Context)
-                        .WithTitle("Stone Shop")
+                        .WithTitle($"{Context.Guild.Name}'s Shop")
                         .WithDescription("The store is currently empty. Please check back again later."));
                     return;
                 }

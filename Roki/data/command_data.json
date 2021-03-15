@@ -63,7 +63,7 @@
     "Aliases": "cmds aliases",
     "Description": "List all commands and their aliases from a module. You can either specify the full/the first few letters of the module name.",
     "Usage": [
-      "{0}commands <module_name>",
+      "{0}commands <module>",
       "{0}commands games"
     ]
   },
@@ -393,18 +393,18 @@
   },
   "xpleaderboard": {
     "Aliases": "xplb",
-    "Description": "Shows the server's XP leaderboard. Default is the top 9.",
+    "Description": "Shows the server's XP leaderboard along with your XP rank. You can also specify a user to get their rank instead.",
     "Usage": [
-      "{0}xplb [page]",
+      "{0}xplb [page|@user]",
       "{0}xplb",
-      "{0}xplb 2"
+      "{0}xplb 1"
     ]
   },
   "xpnotification": {
     "Aliases": "xpnotif",
     "Description": "Sets the preferred location of level up notifications.",
     "Usage": [
-      "{0}xpnotif {dm|server|none}",
+      "{0}xpnotif <dm|server|none>",
       "{0}xpnotif dm"
     ]
   },
@@ -417,9 +417,9 @@
   },
   "leaderboard": {
     "Aliases": "lb",
-    "Description": "Shows the current currency leaderboard. Default is the top 9.",
+    "Description": "Shows the current currency leaderboard along with your currency rank. You can also specify a user to get their rank instead.",
     "Usage": [
-      "{0}lb [page]",
+      "{0}lb [page|@user]",
       "{0}lb",
       "{0}lb 2"
     ]
