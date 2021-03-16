@@ -21,7 +21,7 @@
     @await Html.PartialAsync("_GuildNav", Model)
 </div>
 <div class="w-full ml-4">
-<form id="form-data" onchange="checkForm(coreData, 'core')" onsubmit="return false;">
+<form id="form-data" onchange="checkForm()" onsubmit="return false;">
 <div class="settings container" id="core">
     <h1 class="text-3xl font-medium tracking-tight pt-4">Core Settings</h1>
     <div class="sm:block" aria-hidden="true">
@@ -94,7 +94,7 @@
             <div class="rounded-md">
                 <label for="guild_curr_name_p" class="block text-sm font-medium dark:text-gray-200">Plural Name</label>
                 <div class="mt-1 flex rounded-md">
-                    <input type="text" name="guild_curr_name_p" id="guild_curr_name_p" value="@Model.GuildConfig.CurrencyNamePlural" maxlength="50" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border rounded-md block w-32 text-sm">
+                    <input type="text" name="guild_curr_name_p" id="guild_curr_name_p" value="@Model.GuildConfig.CurrencyNamePlural" maxlength="51" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border rounded-md block w-32 text-sm">
                 </div>
             </div>
         </div>
@@ -103,6 +103,20 @@
             <div class="mt-1 flex rounded-md">
                 @* TODO get image *@
                 <input type="text" name="guild_curr_icon" id="guild_curr_icon" value="@Model.GuildConfig.CurrencyIcon" maxlength="54" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border rounded-md block w-32 text-sm font-mono">
+            </div>
+        </div>
+        <div class="flex space-x-12 mt-4">
+            <div class="rounded-md">
+                <label for="guild_curr_default" class="block text-sm font-medium dark:text-gray-200">Starting Currency</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_curr_default" id="guild_curr_default" value="@Model.GuildConfig.CurrencyDefault" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32 text-sm">
+                </div>
+            </div>
+            <div class="rounded-md">
+                <label for="guild_inv_default" class="block text-sm font-medium dark:text-gray-200">Starting Investing</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_inv_default" id="guild_inv_default" value="@Model.GuildConfig.InvestingDefault" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32 text-sm">
+                </div>
             </div>
         </div>
         <div class="mt-4 rounded-md">
@@ -166,6 +180,13 @@
             <label for="guild_xp_cd_fast" class="block text-sm font-medium dark:text-gray-200">XP Fast Cooldown</label>
             <div class="mt-1 flex rounded-md">
                 <input type="number" name="guild_xp_cd_fast" id="guild_xp_cd_fast" value="@Model.GuildConfig.XpFastCooldown" min="1" max="3600" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-2">
+                <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">sec</span>
+            </div>
+        </div>
+        <div class="mt-4 rounded-md">
+            <label for="guild_xp_notif" class="block text-sm font-medium dark:text-gray-200">Level Up Notification Location</label>
+            <div class="mt-1 flex rounded-md">
+                <input type="number" name="guild_xp_notif" id="guild_xp_notif" value="@Model.GuildConfig.NotificationLocation" min="1" max="3" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-2">
                 <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">sec</span>
             </div>
         </div>
@@ -244,9 +265,16 @@
         <h1 class="text-xl font-normal tracking-tight mt-4">Bet Flip Multi</h1>
         <div class="flex flex-wrap mt-4">
             <div class="rounded-md mr-8">
-                <label for="guild_bfm_min" class="block text-sm font-medium dark:text-gray-200">Minimum Guesses</label>
+                <label for="guild_bfm_min_guess" class="block text-sm font-medium dark:text-gray-200">Minimum Guesses</label>
                 <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_bfm_min" id="guild_bfm_min" value="@Model.GuildConfig.BetFlipMMinGuesses" min="2" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32 text-sm">
+                    <input type="number" name="guild_bfm_min_guess" id="guild_bfm_min_guess" value="@Model.GuildConfig.BetFlipMMinGuesses" min="2" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32 text-sm">
+                </div>
+            </div>
+            <div class="rounded-md mr-8">
+                <label for="guild_bfm_min" class="block text-sm font-medium dark:text-gray-200">Minimum Bet</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_bfm_min" id="guild_bfm_min" value="@Model.GuildConfig.BetFlipMMinMultiplier" min="1.1" step="0.1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-2">
+                    <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">×</span>
                 </div>
             </div>
             <div class="rounded-md mr-8">
@@ -304,13 +332,22 @@
     </div>
 </div>
 <div class="block fixed inset-x-0 -bottom-16 z-10 transition ease-in-out" id="save-modal" onclick="">
-    <div class="flex justify-center">
+    <div class="flex justify-center text-sm">
         <div class="bg-gray-600 w-1/3 p-2 rounded shadow-md bg-opacity-95">
             <div class="flex justify-between items-center">
                 <div class="pl-2">
                     You have unsaved changes
                 </div>
-                <button id="save" class="rounded dark:bg-pink-800 focus:outline-none dark:hover:bg-pink-900 dark:focus:ring-pink-600 py-1.5 px-3" onclick="console.log('pressed')">Save</button>
+                <div class="text-center inline-flex">
+                    <button class="hover:underline mr-4 focus:outline-none focus:ring-0" onclick="resetForm()">Reset</button>
+                    <button id="save" class="rounded dark:bg-pink-800 focus:outline-none dark:hover:bg-pink-900 dark:focus:ring-pink-600 py-1.5 px-3 inline-flex" onclick="submitForm()">
+                        <svg id="save-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white text-center hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <div id="save-text">Save</div>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -370,6 +407,8 @@
     const coreForm = document.getElementById("form-data");
     let coreData = Object.fromEntries(new FormData(coreForm).entries());
     const save = document.getElementById("save-modal");
+    const saveButton = document.getElementById("save");
+    const saveSpinner = document.getElementById("save-spinner");
     
     function checkForm() {
         const newData = Object.fromEntries(new FormData(document.getElementById("form-data")).entries());
@@ -382,25 +421,64 @@
         } 
     }
     
-    coreForm.addEventListener("keyup", () => checkForm(coreData, "core"));
+    coreForm.addEventListener("keyup", () => checkForm());
     
-    // function sendCoreSettings(id) {
-    //     const data = Object.fromEntries(new FormData(document.getElementById("form-data-" + id)).entries());
-    //     fetch(`/manage/@Model.GuildConfig.GuildId/${id}`, {
-    //         method: "POST",
-    //         headers: {
-    //             "Content-Type": "application/json"
-    //         },
-    //         body: JSON.stringify(data)
-    //     })
-    //         .then(res => {
-    //             if (res.status === 200) {
-    //                 coreData = Object.fromEntries(new FormData(coreForm).entries());
-    //                 document.getElementById("save-form-" + id).disabled = true;
-    //             }
-    //         })
-    //         .catch(err => {
-    //             console.log("Error: " + err);
-    //         });
-    // }
+    function resetForm(){
+        coreForm.reset();
+        checkForm();
+        saveSpinner.classList.add("hidden");
+    }
+    
+    const _oldFetch = fetch; 
+    // Create our new version of the fetch function
+    window.fetch = function(){
+    
+        // Create hooks
+        const fetchStart = new Event( "fetchStart", { "view": document, "bubbles": true, "cancelable": false } );
+        const fetchEnd = new Event( "fetchEnd", { "view": document, "bubbles": true, "cancelable": false } );
+    
+        // Pass the supplied arguments to the real fetch function
+        const fetchCall = _oldFetch.apply(this, arguments);
+    
+        // Trigger the fetchStart event
+        document.dispatchEvent(fetchStart);
+    
+        fetchCall.then(function(){
+            // Trigger the fetchEnd event
+            document.dispatchEvent(fetchEnd);
+        }).catch(function(){
+            // Trigger the fetchEnd event
+            document.dispatchEvent(fetchEnd);
+        });
+    
+        return fetchCall;
+    };
+    
+    function submitForm() {
+        document.getElementById("save-spinner").classList.remove("hidden");
+        const data = Object.fromEntries(new FormData(document.getElementById("form-data")).entries());
+        fetch("/manage/@Model.GuildConfig.GuildId/settings", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        })
+            .then(res => {
+                if (res.status === 200) {
+                    coreData = Object.fromEntries(new FormData(coreForm).entries());
+                } else {
+                    res.text().then(text => { console.log(text); });
+                }
+            })
+            .catch((err) => {
+                console.log("Error: " + err);
+            });
+    }
+    
+    document.addEventListener("fetchEnd", async function() {
+        await new Promise(r => setTimeout(r, 2000));
+        checkForm();
+        saveSpinner.classList.add("hidden");
+    });
 </script>
