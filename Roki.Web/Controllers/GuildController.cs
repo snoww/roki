@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -44,6 +45,23 @@ namespace Roki.Web.Controllers
             List<Channel> channels = await _context.Channels.AsNoTracking().Where(x => x.GuildId == guildId).ToListAsync();
 
             return View("Settings", new GuildChannelModel{GuildConfig = config, Channels = channels});
+        }
+
+        [HttpPost("{guildId}/core")]
+        public async Task<IActionResult> UpdateCoreSettings(ulong guildId, [FromBody] CoreSettingsModel model)
+        {
+            if (model.Prefix.Length > 5)
+            {
+                return BadRequest(new {error = "Prefix must be less than 5 characters long."});
+            }
+            GuildConfig guildConfig = await _context.GuildConfigs.SingleOrDefaultAsync(x => x.GuildId == guildId);
+            guildConfig.Prefix = model.Prefix;
+            guildConfig.Logging = model.Logging == "on";
+            guildConfig.XpGain = model.Xp == "on";
+            guildConfig.CurrencyGen = model.Currency == "on";
+            guildConfig.ShowHelpOnError = model.Help == "on";
+            await _context.SaveChangesAsync();
+            return Ok(new {status = "ok"});
         }
 
         // [Route("{guildId}/{channelId}")]
