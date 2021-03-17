@@ -50,6 +50,8 @@ namespace Roki.Web.Controllers
         [HttpPost("{guildId}/settings")]
         public async Task<IActionResult> UpdateCoreSettings(ulong guildId, [FromBody] GuildConfigUpdate model)
         {
+            var errors = new Dictionary<string, string>();
+            
             if (model.Prefix.Length > 2)
             {
                 return BadRequest(new {error = "Prefix must be less than 5 characters long."});

@@ -20,7 +20,7 @@
 <div class="w-80">
     @await Html.PartialAsync("_GuildNav", Model)
 </div>
-<div class="w-full ml-4">
+<div class="w-full ml-4 text-sm">
 <form id="form-data" onchange="checkForm()" onsubmit="return false;">
 <div class="settings container" id="core">
     <h1 class="text-3xl font-medium tracking-tight pt-4">Core Settings</h1>
@@ -31,48 +31,61 @@
     </div>
     <div class="rounded-md overflow-hidden bg-grey-100 dark:bg-gray-900 px-4 py-4">
         <div>
-            <label for="prefix" class="block text-sm font-medium dark:text-gray-200">Prefix</label>
+            <label for="prefix" class="block font-medium dark:text-gray-200">Prefix</label>
             <input type="text" id="prefix" name="prefix" value="@Model.GuildConfig.Prefix" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 mt-1 flex rounded-md block w-20 font-mono" maxlength="5" placeholder="." required>
+            <span class="text-xs text-gray-400" id="guild-prefix-help">This is how you invoke bot commands.</span>
         </div>
-        <div class="mt-4 flex justify-between">
-            <label class="block text-sm font-medium dark:text-gray-200">Default Message Logging Behavior</label>
-            <label for="guild-logging" class="cursor-pointer mr-2">
-                <div class="relative">
-                    <input id="guild-logging" type="checkbox" class="hidden" name="guild-logging" @(Model.GuildConfig.Logging ? "checked" : "")>
-                    <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
-                    <div class="toggle -top-1 -left-1 transition duration-300 ease-in-out absolute w-6 h-6 bg-white rounded-full inset-y-0 left-0"></div>
-                </div>
-            </label>
+        <div>
+            <div class="mt-4 flex justify-between">
+                <label class="block font-medium dark:text-gray-200">Default Message Logging</label>
+                <label for="guild-logging" class="cursor-pointer mr-2">
+                    <div class="relative">
+                        <input id="guild-logging" type="checkbox" class="hidden" name="guild-logging" @(Model.GuildConfig.Logging ? "checked" : "")>
+                        <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
+                        <div class="toggle -top-1 -left-1 transition duration-300 ease-in-out absolute w-6 h-6 bg-white rounded-full inset-y-0 left-0"></div>
+                    </div>
+                </label>
+            </div>
+            <span class="text-xs text-gray-400" id="guild-logging-help">New channels will have logging enabled/disabled.</span>
         </div>
-        <div class="mt-4 flex justify-between">
-            <label class="block text-sm font-medium dark:text-gray-200">Default Currency Generation</label>
-            <label for="guild-curr-gen" class="cursor-pointer mr-2">
-                <div class="relative">
-                    <input id="guild-curr-gen" type="checkbox" class="hidden" name="guild-curr" @(Model.GuildConfig.CurrencyGen ? "checked" : "")>
-                    <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
-                    <div class="toggle -top-1 -left-1 transition duration-300 ease-in-out absolute w-6 h-6 bg-white rounded-full inset-y-0 left-0"></div>
-                </div>
-            </label>
+        <div>
+            <div class="mt-4 flex justify-between">
+                <label class="block font-medium dark:text-gray-200">Default Currency Generation</label>
+                <label for="guild-curr-gen" class="cursor-pointer mr-2">
+                    <div class="relative">
+                        <input id="guild-curr-gen" type="checkbox" class="hidden" name="guild-curr" @(Model.GuildConfig.CurrencyGen ? "checked" : "")>
+                        <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
+                        <div class="toggle -top-1 -left-1 transition duration-300 ease-in-out absolute w-6 h-6 bg-white rounded-full inset-y-0 left-0"></div>
+                    </div>
+                </label>
+            </div>
+            <span class="text-xs text-gray-400" id="guild-curr-help">New channels will have currency generation enabled/disabled.</span>
         </div>
-        <div class="mt-4 flex justify-between">
-            <label class="block text-sm font-medium dark:text-gray-200">Default XP Gain</label>
-            <label for="guild-xp" class="cursor-pointer mr-2">
-                <div class="relative">
-                    <input id="guild-xp" type="checkbox" class="hidden" name="guild-xp" @(Model.GuildConfig.XpGain ? "checked" : "")>
-                    <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
-                    <div class="toggle -top-1 -left-1 transition duration-300 ease-in-out absolute w-6 h-6 bg-white rounded-full inset-y-0 left-0"></div>
-                </div>
-            </label>
+        <div>
+            <div class="mt-4 flex justify-between">
+                <label class="block font-medium dark:text-gray-200">Default XP Gain</label>
+                <label for="guild-xp" class="cursor-pointer mr-2">
+                    <div class="relative">
+                        <input id="guild-xp" type="checkbox" class="hidden" name="guild-xp" @(Model.GuildConfig.XpGain ? "checked" : "")>
+                        <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
+                        <div class="toggle -top-1 -left-1 transition duration-300 ease-in-out absolute w-6 h-6 bg-white rounded-full inset-y-0 left-0"></div>
+                    </div>
+                </label>
+            </div>
+            <span class="text-xs text-gray-400" id="guild-xp-help">New channels will have XP enabled/disabled.</span>
         </div>
-        <div class="mt-4 flex justify-between">
-            <label class="block text-sm font-medium dark:text-gray-200">Show Help on Command Error</label>
-            <label for="guild-show-help" class="cursor-pointer mr-2">
-                <div class="relative">
-                    <input id="guild-show-help" type="checkbox" class="hidden" name="guild-show-help" @(Model.GuildConfig.ShowHelpOnError ? "checked" : "")>
-                    <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
-                    <div class="toggle -top-1 -left-1 transition duration-300 ease-in-out absolute w-6 h-6 bg-white rounded-full inset-y-0 left-0"></div>
-                </div>
-            </label>
+        <div>
+            <div class="mt-4 flex justify-between">
+                <label class="block font-medium dark:text-gray-200">Show Help on Command Error</label>
+                <label for="guild-show-help" class="cursor-pointer mr-2">
+                    <div class="relative">
+                        <input id="guild-show-help" type="checkbox" class="hidden" name="guild-show-help" @(Model.GuildConfig.ShowHelpOnError ? "checked" : "")>
+                        <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
+                        <div class="toggle -top-1 -left-1 transition duration-300 ease-in-out absolute w-6 h-6 bg-white rounded-full inset-y-0 left-0"></div>
+                    </div>
+                </label>
+            </div>
+            <span class="text-xs text-gray-400" id="guild-help-help">Incorrect command usages will show a help message.</span>
         </div>
     </div>
 </div>
@@ -84,74 +97,93 @@
         </div>
     </div>
     <div class="rounded-md overflow-hidden bg-grey-100 dark:bg-gray-900 px-4 py-4">
-        <div class="flex space-x-12">
-            <div class="rounded-md">
-                <label for="guild_curr_name" class="block text-sm font-medium dark:text-gray-200">Currency Name</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="text" name="guild_curr_name" id="guild_curr_name" value="@Model.GuildConfig.CurrencyName" maxlength="50" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32 text-sm">
+        <div>
+            <div class="flex space-x-12">
+                <div class="rounded-md">
+                    <label for="guild_curr_name" class="block font-medium dark:text-gray-200">Currency Name</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="text" name="guild_curr_name" id="guild_curr_name" value="@Model.GuildConfig.CurrencyName" maxlength="50" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32">
+                    </div>
+                    @* <span class="text-xs text-red-700" id="guild_curr_help">Invalid Currency Name</span> *@
+                </div>
+                <div class="rounded-md">
+                    <label for="guild_curr_name_p" class="block font-medium dark:text-gray-200">Plural Name</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="text" name="guild_curr_name_p" id="guild_curr_name_p" value="@Model.GuildConfig.CurrencyNamePlural" maxlength="51" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border rounded-md block w-32">
+                    </div>
                 </div>
             </div>
-            <div class="rounded-md">
-                <label for="guild_curr_name_p" class="block text-sm font-medium dark:text-gray-200">Plural Name</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="text" name="guild_curr_name_p" id="guild_curr_name_p" value="@Model.GuildConfig.CurrencyNamePlural" maxlength="51" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border rounded-md block w-32 text-sm">
-                </div>
-            </div>
+            <span class="text-xs text-gray-400" id="guild-curr-name-help">Change the currency name on your server.</span>
         </div>
-        <div class="mt-2 rounded-md">
-            <label for="guild_curr_icon" class="block text-sm font-medium dark:text-gray-200">Icon</label>
-            <div class="mt-1 flex rounded-md">
-                @* TODO get image *@
-                <input type="text" name="guild_curr_icon" id="guild_curr_icon" value="@Model.GuildConfig.CurrencyIcon" maxlength="54" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border rounded-md block w-32 text-sm font-mono">
+        <div>
+            <div class="mt-2 rounded-md">
+                <label for="guild_curr_icon" class="block font-medium dark:text-gray-200">Icon</label>
+                <div class="mt-1 flex rounded-md">
+                    @* TODO get image *@
+                    <input type="text" name="guild_curr_icon" id="guild_curr_icon" value="@Model.GuildConfig.CurrencyIcon" maxlength="54" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border rounded-md block w-32 font-mono">
+                </div>
             </div>
+            <span class="text-xs text-gray-400" id="guild-curr-icon-help">Change the currency icon on your server.</span>
         </div>
-        <div class="flex space-x-12 mt-4">
-            <div class="rounded-md">
-                <label for="guild_curr_default" class="block text-sm font-medium dark:text-gray-200">Starting Currency</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_curr_default" id="guild_curr_default" value="@Model.GuildConfig.CurrencyDefault" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32 text-sm">
+        <div>
+            <div class="flex space-x-12 mt-4">
+                <div class="rounded-md">
+                    <label for="guild_curr_default" class="block font-medium dark:text-gray-200">Starting Cash</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_curr_default" id="guild_curr_default" value="@Model.GuildConfig.CurrencyDefault" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32">
+                    </div>
+                </div>
+                <div class="rounded-md">
+                    <label for="guild_inv_default" class="block font-medium dark:text-gray-200">Starting Investing</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_inv_default" id="guild_inv_default" value="@Model.GuildConfig.InvestingDefault" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32">
+                    </div>
                 </div>
             </div>
-            <div class="rounded-md">
-                <label for="guild_inv_default" class="block text-sm font-medium dark:text-gray-200">Starting Investing</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_inv_default" id="guild_inv_default" value="@Model.GuildConfig.InvestingDefault" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32 text-sm">
-                </div>
-            </div>
+            <span class="text-xs text-gray-400" id="guild-curr-default-help">Default amount of starting currency for users.</span>
         </div>
-        <div class="mt-4 rounded-md">
-            <label for="guild_curr_prob" class="block text-sm font-medium dark:text-gray-200">Generation Probability</label>
-            <div class="mt-1 flex rounded-md">
-                <input type="number" name="guild_curr_prob" id="guild_curr_prob" value="@(Model.GuildConfig.CurrencyGenerationChance * 100)" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-2">
-                <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">%</span>
+        <div>
+            <div class="mt-4 rounded-md">
+                <label for="guild_curr_prob" class="block font-medium dark:text-gray-200">Generation Probability</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_curr_prob" id="guild_curr_prob" value="@(Model.GuildConfig.CurrencyGenerationChance * 100)" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md z-2">
+                    <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md z-0">%</span>
+                </div>
             </div>
+            <span class="text-xs text-gray-400" id="guild-curr-gen-help">Chance for currency to drop on each message.</span>
         </div>
-        <div class="mt-4 rounded-md">
-            <label for="guild_curr_cd" class="block text-sm font-medium dark:text-gray-200">Generation Cooldown</label>
-            <div class="mt-1 flex rounded-md">
-                <input type="number" name="guild_curr_cd" id="guild_curr_cd" value="@Model.GuildConfig.CurrencyGenerationCooldown" min="0" max="3600" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-2">
-                <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">sec</span>
+        <div>
+            <div class="mt-4 rounded-md">
+                <label for="guild_curr_cd" class="block font-medium dark:text-gray-200">Generation Cooldown</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_curr_cd" id="guild_curr_cd" value="@Model.GuildConfig.CurrencyGenerationCooldown" min="0" max="3600" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md z-2">
+                    <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md z-0">sec</span>
+                </div>
             </div>
+            <span class="text-xs text-gray-400" id="guild-curr-cd-help">Cooldown before currency can drop again.</span>
         </div>
-        <div class="flex space-x-12 mt-4">
-            <div class="rounded-md">
-                <label for="guild_curr_drop" class="block text-sm font-medium dark:text-gray-200">Drop Minimum</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_curr_drop" id="guild_curr_drop" value="@Model.GuildConfig.CurrencyDropAmount" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20 text-sm">
+        <div>
+            <div class="flex space-x-12 mt-4">
+                <div class="rounded-md">
+                    <label for="guild_curr_drop" class="block font-medium dark:text-gray-200">Drop Minimum</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_curr_drop" id="guild_curr_drop" value="@Model.GuildConfig.CurrencyDropAmount" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20">
+                    </div>
+                </div>
+                <div class="rounded-md">
+                    <label for="guild_curr_drop_max" class="block font-medium dark:text-gray-200">Drop Maximum</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_curr_drop_max" id="guild_curr_drop_max" value="@Model.GuildConfig.CurrencyDropAmountMax" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20">
+                    </div>
+                </div>
+                <div class="rounded-md">
+                    <label for="guild_curr_drop_rare" class="block font-medium dark:text-gray-200">Drop Rare</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_curr_drop_rare" id="guild_curr_drop_rare" value="@Model.GuildConfig.CurrencyDropAmountRare" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20">
+                    </div>
                 </div>
             </div>
-            <div class="rounded-md">
-                <label for="guild_curr_drop_max" class="block text-sm font-medium dark:text-gray-200">Drop Maximum</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_curr_drop_max" id="guild_curr_drop_max" value="@Model.GuildConfig.CurrencyDropAmountMax" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20 text-sm">
-                </div>
-            </div>
-            <div class="rounded-md">
-                <label for="guild_curr_drop_rare" class="block text-sm font-medium dark:text-gray-200">Drop Rare</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_curr_drop_rare" id="guild_curr_drop_rare" value="@Model.GuildConfig.CurrencyDropAmountRare" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20 text-sm">
-                </div>
-            </div>
+            <span class="text-xs text-gray-400" id="guild-curr-drop-help">Drop amounts for currency. Rare drops ocurrs 1% of the time, in addtion to the drop chance.</span>
         </div>
     </div>
 </div>
@@ -163,32 +195,44 @@
         </div>
     </div>
     <div class="rounded-md overflow-hidden bg-grey-100 dark:bg-gray-900 px-4 py-4">
-        <div class="rounded-md">
-            <label for="guild_xp_pm" class="block text-sm font-medium dark:text-gray-200">XP Per Message</label>
-            <div class="mt-1 flex rounded-md">
-                <input type="number" name="guild_xp_pm" id="guild_xp_pm" value="@Model.GuildConfig.XpPerMessage" min="0" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20 text-sm">
+        <div>
+            <div class="rounded-md">
+                <label for="guild_xp_pm" class="block font-medium dark:text-gray-200">XP Per Message</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_xp_pm" id="guild_xp_pm" value="@Model.GuildConfig.XpPerMessage" min="0" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20">
+                </div>
             </div>
+            <span class="text-xs text-gray-400" id="guild-xp-pm-help">XP gained per message.</span>            
         </div>
-        <div class="mt-4 rounded-md">
-            <label for="guild_xp_cd" class="block text-sm font-medium dark:text-gray-200">XP Cooldown</label>
-            <div class="mt-1 flex rounded-md">
-                <input type="number" name="guild_xp_cd" id="guild_xp_cd" value="@Model.GuildConfig.XpCooldown" min="1" max="3600" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-2">
-                <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">sec</span>
+        <div>
+            <div class="mt-4 rounded-md">
+                <label for="guild_xp_cd" class="block font-medium dark:text-gray-200">XP Cooldown</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_xp_cd" id="guild_xp_cd" value="@Model.GuildConfig.XpCooldown" min="1" max="3600" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md z-2">
+                    <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md z-0">sec</span>
+                </div>
             </div>
+            <span class="text-xs text-gray-400" id="guild-xp-cd-help">Cooldown before users can gain XP again.</span>
         </div>
-        <div class="mt-4 rounded-md">
-            <label for="guild_xp_cd_fast" class="block text-sm font-medium dark:text-gray-200">XP Fast Cooldown</label>
-            <div class="mt-1 flex rounded-md">
-                <input type="number" name="guild_xp_cd_fast" id="guild_xp_cd_fast" value="@Model.GuildConfig.XpFastCooldown" min="1" max="3600" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-2">
-                <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">sec</span>
+        <div>
+            <div class="mt-4 rounded-md">
+                <label for="guild_xp_cd_fast" class="block font-medium dark:text-gray-200">XP Fast Cooldown</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_xp_cd_fast" id="guild_xp_cd_fast" value="@Model.GuildConfig.XpFastCooldown" min="1" max="3600" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md z-2">
+                    <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md z-0">sec</span>
+                </div>
             </div>
+            <span class="text-xs text-gray-400" id="guild-xp-fcd-help">Cooldown for users who bought a "Fast XP" boost. (Configurable in the Server's Store)</span>            
         </div>
-        <div class="mt-4 rounded-md">
-            <label for="guild_xp_notif" class="block text-sm font-medium dark:text-gray-200">Level Up Notification Location</label>
-            <div class="mt-1 flex rounded-md">
-                <input type="number" name="guild_xp_notif" id="guild_xp_notif" value="@Model.GuildConfig.NotificationLocation" min="1" max="3" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-2">
-                <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">sec</span>
+        <div>
+            <div class="mt-4 rounded-md">
+                <label for="guild_xp_notif" class="block font-medium dark:text-gray-200">Level Up Notification</label>
+                @* todo dropdown  *@
+                <div class="mt-1 flex rounded-md">
+                    <input type="text" name="guild_xp_notif" id="guild_xp_notif" value="@Model.GuildConfig.NotificationLocation" maxlength="6" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32">
+                </div>
             </div>
+            <span class="text-xs text-gray-400" id="guild-xp-notif-help">Where users receive their level up notification by default.</span>
         </div>
     </div>
 </div>
@@ -200,41 +244,52 @@
         </div>
     </div>
     <div class="rounded-md overflow-hidden bg-grey-100 dark:bg-gray-900 px-4 py-4">
-        <h1 class="text-xl font-normal tracking-tight">Jeopardy</h1>
-        <div class="rounded-md mt-4">
-            <label for="guild_jeopardy_mult" class="block text-sm font-medium dark:text-gray-200">Win Payout</label>
-            <div class="mt-1 flex rounded-md">
-                <input type="number" name="guild_jeopardy_mult" id="guild_jeopardy_mult" value="@Model.GuildConfig.JeopardyWinMultiplier.ToString("N2")" min="0.01" max="1" step="0.01" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-2">
-                <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">×</span>
+        <h1 class="text-xl font-normal tracking-tight">Jeopardy!</h1>
+        <span class="text-xs text-gray-400" id="guild-jp-help">Slightly modified version of Jeopardy! made for Discord.</span>
+        <div>
+            <div class="rounded-md mt-3">
+                <label for="guild_jeopardy_mult" class="block font-medium dark:text-gray-200">Win Payout</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_jeopardy_mult" id="guild_jeopardy_mult" value="@Model.GuildConfig.JeopardyWinMultiplier" min="0.01" max="1" step="0.01" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md z-2">
+                    <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md z-0">×</span>
+                </div>
             </div>
+            <span class="text-xs text-gray-400" id="guild-jp-mult-help">Optionally reduce the winnings for Jeopardy!.</span>
         </div>
         <h1 class="text-xl font-normal tracking-tight mt-4">Trivia</h1>
-        <div class="rounded-md mt-4">
-            <label for="guild_trivia_min" class="block text-sm font-medium dark:text-gray-200">Minimum Correct</label>
-            <div class="mt-1 flex rounded-md">
-                <input type="number" name="guild_trivia_min" id="guild_trivia_min" value="@(Model.GuildConfig.TriviaMinCorrect * 100)" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-2">
-                <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">%</span>
+        <span class="text-xs text-gray-400" id="guild-trivia-help">Multiple choice trivia questions on a variety of categories.</span>
+        <div>
+            <div class="rounded-md mt-3">
+                <label for="guild_trivia_min" class="block font-medium dark:text-gray-200">Minimum Correct</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_trivia_min" id="guild_trivia_min" value="@(Model.GuildConfig.TriviaMinCorrect * 100)" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md z-2">
+                    <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md z-0">%</span>
+                </div>
             </div>
+            <span class="text-xs text-gray-400" id="guild-trivia-min-help">Minimum percentage of correct answers required to get payout.</span>
         </div>
-        <div class="flex flex-wrap mt-4">
-            <div class="rounded-md mr-8">
-                <label for="guild_trivia_easy" class="block text-sm font-medium dark:text-gray-200">Easy Reward</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_trivia_easy" id="guild_trivia_easy" value="@Model.GuildConfig.TriviaEasy" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20 text-sm">
+        <div>
+            <div class="flex flex-wrap mt-4">
+                <div class="rounded-md mr-8">
+                    <label for="guild_trivia_easy" class="block font-medium dark:text-gray-200">Easy Reward</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_trivia_easy" id="guild_trivia_easy" value="@Model.GuildConfig.TriviaEasy" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20">
+                    </div>
+                </div>
+                <div class="rounded-md mr-8">
+                    <label for="guild_trivia_med" class="block font-medium dark:text-gray-200">Medium Reward</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_trivia_med" id="guild_trivia_med" value="@Model.GuildConfig.TriviaMedium" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20">
+                    </div>
+                </div>
+                <div class="rounded-md">
+                    <label for="guild_trivia_hard" class="block font-medium dark:text-gray-200">Hard Reward</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_trivia_hard" id="guild_trivia_hard" value="@Model.GuildConfig.TriviaHard" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20">
+                    </div>
                 </div>
             </div>
-            <div class="rounded-md mr-8">
-                <label for="guild_trivia_med" class="block text-sm font-medium dark:text-gray-200">Medium Reward</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_trivia_med" id="guild_trivia_med" value="@Model.GuildConfig.TriviaMedium" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20 text-sm">
-                </div>
-            </div>
-            <div class="rounded-md">
-                <label for="guild_trivia_hard" class="block text-sm font-medium dark:text-gray-200">Hard Reward</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_trivia_hard" id="guild_trivia_hard" value="@Model.GuildConfig.TriviaHard" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20 text-sm">
-                </div>
-            </div>
+            <span class="text-xs text-gray-400" id="guild-trivia-reward-help">Configure rewards for trivia based on difficulty.</span>
         </div>
     </div>
 </div>
@@ -247,92 +302,111 @@
     </div>
     <div class="rounded-md overflow-hidden bg-grey-100 dark:bg-gray-900 px-4 py-4">
         <h1 class="text-xl font-normal tracking-tight">Bet Flip</h1>
-        <div class="flex flex-wrap mt-4">
-            <div class="rounded-md mr-8">
-                <label for="guild_bf_min" class="block text-sm font-medium dark:text-gray-200">Minimum Bet</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_bf_min" id="guild_bf_min" value="@Model.GuildConfig.BetFlipMin" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32 text-sm">
+        <span class="text-xs text-gray-400" id="guild-bf-help">Bet on the results of a coinflip.</span>
+        <div>
+            <div class="flex flex-wrap mt-3">
+                <div class="rounded-md mr-8">
+                    <label for="guild_bf_min" class="block font-medium dark:text-gray-200">Minimum Bet</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_bf_min" id="guild_bf_min" value="@Model.GuildConfig.BetFlipMin" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32">
+                    </div>
+                </div>
+                <div class="rounded-md">
+                    <label for="guild_bf_mult" class="block font-medium dark:text-gray-200">Payout Multiplier</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_bf_mult" id="guild_bf_mult" value="@Model.GuildConfig.BetFlipMultiplier" min="1.01" step="0.01" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md z-2">
+                        <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md z-0">×</span>
+                    </div>
                 </div>
             </div>
-            <div class="rounded-md">
-                <label for="guild_bf_mult" class="block text-sm font-medium dark:text-gray-200">Payout Multiplier</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_bf_mult" id="guild_bf_mult" value="@Model.GuildConfig.BetFlipMultiplier" min="1.01" step="0.01" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-2">
-                    <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">×</span>
-                </div>
-            </div>
+            <span class="text-xs text-gray-400" id="guild-bf-bet-help">Minimum bet required to play.</span>
         </div>
         <h1 class="text-xl font-normal tracking-tight mt-4">Bet Flip Multi</h1>
-        <div class="flex flex-wrap mt-4">
-            <div class="rounded-md mr-8">
-                <label for="guild_bfm_min_guess" class="block text-sm font-medium dark:text-gray-200">Minimum Guesses</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_bfm_min_guess" id="guild_bfm_min_guess" value="@Model.GuildConfig.BetFlipMMinGuesses" min="2" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32 text-sm">
+        <span class="text-xs text-gray-400" id="guild-bfm-help">Guess the results of multiple coinflips at the same time.</span>
+        <div>
+            <div class="flex flex-wrap mt-3">
+                <div class="rounded-md mr-8">
+                    <label for="guild_bfm_min_guess" class="block font-medium dark:text-gray-200">Minimum Guesses</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_bfm_min_guess" id="guild_bfm_min_guess" value="@Model.GuildConfig.BetFlipMMinGuesses" min="2" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32">
+                    </div>
+                </div>
+                <div class="rounded-md mr-8">
+                    <label for="guild_bfm_min" class="block font-medium dark:text-gray-200">Minimum Bet</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_bfm_min" id="guild_bfm_min" value="@Model.GuildConfig.BetFlipMMinMultiplier" min="1.1" step="0.1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md z-2">
+                        <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md z-0">×</span>
+                    </div>
+                </div>
+                <div class="rounded-md mr-8">
+                    <label for="guild_bfm_min_correct" class="block font-medium dark:text-gray-200">Minimum Correct</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_bfm_min_correct" id="guild_bfm_min_correct" value="@(Model.GuildConfig.BetFlipMMinCorrect * 100)" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md z-2">
+                        <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md z-0">%</span>
+                    </div>
+                </div>
+                <div class="rounded-md">
+                    <label for="guild_bfm_mult" class="block font-medium dark:text-gray-200">Payout Multiplier</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_bfm_mult" id="guild_bfm_mult" value="@Model.GuildConfig.BetFlipMMultiplier" min="1.1" step="0.1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md z-2">
+                        <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md z-0">×</span>
+                    </div>
                 </div>
             </div>
-            <div class="rounded-md mr-8">
-                <label for="guild_bfm_min" class="block text-sm font-medium dark:text-gray-200">Minimum Bet</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_bfm_min" id="guild_bfm_min" value="@Model.GuildConfig.BetFlipMMinMultiplier" min="1.1" step="0.1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-2">
-                    <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">×</span>
-                </div>
-            </div>
-            <div class="rounded-md mr-8">
-                <label for="guild_bfm_min_correct" class="block text-sm font-medium dark:text-gray-200">Minimum Correct</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_bfm_min_correct" id="guild_bfm_min_correct" value="@(Model.GuildConfig.BetFlipMMinCorrect * 100)" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-2">
-                    <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">%</span>
-                </div>
-            </div>
-            <div class="rounded-md">
-                <label for="guild_bfm_mult" class="block text-sm font-medium dark:text-gray-200">Payout Multiplier</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_bfm_mult" id="guild_bfm_mult" value="@Model.GuildConfig.BetFlipMMultiplier" min="1.1" step="0.1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-2">
-                    <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">×</span>
-                </div>
-            </div>
+            <span class="text-xs text-gray-400" id="guild-bfm-min-help">Minimum number of guesses. Minimum amount to bet, based on the number of guesses. Minimum correct percentage to get payout.</span>
         </div>
         <h1 class="text-xl font-normal tracking-tight mt-4">Bet Dice (6d6)</h1>
-        <div class="rounded-md mt-4">
-            <label for="guild_bd_min" class="block text-sm font-medium dark:text-gray-200">Minimum Bet</label>
-            <div class="mt-1 flex rounded-md">
-                <input type="number" name="guild_bd_min" id="guild_bd_min" value="@Model.GuildConfig.BetDiceMin" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20 text-sm">
+        <span class="text-xs text-gray-400" id="guild-bd-help">Guess the sum of 6 six-sided dice rolls.</span>
+        <div>
+            <div class="rounded-md mt-3">
+                <label for="guild_bd_min" class="block font-medium dark:text-gray-200">Minimum Bet</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_bd_min" id="guild_bd_min" value="@Model.GuildConfig.BetDiceMin" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20">
+                </div>
             </div>
+            <span class="text-xs text-gray-400" id="guild-bd-min-help">Minimum bet required to play.</span>
         </div>
         <h1 class="text-xl font-normal tracking-tight mt-4">Bet Roll (1d100)</h1>
-        <div class="rounded-md mt-4">
-            <label for="guild_br_min" class="block text-sm font-medium dark:text-gray-200">Minimum Bet</label>
-            <div class="mt-1 flex rounded-md">
-                <input type="number" name="guild_br_min" id="guild_br_min" value="@Model.GuildConfig.BetRollMin" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20 text-sm">
+        <span class="text-xs text-gray-400" id="guild-br-help">Guess the results of a roll of a 100-sided die.</span>
+        <div>
+            <div class="rounded-md mt-3">
+                <label for="guild_br_min" class="block font-medium dark:text-gray-200">Minimum Bet</label>
+                <div class="mt-1 flex rounded-md">
+                    <input type="number" name="guild_br_min" id="guild_br_min" value="@Model.GuildConfig.BetRollMin" min="1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-20">
+                </div>
             </div>
+            <span class="text-xs text-gray-400" id="guild-br-min-help">Minimum bet required to play.</span>
         </div>
-        <div class="flex flex-wrap mt-4">
-            <div class="rounded-md mr-8">
-                <label for="guild_br_71" class="block text-sm font-medium dark:text-gray-200">≥ 71</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_br_71" id="guild_br_71" value="@Model.GuildConfig.BetRoll71Multiplier" min="1" step="0.1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-2">
-                    <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">×</span>
+        <div>
+            <div class="flex flex-wrap mt-4">
+                <div class="rounded-md mr-8">
+                    <label for="guild_br_71" class="block font-medium dark:text-gray-200">≥ 71</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_br_71" id="guild_br_71" value="@Model.GuildConfig.BetRoll71Multiplier" min="1" step="0.1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md z-2">
+                        <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md z-0">×</span>
+                    </div>
+                </div>
+                <div class="rounded-md mr-8">
+                    <label for="guild_br_92" class="block font-medium dark:text-gray-200">≥ 92</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_br_92" id="guild_br_92" value="@Model.GuildConfig.BetRoll92Multiplier" min="1" step="0.1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md z-2">
+                        <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md z-0">×</span>
+                    </div>
+                </div>
+                <div class="rounded-md">
+                    <label for="guild_br_100" class="block font-medium dark:text-gray-200">= 100</label>
+                    <div class="mt-1 flex rounded-md">
+                        <input type="number" name="guild_br_100" id="guild_br_100" value="@Model.GuildConfig.BetRoll100Multiplier" min="1.1" step="0.1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md z-2">
+                        <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md z-0">×</span>
+                    </div>
                 </div>
             </div>
-            <div class="rounded-md mr-8">
-                <label for="guild_br_92" class="block text-sm font-medium dark:text-gray-200">≥ 92</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_br_92" id="guild_br_92" value="@Model.GuildConfig.BetRoll92Multiplier" min="1" step="0.1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-2">
-                    <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">×</span>
-                </div>
-            </div>
-            <div class="rounded-md">
-                <label for="guild_br_100" class="block text-sm font-medium dark:text-gray-200">= 100</label>
-                <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_br_100" id="guild_br_100" value="@Model.GuildConfig.BetRoll100Multiplier" min="1.1" step="0.1" required class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border block w-20 rounded-none rounded-l-md text-sm z-2">
-                    <span class="dark:border-gray-800 dark:bg-gray-700 inline-flex items-center px-3 border border-l-0 rounded-r-md text-sm z-0">×</span>
-                </div>
-            </div>
+            <span class="text-xs text-gray-400" id="guild-br-mult-help">Payout multiplier if rolled above.</span>
         </div>
     </div>
 </div>
 <div class="block fixed inset-x-0 -bottom-16 z-10 transition ease-in-out" id="save-modal" onclick="">
-    <div class="flex justify-center text-sm">
+    <div class="flex justify-center">
         <div class="bg-gray-600 w-1/3 p-2 rounded shadow-md bg-opacity-95">
             <div class="flex justify-between items-center">
                 <div class="pl-2">
