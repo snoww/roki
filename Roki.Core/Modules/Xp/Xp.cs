@@ -43,12 +43,13 @@ namespace Roki.Modules.Xp
             }
 
             await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
+            DateTime now = DateTime.UtcNow;
 
-            RedisValue image = await _cache.StringGetAsync($"xp:image:{user.Id}");
+            RedisValue image = await _cache.StringGetAsync($"xp:image:{user.Id}:{Context.Guild.Id}");
             if (image.HasValue)
             {
                 await using var stream = new MemoryStream((byte[]) image);
-                await Context.Channel.SendFileAsync(stream, $"xp-{user.Id}.png").ConfigureAwait(false);
+                await Context.Channel.SendFileAsync(stream, $"xp-{user}.png").ConfigureAwait(false);
                 return;
             }
 
@@ -59,7 +60,7 @@ namespace Roki.Modules.Xp
                 try
                 {
                     // handle gif avatars in future
-                    string avatarUrl = user.GetAvatarUrl(ImageFormat.Png, 512) ?? user.GetDefaultAvatarUrl();
+                    string avatarUrl = user.GetAvatarUrl(ImageFormat.Png, 256) ?? user.GetDefaultAvatarUrl();
                     avatar = await http.GetStreamAsync(avatarUrl).ConfigureAwait(false);
                 }
                 catch (Exception)
@@ -72,21 +73,19 @@ namespace Roki.Modules.Xp
             var data = await _context.UserData.AsNoTracking()
                 .AsQueryable()
                 .Where(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id)
-                .Select(x => new { x.Xp, x.LastLevelUp})
+                .Select(x => new { x.Xp, x.LastLevelUp, x.LastXpGain})
                 .SingleAsync();
             
             var xp = new XpLevel(data.Xp);
             int rank = await GetUserXpRank(Context.User.Id, Context.Guild.Id);
             bool doubleXp = await _context.Subscriptions.AsNoTracking()
-                .Where(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id && x.Item.Details == "doublexp")
-                .AnyAsync();
+                .AnyAsync(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id && x.Item.Details == "doublexp");
             bool fastXp = await _context.Subscriptions.AsNoTracking()
-                .Where(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id && x.Item.Details == "fastxp")
-                .AnyAsync();
+                .AnyAsync(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id && x.Item.Details == "fastxp");
 
             await using MemoryStream xpImage = XpDrawExtensions.GenerateXpBar(avatar, xp, $"{rank}", 
                 user.Username, user.Discriminator, data.LastLevelUp, doubleXp, fastXp);
-            await _cache.StringSetAsync($"xp:image:{user.Id}", xpImage.ToArray(), TimeSpan.FromMinutes(5), flags: CommandFlags.FireAndForget);
+            await _cache.StringSetAsync($"xp:image:{user.Id}:{Context.Guild.Id}", xpImage.ToArray(), TimeSpan.FromMinutes(5), flags: CommandFlags.FireAndForget);
             await Context.Channel.SendFileAsync(xpImage, $"xp-{user.Id}.png").ConfigureAwait(false);
         }
 
