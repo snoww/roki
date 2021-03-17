@@ -12,28 +12,9 @@ namespace Roki.Modules.Utility.Services
 {
     public class UtilityService : IRokiService
     {
-        // temp hard coding values
-        private const ulong DefaultGuildId = 125025699827417095;
-        private static readonly Random Rng = new();
-
-        private readonly DiscordSocketClient _client;
-        private readonly SocketGuild _guild;
-        private Timer _status;
-
-        public UtilityService(DiscordSocketClient client)
+        public UtilityService()
         {
-            _client = client;
-            _guild = _client.GetGuild(DefaultGuildId);
-            // StartTimers();
         }
-
-        // todo custom statuses
-        private void StartTimers()
-        {
-            // _status = new Timer(RotateStatus, null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
-        }
-        
-
         public string Uwulate(string message)
         {
             var result = new StringBuilder();

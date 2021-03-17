@@ -43,13 +43,13 @@ namespace Roki.Modules.Xp
             }
 
             await Context.Channel.TriggerTypingAsync().ConfigureAwait(false);
-            DateTime now = DateTime.UtcNow;
+            long seconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             RedisValue image = await _cache.StringGetAsync($"xp:image:{user.Id}:{Context.Guild.Id}");
             if (image.HasValue)
             {
                 await using var stream = new MemoryStream((byte[]) image);
-                await Context.Channel.SendFileAsync(stream, $"xp-{user}.png").ConfigureAwait(false);
+                await Context.Channel.SendFileAsync(stream, $"xp-{user.Username}-{seconds}.png").ConfigureAwait(false);
                 return;
             }
 
@@ -85,8 +85,9 @@ namespace Roki.Modules.Xp
 
             await using MemoryStream xpImage = XpDrawExtensions.GenerateXpBar(avatar, xp, $"{rank}", 
                 user.Username, user.Discriminator, data.LastLevelUp, doubleXp, fastXp);
+            await avatar.DisposeAsync();
             await _cache.StringSetAsync($"xp:image:{user.Id}:{Context.Guild.Id}", xpImage.ToArray(), TimeSpan.FromMinutes(5), flags: CommandFlags.FireAndForget);
-            await Context.Channel.SendFileAsync(xpImage, $"xp-{user.Id}.png").ConfigureAwait(false);
+            await Context.Channel.SendFileAsync(xpImage, $"xp-{user.Id}-{seconds}.png").ConfigureAwait(false);
         }
 
         [RokiCommand, Description, Usage, Aliases]
