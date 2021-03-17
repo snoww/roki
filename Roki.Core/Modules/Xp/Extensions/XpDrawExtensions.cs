@@ -14,64 +14,64 @@ namespace Roki.Modules.Xp.Extensions
 {
     public static class XpDrawExtensions
     {
-        private const int PfpLength = 300;
-        private const int PfpOutlineX = 65;
-        private const int PfpOutlineY = 40;
+        private const int PfpLength = 150;
+        private const int PfpOutlineX = 32;
+        private const int PfpOutlineY = 20;
 
-        private const int XpBarX = 475;
-        private const int XpBarY = 130;
-        private const int XpBarHeight = 70;
-        private const int XpBarLength = 1025;
+        private const int XpBarX = 238;
+        private const int XpBarY = 65;
+        private const int XpBarHeight = 35;
+        private const int XpBarLength = 512;
 
-        private const int MaxUsernameLength = 965;
+        private const int MaxUsernameLength = 480;
 
         public static MemoryStream GenerateXpBar(Stream avatar, XpLevel xp, string rank,
             string username, string discriminator, DateTime date, bool doubleXp, bool fastXp)
         {
-            using Image image = Image.Load("./data/xp/roki_xp.png");
+            using Image image = Image.Load("data/xp/roki_xp_half.png");
 
             var transparentGray = new Rgba32(211, 211, 211, 220);
 
-            var grayBackground = new RectangleF(PfpOutlineX + (PfpLength + 20) / 2, 15, 1360, 370);
+            var grayBackground = new RectangleF(PfpOutlineX + (PfpLength + 10) / 2, 7.5f, 680, 185);
 
-            var pfpBackground = new RectangleF(PfpOutlineX, PfpOutlineY, PfpLength + 20, PfpLength + 20);
-            var pfpOutline = new RectangleF(PfpOutlineX, PfpOutlineY, PfpLength + 20, PfpLength + 20);
+            var pfpBackground = new RectangleF(PfpOutlineX, PfpOutlineY, PfpLength + 10, PfpLength + 10);
+            var pfpOutline = new RectangleF(PfpOutlineX, PfpOutlineY, PfpLength + 10, PfpLength + 10);
 
             var xpBarOutline = new RectangleF(XpBarX, XpBarY, XpBarLength, XpBarHeight);
             image.Mutate(x => x
                 .Fill(new Color(transparentGray), grayBackground)
                 // profile pic
                 .Fill(Color.White, pfpBackground)
-                .Draw(Color.WhiteSmoke, 7, pfpOutline)
-                .Fill(Color.HotPink, new RectangleF(75, 50, 300, 300)) // profile pic
+                .Draw(Color.WhiteSmoke, 3.5f, pfpOutline)
+                .Fill(Color.HotPink, new RectangleF(37, 25, 150, 150)) // profile pic
 
                 // xp bar
-                .Draw(Color.HotPink, 5, xpBarOutline));
+                .Draw(Color.HotPink, 2.5f, xpBarOutline));
 
             if (xp.TotalXp != 0)
             {
-                var xpBarProgress = new RectangleF(XpBarX + 5, XpBarY + 5, (XpBarLength - 10) * ((float) xp.ProgressXp / xp.RequiredXp), XpBarHeight - 10);
+                var xpBarProgress = new RectangleF(XpBarX + 2.5f, XpBarY + 2.5f, (XpBarLength - 5) * ((float) xp.ProgressXp / xp.RequiredXp), XpBarHeight - 5);
                 image.Mutate(x => x.Fill(Color.HotPink, xpBarProgress));
             }
 
             using (Image pfp = Image.Load(avatar))
             {
                 pfp.Mutate(x => x.Resize(new Size(PfpLength, PfpLength)));
-                image.Mutate(x => x.DrawImage(pfp, new Point(PfpOutlineX + 10, PfpOutlineY + 10), 1));
+                image.Mutate(x => x.DrawImage(pfp, new Point(PfpOutlineX + 5, PfpOutlineY + 5), 1));
             }
 
             var fonts = new FontCollection();
-            fonts.Install("./data/xp/DIN_REG.ttf");
-            fonts.Install("./data/xp/DIN_MED.ttf");
-            Font usernameFont = fonts.CreateFont("DIN", 60);
-            Font discriminatorFont = fonts.CreateFont("DIN", 42);
-            Font xpFont = fonts.CreateFont("DIN", 60);
-            Font headerFont = fonts.CreateFont("DIN Medium", 40);
-            Font bodyFont = fonts.CreateFont("DIN", 50);
+            fonts.Install("data/xp/DIN_REG.ttf");
+            fonts.Install("data/xp/DIN_MED.ttf");
+            Font usernameFont = fonts.CreateFont("DIN", 30);
+            Font discriminatorFont = fonts.CreateFont("DIN", 21);
+            Font xpFont = fonts.CreateFont("DIN", 30);
+            Font headerFont = fonts.CreateFont("DIN Medium", 20);
+            Font bodyFont = fonts.CreateFont("DIN", 25);
             image.Mutate(x => x
-                .DrawUsername(usernameFont, discriminatorFont, username, $"#{discriminator}", new PointF(XpBarX, 100)) // username + discrim
+                .DrawUsername(usernameFont, discriminatorFont, username, $"#{discriminator}", new PointF(XpBarX, 50)) // username + discrim
                 .DrawText(new TextGraphicsOptions {TextOptions = {HorizontalAlignment = HorizontalAlignment.Center}},
-                    $"XP: {xp.TotalXp:N0} / {xp.TotalRequiredXp:N0}", xpFont, Color.DarkSlateGray, new PointF(XpBarX + XpBarLength / 2, 132)) // xp progress
+                    $"XP: {xp.TotalXp:N0} / {xp.TotalRequiredXp:N0}", xpFont, Color.DarkSlateGray, new PointF(XpBarX + XpBarLength / 2, 66)) // xp progress
                 .DrawStats(headerFont, bodyFont, $"#{rank}", xp.Level.ToString("N0"), xp.TotalXp.ToString("N0"), date)
                 .DrawBoosts(doubleXp, fastXp));
 
@@ -99,7 +99,7 @@ namespace Roki.Modules.Xp.Extensions
                 userGlyphs = TextBuilder.GenerateGlyphs(trimmedUser.ToString(), userOptions);
             }
 
-            var discrimLocation = new PointF(userGlyphs.Bounds.Right + 5, location.Y);
+            var discrimLocation = new PointF(userGlyphs.Bounds.Right + 2, location.Y);
             var discrimOptions = new RendererOptions(discFont, discrimLocation) {ApplyKerning = options.TextOptions.ApplyKerning, VerticalAlignment = options.TextOptions.VerticalAlignment};
 
             IPathCollection discrimGlyphs = TextBuilder.GenerateGlyphs(discrim, discrimOptions);
@@ -114,11 +114,11 @@ namespace Roki.Modules.Xp.Extensions
             string rank, string level, string total, DateTime lastLevelUp)
         {
             const float spacing = XpBarLength / 4f;
-            const int y = 235;
+            const float y = 117.5f;
 
-            source.DrawLines(Color.HotPink, 5, new PointF(XpBarX + spacing, y), new PointF(XpBarX + spacing, y + 105))
-                .DrawLines(Color.HotPink, 5, new PointF(XpBarX + spacing * 2, y), new PointF(XpBarX + spacing * 2, y + 105))
-                .DrawLines(Color.HotPink, 5, new PointF(XpBarX + spacing * 3, y), new PointF(XpBarX + spacing * 3, y + 105));
+            source.DrawLines(Color.HotPink, 2.5f, new PointF(XpBarX + spacing, y), new PointF(XpBarX + spacing, y + 52))
+                .DrawLines(Color.HotPink, 2.5f, new PointF(XpBarX + spacing * 2, y), new PointF(XpBarX + spacing * 2, y + 52))
+                .DrawLines(Color.HotPink, 2.5f, new PointF(XpBarX + spacing * 3, y), new PointF(XpBarX + spacing * 3, y + 52));
 
             var headerOptions = new TextGraphicsOptions {TextOptions = {HorizontalAlignment = HorizontalAlignment.Center}};
 
@@ -126,14 +126,14 @@ namespace Roki.Modules.Xp.Extensions
 
             // need to use en-US since en-CA adds a . to month abbreviation (en-US -> Jan, en-CA -> Jan.)
             string lastLevelUpString = lastLevelUp == DateTime.MinValue ? "Never" : lastLevelUp.ToString("MMM dd yyyy", new CultureInfo("en-US"));
-            source.DrawText(headerOptions, "Rank", header, Color.HotPink, new PointF(603, y)) // (XpBarX + spacing) / 2
-                .DrawText(bodyOptions, rank, body, Color.DarkSlateGray, new PointF(603, 340))
-                .DrawText(headerOptions, "Level", header, Color.HotPink, new PointF(859, y)) // ((XpBarX + spacing) / 2 + (XpBarX + spacing * 2)) / 2
-                .DrawText(bodyOptions, level, body, Color.DarkSlateGray, new PointF(859, 340))
-                .DrawText(headerOptions, "Total XP", header, Color.HotPink, new PointF(1116, y))
-                .DrawText(bodyOptions, total, body, Color.DarkSlateGray, new PointF(1116, 340))
-                .DrawText(headerOptions, "Last Level Up", header, Color.HotPink, new PointF(1390, y))
-                .DrawText(bodyOptions, lastLevelUpString, body, Color.DarkSlateGray, new PointF(1390, 340));
+            source.DrawText(headerOptions, "Rank", header, Color.HotPink, new PointF(301, y)) // (XpBarX + spacing) / 2
+                .DrawText(bodyOptions, rank, body, Color.DarkSlateGray, new PointF(301, 170))
+                .DrawText(headerOptions, "Level", header, Color.HotPink, new PointF(430, y)) // ((XpBarX + spacing) / 2 + (XpBarX + spacing * 2)) / 2
+                .DrawText(bodyOptions, level, body, Color.DarkSlateGray, new PointF(430, 170))
+                .DrawText(headerOptions, "Total XP", header, Color.HotPink, new PointF(558, y))
+                .DrawText(bodyOptions, total, body, Color.DarkSlateGray, new PointF(558, 170))
+                .DrawText(headerOptions, "Last Level Up", header, Color.HotPink, new PointF(695, y))
+                .DrawText(bodyOptions, lastLevelUpString, body, Color.DarkSlateGray, new PointF(695, 170));
 
             return source;
         }
@@ -142,18 +142,18 @@ namespace Roki.Modules.Xp.Extensions
         {
             if (doubleXp && fastXp)
             {
-                using Image<Rgba32> image = Image.Load<Rgba32>("./data/xp/boost_both.png");
-                source.DrawImage(image, new Point(1335, XpBarY), 1); // 1500 - 10 - width of boost_both.png
+                using Image<Rgba32> image = Image.Load<Rgba32>("data/xp/boost_both_half.png");
+                source.DrawImage(image, new Point(667,  XpBarY), 1); // 1500 - 10 - width of boost_both.png
             }
             else if (doubleXp)
             {
-                using Image<Rgba32> image = Image.Load<Rgba32>("./data/xp/boost_double.png");
-                source.DrawImage(image, new Point(1420, XpBarY), 1);
+                using Image<Rgba32> image = Image.Load<Rgba32>("data/xp/boost_double_half.png");
+                source.DrawImage(image, new Point(710, XpBarY), 1);
             }
             else if (fastXp)
             {
-                using Image<Rgba32> image = Image.Load<Rgba32>("./data/xp/boost_fast.png");
-                source.DrawImage(image, new Point(1420, XpBarY + 5), 1);
+                using Image<Rgba32> image = Image.Load<Rgba32>("data/xp/boost_fast_half.png");
+                source.DrawImage(image, new Point(710, XpBarY + 3), 1);
             }
 
             return source;
