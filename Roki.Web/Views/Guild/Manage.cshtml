@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Manage Servers";
 }
-<div class="container w-full md:max-w-3xl mx-auto pt-8">
+<div class="container w-full md:max-w-3xl mx-auto pt-8 ml-2">
     <h1 class="pl-2 mb-6 text-2xl font-medium tracking-tight dark:text-white">My Servers</h1>
     <div class="flex flex-row flex-wrap justify-start">
         @foreach (DiscordGuild guild in Model.OrderBy(x => x.Name))

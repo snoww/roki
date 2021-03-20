@@ -68,4 +68,12 @@
     .section-header {
         @apply text-3xl font-medium tracking-tight pt-4
     }
+    
+    .sidenav {
+        @apply py-2 pl-4 hover:bg-gray-500 active:bg-pink-900 text-sm
+    }
+    
+    .sidenav-header {
+        @apply py-2 pl-2 font-medium
+    } 
 }

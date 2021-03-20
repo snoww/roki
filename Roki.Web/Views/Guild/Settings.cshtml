@@ -5,7 +5,7 @@
 }
 
 <div class="container w-full lg:max-w-6xl mx-auto pt-4 dark:text-white mb-12">
-<div class="flex items-center mt-1">
+<div class="flex items-center mt-1 ml-4 md:ml-0">
     @if (string.IsNullOrWhiteSpace(Model.GuildConfig.Guild.Icon))
     {
         <img class="w-10 rounded-full" src="https://ui-avatars.com/api/?name=@Model.GuildConfig.Guild.Name" alt="=@Model.GuildConfig.Guild.Name">
@@ -17,14 +17,14 @@
     <h1 class="pl-4 text-2xl font-medium tracking-tight">@Model.GuildConfig.Guild.Name - Manage</h1>
 </div>
 <div class="flex">
-<div class="w-80">
+<div class="w-80 hidden sm:block">
     @await Html.PartialAsync("_GuildNav", Model)
 </div>
 <div class="w-full ml-4 text-sm">
 <form id="form-data" onchange="checkForm()" onsubmit="return false;" novalidate>
-<div class="settings container" id="core">
+<div class="settings container pr-4 md:pr-0" id="core">
     <h1 class="text-3xl font-medium tracking-tight pt-3">Core Settings</h1>
-    <div class="sm:block" aria-hidden="true">
+    <div class="block" aria-hidden="true">
         <div class="py-4">
             <div class="border-t border-gray-200"></div>
         </div>
@@ -90,9 +90,9 @@
         </div>
     </div>
 </div>
-<div class="settings container" id="currency">
+<div class="settings container pr-4 md:pr-0" id="currency">
     <h1 class="section-header">Currency Settings</h1>
-    <div class="hidden sm:block" aria-hidden="true">
+    <div class="block" aria-hidden="true">
         <div class="py-4">
             <div class="border-t border-gray-200"></div>
         </div>
@@ -185,7 +185,7 @@
                     <div class="validation-error" id="guild_curr_drop_max_error"></div>
                 </div>
                 <div class="rounded-md">
-                    <label for="guild_curr_drop_rare" class="input-label">Rare Drop</label>
+                    <label for="guild_curr_drop_rare" class="input-label pb-5 sm:pb-0">Rare Drop</label>
                     <div class="mt-1 flex rounded-md">
                         <input type="number" name="guild_curr_drop_rare" id="guild_curr_drop_rare" value="@Model.GuildConfig.CurrencyDropAmountRare" class="input-regular-20">
                     </div>
@@ -196,9 +196,9 @@
         </div>
     </div>
 </div>
-<div class="settings container" id="xp">
+<div class="settings container pr-4 md:pr-0" id="xp">
     <h1 class="section-header">Experience Settings</h1>
-    <div class="hidden sm:block" aria-hidden="true">
+    <div class="block" aria-hidden="true">
         <div class="py-4">
             <div class="border-t border-gray-200"></div>
         </div>
@@ -251,9 +251,9 @@
         </div>
     </div>
 </div>
-<div class="settings container" id="games">
+<div class="settings container pr-4 md:pr-0" id="games">
     <h1 class="section-header">Games Settings</h1>
-    <div class="hidden sm:block" aria-hidden="true">
+    <div class="block" aria-hidden="true">
         <div class="py-4">
             <div class="border-t border-gray-200"></div>
         </div>
@@ -313,9 +313,9 @@
         </div>
     </div>
 </div>
-<div class="settings container mb-16" id="gambling">
+<div class="settings container sm:mb-16 pr-4 md:pr-0" id="gambling">
     <h1 class="section-header">Gambling Settings</h1>
-    <div class="hidden sm:block" aria-hidden="true">
+    <div class="block" aria-hidden="true">
         <div class="py-4">
             <div class="border-t border-gray-200"></div>
         </div>
@@ -363,7 +363,7 @@
                     <div class="validation-error" id="guild_bfm_min_bet_error"></div>
                 </div>
                 <div class="rounded-md mr-8">
-                    <label for="guild_bfm_min_correct" class="input-label">Minimum Correct</label>
+                    <label for="guild_bfm_min_correct" class="input-label pt-1 sm:pt-0">Minimum Correct</label>
                     <div class="mt-1 flex rounded-md">
                         <input type="number" name="guild_bfm_min_correct" id="guild_bfm_min_correct" value="@(Model.GuildConfig.BetFlipMMinCorrect * 100)" class="input-group-text">
                         <span class="input-group-info">%</span>
@@ -371,7 +371,7 @@
                     <div class="validation-error" id="guild_bfm_min_correct_error"></div>
                 </div>
                 <div class="rounded-md">
-                    <label for="guild_bfm_mult" class="input-label">Payout Multiplier</label>
+                    <label for="guild_bfm_mult" class="input-label pt-1 sm:pt-0">Payout Multiplier</label>
                     <div class="mt-1 flex rounded-md">
                         <input type="number" name="guild_bfm_mult" id="guild_bfm_mult" value="@Model.GuildConfig.BetFlipMMultiplier" class="input-group-text">
                         <span class="input-group-info">×</span>
@@ -424,7 +424,7 @@
                     </div>
                 </div>
                 <div class="rounded-md">
-                    <label for="guild_br_100" class="input-label">= 100</label>
+                    <label for="guild_br_100" class="input-label pt-1 sm:pt-0">= 100</label>
                     <div class="mt-1 flex rounded-md">
                         <input type="number" name="guild_br_100" id="guild_br_100" value="@Model.GuildConfig.BetRoll100Multiplier" class="input-group-text">
                         <span class="input-group-info">×</span>
@@ -438,11 +438,9 @@
 </div>
 <div class="block fixed inset-x-0 -bottom-16 z-20 transition ease-in-out" id="save-modal" onclick="">
     <div class="flex justify-center">
-        <div class="bg-gray-600 w-1/3 p-2 rounded shadow-md bg-opacity-95">
+        <div class="bg-gray-600 sm:w-1/3 p-2 rounded shadow-md bg-opacity-95">
             <div class="flex justify-between items-center">
-                <div class="pl-2">
-                    You have unsaved changes
-                </div>
+                <div class="pl-2 pr-4">You have unsaved changes.</div>
                 <div class="text-center inline-flex">
                     <button class="hover:underline mr-4 focus:outline-none focus:ring-0" onclick="resetForm()">Reset</button>
                     <button id="save" class="rounded dark:bg-pink-800 focus:outline-none dark:hover:bg-pink-900 dark:focus:ring-pink-600 py-1.5 px-3 inline-flex" onclick="submitForm()">
