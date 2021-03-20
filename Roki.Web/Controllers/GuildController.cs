@@ -47,35 +47,6 @@ namespace Roki.Web.Controllers
             return View("Settings", new GuildChannelModel{GuildConfig = config, Channels = channels});
         }
 
-        [HttpPost("{guildId}/settings")]
-        public async Task<IActionResult> UpdateCoreSettings(ulong guildId, [FromBody] GuildConfigUpdate model)
-        {
-            var errors = new Dictionary<string, string>();
-            
-            if (model.Prefix.Length > 2)
-            {
-                return BadRequest(new {error = "Prefix must be less than 5 characters long."});
-            }
-            
-            if (model.CurrencyName.Length > 50 || model.CurrencyNamePlural.Length > 51)
-            {
-                return BadRequest(new {error = "Currency Name must be less than 50 characters long."});
-            }
-
-            if (model.CurrencyGenerationChance < 0 || model.CurrencyGenerationChance > 1)
-            {
-                return BadRequest(new {error = "Currency Generation Chance must be between 0 and 1 (inclusive)."});
-            }
-            // GuildConfig guildConfig = await _context.GuildConfigs.SingleOrDefaultAsync(x => x.GuildId == guildId);
-            // guildConfig.Prefix = model.Prefix;
-            // guildConfig.Logging = model.Logging == "on";
-            // guildConfig.XpGain = model.XpGain == "on";
-            // guildConfig.CurrencyGen = model.CurrencyGen == "on";
-            // guildConfig.ShowHelpOnError = model.ShowHelpOnError == "on";
-            // await _context.SaveChangesAsync();
-            return Ok(new {status = "ok"});
-        }
-
         // [Route("{guildId}/{channelId}")]
         // public async Task<IActionResult> ChannelSettings(ulong guildId, ulong channelId)
         // {

@@ -29,58 +29,58 @@ namespace Roki.Web.Models
         [JsonPropertyName("guild_curr_name_p")]
         public string CurrencyNamePlural { get; set; }
         [JsonPropertyName("guild_curr_prob")]
-        public double CurrencyGenerationChance { get; set; }
+        public string CurrencyGenerationChance { get; set; }
         [JsonPropertyName("guild_curr_cd")]
-        public int CurrencyGenerationCooldown { get; set; }
+        public string CurrencyGenerationCooldown { get; set; }
         [JsonPropertyName("guild_curr_drop")]
-        public int CurrencyDropAmount { get; set; }
+        public string CurrencyDropAmount { get; set; }
         [JsonPropertyName("guild_curr_drop_max")]
-        public int CurrencyDropAmountMax { get; set; }
+        public string CurrencyDropAmountMax { get; set; }
         [JsonPropertyName("guild_curr_drop_rare")]
-        public int CurrencyDropAmountRare { get; set; }
+        public string CurrencyDropAmountRare { get; set; }
         [JsonPropertyName("guild_curr_default")]
-        public long CurrencyDefault { get; set; }
+        public string CurrencyDefault { get; set; }
         [JsonPropertyName("guild_inv_default")]
-        public decimal InvestingDefault { get; set; }
+        public string InvestingDefault { get; set; }
         [JsonPropertyName("guild_xp_pm")]
-        public int XpPerMessage { get; set; }
+        public string XpPerMessage { get; set; }
         [JsonPropertyName("guild_xp_cd")]
-        public int XpCooldown { get; set; }
+        public string XpCooldown { get; set; }
         [JsonPropertyName("guild_xp_cd_fast")]
-        public int XpFastCooldown { get; set; }
+        public string XpFastCooldown { get; set; }
         [JsonPropertyName("guild_xp_notif")]
-        public int NotificationLocation { get; set; }
+        public string NotificationLocation { get; set; }
         [JsonPropertyName("guild_bf_min")]
-        public int BetFlipMin { get; set; }
+        public string BetFlipMin { get; set; }
         [JsonPropertyName("guild_bf_mult")]
-        public double BetFlipMultiplier { get; set; }
+        public string BetFlipMultiplier { get; set; }
         [JsonPropertyName("guild_bfm_min")]
-        public double BetFlipMMinMultiplier { get; set; }
+        public string BetFlipMMinMultiplier { get; set; }
         [JsonPropertyName("guild_bfm_min_guess")]
-        public int BetFlipMMinGuesses { get; set; }
+        public string BetFlipMMinGuesses { get; set; }
         [JsonPropertyName("guild_bfm_min_correct")]
-        public double BetFlipMMinCorrect { get; set; }
+        public string BetFlipMMinCorrect { get; set; }
         [JsonPropertyName("guild_bfm_mult")]
-        public double BetFlipMMultiplier { get; set; }
+        public string BetFlipMMultiplier { get; set; }
         [JsonPropertyName("guild_bd_min")]
-        public int BetDiceMin { get; set; }
+        public string BetDiceMin { get; set; }
         [JsonPropertyName("guild_br_min")]
-        public int BetRollMin { get; set; }
+        public string BetRollMin { get; set; }
         [JsonPropertyName("guild_br_71")]
-        public double BetRoll71Multiplier { get; set; }
+        public string BetRoll71Multiplier { get; set; }
         [JsonPropertyName("guild_br_92")]
-        public double BetRoll92Multiplier { get; set; }
+        public string BetRoll92Multiplier { get; set; }
         [JsonPropertyName("guild_br_100")]
-        public double BetRoll100Multiplier { get; set; }
+        public string BetRoll100Multiplier { get; set; }
         [JsonPropertyName("guild_trivia_min")]
-        public double TriviaMinCorrect { get; set; }
+        public string TriviaMinCorrect { get; set; }
         [JsonPropertyName("guild_trivia_easy")]
-        public int TriviaEasy { get; set; }
+        public string TriviaEasy { get; set; }
         [JsonPropertyName("guild_trivia_med")]
-        public int TriviaMedium { get; set; }
+        public string TriviaMedium { get; set; }
         [JsonPropertyName("guild_trivia_hard")]
-        public int TriviaHard { get; set; }
+        public string TriviaHard { get; set; }
         [JsonPropertyName("guild_jeopardy_mult")]
-        public double JeopardyWinMultiplier { get; set; }
+        public string JeopardyWinMultiplier { get; set; }
     }
 }

@@ -57,9 +57,14 @@ namespace Roki.Web
 
             services.AddControllersWithViews()
                 .AddRazorRuntimeCompilation()
+                .ConfigureApiBehaviorOptions(options =>
+                {
+                    options.SuppressModelStateInvalidFilter = true;
+                })
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.IgnoreNullValues = true;
+                    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
                 });
         }
 

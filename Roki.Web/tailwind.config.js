@@ -9,6 +9,7 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['Poppins', ...defaultTheme.fontFamily.sans],
+        mono: ['Jetbrains Mono', ...defaultTheme.fontFamily.mono]
       },
     },
     maxHeight: {
