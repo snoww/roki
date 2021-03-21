@@ -4,25 +4,70 @@
     ViewData["Title"] = Model.GuildConfig.Guild.Name + " - Manage Server";
 }
 
-<div class="container w-full lg:max-w-6xl mx-auto pt-4 dark:text-white mb-12">
-<div class="flex items-center mt-1 ml-4 md:ml-0">
-    @if (string.IsNullOrWhiteSpace(Model.GuildConfig.Guild.Icon))
-    {
-        <img class="w-10 rounded-full" src="https://ui-avatars.com/api/?name=@Model.GuildConfig.Guild.Name" alt="=@Model.GuildConfig.Guild.Name">
-    }
-    else
-    {
-        <img class="w-10 rounded-full" src="https://cdn.discordapp.com/icons/@Model.GuildConfig.GuildId/@Model.GuildConfig.Guild.Icon" alt="=@Model.GuildConfig.Guild.Name">
-    }
-    <h1 class="pl-4 text-2xl font-medium tracking-tight">@Model.GuildConfig.Guild.Name - Manage</h1>
+<div x-data="{ isOpen: false }" class="container w-full lg:max-w-6xl mx-auto pt-3 sm:pt-4 dark:text-white mb-12">
+<div class="flex justify-between ml-4 md:ml-0">
+    <div class="flex items-center">
+        @if (string.IsNullOrWhiteSpace(Model.GuildConfig.Guild.Icon))
+        {
+            <img class="w-10 rounded-full" src="https://ui-avatars.com/api/?name=@Model.GuildConfig.Guild.Name" alt="=@Model.GuildConfig.Guild.Name">
+        }
+        else
+        {
+            <img class="w-10 rounded-full" src="https://cdn.discordapp.com/icons/@Model.GuildConfig.GuildId/@Model.GuildConfig.Guild.Icon" alt="=@Model.GuildConfig.Guild.Name">
+        }
+        <h1 class="pl-4 text-2xl font-medium tracking-tight">@Model.GuildConfig.Guild.Name - Manage</h1>
+    </div>
+    <div class="mr-4 block sm:hidden">
+        <button @@click="isOpen = !isOpen" class="p-2 focus:outline-none">
+            <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+        </button>
+    </div>
+</div>
+<div class="mt-3" id="mobile-nav"
+     x-show="isOpen"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0 transform scale-90"
+     x-transition:enter-end="opacity-100 transform scale-100"
+     x-transition:leave="transition ease-in duration-300"
+     x-transition:leave-start="opacity-100 transform scale-100"
+     x-transition:leave-end="opacity-0 transform scale-90">
+    <nav class="dark:bg-gray-900">
+        <div class="flex flex-none flex-col w-full">
+            <div class="pl-2 py-2 dark:bg-gray-700 font-medium">Server Settings</div>
+            <a class="pl-4 py-2 text-sm" href="#core">Core</a>
+            <a class="pl-4 py-2 text-sm" href="#currency">Currency</a>
+            <a class="pl-4 py-2 text-sm" href="#xp">Experience</a>
+            <a class="pl-4 py-2 text-sm" href="#games">Games</a>
+            <a class="pl-4 py-2 text-sm" href="#gambling">Gambling</a>
+            <div class="pl-2 py-2 dark:bg-gray-700 font-medium">Channel Settings</div>
+            <a class="pl-4 py-2 text-sm" href="/manage/@Model.GuildConfig.GuildId/channels">Manage Channels</a>
+            <div class="pl-2 py-2 dark:bg-gray-700 font-medium">Commands</div>
+            <a class="pl-4 py-2 text-sm" href="#">Command Stuff</a>
+        </div>
+    </nav>
 </div>
 <div class="flex">
-<div class="w-80 hidden sm:block">
-    @await Html.PartialAsync("_GuildNav", Model)
+<div class="sm:w-80 hidden sm:block">
+    <nav class="md:sticky md:top-20 mr-2 mt-4 shadow-md">
+        <div class="flex flex-none flex-col bg-gray-400 dark:bg-gray-700 w-60 rounded">
+            <div class="sidenav-header">Server Settings</div>
+            <a class="nav-settings sidenav core" href="#core" id="core-nav">Core</a>
+            <a class="nav-settings sidenav currency" href="#currency">Currency</a>
+            <a class="nav-settings sidenav xp" href="#xp">Experience</a>
+            <a class="nav-settings sidenav games" href="#games">Games</a>
+            <a class="nav-settings sidenav gambling" href="#gambling">Gambling</a>
+            <div class="sidenav-header">Channel Settings</div>
+            <a class="sidenav channels" href="/manage/@Model.GuildConfig.GuildId/channels">Manage Channels</a>
+            <div class="sidenav-header">Commands</div>
+            <a class="py-2 pl-4 rounded-b hover:bg-gray-500 text-sm" href="#">Command Stuff</a>
+        </div>
+    </nav>
 </div>
-<div class="w-full ml-4 text-sm">
+<div class="w-full pl-4 pr-4 md:pr-0 text-sm">
 <form id="form-data" onchange="checkForm()" onsubmit="return false;" novalidate>
-<div class="settings container pr-4 md:pr-0" id="core">
+<div class="settings container" id="core">
     <h1 class="text-3xl font-medium tracking-tight pt-3">Core Settings</h1>
     <div class="block" aria-hidden="true">
         <div class="py-4">
@@ -90,14 +135,14 @@
         </div>
     </div>
 </div>
-<div class="settings container pr-4 md:pr-0" id="currency">
+<div class="settings container" id="currency">
     <h1 class="section-header">Currency Settings</h1>
     <div class="block" aria-hidden="true">
         <div class="py-4">
             <div class="border-t border-gray-200"></div>
         </div>
     </div>
-    <div class="rounded-md overflow-hidden bg-grey-100 dark:bg-gray-900 px-4 py-4">
+    <div class="rounded-md bg-grey-100 dark:bg-gray-900 px-4 py-4">
         <div>
             <div class="flex space-x-12">
                 <div class="rounded-md">
@@ -169,15 +214,15 @@
             <span class="input-help" id="guild-curr-cd-help">Cooldown before currency can drop again.</span>
         </div>
         <div>
-            <div class="flex space-x-12 mt-4">
-                <div class="rounded-md">
+            <div class="flex flex-wrap mt-4">
+                <div class="rounded-md mr-8">
                     <label for="guild_curr_drop" class="input-label">Minimum Drop</label>
                     <div class="mt-1 flex rounded-md">
                         <input type="number" name="guild_curr_drop" id="guild_curr_drop" value="@Model.GuildConfig.CurrencyDropAmount" class="input-regular-20">
                     </div>
                     <div class="validation-error" id="guild_curr_drop_error"></div>
                 </div>
-                <div class="rounded-md">
+                <div class="rounded-md mr-8">
                     <label for="guild_curr_drop_max" class="input-label">Maximum Drop</label>
                     <div class="mt-1 flex rounded-md">
                         <input type="number" name="guild_curr_drop_max" id="guild_curr_drop_max" value="@Model.GuildConfig.CurrencyDropAmountMax" class="input-regular-20">
@@ -185,7 +230,7 @@
                     <div class="validation-error" id="guild_curr_drop_max_error"></div>
                 </div>
                 <div class="rounded-md">
-                    <label for="guild_curr_drop_rare" class="input-label pb-5 sm:pb-0">Rare Drop</label>
+                    <label for="guild_curr_drop_rare" class="input-label pt-1 sm:pt-0">Rare Drop</label>
                     <div class="mt-1 flex rounded-md">
                         <input type="number" name="guild_curr_drop_rare" id="guild_curr_drop_rare" value="@Model.GuildConfig.CurrencyDropAmountRare" class="input-regular-20">
                     </div>
@@ -196,7 +241,7 @@
         </div>
     </div>
 </div>
-<div class="settings container pr-4 md:pr-0" id="xp">
+<div class="settings container" id="xp">
     <h1 class="section-header">Experience Settings</h1>
     <div class="block" aria-hidden="true">
         <div class="py-4">
@@ -251,7 +296,7 @@
         </div>
     </div>
 </div>
-<div class="settings container pr-4 md:pr-0" id="games">
+<div class="settings container" id="games">
     <h1 class="section-header">Games Settings</h1>
     <div class="block" aria-hidden="true">
         <div class="py-4">
@@ -302,7 +347,7 @@
                     <div class="validation-error" id="guild_trivia_med_error"></div>
                 </div>
                 <div class="rounded-md">
-                    <label for="guild_trivia_hard" class="input-label">Hard Reward</label>
+                    <label for="guild_trivia_hard" class="input-label pt-1 sm:pt-0">Hard Reward</label>
                     <div class="mt-1 flex rounded-md">
                         <input type="number" name="guild_trivia_hard" id="guild_trivia_hard" value="@Model.GuildConfig.TriviaHard" class="input-regular-20">
                     </div>
@@ -313,7 +358,7 @@
         </div>
     </div>
 </div>
-<div class="settings container sm:mb-16 pr-4 md:pr-0" id="gambling">
+<div class="settings container sm:mb-16" id="gambling">
     <h1 class="section-header">Gambling Settings</h1>
     <div class="block" aria-hidden="true">
         <div class="py-4">
@@ -507,7 +552,7 @@
             });
         });
     });
-    
+        
     // enable/disable save button when there are changes detected
     const coreForm = document.getElementById("form-data");
     let coreData = Object.fromEntries(new FormData(coreForm).entries());

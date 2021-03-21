@@ -1,10 +1,12 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+<!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>@ViewData["Title"]</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.1/dist/alpine.min.js" defer></script>
     <environment include="Development">
         <link href="~/css/tailwind.css" rel="stylesheet"/>
     </environment>
@@ -26,22 +28,37 @@
                 <a class="text-base no-underline hover:no-underline hover:text-pink-500 dark:hover:text-pink-800 font-extrabold text-xl" href="/">Roki</a>
             </div>
         </div>
-        <div class="flex-grow flex items-center w-auto z-20" id="nav-content">
-            <ul class="list-reset flex justify-end flex-1 items-center">
-                <li class="mr-3">
-                    <a class="inline-block no-underline hover:text-pink-500 dark:hover:text-pink-800 hover:text-underline py-2 px-4" href="/manage">Manage</a>
-                </li>
-                <li class="mr-3">
-                    @if (User?.Identity?.IsAuthenticated ?? false)
-                    {
-                        <a class="inline-block no-underline hover:text-pink-500 dark:hover:text-pink-800 hover:text-underline py-2 px-4" asp-controller="Authentication" asp-action="Logout">Logout</a>
-                    }
-                    else
-                    {
-                        <a class="inline-block no-underline hover:text-pink-500 dark:hover:text-pink-800 hover:text-underline py-2 px-4" asp-controller="Authentication" asp-action="Login">Login with Discord</a>
-                    }
-                </li>
-            </ul>
+        <div class="flex items-center">
+            @if (User?.Identity?.IsAuthenticated ?? false)
+            {
+                <div class="mr-4 md:mr-8">
+                    <a class="inline-block no-underline hover:text-pink-500 dark:hover:text-pink-800 hover:text-underline py-2" href="/manage">Manage</a>
+                </div>
+                <div x-data="{ isOpen: false }" class="mr-4">
+                    <button @@click="isOpen = !isOpen" class="focus:outline-none">
+                        <img class="inline rounded-full" src="@Context.User.FindFirstValue("urn:discord:avatar:url")" alt="@User.Identity.Name" width="40">
+                    </button>
+                    <div
+                        x-show="isOpen"
+                        x-transition:enter="transition ease-out duration-100 transform"
+                        x-transition:enter-start="opacity-0 scale-95"
+                        x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75 transform"
+                        x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-95"
+                        class="origin-top-right absolute right-0 mt-2 w-40 rounded-md shadow-lg dark:bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                        <div class="py-1" role="none">
+                            <a asp-controller="Authentication" asp-action="Logout" class="block py-2 px-4 text-sm hover:bg-gray-600" role="menuitem">Logout</a>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="mr-4 md:mr-8">
+                    <a class="inline-block no-underline hover:text-pink-500 dark:hover:text-pink-800 hover:text-underline py-2" href="/manage">Login with Discord</a>
+                </div>
+            }
         </div>
     </div>
 </nav>

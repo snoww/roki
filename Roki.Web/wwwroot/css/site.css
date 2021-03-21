@@ -76,4 +76,15 @@
     .sidenav-header {
         @apply py-2 pl-2 font-medium
     } 
+    
+    .mobile-nav-collapse {
+        max-height: 0;
+        transition: max-height 0.15s ease-out;
+        overflow: hidden;
+        background: #d5d5d5;
+    }
+    
+    .mobile-nav-expand {
+        transition: max-height 0.25s ease-in;
+    }
 }
