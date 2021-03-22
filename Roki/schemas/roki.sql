@@ -205,5 +205,17 @@ create table transaction
     message_id  bigint not null
 );
 
--- todo pokemon
--- todo jeopardy
+create index if not exists investment_uid_guild_id_symbol_index
+	on investment (uid, guild_id, symbol);
+
+create index if not exists trade_investment_id_index
+	on trade (investment_id);
+
+create index if not exists message_channel_id_index
+	on message (channel_id);
+
+create index if not exists message_guild_id_index
+	on message (guild_id);
+
+create index if not exists quote_guild_id_keyword_index
+	on quote (guild_id, keyword);
