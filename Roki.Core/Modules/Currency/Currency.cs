@@ -280,6 +280,7 @@ namespace Roki.Modules.Currency
             cmd.Parameters.AddWithValue("uid", (long) userId);
             await cmd.PrepareAsync();
             await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
+            await conn.CloseAsync();
             await reader.ReadAsync();
             // rank | username | discriminator | currency
             return (reader.GetInt64(0), reader.GetString(1), reader.GetString(2), reader.GetInt64(3));

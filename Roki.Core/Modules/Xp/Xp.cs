@@ -287,6 +287,7 @@ namespace Roki.Modules.Xp
             cmd.Parameters.AddWithValue("uid", (long) userId);
             await cmd.PrepareAsync();
             await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
+            await conn.CloseAsync();
             await reader.ReadAsync();
             return reader.GetInt32(0);
         }
@@ -306,6 +307,7 @@ namespace Roki.Modules.Xp
             cmd.Parameters.AddWithValue("uid", (long) userId);
             await cmd.PrepareAsync();
             await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync();
+            await conn.CloseAsync();
             await reader.ReadAsync();
             // rank | username | discriminator | xp
             return (reader.GetInt64(0), reader.GetString(1), reader.GetString(2), reader.GetInt64(3));
