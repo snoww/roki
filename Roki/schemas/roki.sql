@@ -27,7 +27,7 @@ create table channel
     id           bigint primary key,
     guild_id     bigint not null references guild (id),
     name         text   not null,
-    deleted_date date
+    deleted_date timestamp
 );
 
 create table guild_config
