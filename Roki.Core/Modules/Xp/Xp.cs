@@ -60,7 +60,7 @@ namespace Roki.Modules.Xp
                 try
                 {
                     // handle gif avatars in future
-                    string avatarUrl = user.GetAvatarUrl(ImageFormat.Png, 256) ?? user.GetDefaultAvatarUrl();
+                    string avatarUrl = user.GetAvatarUrl(ImageFormat.Png) ?? user.GetDefaultAvatarUrl();
                     avatar = await http.GetStreamAsync(avatarUrl).ConfigureAwait(false);
                 }
                 catch (Exception)
