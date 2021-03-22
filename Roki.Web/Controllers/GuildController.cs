@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
@@ -36,35 +37,36 @@ namespace Roki.Web.Controllers
         [Route("{guildId}")]
         public async Task<IActionResult> GuildSettings(ulong guildId)
         {
-            GuildConfig config = await _context.GuildConfigs.AsNoTracking().Include(x => x.Guild).Where(x => x.GuildId == guildId).SingleOrDefaultAsync();
+            GuildConfig config = await _context.GuildConfigs.AsNoTracking().Include(x => x.Guild).SingleOrDefaultAsync(x => x.GuildId == guildId);
             if (config == null)
             {
-                return View("Manage");
+                return Redirect("manage");
             }
 
-            List<Channel> channels = await _context.Channels.AsNoTracking().Where(x => x.GuildId == guildId).ToListAsync();
-
-            return View("Settings", new GuildChannelModel{GuildConfig = config, Channels = channels});
+            if (config.Guild.OwnerId != ulong.Parse(User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")))
+            {
+                return Redirect("/manage");
+            }
+            
+            return View("GuildSettings", config);
         }
 
-        // [Route("{guildId}/{channelId}")]
-        // public async Task<IActionResult> ChannelSettings(ulong guildId, ulong channelId)
-        // {
-        //     Guild guild = await _context.GetRokiGuild(guildId);
-        //     if (guild == null)
-        //     {
-        //         return View("Manage");
-        //     }
-        //     
-        //     Channel channel = await _context.GetGuildChannel(guildId, channelId);
-        //     if (channel == null)
-        //     {
-        //         // todo show 404
-        //     }
-        //     
-        //     List<ChannelSummary> channels = await _context.GetGuildChannels(guildId);
-        //
-        //     return View("Settings", new GuildChannelModel{Section = "_ChannelSettings", ChannelId = channelId, Guild = guild, Channels = channels, Channel = channel});
-        // }
+        [Route("{guildId}/channels")]
+        public async Task<IActionResult> ChannelSettings(ulong guildId)
+        {
+            Guild guild = await _context.Guilds.AsNoTracking().SingleOrDefaultAsync(x => x.Id == guildId);
+            if (guild == null)
+            {
+                return Redirect("/manage");
+            }
+
+            List<Channel> channels = await _context.Channels.AsNoTracking().Where(x => x.GuildId == guildId).OrderBy(x => x.Name).ToListAsync();
+            
+            if (channels.Count == 0)
+            {
+                return Redirect($"/manage/{guildId}");
+            }
+            return View("ChannelSettings", new ChannelViewModel{Guild = guild, Channels = channels});
+        }
     }
 }

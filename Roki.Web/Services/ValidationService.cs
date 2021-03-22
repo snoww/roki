@@ -26,6 +26,11 @@ namespace Roki.Web.Services
                 config.Prefix = update.Prefix;
             }
 
+            config.Logging = update.Logging == "on";
+            config.XpGain = update.XpGain == "on";
+            config.CurrencyGen = update.CurrencyGen == "on";
+            config.ShowHelpOnError = update.ShowHelpOnError == "on";
+
             if (string.IsNullOrWhiteSpace(update.CurrencyName))
             {
                 errors.Add("guild_curr_error", Required);

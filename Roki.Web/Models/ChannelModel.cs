@@ -24,9 +24,9 @@ namespace Roki.Web.Models
     public class ChannelConfig
     {
         public ulong ChannelId { get; set; }
-        public bool Logging { get; }
-        public bool CurrencyGen { get; }
-        public bool XpGain { get; }
+        public bool Logging { get; set; }
+        public bool CurrencyGen { get; set; }
+        public bool XpGain { get; set; }
 
         [JsonIgnore]
         public virtual Channel Channel { get; set; }
@@ -37,5 +37,15 @@ namespace Roki.Web.Models
             CurrencyGen = currencyGen;
             XpGain = xpGain;
         }
+    }
+
+    public class ChannelConfigUpdate
+    {
+        [JsonPropertyName("channel_logging")]
+        public string Logging { get; set; }
+        [JsonPropertyName("channel_curr")]
+        public string CurrencyGen { get; set; }
+        [JsonPropertyName("channel_xp")]
+        public string XpGain { get; set; }
     }
 }

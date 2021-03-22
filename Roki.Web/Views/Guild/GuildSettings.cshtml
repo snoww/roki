@@ -1,23 +1,23 @@
-@model GuildChannelModel
+@model GuildConfig
 
 @{
-    ViewData["Title"] = Model.GuildConfig.Guild.Name + " - Manage Server";
+    ViewData["Title"] = Model.Guild.Name + " - Manage Server";
 }
 
-<div x-data="{ isOpen: false }" class="container w-full lg:max-w-6xl mx-auto pt-3 sm:pt-4 dark:text-white mb-12">
+<div x-data="{ isOpen: false }" class="container w-full lg:max-w-4xl mx-auto pt-3 sm:pt-4 dark:text-white mb-12">
 <div class="flex justify-between ml-4 md:ml-0">
     <div class="flex items-center">
-        @if (string.IsNullOrWhiteSpace(Model.GuildConfig.Guild.Icon))
+        @if (string.IsNullOrWhiteSpace(Model.Guild.Icon))
         {
-            <img class="w-10 rounded-full" src="https://ui-avatars.com/api/?name=@Model.GuildConfig.Guild.Name" alt="=@Model.GuildConfig.Guild.Name">
+            <img class="w-10 rounded-full" src="https://ui-avatars.com/api/?name=@Model.Guild.Name" alt="=@Model.Guild.Name">
         }
         else
         {
-            <img class="w-10 rounded-full" src="https://cdn.discordapp.com/icons/@Model.GuildConfig.GuildId/@Model.GuildConfig.Guild.Icon" alt="=@Model.GuildConfig.Guild.Name">
+            <img class="w-10 rounded-full" src="https://cdn.discordapp.com/icons/@Model.GuildId/@Model.Guild.Icon" alt="=@Model.Guild.Name">
         }
-        <h1 class="pl-4 text-2xl font-medium tracking-tight">@Model.GuildConfig.Guild.Name - Manage</h1>
+        <h1 class="pl-4 text-2xl font-medium tracking-tight">@Model.Guild.Name - Manage</h1>
     </div>
-    <div class="mr-4 block sm:hidden">
+    <div class="mr-4 block md:hidden">
         <button @@click="isOpen = !isOpen" class="p-2 focus:outline-none">
             <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
@@ -42,14 +42,14 @@
             <a class="pl-4 py-2 text-sm" href="#games">Games</a>
             <a class="pl-4 py-2 text-sm" href="#gambling">Gambling</a>
             <div class="pl-2 py-2 dark:bg-gray-700 font-medium">Channel Settings</div>
-            <a class="pl-4 py-2 text-sm" href="/manage/@Model.GuildConfig.GuildId/channels">Manage Channels</a>
+            <a class="pl-4 py-2 text-sm" href="/manage/@Model.GuildId/channels">Manage Channels</a>
             <div class="pl-2 py-2 dark:bg-gray-700 font-medium">Commands</div>
             <a class="pl-4 py-2 text-sm" href="#">Command Stuff</a>
         </div>
     </nav>
 </div>
 <div class="flex">
-<div class="sm:w-80 hidden sm:block">
+<div class="md:w-80 hidden md:block">
     <nav class="md:sticky md:top-20 mr-2 mt-4 shadow-md">
         <div class="flex flex-none flex-col bg-gray-400 dark:bg-gray-700 w-60 rounded">
             <div class="sidenav-header">Server Settings</div>
@@ -59,7 +59,7 @@
             <a class="nav-settings sidenav games" href="#games">Games</a>
             <a class="nav-settings sidenav gambling" href="#gambling">Gambling</a>
             <div class="sidenav-header">Channel Settings</div>
-            <a class="sidenav channels" href="/manage/@Model.GuildConfig.GuildId/channels">Manage Channels</a>
+            <a class="sidenav channels" href="/manage/@Model.GuildId/channels">Manage Channels</a>
             <div class="sidenav-header">Commands</div>
             <a class="py-2 pl-4 rounded-b hover:bg-gray-500 text-sm" href="#">Command Stuff</a>
         </div>
@@ -77,7 +77,7 @@
     <div class="rounded-md overflow-hidden bg-grey-100 dark:bg-gray-900 px-4 pt-3 pb-4">
         <div>
             <label for="prefix" class="input-label">Prefix</label>
-            <input type="text" id="prefix" name="prefix" value="@Model.GuildConfig.Prefix" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 mt-1 flex rounded-md block w-20 font-mono" maxlength="5" placeholder=".">
+            <input type="text" id="prefix" name="prefix" value="@Model.Prefix" class="input-regular-20 font-mono" maxlength="5" placeholder=".">
             <div class="validation-error" id="guild_prefix_error"></div>
             <span class="input-help" id="guild-prefix-help">This is how you invoke bot commands.</span>
         </div>
@@ -86,7 +86,7 @@
                 <label class="input-label">Default Message Logging</label>
                 <label for="guild_logging" class="cursor-pointer mr-2">
                     <div class="relative">
-                        <input id="guild_logging" type="checkbox" class="hidden" name="guild_logging" @(Model.GuildConfig.Logging ? "checked" : "")>
+                        <input id="guild_logging" type="checkbox" class="hidden" name="guild_logging" @(Model.Logging ? "checked" : "")>
                         <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
                         <div class="toggle -top-1 -left-1 transition duration-300 ease-in-out absolute w-6 h-6 bg-white rounded-full inset-y-0 left-0"></div>
                     </div>
@@ -99,7 +99,7 @@
                 <label class="input-label">Default Currency Generation</label>
                 <label for="guild_curr" class="cursor-pointer mr-2">
                     <div class="relative">
-                        <input id="guild_curr" type="checkbox" class="hidden" name="guild_curr" @(Model.GuildConfig.CurrencyGen ? "checked" : "")>
+                        <input id="guild_curr" type="checkbox" class="hidden" name="guild_curr" @(Model.CurrencyGen ? "checked" : "")>
                         <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
                         <div class="toggle -top-1 -left-1 transition duration-300 ease-in-out absolute w-6 h-6 bg-white rounded-full inset-y-0 left-0"></div>
                     </div>
@@ -112,7 +112,7 @@
                 <label class="input-label">Default XP Gain</label>
                 <label for="guild_xp" class="cursor-pointer mr-2">
                     <div class="relative">
-                        <input id="guild_xp" type="checkbox" class="hidden" name="guild_xp" @(Model.GuildConfig.XpGain ? "checked" : "")>
+                        <input id="guild_xp" type="checkbox" class="hidden" name="guild_xp" @(Model.XpGain ? "checked" : "")>
                         <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
                         <div class="toggle -top-1 -left-1 transition duration-300 ease-in-out absolute w-6 h-6 bg-white rounded-full inset-y-0 left-0"></div>
                     </div>
@@ -125,7 +125,7 @@
                 <label class="input-label">Show Help on Command Error</label>
                 <label for="guild_show_help" class="cursor-pointer mr-2">
                     <div class="relative">
-                        <input id="guild_show_help" type="checkbox" class="hidden" name="guild_show_help" @(Model.GuildConfig.ShowHelpOnError ? "checked" : "")>
+                        <input id="guild_show_help" type="checkbox" class="hidden" name="guild_show_help" @(Model.ShowHelpOnError ? "checked" : "")>
                         <div class="w-10 h-4 bg-gray-400 rounded-full shadow-inner"></div>
                         <div class="toggle -top-1 -left-1 transition duration-300 ease-in-out absolute w-6 h-6 bg-white rounded-full inset-y-0 left-0"></div>
                     </div>
@@ -148,14 +148,14 @@
                 <div class="rounded-md">
                     <label for="guild_curr_name" class="input-label">Currency Name</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="text" name="guild_curr_name" id="guild_curr_name" value="@Model.GuildConfig.CurrencyName" class="input-regular-32">
+                        <input type="text" name="guild_curr_name" id="guild_curr_name" value="@Model.CurrencyName" class="input-regular-32">
                     </div>
                     <div class="validation-error" id="guild_curr_error"></div>
                 </div>
                 <div class="rounded-md">
                     <label for="guild_curr_name_p" class="input-label">Plural Name</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="text" name="guild_curr_name_p" id="guild_curr_name_p" value="@Model.GuildConfig.CurrencyNamePlural" class="input-regular-32">
+                        <input type="text" name="guild_curr_name_p" id="guild_curr_name_p" value="@Model.CurrencyNamePlural" class="input-regular-32">
                     </div>
                     <div class="validation-error" id="guild_curr_p_error"></div>
                 </div>
@@ -166,7 +166,7 @@
             <div class="mt-2 rounded-md">
                 <label for="guild_curr_icon" class="input-label">Icon</label>
                 <div class="mt-1 flex rounded-md">
-                    <input type="text" name="guild_curr_icon" id="guild_curr_icon" value="@Model.GuildConfig.CurrencyIcon" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border rounded-md block w-80 font-mono">
+                    <input type="text" name="guild_curr_icon" id="guild_curr_icon" value="@Model.CurrencyIcon" class="form-input dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 border rounded-md block w-80 font-mono">
                 </div>
                 <div class="validation-error" id="guild_curr_icon_error"></div>
             </div>
@@ -177,14 +177,14 @@
                 <div class="rounded-md">
                     <label for="guild_curr_default" class="input-label">Starting Cash</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="number" name="guild_curr_default" id="guild_curr_default" value="@Model.GuildConfig.CurrencyDefault" class="input-regular-32">
+                        <input type="number" name="guild_curr_default" id="guild_curr_default" value="@Model.CurrencyDefault" class="input-regular-32">
                     </div>
                     <div class="validation-error" id="guild_curr_default_cash_error"></div>
                 </div>
                 <div class="rounded-md">
                     <label for="guild_inv_default" class="input-label">Starting Investing</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="number" name="guild_inv_default" id="guild_inv_default" value="@Model.GuildConfig.InvestingDefault" class="input-regular-32">
+                        <input type="number" name="guild_inv_default" id="guild_inv_default" value="@Model.InvestingDefault" class="input-regular-32">
                     </div>
                     <div class="validation-error" id="guild_curr_default_inv_error"></div>
                 </div>
@@ -195,7 +195,7 @@
             <div class="mt-4 rounded-md">
                 <label for="guild_curr_prob" class="input-label">Generation Probability</label>
                 <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_curr_prob" id="guild_curr_prob" value="@(Model.GuildConfig.CurrencyGenerationChance * 100)" class="input-group-text">
+                    <input type="number" name="guild_curr_prob" id="guild_curr_prob" value="@(Model.CurrencyGenerationChance * 100)" class="input-group-text">
                     <span class="input-group-info">%</span>
                 </div>
                 <div class="validation-error" id="guild_curr_prob_error"></div>
@@ -206,7 +206,7 @@
             <div class="mt-4 rounded-md">
                 <label for="guild_curr_cd" class="input-label">Generation Cooldown</label>
                 <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_curr_cd" id="guild_curr_cd" value="@Model.GuildConfig.CurrencyGenerationCooldown" class="input-group-text">
+                    <input type="number" name="guild_curr_cd" id="guild_curr_cd" value="@Model.CurrencyGenerationCooldown" class="input-group-text">
                     <span class="input-group-info">sec</span>
                 </div>
                 <div class="validation-error" id="guild_curr_cd_error"></div>
@@ -218,21 +218,21 @@
                 <div class="rounded-md mr-8">
                     <label for="guild_curr_drop" class="input-label">Minimum Drop</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="number" name="guild_curr_drop" id="guild_curr_drop" value="@Model.GuildConfig.CurrencyDropAmount" class="input-regular-20">
+                        <input type="number" name="guild_curr_drop" id="guild_curr_drop" value="@Model.CurrencyDropAmount" class="input-regular-20">
                     </div>
                     <div class="validation-error" id="guild_curr_drop_error"></div>
                 </div>
                 <div class="rounded-md mr-8">
                     <label for="guild_curr_drop_max" class="input-label">Maximum Drop</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="number" name="guild_curr_drop_max" id="guild_curr_drop_max" value="@Model.GuildConfig.CurrencyDropAmountMax" class="input-regular-20">
+                        <input type="number" name="guild_curr_drop_max" id="guild_curr_drop_max" value="@Model.CurrencyDropAmountMax" class="input-regular-20">
                     </div>
                     <div class="validation-error" id="guild_curr_drop_max_error"></div>
                 </div>
                 <div class="rounded-md">
-                    <label for="guild_curr_drop_rare" class="input-label pt-1 sm:pt-0">Rare Drop</label>
+                    <label for="guild_curr_drop_rare" class="input-label pt-1 xs:pt-0">Rare Drop</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="number" name="guild_curr_drop_rare" id="guild_curr_drop_rare" value="@Model.GuildConfig.CurrencyDropAmountRare" class="input-regular-20">
+                        <input type="number" name="guild_curr_drop_rare" id="guild_curr_drop_rare" value="@Model.CurrencyDropAmountRare" class="input-regular-20">
                     </div>
                     <div class="validation-error" id="guild_curr_drop_rare_error"></div>
                 </div>
@@ -253,7 +253,7 @@
             <div class="rounded-md">
                 <label for="guild_xp_pm" class="input-label">XP Per Message</label>
                 <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_xp_pm" id="guild_xp_pm" value="@Model.GuildConfig.XpPerMessage" class="input-regular-20">
+                    <input type="number" name="guild_xp_pm" id="guild_xp_pm" value="@Model.XpPerMessage" class="input-regular-20">
                 </div>
                 <div class="validation-error" id="guild_xp_pm_error"></div>
             </div>
@@ -263,7 +263,7 @@
             <div class="mt-4 rounded-md">
                 <label for="guild_xp_cd" class="input-label">XP Cooldown</label>
                 <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_xp_cd" id="guild_xp_cd" value="@Model.GuildConfig.XpCooldown" class="input-group-text">
+                    <input type="number" name="guild_xp_cd" id="guild_xp_cd" value="@Model.XpCooldown" class="input-group-text">
                     <span class="input-group-info">sec</span>
                 </div>
                 <div class="validation-error" id="guild_xp_cd_error"></div>
@@ -274,7 +274,7 @@
             <div class="mt-4 rounded-md">
                 <label for="guild_xp_cd_fast" class="input-label">XP Fast Cooldown</label>
                 <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_xp_cd_fast" id="guild_xp_cd_fast" value="@Model.GuildConfig.XpFastCooldown" class="input-group-text">
+                    <input type="number" name="guild_xp_cd_fast" id="guild_xp_cd_fast" value="@Model.XpFastCooldown" class="input-group-text">
                     <span class="input-group-info">sec</span>
                 </div>
                 <div class="validation-error" id="guild_xp_cd_fast_error"></div>
@@ -285,10 +285,10 @@
             <div class="mt-4 rounded-md">
                 <label for="guild_xp_notif" class="input-label">Level Up Notification</label>
                 <div class="mt-1 flex rounded-md">
-                    <select class="input-regular-32" name="guild_xp_notif" id="guild_xp_notif">
-                        <!option value="0" @(Model.GuildConfig.NotificationLocation == 1 ? "selected" : "")>None</!option>
-                        <!option value="1" @(Model.GuildConfig.NotificationLocation == 1 ? "selected" : "")>Server</!option>
-                        <!option value="2" @(Model.GuildConfig.NotificationLocation == 2 ? "selected" : "")>DM</!option>
+                    <select class="form-select dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-32" name="guild_xp_notif" id="guild_xp_notif">
+                        <!option value="0" @(Model.NotificationLocation == 1 ? "selected" : "")>None</!option>
+                        <!option value="1" @(Model.NotificationLocation == 1 ? "selected" : "")>Server</!option>
+                        <!option value="2" @(Model.NotificationLocation == 2 ? "selected" : "")>DM</!option>
                     </select>
                 </div>
             </div>
@@ -310,7 +310,7 @@
             <div class="rounded-md mt-3">
                 <label for="guild_jeopardy_mult" class="input-label">Win Payout</label>
                 <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_jeopardy_mult" id="guild_jeopardy_mult" value="@Model.GuildConfig.JeopardyWinMultiplier" class="input-group-text">
+                    <input type="number" name="guild_jeopardy_mult" id="guild_jeopardy_mult" value="@Model.JeopardyWinMultiplier" class="input-group-text">
                     <span class="input-group-info">×</span>
                 </div>
                 <div class="validation-error" id="guild_jp_mult_error"></div>
@@ -323,7 +323,7 @@
             <div class="rounded-md mt-3">
                 <label for="guild_trivia_min" class="input-label">Minimum Correct</label>
                 <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_trivia_min" id="guild_trivia_min" value="@(Model.GuildConfig.TriviaMinCorrect * 100)" class="input-group-text">
+                    <input type="number" name="guild_trivia_min" id="guild_trivia_min" value="@(Model.TriviaMinCorrect * 100)" class="input-group-text">
                     <span class="input-group-info">%</span>
                 </div>
                 <div class="validation-error" id="guild_trivia_min_error"></div>
@@ -335,21 +335,21 @@
                 <div class="rounded-md mr-8">
                     <label for="guild_trivia_easy" class="input-label">Easy Reward</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="number" name="guild_trivia_easy" id="guild_trivia_easy" value="@Model.GuildConfig.TriviaEasy" class="input-regular-20">
+                        <input type="number" name="guild_trivia_easy" id="guild_trivia_easy" value="@Model.TriviaEasy" class="input-regular-20">
                     </div>
                     <div class="validation-error" id="guild_trivia_easy_error"></div>
                 </div>
                 <div class="rounded-md mr-8">
                     <label for="guild_trivia_med" class="input-label">Medium Reward</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="number" name="guild_trivia_med" id="guild_trivia_med" value="@Model.GuildConfig.TriviaMedium" class="input-regular-20">
+                        <input type="number" name="guild_trivia_med" id="guild_trivia_med" value="@Model.TriviaMedium" class="input-regular-20">
                     </div>
                     <div class="validation-error" id="guild_trivia_med_error"></div>
                 </div>
                 <div class="rounded-md">
-                    <label for="guild_trivia_hard" class="input-label pt-1 sm:pt-0">Hard Reward</label>
+                    <label for="guild_trivia_hard" class="input-label pt-1 xs:pt-0">Hard Reward</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="number" name="guild_trivia_hard" id="guild_trivia_hard" value="@Model.GuildConfig.TriviaHard" class="input-regular-20">
+                        <input type="number" name="guild_trivia_hard" id="guild_trivia_hard" value="@Model.TriviaHard" class="input-regular-20">
                     </div>
                     <div class="validation-error" id="guild_trivia_hard_error"></div>
                 </div>
@@ -373,14 +373,14 @@
                 <div class="rounded-md mr-8">
                     <label for="guild_bf_min" class="input-label">Minimum Bet</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="number" name="guild_bf_min" id="guild_bf_min" value="@Model.GuildConfig.BetFlipMin" class="input-regular-32">
+                        <input type="number" name="guild_bf_min" id="guild_bf_min" value="@Model.BetFlipMin" class="input-regular-32">
                     </div>
                     <div class="validation-error" id="guild_bf_min_error"></div>
                 </div>
                 <div class="rounded-md">
                     <label for="guild_bf_mult" class="input-label">Payout Multiplier</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="number" name="guild_bf_mult" id="guild_bf_mult" value="@Model.GuildConfig.BetFlipMultiplier" class="input-group-text">
+                        <input type="number" name="guild_bf_mult" id="guild_bf_mult" value="@Model.BetFlipMultiplier" class="input-group-text">
                         <span class="input-group-info">×</span>
                     </div>
                     <div class="validation-error" id="guild_bf_mult_error"></div>
@@ -395,30 +395,30 @@
                 <div class="rounded-md mr-8">
                     <label for="guild_bfm_min_guess" class="input-label">Minimum Guesses</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="number" name="guild_bfm_min_guess" id="guild_bfm_min_guess" value="@Model.GuildConfig.BetFlipMMinGuesses" class="input-regular-32">
+                        <input type="number" name="guild_bfm_min_guess" id="guild_bfm_min_guess" value="@Model.BetFlipMMinGuesses" class="input-regular-32">
                     </div>
                     <div class="validation-error" id="guild_bfm_min_guess_error"></div>
                 </div>
                 <div class="rounded-md mr-8">
                     <label for="guild_bfm_min" class="input-label">Minimum Bet</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="number" name="guild_bfm_min" id="guild_bfm_min" value="@Model.GuildConfig.BetFlipMMinMultiplier" class="input-group-text">
+                        <input type="number" name="guild_bfm_min" id="guild_bfm_min" value="@Model.BetFlipMMinMultiplier" class="input-group-text">
                         <span class="input-group-info">×</span>
                     </div>
                     <div class="validation-error" id="guild_bfm_min_bet_error"></div>
                 </div>
                 <div class="rounded-md mr-8">
-                    <label for="guild_bfm_min_correct" class="input-label pt-1 sm:pt-0">Minimum Correct</label>
+                    <label for="guild_bfm_min_correct" class="input-label pt-1 xs:pt-0">Minimum Correct</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="number" name="guild_bfm_min_correct" id="guild_bfm_min_correct" value="@(Model.GuildConfig.BetFlipMMinCorrect * 100)" class="input-group-text">
+                        <input type="number" name="guild_bfm_min_correct" id="guild_bfm_min_correct" value="@(Model.BetFlipMMinCorrect * 100)" class="input-group-text">
                         <span class="input-group-info">%</span>
                     </div>
                     <div class="validation-error" id="guild_bfm_min_correct_error"></div>
                 </div>
                 <div class="rounded-md">
-                    <label for="guild_bfm_mult" class="input-label pt-1 sm:pt-0">Payout Multiplier</label>
+                    <label for="guild_bfm_mult" class="input-label pt-1 xs:pt-0">Payout Multiplier</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="number" name="guild_bfm_mult" id="guild_bfm_mult" value="@Model.GuildConfig.BetFlipMMultiplier" class="input-group-text">
+                        <input type="number" name="guild_bfm_mult" id="guild_bfm_mult" value="@Model.BetFlipMMultiplier" class="input-group-text">
                         <span class="input-group-info">×</span>
                     </div>
                     <div class="validation-error" id="guild_bfm_mult_error"></div>
@@ -432,7 +432,7 @@
             <div class="rounded-md mt-3">
                 <label for="guild_bd_min" class="input-label">Minimum Bet</label>
                 <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_bd_min" id="guild_bd_min" value="@Model.GuildConfig.BetDiceMin" class="input-regular-20">
+                    <input type="number" name="guild_bd_min" id="guild_bd_min" value="@Model.BetDiceMin" class="input-regular-20">
                 </div>
                 <div class="validation-error" id="guild_bd_min_error"></div>
             </div>
@@ -444,7 +444,7 @@
             <div class="rounded-md mt-3">
                 <label for="guild_br_min" class="input-label">Minimum Bet</label>
                 <div class="mt-1 flex rounded-md">
-                    <input type="number" name="guild_br_min" id="guild_br_min" value="@Model.GuildConfig.BetRollMin" class="input-regular-20">
+                    <input type="number" name="guild_br_min" id="guild_br_min" value="@Model.BetRollMin" class="input-regular-20">
                 </div>
                 <div class="validation-error" id="guild_br_min_error"></div>
             </div>
@@ -455,7 +455,7 @@
                 <div class="rounded-md mr-8">
                     <label for="guild_br_71" class="input-label">≥ 71</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="number" name="guild_br_71" id="guild_br_71" value="@Model.GuildConfig.BetRoll71Multiplier" class="input-group-text">
+                        <input type="number" name="guild_br_71" id="guild_br_71" value="@Model.BetRoll71Multiplier" class="input-group-text">
                         <span class="input-group-info">×</span>
                         <div class="validation-error" id="guild_br_71_error"></div>
                     </div>
@@ -463,15 +463,15 @@
                 <div class="rounded-md mr-8">
                     <label for="guild_br_92" class="input-label">≥ 92</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="number" name="guild_br_92" id="guild_br_92" value="@Model.GuildConfig.BetRoll92Multiplier" class="input-group-text">
+                        <input type="number" name="guild_br_92" id="guild_br_92" value="@Model.BetRoll92Multiplier" class="input-group-text">
                         <span class="input-group-info">×</span>
                         <div class="validation-error" id="guild_br_92_error"></div>
                     </div>
                 </div>
                 <div class="rounded-md">
-                    <label for="guild_br_100" class="input-label pt-1 sm:pt-0">= 100</label>
+                    <label for="guild_br_100" class="input-label pt-1 xs:pt-0">= 100</label>
                     <div class="mt-1 flex rounded-md">
-                        <input type="number" name="guild_br_100" id="guild_br_100" value="@Model.GuildConfig.BetRoll100Multiplier" class="input-group-text">
+                        <input type="number" name="guild_br_100" id="guild_br_100" value="@Model.BetRoll100Multiplier" class="input-group-text">
                         <span class="input-group-info">×</span>
                         <div class="validation-error" id="guild_br_100_error"></div>
                     </div>
@@ -483,7 +483,7 @@
 </div>
 <div class="block fixed inset-x-0 -bottom-16 z-20 transition ease-in-out" id="save-modal" onclick="">
     <div class="flex justify-center">
-        <div class="bg-gray-600 sm:w-1/3 p-2 rounded shadow-md bg-opacity-95">
+        <div class="bg-gray-600 lg:w-1/3 p-2 rounded shadow-md bg-opacity-95">
             <div class="flex justify-between items-center">
                 <div class="pl-2 pr-4">You have unsaved changes.</div>
                 <div class="text-center inline-flex">
@@ -619,7 +619,7 @@
     }
     
     function submitForm() {
-        const data = Object.fromEntries(new FormData(document.getElementById("form-data")).entries());
+        const data = Object.fromEntries(new FormData(coreForm).entries());
         let hasNull = false;
         for (const key in data) {
             if (data[key] == null || data[key] === "") {
@@ -632,9 +632,9 @@
         removeErrors();
         
         if (!hasNull) {
-            document.getElementById("save-spinner").classList.remove("hidden");
+            saveSpinner.classList.remove("hidden");
         }
-        fetch("/manage/@Model.GuildConfig.GuildId/settings", {
+        fetch("/manage/@Model.GuildId/settings", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -656,7 +656,7 @@
     }
     
     document.addEventListener("fetchEnd", async function() {
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(r => setTimeout(r, 500));
         checkForm();
         saveSpinner.classList.add("hidden");
     });
