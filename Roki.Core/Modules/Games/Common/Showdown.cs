@@ -103,10 +103,10 @@ namespace Roki.Modules.Games.Common
             }
 
             // block until retrieved teams
-            while (_teams == null) await Task.Delay(1000);
+            while (_teams.Count != 2) await Task.Delay(1000);
 
-            var t1 = new List<Image<Rgba32>>();
-            var t2 = new List<Image<Rgba32>>();
+            var t1 = new List<Image<Rgba32>>(6);
+            var t2 = new List<Image<Rgba32>>(6);
 
             for (var i = 0; i < _teams["p1"].Count; i++)
             {
@@ -238,12 +238,11 @@ namespace Roki.Modules.Games.Common
                         }
                         else
                         {
-                            IUserMessage notEnoughMsg = await _channel.SendErrorAsync($"<@{reaction.UserId}> Please select a player to bet on first.")
+                            IUserMessage notEnoughMsg = await _channel.SendErrorAsync($"{reaction.User.Value.Mention} Please select a player to bet on first.")
                                 .ConfigureAwait(false);
                             notEnoughMsg.DeleteAfter(3);
                         }
 
-                        await _game.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
                         return Task.CompletedTask;
                     }
 
@@ -251,7 +250,7 @@ namespace Roki.Modules.Games.Common
                     if (reaction.Emote.Equals(Player1))
                     {
                         _scores[user].Player = Bet.P1;
-                        await _game.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
+                        await _game.RemoveReactionAsync(Player2, reaction.User.Value).ConfigureAwait(false);
                         return Task.CompletedTask;
                     }
 
@@ -259,7 +258,7 @@ namespace Roki.Modules.Games.Common
                     if (reaction.Emote.Equals(Player2))
                     {
                         _scores[user].Player = Bet.P2;
-                        await _game.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
+                        await _game.RemoveReactionAsync(Player1, reaction.User.Value).ConfigureAwait(false);
                         return Task.CompletedTask;
                     }
 
@@ -271,7 +270,7 @@ namespace Roki.Modules.Games.Common
                         {
                             _scores[user].Amount = currency;
                             _scores[user].Multiple = 1;
-                            await _game.RemoveReactionsAsync(reaction.User.Value, _reactionMap.Keys.Where(r => !r.Equals(AllIn)).ToArray())
+                            await _game.RemoveReactionsAsync(reaction.User.Value, _reactionMap.Keys.Where(r => !r.Equals(AllIn) && !r.Equals(Player1) && !r.Equals(Player2)).ToArray())
                                 .ConfigureAwait(false);
                         }
                         else if (reaction.Emote.Equals(TimesTwo) && currency >= _scores[user].Amount * _scores[user].Multiple * 2)
@@ -295,7 +294,7 @@ namespace Roki.Modules.Games.Common
                         {
                             IUserMessage notEnoughMsg = await _channel
                                 .SendErrorAsync(
-                                    $"<@{reaction.User.Value.Id}> You do not have enough {_config.CurrencyIcon} to make that bet.")
+                                    $"{reaction.User.Value.Mention} You do not have enough {_config.CurrencyIcon} to make that bet.")
                                 .ConfigureAwait(false);
                             await _game.RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
                             notEnoughMsg.DeleteAfter(5);
@@ -551,11 +550,6 @@ namespace Roki.Modules.Games.Common
             stream.Position = 0;
             return stream;
         }
-
-        // private async Task<long> GetCurrency(IUser user)
-        // {
-        //     return await _currency.GetCurrency(user, _channel.GuildId);
-        // }
 
         private enum Bet
         {
