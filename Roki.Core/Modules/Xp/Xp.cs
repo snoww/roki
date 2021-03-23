@@ -72,16 +72,16 @@ namespace Roki.Modules.Xp
 
             var data = await _context.UserData.AsNoTracking()
                 .AsQueryable()
-                .Where(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id)
+                .Where(x => x.UserId == user.Id && x.GuildId == Context.Guild.Id)
                 .Select(x => new { x.Xp, x.LastLevelUp, x.LastXpGain})
                 .SingleAsync();
             
             var xp = new XpLevel(data.Xp);
-            int rank = await GetUserXpRank(Context.User.Id, Context.Guild.Id);
+            int rank = await GetUserXpRank(user.Id, Context.Guild.Id);
             bool doubleXp = await _context.Subscriptions.AsNoTracking()
-                .AnyAsync(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id && x.Item.Details == "doublexp");
+                .AnyAsync(x => x.UserId == user.Id && x.GuildId == Context.Guild.Id && x.Item.Details == "doublexp");
             bool fastXp = await _context.Subscriptions.AsNoTracking()
-                .AnyAsync(x => x.UserId == Context.User.Id && x.GuildId == Context.Guild.Id && x.Item.Details == "fastxp");
+                .AnyAsync(x => x.UserId == user.Id && x.GuildId == Context.Guild.Id && x.Item.Details == "fastxp");
 
             await using MemoryStream xpImage = XpDrawExtensions.GenerateXpBar(avatar, xp, $"{rank}", 
                 user.Username, user.Discriminator, data.LastLevelUp, doubleXp, fastXp);
