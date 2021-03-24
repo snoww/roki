@@ -17,7 +17,7 @@ namespace Roki.Web.Models
         public string Name { get; set; }
         public string Icon { get; set; }
         public ulong OwnerId { get; set; }
-        public List<ulong> Moderators { get; } = new();
+        public List<long> Moderators { get; } = new();
         public bool Available { get; set; } = true;
 
         public virtual GuildConfig GuildConfig { get; set; }
