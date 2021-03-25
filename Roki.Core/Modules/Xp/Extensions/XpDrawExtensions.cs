@@ -72,7 +72,7 @@ namespace Roki.Modules.Xp.Extensions
                 .DrawUsername(usernameFont, discriminatorFont, username, $"#{discriminator}", new PointF(XpBarX, 50)) // username + discrim
                 .DrawText(new TextGraphicsOptions {TextOptions = {HorizontalAlignment = HorizontalAlignment.Center}},
                     $"XP: {xp.TotalXp:N0} / {xp.TotalRequiredXp:N0}", xpFont, Color.DarkSlateGray, new PointF(XpBarX + XpBarLength / 2, 66)) // xp progress
-                .DrawStats(headerFont, bodyFont, $"#{rank}", xp.Level.ToString("N0"), xp.TotalXp.ToString("N0"), date)
+                .DrawStats(headerFont, bodyFont, $"#{rank}", xp.Level.ToString("N0"), xp.RequiredXp.ToString("N0"), date)
                 .DrawBoosts(doubleXp, fastXp));
 
             var stream = new MemoryStream();
@@ -111,7 +111,7 @@ namespace Roki.Modules.Xp.Extensions
         }
 
         private static IImageProcessingContext DrawStats(this IImageProcessingContext source, Font header, Font body,
-            string rank, string level, string total, DateTime lastLevelUp)
+            string rank, string level, string required, DateTime lastLevelUp)
         {
             const float spacing = XpBarLength / 4f;
             const float y = 117.5f;
@@ -130,8 +130,8 @@ namespace Roki.Modules.Xp.Extensions
                 .DrawText(bodyOptions, rank, body, Color.DarkSlateGray, new PointF(301, 170))
                 .DrawText(headerOptions, "Level", header, Color.HotPink, new PointF(430, y)) // ((XpBarX + spacing) / 2 + (XpBarX + spacing * 2)) / 2
                 .DrawText(bodyOptions, level, body, Color.DarkSlateGray, new PointF(430, 170))
-                .DrawText(headerOptions, "Total XP", header, Color.HotPink, new PointF(558, y))
-                .DrawText(bodyOptions, total, body, Color.DarkSlateGray, new PointF(558, 170))
+                .DrawText(headerOptions, "Required XP", header, Color.HotPink, new PointF(558, y))
+                .DrawText(bodyOptions, required, body, Color.DarkSlateGray, new PointF(558, 170))
                 .DrawText(headerOptions, "Last Level Up", header, Color.HotPink, new PointF(695, y))
                 .DrawText(bodyOptions, lastLevelUpString, body, Color.DarkSlateGray, new PointF(695, 170));
 
