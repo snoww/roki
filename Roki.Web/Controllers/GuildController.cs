@@ -49,8 +49,7 @@ namespace Roki.Web.Controllers
         [Route("{guildId}/channels")]
         public async Task<IActionResult> ChannelSettings(ulong guildId)
         {
-            ulong userId = ulong.Parse(User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"));
-            Guild guild = await _context.Guilds.AsNoTracking().SingleOrDefaultAsync(x => x.Id == guildId && (x.OwnerId == userId || x.Moderators.Contains((long) userId)));
+            Guild guild = await _context.Guilds.AsNoTracking().SingleOrDefaultAsync(x => x.Id == guildId);
             if (guild == null)
             {
                 return Redirect("/manage");

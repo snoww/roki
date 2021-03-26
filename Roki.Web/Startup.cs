@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Roki.Web.Middleware;
 using Roki.Web.Models;
 using Roki.Web.Services;
 
@@ -86,7 +87,7 @@ namespace Roki.Web
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
+            
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -95,6 +96,8 @@ namespace Roki.Web
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.AuthenticateGuild();
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
