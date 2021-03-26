@@ -48,14 +48,16 @@ namespace Roki.Web.Middleware
             }
             
             ulong userId = ulong.Parse(context.User.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"));
-            if (await dbContext.Guilds.AsNoTracking().AnyAsync(x => x.Id == guildId && (x.OwnerId == userId || x.Moderators.Contains((long) userId))))
+            // check if user is owner or is a moderator of server
+            // todo admin bypass?
+            if (!await dbContext.Guilds.AsNoTracking().AnyAsync(x => x.Id == guildId && (x.OwnerId == userId || x.Moderators.Contains((long) userId))))
             {
-                await _next(context);
+                context.Response.Redirect("/manage");
+                await context.Response.CompleteAsync();
                 return;
             }
 
-            context.Response.Redirect("/manage");
-            await context.Response.CompleteAsync();
+            await _next(context);
         }
     }
 }
