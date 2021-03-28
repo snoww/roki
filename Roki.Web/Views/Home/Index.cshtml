@@ -2,23 +2,76 @@
     ViewData["Title"] = "Home";
 }
 
-<div class="container w-full md:max-w-3xl mx-auto pt-4 mx-2">
-    <div class="mx-2">
-        <h1 class="font-bold text-3xl text-center">Roki Bot</h1>
-        <h2 class="font-medium text-lg">
-            General purpose Discord bot for small communities
+<div class="container w-full md:max-w-3xl mx-auto mx-2">
+    <div class="mx-2 pt-40 pb-40 md:pb-60">
+        <h1 class="font-semibold text-6xl sm:text-7xl md:text-8xl text-center">Roki</h1>
+        <h2 class="font-medium text-lg text-center mt-4">
+            A fun, general purpose Discord bot for small communities
         </h2>
-        @if (User?.Identity?.IsAuthenticated ?? false)
-        {
-            <h1>Welcome, @User.Identity.Name</h1>
-            @foreach (var claim in Context.User.Claims)
-            {
-                <div><code>@claim.Type</code>: <strong>@claim.Value</strong></div>
-            }
-        }
-        else
-        {
-            <h1>Welcome, anonymous</h1>
-        }
+        @* @if (User?.Identity?.IsAuthenticated ?? false) *@
+        @* { *@
+        @*     <h1>Welcome, @User.Identity.Name</h1> *@
+        @*     @foreach (var claim in Context.User.Claims) *@
+        @*     { *@
+        @*         <div><code>@claim.Type</code>: <strong>@claim.Value</strong></div> *@
+        @*     } *@
+        @* } *@
+        @* else *@
+        @* { *@
+        @*     <h1>Welcome, anonymous</h1> *@
+        @* } *@
+    </div>
+    <img class="absolute top-24 right-0 3xl:right-20 4xl:right-60 -mt-8 md:-mt-12 opacity-60 xl:opacity-70 2xl:opacity-80" src="https://i.imgur.com/UFnNkqa.png" alt="roki" style="z-index: -1">
+</div>
+<div class="bg-gray-900">
+    <div class="container w-full md:max-w-3xl mx-auto mx-2 pt-4 pb-40 tracking-tight">
+        <div class="mx-4">
+            <div class="font-medium text-xl mb-4">Currency System</div>
+            <div>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin consequat sit amet lacus sed porta. Vestibulum lorem neque, aliquam et lectus et, venenatis vehicula lorem. Sed pellentesque blandit mauris sed aliquet. Nulla id quam tempus ex pulvinar egestas at nec leo. Curabitur feugiat odio vitae lectus consectetur, non blandit sapien hendrerit. Vivamus elementum porta nulla, vel laoreet nisl. Fusce molestie et velit in pulvinar. Aliquam tempus lacinia dui, non porttitor erat accumsan nec. Duis aliquet sem elit, nec faucibus nibh rhoncus non. Ut facilisis laoreet turpis in suscipit. Interdum et malesuada fames ac ante ipsum primis in faucibus.
+            </div>
+        </div>
+        <div class="mx-4 mt-8">
+            <div class="font-medium text-xl mb-4">Experience System</div>
+            <div>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin consequat sit amet lacus sed porta. Vestibulum lorem neque, aliquam et lectus et, venenatis vehicula lorem. Sed pellentesque blandit mauris sed aliquet. Nulla id quam tempus ex pulvinar egestas at nec leo. Curabitur feugiat odio vitae lectus consectetur, non blandit sapien hendrerit. Vivamus elementum porta nulla, vel laoreet nisl. Fusce molestie et velit in pulvinar. Aliquam tempus lacinia dui, non porttitor erat accumsan nec. Duis aliquet sem elit, nec faucibus nibh rhoncus non. Ut facilisis laoreet turpis in suscipit. Interdum et malesuada fames ac ante ipsum primis in faucibus.
+            </div>
+        </div>
+        <div class="mx-4 mt-8">
+            <div class="font-medium text-xl mb-4">Jeopardy!</div>
+            <div>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin consequat sit amet lacus sed porta. Vestibulum lorem neque, aliquam et lectus et, venenatis vehicula lorem. Sed pellentesque blandit mauris sed aliquet. Nulla id quam tempus ex pulvinar egestas at nec leo. Curabitur feugiat odio vitae lectus consectetur, non blandit sapien hendrerit. Vivamus elementum porta nulla, vel laoreet nisl. Fusce molestie et velit in pulvinar. Aliquam tempus lacinia dui, non porttitor erat accumsan nec. Duis aliquet sem elit, nec faucibus nibh rhoncus non. Ut facilisis laoreet turpis in suscipit. Interdum et malesuada fames ac ante ipsum primis in faucibus.
+            </div>
+        </div>
+        <div class="mx-4 mt-8">
+            <div class="font-medium text-xl mb-4">Gambling</div>
+            <div>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin consequat sit amet lacus sed porta. Vestibulum lorem neque, aliquam et lectus et, venenatis vehicula lorem. Sed pellentesque blandit mauris sed aliquet. Nulla id quam tempus ex pulvinar egestas at nec leo. Curabitur feugiat odio vitae lectus consectetur, non blandit sapien hendrerit. Vivamus elementum porta nulla, vel laoreet nisl. Fusce molestie et velit in pulvinar. Aliquam tempus lacinia dui, non porttitor erat accumsan nec. Duis aliquet sem elit, nec faucibus nibh rhoncus non. Ut facilisis laoreet turpis in suscipit. Interdum et malesuada fames ac ante ipsum primis in faucibus.
+            </div>
+        </div>
+        <div class="mx-4 mt-8">
+            <div class="font-medium text-xl mb-4">Music</div>
+            <div>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin consequat sit amet lacus sed porta. Vestibulum lorem neque, aliquam et lectus et, venenatis vehicula lorem. Sed pellentesque blandit mauris sed aliquet. Nulla id quam tempus ex pulvinar egestas at nec leo. Curabitur feugiat odio vitae lectus consectetur, non blandit sapien hendrerit. Vivamus elementum porta nulla, vel laoreet nisl. Fusce molestie et velit in pulvinar. Aliquam tempus lacinia dui, non porttitor erat accumsan nec. Duis aliquet sem elit, nec faucibus nibh rhoncus non. Ut facilisis laoreet turpis in suscipit. Interdum et malesuada fames ac ante ipsum primis in faucibus.
+            </div>
+        </div>
+        <div class="mx-4 mt-8">
+            <div class="font-medium text-xl mb-4">Many more</div>
+            <div>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin consequat sit amet lacus sed porta. Vestibulum lorem neque, aliquam et lectus et, venenatis vehicula lorem. Sed pellentesque blandit mauris sed aliquet. Nulla id quam tempus ex pulvinar egestas at nec leo. Curabitur feugiat odio vitae lectus consectetur, non blandit sapien hendrerit. Vivamus elementum porta nulla, vel laoreet nisl. Fusce molestie et velit in pulvinar. Aliquam tempus lacinia dui, non porttitor erat accumsan nec. Duis aliquet sem elit, nec faucibus nibh rhoncus non. Ut facilisis laoreet turpis in suscipit. Interdum et malesuada fames ac ante ipsum primis in faucibus.
+            </div>
+        </div>
+    </div>
+</div>
+<div class="bottom-0">
+    <div class="container w-full md:max-w-3xl mx-auto mx-2 py-2 bg-gray-800">
+        <div class="flex justify-between items-center mx-4">
+            <a class="hover:text-pink-800" href="https://github.com/snoww/roki" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-github fa-2x"></i>
+            </a>
+            <div>
+                Art by: <span class="hover:text-pink-800"><a href="https://twitter.com/nanojyaa" target="_blank" rel="noopener noreferrer">@@nanojyaa</a></span>
+            </div>
+        </div>
     </div>
 </div>

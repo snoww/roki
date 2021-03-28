@@ -11,6 +11,10 @@ module.exports = {
         sans: ['Poppins', ...defaultTheme.fontFamily.sans],
         mono: ['Jetbrains Mono', ...defaultTheme.fontFamily.mono]
       },
+      screens: {
+        '3xl': '1600px',
+        '4xl': '2000px',
+      },
     },
     maxHeight: {
       '0': '0',
