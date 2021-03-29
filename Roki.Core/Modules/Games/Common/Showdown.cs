@@ -103,7 +103,7 @@ namespace Roki.Modules.Games.Common
             }
 
             // block until retrieved teams
-            while (_teams.Count != 2) await Task.Delay(1000);
+            while (_teams is not {Count: 2}) await Task.Delay(1000);
 
             var t1 = new List<Image<Rgba32>>(6);
             var t2 = new List<Image<Rgba32>>(6);
