@@ -72,7 +72,7 @@ namespace Roki.Modules.Xp.Extensions
                 .DrawUsername(usernameFont, discriminatorFont, username, $"#{discriminator}", new PointF(XpBarX, 50)) // username + discrim
                 .DrawText(new TextGraphicsOptions {TextOptions = {HorizontalAlignment = HorizontalAlignment.Center}},
                     $"XP: {xp.TotalXp:N0} / {xp.TotalRequiredXp:N0}", xpFont, Color.DarkSlateGray, new PointF(XpBarX + XpBarLength / 2, 66)) // xp progress
-                .DrawStats(headerFont, bodyFont, $"#{rank}", xp.Level.ToString("N0"), xp.RequiredXp.ToString("N0"), date)
+                .DrawStats(headerFont, bodyFont, $"#{rank}", xp.Level.ToString("N0"), (xp.TotalRequiredXp - xp.TotalXp).ToString("N0"), date)
                 .DrawBoosts(doubleXp, fastXp));
 
             var stream = new MemoryStream();
