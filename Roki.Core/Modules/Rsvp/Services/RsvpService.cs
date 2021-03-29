@@ -85,7 +85,7 @@ namespace Roki.Modules.Rsvp.Services
                     EmbedField und = old.Fields.First(f => f.Name.StartsWith("U", StringComparison.Ordinal));
                     EmbedBuilder newEmbed = new EmbedBuilder().WithDynamicColor(e.GuildId)
                         .WithAuthor(old.Author?.Name, old.Author?.IconUrl)
-                        .WithTitle($"`{e.Id}` {e.Name}")
+                        .WithTitle($"`#{e.Id}` {e.Name}")
                         .AddField("Description", e.Description)
                         .AddField("Event Date", $"```{e.StartDate:f} UTC```See footer for local time.")
                         .AddField(part.Name, part.Value)
@@ -244,8 +244,8 @@ namespace Roki.Modules.Rsvp.Services
 
             IUserMessage q4 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                     .WithTitle("RSVP Event Setup - Step 4")
-                    .WithDescription($"Now please enter the date and time when this event starts.\nDefault timezone is `{TimeZoneInfo.Local.StandardName}` or you can specify `UTC`\n" +
-                                     "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`")
+                    .WithDescription("Now please enter the date and time when this event starts.\nDefault timezone is in `UTC`\n" +
+                                     "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2021`")
                     .WithFooter("Type stop to cancel event setup"))
                 .ConfigureAwait(false);
             toDelete.Add(q4);
@@ -267,7 +267,7 @@ namespace Roki.Modules.Rsvp.Services
 
             while (eventDate == null || eventDate.Value <= DateTimeOffset.Now)
             {
-                IUserMessage err = await ctx.Channel.SendErrorAsync("Could not parse the date. Please try again.\nExamples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`")
+                IUserMessage err = await ctx.Channel.SendErrorAsync("Could not parse the date. Please try again.\nExamples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2021`")
                     .ConfigureAwait(false);
                 toDelete.Add(err);
                 replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
@@ -317,8 +317,8 @@ namespace Roki.Modules.Rsvp.Services
             while (!confirm.Content.Contains("yes", StringComparison.OrdinalIgnoreCase) || !confirm.Content.Contains("y", StringComparison.OrdinalIgnoreCase))
             {
                 IUserMessage err = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithTitle("RSVP Event Setup - Step 4")
-                        .WithDescription($"Please enter the date this event starts. Default timezone is `{TimeZoneInfo.Local.StandardName}` or you can specify `UTC`\n" +
-                                         "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`")
+                        .WithDescription("Please enter the date this event starts. Default timezone is in `UTC`\n" +
+                                         "Examples: `tomorrow 1pm`, `2021-01-23 2:20pm`, `21:30 jan 19 2021`")
                         .WithFooter("Type stop to cancel event setup"))
                     .ConfigureAwait(false);
                 toDelete.Add(err);
@@ -340,7 +340,7 @@ namespace Roki.Modules.Rsvp.Services
 
                 while (eventDate == null || eventDate.Value <= DateTimeOffset.Now)
                 {
-                    IUserMessage err2 = await ctx.Channel.SendErrorAsync("Could not parse the date. Please try again.\nExamples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`")
+                    IUserMessage err2 = await ctx.Channel.SendErrorAsync("Could not parse the date. Please try again.\nExamples: `tomorrow 1pm`, `2021-01-23 2:20pm`, `21:30 jan 19 2021`")
                         .ConfigureAwait(false);
                     toDelete.Add(err2);
                     replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
@@ -398,7 +398,7 @@ namespace Roki.Modules.Rsvp.Services
                 await context.SaveChangesAsync();
                 TimeSpan startsIn = eventDate.Value - DateTimeOffset.Now;
                 EmbedBuilder eventEmbed = new EmbedBuilder().WithDynamicColor(ctx)
-                    .WithTitle($"`{ev.Id}` {eventTitle}")
+                    .WithTitle($"`#{ev.Id}` {eventTitle}")
                     .WithAuthor(ctx.User.Username, ctx.User.GetAvatarUrl())
                     .WithDescription($"Starts in```{startsIn.ToReadableString()}```")
                     .AddField("Description", eventDesc)
@@ -460,7 +460,7 @@ namespace Roki.Modules.Rsvp.Services
                     IUserMessage q1 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                         .WithTitle("RSVP Event Editor")
                         .WithDescription("Which Event would you like to edit? Type in the # to select.\n" +
-                                         $"{string.Join("\n", events.Select(e => $"`{e.Id}`: {e.Name} `{e.StartDate:f}`"))}")
+                                         $"{string.Join("\n", events.Select(e => $"`#{e.Id}`: {e.Name} `{e.StartDate:f}`"))}")
                         .WithFooter("Type stop to cancel event edit")
                     ).ConfigureAwait(false);
                     toDelete.Add(q1);
@@ -500,7 +500,7 @@ namespace Roki.Modules.Rsvp.Services
                 IUserMessage q2 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                     .WithTitle("RSVP Event Editor")
                     .WithDescription(
-                        $"What do you want to change for: `{activeEditEvent.Id}` **{activeEditEvent.Name}**\n`1.` Edit Title\n`2.` Edit Description\n`3.` Edit Event Date\n`4.` Delete Event")
+                        $"What do you want to change for: `#{activeEditEvent.Id}` **{activeEditEvent.Name}**\n`1.` Edit Title\n`2.` Edit Description\n`3.` Edit Event Date\n`4.` Delete Event")
                     .WithFooter("Type stop to finish editing")
                 ).ConfigureAwait(false);
                 toDelete.Add(q2);
@@ -578,8 +578,8 @@ namespace Roki.Modules.Rsvp.Services
                         IUserMessage e3 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                                 .WithTitle("RSVP Event Editor - Edit Event Date")
                                 .WithDescription("What should the new event date be?" +
-                                                 $"Default timezone is `{TimeZoneInfo.Local.StandardName}` or you can specify `UTC`" +
-                                                 "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`"))
+                                                 "Default timezone is in `UTC`" +
+                                                 "Examples: `tomorrow 1pm`, `2021-01-23 2:20pm`, `21:30 jan 19 2021`"))
                             .ConfigureAwait(false);
                         toDelete.Add(e3);
                         editReply = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
@@ -597,7 +597,7 @@ namespace Roki.Modules.Rsvp.Services
                         DateTimeOffset? newDate = ParseDateTimeFromString(editReply.Content);
                         while (newDate == null || newDate.Value <= DateTimeOffset.Now)
                         {
-                            IUserMessage err = await ctx.Channel.SendErrorAsync("Could not parse the date. Please try again.\nExamples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`")
+                            IUserMessage err = await ctx.Channel.SendErrorAsync("Could not parse the date. Please try again.\nExamples: `tomorrow 1pm`, `2021-01-23 2:20pm`, `21:30 jan 19 2021`")
                                 .ConfigureAwait(false);
                             toDelete.Add(err);
                             replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
@@ -641,8 +641,8 @@ namespace Roki.Modules.Rsvp.Services
                         {
                             IUserMessage err = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx).WithTitle("RSVP Event Editor - Edit Event Date")
                                     .WithDescription(
-                                        $"Please enter the correct date. Default timezone is `{TimeZoneInfo.Local.StandardName}` or you can specify `UTC`\n" +
-                                        "Examples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`"))
+                                        "Please enter the correct date. Default timezone is in `UTC`\n" +
+                                        "Examples: `tomorrow 1pm`, `2021-01-23 2:20pm`, `21:30 jan 19 2021`"))
                                 .ConfigureAwait(false);
                             toDelete.Add(err);
                             replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
@@ -660,7 +660,7 @@ namespace Roki.Modules.Rsvp.Services
 
                             while (newDate == null || newDate.Value <= DateTimeOffset.Now)
                             {
-                                IUserMessage err2 = await ctx.Channel.SendErrorAsync("Could not parse the date. Please try again.\nExamples: `tomorrow 1pm`, `5pm nov 24`, `21:30 jan 19 2020 utc`")
+                                IUserMessage err2 = await ctx.Channel.SendErrorAsync("Could not parse the date. Please try again.\nExamples: `tomorrow 1pm`, `2021-01-23 2:20pm`, `21:30 jan 19 2021`")
                                     .ConfigureAwait(false);
                                 toDelete.Add(err2);
                                 replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(1)).ConfigureAwait(false);
@@ -715,7 +715,7 @@ namespace Roki.Modules.Rsvp.Services
                     {
                         IUserMessage e4 = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                                 .WithTitle("RSVP Event Editor - Delete Event")
-                                .WithDescription($"Are you sure you want to delete the event? `yes`/`no`\n`{activeEditEvent.Id}` **{activeEditEvent.Name}**\n**You cannot undo this process.**"))
+                                .WithDescription($"Are you sure you want to delete the event? `yes`/`no`\n`#{activeEditEvent.Id}` **{activeEditEvent.Name}**\n**You cannot undo this process.**"))
                             .ConfigureAwait(false);
                         toDelete.Add(e4);
                         replyMessage = await ReplyHandler(ctx, TimeSpan.FromMinutes(3)).ConfigureAwait(false);
@@ -741,7 +741,7 @@ namespace Roki.Modules.Rsvp.Services
 
                             await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                                     .WithTitle("RSVP Event Editor - Event Deleted")
-                                    .WithDescription($"`{activeEditEvent.Id}` **{activeEditEvent.Name}** has been deleted"))
+                                    .WithDescription($"`#{activeEditEvent.Id}` **{activeEditEvent.Name}** has been deleted"))
                                 .ConfigureAwait(false);
                             await _cache.KeyDeleteAsync($"event:{message.Id}");
                             await context.SaveChangesAsync();
@@ -758,7 +758,7 @@ namespace Roki.Modules.Rsvp.Services
                     IUserMessage q2Repeat = await ctx.Channel.EmbedAsync(new EmbedBuilder().WithDynamicColor(ctx)
                         .WithTitle("RSVP Event Editor")
                         .WithDescription(
-                            $"What else do you want to change for: `{activeEditEvent.Id}` **{activeEditEvent.Name}**\n1. Edit Title\n2. Edit Description\n3. Edit Start Date\n4. Delete Event")
+                            $"What else do you want to change for: `#{activeEditEvent.Id}` **{activeEditEvent.Name}**\n1. Edit Title\n2. Edit Description\n3. Edit Start Date\n4. Delete Event")
                         .WithFooter("Type stop to finish editing")
                     ).ConfigureAwait(false);
                     toDelete.Add(q2Repeat);
@@ -955,15 +955,21 @@ namespace Roki.Modules.Rsvp.Services
 
         private static DateTimeOffset? ParseDateTimeFromString(string datetime)
         {
-            if (datetime.Contains("tomorrow", StringComparison.OrdinalIgnoreCase))
+            datetime = datetime.ToLowerInvariant();
+            if (datetime.Contains("tomorrow", StringComparison.Ordinal) || datetime.Contains("tmr", StringComparison.Ordinal))
             {
                 DateTimeOffset tmr = DateTimeOffset.Now.AddDays(1);
-                datetime = datetime.Replace("tomorrow", tmr.ToString("d"), StringComparison.OrdinalIgnoreCase);
+                datetime = datetime.Replace("tmr", tmr.ToString("d"), StringComparison.Ordinal)
+                    .Replace("tomorrow", tmr.ToString("d"), StringComparison.Ordinal);
             }
-            else if (datetime.Contains("tmr", StringComparison.OrdinalIgnoreCase))
+
+            if (datetime.Contains("utc", StringComparison.Ordinal))
             {
-                DateTimeOffset tmr = DateTimeOffset.Now.AddDays(1);
-                datetime = datetime.Replace("tmr", tmr.ToString("d"), StringComparison.OrdinalIgnoreCase);
+                datetime = datetime.Replace("utc", "z", StringComparison.Ordinal);
+            }
+            else
+            {
+                datetime += " Z";
             }
 
             try
