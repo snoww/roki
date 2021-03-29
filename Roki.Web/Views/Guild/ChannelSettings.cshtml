@@ -4,7 +4,7 @@
     ViewData["Title"] = Model.Guild.Name + " - Manage Channels";
 }
 
-<div x-data="{ isOpen: false }" class="container w-full lg:max-w-4xl mx-auto pt-3 sm:pt-4 dark:text-white mb-12">
+<div x-data="{ isOpen: false }" class="container w-full lg:max-w-4xl mx-auto pt-3 sm:pt-4 text-white mb-12">
     <div class="flex justify-between ml-4 md:ml-0">
         <div class="flex items-center">
             @if (string.IsNullOrWhiteSpace(Model.Guild.Icon))
@@ -33,17 +33,17 @@
          x-transition:leave="transition ease-in duration-300"
          x-transition:leave-start="opacity-100 transform scale-100"
          x-transition:leave-end="opacity-0 transform scale-90">
-        <nav class="dark:bg-gray-900">
+        <nav class="bg-gray-900">
             <div class="flex flex-none flex-col w-full">
-                <div class="pl-2 py-2 dark:bg-gray-700 font-medium">Server Settings</div>
+                <div class="pl-2 py-2 bg-gray-700 font-medium">Server Settings</div>
                 <a class="pl-4 py-2 text-sm" href="/manage/@Model.Guild.Id">Core</a>
                 <a class="pl-4 py-2 text-sm" href="/manage/@Model.Guild.Id#currency">Currency</a>
                 <a class="pl-4 py-2 text-sm" href="/manage/@Model.Guild.Id#xp">Experience</a>
                 <a class="pl-4 py-2 text-sm" href="/manage/@Model.Guild.Id#games">Games</a>
                 <a class="pl-4 py-2 text-sm" href="/manage/@Model.Guild.Id#gambling">Gambling</a>
-                <div class="pl-2 py-2 dark:bg-gray-700 font-medium">Channel Settings</div>
+                <div class="pl-2 py-2 bg-gray-700 font-medium">Channel Settings</div>
                 <a class="pl-4 py-2 text-sm" href="/manage/@Model.Guild.Id/channels">Manage Channels</a>
-                <div class="pl-2 py-2 dark:bg-gray-700 font-medium">Commands</div>
+                <div class="pl-2 py-2 bg-gray-700 font-medium">Commands</div>
                 <a class="pl-4 py-2 text-sm" href="#">Command Stuff</a>
             </div>
         </nav>
@@ -51,7 +51,7 @@
     <div class="flex">
         <div class="md:w-80 hidden md:block">
             <nav class="md:sticky md:top-20 mr-2 mt-4 shadow-md">
-                <div class="flex flex-none flex-col bg-gray-400 dark:bg-gray-700 w-60 rounded">
+                <div class="flex flex-none flex-col bg-gray-400 bg-gray-700 w-60 rounded">
                     <div class="sidenav-header">Server Settings</div>
                     <a class="sidenav core" href="/manage/@Model.Guild.Id">Core</a>
                     <a class="sidenav currency" href="/manage/@Model.Guild.Id#currency">Currency</a>
@@ -73,10 +73,10 @@
                         <div class="border-t border-gray-200"></div>
                     </div>
                 </div>
-                <div class="overflow-hidden bg-grey-100 dark:bg-gray-900 px-4 pt-3 pb-4">
+                <div class="overflow-hidden bg-grey-100 bg-gray-900 px-4 pt-3 pb-4">
                     <div class="flex justify-between items-center">
                         <h1 class="text-base font-normal tracking-tight">Select Channel</h1>
-                        <select class="form-select dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border block w-40 truncate" id="channel_select" onchange="loadChannel()">
+                        <select class="form-select bg-gray-700 focus:ring-pink-900 focus:border-pink-900 border-gray-800 rounded-md border block w-40 truncate" id="channel_select" onchange="loadChannel()">
                             @foreach (Channel channel in Model.Channels)
                             {
                                 <option class="max-w-40" title="@channel.Id" value="@channel.Id">#@channel.Name</option>
@@ -126,14 +126,14 @@
                         <div id="is-deleted">
                             <div class="mt-2 flex justify-between items-center">
                                 <label class="input-label">Deleted Date</label>
-                                <input id="deleted-date" type="text" class="dark:bg-gray-700 dark:focus:ring-pink-900 dark:focus:border-pink-900 dark:border-gray-800 rounded-md border disabled:opacity-50" disabled>
+                                <input id="deleted-date" type="text" class="bg-gray-700 focus:ring-pink-900 focus:border-pink-900 border-gray-800 rounded-md border disabled:opacity-50" disabled>
                             </div>
                             <span class="input-help" id="channel-deleted">If the channel was deleted on Discord, it is kept in Roki's database. This date is only recorded if the deletion happened when Roki was online.</span>
                         </div>
                         <div id="delete">
                             <div class="mt-2 flex justify-between items-center">
                                 <label class="input-label">Delete Channel</label>
-                                <button class="rounded dark:bg-red-800 focus:outline-none dark:hover:bg-red-900 dark:focus:ring-red-600 py-1.5 px-3 inline-flex" onclick="deleteChannel()">Delete</button>
+                                <button class="rounded bg-red-800 focus:outline-none hover:bg-red-900 focus:ring-red-600 py-1.5 px-3 inline-flex" onclick="deleteChannel()">Delete</button>
                             </div>
                             <span class="input-help" id="channel-delete">Removes the channel from Roki's database. This removes ALL logged messages in this channel if logging was enabled. (Warning: this is permanent)</span>
                         </div>
@@ -147,7 +147,7 @@
                             <div class="pl-2 pr-4">You have unsaved changes.</div>
                             <div class="text-center inline-flex">
                                 <button class="hover:underline mr-4 focus:outline-none focus:ring-0" onclick="resetForm()">Reset</button>
-                                <button id="save" class="rounded dark:bg-pink-800 focus:outline-none dark:hover:bg-pink-900 dark:focus:ring-pink-600 py-1.5 px-3 inline-flex" onclick="submitForm()">
+                                <button id="save" class="rounded bg-pink-800 focus:outline-none hover:bg-pink-900 focus:ring-pink-600 py-1.5 px-3 inline-flex" onclick="submitForm()">
                                     <svg id="save-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white text-center hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>

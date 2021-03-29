@@ -4,11 +4,11 @@
     ViewData["Title"] = "Manage Servers";
 }
 <div class="container w-full md:max-w-3xl mx-auto pt-4 mx-2">
-    <h1 class="ml-4 mb-4 text-2xl font-medium tracking-tight dark:text-white">My Servers</h1>
+    <h1 class="ml-4 mb-4 text-2xl font-medium tracking-tight text-white">My Servers</h1>
     <div class="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 gap-4 mx-4">
         @foreach (DiscordGuild guild in Model.OrderBy(x => x.Name))
         {
-            <div class="rounded bg-gray-300 dark:bg-gray-900 hover:bg-gray-400 dark:hover:bg-gray-700 shadow-lg">
+            <div class="rounded bg-gray-900 hover:bg-gray-400 hover:bg-gray-700 shadow-lg">
                 <a class="flex flex-col text-center p-2" href="/manage/@guild.Id">
                     <div class="flex justify-center">
                         @if (string.IsNullOrWhiteSpace(guild.Icon))
@@ -20,7 +20,7 @@
                             <img class="rounded w-full" src="https://cdn.discordapp.com/icons/@guild.Id/@guild.Icon" alt="@guild.Name">
                         }
                     </div>
-                    <p class="dark:text-white truncate text-sm pt-2" title="@guild.Name">@guild.Name</p>
+                    <p class="text-white truncate text-sm pt-2" title="@guild.Name">@guild.Name</p>
                 </a>
             </div>
         }
