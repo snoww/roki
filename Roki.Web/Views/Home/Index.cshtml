@@ -3,11 +3,14 @@
 }
 
 <div class="container w-full md:max-w-3xl mx-auto mx-2">
-    <div class="mx-2 pt-40 pb-40 md:pb-60">
-        <h1 class="font-semibold text-6xl sm:text-7xl md:text-8xl text-center">Roki</h1>
-        <h2 class="font-medium text-lg text-center mt-4">
+    <div class="mx-2 pt-40 pb-40 md:pb-60 text-center">
+        <h1 class="font-semibold text-6xl sm:text-7xl md:text-8xl">Roki</h1>
+        <h2 class="font-medium text-lg mt-4">
             A fun, general purpose Discord bot for small communities
         </h2>
+        <a class="cursor-pointer rounded dark:bg-pink-800 focus:outline-none dark:hover:bg-pink-900 dark:focus:ring-pink-600 mt-2 sm:mt-4 md:mt-6 lg:mt-8 py-1.5 px-3 inline-flex" href="https://discord.com/oauth2/authorize?client_id=220678903432347650&permissions=3724016759&scope=bot" target="_blank" rel="noopener noreferrer">
+            Invite to Server
+        </a>
         @* @if (User?.Identity?.IsAuthenticated ?? false) *@
         @* { *@
         @*     <h1>Welcome, @User.Identity.Name</h1> *@
@@ -102,23 +105,6 @@
                     <li>YouTube, Wikipedia, Anime, IMDb, etc. searching</li>
                 </ul>
                 and many more.
-            </div>
-        </div>
-    </div>
-</div>
-<div class="bottom-0">
-    <div class="container w-full md:max-w-6xl mx-auto mx-2 py-2 bg-gray-800">
-        <div class="flex justify-between items-center mx-4">
-            <div class="flex justify-start items-center">
-                <a class="hover:text-pink-800 mr-4" href="https://github.com/snoww/roki" target="_blank" rel="noopener noreferrer">
-                    <i class="fab fa-github fa-2x"></i>
-                </a>
-                <div>
-                    Made by Snow
-                </div>
-            </div>
-            <div>
-                Art by <span class="hover:text-pink-800"><a href="https://twitter.com/nanojyaa" target="_blank" rel="noopener noreferrer">@@nanojyaa</a></span>
             </div>
         </div>
     </div>

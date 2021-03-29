@@ -65,7 +65,36 @@
 <div class="mt-16">
     @RenderBody()
 </div>
-@* <script src="~/js/site.js" asp-append-version="true"></script> *@
+<footer class="bottom-0 w-full bg-gray-700" id="footer">
+    <div class="container mx-auto mx-2 py-2 md:max-w-6xl">
+        <div class="flex justify-between items-center mx-4">
+            <div class="flex justify-start items-center">
+                <a class="hover:text-pink-800 mr-4" href="https://github.com/snoww/roki" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-github fa-2x"></i>
+                </a>
+                <div>
+                    Made by Snow
+                </div>
+            </div>
+            <div>
+                Art by <span class="hover:text-pink-800"><a href="https://twitter.com/nanojyaa" target="_blank" rel="noopener noreferrer">@@nanojyaa</a></span>
+            </div>
+        </div>
+    </div>
+</footer>
+<script>
+    const footer = document.getElementById("footer");
+    const changeFooter = () => {
+        if (window.innerHeight < document.documentElement.scrollHeight){
+            footer.classList.remove("absolute");
+        } else {
+            footer.classList.add("absolute");
+        }
+    };
+    
+    window.addEventListener("load", changeFooter);
+    window.addEventListener("resize", changeFooter);
+</script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
