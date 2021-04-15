@@ -111,6 +111,7 @@ create table user_data
     notification_location int       not null,
     currency              bigint    not null,
     investing             decimal   not null,
+    xp_card_image         text,
     primary key (uid, guild_id)
 );
 
@@ -184,13 +185,13 @@ create table event
 create table quote
 (
     id         serial primary key,
-    guild_id   bigint    not null references guild (id),
-    channel_id bigint    not null,
-    message_id bigint    not null,
-    author_id  bigint    not null references users (id),
-    keyword    text      not null,
-    text       text      not null,
-    use_count  int       not null
+    guild_id   bigint not null references guild (id),
+    channel_id bigint not null,
+    message_id bigint not null,
+    author_id  bigint not null references users (id),
+    keyword    text   not null,
+    text       text   not null,
+    use_count  int    not null
 );
 
 create table transaction
@@ -206,16 +207,16 @@ create table transaction
 );
 
 create index if not exists investment_uid_guild_id_symbol_index
-	on investment (uid, guild_id, symbol);
+    on investment (uid, guild_id, symbol);
 
 create index if not exists trade_investment_id_index
-	on trade (investment_id);
+    on trade (investment_id);
 
 create index if not exists message_channel_id_index
-	on message (channel_id);
+    on message (channel_id);
 
 create index if not exists message_guild_id_index
-	on message (guild_id);
+    on message (guild_id);
 
 create index if not exists quote_guild_id_keyword_index
-	on quote (guild_id, keyword);
+    on quote (guild_id, keyword);

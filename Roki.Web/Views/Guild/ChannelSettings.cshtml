@@ -128,14 +128,14 @@
                                 <label class="input-label">Deleted Date</label>
                                 <input id="deleted-date" type="text" class="bg-gray-700 focus:ring-pink-900 focus:border-pink-900 border-gray-800 rounded-md border disabled:opacity-50" disabled>
                             </div>
-                            <span class="input-help" id="channel-deleted">If the channel was deleted on Discord, it is kept in Roki's database. This date is only recorded if the deletion happened when Roki was online.</span>
+                            <span class="input-help" id="channel-deleted">If the channel was deleted on Discord, it is still kept in Roki's database. This date is recorded only if it was deleted when Roki was online.</span>
                         </div>
                         <div id="delete">
                             <div class="mt-2 flex justify-between items-center">
                                 <label class="input-label">Delete Channel</label>
                                 <button class="rounded bg-red-800 focus:outline-none hover:bg-red-900 focus:ring-red-600 py-1.5 px-3 inline-flex" onclick="deleteChannel()">Delete</button>
                             </div>
-                            <span class="input-help" id="channel-delete">Removes the channel from Roki's database. This removes ALL logged messages in this channel if logging was enabled. (Warning: this is permanent)</span>
+                            <span class="input-help" id="channel-delete">Removes the channel from Roki's database. This removes ALL logs of this channel if logging was enabled. (Warning: this is permanent)</span>
                         </div>
                     </form>
                 </div>
