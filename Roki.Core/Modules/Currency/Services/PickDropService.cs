@@ -124,7 +124,7 @@ namespace Roki.Modules.Currency.Services
                 finally
                 {
                     _cache.KeyDelete($"gen:{channel.Id}");
-                    _cache.KeyDelete($"gen:{channel.Id}");
+                    _cache.KeyDelete($"gen:log:{channel.Id}");
                 }
 
                 return amount;
