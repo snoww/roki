@@ -35,17 +35,17 @@ namespace Roki.Services
 
         public async Task<GuildConfig> GetGuildConfigAsync(ulong guildId)
         {
-            RedisValue cacheGuildConfig = await _cache.StringGetAsync($"config:{guildId}");
-            if (cacheGuildConfig.HasValue)
-            {
-                return JsonSerializer.Deserialize<GuildConfig>(cacheGuildConfig.ToString());
-            }
+            // RedisValue cacheGuildConfig = await _cache.StringGetAsync($"config:{guildId}");
+            // if (cacheGuildConfig.HasValue)
+            // {
+            //     return JsonSerializer.Deserialize<GuildConfig>(cacheGuildConfig.ToString());
+            // }
 
             using IServiceScope scope = _scopeFactory.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<RokiContext>();
 
             GuildConfig guildConfig = await context.GuildConfigs.AsNoTracking().SingleOrDefaultAsync(x => x.GuildId == guildId);
-            await _cache.StringSetAsync($"config:{guildId}", JsonSerializer.Serialize(guildConfig), TimeSpan.FromDays(1));
+            // await _cache.StringSetAsync($"config:{guildId}", JsonSerializer.Serialize(guildConfig), TimeSpan.FromDays(1));
             return guildConfig;
         } 
         

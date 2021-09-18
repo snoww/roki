@@ -1,0 +1,100 @@
+﻿@using System.Security.Claims
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.1/dist/alpine.min.js" defer></script>
+    <environment include="Development">
+        <link href="~/css/tailwind.css" rel="stylesheet"/>
+    </environment>
+    <environment exclude="Development">
+        <link href="~/css/tailwind.min.css" rel="stylesheet" asp-append-version="true"/>
+    </environment>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100 bg-gray-800 text-white font-sans leading-normal tracking-normal">
+<nav class="fixed top-0 w-full z-50 top-0 bg-gray-900 shadow-lg">
+    <div class="w-full mx-auto flex flex-wrap items-center justify-between py-2">
+        <div class="flex items-center">
+            <a href="/">
+                <img class="pl-4" src="~/images/roki2-round-10.png" alt="Roki" width="64">
+            </a>
+            <div class="pl-4">
+                <a class="text-base no-underline hover:no-underline hover:text-pink-800 font-extrabold text-xl" href="/">Roki</a>
+            </div>
+        </div>
+        <div class="flex items-center">
+            @if (User?.Identity?.IsAuthenticated ?? false)
+            {
+                <div class="mr-4 md:mr-8">
+                    <a class="inline-block no-underline hover:text-pink-800 hover:text-underline py-2" href="/manage">Manage</a>
+                </div>
+                <div x-data="{ isOpen: false }" class="mr-4">
+                    <button @@click="isOpen = !isOpen" class="focus:outline-none">
+                        <img class="inline rounded-full" src="@Context.User.FindFirstValue("urn:discord:avatar:url")" alt="@User.Identity.Name" width="40">
+                    </button>
+                    <div
+                        x-show="isOpen"
+                        x-transition:enter="transition ease-out duration-100 transform"
+                        x-transition:enter-start="opacity-0 scale-95"
+                        x-transition:enter-end="opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75 transform"
+                        x-transition:leave-start="opacity-100 scale-100"
+                        x-transition:leave-end="opacity-0 scale-95"
+                        class="origin-top-right absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none mr-2" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                        <div class="py-1" role="none">
+                            <a asp-controller="Authentication" asp-action="Logout" class="block py-2 px-4 text-sm hover:bg-gray-600" role="menuitem">Logout</a>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="mr-4 md:mr-8">
+                    <a class="inline-block no-underline hover:text-pink-800 hover:text-underline py-2" href="/login">Login with Discord</a>
+                </div>
+            }
+        </div>
+    </div>
+</nav>
+<div class="mt-16">
+    @RenderBody()
+</div>
+<footer class="bottom-0 w-full bg-gray-700" id="footer">
+    <div class="container mx-auto mx-2 py-2 md:max-w-6xl">
+        <div class="flex justify-between items-center mx-4">
+            <div class="flex justify-start items-center">
+                <a class="hover:text-pink-800 mr-4" href="https://github.com/snoww/roki" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-github fa-2x"></i>
+                </a>
+                <div>
+                    Made by Snow
+                </div>
+            </div>
+            <div>
+                Art by <span class="hover:text-pink-800"><a href="https://twitter.com/nanojyaa" target="_blank" rel="noopener noreferrer">@@nanojyaa</a></span>
+            </div>
+        </div>
+    </div>
+</footer>
+<script>
+    const footer = document.getElementById("footer");
+    const changeFooter = () => {
+        if (window.innerHeight < document.documentElement.scrollHeight){
+            footer.classList.remove("absolute");
+        } else {
+            footer.classList.add("absolute");
+        }
+    };
+    
+    window.addEventListener("load", changeFooter);
+    window.addEventListener("resize", changeFooter);
+</script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,131 @@
+﻿@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="container w-full md:max-w-3xl mx-auto mx-2">
+    <div class="mx-2 pt-40 pb-40 md:pb-60 text-center">
+        <h1 class="font-semibold text-6xl sm:text-7xl md:text-8xl">Roki</h1>
+        <h2 class="font-medium text-lg mt-4">
+            A fun, general purpose Discord bot for small communities
+        </h2>
+        <a class="cursor-pointer rounded bg-pink-800 focus:outline-none hover:bg-pink-900 focus:ring-pink-600 mt-2 sm:mt-4 md:mt-6 lg:mt-8 py-1.5 px-3 inline-flex" href="https://discord.com/oauth2/authorize?client_id=220678903432347650&permissions=3724016759&scope=bot" target="_blank" rel="noopener noreferrer">
+            Invite to Server
+        </a>
+        @* @if (User?.Identity?.IsAuthenticated ?? false) *@
+        @* { *@
+        @*     <h1>Welcome, @User.Identity.Name</h1> *@
+        @*     @foreach (var claim in Context.User.Claims) *@
+        @*     { *@
+        @*         <div><code>@claim.Type</code>: <strong>@claim.Value</strong></div> *@
+        @*     } *@
+        @* } *@
+        @* else *@
+        @* { *@
+        @*     <h1>Welcome, anonymous</h1> *@
+        @* } *@
+    </div>
+    <img class="absolute top-24 right-0 3xl:right-20 4xl:right-60 -mt-8 md:-mt-12 opacity-60 xl:opacity-70 2xl:opacity-80" src="https://i.imgur.com/UFnNkqa.png" alt="roki" style="z-index: -1">
+</div>
+<div class="bg-gray-900">
+    <div class="container w-full md:max-w-5xl mx-auto mx-2 pt-4 pb-12 tracking-tight">
+        <div class="block md:flex md:justify-around md:items-center mx-4 mt-4 md:mt-10">
+            <div class="bg-gray-800 px-6 pt-4 pb-6 rounded-md">
+                <div class="font-medium text-2xl mb-2">Currency System</div>
+                <div>
+                    Fully customizable currency system in your server.
+                    <ul class="list-disc pl-8 text-sm">
+                        <li>Custom currency name and icon to your needs</li>
+                        <li>Use currency to gamble and play games</li>
+                        <li>Setup a custom store for users to buy roles</li>
+                        <li>Currency leaderboard to complete with your friends</li>
+                        <li>Virtual stock exchange</li>
+                    </ul>
+                </div>
+            </div>
+            <img class="rounded-md hidden md:block" src="https://i.imgur.com/aMXShYe.png" alt="currency leaderboard" width="200">
+        </div>
+        <div class="block md:flex md:justify-around md:items-center mx-4 mt-8">
+            <img class="rounded-md hidden md:block w-2/5 opacity-85" src="https://i.imgur.com/CP2LbLr.png" alt="xp rank card">
+            <div class="bg-gray-800 px-6 pt-4 pb-6 rounded-md">
+                <div class="font-medium text-2xl mb-2">Experience System</div>
+                <div>
+                    Fully customizable XP system in your server.
+                    <ul class="list-disc pl-8 text-sm">
+                        <li>Control XP gain rate</li>
+                        <li>Custom XP rank cards</li>
+                        <li>Setup levep up rewards</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="block md:flex md:justify-around md:items-center mx-4 mt-8">
+            <div class="bg-gray-800 px-6 pt-4 pb-6 rounded-md mr-0 md:mr-4 lg:mr-0">
+                <div class="font-medium text-2xl mb-2">Jeopardy!</div>
+                <div>
+                    Play a custom modified version of Jeopardy!
+                    <ul class="list-disc pl-8 text-sm">
+                        <li>Contains over 45,000 categories and over 220,000 clues</li>
+                        <li>Advanced answer parsing system</li>
+                        <li>Functional Final Jeopardy!</li>
+                    </ul>
+                </div>
+            </div>
+            <img class="rounded-md hidden md:block" src="https://i.imgur.com/8G7nL8j.png" alt="example of jeopardy game">
+        </div>
+        <div class="block md:flex md:justify-around md:items-center mx-4 mt-8">
+            <img class="rounded-md hidden md:block" src="https://i.imgur.com/87iKHXY.png" alt="example of bet pokemon game" width="450">
+            <div class="bg-gray-800 px-6 pt-4 pb-6 rounded-md">
+                <div class="font-medium text-2xl mb-2">Games & Gambling</div>
+                <div>
+                    <ul class="list-disc pl-8 text-sm">
+                        <li>Bet on A.I. vs A.I. Pokémon games</li>
+                        <li>Bet on coinflips and dice rolls</li>
+                        <li>Trivia games</li>
+                        <li>Challenge your friends to a chess match</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="block md:flex md:justify-around md:items-center mx-4 mt-8">
+            <div class="bg-gray-800 px-6 pt-4 pb-6 rounded-md">
+                <div class="font-medium text-2xl mb-2">Events</div>
+                <div>
+                    <ul class="list-disc pl-8 text-sm">
+                        <li>Setup and schedule events</li>
+                        <li>Updates and lists participants</li>
+                        <li>Automatic reminders to participants</li>
+                    </ul>
+                </div>
+            </div>
+            <img class="rounded-md hidden md:block" src="https://i.imgur.com/sUltoZp.png" alt="example of event" width="360">
+        </div>
+        <div class="block md:flex md:justify-around md:items-center mx-4 mt-8">
+            <img class="rounded-md hidden md:block" src="https://i.imgur.com/zjjpWiW.png" alt="music queue" width="380">
+            <div class="ml-0 md:ml-2">
+                <div class="bg-gray-800 px-6 pt-4 pb-6 rounded-md">
+                    <div class="font-medium text-2xl mb-2">Music</div>
+                    <ul class="list-disc pl-8 text-sm">
+                        <li>Queue YouTube songs, playlists</li>
+                        <li>Custom autoplay based on previous songs</li>
+                        <li>All features you'd expect from any other music bot</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="mx-4 mt-8 md:mt-12 flex">
+            <div class="bg-gray-800 px-6 pt-4 pb-6 rounded-md">
+                <div class="font-medium text-2xl mb-2">Many more</div>
+                <div class="text-sm">
+                    <ul class="list-disc pl-8 mb-2">
+                        <li>Web dashboard</li>
+                        <li>Message logging</li>
+                        <li>Moderation</li>
+                        <li>Quotes</li>
+                        <li>YouTube, Wikipedia, Anime, IMDb, etc. searching</li>
+                        <li>...</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

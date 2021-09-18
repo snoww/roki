@@ -1,0 +1,21 @@
+{
+  "name": "tailwind",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "css:build": "npx tailwindcss-cli@latest build ./wwwroot/css/site.css -o ./wwwroot/css/tailwind.css",
+    "css:publish": "cross-env NODE_ENV=production npx tailwindcss-cli@latest build ./wwwroot/css/site.css -o ./wwwroot/css/tailwind.min.css"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.3.2",
+    "autoprefixer": "^10.2.5",
+    "cross-env": "^7.0.3",
+    "postcss": "^8.2.8",
+    "tailwindcss": "^2.0.4"
+  },
+  "dependencies": {}
+}
